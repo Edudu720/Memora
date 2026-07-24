@@ -114,9 +114,11 @@ Se uma feature apenas resolve sem ensinar, ela precisa de justificativa explíci
 | Camada | Tecnologia |
 |---|---|
 | Frontend | Flutter + Dart |
-| Backend | REST API própria |
+| Backend | Java + Spring Boot — REST API própria (ver [ADR 001](../../docs/architecture/adr-001-linguagem-do-backend.md)) |
+| Segurança backend | Spring Security |
 | Banco | PostgreSQL (relacional) |
-| Autenticação | JWT curto + Refresh Token rotativo |
+| Autenticação | JWT curto + Refresh Token rotativo (Argon2id) |
+| Contrato app↔API | OpenAPI como fonte da verdade; cliente Dart gerado |
 | Storage | Cloud Storage |
 
 ### Segurança — Flutter

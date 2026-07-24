@@ -251,9 +251,11 @@ Nenhuma PR é aprovada sem todos os itens marcados:
 |---|---|---|
 | App | Flutter + Dart | Multiplataforma, controle fino de acessibilidade |
 | Arquitetura | Clean Architecture, Feature-First, Repository Pattern, SOLID | Isolamento e testabilidade |
-| Backend | REST API própria | Validação crítica fora do dispositivo |
+| Backend | Java + Spring Boot | Ecossistema de segurança maduro e conhecimento prévio da equipe — ver [ADR 001](docs/architecture/adr-001-linguagem-do-backend.md) |
+| Segurança backend | Spring Security | Argon2id, JWT, rate limiting e hardening como configuração de framework auditado |
 | Banco | PostgreSQL | Relacional, com classificação de sensibilidade por campo |
 | Auth | JWT curto + Refresh Token rotativo | Janela de exposição mínima |
+| Contrato app↔API | OpenAPI → cliente Dart gerado | Evita divergência entre DTO do app e a API |
 | Storage seguro | `flutter_secure_storage` | Tokens nunca em SharedPreferences |
 | Storage de arquivos | Cloud Storage | — |
 
