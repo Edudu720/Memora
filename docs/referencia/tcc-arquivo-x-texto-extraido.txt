@@ -1,0 +1,596 @@
+
+
+
+	FACULDADE DE TECNOLOGIA DE AMERICANA
+Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas
+
+Eduardo Juncker Toras
+Eduardo Moraes Trevisan
+Henrique Moreira Sandrini
+
+MEMORA
+
+Americana, SP
+2025
+
+
+	FACULDADE DE TECNOLOGIA DE AMERICANA
+Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas
+
+Eduardo Juncker Toras
+Eduardo Moraes Trevisan
+Henrique Moreira Sandrini
+
+MEMORA
+
+Projeto de Conclusão da disciplina Projeto Integrador do Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas, sob a orientação do Prof. Dr. Ivan Menerval da Silva
+
+Área de concentração: Engenharia de Software
+
+Americana, SP
+2025
+RESUMO
+
+O projeto Memora (NewXz) consiste no desenvolvimento de um assistente móvel voltado para pessoas idosas com pouca familiaridade com tecnologia, cujo objetivo é facilitar o uso de smartphones Android. A aplicação busca automatizar tarefas rotineiras, como abrir aplicativos, enviar mensagens, realizar chamadas e acessar a galeria, ao mesmo tempo em que ensina o usuário a executar essas ações manualmente, promovendo autonomia e inclusão digital.
+
+A metodologia aplicada baseou-se no framework ágil Scrum, com sprints mensais e reuniões diárias, garantindo colaboração constante, entregas incrementais e melhoria contínua. O desenvolvimento foi realizado no Android Studio, utilizando Java como linguagem principal, com suporte de bibliotecas nativas e possíveis integrações ao Firebase para autenticação e armazenamento em nuvem. A equipe NewXz contou com papéis bem definidos: o Scrum Master responsável pela coordenação e remoção de impedimentos, e os desenvolvedores, encarregados da implementação, testes e documentação.
+
+Os resultados esperados incluem a criação de uma ferramenta que reduz barreiras digitais e promove interação mais confiante e independente entre idosos e dispositivos móveis. Conclui-se que o uso de metodologias ágeis aliado a um foco em acessibilidade permite desenvolver soluções tecnológicas mais inclusivas, empáticas e eficazes, contribuindo significativamente para a inclusão social e digital da terceira idade.
+
+Palavras Chave: Inclusão digital; Acessibilidade; Aplicativo móvel.
+
+Sumário
+
+		 TOC \o "1-3" \h \z \u 1	INTRODUÇÃO	 PAGEREF _Toc213412700 \h 7
+		2	PROJETO DO SISTEMA	 PAGEREF _Toc213412701 \h 8
+		2.1	Softwares Similares	 PAGEREF _Toc213412702 \h 8
+		2.2	Levantamento de Requisitos	 PAGEREF _Toc213412703 \h 10
+		2.2.1	Requisitos Funcionais	 PAGEREF _Toc213412704 \h 10
+		2.2.2	Requisitos Não Funcionais	 PAGEREF _Toc213412705 \h 10
+		3	DESENVOLVIMENTO	 PAGEREF _Toc213412706 \h 11
+		3.1	Interfaces de Usuário	 PAGEREF _Toc213412707 \h 12
+
+LISTA DE FIGURAS
+
+	 TOC \h \z \c "Figura" Figura 1 - Diagrama de estados (mapa das telas)	 PAGEREF _Toc213489627 \h 14
+	Figura 2 - Tela primária	 PAGEREF _Toc213489628 \h 15
+	Figura 3 - Tela de Cadastro	 PAGEREF _Toc213489629 \h 16
+	Figura 4 - Tela Login	 PAGEREF _Toc213489630 \h 17
+	Figura 5 - Tela Olá	 PAGEREF _Toc213489631 \h 18
+	Figura 6 - Tela apresentação	 PAGEREF _Toc213489632 \h 19
+	Figura 7 - Tela ChatBot Exemplo	 PAGEREF _Toc213489633 \h 20
+	Figura 8 - Tela inicia	 PAGEREF _Toc213489634 \h 21
+	Figura 9 - Tela Hub	 PAGEREF _Toc213489635 \h 22
+	Figura 10 - Tela Planos	 PAGEREF _Toc213489636 \h 23
+	Figura 11 - Tela Chatbot	 PAGEREF _Toc213489637 \h 24
+	Figura 12 - Tela instagram	 PAGEREF _Toc213489638 \h 25
+	Figura 13 - TelaChatBotNão	 PAGEREF _Toc213489639 \h 26
+	Figura 14 - Tela ajuda	 PAGEREF _Toc213489640 \h 27
+	Figura 15 - Tela ChatBotAjuda	 PAGEREF _Toc213489641 \h 28
+	Figura 16 - Tela ChatBotAjudaSair	 PAGEREF _Toc213489642 \h 29
+	Figura 17 - Tela ChatBotAjudaOpção	 PAGEREF _Toc213489643 \h 30
+	Figura 18 - Tela ChatBotAjudaTexto	 PAGEREF _Toc213489644 \h 31
+	Figura 19 - Tela ChatBotAjudaExemplo	 PAGEREF _Toc213489645 \h 32
+	Figura 20 - Tela Apps Atuais	 PAGEREF _Toc213489646 \h 33
+	Figura 21 - Tela TikTok	 PAGEREF _Toc213489647 \h 34
+	Figura 22 - Tela TikTok2	 PAGEREF _Toc213489648 \h 35
+	Figura 23 - Tela TikTok3	 PAGEREF _Toc213489649 \h 36
+	Figura 24 - Tela TikTok4	 PAGEREF _Toc213489650 \h 37
+	Figura 25 - Tela Config	 PAGEREF _Toc213489651 \h 38
+	Figura 26 - Tela Config - Acessibilidade.	 PAGEREF _Toc213489652 \h 39
+	Figura 27 - Tela Perfil	 PAGEREF _Toc213489653 \h 40
+	Figura 28 - Tela Serivos Socias	 PAGEREF _Toc213489654 \h 41
+	Figura 29 - Tela GOV 1	 PAGEREF _Toc213489655 \h 42
+	Figura 30 - Tela Info GOV 1	 PAGEREF _Toc213489656 \h 43
+	Figura 31 - Tela GOV 2	 PAGEREF _Toc213489657 \h 44
+	Figura 32 - Tela Info GOV 2	 PAGEREF _Toc213489658 \h 45
+	Figura 33 - Tela GOV 3	 PAGEREF _Toc213489659 \h 46
+	Figura 34 - Tela Info GOV 3	 PAGEREF _Toc213489660 \h 47
+	Figura 35 - Tela GOV 4	 PAGEREF _Toc213489661 \h 48
+	Figura 36 - Tela Info GOV 4	 PAGEREF _Toc213489662 \h 49
+
+
+
+LISTA DE TABELAS
+
+	 TOC \h \z \c "Tabela" Tabela 1 – Comparativo de funcionalidades entre ... e o aplicativo desenvolvido neste trabalho.
+	Tabela 2 – Requisitos funcionais do projeto.	9
+	Tabela 3 – Requisitos não funcionais do projeto.	10
+	Tabela 4 – Caso de uso.	11
+
+
+
+1	INTRODUÇÃO
+
+No Brasil, o avanço da tecnologia e o aumento da digitalização de serviços têm ampliado o acesso a ferramentas digitais, contudo, uma parcela significativa da população idosa ainda enfrenta dificuldades no uso de smartphones e aplicativos. Essa limitação está frequentemente associada à falta de familiaridade com dispositivos eletrônicos, medo de errar, interfaces pouco acessíveis e ausência de suporte contínuo. Essa realidade contribui para a exclusão digital e social de pessoas da terceira idade, que acabam dependendo de familiares ou cuidadores para realizar tarefas simples, como enviar mensagens, efetuar chamadas ou acessar aplicativos de comunicação e serviços.
+Diante desse cenário, foi idealizado o projeto Memora (NewXz), um assistente móvel voltado para o público idoso, com o objetivo de simplificar o uso de smartphones Android e promover autonomia digital. O aplicativo busca auxiliar o usuário em tarefas do cotidiano — como abrir aplicativos, enviar mensagens, realizar chamadas e acessar a galeria — de forma didática e humanizada, ensinando o passo a passo durante a execução. Além disso, pretende reduzir a dependência de suporte externo e incentivar a inclusão social por meio de interações acessíveis, empáticas e intuitivas.
+A proposta demonstrou-se viável e de grande potencial de impacto, uma vez que o uso de dispositivos móveis está cada vez mais difundido entre as faixas etárias mais altas. De acordo com o IBGE, o número de idosos conectados à internet vem crescendo progressivamente, tornando-se um público com necessidades específicas de acessibilidade digital. Dessa forma, o Memora se apresenta como uma solução prática e escalável para aproximar esse público da tecnologia e fortalecer seus laços de comunicação com familiares e serviços essenciais.
+Este trabalho tem como objetivo desenvolver o aplicativo Memora utilizando a metodologia ágil Scrum, que permite organização, planejamento e entregas iterativas do produto, e a linguagem Java dentro do ambiente Android Studio.
+O restante do trabalho está estruturado da seguinte forma: o Capítulo 2 apresenta a documentação e requisitos do sistema desenvolvido; o Capítulo 3 apresenta as considerações finais e as possibilidades de trabalhos futuros.
+
+2	PROJETO DO SISTEMA
+2.1	Softwares Similares
+Atualmente existem diversos aplicativos voltados para assistência digital e acessibilidade, cada um com diferentes funcionalidades e públicos-alvo. Para fins de comparação e inspiração no desenvolvimento do Memora, foram analisadas três das aplicações mais conhecidas e relevantes disponíveis para o sistema Android, considerando seus recursos, usabilidade e avaliação geral dos usuários:
+Google Assistente: trata-se de um assistente virtual desenvolvido pela Google, capaz de executar comandos por voz, responder perguntas, realizar chamadas, enviar mensagens e controlar outros aplicativos do dispositivo. Seu objetivo principal é facilitar o uso do smartphone por meio de comandos naturais de fala. Embora seja uma ferramenta robusta e amplamente utilizada, muitos usuários idosos enfrentam dificuldades com sua configuração inicial e com a interpretação de comandos mais complexos. Aplicativo com nota 4,3 na Google Play (GOOGLE PLAY, 2024a).
+Alexa (Amazon): assistente virtual que possibilita o controle por voz de dispositivos inteligentes e execução de tarefas como reproduzir músicas, definir lembretes e realizar chamadas. Apesar de ser intuitiva, sua interface foi projetada com foco em integração com dispositivos inteligentes (IoT), o que pode torná-la menos prática para idosos que buscam um uso mais simples e direto do smartphone. Aplicação com nota 4,2 na Google Play (GOOGLE PLAY, 2024b).
+Voice Access: ferramenta desenvolvida pelo Google com foco em acessibilidade, permitindo controlar o celular inteiramente por comandos de voz, ideal para pessoas com dificuldades motoras ou limitações visuais. Embora ofereça funcionalidades acessíveis, sua interface pode ser considerada técnica e pouco intuitiva para usuários sem experiência prévia com tecnologia. Aplicação com nota 4,1 na Google Play (GOOGLE PLAY, 2024c).
+O Memora, portanto, diferencia-se ao combinar a assistência automatizada com um caráter educativo, ensinando o usuário a realizar as ações manualmente, ao mesmo tempo em que oferece suporte direto para execução de tarefas. Dessa forma, o aplicativo busca promover autonomia, inclusão digital e confiança no uso do smartphone por pessoas idosas com pouca familiaridade tecnológica.
+
+Levando estes aspectos em consideração, foi elaborada a Tabela 1 mostrando as principais diferenças do Memora, em relação aos aplicativos citados anteriormente:
+
+Tabela  SEQ Tabela \* ARABIC 1 - Comparativo de funcionalidades da aplicação Memora em relação aos concorrentes.
+Funcionalidades
+ | Google Assistente
+ | Alexa
+ | Voice Access
+ | Memora
+ |
+Executar comandos por voz
+ | X
+ | X
+ | X
+ | X
+ |
+Enviar mensagens e realizar chamadas
+ | X
+ | X
+ | -
+ | X
+ |
+Acessar galeria e aplicativos
+ | X
+ | X
+ | X
+ | X
+ |
+Assistência personalizada para idosos
+ | -
+ | -
+ | -
+ | X
+ |
+Orientar o usuário passo a passo (modo educativo)
+ | -
+ | -
+ | -
+ | X
+ |
+Lembrar compromissos e tarefas
+ | X
+ | X
+ | -
+ | X
+ |
+Interface simplificada e acessível
+ | -
+ | -
+ | X
+ | X
+ |
+Compatibilidade com dispositivos inteligentes
+ | X
+ | X
+ | -
+ | -
+ |
+Suporte offline parcial
+ | -
+ | -
+ | -
+ | X
+ |
+Personalização por nível de dificuldade
+ | -
+ | -
+ | -
+ | X
+ |
+Reconhecimento de fala otimizado para idosos
+ | -
+ | -
+ | -
+ | X
+ |
+Ser multiplataforma
+ | X
+ | X
+ | X
+ | X
+ |
+
+Fonte: Elaborado pelo autor (2025).
+2.2	Levantamento de Requisitos
+	A engenharia de requisitos (RE – Requirements Engineering) é o processo de descobrir, analisar, documentar e verificar requisitos de um sistema. Um requisito pode ser definido como uma descrição dos serviços fornecidos pelo sistema e as suas restrições operacionais (SOMMERVILLE, 2007). Tradicionalmente, os requisitos são divididos em dois tipos: requisitos funcionais e requisitos não funcionais.
+2.2.1	Requisitos Funcionais
+	Os requisitos funcionais descrevem o que o sistema deve fazer, isto é, definem a funcionalidade desejada do software (SOMMERVILLE, 2007). A Tabela 2 apresenta os requisitos funcionais deste projeto.
+
+Tabela  SEQ Tabela \* ARABIC 2 – Requisitos funcionais do projeto.
+
+Identificação
+ | Requisito Funcional
+ | Prioridade
+ |
+RF001
+ | Execução de Comandos por Texto
+ | Essencial
+ |
+RF002
+ | Abertura de Aplicativos Android
+ | Essencial
+ |
+RF003
+ | Envio de Mensagens
+ | Importante
+ |
+RF004
+ | Modo de Ensino Passo a Passo
+ | Importante
+ |
+RF005
+ | Respostas Humanizadas
+ | Desejável
+ |
+RF006
+ | Integração com Aplicativos do Sistema Android
+ | Importante
+ |
+
+Fonte: Elaborado pelo autor (2025).
+2.2.2	Requisitos Não Funcionais
+	“Os requisitos não funcionais são aqueles não diretamente relacionados às funções específicas fornecidas pelo sistema” (SOMMERVILLE, 2007). A Tabela 3 apresenta os requisitos não funcionais deste projeto.
+
+Tabela  SEQ Tabela \* ARABIC 3 – Requisitos não funcionais do projeto.
+
+Identificação
+ | Requisito não funcional
+ | Categoria
+ | Prioridade
+ |
+RNF001
+ | A interface deve ser intuitiva, com botões grandes, linguagem acessível e respostas humanizadas voltadas ao público idoso.
+ | Usabilidade
+ | Essencial
+ |
+RNF002
+ | O aplicativo deve manter alta disponibilidade (99%) e permitir recuperação simples das informações salvas em caso de falha.
+ | Confiabilidade
+ | Essencial
+ |
+RNF003
+ | O tempo de resposta a comandos deve ser inferior a 2 segundos e o tempo de inicialização não deve ultrapassar 5 segundos.
+ | Desempenho
+ | Essencial
+ |
+RNF004
+ | As comunicações devem ocorrer via HTTPS e os dados do usuário (contatos, histórico de comandos) devem ser armazenados de forma segura e criptografada.
+ | Segurança
+ | Essencial
+ |
+RNF005
+ | O aplicativo deve estar disponível na Google Play e permitir atualizações automáticas para correção de falhas e melhorias.
+ | Distribuição
+ | Essencial
+ |
+RNF006
+ | O sistema deve seguir os padrões de desenvolvimento Android (Material Design e boas práticas de acessibilidade).
+ | Padrões
+ | Essencial
+ |
+RNF007
+ | O sistema deve ser desenvolvido no Android Studio, utilizando Java e bibliotecas nativas do Android (SDK), com compatibilidade para dispositivos de entrada.
+ | Hardware e Software
+ | Essencial
+ |
+
+Fonte: Elaborado pelo autor (2025).
+
+3	DESENVOLVIMENTO
+
+	Para o desenvolvimento do projeto Memora, foi adotada a metodologia Scrum, um framework ágil amplamente utilizado em projetos de software que visa aumentar a produtividade, a comunicação e a capacidade de adaptação da equipe durante o processo de desenvolvimento.
+ O Scrum é baseado em iterações curtas e cíclicas, chamadas de sprints, nas quais são planejadas, desenvolvidas e entregues partes funcionais do sistema. Essa abordagem permite que o produto evolua de forma contínua e incremental, garantindo que ajustes possam ser realizados de acordo com o feedback dos usuários e as necessidades do público-alvo — no caso do Memora, pessoas idosas com baixa familiaridade tecnológica.
+ A escolha dessa metodologia se deu por ela proporcionar maior flexibilidade, entregas rápidas de valor e colaboração constante entre os membros da equipe, aspectos fundamentais para um projeto que envolve acessibilidade, usabilidade e experiência do usuário.
+No âmbito da metodologia Scrum adotada para o desenvolvimento do Memora, a equipe conta com uma definição clara de papéis, essencial para o sucesso do framework ágil:
+Henrique Moreira Sandrini atua como Scrum Master, sendo responsável por garantir que a equipe compreenda e siga os princípios e práticas do Scrum. Sua atuação é fundamental para remover impedimentos, facilitar as cerimônias do Scrum (como reuniões diárias, planejamento de sprint e retrospectivas) e assegurar que o time tenha um ambiente propício para a produtividade e a colaboração.
+Eduardo Juncker Toras e Eduardo Moraes Trevisan atuam como Desenvolvedores, formando o núcleo técnico responsável pela construção dos incrementos do produto a cada sprint. Eles colaboram ativamente na implementação das funcionalidades, no desenvolvimento do back-end e front-end, respectivamente, e na garantia de que as entregas atendam aos critérios de qualidade e à Definição de Pronto (DoD) estabelecida.
+
+3.1	Interfaces de Usuário
+
+A necessidade da construção de uma interface amigável ao usuário é fundamental em um sistema. A interface faz parte do sistema computacional e determina como as pessoas operam e controlam o sistema. Quando uma interface é bem projetada, ela é compreensível, agradável e controlável. Neste contexto, estes protótipos têm como objetivo apresentar a aplicativo e os recursos da tela (Figura 1).
+
+Figura 1 – Diagrama de estados (mapa das telas).
+Figura  SEQ Figura \* ARABIC 1 - Diagrama de estados (mapa das telas)
+
+Fonte: Elaborado pelo autor
+
+A Figura 2 apresenta a tela Primária consiste na primeira tela apresentada ao entrar no aplicativo. Ela é apenas mostradas a primeiros usuários e aqueles que não possuem uma conta ou foram deslogados. Ela apresenta o sistema
+Figura  SEQ Figura \* ARABIC 2 - Tela primária
+
+Fonte: Elaborado pelo autor
+
+A tela primária apresentada na Figura 2 é composta por:
+Botão Começar jornada: Para começar a utilizar o sistema.
+	A Figura 3 apresenta a tela de cadastro, onde se completa essas informações para ter acesso ao sistema com e-mail e senha, sendo todas informações obrigatórias.
+Figura  SEQ Figura \* ARABIC 3 - Tela de Cadastro
+
+		Fonte: Elaborado pelo autor
+
+A tela de cadastro apresentada na Figura 3 é composta por:
+Campo E-mail: Para colocar seu e-mail.
+Campo nome: Para colocar seu nome.
+Campo Nome de usuário: Para colocar o nome de usuário
+Campo criar senha: Para criar a senha.
+Campo confirmar senha: Para confirmar sua senha.
+Botão Cadastrar: Cadastra o usuário.
+Botão Possuo Cadastro: Transfere para a tela Login.
+A Figura 4 apresenta a tela de Login, onde o usuário faz o Login para utilizar o sistema.
+Figura  SEQ Figura \* ARABIC 4 - Tela Login
+
+Fonte: Elaborado pelo autor
+
+A tela de login apresentada na Figura 4 é composta por:
+Campo usuário: Para colocar o seu usuário.
+Campo Senha: Para colocar sua senha.
+Botão entrar: Entrar no sistema.
+Botão entrar com Google: Entrar no sistema via conta Google.
+Botão entrar com Facebook: Entrar no sistema via Facebook.
+Botão esqueceu a senha: Redefine a sua senha
+Botão primeiro acesso: Redireciona para a tela cadastro.
+
+A Figura 5 apresenta a tela de Olá,onde a IA Memora da as boas vindas do usuário ao sistema.
+Figura  SEQ Figura \* ARABIC 5 - Tela Olá
+
+Fonte: Elaborado pelo autor
+
+A tela Olá apresentada na Figura 38 é composta por:
+Botão Continuar: Continua para a próxima tela.
+A Figura 6 apresenta a tela Apresentação que apresenta uma das principais funções do sistema.
+Figura  SEQ Figura \* ARABIC 6 - Tela apresentação
+
+Fonte: Elaborado pelo autor
+
+A tela de Apresentação apresentada na Figura 6 é composta por:
+Botão Continuar: Continua para a próxima tela.
+A Figura 7 apresenta a tela de Chatbot em que dá um exemplo para o usuário de como a funcionalidade se apresenta no sistema.
+Figura  SEQ Figura \* ARABIC 7 - Tela ChatBot Exemplo
+
+Fonte: Elaborado pelo autor
+
+A tela de ChatBot Exemplo apresentada na Figura 7 é composta por:
+Botão Voltar: Volta para a tela principal, iniciando a experiência no sistema
+.
+A Figura 8 apresenta a tela Inicial onde o usuário é recebido e pode entrar no Hub do sistema.
+Figura  SEQ Figura \* ARABIC 8 - Tela inicia
+
+3200400651239Fonte: Elaborado pelo autor
+
+A tela Inicial apresentada na Figura 8 é composta por
+Botão Hub: Acessa o Hub principal do aplicativo.
+Botão Configuração: Acessa a configuração
+Botão Home: Acessa a homepage
+Botão Perfil: Acessa o perfil.
+A Figura 9 apresenta a tela Hub, módulo que conecta todas as partes do sistema em uma só.
+
+Figura  SEQ Figura \* ARABIC 9 - Tela Hub
+
+Fonte: Elaborado pelo autor
+
+A tela Hub apresentada na Figura 9 é composta por:
+Botão Chatbot: Acessa o ChatBot.
+Botão Serviços Sociais: Acessa a área de serviços sociais.
+Botão Apps Atuais: Acessa a área de apps atuais
+Botão Ajuda: Acessa a área de ajuda
+Botão Planos: Acessa a área de Planos.
+ A Figura 10 apresenta a tela Planos, Onde é possível visualizar os dois planos existentes dentro do sistema, Básico e Premium.
+Figura  SEQ Figura \* ARABIC 10 - Tela Planos
+
+Fonte: Elaborado pelo autor.
+
+A tela Planos apresentada na Figura 10 é composta por:
+Botão Melhorar: Muda o plano básico para Premium.
+A Figura 11 apresenta a tela ChatBot, nessa tela o usuário acessa o ChatBot e pode usar de suas funcionalidades.
+
+Figura  SEQ Figura \* ARABIC 11 - Tela Chatbot
+
+Fonte: Elaborado pelo autor
+
+A tela Chatbot apresentada na Figura 11 é composta por:
+Botão Sim: Acessa a segunda parte do Chat, aonde é redirecionado ao instagram
+Botão Não: Usuário nega a interação e é parabenizado.
+A Figura 12 apresenta a tela de Chatbot sim. Nessa tela o usuário ve a sua resposta no caso de sim.
+Figura  SEQ Figura \* ARABIC 12 - Tela instagram
+
+Fonte: Elaborado pelo autor
+
+
+A Figura 13 apresenta a tela ChatBotNão. Nessa tela o usuário visualiza a sua resposta em caso de opção Não.
+
+Figura  SEQ Figura \* ARABIC 13 - TelaChatBotNão
+
+Fonte: Elaborado pelo autor
+
+A tela de Perfil de Time apresentada na Figura 13 é composta por:
+Botão Voltar: Volta a tela Hub.
+
+A figura 14 representa a tela de ajuda do sistema, e é composta pelo botão:
+
+Figura  SEQ Figura \* ARABIC 14 - Tela ajuda
+
+Fonte: Elaborado pelo autor
+
+Botão Aplicativo: Usado para passar informações e auxiliar sobre o aplicativo.
+Botão Memora: Ensina o que o memora pode fazer
+Botão Chatbot: auxilia sobre o uso do chatbot
+Planos: mostra os planos disponíveis do app
+Compartilhar: compartilha o link do app
+Serviços: mostra os serviços oferecidos pelo app
+Download: mostra como faz um download
+Segurança: mostra dicas de segurança para evitar golpes
+
+Figura  SEQ Figura \* ARABIC 15 - Tela ChatBotAjuda
+
+Fonte: Elaborado pelo autor
+
+A figura 15 demonstra a Memora auxiliando o usuário com o aplicativo
+Continuar: O botão continuar levará para a próxima etapa
+
+Figura  SEQ Figura \* ARABIC 16 - Tela ChatBotAjudaSair
+
+Fonte: Elaborado pelo autor
+
+A figura 16 demonstra o passo do botão continuar da figura 5
+ChatBot: O botão levará o usuário direto para o chatbot
+Voltar: Volta pra tela anterior
+
+Figura  SEQ Figura \* ARABIC 17 - Tela ChatBotAjudaOpção
+
+Fonte: Elaborado pelo autor
+
+A figura 17 demonstra uma conversa simulada do usuário com o chatbot
+
+Sim: O botão sim realizará a tarefa
+Não: O botão não irá cancelar a tarefa
+
+Figura  SEQ Figura \* ARABIC 18 - Tela ChatBotAjudaTexto
+
+Fonte: Elaborado pelo autor
+
+A figura 18 continua a conversa simulada
+
+Continuar: O botão continuar levará para a próxima etapa
+
+Figura  SEQ Figura \* ARABIC 19 - Tela ChatBotAjudaExemplo
+
+Fonte: Elaborado pelo autor
+
+A figura 19 ainda continua a conversa
+
+Continuar: O botão continuar levará para a próxima etapa
+
+Figura  SEQ Figura \* ARABIC 20 - Tela Apps Atuais
+
+Fonte: Elaborado pelo autor
+
+A figura 20 demonstra os aplicativos atuais geralmente mais utilizados, ao clicar em um app, o sistema ensinará o usuário a utilizar o aplicativo
+
+Figura  SEQ Figura \* ARABIC 21 - Tela TikTok
+
+Fonte: Elaborado pelo autor
+
+A figura 21 demonstra a tela que antecede o processo
+
+Figura  SEQ Figura \* ARABIC 22 - Tela TikTok2
+
+Fonte: Elaborado pelo autor
+
+A figura 22 demonstra o caminho de aprendizado para a utilização do aplicativo
+Continuar: O botão continuar levará para a próxima etapa
+
+Figura  SEQ Figura \* ARABIC 23 - Tela TikTok3
+
+Fonte: Elaborado pelo autor
+
+A figura 23 mostra a finalização do processo de aprendizado
+Continuar: O botão continuar finalizará o processo de aprendizagem
+
+Figura  SEQ Figura \* ARABIC 24 - Tela TikTok4
+
+Fonte: Elaborado pelo autor
+A figura 24 mostra o final do processo com um botão de voltar
+Voltar: O botão voltar voltará ao hub.
+
+Figura  SEQ Figura \* ARABIC 25 - Tela Config
+
+Fonte: Elaborado pelo autor
+
+A tela de configurações apresentada na Figura 25 é composta por:
+Botão Tela: Abre configurações de tela.
+Botão Acessibilidade: Abre configurações de acessibilidade.
+Botão privacidade: Abre configurações de privacidade.
+Botão Conta: Abre configurações de conta.
+Botão Notificações: Abre configurações de notificações.
+Figura  SEQ Figura \* ARABIC 26 - Tela Config - Acessibilidade.
+
+Fonte: Elaborado pelo autor
+
+A tela de configurações de acessibilidade apresentada na Figura 26 é composta por:
+Botão Cores: Para mudar as cores do aplicativo.
+Botão Temas: Para mudar o tema do aplicativo.
+Botão Fontes: Para mudar a fonte do aplicativo.
+Botão idiomas: Para mudar o idioma do aplicativo.
+Figura  SEQ Figura \* ARABIC 27 - Tela Perfil
+
+		Fonte: Elaborado pelo autor
+
+A tela de perfil apresentada na Figura 27 é composta por:
+Campo Nome: Campo que mostra o nome do usuário.
+Campo Idade: Campo que mostra a idade do usuário.
+Campo Email: Campo que mostra o email do usuário.
+Campo App favorito: Campo que mostra o app mais usado do usuário.
+Campo Plano: Campo que mostra o plano do aplicativo do usuário.
+
+
+Figura  SEQ Figura \* ARABIC 28 - Tela Serivos Socias
+
+Fonte: Elaborado pelo autor
+
+A tela de Serviços Sociais apresentada na Figura 28 é composta por:
+Botão Gov.br: Acessa o aplicativo do GOV.
+Botão e-Titulo: Acessa o aplicativo do e-Titulo.
+Botão Serasa: Acessa o aplicativo do Serasa.
+Botão FGTS: Acessa o aplicativo do FGTS.
+Botão PoupaTempo: Acessa o aplicativo do poupaTempo.
+Botão Carteira Digital: Acessa o aplicativo da Carteira Digital.
+Botão Correios: Acessa o aplicativo do Correios.
+Botão Carteira de Trabalho: Acessa o aplicativo da CLT.
+
+Figura  SEQ Figura \* ARABIC 29 - Tela GOV 1
+
+Fonte: Elaborado pelo autor
+
+A tela do GOV 1 apresentada na Figura 29 antecede a tela de ajuda do Memora ao realizar login no aplicativo do GOV.
+Figura  SEQ Figura \* ARABIC 30 - Tela Info GOV 1
+
+Fonte: Elaborado pelo autor
+
+A tela do Info GOV 1 apresentada na Figura 30 mostra o Memora auxiliando o usuário a realizar login no aplicativo do GOV.
+
+Figura  SEQ Figura \* ARABIC 31 - Tela GOV 2
+
+320040065151000Fonte: Elaborado pelo autor
+
+A tela do GOV 2 apresentada na Figura 31 antecede a tela de ajuda do Memora ao realizar login no aplicativo do GOV.
+
+
+
+Figura  SEQ Figura \* ARABIC 32 - Tela Info GOV 2
+
+Fonte: Elaborado pelo autor
+
+A tela do Info GOV 2 apresentada na Figura 32 mostra o Memora auxiliando o usuário a realizar login no aplicativo do GOV.
+
+
+Figura  SEQ Figura \* ARABIC 33 - Tela GOV 3
+
+Fonte: Elaborado pelo autor.
+
+A tela do GOV 3 apresentada na Figura 33 antecede a tela de ajuda do Memora ao realizar login no aplicativo do GOV.
+
+
+Figura  SEQ Figura \* ARABIC 34 - Tela Info GOV 3
+
+Fonte: Elaborado pelo autor
+
+A tela do Info GOV 3 apresentada na Figura 34 mostra o Memora auxiliando o usuário a realizar login no aplicativo do GOV.
+
+Figura  SEQ Figura \* ARABIC 35 - Tela GOV 4
+
+Fonte: Elaborado pelo autor
+
+A tela do GOV 4 apresentada na Figura 35 antecede a tela de despedida do Memora ao realizar, com sucesso, login no aplicativo do GOV.
+
+Figura  SEQ Figura \* ARABIC 36 - Tela Info GOV 4
+
+Fonte: Elaborado pelo autor
+
+A tela do Info GOV 4 apresentada na Figura 36 mostra o Memora se despedindo do usuário ao realizar, com sucesso, login no aplicativo do GOV.
+
