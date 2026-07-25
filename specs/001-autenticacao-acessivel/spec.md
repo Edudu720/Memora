@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-24
 
-**Status**: Draft — aguardando clarificações
+**Status**: Clarificada — pronta para `/speckit-plan`
 
 **Input**: Cadastro de nova conta e login para usuário idoso, com base nas telas
 Primária, Cadastro e Login do protótipo, sob os princípios da
@@ -119,6 +119,42 @@ visível ou acessível sem nova autenticação.
    se tenho certeza, explicando em linguagem comum o que vai acontecer.
 2. **Given** que confirmei a saída, **When** o processo termina, **Then** nenhum
    dado meu permanece acessível no aparelho.
+
+---
+
+### User Story 5 - Ser ajudada por um familiar sem entregar minha senha (Priority: P2)
+
+A filha de Dona Ana instala o Memora e senta ao lado dela para configurar. Logo no
+início o aplicativo pergunta se alguém está ajudando. A filha preenche o nome e o
+contato — mas, ao chegar na senha, o aplicativo **interrompe e pede que o celular
+volte para a Dona Ana**, explicando que a senha é um segredo só dela. Ao final,
+Dona Ana entra uma vez sozinha, para provar a si mesma que consegue.
+
+**Why this priority**: Na prática, este é o caminho **mais frequente** de entrada no
+produto — quase nenhum idoso instala o aplicativo sozinho. Ignorá-lo não faz o
+cenário desaparecer: faz com que ele aconteça sem proteção, com o familiar
+conhecendo a senha e a dependência se tornando permanente. Está em P2 apenas porque
+depende da User Story 1 existir primeiro.
+
+**Independent Test**: Simular o cadastro com duas pessoas e verificar que o
+acompanhante nunca vê nem digita a senha, e que a pessoa dona da conta consegue
+entrar sozinha ao final.
+
+**Acceptance Scenarios**:
+
+1. **Given** que inicio o cadastro, **When** vejo a primeira tela, **Then** o
+   aplicativo pergunta de forma clara se há alguém me ajudando.
+2. **Given** que o modo assistido está ativo, **When** o cadastro chega na senha,
+   **Then** o aplicativo interrompe e pede explicitamente que o aparelho seja
+   entregue à pessoa dona da conta.
+3. **Given** que estou criando minha senha no modo assistido, **When** digito,
+   **Then** o conteúdo não é revelado na tela por padrão e não há como o
+   acompanhante recuperá-lo depois pelo aplicativo.
+4. **Given** que o cadastro assistido terminou, **When** chego ao final, **Then** o
+   aplicativo me conduz a entrar uma vez sozinha, reforçando que eu consigo.
+5. **Given** que o modo assistido está ativo, **When** o contato de recuperação é
+   informado, **Then** o aplicativo exige que ele pertença à pessoa dona da conta e
+   confirma essa posse antes de aceitá-lo como canal de recuperação.
 
 ---
 
@@ -254,6 +290,51 @@ visível ou acessível sem nova autenticação.
 - **FR-047**: A assistente Memora MUST NOT solicitar, exibir, repetir ou armazenar a
   senha do usuário em nenhuma circunstância.
 
+### Requisitos Funcionais — Identificador de Acesso *(decisão D1)*
+
+- **FR-048**: O sistema MUST aceitar **e-mail ou telefone celular** como
+  identificador de acesso.
+- **FR-049**: O cadastro MUST exigir **apenas um** dos dois canais, à escolha da
+  pessoa. Exigir ambos contrariaria a FR-001.
+- **FR-050**: O sistema MUST oferecer o cadastro do segundo canal **depois** do
+  primeiro acesso, de forma não bloqueante, apresentado como reforço de segurança
+  da conta e não como obrigação.
+- **FR-051**: O sistema MUST aceitar qualquer um dos canais cadastrados na tela de
+  login, sem exigir que a pessoa lembre qual usou no cadastro.
+- **FR-052**: O sistema MUST verificar a posse de um canal antes de aceitá-lo como
+  meio válido de recuperação de acesso.
+
+### Requisitos Funcionais — Login Social *(decisão D2)*
+
+- **FR-053**: O sistema MUST oferecer entrada por **Google** e por **Facebook**.
+- **FR-054**: O sistema MUST avisar, antes do redirecionamento, que a pessoa será
+  levada para fora do Memora e voltará em seguida — atendendo à FR-044.
+- **FR-055**: O sistema MUST NOT solicitar, exibir ou receber a senha da conta
+  externa dentro do Memora, em nenhuma hipótese.
+- **FR-056**: O sistema MUST solicitar do provedor externo o **mínimo** de
+  informação necessária para criar a conta.
+- **FR-057**: Se o identificador vindo do provedor externo já existir como conta com
+  senha, o sistema MUST vincular os acessos à mesma pessoa, sem criar conta
+  duplicada e sem revelar a existência prévia da conta.
+
+### Requisitos Funcionais — Cadastro Assistido *(decisão D3)*
+
+- **FR-058**: O cadastro MUST perguntar, no início, se há alguém ajudando.
+- **FR-059**: Com o modo assistido ativo, o sistema MUST interromper o fluxo ao
+  chegar na senha e solicitar de forma explícita que o aparelho seja entregue à
+  pessoa dona da conta.
+- **FR-060**: No modo assistido, a senha MUST permanecer oculta por padrão, e o
+  controle de revelar (FR-007) MUST vir desativado.
+- **FR-061**: O sistema MUST NOT oferecer, em nenhum momento posterior, qualquer
+  forma de exibir a senha criada.
+- **FR-062**: No modo assistido, o sistema MUST exigir que o canal de recuperação
+  pertença à pessoa dona da conta, confirmando a posse conforme FR-052, **antes** de
+  concluir o cadastro.
+- **FR-063**: Ao final do cadastro assistido, o sistema MUST conduzir a pessoa dona
+  da conta a realizar uma entrada sozinha, como confirmação de autonomia.
+- **FR-064**: O modo assistido MUST ser apenas um caminho de acompanhamento. Ele
+  MUST NOT criar vínculo permanente, permissão ou acesso do acompanhante à conta.
+
 ---
 
 ### Key Entities
@@ -293,6 +374,12 @@ visível ou acessível sem nova autenticação.
 - **SC-009**: Zero credenciais localizáveis em armazenamento do aparelho ou em
   registros de diagnóstico, verificado por inspeção.
 - **SC-010**: A taxa de abandono na tela de cadastro fica abaixo de 25%.
+- **SC-011**: Em 100% dos cadastros assistidos observados em teste, o acompanhante
+  não vê nem digita a senha.
+- **SC-012**: 80% das pessoas que passaram por cadastro assistido conseguem entrar
+  sozinhas na primeira tentativa, ao final do fluxo.
+- **SC-013**: 100% dos canais de recuperação aceitos pertencem, com posse
+  confirmada, à pessoa dona da conta.
 
 ---
 
@@ -300,8 +387,11 @@ visível ou acessível sem nova autenticação.
 
 - O aparelho é Android, com conexão de internet disponível na maior parte do tempo.
   Uso totalmente offline está **fora de escopo** desta funcionalidade.
-- A pessoa usuária opera o aparelho sozinha no momento do cadastro; cenários de
-  cadastro assistido dependem da clarificação **Q3**.
+- O cadastro pode ocorrer com acompanhante presente; o modo assistido (D3) trata
+  esse cenário explicitamente.
+- O acompanhante é presumido **bem-intencionado, porém não confiável com o segredo**.
+  O desenho não busca detectar má-fé, e sim evitar que a dependência se forme por
+  descuido.
 - Cada pessoa possui uma conta individual. Contas compartilhadas ou perfis múltiplos
   estão fora de escopo.
 - Autenticação por biometria está **fora de escopo** nesta fase, mas a modelagem não
@@ -346,6 +436,10 @@ equipe de desenvolvimento — acessa credenciais.
 | Credencial em registro de diagnóstico | Vazamento amplo | FR-036, FR-040 |
 | Aparelho compartilhado ou perdido | Acesso indevido | FR-024, FR-026 |
 | Aplicativo falso imitando o Memora | Roubo de credencial | FR-045 |
+| Acompanhante cadastra o próprio contato como canal de recuperação | Controle permanente da conta alheia | FR-052, FR-062 |
+| Acompanhante retém a senha criada no cadastro | Dependência permanente | FR-059, FR-060, FR-061 |
+| Provedor externo devolve mais dados que o necessário | Exposição desnecessária | FR-056 |
+| Conta duplicada ao alternar entre senha e login social | Perda de acesso e confusão | FR-057 |
 
 ### Monitoramento e registro
 
@@ -364,59 +458,66 @@ observáveis.
 | Ligar dizendo ser "suporte do Memora" e pedir a senha | Confiança em autoridade; o idoso não sabe que suporte legítimo nunca pede senha | FR-023, FR-047 — aviso permanente e regra absoluta para a assistente |
 | Enviar mensagem com link falso de "recuperação de senha" | O link chega em canal familiar e cria urgência | FR-046 — o Memora não envia links fora do fluxo iniciado pelo usuário |
 | Aplicativo clonado com tela de login idêntica | O idoso não distingue aplicativo legítimo de cópia | FR-045 — sinal de identidade consistente |
-| Familiar ou cuidador cadastra e retém a senha | Dependência disfarçada de ajuda | FR-024 — sair da conta sempre acessível; ver **Q3** |
+| Familiar ou cuidador cadastra e retém a senha | Dependência disfarçada de ajuda | FR-059 a FR-063 — modo assistido devolve o aparelho na etapa da senha |
+| Tela falsa imitando o login do Google ou do Facebook | O idoso não sabe distinguir a tela legítima do provedor | FR-054, FR-055 — aviso antes de sair e nenhum campo de senha de terceiro dentro do Memora |
 | Induzir o cadastro de CPF ou dado bancário "para validar" | Formulários longos normalizam pedir dados demais | FR-043 — o app nunca pede esses dados, tornando o pedido um sinal de alerta |
 | Pressa e ameaça ("sua conta será excluída") | Medo de perder acesso | Nenhuma mensagem do Memora usa urgência ou ameaça |
 
 ---
 
-## Perguntas em Aberto
+## Decisões de Clarificação
 
-> A especificação **não avança para o plano** com estas questões abertas.
-> Serão resolvidas em `/speckit-clarify`.
+> Resolvidas com a equipe em 2026-07-24. As três questões que bloqueavam esta spec
+> estão fechadas.
 
-### Q1: Qual será o identificador de acesso?
+### D1 — Identificador de acesso: **e-mail ou telefone** *(opção C)*
 
-**Contexto**: FR-002 elimina o "nome de usuário", mas resta definir o que a pessoa
-digita para entrar. Esta decisão condiciona o cadastro, o login **e** todo o fluxo
-de recuperação.
+A pessoa escolhe um dos dois. Recuperação redundante sem perder o público que não
+possui e-mail ou não sabe acessá-lo.
 
-| Opção | Resposta | Implicações |
-|---|---|---|
-| A | **E-mail** | Recuperação por e-mail, sem custo. Risco: parte do público não tem e-mail, não lembra qual é, ou não sabe acessá-lo — e a recuperação vira beco sem saída |
-| B | **Telefone celular** | O idoso costuma saber seu número de cor. Recuperação por SMS. Risco: custo por mensagem e o SMS é canal saturado de golpes, o que tensiona a FR-046 |
-| C | **Ambos**, com um obrigatório | Maior flexibilidade e recuperação redundante. Custo: cadastro mais longo, contrariando a FR-001 |
+**Ajuste adotado para não inflar o cadastro:** apenas **um** canal é exigido na
+criação da conta (FR-049). O segundo é oferecido depois do primeiro acesso, como
+reforço de segurança e nunca como obrigação (FR-050). Assim a decisão convive com a
+FR-001, que manda pedir o mínimo possível.
 
-### Q2: Manteremos login social (Google / Facebook)?
+**Requisitos gerados:** FR-048 a FR-052.
 
-**Contexto**: O protótipo exibe ambos. A favor: o usuário não cria nem memoriza
-senha — o que remove a causa nº 1 de perda de acesso neste público. Contra:
-adiciona uma tela de terceiro que o idoso não sabe validar.
+### D2 — Login social: **Google e Facebook** *(opção B)*
 
-| Opção | Resposta | Implicações |
-|---|---|---|
-| A | **Apenas Google** | A conta já existe no aparelho Android. Reduz senhas e nenhuma senha é digitada dentro do Memora. Recomendado |
-| B | **Google e Facebook** | Fiel ao protótipo. Porém o Facebook é vetor recorrente de golpe com este público e agrega pouco em aparelho Android |
-| C | **Nenhum** | Fluxo mais simples e sob controle total. Porém joga 100% do público na memorização de senha |
+Mantém fidelidade ao protótipo e oferece um caminho sem senha, que é a maior causa
+de perda de acesso neste público.
 
-### Q3: O cadastro assistido por familiar entra no escopo agora?
+**Ressalva técnica registrada:** em aparelho Android a conta Google já está
+presente, enquanto o Facebook agrega pouco alcance e é vetor recorrente de golpe
+com pessoas idosas. A decisão é de produto e foi tomada com essa ressalva conhecida.
+As mitigações obrigatórias estão em FR-054 e FR-055: aviso explícito de saída do
+aplicativo e proibição absoluta de qualquer campo de senha de terceiro dentro do
+Memora.
 
-**Contexto**: Na prática, boa parte dos idosos terá o aplicativo instalado e
-configurado por um filho ou neto. Se não desenharmos esse caminho, ele acontecerá
-mesmo assim — com o familiar **conhecendo a senha**, o que cria dependência
-permanente e mina o propósito do produto.
+**Requisitos gerados:** FR-053 a FR-057.
 
-| Opção | Resposta | Implicações |
-|---|---|---|
-| A | **Fora de escopo agora** | Mantém a feature enxuta. Aceita-se que o cenário ocorra sem apoio do produto |
-| B | **Modo assistido explícito** | O familiar ajuda no preenchimento, mas a senha é definida em etapa privada pelo próprio idoso. Protege a autonomia. Aumenta o escopo |
-| C | **Convite por familiar** | O familiar inicia a conta e o idoso a conclui no próprio aparelho. Mais seguro, porém bem mais complexo |
+### D3 — Cadastro assistido: **modo assistido explícito** *(opção B)*
+
+O produto reconhece que o cadastro quase sempre acontece com um familiar ao lado, e
+protege o único ponto que realmente importa: **quem fica sabendo a senha**.
+
+O acompanhante ajuda no preenchimento, mas o fluxo é interrompido na senha e o
+aparelho volta para a pessoa dona da conta. Ao final, ela entra uma vez sozinha.
+
+**Risco identificado durante a decisão e já tratado:** com dois canais possíveis
+(D1), o acompanhante poderia cadastrar o **próprio** e-mail ou telefone como contato
+de recuperação — e assim controlar a conta permanentemente, mesmo sem saber a senha.
+A FR-062, combinada com a FR-052, exige que o canal pertença à pessoa dona da conta
+e que essa posse seja confirmada antes da conclusão do cadastro.
+
+**Requisitos gerados:** FR-058 a FR-064.
 
 ---
 
 ## Dependências
 
-- Canal de envio para recuperação de acesso — **depende de Q1**.
-- Provedor de identidade externo — **depende de Q2**.
-- Design System com tokens de cor, tipografia e espaçamento validados em contraste:
-  ainda não existe. Bloqueia a implementação, não a especificação.
+- **Canal de e-mail e canal de SMS** para verificação de posse e recuperação de
+  acesso (decorre de D1).
+- **Provedores de identidade Google e Facebook** (decorre de D2).
+- **Design System** com tokens de cor, tipografia e espaçamento validados em
+  contraste: ainda não existe. Bloqueia a implementação, não a especificação.

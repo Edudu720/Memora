@@ -2,6 +2,7 @@
 
 **Purpose**: Validar completude e qualidade da especificação antes do planejamento
 **Created**: 2026-07-24
+**Last validated**: 2026-07-24 (após clarificações D1, D2, D3)
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
@@ -13,8 +14,7 @@
 
 ## Requirement Completeness
 
-- [ ] **No [NEEDS CLARIFICATION] markers remain** — ⚠️ **FALHA ESPERADA**: 3 questões
-      abertas (Q1, Q2, Q3). Ver notas.
+- [x] No [NEEDS CLARIFICATION] markers remain — ✅ **resolvido**: D1, D2 e D3 fechados
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic
@@ -32,41 +32,39 @@
 
 ## Conformidade com a Constituição
 
-- [x] **Princípio I** — Threat Model documentado com dados, atores, ameaças, impacto,
+- [x] **Princípio I** — Threat Model com 13 ameaças mapeadas, classificação de dados,
       mitigação e monitoramento
-- [x] **Princípio II** — Análise de engenharia social respondendo *"como um golpista
-      exploraria estas telas?"*, com 6 vetores mapeados
-- [x] **Princípio III** — Critérios de acessibilidade como requisitos verificáveis
-      (FR-027 a FR-034) e como métricas de sucesso (SC-005 a SC-007)
+- [x] **Princípio II** — Análise de engenharia social com 7 vetores de golpe
+- [x] **Princípio III** — Acessibilidade como requisito (FR-027 a FR-034) e como
+      métrica (SC-005 a SC-007)
 - [x] **Princípio IV** — Nenhuma linha de código escrita antes desta spec
 - [x] **Princípio VI** — FR-047 impede a assistente de tocar em credenciais
-- [x] **Princípio VII** — Autonomia preservada: FR-024 e Q3 tratam a dependência
-      familiar em vez de ignorá-la
+- [x] **Princípio VII** — Autonomia protegida no ponto decisivo: FR-059 a FR-063
+
+## Resultado
+
+**16 de 16 itens aprovados.** Especificação liberada para `/speckit-plan`.
 
 ## Notes
 
-### Item que falha, e por quê
+### Decisões que geraram requisitos novos
 
-**"No [NEEDS CLARIFICATION] markers remain"** é o único item reprovado, e isso é
-**intencional**. As três questões abertas atendem aos critérios de bloqueio:
-impactam escopo, segurança e experiência, e não possuem padrão razoável que
-pudesse ser assumido sem risco.
+| Decisão | Escolha | Requisitos |
+|---|---|---|
+| D1 — Identificador | E-mail **ou** telefone, um exigido no cadastro | FR-048 a FR-052 |
+| D2 — Login social | Google **e** Facebook | FR-053 a FR-057 |
+| D3 — Cadastro assistido | Modo assistido explícito | FR-058 a FR-064 |
 
-- **Q1 (identificador de acesso)** condiciona cadastro, login e todo o fluxo de
-  recuperação. Assumir "e-mail" por padrão é a escolha comum da indústria — e
-  provavelmente errada para um público que frequentemente não tem ou não acessa
-  e-mail. Não é uma decisão que eu deva tomar sozinho.
-- **Q2 (login social)** é decisão de segurança com trade-off real entre reduzir
-  senhas e adicionar tela de terceiro não verificável.
-- **Q3 (cadastro assistido)** define escopo e afeta diretamente o Princípio VII.
+### Ressalvas registradas, não bloqueantes
+
+- **D2**: a inclusão do Facebook foi decidida com a ressalva técnica documentada na
+  spec — baixo alcance adicional em Android e vetor recorrente de golpe com este
+  público. Mitigado por FR-054 e FR-055.
+- **D1**: exigir dois canais no cadastro contrariaria a FR-001. Resolvido exigindo
+  apenas um e oferecendo o segundo após o primeiro acesso (FR-049, FR-050).
 
 ### Observação sobre unidade de medida
 
 FR-027 usa `dp`, unidade da plataforma Android. É tecnicamente um detalhe de
 implementação, mas foi mantida por ser a forma como o critério de acessibilidade é
 expresso e verificado na prática, e por já constar assim na Constituição.
-
-### Portão de saída
-
-Esta spec **não avança para `/speckit-plan`** enquanto Q1, Q2 e Q3 não forem
-respondidas. Próximo passo: `/speckit-clarify`.
