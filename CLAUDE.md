@@ -110,21 +110,34 @@ export PATH="/c/Users/Edu/AppData/Roaming/Python/Python314/Scripts:$PATH"
 | Java | 21 LTS (backend, ainda não iniciado) |
 | Scripts do Spec Kit | **PowerShell** (`.ps1`) — use a ferramenta PowerShell |
 | Identidade git | `Eduardo Juncker <eduardojunckertorasl@gmail.com>` |
+| **Shell do usuário** | **Windows PowerShell 5.1** |
 | Repositório | `Edudu720/Memora` (privado) |
 
 ---
 
 ## 6. Verificação — rode antes de dizer que terminou
 
-```bash
-cd app && flutter analyze && flutter test
+```powershell
+cd app; flutter analyze; flutter test
 ```
 
-```bash
+```powershell
 python specs/002-design-system/ferramentas/validar_paleta.py
 ```
 
 Os três precisam passar. O CI (`.github/workflows/verificacao.yml`) roda os mesmos.
+
+### ⚠️ Sintaxe de comando
+
+O usuário roda **Windows PowerShell 5.1**, que **não aceita `&&`** — é erro de
+parser, não apenas incompatibilidade. Ao entregar comandos a ele:
+
+- Use `;` como separador: `cd app; flutter test`
+- Para encadear só em caso de sucesso: `cd app; if ($?) { flutter test }`
+- `&&`, `||`, ternário e `??` não existem nessa versão
+
+Você (agente) pode usar bash pela ferramenta Bash, mas **o que for colado para o
+usuário precisa ser PowerShell**.
 
 ### Princípio de verificação adotado aqui
 
