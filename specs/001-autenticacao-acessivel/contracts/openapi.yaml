@@ -1,0 +1,556 @@
+openapi: 3.1.0
+
+info:
+  title: Memora — API de Autenticação
+  version: 1.0.0
+  description: |
+    Contrato de autenticação do Memora.
+
+    **Esta especificação é a fonte da verdade do contrato** (decisão R8). O cliente
+    Dart consumido pelo aplicativo Flutter é **gerado** a partir deste arquivo e
+    nunca editado à mão.
+
+    ## Princípios refletidos neste contrato
+
+    - Nenhuma resposta permite deduzir se uma conta existe (FR-010, FR-013, FR-019).
+    - Nenhuma resposta expõe detalhe interno, stack trace ou estrutura de banco (FR-041).
+    - Toda resposta de erro segue o mesmo formato, com texto já pronto para
+      exibição a uma pessoa idosa.
+    - Identificadores são UUID, nunca sequenciais.
+
+servers:
+  - url: https://api.memora.app/v1
+    description: Produção
+  - url: http://localhost:8080/v1
+    description: Desenvolvimento local
+
+tags:
+  - name: Cadastro
+  - name: Sessão
+  - name: Canais de contato
+  - name: Recuperação de acesso
+
+paths:
+
+  /auth/cadastro:
+    post:
+      tags: [Cadastro]
+      summary: Criar conta
+      description: |
+        Cria a conta e **já devolve sessão iniciada** (FR-009). A pessoa não precisa
+        fazer login em seguida.
+
+        Exige **apenas um** canal de contato (FR-049). O segundo é oferecido depois
+        do primeiro acesso (FR-050).
+
+        Se o canal já pertencer a uma conta, responde **201 da mesma forma**, sem
+        criar nada e sem revelar a existência (FR-010). O aplicativo conduz a pessoa
+        ao login conforme o cenário 5 da User Story 1.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CadastroRequisicao'
+      responses:
+        '201':
+          description: Conta criada e sessão iniciada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessaoResposta'
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '429':
+          $ref: '#/components/responses/MuitasTentativas'
+
+  /auth/entrar:
+    post:
+      tags: [Sessão]
+      summary: Entrar com identificador e senha
+      description: |
+        Aceita **qualquer canal verificado** da pessoa — e-mail ou telefone (FR-051).
+
+        O erro é sempre genérico: não distingue identificador inexistente de senha
+        incorreta (FR-013). O servidor executa o hash mesmo quando a conta não
+        existe, para que o tempo de resposta não denuncie a existência (R3).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntrarRequisicao'
+      responses:
+        '200':
+          description: Autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessaoResposta'
+        '401':
+          $ref: '#/components/responses/CredenciaisInvalidas'
+        '429':
+          $ref: '#/components/responses/MuitasTentativas'
+
+  /auth/social/{provedor}:
+    post:
+      tags: [Sessão]
+      summary: Entrar com provedor externo
+      description: |
+        Recebe o token de identidade obtido pelo aplicativo via Authorization Code
+        com PKCE (R6). O backend **valida assinatura, emissor, audiência e
+        expiração** antes de aceitar.
+
+        Se o identificador já existir como conta com senha, os acessos são
+        vinculados à mesma pessoa, sem criar duplicata e **sem revelar** que a conta
+        já existia (FR-057).
+
+        O token do provedor é validado e **descartado** — nunca armazenado.
+      security: []
+      parameters:
+        - name: provedor
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [google, facebook]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token_identidade]
+              properties:
+                token_identidade:
+                  type: string
+                  description: Token de identidade devolvido pelo provedor
+                aparelho_descricao:
+                  type: string
+                  maxLength: 120
+      responses:
+        '200':
+          description: Autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessaoResposta'
+        '401':
+          $ref: '#/components/responses/CredenciaisInvalidas'
+
+  /auth/sessao/renovar:
+    post:
+      tags: [Sessão]
+      summary: Renovar sessão
+      description: |
+        Rotação de refresh token (R2). O token apresentado é invalidado e um novo é
+        emitido.
+
+        **Detecção de reuso**: se o token já tiver sido usado, isso indica roubo.
+        Toda a família de sessões é revogada e a pessoa é notificada. A resposta é
+        `401`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: Sessão renovada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessaoResposta'
+        '401':
+          $ref: '#/components/responses/CredenciaisInvalidas'
+
+  /auth/sair:
+    post:
+      tags: [Sessão]
+      summary: Encerrar sessão
+      description: |
+        Revoga a sessão atual (FR-026). O aplicativo é responsável por limpar todo
+        dado pessoal e credencial do armazenamento seguro do aparelho.
+      responses:
+        '204':
+          description: Sessão encerrada
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+
+  /canais:
+    post:
+      tags: [Canais de contato]
+      summary: Adicionar segundo canal de contato
+      description: |
+        Oferecido **após** o primeiro acesso, de forma não bloqueante, como reforço
+        de segurança da conta (FR-050). Cria o canal como **não verificado**.
+      responses:
+        '201':
+          description: Canal criado, aguardando verificação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Canal'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CanalRequisicao'
+
+  /canais/{canalId}/codigo:
+    post:
+      tags: [Canais de contato]
+      summary: Enviar código de verificação
+      description: |
+        Envia código numérico de 6 dígitos, válido por 10 minutos, de uso único (R5).
+
+        **Código, não link.** A FR-046 desaconselha links de autenticação em canais
+        imitáveis — a regra que ensinamos à pessoa é *"nunca clique, sempre digite"*.
+
+        Solicitar novo código invalida o anterior.
+      parameters:
+        - $ref: '#/components/parameters/CanalId'
+      responses:
+        '202':
+          description: Código enviado, se o canal for elegível
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '429':
+          $ref: '#/components/responses/MuitasTentativas'
+
+  /canais/{canalId}/verificar:
+    post:
+      tags: [Canais de contato]
+      summary: Confirmar posse do canal
+      description: |
+        Confirma que a pessoa controla o canal. **Somente canal verificado serve
+        para recuperar acesso** (FR-052).
+
+        Este é o ponto que impede o cenário do acompanhante que cadastra o próprio
+        contato e mantém controle da conta alheia (FR-062).
+      parameters:
+        - $ref: '#/components/parameters/CanalId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [codigo]
+              properties:
+                codigo:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: Canal verificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Canal'
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+
+  /auth/recuperacao/solicitar:
+    post:
+      tags: [Recuperação de acesso]
+      summary: Solicitar recuperação de acesso
+      description: |
+        Responde **202 sempre**, exista a conta ou não (FR-019). O texto devolvido é
+        idêntico nos dois casos.
+
+        Só envia para canal **verificado**.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identificador]
+              properties:
+                identificador:
+                  type: string
+      responses:
+        '202':
+          description: |
+            Solicitação recebida. A resposta é idêntica exista ou não a conta.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensagem:
+                    type: string
+                    example: >-
+                      Se essa conta existir, enviamos um código de 6 números.
+                      Confira suas mensagens 😊
+        '429':
+          $ref: '#/components/responses/MuitasTentativas'
+
+  /auth/recuperacao/confirmar:
+    post:
+      tags: [Recuperação de acesso]
+      summary: Definir nova senha
+      description: |
+        Troca a senha e **revoga todas as sessões ativas** (FR-021). A pessoa é
+        notificada pelo canal cadastrado (FR-022).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identificador, codigo, nova_senha]
+              properties:
+                identificador:
+                  type: string
+                codigo:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+                nova_senha:
+                  $ref: '#/components/schemas/Senha'
+      responses:
+        '200':
+          description: Senha alterada e sessão nova emitida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessaoResposta'
+        '400':
+          $ref: '#/components/responses/DadosInvalidos'
+        '429':
+          $ref: '#/components/responses/MuitasTentativas'
+
+  /eu:
+    get:
+      tags: [Sessão]
+      summary: Dados da pessoa autenticada
+      responses:
+        '200':
+          description: Dados mínimos da conta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PessoaResposta'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+
+components:
+
+  securitySchemes:
+    tokenDeAcesso:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CanalId:
+      name: canalId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+
+    Senha:
+      type: string
+      minLength: 10
+      maxLength: 128
+      description: |
+        A política prioriza **comprimento** sobre complexidade simbólica (FR-042).
+        Não exigimos maiúscula, número ou símbolo — exigências assim levam pessoas
+        idosas a anotar a senha em papel, o que piora a segurança real.
+
+        Senhas notoriamente comprometidas são recusadas.
+
+    CadastroRequisicao:
+      type: object
+      required: [nome_tratamento, canal, senha]
+      properties:
+        nome_tratamento:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Como a pessoa quer ser chamada. **Nunca é credencial** (FR-003)
+        canal:
+          $ref: '#/components/schemas/CanalRequisicao'
+        senha:
+          $ref: '#/components/schemas/Senha'
+        modo_assistido:
+          type: boolean
+          default: false
+          description: |
+            Indica que houve acompanhante no cadastro (D3). Quando `true`, o
+            servidor **exige canal com posse já confirmada** antes de concluir
+            (FR-062).
+
+            Não cria vínculo, permissão ou acesso do acompanhante (FR-064) — é
+            apenas um sinal de fluxo.
+        aparelho_descricao:
+          type: string
+          maxLength: 120
+
+    CanalRequisicao:
+      type: object
+      required: [tipo, valor]
+      properties:
+        tipo:
+          type: string
+          enum: [email, telefone]
+        valor:
+          type: string
+          description: Normalizado pelo servidor — minúsculas, sem espaços
+
+    Canal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tipo:
+          type: string
+          enum: [email, telefone]
+        valor_mascarado:
+          type: string
+          description: Nunca devolvemos o valor completo
+          example: "ana****@gmail.com"
+        verificado:
+          type: boolean
+        principal:
+          type: boolean
+
+    EntrarRequisicao:
+      type: object
+      required: [identificador, senha]
+      properties:
+        identificador:
+          type: string
+          description: E-mail **ou** telefone. Qualquer canal verificado (FR-051)
+        senha:
+          type: string
+        aparelho_descricao:
+          type: string
+          maxLength: 120
+
+    SessaoResposta:
+      type: object
+      required: [token_acesso, refresh_token, expira_em_segundos, pessoa]
+      properties:
+        token_acesso:
+          type: string
+          description: Válido por 15 minutos (R2)
+        refresh_token:
+          type: string
+          description: |
+            Opaco e rotativo. O aplicativo MUST guardá-lo apenas em armazenamento
+            seguro do sistema, nunca em preferências comuns (FR-036, R7).
+        expira_em_segundos:
+          type: integer
+          example: 900
+        pessoa:
+          $ref: '#/components/schemas/PessoaResposta'
+
+    PessoaResposta:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome_tratamento:
+          type: string
+        canais:
+          type: array
+          items:
+            $ref: '#/components/schemas/Canal'
+        possui_senha:
+          type: boolean
+          description: Falso quando a conta usa apenas login social
+
+    Erro:
+      type: object
+      required: [codigo, mensagem]
+      properties:
+        codigo:
+          type: string
+          description: Código estável, para o aplicativo decidir o comportamento
+          example: CREDENCIAIS_INVALIDAS
+        mensagem:
+          type: string
+          description: |
+            Texto **pronto para exibição**, na persona da Memora: acolhedor, sem
+            jargão e sem culpar a pessoa. Nunca expõe detalhe interno (FR-041).
+        tentar_novamente_em_segundos:
+          type: integer
+          description: Presente apenas em bloqueio temporário
+
+  responses:
+
+    DadosInvalidos:
+      description: Dado informado não pôde ser aceito
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            codigo: DADOS_INVALIDOS
+            mensagem: >-
+              Não consegui entender esse endereço de e-mail. Pode conferir se
+              está completo? 😊
+
+    CredenciaisInvalidas:
+      description: |
+        Resposta **deliberadamente genérica** (FR-013). Não distingue conta
+        inexistente de senha errada.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            codigo: CREDENCIAIS_INVALIDAS
+            mensagem: >-
+              Esses dados não conferem. Vamos tentar de novo com calma? 😊
+
+    NaoAutenticado:
+      description: Sessão ausente, expirada ou revogada
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            codigo: SESSAO_EXPIRADA
+            mensagem: >-
+              Faz um tempinho que você não usa o Memora. Vamos entrar de novo?
+
+    MuitasTentativas:
+      description: Bloqueio temporário por excesso de tentativas
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+          example:
+            codigo: MUITAS_TENTATIVAS
+            mensagem: >-
+              Tudo bem, acontece! Para proteger sua conta, vamos esperar 5
+              minutinhos antes de tentar de novo. Se preferir, eu posso te ajudar
+              a criar uma senha nova 😊
+            tentar_novamente_em_segundos: 300
+
+security:
+  - tokenDeAcesso: []
