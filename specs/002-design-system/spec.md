@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-24
 
-**Status**: Draft — aguardando clarificações
+**Status**: Clarificada — pronta para `/speckit-plan`
 
 **Input**: Sistema de design do Memora — tokens, componentes e temas — derivado das
 38 telas do protótipo em `docs/design/prototipo/`, sob os princípios da
@@ -277,11 +277,11 @@ espaçamento ou tamanho literal.
 
 - O aplicativo é Android; o comportamento segue as convenções da plataforma.
 - Os tokens derivam da **intenção visual** do protótipo, não de valores exatos: as
-  cores foram amostradas de imagem, não extraídas do Figma. Ver **Q1**.
+  cores são amostradas de imagem, não extraídas do Figma (D1).
 - Onde o protótipo conflita com acessibilidade, **a acessibilidade vence** — e a
-  divergência é registrada.
-- Múltiplos idiomas estão **fora de escopo** nesta feature, mas o sistema não deve
-  impedir sua adição. O botão "Idiomas" do protótipo depende de **Q3**.
+  divergência é registrada com a medição que a justificou (FR-038).
+- Múltiplos idiomas estão **fora de escopo** (D3), mas a estrutura é preparada para
+  recebê-los.
 - Nenhum dado pessoal trafega nesta feature; ela não possui superfície de ataque
   própria além da persistência local de preferências.
 
@@ -318,45 +318,61 @@ indireta, mas existe.
 
 ---
 
-## Perguntas em Aberto
+## Decisões de Clarificação
 
-### Q1: Como obtemos os valores visuais reais?
+> Resolvidas com a equipe em 2026-07-24.
 
-**Contexto**: as cores atuais foram amostradas de PNG dentro do `.docx`. Compressão
-de imagem altera pixel — os valores são aproximados. Como os tokens são a base de
-tudo, errar aqui se propaga para o aplicativo inteiro.
+### D1 — Origem dos valores visuais: **derivar das imagens** *(opção C)*
 
-| Opção | Resposta | Implicações |
-|---|---|---|
-| A | **Exportar tokens do Figma** | Valores exatos de cor, tipografia e espaçamento. Requer alguém com acesso ao arquivo |
-| B | **Liberar o link do Figma** | Eu extraio diretamente. Reversível depois |
-| C | **Derivar das imagens e validar** | Sem dependência externa. Os tokens serão *inspirados* no protótipo, com contraste corrigido. O resultado diverge visualmente do Figma |
+Os tokens serão derivados por **amostragem programática** das 38 telas do protótipo,
+e não estimados visualmente. Cada cor amostrada é então **validada em contraste** e
+ajustada quando reprovar.
 
-### Q2: Quantos temas oferecer?
+**Consequência assumida**: o resultado será fiel à **intenção** do protótipo — a
+identidade azul, a estrutura das telas —, mas os valores exatos poderão divergir do
+arquivo do Figma. Onde a cor original reprovar em contraste, ela **será alterada**,
+por força da FR-018 e do Princípio III.
 
-**Contexto**: a FR-017 proíbe escolha livre de cor. Resta definir o tamanho do
-cardápio — cada tema adicional multiplica a matriz de validação e de teste.
+**Registro para a defesa acadêmica**: toda divergência entre o protótipo e o token
+final deve ser documentada com o motivo e a medição de contraste que a justificou.
+Isso transforma a mudança de "achismo" em decisão de engenharia.
 
-| Opção | Resposta | Implicações |
-|---|---|---|
-| A | **Claro e escuro apenas** | Mínimo viável, validação simples. Menor sensação de personalização que o protótipo promete |
-| B | **Claro, escuro e alto contraste** | Atende quem tem baixa visão severa. Recomendado |
-| C | **Quatro ou mais variações de cor** | Mais próximo do "Mexa como quiser". Custo de validação cresce em cada combinação |
+### D2 — Temas: **claro, escuro e alto contraste** *(opção B)*
 
-### Q3: O botão "Idiomas" entra agora?
+Três temas, todos pré-validados. O de alto contraste atende baixa visão severa —
+condição frequente no público-alvo e mal servida por aplicativos comuns.
 
-**Contexto**: o protótipo exibe "Idiomas" nas configurações de acessibilidade. Não
-há requisito de múltiplos idiomas em nenhum documento do projeto.
+**Requisitos gerados**: FR-034 e FR-035.
 
-| Opção | Resposta | Implicações |
-|---|---|---|
-| A | **Fora de escopo; preparar a estrutura** | O sistema fica pronto para receber idiomas, mas só português é entregue. O botão sai da tela por ora |
-| B | **Entregar português e mais um idioma** | Cumpre a promessa do protótipo. Aumenta o escopo de tradução e de teste de layout |
+### D3 — Idiomas: **fora de escopo, estrutura preparada** *(opção A)*
+
+Somente português é entregue. Nenhum documento do projeto exige múltiplos idiomas —
+o botão aparece apenas no protótipo. A estrutura de internacionalização é preparada
+para não bloquear a adição futura, e o botão "Idiomas" sai da tela por ora.
+
+**Requisitos gerados**: FR-036 e FR-037.
+
+---
+
+## Requisitos Adicionais das Decisões
+
+- **FR-034**: O sistema MUST oferecer três temas: **claro**, **escuro** e
+  **alto contraste**.
+- **FR-035**: O tema de alto contraste MUST atender contraste mínimo de **7:1** para
+  texto normal, superando o nível AA.
+- **FR-036**: Todo texto exibido MUST vir da camada de internacionalização, mesmo
+  havendo um único idioma.
+- **FR-037**: A tela de configurações MUST NOT exibir a opção "Idiomas" enquanto
+  houver apenas um idioma disponível.
+  *(Divergência do protótipo: oferecer uma opção que não faz nada confunde o público
+  e quebra a confiança na interface.)*
+- **FR-038**: Toda divergência entre o valor visual do protótipo e o token final
+  MUST ser documentada com o motivo e a medição de contraste correspondente.
 
 ---
 
 ## Dependências
 
 - **Bloqueia** a implementação da feature 001 e de todas as seguintes.
-- Depende de **Q1** para os valores definitivos dos tokens.
 - Não depende de backend, banco ou rede.
+- Não depende de acesso ao Figma — resolvido por D1.

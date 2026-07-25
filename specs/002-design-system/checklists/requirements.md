@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] **No [NEEDS CLARIFICATION] markers remain** — ⚠️ 3 questões abertas (Q1, Q2, Q3)
+- [x] No [NEEDS CLARIFICATION] markers remain — ✅ D1, D2 e D3 fechados
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic
@@ -65,8 +65,24 @@ FR-017 e FR-018 resolvem oferecendo escolha entre opções curadas e pré-valida
 autonomia é preservada; a garantia de leitura também. É uma divergência **deliberada**
 em relação ao protótipo, e está registrada como tal.
 
-### Portão de saída
+### Decisões que geraram requisitos novos
 
-Esta spec não avança para `/speckit-plan` enquanto Q1, Q2 e Q3 não forem
-respondidas. **Q1 é a mais urgente**: os tokens são a base de tudo, e hoje os
-valores que temos são aproximações amostradas de imagem comprimida.
+| Decisão | Escolha | Requisitos |
+|---|---|---|
+| D1 — Origem dos valores | Derivar das imagens, com validação de contraste | FR-038 |
+| D2 — Temas | Claro, escuro e alto contraste | FR-034, FR-035 |
+| D3 — Idiomas | Fora de escopo, estrutura preparada | FR-036, FR-037 |
+
+### Risco aceito na D1
+
+Sem acesso ao Figma, os tokens serão derivados por amostragem programática das
+imagens do protótipo. Compressão de imagem altera pixel — os valores finais **podem
+divergir** do arquivo original.
+
+A FR-038 mitiga transformando cada divergência em registro documentado, com a
+medição de contraste que a justificou. Para a defesa acadêmica, isso é preferível a
+uma cor "igual à do Figma" que reprova em acessibilidade.
+
+### Resultado
+
+**16 de 16 itens aprovados.** Especificação liberada para `/speckit-plan`.
