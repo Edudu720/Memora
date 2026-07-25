@@ -24,13 +24,13 @@ refatoração se estiver automatizado.
 
 **Purpose**: criar o projeto e a estrutura definida no plano.
 
-- [ ] **T001** Criar o projeto Flutter em `app/`, pacote `br.fatec.memora`, apenas
+- [x] **T001** Criar o projeto Flutter em `app/`, pacote `br.fatec.memora`, apenas
       plataforma Android
-- [ ] **T002** Criar a árvore de pastas de `app/lib/design_system/` conforme a
+- [x] **T002** Criar a árvore de pastas de `app/lib/design_system/` conforme a
       Structure Decision do plano
-- [ ] **T003** [P] Configurar `analysis_options.yaml` com lints estritos
-- [ ] **T004** [P] Adicionar `.gitignore` do Flutter em `app/`
-- [ ] **T005** Configurar verificação contínua no GitHub Actions rodando
+- [x] **T003** [P] Configurar `analysis_options.yaml` com lints estritos
+- [x] **T004** [P] Adicionar `.gitignore` do Flutter em `app/`
+- [x] **T005** Configurar verificação contínua no GitHub Actions rodando
       `flutter analyze`, `flutter test` e
       `python specs/002-design-system/ferramentas/validar_paleta.py`
 
@@ -40,25 +40,30 @@ refatoração se estiver automatizado.
 
 > **BLOQUEIA TODAS AS HISTÓRIAS.** Nenhum componente pode ser escrito antes.
 
-- [ ] **T006** Criar `app/lib/design_system/tokens/cores.dart` espelhando exatamente
+- [x] **T006** Criar `app/lib/design_system/tokens/cores.dart` espelhando exatamente
       os valores de `ferramentas/validar_paleta.py`
-- [ ] **T007** [P] Criar `tokens/tipografia.dart` — escala de R4, piso de 16 sp
-- [ ] **T008** [P] Criar `tokens/espacamento.dart` — escala base 4
-- [ ] **T009** [P] Criar `tokens/raio.dart` e `tokens/elevacao.dart`
-- [ ] **T010** [P] Criar `tokens/movimento.dart` — durações de R5
-- [ ] **T011** [P] Criar `tokens/dimensoes.dart` — `alvo_minimo` 48, `alvo_decisao`
+- [x] **T007** [P] Criar `tokens/tipografia.dart` — escala de R4, piso de 16 sp
+- [x] **T008** [P] Criar `tokens/espacamento.dart` — escala base 4
+- [x] **T009** [P] Criar `tokens/raio.dart` e `tokens/elevacao.dart`
+- [x] **T010** [P] Criar `tokens/movimento.dart` — durações de R5
+- [x] **T011** [P] Criar `tokens/dimensoes.dart` — `alvo_minimo` 48, `alvo_decisao`
       56, `separacao_alvo` 8, `escala_texto_max` 2.0
-- [ ] **T012** Criar `temas/memora_theme_extension.dart` — `ThemeExtension` tipada
+- [x] **T012** Criar `temas/memora_theme_extension.dart` — `ThemeExtension` tipada
       expondo todos os tokens (R6)
-- [ ] **T013** Criar `temas/tema_claro.dart`, `tema_escuro.dart` e
+- [x] **T013** Criar `temas/tema_claro.dart`, `tema_escuro.dart` e
       `tema_alto_contraste.dart`
-- [ ] **T014** Criar `design_system.dart` como ponto único de exportação
-- [ ] **T015** Escrever `test/design_system/contraste_test.dart` — porta o validador
+- [x] **T014** Criar `design_system.dart` como ponto único de exportação
+- [x] **T015** Escrever `test/design_system/contraste_test.dart` — porta o validador
       de paleta para o Dart, garantindo que os valores no código não divirjam dos
       valores validados
 
 **Portão da fase**: `validar_paleta.py` e `contraste_test.dart` passando, com os
 mesmos 48 pares.
+
+> ✅ **Fases 1 e 2 concluídas em 2026-07-24.** 52 testes passando, `flutter analyze`
+> limpo, validador de paleta aprovado. O portão foi verificado contra regressão:
+> injetando `#7090E8`, o teste falha acusando 3,07:1 — o mesmo valor previsto pela
+> amostragem em Python.
 
 ---
 

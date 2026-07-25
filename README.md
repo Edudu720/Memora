@@ -281,15 +281,31 @@ E a pergunta que valida qualquer decisão:
 
 ## Estado atual do projeto
 
+**Atualizado em 2026-07-24.**
+
 | Item | Status |
 |---|---|
 | Ambiente SDD (Spec Kit + Claude Code) | ✅ Configurado |
 | Constitution v1.0.0 | ✅ Ratificada |
-| Protótipo de telas | ✅ Documentado em `docs/design/prototipo/` |
-| Design System (tokens) | ⬜ Pendente |
-| Primeira spec de feature | ⬜ Pendente |
-| Backend | ⬜ Não iniciado |
-| App Flutter | ⬜ Não iniciado |
+| Protótipo de telas | ✅ 38 telas em `docs/design/prototipo/` |
+| Requisitos atualizados vs. Arquivo X | ✅ [documentado](docs/referencia/requisitos-atualizados.md) |
+| **001 — Autenticação** — spec e plano | ✅ 64 requisitos, contrato OpenAPI |
+| **001 — Autenticação** — implementação | ⬜ Bloqueada pelo Design System |
+| **002 — Design System** — spec, plano e tarefas | ✅ 38 requisitos, 53 tarefas |
+| **002 — Design System** — tokens e temas | ✅ T001-T015, 52 testes passando |
+| **002 — Design System** — componentes | 🟡 Em andamento a partir de T016 |
+| Backend (Java + Spring Boot) | ⬜ Não iniciado |
+
+### Verificação atual
+
+| Portão | Resultado |
+|---|---|
+| `flutter analyze` | ✅ Sem problemas |
+| `flutter test` | ✅ 52 passando |
+| `validar_paleta.py` | ✅ 48 pares, 3 temas |
+
+> **Continuando o trabalho?** Leia [CLAUDE.md](CLAUDE.md) — contém o estado
+> detalhado, as decisões já tomadas e as armadilhas do ambiente.
 
 ---
 
