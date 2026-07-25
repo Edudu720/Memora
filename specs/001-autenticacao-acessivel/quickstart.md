@@ -24,12 +24,12 @@
 docker compose up -d
 ```
 
-```bash
-cd backend && ./mvnw spring-boot:run
+```powershell
+cd backend; .\mvnw spring-boot:run
 ```
 
-```bash
-cd app && flutter run
+```powershell
+cd app; flutter run
 ```
 
 ---
@@ -127,8 +127,8 @@ Bloqueio tecnicamente correto com texto ríspido **reprova** neste cenário.
 
 **Cobre**: FR-027 a FR-034 · SC-005, SC-006, SC-007
 
-```bash
-cd app && flutter test test/acessibilidade/
+```powershell
+cd app; flutter test test/acessibilidade/
 ```
 
 Cada tela desta feature é verificada contra:
