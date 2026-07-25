@@ -1,0 +1,40 @@
+name: Verificação
+
+# Portões automatizados exigidos pela Constituição do projeto.
+# Acessibilidade só sobrevive a refatoração se estiver automatizada.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  contraste:
+    name: Contraste da paleta (WCAG 2.2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validar os 48 pares dos três temas
+        run: python specs/002-design-system/ferramentas/validar_paleta.py
+
+  app:
+    name: Análise e testes do aplicativo
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Instalar dependências
+        run: flutter pub get
+      - name: Análise estática
+        run: flutter analyze
+      - name: Testes
+        run: flutter test
