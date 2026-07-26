@@ -101,16 +101,22 @@ nem visualmente nem semanticamente.
 
 ## Phase 4: US2 — Ler com a letra do meu tamanho (P1)
 
-- [ ] **T024** [US2] Criar `componentes/texto/texto_memora.dart` aplicando a escala
+- [x] **T024** [US2] Criar `componentes/texto/texto_memora.dart` aplicando a escala
       tipográfica e o teto de escala 2.0
-- [ ] **T025** [US2] Revisar todos os componentes das fases anteriores eliminando
+- [x] **T025** [US2] Revisar todos os componentes das fases anteriores eliminando
       qualquer altura fixa (FR-026)
-- [ ] **T026** [US2] Escrever `test/design_system/escala_texto_test.dart` — cada
+- [x] **T026** [US2] Escrever `test/design_system/escala_texto_test.dart` — cada
       componente renderizado em 1.0, 1.5 e 2.0, sem estouro de layout
-- [ ] **T027** [US2] Escrever `test/design_system/semantica_test.dart` — rótulo e
+- [x] **T027** [US2] Escrever `test/design_system/semantica_test.dart` — rótulo e
       estado expostos em todos os componentes interativos
 
 **Portão da fase**: nenhum aviso de overflow em escala 2.0, em nenhum componente.
+
+> ✅ **Fase 4 concluída em 2026-07-25.** 96 testes passando.
+>
+> T025 revelou uma inconsistência real: `TextoMemora` limitava a ampliação a 2,0,
+> mas os componentes usavam `Text` cru, sem teto. Em escala de sistema acima de 2,0
+> eles divergiam. Resolvido com `escalaTextoLimitada(context)`, usada por todos.
 
 ---
 

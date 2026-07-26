@@ -5,6 +5,7 @@ import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
 import '../../temas/memora_theme_extension.dart';
+import '../texto/texto_memora.dart';
 
 /// Exibe um dado da pessoa — nome, idade, e-mail — de forma inequivocamente
 /// **não clicável**.
@@ -85,6 +86,7 @@ class CampoInformacao extends StatelessWidget {
                   Flexible(
                     child: Text(
                       rotulo,
+                      textScaler: escalaTextoLimitada(context),
                       style: MemoraTipografia.apoio.copyWith(
                         color: cores.textoSuave,
                       ),
@@ -95,6 +97,7 @@ class CampoInformacao extends StatelessWidget {
               const SizedBox(height: MemoraEspacamento.xs),
               Text(
                 valor,
+                textScaler: escalaTextoLimitada(context),
                 style: MemoraTipografia.corpoForte.copyWith(color: cores.texto),
               ),
             ],

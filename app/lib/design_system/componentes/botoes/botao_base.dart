@@ -7,6 +7,7 @@ import '../../tokens/movimento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
 import '../../temas/memora_theme_extension.dart';
+import '../texto/texto_memora.dart';
 
 /// Variação visual de um botão do Memora.
 ///
@@ -137,6 +138,7 @@ class BotaoBase extends StatelessWidget {
           child: Text(
             rotulo,
             textAlign: TextAlign.center,
+            textScaler: escalaTextoLimitada(context),
             style: MemoraTipografia.rotuloBotao.copyWith(
               color: conteudo,
               decoration: estilo == EstiloBotao.terciario

@@ -71,7 +71,7 @@ execute as instruções manualmente. O resultado é idêntico.
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
 | **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ bloqueada |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T023 feitas |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T027 feitas |
 
 ### O que já existe em código
 
@@ -85,18 +85,27 @@ execute as instruções manualmente. O resultado é idêntico.
   `ListaInformacao`. **Nenhum aceita callback de toque** — é ausência de API
 - **componentes/botoes/** — `BotaoPrimario`, `BotaoSecundario`, `BotaoTerciario`,
   `BotaoPerigo`, sobre um `BotaoBase` que concentra as garantias
+- **componentes/texto/** — `TextoMemora` e `escalaTextoLimitada(context)`
 
-`app/test/design_system/` — 65 testes.
+`app/test/design_system/` — 96 testes.
+
+### Regra de texto
+
+**Todo `Text` usa `escalaTextoLimitada(context)`.** Sem isso o componente diverge
+dos demais em ampliação extrema e o layout quebra de forma imprevisível.
 
 ### Regra visual que separa dado de ação
 
 **Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
 Não invente uma terceira linguagem sem revisar a FR-012.
 
-### Próxima tarefa: **T024**
+### Próxima tarefa: **T028**
 
-Fase 4 (`specs/002-design-system/tasks.md`): texto escalável e semântica.
-Inclui revisar os componentes já feitos eliminando qualquer altura fixa.
+Fase 5 (`specs/002-design-system/tasks.md`): preferências de aparência —
+troca de tema, ajuste de tamanho de texto e persistência.
+
+Alternativa: fase 6 (T035-T044), que contém a `ConfirmacaoMemora` e os campos
+de entrada de que a feature 001 precisa.
 
 **A feature 001 é desbloqueada ao final da fase 6** (T044).
 
@@ -186,6 +195,10 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - **`containsSemantics` está obsoleto** no Flutter 3.41. Use `isSemantics`.
 - **Não acesse o tema por reflexão.** Use `context.memora` — a extensão já existe
   em `temas/memora_theme_extension.dart`.
+- **`Semantics(button: true)` não basta**: sem `onTap` na própria `Semantics`, o
+  TalkBack anuncia o botão mas o duplo-toque não ativa nada. Custou um defeito real.
+- **Não use `Opacity` para estado desabilitado.** Derruba o contraste do rótulo
+  para 2,79:1. Use `superficieAlt` com `textoSuave`, que mede 6,22:1.
 - **`.specify/feature.json`** aponta a feature ativa e **conflita** quando duas
   branches o alteram. Resolva mantendo a feature em que você está.
 

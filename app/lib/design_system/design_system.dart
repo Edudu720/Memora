@@ -12,6 +12,7 @@ export 'componentes/botoes/botao_terciario.dart';
 export 'componentes/informacao/campo_informacao.dart';
 export 'componentes/informacao/destaque_informacao.dart';
 export 'componentes/informacao/lista_informacao.dart';
+export 'componentes/texto/texto_memora.dart';
 export 'temas/memora_theme_extension.dart';
 export 'temas/temas_memora.dart';
 export 'tokens/cores.dart';

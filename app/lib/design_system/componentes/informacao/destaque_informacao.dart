@@ -5,6 +5,7 @@ import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
 import '../../temas/memora_theme_extension.dart';
+import '../texto/texto_memora.dart';
 
 /// Informação de maior ênfase — ainda inequivocamente **não clicável**.
 ///
@@ -63,6 +64,7 @@ class DestaqueInformacao extends StatelessWidget {
                   Flexible(
                     child: Text(
                       rotulo,
+                      textScaler: escalaTextoLimitada(context),
                       style: MemoraTipografia.apoio.copyWith(
                         color: cores.texto,
                       ),
@@ -73,6 +75,7 @@ class DestaqueInformacao extends StatelessWidget {
               const SizedBox(height: MemoraEspacamento.xs),
               Text(
                 valor,
+                textScaler: escalaTextoLimitada(context),
                 style: MemoraTipografia.tituloSecao.copyWith(
                   color: cores.texto,
                 ),

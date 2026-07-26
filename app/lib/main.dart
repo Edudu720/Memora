@@ -45,12 +45,7 @@ class _AmostraDeComponentes extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                'Memora',
-                style: MemoraTipografia.tituloTela.copyWith(
-                  color: cores.primaria,
-                ),
-              ),
+              TextoMemora.tituloTela('Memora', cor: cores.primaria),
               const SizedBox(height: MemoraEspacamento.xxl),
 
               // ---------- Informação: NÃO é clicável ----------
@@ -84,15 +79,7 @@ class _AmostraDeComponentes extends StatelessWidget {
               const SizedBox(height: MemoraEspacamento.xxl),
 
               // ---------- Ação: É clicável ----------
-              Semantics(
-                header: true,
-                child: Text(
-                  'Isto é ação',
-                  style: MemoraTipografia.tituloSecao.copyWith(
-                    color: cores.texto,
-                  ),
-                ),
-              ),
+              const TextoMemora.tituloSecao('Isto é ação'),
               const SizedBox(height: MemoraEspacamento.md),
               BotaoPrimario(
                 rotulo: 'Começar jornada',
