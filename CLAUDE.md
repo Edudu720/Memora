@@ -70,8 +70,8 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ bloqueada |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T034 feitas |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ **desbloqueada** |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
 
@@ -91,7 +91,11 @@ execute as instruções manualmente. O resultado é idêntico.
   `TelaAparencia`. A implementação de persistência vive em
   `services/preferencias/`, para o Design System não depender de armazenamento
 
-`app/test/design_system/` — 121 testes.
+- **componentes/confirmacao/** — `ConfirmacaoMemora`, com variante irreversível
+- **componentes/campos/** — `CampoTexto`, `CampoSenha`, `CampoCodigo`
+- **componentes/cartoes/**, **dialogos/**, **navegacao/**, **feedback/**
+
+`app/test/design_system/` — 139 testes.
 
 ### Regra de texto
 
@@ -103,13 +107,15 @@ dos demais em ampliação extrema e o layout quebra de forma imprevisível.
 **Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
 Não invente uma terceira linguagem sem revisar a FR-012.
 
-### Próxima tarefa: **T035**
+### Próxima tarefa: **T045**
 
-Fase 6 (`specs/002-design-system/tasks.md`): componentes de decisão e entrada.
-**É esta fase que desbloqueia a feature 001.**
+Fase 7 (`specs/002-design-system/tasks.md`): galeria de componentes, análise
+estática contra valores literais e guia de uso.
 
-Inclui a `ConfirmacaoMemora`, que substitui os botões SIM/NÃO do protótipo —
-vertical, 56 dp, frases completas em vez de palavras isoladas.
+**Alternativa, e provavelmente mais valiosa agora:** a feature 001 está
+desbloqueada. Rodar `/speckit-tasks` nela e começar as telas de autenticação
+é uma escolha legítima — a fase 7 protege o sistema a longo prazo, mas não
+entrega produto.
 
 **A feature 001 é desbloqueada ao final da fase 6** (T044).
 

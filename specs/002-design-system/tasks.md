@@ -154,24 +154,35 @@ nem visualmente nem semanticamente.
 
 ## Phase 6: US4 — Consistência e componentes de decisão (P2)
 
-- [ ] **T035** [US4] Criar `componentes/confirmacao/confirmacao_memora.dart` —
+- [x] **T035** [US4] Criar `componentes/confirmacao/confirmacao_memora.dart` —
       vertical, largura total, 56 dp, frases completas, ícone + texto (R3)
-- [ ] **T036** [US4] Criar a variante `irreversivel` — ação destrutiva separada,
+- [x] **T036** [US4] Criar a variante `irreversivel` — ação destrutiva separada,
       exigindo segunda confirmação (FR-013)
-- [ ] **T037** [P] [US4] Criar `componentes/campos/campo_texto.dart` — rótulo acima
+- [x] **T037** [P] [US4] Criar `componentes/campos/campo_texto.dart` — rótulo acima
       e sempre visível, com `textoAjuda` obrigatório
-- [ ] **T038** [P] [US4] Criar `campo_senha.dart` — controle de revelar rotulado em
+- [x] **T038** [P] [US4] Criar `campo_senha.dart` — controle de revelar rotulado em
       texto, desativável para o modo assistido da feature 001
-- [ ] **T039** [P] [US4] Criar `campo_codigo.dart` — 6 dígitos, teclado numérico
-- [ ] **T040** [P] [US4] Criar `componentes/cartoes/cartao.dart`
-- [ ] **T041** [P] [US4] Criar `componentes/dialogos/dialogo.dart` e
+- [x] **T039** [P] [US4] Criar `campo_codigo.dart` — 6 dígitos, teclado numérico
+- [x] **T040** [P] [US4] Criar `componentes/cartoes/cartao.dart`
+- [x] **T041** [P] [US4] Criar `componentes/dialogos/dialogo.dart` e
       `folha_inferior.dart`
-- [ ] **T042** [US4] Criar `componentes/navegacao/barra_superior.dart` — voltar
+- [x] **T042** [US4] Criar `componentes/navegacao/barra_superior.dart` — voltar
       sempre com rótulo textual
-- [ ] **T043** [US4] Criar `componentes/navegacao/navegacao_inferior.dart` —
+- [x] **T043** [US4] Criar `componentes/navegacao/navegacao_inferior.dart` —
       **ícone + rótulo** em todos os itens (FR-016)
-- [ ] **T044** [P] [US4] Criar `componentes/feedback/carregando.dart`,
+- [x] **T044** [P] [US4] Criar `componentes/feedback/carregando.dart`,
       `mensagem_erro.dart` e `estado_vazio.dart` — ícone **e** texto, nunca só cor
+
+> ✅ **Fase 6 concluída em 2026-07-25.** 139 testes passando.
+>
+> **A feature 001 está desbloqueada.** Existem componentes suficientes para
+> construir cadastro, login, recuperação e saída.
+>
+> Decisões da `ConfirmacaoMemora`:
+> - Na variante irreversível, **a recusa vem antes** da ação destrutiva: o caminho
+>   seguro é lido primeiro e fica mais perto do polegar.
+> - A dupla confirmação troca o texto para *"Tem certeza mesmo?"*, e é possível
+>   desistir entre os dois toques.
 
 ---
 
