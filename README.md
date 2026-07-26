@@ -281,7 +281,7 @@ E a pergunta que valida qualquer decisão:
 
 ## Estado atual do projeto
 
-**Atualizado em 2026-07-24.**
+**Atualizado em 2026-07-26.**
 
 | Item | Status |
 |---|---|
@@ -290,19 +290,27 @@ E a pergunta que valida qualquer decisão:
 | Protótipo de telas | ✅ 38 telas em `docs/design/prototipo/` |
 | Requisitos atualizados vs. Arquivo X | ✅ [documentado](docs/referencia/requisitos-atualizados.md) |
 | **001 — Autenticação** — spec e plano | ✅ 64 requisitos, contrato OpenAPI |
-| **001 — Autenticação** — implementação | ⬜ Bloqueada pelo Design System |
+| **001 — Autenticação** — tarefas | ✅ 88 tarefas |
+| **001 — Autenticação** — telas da US1 | 🟡 Funcionando contra repositório simulado |
+| **001 — Autenticação** — backend | 🟡 Núcleo de segurança pronto; endpoints pendentes |
 | **002 — Design System** — spec, plano e tarefas | ✅ 38 requisitos, 53 tarefas |
 | **002 — Design System** — tokens e temas | ✅ T001-T015, 52 testes passando |
 | **002 — Design System** — componentes | 🟡 Em andamento a partir de T016 |
-| Backend (Java + Spring Boot) | ⬜ Não iniciado |
+| Backend (Java + Spring Boot) | 🟡 Projeto criado, Argon2 calibrado e testado |
+
+> ⚠️ **Docker é pré-requisito para continuar.** Sem ele não há PostgreSQL local
+> nem Testcontainers, e as tarefas T008-T014 ficam bloqueadas.
 
 ### Verificação atual
 
 | Portão | Resultado |
 |---|---|
 | `flutter analyze` | ✅ Sem problemas |
-| `flutter test` | ✅ 52 passando |
+| `flutter test` | ✅ 175 passando |
+| `mvnw test` (backend) | ✅ 6 passando |
 | `validar_paleta.py` | ✅ 51 pares, 3 temas |
+
+Como rodar o aplicativo: ver [CLAUDE.md, seção 5.1](CLAUDE.md).
 
 > **Continuando o trabalho?** Leia [CLAUDE.md](CLAUDE.md) — contém o estado
 > detalhado, as decisões já tomadas e as armadilhas do ambiente.

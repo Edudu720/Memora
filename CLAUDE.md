@@ -4,9 +4,10 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-25
-**Estado**: Design System em implementação. Tokens, temas e componentes de
-informação e ação prontos e validados.
+**Última sessão**: 2026-07-26
+**Estado**: Design System quase completo (T001-T044). Feature 001 com as telas
+de cadastro funcionando contra repositório simulado; backend com o núcleo de
+segurança pronto, mas ainda sem endpoints.
 
 ---
 
@@ -70,7 +71,7 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ **desbloqueada** |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 telas da US1 prontas; backend pendente |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
@@ -107,15 +108,26 @@ dos demais em ampliação extrema e o layout quebra de forma imprevisível.
 **Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
 Não invente uma terceira linguagem sem revisar a FR-012.
 
-### Próxima tarefa: **T045**
+### Próxima tarefa: **instalar Docker**, e então T008 a T014
 
-Fase 7 (`specs/002-design-system/tasks.md`): galeria de componentes, análise
-estática contra valores literais e guia de uso.
+`specs/001-autenticacao-acessivel/tasks.md`, fase 2. **Sem Docker não dá para
+avançar**: entidades, migrations e Testcontainers dependem todos de um PostgreSQL
+local, e a máquina não tem Docker instalado.
 
-**Alternativa, e provavelmente mais valiosa agora:** a feature 001 está
-desbloqueada. Rodar `/speckit-tasks` nela e começar as telas de autenticação
-é uma escolha legítima — a fase 7 protege o sistema a longo prazo, mas não
-entrega produto.
+Depois disso a ordem é: entidades e migrations (T008-T014), sessão e rate limiting
+(T018-T023), contrato e erros (T024-T027), e por fim os endpoints da US1
+(T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
+
+**A troca do simulado pelo real é de uma linha**, em
+`lib/demonstracao/casa_demonstracao.dart`, porque as telas dependem apenas da
+interface `RepositorioAutenticacao`.
+
+Pendências menores da fase 1: T003 (docker-compose), T005 (geração do cliente
+Dart) e T007 (job de backend no CI).
+
+Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
+e análise estática contra valores literais. Protege o sistema a longo prazo, mas
+não entrega produto.
 
 **A feature 001 é desbloqueada ao final da fase 6** (T044).
 
@@ -142,6 +154,49 @@ export PATH="/c/Users/Edu/AppData/Roaming/Python/Python314/Scripts:$PATH"
 | Identidade git | `Eduardo Juncker <eduardojunckertorasl@gmail.com>` |
 | **Shell do usuário** | **Windows PowerShell 5.1** |
 | Repositório | `Edudu720/Memora` (privado) |
+
+---
+
+## 5.1 Como rodar o aplicativo
+
+O projeto é **apenas Android**. Não há suporte a Windows nem web — `flutter run`
+falha com "No supported devices connected" se nenhum emulador estiver de pé.
+
+Emulador configurado: **Pixel_6**.
+
+```powershell
+cd C:\Users\Edu\Documents\Memora\app; flutter emulators --launch Pixel_6; Start-Sleep -Seconds 60; flutter run
+```
+
+Com o emulador já aberto:
+
+```powershell
+cd C:\Users\Edu\Documents\Memora\app; flutter run
+```
+
+Com o app rodando: `r` recarrega na hora, `R` reinicia, `q` encerra.
+
+### O que existe para ver
+
+A tela inicial é uma **casca de demonstração** (`lib/demonstracao/`), provisória,
+com três abas:
+
+| Aba | Conteúdo |
+|---|---|
+| **Cadastro** | Fluxo real da US1: boas-vindas, cadastro e confirmação |
+| **Componentes** | Vitrine do Design System |
+| **Aparência** | Tela real de preferências, com pré-visualização |
+
+A casca sai quando o Hub existir.
+
+### Backend
+
+Precisa de `JAVA_HOME` explícito, porque o `java` do PATH é um atalho que confunde
+o Maven:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"; cd C:\Users\Edu\Documents\Memora\backend; .\mvnw test
+```
 
 ---
 
@@ -209,6 +264,15 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   TalkBack anuncia o botão mas o duplo-toque não ativa nada. Custou um defeito real.
 - **Não use `Opacity` para estado desabilitado.** Derruba o contraste do rótulo
   para 2,79:1. Use `superficieAlt` com `textoSuave`, que mede 6,22:1.
+- **`pumpAndSettle` trava com o `Carregando` na tela** — ele anima sem parar.
+  Verificações de concorrência vão para teste de unidade, não de widget.
+- **Localize campo por chave, não por texto.** O rótulo aparece em mais de um
+  ponto da árvore. As telas expõem `TelaCadastro.chaveNome` e afins.
+- **Argon2: o mínimo da OWASP é fraco neste hardware.** 19 MiB rende 42 ms;
+  calibramos para 64 MiB com t=4, que rende ~240 ms. Meça antes de confiar.
+- **Não há Maven nem Docker na máquina.** O backend usa o wrapper (`./mvnw`) e
+  precisa de `JAVA_HOME="/c/Program Files/Java/jdk-21"`. Sem Docker não há
+  PostgreSQL local nem Testcontainers.
 - **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
   causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
   Use `ensureVisible` antes.

@@ -34,8 +34,26 @@ versionados.
   mais memória por requisição. Descartada porque a instância de estudo do TCC pode
   ter memória limitada; 19 MiB é o piso seguro.
 
-**Verificação obrigatória na implementação**: medir o tempo de hash no ambiente
-alvo. Se ficar abaixo de ~250 ms, aumentar a memória.
+**Verificação executada em 2026-07-26 (T017)** — e ela mudou a decisão:
+
+| Parâmetros | Tempo medido |
+|---|---|
+| 19.456 KiB, t=2 (mínimo OWASP) | **42 ms** |
+| 32.768 KiB, t=3 | 84 ms |
+| 47.104 KiB, t=3 | 121 ms |
+| 65.536 KiB, t=3 | 172 ms |
+| **65.536 KiB, t=4** | **249 ms** ✅ |
+| 98.304 KiB, t=3 | 298 ms |
+
+O mínimo da OWASP produz hash de 42 ms neste hardware — muito abaixo do alvo de
+250 a 500 ms. **Hash barato para nós é hash barato para o atacante.**
+
+**Parâmetros finais: 65.536 KiB (64 MiB), t=4, p=1.** Preferido a 98.304 KiB com
+t=3, que também atingia o alvo, porque cada hash concorrente consome a memória
+inteira — 96 MiB por login simultâneo inviabiliza um servidor modesto.
+
+Esta é a razão de a tarefa T017 existir: parâmetro que parece forte no papel pode
+estar fraco na máquina onde roda.
 
 ---
 
