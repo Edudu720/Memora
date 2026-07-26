@@ -79,9 +79,27 @@ void main() {
 
       expect(
         tester.getSemantics(find.byType(BotaoPrimario)),
-        isSemantics(isButton: true, isEnabled: true),
+        isSemantics(isButton: true, isEnabled: true, hasTapAction: true),
         reason: 'O contraste com o teste anterior é o ponto: leitor de tela '
-            'precisa distinguir dado de ação tanto quanto a visão.',
+            'precisa distinguir dado de ação tanto quanto a visão. E anunciar '
+            '"botão" sem expor ação de toque é pior que não anunciar nada — a '
+            'pessoa tenta ativar e nada acontece.',
+      );
+      handle.dispose();
+    });
+
+    testWidgets('botão desabilitado não expõe ação de toque',
+        (WidgetTester tester) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _comTema(const BotaoPrimario(rotulo: 'Continuar')),
+      );
+
+      expect(
+        tester.getSemantics(find.byType(BotaoPrimario)),
+        isSemantics(isButton: true, isEnabled: false, hasTapAction: false),
+        reason: 'Desabilitado precisa ser anunciado como indisponível, e não '
+            'oferecer uma ativação que não faz nada.',
       );
       handle.dispose();
     });

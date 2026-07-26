@@ -74,22 +74,38 @@ class BotaoBase extends StatelessWidget {
 
   bool get _habilitado => aoTocar != null && !carregando;
 
-  Color _corDeFundo(MemoraCores c) => switch (estilo) {
-        EstiloBotao.primario => c.primaria,
-        EstiloBotao.perigo => c.perigo,
-        EstiloBotao.secundario => Colors.transparent,
-        EstiloBotao.terciario => Colors.transparent,
+  // Desabilitado NÃO usa transparência. Reduzir opacidade derrubaria o
+  // contraste do rótulo para 2,79:1 — abaixo do mínimo. A WCAG isenta
+  // componentes inativos, mas uma pessoa que não consegue ler o botão também
+  // não descobre qual ação está indisponível.
+  Color _corDeFundo(MemoraCores c) {
+    if (!_habilitado) {
+      return switch (estilo) {
+        EstiloBotao.primario || EstiloBotao.perigo => c.superficieAlt,
+        EstiloBotao.secundario || EstiloBotao.terciario => Colors.transparent,
       };
+    }
+    return switch (estilo) {
+      EstiloBotao.primario => c.primaria,
+      EstiloBotao.perigo => c.perigo,
+      EstiloBotao.secundario => Colors.transparent,
+      EstiloBotao.terciario => Colors.transparent,
+    };
+  }
 
-  Color _corDoConteudo(MemoraCores c) => switch (estilo) {
-        EstiloBotao.primario => c.sobrePrimaria,
-        EstiloBotao.perigo => c.sobrePerigo,
-        EstiloBotao.secundario => c.primaria,
-        EstiloBotao.terciario => c.primaria,
-      };
+  Color _corDoConteudo(MemoraCores c) {
+    if (!_habilitado) return c.textoSuave;
+    return switch (estilo) {
+      EstiloBotao.primario => c.sobrePrimaria,
+      EstiloBotao.perigo => c.sobrePerigo,
+      EstiloBotao.secundario => c.primaria,
+      EstiloBotao.terciario => c.primaria,
+    };
+  }
 
   BoxBorder? _borda(MemoraCores c) => switch (estilo) {
-        EstiloBotao.secundario => Border.all(color: c.primaria, width: 2),
+        EstiloBotao.secundario =>
+          Border.all(color: _habilitado ? c.primaria : c.borda, width: 2),
         _ => null,
       };
 
@@ -98,11 +114,6 @@ class BotaoBase extends StatelessWidget {
     final MemoraCores cores = context.memora.cores;
     final Color fundo = _corDeFundo(cores);
     final Color conteudo = _corDoConteudo(cores);
-
-    // Desabilitado precisa continuar legível: reduzimos a saturação sem
-    // apagar o texto, para a pessoa entender que a ação existe mas não está
-    // disponível agora.
-    final double opacidade = _habilitado ? 1.0 : 0.55;
 
     final Widget miolo = Row(
       mainAxisSize: larguraTotal ? MainAxisSize.max : MainAxisSize.min,
@@ -138,40 +149,43 @@ class BotaoBase extends StatelessWidget {
       ],
     );
 
+    // Sem esta ação, o TalkBack anuncia "botão" mas o duplo-toque não ativa
+    // nada: o InkWell fica dentro do ExcludeSemantics e não é alcançado.
     return Semantics(
       button: true,
       enabled: _habilitado,
       label: rotulo,
+      onTap: _habilitado ? aoTocar : null,
       child: ExcludeSemantics(
-        child: Opacity(
-          opacity: opacidade,
-          child: AnimatedContainer(
-            duration: MemoraMovimento.rapido,
-            // Altura MÍNIMA, nunca fixa: o botão cresce com o texto ampliado
-            // até 200% sem cortar conteúdo (FR-026).
-            constraints: BoxConstraints(
-              minHeight: alturaMinima,
-              minWidth: MemoraDimensoes.alvoMinimo,
-            ),
-            width: larguraTotal ? double.infinity : null,
-            decoration: BoxDecoration(
-              color: fundo,
-              border: _borda(cores),
+        child: AnimatedContainer(
+          duration: MemoraMovimento.efetiva(
+            MemoraMovimento.rapido,
+            reduzirMovimento: MediaQuery.disableAnimationsOf(context),
+          ),
+          // Altura MÍNIMA, nunca fixa: o botão cresce com o texto ampliado
+          // até 200% sem cortar conteúdo (FR-026).
+          constraints: BoxConstraints(
+            minHeight: alturaMinima,
+            minWidth: MemoraDimensoes.alvoMinimo,
+          ),
+          width: larguraTotal ? double.infinity : null,
+          decoration: BoxDecoration(
+            color: fundo,
+            border: _borda(cores),
+            borderRadius: BorderRadius.circular(MemoraRaio.pilula),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(MemoraRaio.pilula),
+            child: InkWell(
+              onTap: _habilitado ? aoTocar : null,
               borderRadius: BorderRadius.circular(MemoraRaio.pilula),
-            ),
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(MemoraRaio.pilula),
-              child: InkWell(
-                onTap: _habilitado ? aoTocar : null,
-                borderRadius: BorderRadius.circular(MemoraRaio.pilula),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: MemoraEspacamento.xl,
-                    vertical: MemoraEspacamento.md,
-                  ),
-                  child: miolo,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MemoraEspacamento.xl,
+                  vertical: MemoraEspacamento.md,
                 ),
+                child: miolo,
               ),
             ),
           ),

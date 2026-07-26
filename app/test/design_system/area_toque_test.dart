@@ -100,6 +100,39 @@ void main() {
     });
   });
 
+  group('Redução de movimento — FR-027', () {
+    testWidgets('animação é suprimida quando o sistema pede menos movimento',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: MediaQuery(
+            data: const MediaQueryData(disableAnimations: true),
+            child: Scaffold(
+              body: Center(
+                child: BotaoPrimario(rotulo: 'Continuar', aoTocar: () {}),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final AnimatedContainer container = tester.widget<AnimatedContainer>(
+        find.descendant(
+          of: find.byType(BotaoPrimario),
+          matching: find.byType(AnimatedContainer),
+        ),
+      );
+
+      expect(
+        container.duration,
+        Duration.zero,
+        reason: 'Com "reduzir movimento" ativo, nenhuma animação deve ocorrer. '
+            'MemoraMovimento.efetiva existe justamente para isso.',
+      );
+    });
+  });
+
   group('Crescimento com texto ampliado — FR-026', () {
     testWidgets('botão cresce em vez de cortar o texto em escala 2.0',
         (WidgetTester tester) async {

@@ -58,7 +58,7 @@ refatoração se estiver automatizado.
       valores validados
 
 **Portão da fase**: `validar_paleta.py` e `contraste_test.dart` passando, com os
-mesmos 48 pares.
+mesmos 51 pares.
 
 > ✅ **Fases 1 e 2 concluídas em 2026-07-24.** 52 testes passando, `flutter analyze`
 > limpo, validador de paleta aprovado. O portão foi verificado contra regressão:

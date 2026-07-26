@@ -42,6 +42,10 @@ const List<_Par> _pares = <_Par>[
   _Par('texto sobre superficieAlt', _texto, _superficieAlt),
   _Par('textoSuave sobre fundo', _textoSuave, _fundo),
   _Par('textoSuave sobre superficie', _textoSuave, _superficie),
+  // Estado desabilitado dos botões: rótulo suave sobre superfície
+  // secundária. Substituiu o uso de opacidade, que derrubava o
+  // contraste do rótulo para 2,79:1.
+  _Par('textoSuave sobre superficieAlt', _textoSuave, _superficieAlt),
   _Par('primaria sobre fundo', _primaria, _fundo),
   _Par('primaria sobre superficie', _primaria, _superficie),
   _Par('sobrePrimaria sobre primaria', _sobrePrimaria, _primaria),
@@ -93,8 +97,8 @@ void main() {
       });
     }
 
-    test('o validador cobre exatamente 48 pares', () {
-      expect(_pares.length * MemoraTheme.todos.length, 48);
+    test('o validador cobre exatamente 51 pares', () {
+      expect(_pares.length * MemoraTheme.todos.length, 51);
     });
   });
 

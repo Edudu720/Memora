@@ -84,6 +84,7 @@ PARES = [
     ("texto",          "superficie_alt", "texto"),
     ("texto_suave",    "fundo",          "texto"),
     ("texto_suave",    "superficie",     "texto"),
+    ("texto_suave",    "superficie_alt", "texto"),  # estado desabilitado
     ("primaria",       "fundo",          "texto"),
     ("primaria",       "superficie",     "texto"),
     ("sobre_primaria", "primaria",       "texto"),
