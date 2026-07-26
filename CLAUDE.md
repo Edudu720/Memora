@@ -70,7 +70,7 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ **desbloqueada** |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 telas da US1 prontas; backend pendente |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
@@ -209,6 +209,15 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   TalkBack anuncia o botão mas o duplo-toque não ativa nada. Custou um defeito real.
 - **Não use `Opacity` para estado desabilitado.** Derruba o contraste do rótulo
   para 2,79:1. Use `superficieAlt` com `textoSuave`, que mede 6,22:1.
+- **`pumpAndSettle` trava com o `Carregando` na tela** — ele anima sem parar.
+  Verificações de concorrência vão para teste de unidade, não de widget.
+- **Localize campo por chave, não por texto.** O rótulo aparece em mais de um
+  ponto da árvore. As telas expõem `TelaCadastro.chaveNome` e afins.
+- **Argon2: o mínimo da OWASP é fraco neste hardware.** 19 MiB rende 42 ms;
+  calibramos para 64 MiB com t=4, que rende ~240 ms. Meça antes de confiar.
+- **Não há Maven nem Docker na máquina.** O backend usa o wrapper (`./mvnw`) e
+  precisa de `JAVA_HOME="/c/Program Files/Java/jdk-21"`. Sem Docker não há
+  PostgreSQL local nem Testcontainers.
 - **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
   causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
   Use `ensureVisible` antes.

@@ -36,7 +36,7 @@ description: "Task list — Autenticação Acessível do Memora"
 - [ ] T003 [P] Criar `docker-compose.yml` na raiz com PostgreSQL 16 para desenvolvimento
 - [x] T004 [P] Adicionar `.gitignore` do Java em `backend/`
 - [ ] T005 Configurar geração do cliente Dart a partir de `specs/001-autenticacao-acessivel/contracts/openapi.yaml` para `app/lib/services/api/`, com script reproduzível
-- [ ] T006 Criar a estrutura `app/lib/features/autenticacao/{data,domain,presentation}/`
+- [x] T006 Criar a estrutura `app/lib/features/autenticacao/{data,domain,presentation}/`
 - [ ] T007 Estender `.github/workflows/verificacao.yml` com job de build e teste do backend
 
 ---
@@ -76,8 +76,8 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Aplicativo — base da feature
 
-- [ ] T028 [P] Criar entidades de domínio em `app/lib/features/autenticacao/domain/`
-- [ ] T029 [P] Criar `RepositorioAutenticacao` (interface) em `domain/`
+- [x] T028 [P] Criar entidades de domínio em `app/lib/features/autenticacao/domain/`
+- [x] T029 [P] Criar `RepositorioAutenticacao` (interface) em `domain/`
 - [ ] T030 Implementar `RepositorioAutenticacaoApi` em `data/`, sobre o cliente gerado
 - [ ] T031 Implementar armazenamento de credenciais com `flutter_secure_storage` em `app/lib/services/seguranca/` — **nunca** `SharedPreferences`
 - [ ] T032 Escrever teste do cenário V8 em `app/test/features/autenticacao/armazenamento_seguro_test.dart` — nenhuma credencial em armazenamento comum
@@ -90,6 +90,20 @@ description: "Task list — Autenticação Acessível do Memora"
 
 **Teste independente**: entregar o app a alguém de 65+ anos, sem instrução, e observar se conclui o cadastro sozinha.
 
+> 🟡 **Aplicativo concluído em 2026-07-26. Backend pendente.**
+>
+> As telas funcionam de ponta a ponta contra `RepositorioAutenticacaoSimulado`,
+> que substitui o servidor até os endpoints existirem. A troca para a
+> implementação real é de uma linha, porque as telas dependem apenas da
+> interface `RepositorioAutenticacao`.
+>
+> 36 testes. Achados durante a implementação:
+> - `pumpAndSettle` **nunca resolve** enquanto o indicador de carregamento
+>   estiver na tela — ele anima indefinidamente. Um teste travou 10 minutos até
+>   eu mover a verificação de concorrência para teste de unidade.
+> - Localizar campo por texto é frágil: o rótulo aparece em mais de um ponto da
+>   árvore. As telas expõem chaves (`TelaCadastro.chaveNome` etc.) para isso.
+
 ### Backend
 
 - [ ] T033 [US1] Implementar `POST /v1/auth/cadastro` em `autenticacao/api/`, devolvendo sessão iniciada (FR-009)
@@ -100,15 +114,15 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Aplicativo
 
-- [ ] T038 [P] [US1] Criar `TelaBoasVindas` em `presentation/telas/` — **uma única** ação principal, nenhuma decisão
-- [ ] T039 [US1] Criar `ControladorCadastro` em `presentation/controladores/`, com estados vazio, carregando, erro e sucesso
-- [ ] T040 [US1] Criar `TelaCadastro` usando `CampoTexto`, `CampoSenha` e `BotaoPrimario` do Design System
-- [ ] T041 [US1] Implementar `textoAjuda` em cada campo explicando **para que o dado serve** (FR-004)
-- [ ] T042 [US1] Implementar validação por campo em `app/lib/features/autenticacao/presentation/controladores/controlador_cadastro.dart`, preservando o que já foi digitado (FR-005, FR-006)
-- [ ] T043 [US1] Exibir as regras de senha em `app/lib/features/autenticacao/presentation/widgets/regras_de_senha.dart`, com atendimento em tempo real (FR-008)
-- [ ] T044 [US1] Tratar toque duplo no envio em `app/lib/features/autenticacao/presentation/controladores/controlador_cadastro.dart`
-- [ ] T045 [US1] Escrever teste de widget do cadastro em `app/test/features/autenticacao/tela_cadastro_test.dart`
-- [ ] T046 [US1] Escrever teste de acessibilidade em `app/test/features/autenticacao/cadastro_acessibilidade_test.dart`: contraste, alvo de toque, escala 2.0 e leitor de tela
+- [x] T038 [P] [US1] Criar `TelaBoasVindas` em `presentation/telas/` — **uma única** ação principal, nenhuma decisão
+- [x] T039 [US1] Criar `ControladorCadastro` em `presentation/controladores/`, com estados vazio, carregando, erro e sucesso
+- [x] T040 [US1] Criar `TelaCadastro` usando `CampoTexto`, `CampoSenha` e `BotaoPrimario` do Design System
+- [x] T041 [US1] Implementar `textoAjuda` em cada campo explicando **para que o dado serve** (FR-004)
+- [x] T042 [US1] Implementar validação por campo em `app/lib/features/autenticacao/presentation/controladores/controlador_cadastro.dart`, preservando o que já foi digitado (FR-005, FR-006)
+- [x] T043 [US1] Exibir as regras de senha em `app/lib/features/autenticacao/presentation/widgets/regras_de_senha.dart`, com atendimento em tempo real (FR-008)
+- [x] T044 [US1] Tratar toque duplo no envio em `app/lib/features/autenticacao/presentation/controladores/controlador_cadastro.dart`
+- [x] T045 [US1] Escrever teste de widget do cadastro em `app/test/features/autenticacao/tela_cadastro_test.dart`
+- [x] T046 [US1] Escrever teste de acessibilidade em `app/test/features/autenticacao/cadastro_acessibilidade_test.dart`: contraste, alvo de toque, escala 2.0 e leitor de tela
 
 ---
 
