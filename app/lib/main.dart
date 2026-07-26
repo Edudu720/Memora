@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'demonstracao/casa_demonstracao.dart';
 import 'design_system/design_system.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 
@@ -45,7 +46,7 @@ class AplicativoMemora extends StatelessWidget {
               fatorDoAplicativo: atual.escalaTexto,
               child: child!,
             ),
-            home: const TelaAparencia(),
+            home: const CasaDemonstracao(),
           );
         },
       ),
