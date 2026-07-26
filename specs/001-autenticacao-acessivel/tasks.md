@@ -58,21 +58,21 @@ description: "Task list — Autenticação Acessível do Memora"
 ### Segurança — o núcleo da feature
 
 - [ ] T015 Configurar `Argon2PasswordEncoder` em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/` com **19456 KiB de memória, 2 iterações, paralelismo 1** — os padrões do Spring usam 16 MiB, abaixo do mínimo OWASP (R1)
-- [ ] T016 Escrever teste que **falha** se os parâmetros do Argon2 ficarem abaixo do mínimo OWASP
-- [ ] T017 Medir o tempo de hash no ambiente alvo e registrar em `research.md`; se ficar abaixo de ~250 ms, aumentar a memória
+- [ ] T016 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/Argon2ParametrosTest.java` que **falha** se os parâmetros ficarem abaixo do mínimo OWASP
+- [ ] T017 Medir o tempo de hash no ambiente alvo e registrar em `specs/001-autenticacao-acessivel/research.md`; se ficar abaixo de ~250 ms, aumentar a memória
 - [ ] T018 Implementar emissão de token de acesso (15 min) e refresh opaco em `seguranca/`
 - [ ] T019 Implementar **rotação com detecção de reuso**: refresh já usado revoga toda a `familiaId` e registra `reuso_token_detectado` (R2)
 - [ ] T020 Escrever teste do cenário V3 do [quickstart.md](quickstart.md) — reusar token antigo derruba a família inteira
-- [ ] T021 Implementar rate limiting em duas camadas com Bucket4j, com estado fora da memória local (R4)
-- [ ] T022 Implementar comparação em **tempo constante** executando hash fictício quando a conta não existe (R3)
-- [ ] T023 Escrever teste que mede a latência de conta existente contra inexistente e falha se a diferença for observável
+- [ ] T021 Implementar rate limiting em duas camadas em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/LimitadorTentativas.java`, com estado fora da memória local (R4)
+- [ ] T022 Implementar comparação em **tempo constante** em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/VerificadorCredenciais.java`, executando hash fictício quando a conta não existe (R3)
+- [ ] T023 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/TempoConstanteTest.java` medindo a latência de conta existente contra inexistente
 
 ### Contrato e erros
 
 - [ ] T024 Implementar o esquema `Erro` de [contracts/openapi.yaml](contracts/openapi.yaml) com tratamento global, sem stack trace nem detalhe interno (FR-041)
 - [ ] T025 [P] Implementar registro de `EventoAutenticacao` para todos os tipos, sem dado sensível (FR-039, FR-040)
-- [ ] T026 [P] Adicionar Trace ID e Request ID em toda resposta
-- [ ] T027 Gerar o cliente Dart e verificar que ele compila contra o contrato
+- [ ] T026 [P] Adicionar Trace ID e Request ID em `backend/src/main/java/br/fatec/memora/comum/FiltroRastreio.java`
+- [ ] T027 Gerar o cliente Dart em `app/lib/services/api/` e verificar que compila contra o contrato
 
 ### Aplicativo — base da feature
 
@@ -80,7 +80,7 @@ description: "Task list — Autenticação Acessível do Memora"
 - [ ] T029 [P] Criar `RepositorioAutenticacao` (interface) em `domain/`
 - [ ] T030 Implementar `RepositorioAutenticacaoApi` em `data/`, sobre o cliente gerado
 - [ ] T031 Implementar armazenamento de credenciais com `flutter_secure_storage` em `app/lib/services/seguranca/` — **nunca** `SharedPreferences`
-- [ ] T032 Escrever teste do cenário V8 — nenhuma credencial localizável em armazenamento comum
+- [ ] T032 Escrever teste do cenário V8 em `app/test/features/autenticacao/armazenamento_seguro_test.dart` — nenhuma credencial em armazenamento comum
 
 ---
 
@@ -93,10 +93,10 @@ description: "Task list — Autenticação Acessível do Memora"
 ### Backend
 
 - [ ] T033 [US1] Implementar `POST /v1/auth/cadastro` em `autenticacao/api/`, devolvendo sessão iniciada (FR-009)
-- [ ] T034 [US1] Implementar política de senha priorizando **comprimento** e recusando senhas comprometidas (FR-042)
+- [ ] T034 [US1] Implementar política de senha em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/PoliticaDeSenha.java`, priorizando **comprimento** e recusando senhas comprometidas (FR-042)
 - [ ] T035 [US1] Garantir resposta `201` idêntica quando o canal já existe, sem revelar (FR-010)
-- [ ] T036 [US1] Escrever teste do cenário V2 — nenhuma resposta revela existência de conta
-- [ ] T037 [US1] Implementar normalização do identificador: minúsculas, sem espaços
+- [ ] T036 [US1] Escrever teste do cenário V2 em `backend/src/test/java/br/fatec/memora/autenticacao/api/NaoRevelaExistenciaTest.java`
+- [ ] T037 [US1] Implementar normalização do identificador em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/NormalizadorIdentificador.java`
 
 ### Aplicativo
 
@@ -104,11 +104,11 @@ description: "Task list — Autenticação Acessível do Memora"
 - [ ] T039 [US1] Criar `ControladorCadastro` em `presentation/controladores/`, com estados vazio, carregando, erro e sucesso
 - [ ] T040 [US1] Criar `TelaCadastro` usando `CampoTexto`, `CampoSenha` e `BotaoPrimario` do Design System
 - [ ] T041 [US1] Implementar `textoAjuda` em cada campo explicando **para que o dado serve** (FR-004)
-- [ ] T042 [US1] Implementar validação ao sair de cada campo, preservando o que já foi digitado em caso de erro (FR-005, FR-006)
-- [ ] T043 [US1] Exibir as regras de senha **antes** de a pessoa digitar, com atendimento em tempo real (FR-008)
-- [ ] T044 [US1] Tratar toque duplo no envio para não criar conta duplicada
-- [ ] T045 [US1] Escrever teste de widget do fluxo completo de cadastro
-- [ ] T046 [US1] Escrever teste de acessibilidade da tela de cadastro: contraste, alvo de toque, escala 2.0 e leitor de tela
+- [ ] T042 [US1] Implementar validação por campo em `app/lib/features/autenticacao/presentation/controladores/controlador_cadastro.dart`, preservando o que já foi digitado (FR-005, FR-006)
+- [ ] T043 [US1] Exibir as regras de senha em `app/lib/features/autenticacao/presentation/widgets/regras_de_senha.dart`, com atendimento em tempo real (FR-008)
+- [ ] T044 [US1] Tratar toque duplo no envio em `app/lib/features/autenticacao/presentation/controladores/controlador_cadastro.dart`
+- [ ] T045 [US1] Escrever teste de widget do cadastro em `app/test/features/autenticacao/tela_cadastro_test.dart`
+- [ ] T046 [US1] Escrever teste de acessibilidade em `app/test/features/autenticacao/cadastro_acessibilidade_test.dart`: contraste, alvo de toque, escala 2.0 e leitor de tela
 
 ---
 
@@ -122,17 +122,17 @@ description: "Task list — Autenticação Acessível do Memora"
 
 - [ ] T047 [US2] Implementar `POST /v1/auth/entrar`, aceitando **qualquer canal verificado** (FR-051)
 - [ ] T048 [US2] Implementar `POST /v1/auth/sessao/renovar` com a rotação de T019
-- [ ] T049 [US2] Implementar bloqueio progressivo — 1, 5, 15, 60 min — após 5 falhas (FR-014)
+- [ ] T049 [US2] Implementar bloqueio progressivo em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/BloqueioProgressivo.java` — 1, 5, 15, 60 min após 5 falhas (FR-014)
 - [ ] T050 [US2] Escrever teste do cenário V6 — bloqueio progressivo devolve `tentar_novamente_em_segundos`
 
 ### Aplicativo
 
 - [ ] T051 [US2] Criar `ControladorLogin` com renovação automática de sessão
 - [ ] T052 [US2] Criar `TelaLogin` usando os componentes do Design System
-- [ ] T053 [US2] Pré-preencher o identificador do último acesso neste aparelho (FR-012)
-- [ ] T054 [US2] Escrever os textos de bloqueio na persona da Memora: acolhedores, explicando o motivo e oferecendo a recuperação (FR-015)
-- [ ] T055 [US2] Implementar expiração por inatividade com aviso prévio (FR-017)
-- [ ] T056 [US2] Escrever teste de widget do login, incluindo o estado bloqueado
+- [ ] T053 [US2] Pré-preencher o identificador do último acesso em `app/lib/features/autenticacao/data/ultimo_acesso_local.dart` (FR-012)
+- [ ] T054 [US2] Escrever os textos de bloqueio em `app/lib/l10n/` na persona da Memora: acolhedores, com motivo e caminho de recuperação (FR-015)
+- [ ] T055 [US2] Implementar expiração por inatividade em `app/lib/features/autenticacao/domain/monitor_de_sessao.dart`, com aviso prévio (FR-017)
+- [ ] T056 [US2] Escrever teste de widget do login em `app/test/features/autenticacao/tela_login_test.dart`, incluindo o estado bloqueado
 
 ---
 
@@ -146,8 +146,8 @@ description: "Task list — Autenticação Acessível do Memora"
 
 - [ ] T057 [US5] Aceitar `modo_assistido` no cadastro e **exigir canal com posse confirmada** antes de concluir (FR-062)
 - [ ] T058 [US5] Implementar `POST /v1/canais/{id}/codigo` e `POST /v1/canais/{id}/verificar` com código de 6 dígitos, validade de 10 min e uso único (R5)
-- [ ] T059 [US5] Guardar o código **hasheado**, nunca em texto puro
-- [ ] T060 [US5] Escrever teste do cenário V4 — canal não verificado **não** recebe código de recuperação
+- [ ] T059 [US5] Guardar o código **hasheado** em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/CodigoVerificacao.java`, nunca em texto puro
+- [ ] T060 [US5] Escrever teste do cenário V4 em `backend/src/test/java/br/fatec/memora/autenticacao/api/CanalNaoVerificadoTest.java`
 
 ### Aplicativo
 
@@ -155,7 +155,7 @@ description: "Task list — Autenticação Acessível do Memora"
 - [ ] T062 [US5] Criar `TelaEntregaDoAparelho`, que interrompe o fluxo e pede que o aparelho volte à pessoa dona da conta (FR-059)
 - [ ] T063 [US5] Usar `CampoSenha` com `permitirRevelar: false` no modo assistido (FR-060)
 - [ ] T064 [US5] Criar `TelaPrimeiraEntrada`, conduzindo a pessoa a entrar sozinha ao final (FR-063)
-- [ ] T065 [US5] Escrever teste garantindo que o modo assistido **não** cria vínculo nem permissão para o acompanhante (FR-064)
+- [ ] T065 [US5] Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/api/ModoAssistidoSemVinculoTest.java` garantindo que não há vínculo nem permissão para o acompanhante (FR-064)
 
 ---
 
@@ -169,15 +169,15 @@ description: "Task list — Autenticação Acessível do Memora"
 
 - [ ] T066 [US3] Implementar `POST /v1/auth/recuperacao/solicitar`, respondendo `202` **sempre** (FR-019)
 - [ ] T067 [US3] Implementar `POST /v1/auth/recuperacao/confirmar`, revogando **todas** as sessões (FR-021)
-- [ ] T068 [US3] Notificar a pessoa pelo canal cadastrado quando a senha mudar (FR-022)
-- [ ] T069 [US3] Escrever teste do cenário V5 — trocar a senha derruba as sessões de todos os aparelhos
+- [ ] T068 [US3] Notificar pelo canal cadastrado em `backend/src/main/java/br/fatec/memora/autenticacao/infra/NotificadorDeConta.java` quando a senha mudar (FR-022)
+- [ ] T069 [US3] Escrever teste do cenário V5 em `backend/src/test/java/br/fatec/memora/autenticacao/api/TrocaDeSenhaRevogaSessoesTest.java`
 
 ### Aplicativo
 
 - [ ] T070 [US3] Criar `TelaRecuperacao` usando `CampoCodigo`
-- [ ] T071 [US3] Exibir aviso permanente de que o Memora **nunca** pede senha por telefone, mensagem ou e-mail (FR-023)
-- [ ] T072 [US3] Tratar código expirado com caminho claro para solicitar outro
-- [ ] T073 [US3] Escrever teste de widget do fluxo de recuperação
+- [ ] T071 [US3] Exibir aviso permanente em `app/lib/features/autenticacao/presentation/widgets/aviso_antigolpe.dart` — o Memora **nunca** pede senha por telefone, mensagem ou e-mail (FR-023)
+- [ ] T072 [US3] Tratar código expirado em `app/lib/features/autenticacao/presentation/controladores/controlador_recuperacao.dart`, com caminho para solicitar outro
+- [ ] T073 [US3] Escrever teste de widget em `app/test/features/autenticacao/tela_recuperacao_test.dart`
 
 ---
 
@@ -188,10 +188,10 @@ description: "Task list — Autenticação Acessível do Memora"
 **Teste independente**: sair e verificar que nenhum dado pessoal permanece acessível.
 
 - [ ] T074 [US4] Implementar `POST /v1/auth/sair` revogando a sessão atual
-- [ ] T075 [US4] Adicionar a saída em local previsível, a no máximo dois toques do perfil (FR-024)
-- [ ] T076 [US4] Usar `ConfirmacaoMemora` antes de encerrar, explicando o que vai acontecer (FR-025)
-- [ ] T077 [US4] Limpar todo dado pessoal e credencial do aparelho ao sair (FR-026)
-- [ ] T078 [US4] Escrever teste verificando que nada resta no armazenamento após a saída
+- [ ] T075 [US4] Adicionar a saída em `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart`, a no máximo dois toques (FR-024)
+- [ ] T076 [US4] Usar `ConfirmacaoMemora` em `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart` antes de encerrar (FR-025)
+- [ ] T077 [US4] Limpar dado pessoal e credencial em `app/lib/services/seguranca/limpeza_de_sessao.dart` (FR-026)
+- [ ] T078 [US4] Escrever teste em `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart`
 
 ---
 
@@ -200,19 +200,19 @@ description: "Task list — Autenticação Acessível do Memora"
 > Depende da US1 e da US2 existirem.
 
 - [ ] T079 Implementar `POST /v1/auth/social/{provedor}` validando assinatura, emissor, audiência e expiração do token (R6)
-- [ ] T080 Implementar vinculação de contas sem criar duplicata e sem revelar existência prévia (FR-057)
-- [ ] T081 Integrar Google e Facebook no aplicativo por Authorization Code com PKCE, em aba segura do sistema
-- [ ] T082 Exibir aviso explícito **antes** do redirecionamento, informando que a pessoa sai do Memora (FR-054)
-- [ ] T083 Escrever teste do cenário V9 — **nenhuma WebView**, nenhum campo de senha de terceiro dentro do app
+- [ ] T080 Implementar vinculação de contas em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/VinculadorDeIdentidades.java`, sem duplicata e sem revelar existência prévia (FR-057)
+- [ ] T081 Integrar Google e Facebook em `app/lib/services/identidade/`, por Authorization Code com PKCE em aba segura do sistema
+- [ ] T082 Exibir aviso de saída em `app/lib/features/autenticacao/presentation/widgets/aviso_saida_do_app.dart`, antes do redirecionamento (FR-054)
+- [ ] T083 Escrever teste do cenário V9 em `app/test/features/autenticacao/login_social_sem_webview_test.dart`
 
 ---
 
 ## Phase 9: Validação final
 
-- [ ] T084 Executar V1 a V9 do [quickstart.md](quickstart.md) de forma automatizada
-- [ ] T085 Executar **V10** — teste com 5 pessoas de 65+ anos, sem instrução e sem ajuda
-- [ ] T086 Verificar SC-001 a SC-010 contra os resultados observados
-- [ ] T087 Revisões obrigatórias: código, UX, acessibilidade, performance, segurança e arquitetura
+- [ ] T084 Executar V1 a V9 de `specs/001-autenticacao-acessivel/quickstart.md` de forma automatizada
+- [ ] T085 Executar **V10** de `specs/001-autenticacao-acessivel/quickstart.md` — 5 pessoas de 65+ anos, sem instrução e sem ajuda
+- [ ] T086 Verificar SC-001 a SC-010 de `specs/001-autenticacao-acessivel/spec.md` contra os resultados observados
+- [ ] T087 Revisões obrigatórias conforme `.specify/memory/constitution.md`: código, UX, acessibilidade, performance, segurança e arquitetura
 - [ ] T088 Atualizar [requisitos-atualizados.md](../../docs/referencia/requisitos-atualizados.md) com o que a implementação revelou
 
 ---
