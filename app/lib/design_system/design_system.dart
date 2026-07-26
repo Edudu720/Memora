@@ -5,6 +5,31 @@
 /// erosão que a FR-002 existe para evitar.
 library;
 
+export 'componentes/botoes/botao_perigo.dart';
+export 'componentes/botoes/botao_primario.dart';
+export 'componentes/botoes/botao_secundario.dart';
+export 'componentes/botoes/botao_terciario.dart';
+export 'componentes/campos/campo_codigo.dart';
+export 'componentes/campos/campo_senha.dart';
+export 'componentes/campos/campo_texto.dart';
+export 'componentes/cartoes/cartao.dart';
+export 'componentes/confirmacao/confirmacao_memora.dart';
+export 'componentes/dialogos/dialogo.dart';
+export 'componentes/dialogos/folha_inferior.dart';
+export 'componentes/feedback/carregando.dart';
+export 'componentes/feedback/estado_vazio.dart';
+export 'componentes/feedback/mensagem_erro.dart';
+export 'componentes/informacao/campo_informacao.dart';
+export 'componentes/informacao/destaque_informacao.dart';
+export 'componentes/informacao/lista_informacao.dart';
+export 'componentes/navegacao/barra_superior.dart';
+export 'componentes/navegacao/navegacao_inferior.dart';
+export 'componentes/selecao/opcao_selecionavel.dart';
+export 'componentes/texto/texto_memora.dart';
+export 'preferencias/controlador_aparencia.dart';
+export 'preferencias/escopo_aparencia.dart';
+export 'preferencias/preferencia_aparencia.dart';
+export 'preferencias/tela_aparencia.dart';
 export 'temas/memora_theme_extension.dart';
 export 'temas/temas_memora.dart';
 export 'tokens/cores.dart';

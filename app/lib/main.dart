@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'demonstracao/casa_demonstracao.dart';
 import 'design_system/design_system.dart';
+import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 
-void main() => runApp(const AplicativoMemora());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final RepositorioPreferenciaAparenciaLocal repositorio =
+      await RepositorioPreferenciaAparenciaLocal.abrir();
+  final ControladorAparencia controlador = ControladorAparencia(repositorio);
+  await controlador.carregar();
+
+  runApp(AplicativoMemora(controlador: controlador));
+}
 
 /// Raiz do aplicativo Memora.
 ///
@@ -10,52 +20,35 @@ void main() => runApp(const AplicativoMemora());
 /// chegam com a feature 001, que só é desbloqueada quando os componentes
 /// estiverem prontos e validados.
 class AplicativoMemora extends StatelessWidget {
+  /// Controla o tema e a ampliação de texto escolhidos pela pessoa.
+  final ControladorAparencia controlador;
+
   /// Cria a raiz do aplicativo.
-  const AplicativoMemora({super.key});
+  const AplicativoMemora({required this.controlador, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Memora',
-      debugShowCheckedModeBanner: false,
-      theme: TemasMemora.claro,
-      darkTheme: TemasMemora.escuro,
-      home: const _AmostraDeTokens(),
-    );
-  }
-}
+    return EscopoAparencia(
+      controlador: controlador,
+      child: ListenableBuilder(
+        listenable: controlador,
+        builder: (BuildContext context, _) {
+          final PreferenciaAparencia atual = controlador.atual;
+          final AparenciaResolvida aparencia = AparenciaResolvida.de(atual);
 
-/// Amostra provisória dos tokens, substituída pela galeria em T045.
-class _AmostraDeTokens extends StatelessWidget {
-  const _AmostraDeTokens();
-
-  @override
-  Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-
-    return Scaffold(
-      backgroundColor: cores.fundo,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(MemoraEspacamento.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                'Memora',
-                style: MemoraTipografia.tituloTela.copyWith(
-                  color: cores.primaria,
-                ),
-              ),
-              const SizedBox(height: MemoraEspacamento.lg),
-              Text(
-                'Design System em construção. Os tokens já estão validados: '
-                '48 pares de contraste aprovados nos três temas.',
-                style: MemoraTipografia.corpo.copyWith(color: cores.texto),
-              ),
-            ],
-          ),
-        ),
+          return MaterialApp(
+            title: 'Memora',
+            debugShowCheckedModeBanner: false,
+            theme: aparencia.temaClaro,
+            darkTheme: aparencia.temaEscuro,
+            themeMode: aparencia.modo,
+            builder: (BuildContext context, Widget? child) => AmpliacaoDeTexto(
+              fatorDoAplicativo: atual.escalaTexto,
+              child: child!,
+            ),
+            home: const CasaDemonstracao(),
+          );
+        },
       ),
     );
   }

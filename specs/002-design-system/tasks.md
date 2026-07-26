@@ -58,7 +58,7 @@ refatoração se estiver automatizado.
       valores validados
 
 **Portão da fase**: `validar_paleta.py` e `contraste_test.dart` passando, com os
-mesmos 48 pares.
+mesmos 51 pares.
 
 > ✅ **Fases 1 e 2 concluídas em 2026-07-24.** 52 testes passando, `flutter analyze`
 > limpo, validador de paleta aprovado. O portão foi verificado contra regressão:
@@ -71,79 +71,118 @@ mesmos 48 pares.
 
 > A falha mais grave do protótipo. Ver FR-012.
 
-- [ ] **T016** [US1] Criar `componentes/informacao/campo_informacao.dart` — sem
+- [x] **T016** [US1] Criar `componentes/informacao/campo_informacao.dart` — sem
       fundo preenchido, sem forma de pílula, **sem aceitar callback de toque**
-- [ ] **T017** [P] [US1] Criar `componentes/informacao/lista_informacao.dart`
-- [ ] **T018** [P] [US1] Criar `componentes/informacao/destaque_informacao.dart`
-- [ ] **T019** [US1] Criar `componentes/botoes/botao_primario.dart` — 56 dp,
+- [x] **T017** [P] [US1] Criar `componentes/informacao/lista_informacao.dart`
+- [x] **T018** [P] [US1] Criar `componentes/informacao/destaque_informacao.dart`
+- [x] **T019** [US1] Criar `componentes/botoes/botao_primario.dart` — 56 dp,
       preenchido, rótulo textual obrigatório
-- [ ] **T020** [P] [US1] Criar `botao_secundario.dart` e `botao_terciario.dart`
-- [ ] **T021** [US1] Criar `componentes/botoes/botao_perigo.dart` — cor `perigo`,
+- [x] **T020** [P] [US1] Criar `botao_secundario.dart` e `botao_terciario.dart`
+- [x] **T021** [US1] Criar `componentes/botoes/botao_perigo.dart` — cor `perigo`,
       ícone obrigatório, nunca adjacente a outro botão
-- [ ] **T022** [US1] Escrever `test/design_system/area_toque_test.dart` cobrindo
+- [x] **T022** [US1] Escrever `test/design_system/area_toque_test.dart` cobrindo
       todos os botões com `androidTapTargetGuideline`
-- [ ] **T023** [US1] Escrever teste garantindo que os componentes de informação
+- [x] **T023** [US1] Escrever teste garantindo que os componentes de informação
       **não expõem** semântica de botão a leitores de tela
 
 **Portão da fase**: um componente de informação não pode ser confundido com botão,
 nem visualmente nem semanticamente.
 
+> ✅ **Fase 3 concluída em 2026-07-25.** 65 testes passando, `flutter analyze` limpo.
+> Portão verificado contra regressão: ao anunciar `CampoInformacao` como botão, o
+> teste de semântica falha.
+>
+> Regra visual adotada: **ação usa pílula e preenchimento; informação nunca usa**.
+> `CampoInformacao` e `DestaqueInformacao` não expõem callback de toque — é ausência
+> de API, não convenção. `ListaInformacao` só aceita `CampoInformacao`, então um
+> botão não pode ser misturado a dados nem por engano de digitação.
+
 ---
 
 ## Phase 4: US2 — Ler com a letra do meu tamanho (P1)
 
-- [ ] **T024** [US2] Criar `componentes/texto/texto_memora.dart` aplicando a escala
+- [x] **T024** [US2] Criar `componentes/texto/texto_memora.dart` aplicando a escala
       tipográfica e o teto de escala 2.0
-- [ ] **T025** [US2] Revisar todos os componentes das fases anteriores eliminando
+- [x] **T025** [US2] Revisar todos os componentes das fases anteriores eliminando
       qualquer altura fixa (FR-026)
-- [ ] **T026** [US2] Escrever `test/design_system/escala_texto_test.dart` — cada
+- [x] **T026** [US2] Escrever `test/design_system/escala_texto_test.dart` — cada
       componente renderizado em 1.0, 1.5 e 2.0, sem estouro de layout
-- [ ] **T027** [US2] Escrever `test/design_system/semantica_test.dart` — rótulo e
+- [x] **T027** [US2] Escrever `test/design_system/semantica_test.dart` — rótulo e
       estado expostos em todos os componentes interativos
 
 **Portão da fase**: nenhum aviso de overflow em escala 2.0, em nenhum componente.
+
+> ✅ **Fase 4 concluída em 2026-07-25.** 96 testes passando.
+>
+> T025 revelou uma inconsistência real: `TextoMemora` limitava a ampliação a 2,0,
+> mas os componentes usavam `Text` cru, sem teto. Em escala de sistema acima de 2,0
+> eles divergiam. Resolvido com `escalaTextoLimitada(context)`, usada por todos.
 
 ---
 
 ## Phase 5: US3 — Personalizar sem estragar a leitura (P2)
 
-- [ ] **T028** [US3] Criar a entidade de preferência de aparência conforme
+- [x] **T028** [US3] Criar a entidade de preferência de aparência conforme
       [data-model.md](data-model.md)
-- [ ] **T029** [US3] Implementar persistência local da preferência
+- [x] **T029** [US3] Implementar persistência local da preferência
       (**armazenamento simples — não é dado sensível**)
-- [ ] **T030** [US3] Implementar troca de tema em tempo de execução, com
+- [x] **T030** [US3] Implementar troca de tema em tempo de execução, com
       `sistema` como padrão
-- [ ] **T031** [US3] Implementar ajuste de tamanho de texto no app, multiplicando a
+- [x] **T031** [US3] Implementar ajuste de tamanho de texto no app, multiplicando a
       escala do sistema, limitado a 2.0
-- [ ] **T032** [US3] Implementar "voltar ao padrão" alcançável em **um toque**
+- [x] **T032** [US3] Implementar "voltar ao padrão" alcançável em **um toque**
       (FR-022)
-- [ ] **T033** [US3] Implementar pré-visualização antes de confirmar a mudança
+- [x] **T033** [US3] Implementar pré-visualização antes de confirmar a mudança
       (FR-023)
-- [ ] **T034** [US3] Escrever teste cobrindo persistência e precedência da escolha
+- [x] **T034** [US3] Escrever teste cobrindo persistência e precedência da escolha
       explícita sobre o tema do sistema
+
+> ✅ **Fase 5 concluída em 2026-07-25.** 121 testes passando.
+>
+> Decisões tomadas na implementação:
+> - **Opções discretas em vez de controle deslizante** para o tamanho de letra.
+>   Arrastar exige precisão motora que não podemos pressupor, e a FR-015 proíbe
+>   depender de gesto complexo.
+> - **"Voltar ao jeito original" não passa por pré-visualização.** É a saída de
+>   emergência de quem se perdeu; exigir uma confirmação extra a inutilizaria.
+> - **Falha ao ler a preferência cai no padrão** em vez de propagar erro: não
+>   conseguir ler uma preferência visual nunca pode impedir alguém de usar o app.
+> - Componente novo: `OpcaoSelecionavel`, com três sinais simultâneos de seleção
+>   (ícone, borda e fundo), porque cor sozinha não comunica (FR-014).
 
 ---
 
 ## Phase 6: US4 — Consistência e componentes de decisão (P2)
 
-- [ ] **T035** [US4] Criar `componentes/confirmacao/confirmacao_memora.dart` —
+- [x] **T035** [US4] Criar `componentes/confirmacao/confirmacao_memora.dart` —
       vertical, largura total, 56 dp, frases completas, ícone + texto (R3)
-- [ ] **T036** [US4] Criar a variante `irreversivel` — ação destrutiva separada,
+- [x] **T036** [US4] Criar a variante `irreversivel` — ação destrutiva separada,
       exigindo segunda confirmação (FR-013)
-- [ ] **T037** [P] [US4] Criar `componentes/campos/campo_texto.dart` — rótulo acima
+- [x] **T037** [P] [US4] Criar `componentes/campos/campo_texto.dart` — rótulo acima
       e sempre visível, com `textoAjuda` obrigatório
-- [ ] **T038** [P] [US4] Criar `campo_senha.dart` — controle de revelar rotulado em
+- [x] **T038** [P] [US4] Criar `campo_senha.dart` — controle de revelar rotulado em
       texto, desativável para o modo assistido da feature 001
-- [ ] **T039** [P] [US4] Criar `campo_codigo.dart` — 6 dígitos, teclado numérico
-- [ ] **T040** [P] [US4] Criar `componentes/cartoes/cartao.dart`
-- [ ] **T041** [P] [US4] Criar `componentes/dialogos/dialogo.dart` e
+- [x] **T039** [P] [US4] Criar `campo_codigo.dart` — 6 dígitos, teclado numérico
+- [x] **T040** [P] [US4] Criar `componentes/cartoes/cartao.dart`
+- [x] **T041** [P] [US4] Criar `componentes/dialogos/dialogo.dart` e
       `folha_inferior.dart`
-- [ ] **T042** [US4] Criar `componentes/navegacao/barra_superior.dart` — voltar
+- [x] **T042** [US4] Criar `componentes/navegacao/barra_superior.dart` — voltar
       sempre com rótulo textual
-- [ ] **T043** [US4] Criar `componentes/navegacao/navegacao_inferior.dart` —
+- [x] **T043** [US4] Criar `componentes/navegacao/navegacao_inferior.dart` —
       **ícone + rótulo** em todos os itens (FR-016)
-- [ ] **T044** [P] [US4] Criar `componentes/feedback/carregando.dart`,
+- [x] **T044** [P] [US4] Criar `componentes/feedback/carregando.dart`,
       `mensagem_erro.dart` e `estado_vazio.dart` — ícone **e** texto, nunca só cor
+
+> ✅ **Fase 6 concluída em 2026-07-25.** 139 testes passando.
+>
+> **A feature 001 está desbloqueada.** Existem componentes suficientes para
+> construir cadastro, login, recuperação e saída.
+>
+> Decisões da `ConfirmacaoMemora`:
+> - Na variante irreversível, **a recusa vem antes** da ação destrutiva: o caminho
+>   seguro é lido primeiro e fica mais perto do polegar.
+> - A dupla confirmação troca o texto para *"Tem certeza mesmo?"*, e é possível
+>   desistir entre os dois toques.
 
 ---
 

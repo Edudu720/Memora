@@ -302,7 +302,7 @@ E a pergunta que valida qualquer decisão:
 |---|---|
 | `flutter analyze` | ✅ Sem problemas |
 | `flutter test` | ✅ 52 passando |
-| `validar_paleta.py` | ✅ 48 pares, 3 temas |
+| `validar_paleta.py` | ✅ 51 pares, 3 temas |
 
 > **Continuando o trabalho?** Leia [CLAUDE.md](CLAUDE.md) — contém o estado
 > detalhado, as decisões já tomadas e as armadilhas do ambiente.

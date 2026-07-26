@@ -4,8 +4,9 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-24
-**Estado**: Design System em implementação. Tokens e temas prontos e validados.
+**Última sessão**: 2026-07-25
+**Estado**: Design System em implementação. Tokens, temas e componentes de
+informação e ação prontos e validados.
 
 ---
 
@@ -46,12 +47,15 @@ constitution → specify → clarify → plan → checklist → tasks → analyz
 
 ### ⚠️ Armadilha conhecida
 
-As skills do Spec Kit estão em `.claude/skills/speckit-*`, mas **podem não estar
-registradas na ferramenta `Skill`** se foram instaladas depois do início da sessão.
+As skills do Spec Kit estão em `.claude/skills/speckit-*` e **normalmente estão
+registradas** na ferramenta `Skill` em sessões novas.
 
-**Se `Skill(speckit-plan)` falhar com "Unknown skill"**: leia
-`.claude/skills/speckit-<nome>/SKILL.md` e execute as instruções manualmente. O
-resultado é idêntico. Já foi feito assim nesta sessão inteira.
+**Se `Skill(speckit-plan)` falhar com "Unknown skill"** — acontece quando são
+instaladas no meio da sessão: leia `.claude/skills/speckit-<nome>/SKILL.md` e
+execute as instruções manualmente. O resultado é idêntico.
+
+**Ao usar `/speckit-implement`, limite o escopo a uma fase por vez.** Cada fase do
+`tasks.md` tem portão próprio e vira uma PR separada.
 
 ### Regras de fase
 
@@ -66,8 +70,8 @@ resultado é idêntico. Já foi feito assim nesta sessão inteira.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ bloqueada |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T015 feitas |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ **desbloqueada** |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
 
@@ -77,15 +81,41 @@ resultado é idêntico. Já foi feito assim nesta sessão inteira.
 - **temas/** — `ThemeExtension` tipada; um token inexistente **não compila**
 - **design_system.dart** — ponto único de exportação
 
-`app/test/design_system/contraste_test.dart` — 52 testes.
+- **componentes/informacao/** — `CampoInformacao`, `DestaqueInformacao`,
+  `ListaInformacao`. **Nenhum aceita callback de toque** — é ausência de API
+- **componentes/botoes/** — `BotaoPrimario`, `BotaoSecundario`, `BotaoTerciario`,
+  `BotaoPerigo`, sobre um `BotaoBase` que concentra as garantias
+- **componentes/texto/** — `TextoMemora` e `escalaTextoLimitada(context)`
+- **componentes/selecao/** — `OpcaoSelecionavel`
+- **preferencias/** — entidade, controlador com pré-visualização, escopo e
+  `TelaAparencia`. A implementação de persistência vive em
+  `services/preferencias/`, para o Design System não depender de armazenamento
 
-### Próxima tarefa: **T016**
+- **componentes/confirmacao/** — `ConfirmacaoMemora`, com variante irreversível
+- **componentes/campos/** — `CampoTexto`, `CampoSenha`, `CampoCodigo`
+- **componentes/cartoes/**, **dialogos/**, **navegacao/**, **feedback/**
 
-Componentes de informação e ação (`specs/002-design-system/tasks.md`, fase 3).
-Resolve a falha mais grave do protótipo: campos de dado que pareciam botões.
+`app/test/design_system/` — 139 testes.
 
-**Detalhe de projeto que importa**: `CampoInformacao` **não aceita callback de
-toque**. É proibição estrutural, não convenção — assim o erro não tem como voltar.
+### Regra de texto
+
+**Todo `Text` usa `escalaTextoLimitada(context)`.** Sem isso o componente diverge
+dos demais em ampliação extrema e o layout quebra de forma imprevisível.
+
+### Regra visual que separa dado de ação
+
+**Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
+Não invente uma terceira linguagem sem revisar a FR-012.
+
+### Próxima tarefa: **T045**
+
+Fase 7 (`specs/002-design-system/tasks.md`): galeria de componentes, análise
+estática contra valores literais e guia de uso.
+
+**Alternativa, e provavelmente mais valiosa agora:** a feature 001 está
+desbloqueada. Rodar `/speckit-tasks` nela e começar as telas de autenticação
+é uma escolha legítima — a fase 7 protege o sistema a longo prazo, mas não
+entrega produto.
 
 **A feature 001 é desbloqueada ao final da fase 6** (T044).
 
@@ -172,6 +202,16 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   24 px contra 48 dp**. Meça antes de afirmar.
 - **`@immutable` vem de `foundation`**, não de `painting`. Custou um erro de
   compilação.
+- **`containsSemantics` está obsoleto** no Flutter 3.41. Use `isSemantics`.
+- **Não acesse o tema por reflexão.** Use `context.memora` — a extensão já existe
+  em `temas/memora_theme_extension.dart`.
+- **`Semantics(button: true)` não basta**: sem `onTap` na própria `Semantics`, o
+  TalkBack anuncia o botão mas o duplo-toque não ativa nada. Custou um defeito real.
+- **Não use `Opacity` para estado desabilitado.** Derruba o contraste do rótulo
+  para 2,79:1. Use `superficieAlt` com `textoSuave`, que mede 6,22:1.
+- **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
+  causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
+  Use `ensureVisible` antes.
 - **`.specify/feature.json`** aponta a feature ativa e **conflita** quando duas
   branches o alteram. Resolva mantendo a feature em que você está.
 
