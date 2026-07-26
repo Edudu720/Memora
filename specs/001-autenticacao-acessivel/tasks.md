@@ -31,10 +31,10 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ## Phase 1: Setup
 
-- [ ] T001 Criar o projeto Spring Boot em `backend/`, pacote `br.fatec.memora`, com Java 21
-- [ ] T002 [P] Configurar `backend/pom.xml` com Spring Web, Spring Security, Spring Data JPA, PostgreSQL, BouncyCastle, Bucket4j, springdoc-openapi e Testcontainers
+- [x] T001 Criar o projeto Spring Boot em `backend/`, pacote `br.fatec.memora`, com Java 21
+- [x] T002 [P] Configurar `backend/pom.xml` com Spring Web, Spring Security, Spring Data JPA, PostgreSQL, BouncyCastle, Bucket4j, springdoc-openapi e Testcontainers
 - [ ] T003 [P] Criar `docker-compose.yml` na raiz com PostgreSQL 16 para desenvolvimento
-- [ ] T004 [P] Adicionar `.gitignore` do Java em `backend/`
+- [x] T004 [P] Adicionar `.gitignore` do Java em `backend/`
 - [ ] T005 Configurar geração do cliente Dart a partir de `specs/001-autenticacao-acessivel/contracts/openapi.yaml` para `app/lib/services/api/`, com script reproduzível
 - [ ] T006 Criar a estrutura `app/lib/features/autenticacao/{data,domain,presentation}/`
 - [ ] T007 Estender `.github/workflows/verificacao.yml` com job de build e teste do backend
@@ -57,9 +57,9 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Segurança — o núcleo da feature
 
-- [ ] T015 Configurar `Argon2PasswordEncoder` em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/` com **19456 KiB de memória, 2 iterações, paralelismo 1** — os padrões do Spring usam 16 MiB, abaixo do mínimo OWASP (R1)
-- [ ] T016 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/Argon2ParametrosTest.java` que **falha** se os parâmetros ficarem abaixo do mínimo OWASP
-- [ ] T017 Medir o tempo de hash no ambiente alvo e registrar em `specs/001-autenticacao-acessivel/research.md`; se ficar abaixo de ~250 ms, aumentar a memória
+- [x] T015 Configurar `Argon2PasswordEncoder` em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/` com **19456 KiB de memória, 2 iterações, paralelismo 1** — os padrões do Spring usam 16 MiB, abaixo do mínimo OWASP (R1)
+- [x] T016 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/Argon2ParametrosTest.java` que **falha** se os parâmetros ficarem abaixo do mínimo OWASP
+- [x] T017 Medir o tempo de hash no ambiente alvo e registrar em `specs/001-autenticacao-acessivel/research.md`; se ficar abaixo de ~250 ms, aumentar a memória
 - [ ] T018 Implementar emissão de token de acesso (15 min) e refresh opaco em `seguranca/`
 - [ ] T019 Implementar **rotação com detecção de reuso**: refresh já usado revoga toda a `familiaId` e registra `reuso_token_detectado` (R2)
 - [ ] T020 Escrever teste do cenário V3 do [quickstart.md](quickstart.md) — reusar token antigo derruba a família inteira
