@@ -5,6 +5,13 @@
 /// erosão que a FR-002 existe para evitar.
 library;
 
+export 'componentes/botoes/botao_perigo.dart';
+export 'componentes/botoes/botao_primario.dart';
+export 'componentes/botoes/botao_secundario.dart';
+export 'componentes/botoes/botao_terciario.dart';
+export 'componentes/informacao/campo_informacao.dart';
+export 'componentes/informacao/destaque_informacao.dart';
+export 'componentes/informacao/lista_informacao.dart';
 export 'temas/memora_theme_extension.dart';
 export 'temas/temas_memora.dart';
 export 'tokens/cores.dart';

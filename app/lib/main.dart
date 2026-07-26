@@ -20,14 +20,18 @@ class AplicativoMemora extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: TemasMemora.claro,
       darkTheme: TemasMemora.escuro,
-      home: const _AmostraDeTokens(),
+      home: const _AmostraDeComponentes(),
     );
   }
 }
 
-/// Amostra provisória dos tokens, substituída pela galeria em T045.
-class _AmostraDeTokens extends StatelessWidget {
-  const _AmostraDeTokens();
+/// Amostra provisória dos componentes, substituída pela galeria em T045.
+///
+/// Mostra lado a lado a distinção que a fase 3 resolve: **informação não pode
+/// parecer ação**. No protótipo, os dados do Perfil eram pílulas azuis
+/// idênticas aos botões do Hub.
+class _AmostraDeComponentes extends StatelessWidget {
+  const _AmostraDeComponentes();
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,7 @@ class _AmostraDeTokens extends StatelessWidget {
     return Scaffold(
       backgroundColor: cores.fundo,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(MemoraEspacamento.xl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,12 +51,77 @@ class _AmostraDeTokens extends StatelessWidget {
                   color: cores.primaria,
                 ),
               ),
-              const SizedBox(height: MemoraEspacamento.lg),
-              Text(
-                'Design System em construção. Os tokens já estão validados: '
-                '48 pares de contraste aprovados nos três temas.',
-                style: MemoraTipografia.corpo.copyWith(color: cores.texto),
+              const SizedBox(height: MemoraEspacamento.xxl),
+
+              // ---------- Informação: NÃO é clicável ----------
+              const ListaInformacao(
+                titulo: 'Isto é informação',
+                campos: <CampoInformacao>[
+                  CampoInformacao(
+                    rotulo: 'Nome',
+                    valor: 'Ana',
+                    icone: Icons.person_outline,
+                  ),
+                  CampoInformacao(
+                    rotulo: 'Idade',
+                    valor: '72 anos',
+                    icone: Icons.cake_outlined,
+                  ),
+                  CampoInformacao(
+                    rotulo: 'E-mail',
+                    valor: 'ana@email.com',
+                    icone: Icons.mail_outline,
+                  ),
+                ],
               ),
+              const SizedBox(height: MemoraEspacamento.lg),
+              const DestaqueInformacao(
+                rotulo: 'Seu plano',
+                valor: 'Premium',
+                icone: Icons.star_outline,
+              ),
+
+              const SizedBox(height: MemoraEspacamento.xxl),
+
+              // ---------- Ação: É clicável ----------
+              Semantics(
+                header: true,
+                child: Text(
+                  'Isto é ação',
+                  style: MemoraTipografia.tituloSecao.copyWith(
+                    color: cores.texto,
+                  ),
+                ),
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              BotaoPrimario(
+                rotulo: 'Começar jornada',
+                icone: Icons.arrow_forward,
+                aoTocar: () {},
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              BotaoSecundario(
+                rotulo: 'Entrar com Google',
+                aoTocar: () {},
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              const BotaoPrimario(rotulo: 'Desabilitado'),
+              const SizedBox(height: MemoraEspacamento.md),
+              const BotaoPrimario(rotulo: 'Carregando', carregando: true),
+              const SizedBox(height: MemoraEspacamento.md),
+              BotaoTerciario(
+                rotulo: 'Esqueci minha senha',
+                aoTocar: () {},
+              ),
+
+              // Ação destrutiva fica isolada por espaçamento maior (FR-013).
+              const SizedBox(height: MemoraEspacamento.xxxl),
+              BotaoPerigo(
+                rotulo: 'Apagar minha conta',
+                icone: Icons.warning_amber_rounded,
+                aoTocar: () {},
+              ),
+              const SizedBox(height: MemoraEspacamento.xxl),
             ],
           ),
         ),

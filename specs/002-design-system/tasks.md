@@ -71,22 +71,31 @@ mesmos 48 pares.
 
 > A falha mais grave do protótipo. Ver FR-012.
 
-- [ ] **T016** [US1] Criar `componentes/informacao/campo_informacao.dart` — sem
+- [x] **T016** [US1] Criar `componentes/informacao/campo_informacao.dart` — sem
       fundo preenchido, sem forma de pílula, **sem aceitar callback de toque**
-- [ ] **T017** [P] [US1] Criar `componentes/informacao/lista_informacao.dart`
-- [ ] **T018** [P] [US1] Criar `componentes/informacao/destaque_informacao.dart`
-- [ ] **T019** [US1] Criar `componentes/botoes/botao_primario.dart` — 56 dp,
+- [x] **T017** [P] [US1] Criar `componentes/informacao/lista_informacao.dart`
+- [x] **T018** [P] [US1] Criar `componentes/informacao/destaque_informacao.dart`
+- [x] **T019** [US1] Criar `componentes/botoes/botao_primario.dart` — 56 dp,
       preenchido, rótulo textual obrigatório
-- [ ] **T020** [P] [US1] Criar `botao_secundario.dart` e `botao_terciario.dart`
-- [ ] **T021** [US1] Criar `componentes/botoes/botao_perigo.dart` — cor `perigo`,
+- [x] **T020** [P] [US1] Criar `botao_secundario.dart` e `botao_terciario.dart`
+- [x] **T021** [US1] Criar `componentes/botoes/botao_perigo.dart` — cor `perigo`,
       ícone obrigatório, nunca adjacente a outro botão
-- [ ] **T022** [US1] Escrever `test/design_system/area_toque_test.dart` cobrindo
+- [x] **T022** [US1] Escrever `test/design_system/area_toque_test.dart` cobrindo
       todos os botões com `androidTapTargetGuideline`
-- [ ] **T023** [US1] Escrever teste garantindo que os componentes de informação
+- [x] **T023** [US1] Escrever teste garantindo que os componentes de informação
       **não expõem** semântica de botão a leitores de tela
 
 **Portão da fase**: um componente de informação não pode ser confundido com botão,
 nem visualmente nem semanticamente.
+
+> ✅ **Fase 3 concluída em 2026-07-25.** 65 testes passando, `flutter analyze` limpo.
+> Portão verificado contra regressão: ao anunciar `CampoInformacao` como botão, o
+> teste de semântica falha.
+>
+> Regra visual adotada: **ação usa pílula e preenchimento; informação nunca usa**.
+> `CampoInformacao` e `DestaqueInformacao` não expõem callback de toque — é ausência
+> de API, não convenção. `ListaInformacao` só aceita `CampoInformacao`, então um
+> botão não pode ser misturado a dados nem por engano de digitação.
 
 ---
 
