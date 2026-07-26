@@ -122,20 +122,33 @@ nem visualmente nem semanticamente.
 
 ## Phase 5: US3 — Personalizar sem estragar a leitura (P2)
 
-- [ ] **T028** [US3] Criar a entidade de preferência de aparência conforme
+- [x] **T028** [US3] Criar a entidade de preferência de aparência conforme
       [data-model.md](data-model.md)
-- [ ] **T029** [US3] Implementar persistência local da preferência
+- [x] **T029** [US3] Implementar persistência local da preferência
       (**armazenamento simples — não é dado sensível**)
-- [ ] **T030** [US3] Implementar troca de tema em tempo de execução, com
+- [x] **T030** [US3] Implementar troca de tema em tempo de execução, com
       `sistema` como padrão
-- [ ] **T031** [US3] Implementar ajuste de tamanho de texto no app, multiplicando a
+- [x] **T031** [US3] Implementar ajuste de tamanho de texto no app, multiplicando a
       escala do sistema, limitado a 2.0
-- [ ] **T032** [US3] Implementar "voltar ao padrão" alcançável em **um toque**
+- [x] **T032** [US3] Implementar "voltar ao padrão" alcançável em **um toque**
       (FR-022)
-- [ ] **T033** [US3] Implementar pré-visualização antes de confirmar a mudança
+- [x] **T033** [US3] Implementar pré-visualização antes de confirmar a mudança
       (FR-023)
-- [ ] **T034** [US3] Escrever teste cobrindo persistência e precedência da escolha
+- [x] **T034** [US3] Escrever teste cobrindo persistência e precedência da escolha
       explícita sobre o tema do sistema
+
+> ✅ **Fase 5 concluída em 2026-07-25.** 121 testes passando.
+>
+> Decisões tomadas na implementação:
+> - **Opções discretas em vez de controle deslizante** para o tamanho de letra.
+>   Arrastar exige precisão motora que não podemos pressupor, e a FR-015 proíbe
+>   depender de gesto complexo.
+> - **"Voltar ao jeito original" não passa por pré-visualização.** É a saída de
+>   emergência de quem se perdeu; exigir uma confirmação extra a inutilizaria.
+> - **Falha ao ler a preferência cai no padrão** em vez de propagar erro: não
+>   conseguir ler uma preferência visual nunca pode impedir alguém de usar o app.
+> - Componente novo: `OpcaoSelecionavel`, com três sinais simultâneos de seleção
+>   (ícone, borda e fundo), porque cor sozinha não comunica (FR-014).
 
 ---
 

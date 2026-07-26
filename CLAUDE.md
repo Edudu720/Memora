@@ -71,7 +71,7 @@ execute as instruções manualmente. O resultado é idêntico.
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
 | **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ bloqueada |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T027 feitas |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T034 feitas |
 
 ### O que já existe em código
 
@@ -86,8 +86,12 @@ execute as instruções manualmente. O resultado é idêntico.
 - **componentes/botoes/** — `BotaoPrimario`, `BotaoSecundario`, `BotaoTerciario`,
   `BotaoPerigo`, sobre um `BotaoBase` que concentra as garantias
 - **componentes/texto/** — `TextoMemora` e `escalaTextoLimitada(context)`
+- **componentes/selecao/** — `OpcaoSelecionavel`
+- **preferencias/** — entidade, controlador com pré-visualização, escopo e
+  `TelaAparencia`. A implementação de persistência vive em
+  `services/preferencias/`, para o Design System não depender de armazenamento
 
-`app/test/design_system/` — 96 testes.
+`app/test/design_system/` — 121 testes.
 
 ### Regra de texto
 
@@ -99,13 +103,13 @@ dos demais em ampliação extrema e o layout quebra de forma imprevisível.
 **Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
 Não invente uma terceira linguagem sem revisar a FR-012.
 
-### Próxima tarefa: **T028**
+### Próxima tarefa: **T035**
 
-Fase 5 (`specs/002-design-system/tasks.md`): preferências de aparência —
-troca de tema, ajuste de tamanho de texto e persistência.
+Fase 6 (`specs/002-design-system/tasks.md`): componentes de decisão e entrada.
+**É esta fase que desbloqueia a feature 001.**
 
-Alternativa: fase 6 (T035-T044), que contém a `ConfirmacaoMemora` e os campos
-de entrada de que a feature 001 precisa.
+Inclui a `ConfirmacaoMemora`, que substitui os botões SIM/NÃO do protótipo —
+vertical, 56 dp, frases completas em vez de palavras isoladas.
 
 **A feature 001 é desbloqueada ao final da fase 6** (T044).
 
@@ -199,6 +203,9 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   TalkBack anuncia o botão mas o duplo-toque não ativa nada. Custou um defeito real.
 - **Não use `Opacity` para estado desabilitado.** Derruba o contraste do rótulo
   para 2,79:1. Use `superficieAlt` com `textoSuave`, que mede 6,22:1.
+- **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
+  causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
+  Use `ensureVisible` antes.
 - **`.specify/feature.json`** aponta a feature ativa e **conflita** quando duas
   branches o alteram. Resolva mantendo a feature em que você está.
 

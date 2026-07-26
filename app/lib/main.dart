@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 
 import 'design_system/design_system.dart';
+import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 
-void main() => runApp(const AplicativoMemora());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final RepositorioPreferenciaAparenciaLocal repositorio =
+      await RepositorioPreferenciaAparenciaLocal.abrir();
+  final ControladorAparencia controlador = ControladorAparencia(repositorio);
+  await controlador.carregar();
+
+  runApp(AplicativoMemora(controlador: controlador));
+}
 
 /// Raiz do aplicativo Memora.
 ///
@@ -10,108 +19,35 @@ void main() => runApp(const AplicativoMemora());
 /// chegam com a feature 001, que só é desbloqueada quando os componentes
 /// estiverem prontos e validados.
 class AplicativoMemora extends StatelessWidget {
+  /// Controla o tema e a ampliação de texto escolhidos pela pessoa.
+  final ControladorAparencia controlador;
+
   /// Cria a raiz do aplicativo.
-  const AplicativoMemora({super.key});
+  const AplicativoMemora({required this.controlador, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Memora',
-      debugShowCheckedModeBanner: false,
-      theme: TemasMemora.claro,
-      darkTheme: TemasMemora.escuro,
-      home: const _AmostraDeComponentes(),
-    );
-  }
-}
+    return EscopoAparencia(
+      controlador: controlador,
+      child: ListenableBuilder(
+        listenable: controlador,
+        builder: (BuildContext context, _) {
+          final PreferenciaAparencia atual = controlador.atual;
+          final AparenciaResolvida aparencia = AparenciaResolvida.de(atual);
 
-/// Amostra provisória dos componentes, substituída pela galeria em T045.
-///
-/// Mostra lado a lado a distinção que a fase 3 resolve: **informação não pode
-/// parecer ação**. No protótipo, os dados do Perfil eram pílulas azuis
-/// idênticas aos botões do Hub.
-class _AmostraDeComponentes extends StatelessWidget {
-  const _AmostraDeComponentes();
-
-  @override
-  Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-
-    return Scaffold(
-      backgroundColor: cores.fundo,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(MemoraEspacamento.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextoMemora.tituloTela('Memora', cor: cores.primaria),
-              const SizedBox(height: MemoraEspacamento.xxl),
-
-              // ---------- Informação: NÃO é clicável ----------
-              const ListaInformacao(
-                titulo: 'Isto é informação',
-                campos: <CampoInformacao>[
-                  CampoInformacao(
-                    rotulo: 'Nome',
-                    valor: 'Ana',
-                    icone: Icons.person_outline,
-                  ),
-                  CampoInformacao(
-                    rotulo: 'Idade',
-                    valor: '72 anos',
-                    icone: Icons.cake_outlined,
-                  ),
-                  CampoInformacao(
-                    rotulo: 'E-mail',
-                    valor: 'ana@email.com',
-                    icone: Icons.mail_outline,
-                  ),
-                ],
-              ),
-              const SizedBox(height: MemoraEspacamento.lg),
-              const DestaqueInformacao(
-                rotulo: 'Seu plano',
-                valor: 'Premium',
-                icone: Icons.star_outline,
-              ),
-
-              const SizedBox(height: MemoraEspacamento.xxl),
-
-              // ---------- Ação: É clicável ----------
-              const TextoMemora.tituloSecao('Isto é ação'),
-              const SizedBox(height: MemoraEspacamento.md),
-              BotaoPrimario(
-                rotulo: 'Começar jornada',
-                icone: Icons.arrow_forward,
-                aoTocar: () {},
-              ),
-              const SizedBox(height: MemoraEspacamento.md),
-              BotaoSecundario(
-                rotulo: 'Entrar com Google',
-                aoTocar: () {},
-              ),
-              const SizedBox(height: MemoraEspacamento.md),
-              const BotaoPrimario(rotulo: 'Desabilitado'),
-              const SizedBox(height: MemoraEspacamento.md),
-              const BotaoPrimario(rotulo: 'Carregando', carregando: true),
-              const SizedBox(height: MemoraEspacamento.md),
-              BotaoTerciario(
-                rotulo: 'Esqueci minha senha',
-                aoTocar: () {},
-              ),
-
-              // Ação destrutiva fica isolada por espaçamento maior (FR-013).
-              const SizedBox(height: MemoraEspacamento.xxxl),
-              BotaoPerigo(
-                rotulo: 'Apagar minha conta',
-                icone: Icons.warning_amber_rounded,
-                aoTocar: () {},
-              ),
-              const SizedBox(height: MemoraEspacamento.xxl),
-            ],
-          ),
-        ),
+          return MaterialApp(
+            title: 'Memora',
+            debugShowCheckedModeBanner: false,
+            theme: aparencia.temaClaro,
+            darkTheme: aparencia.temaEscuro,
+            themeMode: aparencia.modo,
+            builder: (BuildContext context, Widget? child) => AmpliacaoDeTexto(
+              fatorDoAplicativo: atual.escalaTexto,
+              child: child!,
+            ),
+            home: const TelaAparencia(),
+          );
+        },
       ),
     );
   }
