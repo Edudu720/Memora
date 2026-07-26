@@ -4,8 +4,9 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-24
-**Estado**: Design System em implementação. Tokens e temas prontos e validados.
+**Última sessão**: 2026-07-25
+**Estado**: Design System em implementação. Tokens, temas e componentes de
+informação e ação prontos e validados.
 
 ---
 
@@ -46,12 +47,15 @@ constitution → specify → clarify → plan → checklist → tasks → analyz
 
 ### ⚠️ Armadilha conhecida
 
-As skills do Spec Kit estão em `.claude/skills/speckit-*`, mas **podem não estar
-registradas na ferramenta `Skill`** se foram instaladas depois do início da sessão.
+As skills do Spec Kit estão em `.claude/skills/speckit-*` e **normalmente estão
+registradas** na ferramenta `Skill` em sessões novas.
 
-**Se `Skill(speckit-plan)` falhar com "Unknown skill"**: leia
-`.claude/skills/speckit-<nome>/SKILL.md` e execute as instruções manualmente. O
-resultado é idêntico. Já foi feito assim nesta sessão inteira.
+**Se `Skill(speckit-plan)` falhar com "Unknown skill"** — acontece quando são
+instaladas no meio da sessão: leia `.claude/skills/speckit-<nome>/SKILL.md` e
+execute as instruções manualmente. O resultado é idêntico.
+
+**Ao usar `/speckit-implement`, limite o escopo a uma fase por vez.** Cada fase do
+`tasks.md` tem portão próprio e vira uma PR separada.
 
 ### Regras de fase
 
@@ -67,7 +71,7 @@ resultado é idêntico. Já foi feito assim nesta sessão inteira.
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
 | **001 — Autenticação Acessível** | ✅ | ✅ | ⬜ | ⬜ bloqueada |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T015 feitas |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T023 feitas |
 
 ### O que já existe em código
 
@@ -77,15 +81,22 @@ resultado é idêntico. Já foi feito assim nesta sessão inteira.
 - **temas/** — `ThemeExtension` tipada; um token inexistente **não compila**
 - **design_system.dart** — ponto único de exportação
 
-`app/test/design_system/contraste_test.dart` — 52 testes.
+- **componentes/informacao/** — `CampoInformacao`, `DestaqueInformacao`,
+  `ListaInformacao`. **Nenhum aceita callback de toque** — é ausência de API
+- **componentes/botoes/** — `BotaoPrimario`, `BotaoSecundario`, `BotaoTerciario`,
+  `BotaoPerigo`, sobre um `BotaoBase` que concentra as garantias
 
-### Próxima tarefa: **T016**
+`app/test/design_system/` — 65 testes.
 
-Componentes de informação e ação (`specs/002-design-system/tasks.md`, fase 3).
-Resolve a falha mais grave do protótipo: campos de dado que pareciam botões.
+### Regra visual que separa dado de ação
 
-**Detalhe de projeto que importa**: `CampoInformacao` **não aceita callback de
-toque**. É proibição estrutural, não convenção — assim o erro não tem como voltar.
+**Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
+Não invente uma terceira linguagem sem revisar a FR-012.
+
+### Próxima tarefa: **T024**
+
+Fase 4 (`specs/002-design-system/tasks.md`): texto escalável e semântica.
+Inclui revisar os componentes já feitos eliminando qualquer altura fixa.
 
 **A feature 001 é desbloqueada ao final da fase 6** (T044).
 
@@ -172,6 +183,9 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   24 px contra 48 dp**. Meça antes de afirmar.
 - **`@immutable` vem de `foundation`**, não de `painting`. Custou um erro de
   compilação.
+- **`containsSemantics` está obsoleto** no Flutter 3.41. Use `isSemantics`.
+- **Não acesse o tema por reflexão.** Use `context.memora` — a extensão já existe
+  em `temas/memora_theme_extension.dart`.
 - **`.specify/feature.json`** aponta a feature ativa e **conflita** quando duas
   branches o alteram. Resolva mantendo a feature em que você está.
 
