@@ -33,11 +33,11 @@ description: "Task list — Autenticação Acessível do Memora"
 
 - [x] T001 Criar o projeto Spring Boot em `backend/`, pacote `br.fatec.memora`, com Java 21
 - [x] T002 [P] Configurar `backend/pom.xml` com Spring Web, Spring Security, Spring Data JPA, PostgreSQL, BouncyCastle, Bucket4j, springdoc-openapi e Testcontainers
-- [ ] T003 [P] Criar `docker-compose.yml` na raiz com PostgreSQL 16 para desenvolvimento
+- [x] T003 [P] Criar `docker-compose.yml` na raiz com PostgreSQL 16 para desenvolvimento
 - [x] T004 [P] Adicionar `.gitignore` do Java em `backend/`
-- [ ] T005 Configurar geração do cliente Dart a partir de `specs/001-autenticacao-acessivel/contracts/openapi.yaml` para `app/lib/services/api/`, com script reproduzível
+- [x] T005 Configurar geração do cliente Dart a partir de `specs/001-autenticacao-acessivel/contracts/openapi.yaml` para `app/lib/services/api/`, com script reproduzível
 - [x] T006 Criar a estrutura `app/lib/features/autenticacao/{data,domain,presentation}/`
-- [ ] T007 Estender `.github/workflows/verificacao.yml` com job de build e teste do backend
+- [x] T007 Estender `.github/workflows/verificacao.yml` com job de build e teste do backend
 
 ---
 
