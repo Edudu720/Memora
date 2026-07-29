@@ -4,10 +4,11 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-26
-**Estado**: Design System quase completo (T001-T044). Feature 001 com as telas
-de cadastro funcionando contra repositório simulado; backend com o núcleo de
-segurança pronto, mas ainda sem endpoints.
+**Última sessão**: 2026-07-28
+**Estado**: Fase 1 da feature 001 **completa** (T001-T007, PR #8). Docker
+instalado e funcionando; PostgreSQL 16 sobe via `docker compose up -d`;
+Testcontainers rodando. Telas de cadastro da US1 contra repositório simulado;
+backend ainda sem endpoints. **Próximo: T008-T014** (migrations e entidades).
 
 ---
 
@@ -108,13 +109,15 @@ dos demais em ampliação extrema e o layout quebra de forma imprevisível.
 **Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
 Não invente uma terceira linguagem sem revisar a FR-012.
 
-### Próxima tarefa: **instalar Docker**, e então T008 a T014
+### Próxima tarefa: **T008 a T014** (migrations e entidades)
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 2. **Sem Docker não dá para
-avançar**: entidades, migrations e Testcontainers dependem todos de um PostgreSQL
-local, e a máquina não tem Docker instalado.
+`specs/001-autenticacao-acessivel/tasks.md`, fase 2. A fase 1 fechou em
+2026-07-28 (PR #8): Docker Desktop instalado e funcionando, `docker-compose.yml`
+com PostgreSQL 16 validado, script de geração do cliente Dart pronto
+(`specs/001-autenticacao-acessivel/ferramentas/gerar_cliente_api.ps1`) e job de
+backend no CI. O `contextLoads` sobe contra Testcontainers.
 
-Depois disso a ordem é: entidades e migrations (T008-T014), sessão e rate limiting
+A ordem segue: entidades e migrations (T008-T014), sessão e rate limiting
 (T018-T023), contrato e erros (T024-T027), e por fim os endpoints da US1
 (T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
 
@@ -122,8 +125,14 @@ Depois disso a ordem é: entidades e migrations (T008-T014), sessão e rate limi
 `lib/demonstracao/casa_demonstracao.dart`, porque as telas dependem apenas da
 interface `RepositorioAutenticacao`.
 
-Pendências menores da fase 1: T003 (docker-compose), T005 (geração do cliente
-Dart) e T007 (job de backend no CI).
+⚠️ Avisos para o **T027** (geração do cliente no app):
+- Tags acentuadas do contrato geram nomes mutilados (`SessoApi`,
+  `RecuperaoDeAcessoApi`). Normalizar as tags para ASCII antes de gerar.
+- O `dart-dio` gera um **pacote completo** (pubspec próprio). Não cabe
+  literalmente em `app/lib/services/api/`; montar como pacote local
+  (ex.: `app/pacotes/memora_api/`) e ajustar a tarefa.
+- Bucket4j e springdoc ainda **não** estão no pom (lacuna do T002);
+  entram em T021 e T024 respectivamente.
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
 e análise estática contra valores literais. Protege o sistema a longo prazo, mas
@@ -149,7 +158,8 @@ export PATH="/c/Users/Edu/AppData/Roaming/Python/Python314/Scripts:$PATH"
 | Item | Valor |
 |---|---|
 | Flutter | 3.41.6 · Dart 3.11.4 |
-| Java | 21 LTS (backend, ainda não iniciado) |
+| Java | 21 LTS |
+| Docker | Desktop 29.6.2 · Compose v5.3.1 — `docker compose up -d` na raiz sobe o PostgreSQL 16 |
 | Scripts do Spec Kit | **PowerShell** (`.ps1`) — use a ferramenta PowerShell |
 | Identidade git | `Eduardo Juncker <eduardojunckertorasl@gmail.com>` |
 | **Shell do usuário** | **Windows PowerShell 5.1** |
@@ -270,9 +280,19 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   ponto da árvore. As telas expõem `TelaCadastro.chaveNome` e afins.
 - **Argon2: o mínimo da OWASP é fraco neste hardware.** 19 MiB rende 42 ms;
   calibramos para 64 MiB com t=4, que rende ~240 ms. Meça antes de confiar.
-- **Não há Maven nem Docker na máquina.** O backend usa o wrapper (`./mvnw`) e
-  precisa de `JAVA_HOME="/c/Program Files/Java/jdk-21"`. Sem Docker não há
-  PostgreSQL local nem Testcontainers.
+- **Não há Maven na máquina.** O backend usa o wrapper (`./mvnw`) e
+  precisa de `JAVA_HOME="/c/Program Files/Java/jdk-21"`.
+- **Docker 29 rejeita Testcontainers 1.x** (exige API ≥ 1.44; o docker-java
+  antigo pede 1.32 e leva 400 com um "info" vazio). Usamos **Testcontainers
+  2.0.5, gerenciado pelo Spring Boot 4.1** — sem BOM próprio no pom, e os
+  artefatos 2.x têm prefixo novo: `testcontainers-postgresql`,
+  `testcontainers-junit-jupiter`.
+- **Encoding no Windows tem duas armadilhas opostas**: `.ps1` com acento
+  precisa de UTF-8 **com** BOM (senão o PowerShell 5.1 lê como ANSI e quebra o
+  parser); `.java` precisa de UTF-8 **sem** BOM (senão o `javac` engasga).
+  O `Set-Content -Encoding UTF8` do PS 5.1 grava BOM sempre.
+- **O parser do OpenAPI Generator trata `-i` como URI**: caminho Windows com
+  `\` falha com "Illegal character in opaque part". Converta para `/` antes.
 - **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
   causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
   Use `ensureVisible` antes.
