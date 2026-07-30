@@ -6,8 +6,10 @@ name: Verificação
 on:
   push:
     branches: [master]
+  # Sem filtro de branch de destino: cada fase do tasks.md vira uma PR, e uma
+  # PR empilhada sobre outra tem destino diferente de master. Com o filtro
+  # antigo (`branches: [master]`) essas PRs passavam sem verificação nenhuma.
   pull_request:
-    branches: [master]
 
 jobs:
   contraste:
