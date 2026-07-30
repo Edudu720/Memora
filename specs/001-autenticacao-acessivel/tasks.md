@@ -47,13 +47,13 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Banco e entidades
 
-- [ ] T008 Criar migration inicial em `backend/src/main/resources/db/migration/` com as 5 tabelas de [data-model.md](data-model.md), usando UUID como chave
-- [ ] T009 [P] Criar entidade `PessoaUsuaria` em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/`
-- [ ] T010 [P] Criar entidade `CanalContato` com unicidade de `(tipo, valor)`
-- [ ] T011 [P] Criar entidade `Sessao` com `familiaId` e `substituidaPor`
-- [ ] T012 [P] Criar entidade `CodigoVerificacao`
-- [ ] T013 [P] Criar entidade `EventoAutenticacao`, somente inserção
-- [ ] T014 Criar os repositórios Spring Data com os índices de [data-model.md](data-model.md)
+- [x] T008 Criar migration inicial em `backend/src/main/resources/db/migration/` com as 5 tabelas de [data-model.md](data-model.md), usando UUID como chave
+- [x] T009 [P] Criar entidade `PessoaUsuaria` em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/`
+- [x] T010 [P] Criar entidade `CanalContato` com unicidade de `(tipo, valor)`
+- [x] T011 [P] Criar entidade `Sessao` com `familiaId` e `substituidaPor`
+- [x] T012 [P] Criar entidade `CodigoVerificacao`
+- [x] T013 [P] Criar entidade `EventoAutenticacao`, somente inserção
+- [x] T014 Criar os repositórios Spring Data com os índices de [data-model.md](data-model.md)
 
 ### Segurança — o núcleo da feature
 
@@ -212,6 +212,19 @@ description: "Task list — Autenticação Acessível do Memora"
 ## Phase 8: Login social (D2)
 
 > Depende da US1 e da US2 existirem.
+
+> ⚠️ **A tabela `IDENTIDADE_EXTERNA` ainda não existe.** O
+> [data-model.md](data-model.md) descreve **6** entidades, mas a T008 pede as
+> "5 tabelas" e as T009-T013 criam 5 entidades — `IdentidadeExterna` ficou de
+> fora, e ela só é usada aqui. Foi deliberado não criá-la na migration V1:
+> tabela que nada usa é superfície sem valor, e migration do Flyway é
+> acrescentável. **Esta fase precisa de uma migration `V2`** com
+> `identidade_externa`, índice único em `(provedor, subject)`, e da entidade
+> correspondente. Vale confirmar com a equipe se preferem antecipar isso.
+>
+> Junto vem a regra que hoje não tem como ser garantida: "senha nula exige ao
+> menos uma identidade externa" (FR-053). Não pode virar `CHECK` porque depende
+> de outra tabela — precisa ser verificada no domínio ao criar conta social.
 
 - [ ] T079 Implementar `POST /v1/auth/social/{provedor}` validando assinatura, emissor, audiência e expiração do token (R6)
 - [ ] T080 Implementar vinculação de contas em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/VinculadorDeIdentidades.java`, sem duplicata e sem revelar existência prévia (FR-057)
