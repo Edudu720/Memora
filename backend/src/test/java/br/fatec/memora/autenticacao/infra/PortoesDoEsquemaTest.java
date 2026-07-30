@@ -153,6 +153,23 @@ class PortoesDoEsquemaTest extends TesteComBanco {
     }
 
     @Test
+    @DisplayName("a contagem por origem tem indice — senao o limitador varre a trilha inteira")
+    void indiceDaContagemPorOrigem() {
+        // O LimitadorTentativas conta falhas por origem a cada tentativa de
+        // entrada. Sem indice, essa contagem percorre a tabela que mais cresce
+        // no sistema, e o caminho de login degrada junto com o volume de
+        // auditoria.
+        assertThat(jdbc.queryForObject(
+                        """
+                        SELECT count(*) FROM pg_indexes
+                         WHERE schemaname = 'public'
+                           AND indexname = 'ix_evento_origem_ocorrido'
+                        """,
+                        Integer.class))
+                .isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("o Flyway aplicou a migration inicial")
     void migrationRegistrada() {
         assertThat(jdbc.queryForObject(
