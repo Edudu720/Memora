@@ -15,6 +15,12 @@ analyzer:
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
+    # Cliente da API gerado a partir de contracts/openapi.yaml (T027, R8). Fica
+    # de fora pelo mesmo motivo dos arquivos acima: ninguém edita este código,
+    # então aviso aqui não vira correção — vira `flutter analyze` vermelho no CI
+    # sem que exista ação possível. As regras que o pegariam são justamente as de
+    # estilo humano, como documentação de membro público.
+    - "lib/services/api/**"
 
 linter:
   rules:

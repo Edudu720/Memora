@@ -57,18 +57,63 @@ if (-not (Test-Path $Jar)) {
 Write-Output "Contrato : $Contrato"
 Write-Output "Destino  : $Destino"
 
-# O parser da especificação trata o caminho como URI; barra invertida quebra.
-$ContratoUri = $Contrato.Replace('\', '/')
-
-& $Java -jar $Jar generate `
-    -i $ContratoUri `
-    -g dart-dio `
-    -o $Destino `
-    --additional-properties "pubName=memora_api,pubDescription=Cliente gerado da API do Memora — não editar à mão,serializationLibrary=json_serializable"
+# Espaço no caminho do repositório derrubava a geração, e não há forma de passar
+# o caminho absoluto que agrade os dois estágios do gerador: ele valida a entrada
+# como URI (onde espaço é ilegal) e depois a abre como caminho de arquivo (onde
+# "file:///...%20..." não existe). Acontece com qualquer pessoa cujo usuário do
+# Windows tenha nome composto.
+#
+# A saída é não dar caminho nenhum: rodamos de dentro da pasta do contrato e
+# passamos só o nome do arquivo. O destino continua absoluto porque `-o` é
+# tratado como caminho comum, sem o estágio de URI.
+Push-Location (Split-Path -Parent $Contrato)
+try {
+    & $Java -jar $Jar generate `
+        -i (Split-Path -Leaf $Contrato) `
+        -g dart-dio `
+        -o $Destino `
+        --additional-properties "pubName=memora_api,pubDescription=Cliente gerado da API do Memora - nao editar a mao,serializationLibrary=json_serializable"
+} finally {
+    Pop-Location
+}
 
 if ($LASTEXITCODE -ne 0) {
     throw "Geração falhou com código $LASTEXITCODE"
 }
+
+# --- Correção do piso do SDK no pubspec gerado ------------------------------
+#
+# O template do dart-dio declara `sdk: '>=3.5.0 <4.0.0'`, e essa versão de
+# linguagem não conhece *null-aware elements* (`?valor` dentro de literal de
+# coleção). O `json_serializable` atual emite exatamente essa sintaxe, então o
+# pacote gerado não compila contra o próprio pubspec gerado.
+#
+# A R8 proíbe editar o cliente à mão — e é justamente por isso que o ajuste mora
+# aqui: faz parte da geração, roda igual para todo mundo e sobrevive à próxima
+# regeração. O piso acompanha o do aplicativo, que é quem consome este pacote,
+# para não existirem duas versões mínimas de Dart no repositório.
+
+$PubspecDoApp = Join-Path $RaizRepo 'app\pubspec.yaml'
+$PubspecGerado = Join-Path $Destino 'pubspec.yaml'
+
+# O pubspec do aplicativo tem duas linhas `sdk:`: a restrição de versão em
+# `environment:` e o `sdk: flutter` da dependência do próprio Flutter. Só a
+# primeira interessa, e o descarte é por valor, não por posição.
+$RestricaoDoApp = (Select-String -Path $PubspecDoApp -Pattern '^\s*sdk:\s*(\S.*)$').Matches `
+    | ForEach-Object { $_.Groups[1].Value.Trim() } `
+    | Where-Object { $_ -ne 'flutter' } `
+    | Select-Object -First 1
+
+if (-not $RestricaoDoApp) {
+    throw "Não consegui ler a restrição de SDK de $PubspecDoApp"
+}
+
+# Gravado sem BOM: `Set-Content -Encoding utf8` do PowerShell 5.1 escreveria um,
+# e BOM em pubspec.yaml confunde parser de YAML.
+$Ajustado = (Get-Content $PubspecGerado -Raw) -replace "(?m)^(\s*sdk:\s*).+$", "`${1}$RestricaoDoApp"
+[System.IO.File]::WriteAllText($PubspecGerado, $Ajustado, [System.Text.UTF8Encoding]::new($false))
+
+Write-Output "Piso do SDK alinhado ao do aplicativo: $RestricaoDoApp"
 
 Write-Output ''
 Write-Output 'Cliente gerado. Próximos passos (T027):'

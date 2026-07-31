@@ -69,10 +69,10 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Contrato e erros
 
-- [ ] T024 Implementar o esquema `Erro` de [contracts/openapi.yaml](contracts/openapi.yaml) com tratamento global, sem stack trace nem detalhe interno (FR-041)
-- [ ] T025 [P] Implementar registro de `EventoAutenticacao` para todos os tipos, sem dado sensível (FR-039, FR-040)
-- [ ] T026 [P] Adicionar Trace ID e Request ID em `backend/src/main/java/br/fatec/memora/comum/FiltroRastreio.java`
-- [ ] T027 Gerar o cliente Dart em `app/lib/services/api/` e verificar que compila contra o contrato
+- [x] T024 Implementar o esquema `Erro` de [contracts/openapi.yaml](contracts/openapi.yaml) com tratamento global, sem stack trace nem detalhe interno (FR-041)
+- [x] T025 [P] Implementar registro de `EventoAutenticacao` para todos os tipos, sem dado sensível (FR-039, FR-040)
+- [x] T026 [P] Adicionar Trace ID e Request ID em `backend/src/main/java/br/fatec/memora/comum/FiltroRastreio.java`
+- [x] T027 Gerar o cliente Dart em `app/lib/services/api/` e verificar que compila contra o contrato
 
 ### Aplicativo — base da feature
 
