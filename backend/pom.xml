@@ -56,6 +56,28 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!--
+			O Flyway e o dono do esquema (T008).
+
+			Sao duas dependencias por dois motivos distintos:
+
+			  * spring-boot-starter-flyway, e nao flyway-core direto: no Spring
+			    Boot 4 cada autoconfiguracao vive em modulo proprio. Com apenas
+			    flyway-core o Flyway fica no classpath e nunca e executado — as
+			    migrations sao ignoradas em silencio e o Hibernate reclama de
+			    tabela ausente.
+			  * flyway-database-postgresql: desde o Flyway 10 o suporte a cada
+			    banco e um modulo separado.
+		-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator-test</artifactId>

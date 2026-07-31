@@ -4,11 +4,11 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-28
-**Estado**: Fase 1 da feature 001 **completa** (T001-T007, PR #8). Docker
-instalado e funcionando; PostgreSQL 16 sobe via `docker compose up -d`;
-Testcontainers rodando. Telas de cadastro da US1 contra repositório simulado;
-backend ainda sem endpoints. **Próximo: T008-T014** (migrations e entidades).
+**Última sessão**: 2026-07-29
+**Estado**: Fase 1 completa (T001-T007) e **banco da fase 2 pronto**
+(T008-T014): migration V1 com as 5 tabelas, entidades, repositórios e 43 testes
+no backend. Telas de cadastro da US1 contra repositório simulado; backend ainda
+sem endpoints. **Próximo: T018-T023** (sessão, rotação de token e rate limiting).
 
 ---
 
@@ -109,17 +109,50 @@ dos demais em ampliação extrema e o layout quebra de forma imprevisível.
 **Ação usa pílula e preenchimento. Informação nunca usa nenhum dos dois.**
 Não invente uma terceira linguagem sem revisar a FR-012.
 
-### Próxima tarefa: **T008 a T014** (migrations e entidades)
+### O que já existe no backend
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 2. A fase 1 fechou em
-2026-07-28 (PR #8): Docker Desktop instalado e funcionando, `docker-compose.yml`
-com PostgreSQL 16 validado, script de geração do cliente Dart pronto
-(`specs/001-autenticacao-acessivel/ferramentas/gerar_cliente_api.ps1`) e job de
-backend no CI. O `contextLoads` sobe contra Testcontainers.
+`backend/src/main/java/br/fatec/memora/autenticacao/`:
+- **dominio/** — as 5 entidades (`PessoaUsuaria`, `CanalContato`, `Sessao`,
+  `CodigoVerificacao`, `EventoAutenticacao`) e os 5 enums. Canais, sessões e
+  códigos referenciam a pessoa **por UUID**, sem associação JPA: nada no domínio
+  navega de sessão para pessoa, e associação preguiçosa com
+  `open-in-view=false` estoura fora de transação.
+- **seguranca/** — `ConfiguracaoDeSenha` com Argon2id a 64 MiB, t=4
+- **infra/** — os 5 repositórios Spring Data. Cada consulta corresponde a um
+  índice declarado na migration
 
-A ordem segue: entidades e migrations (T008-T014), sessão e rate limiting
-(T018-T023), contrato e erros (T024-T027), e por fim os endpoints da US1
-(T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
+`backend/src/main/resources/db/migration/V1__esquema_inicial.sql` — o Flyway é o
+dono do esquema; o Hibernate nunca cria nem altera tabela.
+
+**Os valores de enum são gravados em MAIÚSCULAS** (`ATIVA`, `EMAIL`), embora o
+`data-model.md` os escreva em minúsculas. Assim banco e constante Java são
+idênticos, sem conversor no meio. A camada de API converte para o formato do
+contrato (`email`, `telefone`) ao responder.
+
+**A trilha de auditoria não se reescreve**: `EventoAutenticacao` é
+`@Immutable`, não tem método que altere estado, e o gatilho
+`tg_evento_somente_insercao` recusa UPDATE **no banco** — inclusive por SQL
+avulso. `DELETE` continua permitido de propósito, porque a retenção de 12 meses
+exige expurgo. Testado em `PortoesDoEsquemaTest`.
+
+`backend/src/test/` — 43 testes. `TesteComBanco` é a base que compartilha **um**
+PostgreSQL entre todas as classes (padrão singleton container); herdar dela
+custa zero, subir um container por classe custaria ~15 s cada.
+
+### Próxima tarefa: **T018 a T023** (sessão, rotação e rate limiting)
+
+`specs/001-autenticacao-acessivel/tasks.md`, fase 2. São **as tarefas em que um
+erro não gera bug, gera vítima** — nenhuma fecha sem o teste correspondente
+passando.
+
+A ordem segue: sessão e rate limiting (T018-T023), contrato e erros
+(T024-T027), e por fim os endpoints da US1 (T033-T037), que substituem o
+`RepositorioAutenticacaoSimulado`.
+
+O repositório de sessão já tem o que a T019 precisa: `findByRefreshTokenHash`
+para achar o token apresentado, `Sessao.foiSubstituida()` para detectar reuso e
+`revogarFamilia` como **uma** instrução — buscar, decidir e gravar uma por uma
+abriria janela para a requisição concorrente do atacante passar no meio.
 
 **A troca do simulado pelo real é de uma linha**, em
 `lib/demonstracao/casa_demonstracao.dart`, porque as telas dependem apenas da
@@ -287,6 +320,24 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   2.0.5, gerenciado pelo Spring Boot 4.1** — sem BOM próprio no pom, e os
   artefatos 2.x têm prefixo novo: `testcontainers-postgresql`,
   `testcontainers-junit-jupiter`.
+- **No Spring Boot 4 cada autoconfiguração vive em módulo próprio.** Pôr
+  `flyway-core` no pom **não** ativa o Flyway: as migrations são ignoradas em
+  silêncio e o sintoma aparece longe da causa, como
+  `Schema validation: missing table` vindo do Hibernate. Use
+  `spring-boot-starter-flyway`. Mesma família de armadilha do
+  `spring-boot-starter-webmvc`. Suspeite disso em qualquer integração nova.
+- **`spring.jpa.hibernate.ddl-auto=validate` é portão, não configuração.**
+  Com ele, subir o contexto compara cada entidade com o esquema do Flyway;
+  divergência derruba a aplicação em vez de gerar coluna fantasma. Verificado
+  injetando `nome_de_tratamento` de propósito: reprova com
+  `missing column [nome_de_tratamento]`. É o que o `contextLoads` protege.
+- **O driver do PostgreSQL não infere tipo SQL para `Instant`** em JDBC cru
+  (`JdbcTemplate`) — falha com "Não pode inferir um tipo SQL". Pelo Hibernate
+  funciona, porque ele declara o tipo. Em consulta crua use `OffsetDateTime`.
+- **Compare instante truncado a microssegundos em teste.** `TIMESTAMPTZ` guarda
+  microssegundos e o `Instant` do Java carrega nanossegundos: comparar o valor
+  gravado com o original falha de forma intermitente. Use
+  `truncatedTo(ChronoUnit.MICROS)`.
 - **Encoding no Windows tem duas armadilhas opostas**: `.ps1` com acento
   precisa de UTF-8 **com** BOM (senão o PowerShell 5.1 lê como ANSI e quebra o
   parser); `.java` precisa de UTF-8 **sem** BOM (senão o `javac` engasga).

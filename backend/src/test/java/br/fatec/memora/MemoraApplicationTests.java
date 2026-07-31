@@ -1,27 +1,24 @@
 package br.fatec.memora;
 
+import br.fatec.memora.suporte.TesteComBanco;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * O contexto sobe contra um PostgreSQL real e descartavel (Testcontainers),
- * o mesmo padrao dos testes de integracao das fases seguintes. Sem banco,
- * o Spring Data JPA nao consegue montar o datasource e o contexto nao carrega.
+ * O contexto sobe contra um PostgreSQL real e descartavel.
+ *
+ * <h2>Este teste vale mais do que parece</h2>
+ *
+ * Com {@code spring.jpa.hibernate.ddl-auto=validate}, subir o contexto obriga o
+ * Hibernate a comparar <b>cada entidade</b> com o esquema criado pelo Flyway.
+ * Coluna renomeada na migration e esquecida na entidade, tipo trocado, tabela
+ * ausente: qualquer divergencia derruba esta subida.
+ *
+ * <p>Ou seja, este metodo vazio e o portao que mantem migration e entidade em
+ * acordo.
  */
-@SpringBootTest
-@Testcontainers
-class MemoraApplicationTests {
+class MemoraApplicationTests extends TesteComBanco {
 
-	@Container
-	@ServiceConnection
-	static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
-
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+    }
 }
