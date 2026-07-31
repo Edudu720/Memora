@@ -4,11 +4,17 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-29
-**Estado**: fase 1 completa (T001-T007); da fase 2, **banco** (T008-T014) e
-**núcleo de segurança** (T015-T023) prontos, com 99 testes no backend. Telas de
-cadastro da US1 contra repositório simulado; backend ainda **sem endpoints**.
-**Próximo: T024-T027** (esquema de erro, auditoria, rastreio e cliente Dart).
+**Última sessão**: 2026-07-30 — primeira sessão do **Henrique**, na máquina dele
+**Estado**: **fase 2 completa no servidor**. Banco (T008-T014), núcleo de
+segurança (T015-T023) e contrato/erros (T024-T027) prontos, com **137 testes** no
+backend. Telas de cadastro da US1 contra repositório simulado; backend ainda
+**sem endpoints**.
+**Próximo: T030-T032** (repositório sobre o cliente gerado e armazenamento
+seguro) ou direto **T033-T037** (endpoints da US1). Ver seção 4.
+
+> ⚠️ **Antes de tocar no cliente da API, leia "Dívida deixada pelo T027"**, na
+> seção 4. Duas orientações que estavam escritas aqui não foram seguidas, e a
+> correção ainda está em aberto.
 
 ---
 
@@ -147,7 +153,39 @@ contrato (`email`, `telefone`) ao responder.
 avulso. `DELETE` continua permitido de propósito, porque a retenção de 12 meses
 exige expurgo. Testado em `PortoesDoEsquemaTest`.
 
-`backend/src/test/` — 99 testes. `TesteComBanco` é a base que compartilha **um**
+`backend/src/main/java/br/fatec/memora/comum/` — o que atravessa a aplicação
+inteira (T024-T026):
+- `CodigoDeErro` — os 4 códigos do contrato mais `ERRO_INESPERADO`, cada um com
+  status HTTP e o texto na persona da Memora no **mesmo lugar**
+- `Erro` — o record do contrato. `tentar_novamente_em_segundos` some do JSON
+  quando não há espera. Usa `@JsonProperty` em vez de estratégia global de
+  snake_case, para que o nome que viaja esteja escrito ao lado do campo
+- `FalhaDoMemora` — falha **prevista**, a única cuja mensagem chega à pessoa
+- `TratadorGlobalDeErros` — a regra que sustenta a FR-041: **texto de exceção que
+  não seja nossa nunca vai para a resposta**. Uma
+  `DataIntegrityViolationException` traz o nome da constraint na mensagem;
+  repassá-la revelaria que aquele canal já pertence a alguém, derrubando a FR-010
+  por caminho lateral
+- `FiltroRastreio` — Trace ID e Request ID no MDC e nos cabeçalhos. Request ID
+  vindo do cliente é **validado antes de aceito**: quebra de linha no valor forja
+  entrada de log e parte a resposta HTTP em duas
+- `ContextoDaRequisicao` — `ThreadLocal` limpo no `finally`. Sem a limpeza, a
+  origem de uma pessoa reaparece na requisição da seguinte
+- `RegistroDeAuditoria` — ponto único de escrita na trilha
+
+**A origem de rede é HMAC, não resumo simples.** SHA-256 puro não cumpre o que o
+`data-model.md` pede: o espaço IPv4 inteiro são 4 bilhões de valores, revertidos
+por força bruta a partir de uma cópia do banco. A chave vem de
+`MEMORA_CHAVE_ORIGEM` e **precisa ser estável entre reinícios** — se mudar, a
+contagem por origem da R4 zera junto com o processo.
+
+**A auditoria tem dois modos de gravação, e trocá-los quebra coisa.** Evento de
+**recusa** vai em transação própria, senão o rollback da operação apaga o
+registro da tentativa. Evento de **sucesso** não pode fazer isso: o evento de
+cadastro aponta para conta criada na transação em curso e ainda não confirmada, e
+`fk_evento_pessoa` quebraria. Há teste para os dois lados.
+
+`backend/src/test/` — 137 testes. `TesteComBanco` é a base que compartilha **um**
 PostgreSQL entre todas as classes (padrão singleton container); herdar dela
 custa zero, subir um container por classe custaria ~15 s cada.
 
@@ -177,10 +215,47 @@ o oposto do que a R3 busca. A camada por origem atenua. Fechar de vez exigiria
 contar falhas por identificador, inclusive inexistente, e a trilha
 deliberadamente não guarda identificador (FR-040). **Decisão da equipe.**
 
-### Próxima tarefa: **T024 a T027** (contrato, erros e cliente Dart)
+### Dívida deixada pelo T027 — leia antes de mexer no cliente da API
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 2. Depois vêm os endpoints da
-US1 (T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
+Esta seção do arquivo já trazia dois avisos escritos para o T027. **Nenhum dos
+dois foi seguido**, e a correção continua em aberto. Ficam aqui como decisão a
+tomar, não como erro a lamentar:
+
+1. **O cliente foi gerado dentro de `app/lib/services/api/`**, apesar do aviso de
+   que o `dart-dio` produz um pacote completo, com pubspec próprio, e que a
+   sugestão era montá-lo como pacote local em `app/pacotes/memora_api/`. O
+   problema previsto aconteceu: pacote aninhado dentro de `lib/` faz o
+   `flutter analyze` do CI reprovar por avisos em código gerado. Foi contornado
+   excluindo `lib/services/api/**` da análise — **contorno, não solução**. Mover
+   para `app/pacotes/` continua sendo o certo, e implica ajustar o `-Saida`
+   padrão do script e a redação do T027.
+
+2. **As tags acentuadas do contrato não foram normalizadas**, e os nomes saíram
+   mutilados como o aviso previa: `sesso_api.dart`,
+   `recuperao_de_acesso_api.dart`. Normalizar as tags do `openapi.yaml` para
+   ASCII resolve, mas mexe no contrato — pelo Princípio IV isso é decisão de
+   spec, não de implementação. **Precisa passar por `/speckit-clarify`.**
+
+3. **O springdoc continua fora do pom.** Este arquivo dizia que ele entraria no
+   T024; não entrou. Não fez falta ainda porque não existe endpoint para
+   documentar, mas a lacuna do T002 segue aberta — junto com o Bucket4j, que
+   permanece dispensado por decisão consciente (ver "Duas decisões que divergem
+   da pesquisa", acima).
+
+### Uma divergência do contrato, criada no T024
+
+**`ERRO_INESPERADO` não existe no `openapi.yaml`.** Nenhuma operação documenta
+resposta `500`, e ela vai acontecer. Sem código nosso, a falha inesperada sairia
+no formato padrão do Spring, que carrega caminho da requisição e classe da
+exceção — exatamente o que a FR-041 proíbe. Foi implementado porque a
+alternativa era vazar. **O contrato precisa passar a documentar o `500`.**
+
+### Próxima tarefa: **T030-T032** ou **T033-T037**
+
+`specs/001-autenticacao-acessivel/tasks.md`, fase 2 e fase 3. Restam da fase 2 as
+tarefas do aplicativo (T030 repositório sobre o cliente gerado, T031
+armazenamento seguro, T032 teste do cenário V8). Depois vêm os endpoints da US1
+(T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
 
 Quando os endpoints chegarem, o que já está pronto para eles:
 - `ServicoDeSessao.iniciar` devolve o `SessaoResposta` do contrato inteiro
@@ -190,21 +265,14 @@ Quando os endpoints chegarem, o que já está pronto para eles:
   informa que aquele token um dia foi válido
 - `LimitadorTentativas.avaliar` devolve `Bloqueado(segundos)`, que é o
   `tentar_novamente_em_segundos` do `429`
-- **Bucket4j e springdoc continuam fora do pom** (lacuna do T002); springdoc
-  entra na T024
+- `FalhaDoMemora.bloqueio(segundos)` já converte esse `Bloqueado` no `429` do
+  contrato, com `tentar_novamente_em_segundos` preenchido
+- `RegistroDeAuditoria` cobre os 9 tipos de evento; o endpoint só escolhe **qual**
+  registrar e **com que desfecho**
 
 **A troca do simulado pelo real é de uma linha**, em
 `lib/demonstracao/casa_demonstracao.dart`, porque as telas dependem apenas da
 interface `RepositorioAutenticacao`.
-
-⚠️ Avisos para o **T027** (geração do cliente no app):
-- Tags acentuadas do contrato geram nomes mutilados (`SessoApi`,
-  `RecuperaoDeAcessoApi`). Normalizar as tags para ASCII antes de gerar.
-- O `dart-dio` gera um **pacote completo** (pubspec próprio). Não cabe
-  literalmente em `app/lib/services/api/`; montar como pacote local
-  (ex.: `app/pacotes/memora_api/`) e ajustar a tarefa.
-- Bucket4j e springdoc ainda **não** estão no pom (lacuna do T002);
-  entram em T021 e T024 respectivamente.
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
 e análise estática contra valores literais. Protege o sistema a longo prazo, mas
@@ -236,6 +304,45 @@ export PATH="/c/Users/Edu/AppData/Roaming/Python/Python314/Scripts:$PATH"
 | Identidade git | `Eduardo Juncker <eduardojunckertorasl@gmail.com>` |
 | **Shell do usuário** | **Windows PowerShell 5.1** |
 | Repositório | `Edudu720/Memora` (privado) |
+
+### A máquina do Henrique é diferente — não presuma a do Eduardo
+
+Desde 2026-07-30 há duas máquinas no projeto, e os caminhos **não coincidem**.
+Confira em qual você está antes de copiar comando daqui.
+
+| Item | Eduardo | Henrique |
+|---|---|---|
+| Raiz do repo | `C:\Users\Edu\Documents\Memora` | `C:\Users\Henriqueee sigma\Documents\ProgramingProjects\Memora` |
+| Flutter | 3.41.6 · Dart 3.11.4 | **3.44.8 · Dart 3.12.2**, em `C:\flutter` |
+| JDK | 21 | **22** (`JAVA_HOME` já definido) |
+| `gh` | no PATH | `C:\Program Files\GitHub CLI\gh.exe` |
+| git | `Eduardo Juncker` | `Henrique Sandrini <sandrinihenrique@gmail.com>` |
+
+⚠️ **O caminho do Henrique tem espaço** (`Henriqueee sigma`), e isso quebra
+ferramenta de verdade. Já derrubou o `openapi-generator` duas vezes: ele valida a
+entrada como URI, onde espaço é ilegal, e depois abre como caminho de arquivo,
+onde `file:///...%20...` não existe. **Não há caminho absoluto que agrade os
+dois** — a saída foi gerar de dentro da pasta do contrato passando só o nome do
+arquivo, e é por isso que o Flutter dele está em `C:\flutter`, fora da home.
+Espere o mesmo tipo de falha em outras ferramentas Java e Dart.
+
+⚠️ **Os dois estão em versões diferentes do Flutter.** Rodar `flutter pub get` na
+máquina do Henrique reescreve `app/pubspec.lock` com `meta 1.18.0` e
+`test_api 0.7.11`, contra `1.17.0` e `0.7.10` do repositório. **Reverter o lock**
+em vez de commitar — o contrário força o outro a atualizar o SDK sem ter pedido.
+O CI usa `channel: stable` sem pino, então a divergência volta. Vale a equipe
+decidir se pina a versão no workflow.
+
+### Fluxo de PRs — empilhadas
+
+Cada seção do `tasks.md` vira uma branch e uma PR, e **cada branch sai da
+anterior**, não da `master`. Consequências práticas:
+
+- entram **na ordem**; a de baixo primeiro;
+- quando a de baixo é mergeada, a de cima **continua apontando para a branch
+  antiga** e precisa ser reapontada (`gh pr edit N --base master`) — senão o
+  merge não chega à `master`;
+- merge com **commit de merge**, que é o padrão do histórico.
 
 ---
 
@@ -415,10 +522,28 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 
 | Pendência | Com quem | Bloqueia? |
 |---|---|---|
-| Aceitar convite do repositório | Henrique-Sandrini e Du3101 | Não |
+| **Contrato passar a documentar o `500`** | Eduardo — decisão de spec | Não, mas o servidor já responde algo que o contrato não prevê |
+| **Mover o cliente gerado para `app/pacotes/`** | Equipe | Não — hoje há contorno na análise estática |
+| **Normalizar as tags acentuadas do `openapi.yaml`** | Eduardo — decisão de spec | Não — nomes mutilados no cliente |
+| **Definir `MEMORA_CHAVE_ORIGEM` em produção** | Quem for implantar | **Sim, na implantação.** Se mudar entre reinícios, o limite por origem da R4 zera |
+| Revisar as PRs #10 e #11 | Eduardo | Não — ambas `MERGEABLE`, CI verde |
+| Aceitar convite do repositório | Henrique-Sandrini e Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
+
+### Onde a fila parou em 2026-07-30
+
+`master` tem as PRs **#8** (fase 1) e **#9** (banco). Continuam abertas, por
+decisão do Henrique, para revisão com calma:
+
+- **[#10](https://github.com/Edudu720/Memora/pull/10)** — núcleo de segurança
+  (T018-T023), do Eduardo. Base ainda é `feature/001-fase2-banco`, **já dentro da
+  `master`**: precisa ser reapontada para `master` antes do merge.
+- **[#11](https://github.com/Edudu720/Memora/pull/11)** — contrato, erros,
+  auditoria e cliente gerado (T024-T027), do Henrique. Base é
+  `feature/001-fase2-seguranca`; entra depois da #10. As três decisões acima
+  estão escritas na descrição dela.
 
 > A proteção da branch `master` **não está ativa** — o GitHub exige plano Pro em
 > repositório privado. A regra de não commitar direto vale por acordo da equipe.
