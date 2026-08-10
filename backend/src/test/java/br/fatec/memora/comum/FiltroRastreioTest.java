@@ -29,9 +29,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 @DisplayName("Rastreio da requisicao")
 class FiltroRastreioTest {
 
-    private static final String CHAVE = "chave-de-teste";
+    /** 32 bytes: o piso exigido pela {@link ConfiguracaoDeRastreio}. */
+    private static final String CHAVE = "chave-de-teste-com-trinta-e-dois";
 
-    private final FiltroRastreio filtro = new FiltroRastreio(CHAVE);
+    private static final String OUTRA_CHAVE = "outra-chave-de-teste-com-32-bytes";
+
+    private final FiltroRastreio filtro = new FiltroRastreio(ConfiguracaoDeRastreio.chaveDe(CHAVE));
 
     @Nested
     @DisplayName("Identificadores")
@@ -192,7 +195,10 @@ class FiltroRastreioTest {
         @DisplayName("chave diferente resume diferente: e HMAC, nao resumo simples")
         void chaveMudaOResumo() throws Exception {
             String comUmaChave = origemDe("203.0.113.42");
-            String comOutraChave = origemComFiltro(new FiltroRastreio("outra-chave"), "203.0.113.42");
+            String comOutraChave =
+                    origemComFiltro(
+                            new FiltroRastreio(ConfiguracaoDeRastreio.chaveDe(OUTRA_CHAVE)),
+                            "203.0.113.42");
 
             assertThat(comUmaChave).isNotEqualTo(comOutraChave);
         }

@@ -9,15 +9,14 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -68,10 +67,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * a contagem por origem do {@code LimitadorTentativas} (R4) zera junto com o
  * processo — que é exatamente o que a R4 proíbe.
  *
- * <p>O valor padrão abaixo serve só para desenvolvimento, como o da senha do
- * banco em {@code application.properties}. <b>Em produção vem do ambiente.</b>
+ * <p>De onde a chave vem, e o que acontece quando ninguém a configura, está em
+ * {@link ConfiguracaoDeRastreio}. Aqui ela chega pronta: este filtro não decide
+ * política de segredo, só usa a chave que recebeu.
  */
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class FiltroRastreio extends OncePerRequestFilter {
 
@@ -97,14 +96,10 @@ public class FiltroRastreio extends OncePerRequestFilter {
 
     private static final String ALGORITMO_HMAC = "HmacSHA256";
 
-    private final SecretKeySpec chaveDeOrigem;
+    private final SecretKey chaveDeOrigem;
 
-    public FiltroRastreio(
-            @Value("${memora.rastreio.chave-de-origem:memora-dev-chave-de-origem}")
-                    String chaveDeOrigem) {
-        this.chaveDeOrigem =
-                new SecretKeySpec(
-                        chaveDeOrigem.getBytes(StandardCharsets.UTF_8), ALGORITMO_HMAC);
+    public FiltroRastreio(SecretKey chaveDeOrigem) {
+        this.chaveDeOrigem = Objects.requireNonNull(chaveDeOrigem, "chaveDeOrigem");
     }
 
     @Override

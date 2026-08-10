@@ -4,8 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -94,13 +96,61 @@ public class TratadorGlobalDeErros {
      * <p>É o handler mais importante desta classe. Sem ele, a exceção subiria
      * para o tratamento padrão do Spring, cuja resposta inclui caminho da
      * requisição e, conforme a configuração, a mensagem da exceção.
+     *
+     * <p>Antes de tratar como defeito, verifica se o próprio framework já
+     * classificou a falha — ver {@link #recusaDoFramework}.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Erro> tratarFalhaInesperada(Exception excecao) {
+        if (excecao instanceof ErrorResponse classificadaPeloFramework) {
+            return recusaDoFramework(classificadaPeloFramework);
+        }
+
         // Único lugar do sistema que registra exceção com stack trace. O Trace
         // ID vem junto pelo MDC.
         LOG.error("Falha inesperada ao processar a requisição", excecao);
         return respostaPadrao(CodigoDeErro.ERRO_INESPERADO);
+    }
+
+    /**
+     * Falha que o Spring já classificou, com status próprio.
+     *
+     * <p>Caminho inexistente ({@code NoResourceFoundException}) e método errado
+     * ({@code HttpRequestMethodNotSupportedException}) chegam por aqui. Sem esta
+     * verificação eles casariam com o handler genérico acima e sairiam como
+     * {@code 500}, com stack trace em nível {@code ERROR} — ou seja, um robô
+     * varrendo {@code /wp-admin} produziria uma tempestade de erro no log e
+     * receberia a informação errada. <b>Preservar o status é o correto e é o
+     * menos revelador</b>: um 404 diz o que qualquer servidor diria, e um 500
+     * mentiria dizendo que algo aqui dentro quebrou.
+     *
+     * <p>O corpo continua sendo o nosso: a mensagem da exceção do framework
+     * nunca é copiada, pela mesma regra que vale para todo o resto desta classe.
+     *
+     * <p><b>Divergência de contrato anotada</b>, na mesma linha do
+     * {@link CodigoDeErro#ERRO_INESPERADO}: o OpenAPI não documenta {@code 404}
+     * nem {@code 405}, então não existe código próprio para eles.
+     * {@link CodigoDeErro#DADOS_INVALIDOS} é o mais próximo — a requisição não
+     * pôde ser entendida — e nenhuma tela depende disso, porque o aplicativo só
+     * chama caminhos que o cliente gerado conhece. Fica para a equipe decidir se
+     * o contrato passa a documentá-los.
+     */
+    private ResponseEntity<Erro> recusaDoFramework(ErrorResponse resposta) {
+        HttpStatusCode status = resposta.getStatusCode();
+
+        if (status.is5xxServerError()) {
+            LOG.error("Falha do framework com status {}", status);
+            return respostaPadrao(CodigoDeErro.ERRO_INESPERADO);
+        }
+
+        // Nível INFO: requisição a caminho que não existe é ruído de rede, não
+        // defeito nosso.
+        LOG.info("Requisição não atendida, status {}", status);
+        return ResponseEntity.status(status)
+                .body(
+                        Erro.de(
+                                CodigoDeErro.DADOS_INVALIDOS,
+                                CodigoDeErro.DADOS_INVALIDOS.mensagemPadrao()));
     }
 
     private ResponseEntity<Erro> respostaPadrao(CodigoDeErro codigo) {
