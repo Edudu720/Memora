@@ -4,17 +4,18 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-07-30 — primeira sessão do **Henrique**, na máquina dele
+**Última sessão**: 2026-08-10 — revisão da PR #11 do Henrique e correção dos
+achados
 **Estado**: **fase 2 completa no servidor**. Banco (T008-T014), núcleo de
-segurança (T015-T023) e contrato/erros (T024-T027) prontos, com **137 testes** no
+segurança (T015-T023) e contrato/erros (T024-T027) prontos, com **151 testes** no
 backend. Telas de cadastro da US1 contra repositório simulado; backend ainda
 **sem endpoints**.
 **Próximo: T030-T032** (repositório sobre o cliente gerado e armazenamento
 seguro) ou direto **T033-T037** (endpoints da US1). Ver seção 4.
 
 > ⚠️ **Antes de tocar no cliente da API, leia "Dívida deixada pelo T027"**, na
-> seção 4. Duas orientações que estavam escritas aqui não foram seguidas, e a
-> correção ainda está em aberto.
+> seção 4. O cliente agora é um pacote local em `app/pacotes/memora_api/`, com
+> job próprio no CI; o que continua em aberto são as tags acentuadas do contrato.
 
 ---
 
@@ -179,23 +180,49 @@ por força bruta a partir de uma cópia do banco. A chave vem de
 `MEMORA_CHAVE_ORIGEM` e **precisa ser estável entre reinícios** — se mudar, a
 contagem por origem da R4 zera junto com o processo.
 
+**A chave dessa HMAC não tem padrão no repositório**, e isso é de propósito
+(`ConfiguracaoDeRastreio`). Toda a proteção do parágrafo acima *é* a chave: com
+chave conhecida, o HMAC vale o mesmo que o resumo sem chave que ele substituiu —
+e um padrão commitado seria conhecido. Sem a variável, a chave é **sorteada na
+subida** com WARN, exatamente como o `memora.token.segredo` já fazia; chave
+informada com menos de 32 bytes **derruba a subida**. O preço do sorteio é a
+contagem da R4 recomeçar a cada reinício, e ele é menor que entregar de bandeja
+a origem de todo mundo.
+
+**Falha que o Spring já classificou preserva o status dela.** O handler de
+`Exception` verifica `instanceof ErrorResponse` antes de tratar como defeito:
+sem isso, caminho inexistente e método errado saíam como `500` com stack trace em
+nível ERROR, e um robô varrendo caminhos virava tempestade no log. Repare que
+`NoResourceFoundException` **implementa** `ErrorResponse` sem estender
+`ErrorResponseException` — por isso a verificação é por interface, e um
+`@ExceptionHandler(ErrorResponseException.class)` não pegaria o caso.
+
+**O `REQUIRES_NEW` da auditoria custa duas conexões por requisição.** Durante a
+gravação do evento de recusa, a requisição segura a conexão da transação de fora
+e a da de dentro. Com o padrão do Hikari (10), bastariam 10 requisições
+simultâneas para o pool esperar por si mesmo; por isso
+`spring.datasource.hikari.maximum-pool-size` está **explícito** em 20. O teto de
+requisições simultâneas em operação auditada é metade desse número.
+
 **A auditoria tem dois modos de gravação, e trocá-los quebra coisa.** Evento de
 **recusa** vai em transação própria, senão o rollback da operação apaga o
 registro da tentativa. Evento de **sucesso** não pode fazer isso: o evento de
 cadastro aponta para conta criada na transação em curso e ainda não confirmada, e
 `fk_evento_pessoa` quebraria. Há teste para os dois lados.
 
-`backend/src/test/` — 137 testes. `TesteComBanco` é a base que compartilha **um**
+`backend/src/test/` — 151 testes. `TesteComBanco` é a base que compartilha **um**
 PostgreSQL entre todas as classes (padrão singleton container); herdar dela
 custa zero, subir um container por classe custaria ~15 s cada.
 
-### Três portões de segurança, cada um validado quebrando de propósito
+### Cinco portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
 | Entidade bate com a migration | `contextLoads` | Renomeei uma coluna: reprovou com `missing column` |
 | Tempo não revela conta existente | `TempoConstanteTest` | Pus o atalho `return false`: reprovou com **0 ms** contra os ~240 ms esperados |
 | Reuso de token derruba a família | `ReusoDeTokenTest` (V3) | Revoguei só o token reusado: reprovou com "B continuou funcionando" |
+| Falha do framework não vira 500 | `TratadorGlobalDeErrosTest` | Desliguei o `instanceof ErrorResponse`: reprovou com `expected:<404> but was:<500>` |
+| Chave de origem fraca não sobe | `ConfiguracaoDeRastreioTest` | Removi a checagem de tamanho: reprovou com "Expecting code to raise a throwable" nas três chaves curtas |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
 três realmente pegam.
@@ -217,18 +244,23 @@ deliberadamente não guarda identificador (FR-040). **Decisão da equipe.**
 
 ### Dívida deixada pelo T027 — leia antes de mexer no cliente da API
 
-Esta seção do arquivo já trazia dois avisos escritos para o T027. **Nenhum dos
-dois foi seguido**, e a correção continua em aberto. Ficam aqui como decisão a
-tomar, não como erro a lamentar:
+1. ~~**O cliente foi gerado dentro de `app/lib/services/api/`**~~ — **resolvido
+   na revisão da PR #11.** O pacote vive em **`app/pacotes/memora_api/`**, é
+   dependência `path:` declarada em `app/pubspec.yaml`, e o `-Saida` padrão do
+   script aponta para lá.
 
-1. **O cliente foi gerado dentro de `app/lib/services/api/`**, apesar do aviso de
-   que o `dart-dio` produz um pacote completo, com pubspec próprio, e que a
-   sugestão era montá-lo como pacote local em `app/pacotes/memora_api/`. O
-   problema previsto aconteceu: pacote aninhado dentro de `lib/` faz o
-   `flutter analyze` do CI reprovar por avisos em código gerado. Foi contornado
-   excluindo `lib/services/api/**` da análise — **contorno, não solução**. Mover
-   para `app/pacotes/` continua sendo o certo, e implica ajustar o `-Saida`
-   padrão do script e a redação do T027.
+   Vale saber por que isso importava mais do que parecia. Dentro de `lib/`, o
+   pacote **não era dependência de ninguém**: nada o importava, a análise
+   estática o excluía, e os 46 testes que o gerador escreve **não rodavam**, pois
+   `flutter test` só varre `app/test/`. Ou seja, o entregável do T027 não era
+   verificado por nada — uma regeração quebrada passaria até o dia em que uma
+   tela precisasse dele. Agora há um job próprio no CI (`cliente-gerado`) que
+   roda `dart analyze` e `dart test` no pacote.
+
+   Os quatro avisos `unused_import` que motivaram a exclusão da análise são
+   silenciados **um a um**, pelo próprio script, no `analysis_options.yaml`
+   gerado. Excluir o pacote inteiro esconderia erro de verdade, que é justamente
+   o que precisa ser pego quando o contrato mudar.
 
 2. **As tags acentuadas do contrato não foram normalizadas**, e os nomes saíram
    mutilados como o aviso previa: `sesso_api.dart`,
@@ -242,13 +274,23 @@ tomar, não como erro a lamentar:
    permanece dispensado por decisão consciente (ver "Duas decisões que divergem
    da pesquisa", acima).
 
-### Uma divergência do contrato, criada no T024
+### Divergências do contrato — agora rastreadas na **T027a**
 
 **`ERRO_INESPERADO` não existe no `openapi.yaml`.** Nenhuma operação documenta
 resposta `500`, e ela vai acontecer. Sem código nosso, a falha inesperada sairia
 no formato padrão do Spring, que carrega caminho da requisição e classe da
 exceção — exatamente o que a FR-041 proíbe. Foi implementado porque a
-alternativa era vazar. **O contrato precisa passar a documentar o `500`.**
+alternativa era vazar.
+
+**`404` e `405` também não estão no contrato**, e o servidor os devolve desde a
+correção do handler de `ErrorResponse`. Saem com `DADOS_INVALIDOS`, que é o
+código mais próximo — nenhuma tela depende disso, porque o aplicativo só chama
+caminhos que o cliente gerado conhece.
+
+Dívida de spec, não de código. Está na **T027a** do `tasks.md`, para não
+depender de alguém reler este arquivo. Fechá-la também elimina os
+`unused_import` do cliente gerado, que existem justamente porque nenhuma
+operação declara resposta de erro.
 
 ### Próxima tarefa: **T030-T032** ou **T033-T037**
 
@@ -525,7 +567,7 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 | **Contrato passar a documentar o `500`** | Eduardo — decisão de spec | Não, mas o servidor já responde algo que o contrato não prevê |
 | **Mover o cliente gerado para `app/pacotes/`** | Equipe | Não — hoje há contorno na análise estática |
 | **Normalizar as tags acentuadas do `openapi.yaml`** | Eduardo — decisão de spec | Não — nomes mutilados no cliente |
-| **Definir `MEMORA_CHAVE_ORIGEM` em produção** | Quem for implantar | **Sim, na implantação.** Se mudar entre reinícios, o limite por origem da R4 zera |
+| **Definir `MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem for implantar | **Sim, na implantação.** Sem ela a chave é sorteada a cada subida e o limite por origem da R4 zera junto; um WARN avisa |
 | Revisar as PRs #10 e #11 | Eduardo | Não — ambas `MERGEABLE`, CI verde |
 | Aceitar convite do repositório | Henrique-Sandrini e Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |

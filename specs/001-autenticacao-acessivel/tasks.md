@@ -72,7 +72,8 @@ description: "Task list — Autenticação Acessível do Memora"
 - [x] T024 Implementar o esquema `Erro` de [contracts/openapi.yaml](contracts/openapi.yaml) com tratamento global, sem stack trace nem detalhe interno (FR-041)
 - [x] T025 [P] Implementar registro de `EventoAutenticacao` para todos os tipos, sem dado sensível (FR-039, FR-040)
 - [x] T026 [P] Adicionar Trace ID e Request ID em `backend/src/main/java/br/fatec/memora/comum/FiltroRastreio.java`
-- [x] T027 Gerar o cliente Dart em `app/lib/services/api/` e verificar que compila contra o contrato
+- [x] T027 Gerar o cliente Dart em `app/pacotes/memora_api/` e verificar que compila contra o contrato
+- [ ] T027a Documentar em [contracts/openapi.yaml](contracts/openapi.yaml) as respostas de erro que o servidor já devolve e o contrato não prevê: `500` (`ERRO_INESPERADO`), `404` e `405`. **Dívida de spec, não de código** — hoje as três existem em `CodigoDeErro`/`TratadorGlobalDeErros` porque a alternativa era vazar o formato padrão do Spring, que carrega caminho e classe da exceção (FR-041). Fechar isto também elimina os `unused_import` que o gerador produz por não haver resposta de erro declarada
 
 ### Aplicativo — base da feature
 

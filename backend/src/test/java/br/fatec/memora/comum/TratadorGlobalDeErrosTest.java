@@ -14,13 +14,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.ErrorResponseException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
  * Tratamento global de erro (T024, FR-041).
@@ -165,6 +170,62 @@ class TratadorGlobalDeErrosTest {
         }
     }
 
+    /**
+     * Falha que o proprio Spring ja classificou, com status proprio.
+     *
+     * <p>Sem tratamento especifico, {@code NoResourceFoundException} e
+     * {@code HttpRequestMethodNotSupportedException} casam com o handler de
+     * {@code Exception} e saem como 500, com stack trace em nivel ERROR — um robo
+     * varrendo caminhos produziria tempestade de erro no log e receberia a
+     * informacao errada.
+     */
+    @Nested
+    @DisplayName("Recusa vinda do framework")
+    class RecusaDoFramework {
+
+        @Test
+        @DisplayName("caminho inexistente sai 404, nao 500")
+        void caminhoInexistente() throws Exception {
+            mockMvc.perform(get("/mentira/rota-inexistente"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"));
+        }
+
+        @Test
+        @DisplayName("metodo nao suportado sai 405, nao 500")
+        void metodoNaoSuportado() throws Exception {
+            mockMvc.perform(get("/mentira/metodo-errado"))
+                    .andExpect(status().isMethodNotAllowed())
+                    .andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"));
+        }
+
+        /**
+         * O outro lado: falha de servidor classificada pelo framework continua
+         * sendo erro inesperado. Preservar o status nao pode virar desculpa para
+         * repassar 5xx alheio como se fosse resposta normal.
+         */
+        @Test
+        @DisplayName("status 5xx do framework continua ERRO_INESPERADO")
+        void cincoXxContinuaInesperado() throws Exception {
+            mockMvc.perform(get("/mentira/falha-de-gateway"))
+                    .andExpect(status().isInternalServerError())
+                    .andExpect(jsonPath("$.codigo").value("ERRO_INESPERADO"));
+        }
+
+        /** A regra da FR-041 nao afrouxa por a excecao ser do framework. */
+        @Test
+        @DisplayName("o caminho pedido nao aparece na resposta")
+        void caminhoNaoVazaNaResposta() throws Exception {
+            mockMvc.perform(get("/mentira/rota-inexistente"))
+                    .andExpect(
+                            content()
+                                    .string(
+                                            Matchers.not(
+                                                    Matchers.containsString(
+                                                            "rota-inexistente"))));
+        }
+    }
+
     /** Corpo qualquer, so para exercitar a validacao. */
     record CorpoValidado(@NotBlank String nome, @Size(min = 10) String senha) {}
 
@@ -194,6 +255,25 @@ class TratadorGlobalDeErrosTest {
             throw new IllegalStateException(
                     "ERROR: duplicate key value violates unique constraint "
                             + "\"uq_canal_tipo_valor\" na tabela canal_contato");
+        }
+
+        @org.springframework.web.bind.annotation.GetMapping("/rota-inexistente")
+        void rotaInexistente() throws NoResourceFoundException {
+            // Lancada aqui de proposito: no MockMvc autonomo o DispatcherServlet
+            // responde 404 sozinho e o tratador nunca seria exercitado. O que
+            // importa e a conversao, e ela e identica.
+            throw new NoResourceFoundException(
+                    HttpMethod.GET, "/mentira/rota-inexistente", "rota-inexistente");
+        }
+
+        @org.springframework.web.bind.annotation.GetMapping("/metodo-errado")
+        void metodoErrado() throws HttpRequestMethodNotSupportedException {
+            throw new HttpRequestMethodNotSupportedException("DELETE");
+        }
+
+        @org.springframework.web.bind.annotation.GetMapping("/falha-de-gateway")
+        void falhaDeGateway() {
+            throw new ErrorResponseException(HttpStatus.BAD_GATEWAY);
         }
 
         @PostMapping("/validado")

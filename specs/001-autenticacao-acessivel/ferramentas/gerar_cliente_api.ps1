@@ -12,7 +12,13 @@
 
 param(
     # Destino do cliente gerado, relativo à raiz do repositório.
-    [string]$Saida = 'app/lib/services/api'
+    #
+    # Fora de `app/lib/` de propósito: o dart-dio gera um pacote completo, com
+    # pubspec próprio. Dentro de lib/ ele não pode ser dependência do aplicativo
+    # — e código que ninguém importa não compila nem quebra, então erro de
+    # geração só apareceria no dia em que alguém precisasse dele. Aqui é um
+    # pacote local normal, declarado em app/pubspec.yaml e verificado no CI.
+    [string]$Saida = 'app/pacotes/memora_api'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -115,6 +121,32 @@ $Ajustado = (Get-Content $PubspecGerado -Raw) -replace "(?m)^(\s*sdk:\s*).+$", "
 
 Write-Output "Piso do SDK alinhado ao do aplicativo: $RestricaoDoApp"
 
+# --- Aviso de importação não usada no código gerado -------------------------
+#
+# O gerador importa `erro.dart` nos quatro arquivos de API e não o usa, porque
+# nenhuma operação do contrato declara resposta de erro. São quatro avisos
+# `unused_import`, e `dart analyze` sai com código 2 diante de aviso — o que
+# reprovaria o CI por algo que ninguém pode corrigir, já que a R8 proíbe editar
+# o gerado.
+#
+# Silenciar mora aqui, e só esta regra: excluir o pacote inteiro da análise
+# esconderia também erro de verdade, que é justamente o que a verificação
+# precisa pegar quando o contrato mudar. O `analysis_options.yaml` já vem do
+# gerador com uma seção `errors:`; acrescentamos uma linha a ela.
+#
+# Isto some sozinho quando o contrato passar a documentar as respostas de erro
+# — ver a dívida de spec anotada em CodigoDeErro.ERRO_INESPERADO.
+
+$OpcoesGeradas = Join-Path $Destino 'analysis_options.yaml'
+$Opcoes = Get-Content $OpcoesGeradas -Raw
+
+if ($Opcoes -notmatch '(?m)^\s*unused_import:') {
+    $Opcoes = $Opcoes -replace "(?m)^(\s*)errors:\s*$", "`${1}errors:`n`${1}  unused_import: ignore"
+    [System.IO.File]::WriteAllText($OpcoesGeradas, $Opcoes, [System.Text.UTF8Encoding]::new($false))
+    Write-Output 'Aviso unused_import silenciado no analysis_options.yaml gerado.'
+}
+
 Write-Output ''
 Write-Output 'Cliente gerado. Próximos passos (T027):'
-Write-Output '  cd app; flutter pub get; dart run build_runner build --delete-conflicting-outputs'
+Write-Output '  cd app; flutter pub get'
+Write-Output '  cd app/pacotes/memora_api; dart pub get; dart analyze; dart test'

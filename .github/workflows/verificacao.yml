@@ -58,3 +58,25 @@ jobs:
         run: flutter analyze
       - name: Testes
         run: flutter test
+
+  cliente-gerado:
+    name: Cliente da API gerado do contrato
+    runs-on: ubuntu-latest
+    # O pacote é gerado de contracts/openapi.yaml e nunca editado à mão (R8).
+    # Verificar aqui é o que impede que uma regeração quebrada passe despercebida:
+    # ninguém edita este código, então nada mais o exercita até o dia em que uma
+    # tela precisar dele.
+    defaults:
+      run:
+        working-directory: app/pacotes/memora_api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Instalar dependências
+        run: dart pub get
+      - name: Análise estática
+        run: dart analyze
+      - name: Testes
+        run: dart test

@@ -36,6 +36,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.5
 
+  # Cliente da API gerado de contracts/openapi.yaml (T027, R8). Mora fora de
+  # lib/ porque o dart-dio gera um pacote completo, com pubspec próprio: dentro
+  # de lib/ ele não seria dependência de ninguém, e código que nada importa não
+  # compila nem quebra — fica invisível até o dia em que precisa funcionar.
+  memora_api:
+    path: pacotes/memora_api
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
