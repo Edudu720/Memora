@@ -108,10 +108,10 @@ description: "Task list — Autenticação Acessível do Memora"
 ### Backend
 
 - [ ] T033 [US1] Implementar `POST /v1/auth/cadastro` em `autenticacao/api/`, devolvendo sessão iniciada (FR-009)
-- [ ] T034 [US1] Implementar política de senha em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/PoliticaDeSenha.java`, priorizando **comprimento** e recusando senhas comprometidas (FR-042)
+- [x] T034 [US1] Implementar política de senha em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/PoliticaDeSenha.java`, priorizando **comprimento** e recusando senhas comprometidas (FR-042)
 - [ ] T035 [US1] Garantir resposta `201` idêntica quando o canal já existe, sem revelar (FR-010)
 - [ ] T036 [US1] Escrever teste do cenário V2 em `backend/src/test/java/br/fatec/memora/autenticacao/api/NaoRevelaExistenciaTest.java`
-- [ ] T037 [US1] Implementar normalização do identificador em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/NormalizadorIdentificador.java`
+- [x] T037 [US1] Implementar normalização do identificador em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/NormalizadorIdentificador.java`
 
 ### Aplicativo
 

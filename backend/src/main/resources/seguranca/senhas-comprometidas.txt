@@ -1,0 +1,69 @@
+# Senhas notoriamente comprometidas, recusadas pela PoliticaDeSenha (FR-042).
+#
+# Uma por linha, ja em minusculas. Linha vazia e linha iniciada por # sao
+# ignoradas. Comparacao exata: a politica nao tenta adivinhar variacao.
+#
+# A lista e curta de proposito. Ela nao existe para cobrir todo vazamento
+# conhecido — isso e trabalho de servico externo, e a troca fica isolada em
+# PoliticaDeSenha. Existe para barrar o que aparece no topo de todo vazamento
+# publicado, incluindo o que e comum no Brasil e nao aparece em lista em ingles.
+#
+# So entram senhas com 10 caracteres ou mais: abaixo disso o piso de comprimento
+# ja recusa, e a entrada seria peso morto.
+
+# Sequencias de teclado e numeros
+1234567890
+12345678901
+123456789012
+0123456789
+1234512345
+9876543210
+0987654321
+1111111111
+0000000000
+1212121212
+1234554321
+abcdefghij
+qwertyuiop
+qwertyuiopa
+asdfghjkkl
+1q2w3e4r5t
+
+# Variacoes de "senha" e "password"
+senha123456
+senha1234567
+senhasenha
+minhasenha
+minhasenha1
+senhadobanco
+password12
+password123
+password1234
+passw0rd123
+senha123abc
+
+# Comuns em portugues
+brasil12345
+brasilsil123
+saopaulo123
+corinthians
+flamengo123
+palmeiras1
+teamo123456
+euteamo1234
+familia1234
+deusefiel12
+deusnocomando
+jesuscristo
+jesus123456
+principal123
+mudar123456
+trocar123456
+teste123456
+usuario1234
+
+# Datas e padroes de nascimento
+01011970001
+01012000000
+1010101010
+2020202020
