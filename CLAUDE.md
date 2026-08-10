@@ -5,10 +5,10 @@
 > análises já feitas.
 
 **Última sessão**: 2026-07-29
-**Estado**: Fase 1 completa (T001-T007) e **banco da fase 2 pronto**
-(T008-T014): migration V1 com as 5 tabelas, entidades, repositórios e 43 testes
-no backend. Telas de cadastro da US1 contra repositório simulado; backend ainda
-sem endpoints. **Próximo: T018-T023** (sessão, rotação de token e rate limiting).
+**Estado**: fase 1 completa (T001-T007); da fase 2, **banco** (T008-T014) e
+**núcleo de segurança** (T015-T023) prontos, com 99 testes no backend. Telas de
+cadastro da US1 contra repositório simulado; backend ainda **sem endpoints**.
+**Próximo: T024-T027** (esquema de erro, auditoria, rastreio e cliente Dart).
 
 ---
 
@@ -117,7 +117,19 @@ Não invente uma terceira linguagem sem revisar a FR-012.
   códigos referenciam a pessoa **por UUID**, sem associação JPA: nada no domínio
   navega de sessão para pessoa, e associação preguiçosa com
   `open-in-view=false` estoura fora de transação.
-- **seguranca/** — `ConfiguracaoDeSenha` com Argon2id a 64 MiB, t=4
+- **seguranca/** — o núcleo da feature:
+  - `ConfiguracaoDeSenha` — Argon2id a 64 MiB, t=4
+  - `GeradorDeSegredoOpaco` — refresh token de 256 bits. **Usa SHA-256, não
+    Argon2**: hash lento existe para proteger segredo de baixa entropia; valor
+    aleatório de 256 bits não ganha nada com isso, e pagaria 240 ms a cada
+    abertura do app
+  - `EmissorDeTokenDeAcesso` / `ConfiguracaoDeToken` — JWT HS256 de 15 min. Sem
+    `memora.token.segredo` configurado, a chave é **sorteada na subida** e um
+    WARN avisa. Nenhum segredo no repositório; segredo curto derruba a subida
+  - `ServicoDeSessao` — abre e rotaciona sessão, com detecção de reuso
+  - `VerificadorCredenciais` — roda o hash **mesmo sem conta**, contra hash
+    fictício gerado pelo mesmo codificador
+  - `LimitadorTentativas` + `BloqueioProgressivo` — as duas camadas da R4
 - **infra/** — os 5 repositórios Spring Data. Cada consulta corresponde a um
   índice declarado na migration
 
@@ -135,24 +147,51 @@ contrato (`email`, `telefone`) ao responder.
 avulso. `DELETE` continua permitido de propósito, porque a retenção de 12 meses
 exige expurgo. Testado em `PortoesDoEsquemaTest`.
 
-`backend/src/test/` — 43 testes. `TesteComBanco` é a base que compartilha **um**
+`backend/src/test/` — 99 testes. `TesteComBanco` é a base que compartilha **um**
 PostgreSQL entre todas as classes (padrão singleton container); herdar dela
 custa zero, subir um container por classe custaria ~15 s cada.
 
-### Próxima tarefa: **T018 a T023** (sessão, rotação e rate limiting)
+### Três portões de segurança, cada um validado quebrando de propósito
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 2. São **as tarefas em que um
-erro não gera bug, gera vítima** — nenhuma fecha sem o teste correspondente
-passando.
+| Portão | Onde | Como foi provado |
+|---|---|---|
+| Entidade bate com a migration | `contextLoads` | Renomeei uma coluna: reprovou com `missing column` |
+| Tempo não revela conta existente | `TempoConstanteTest` | Pus o atalho `return false`: reprovou com **0 ms** contra os ~240 ms esperados |
+| Reuso de token derruba a família | `ReusoDeTokenTest` (V3) | Revoguei só o token reusado: reprovou com "B continuou funcionando" |
 
-A ordem segue: sessão e rate limiting (T018-T023), contrato e erros
-(T024-T027), e por fim os endpoints da US1 (T033-T037), que substituem o
-`RepositorioAutenticacaoSimulado`.
+**Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
+três realmente pegam.
 
-O repositório de sessão já tem o que a T019 precisa: `findByRefreshTokenHash`
-para achar o token apresentado, `Sessao.foiSubstituida()` para detectar reuso e
-`revogarFamilia` como **uma** instrução — buscar, decidir e gravar uma por uma
-abriria janela para a requisição concorrente do atacante passar no meio.
+### Duas decisões que divergem da pesquisa — reabra se discordar
+
+**A R4 sugeria Bucket4j; não usamos.** As duas camadas guardam estado no banco:
+a camada por conta em `pessoa_usuaria.falhas_consecutivas`/`bloqueada_ate`, e a
+camada por origem contando `evento_autenticacao`, que a FR-039 obriga a escrever
+de qualquer forma. Bucket4j traria dependência e tabela própria para
+reimplementar contagem que já existe. A troca fica isolada em
+`LimitadorTentativas`.
+
+**Brecha conhecida e aceita por ora**: só conta que existe pode ser bloqueada,
+então um `429` depois de 5 tentativas revela que aquele identificador tem conta —
+o oposto do que a R3 busca. A camada por origem atenua. Fechar de vez exigiria
+contar falhas por identificador, inclusive inexistente, e a trilha
+deliberadamente não guarda identificador (FR-040). **Decisão da equipe.**
+
+### Próxima tarefa: **T024 a T027** (contrato, erros e cliente Dart)
+
+`specs/001-autenticacao-acessivel/tasks.md`, fase 2. Depois vêm os endpoints da
+US1 (T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
+
+Quando os endpoints chegarem, o que já está pronto para eles:
+- `ServicoDeSessao.iniciar` devolve o `SessaoResposta` do contrato inteiro
+  (token de acesso, refresh, 900 s)
+- `ServicoDeSessao.renovar` devolve `Recusada(motivo)`. **O motivo é da
+  auditoria, não do cliente** — a resposta é `401` em todos os casos, senão
+  informa que aquele token um dia foi válido
+- `LimitadorTentativas.avaliar` devolve `Bloqueado(segundos)`, que é o
+  `tentar_novamente_em_segundos` do `429`
+- **Bucket4j e springdoc continuam fora do pom** (lacuna do T002); springdoc
+  entra na T024
 
 **A troca do simulado pelo real é de uma linha**, em
 `lib/demonstracao/casa_demonstracao.dart`, porque as telas dependem apenas da
@@ -344,6 +383,14 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   O `Set-Content -Encoding UTF8` do PS 5.1 grava BOM sempre.
 - **O parser do OpenAPI Generator trata `-i` como URI**: caminho Windows com
   `\` falha com "Illegal character in opaque part". Converta para `/` antes.
+- **O separador de `-Dtest=` no Surefire é vírgula, não `+`.** Com `+` o build
+  falha antes de rodar teste nenhum, sem dizer por quê.
+- **`Select-Object -First N` em cima do `mvnw` mata o processo** e devolve código
+  de saída não-zero mesmo com BUILD SUCCESS. Para ler saída de build, capture
+  com `Out-String` antes de filtrar — senão você persegue um erro que não existe.
+- **`@Modifying` em consulta de atualização precisa de
+  `clearAutomatically = true`**, senão entidade já carregada na transação fica
+  desatualizada depois da atualização em massa e o teste engana.
 - **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
   causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
   Use `ensureVisible` antes.

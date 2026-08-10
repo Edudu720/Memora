@@ -109,6 +109,15 @@
 			<version>1.82</version>
 		</dependency>
 
+		<!--
+			Assinatura e verificacao do token de acesso (T018). O refresh token e
+			opaco e nao usa isto; so o token de acesso e autocontido.
+		-->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-jose</artifactId>
+		</dependency>
+
 		<!-- Testes de integração rodam contra PostgreSQL real e descartável (T002). -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

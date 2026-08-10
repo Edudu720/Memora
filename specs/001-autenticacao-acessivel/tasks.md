@@ -60,12 +60,12 @@ description: "Task list — Autenticação Acessível do Memora"
 - [x] T015 Configurar `Argon2PasswordEncoder` em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/` com **19456 KiB de memória, 2 iterações, paralelismo 1** — os padrões do Spring usam 16 MiB, abaixo do mínimo OWASP (R1)
 - [x] T016 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/Argon2ParametrosTest.java` que **falha** se os parâmetros ficarem abaixo do mínimo OWASP
 - [x] T017 Medir o tempo de hash no ambiente alvo e registrar em `specs/001-autenticacao-acessivel/research.md`; se ficar abaixo de ~250 ms, aumentar a memória
-- [ ] T018 Implementar emissão de token de acesso (15 min) e refresh opaco em `seguranca/`
-- [ ] T019 Implementar **rotação com detecção de reuso**: refresh já usado revoga toda a `familiaId` e registra `reuso_token_detectado` (R2)
-- [ ] T020 Escrever teste do cenário V3 do [quickstart.md](quickstart.md) — reusar token antigo derruba a família inteira
-- [ ] T021 Implementar rate limiting em duas camadas em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/LimitadorTentativas.java`, com estado fora da memória local (R4)
-- [ ] T022 Implementar comparação em **tempo constante** em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/VerificadorCredenciais.java`, executando hash fictício quando a conta não existe (R3)
-- [ ] T023 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/TempoConstanteTest.java` medindo a latência de conta existente contra inexistente
+- [x] T018 Implementar emissão de token de acesso (15 min) e refresh opaco em `seguranca/`
+- [x] T019 Implementar **rotação com detecção de reuso**: refresh já usado revoga toda a `familiaId` e registra `reuso_token_detectado` (R2)
+- [x] T020 Escrever teste do cenário V3 do [quickstart.md](quickstart.md) — reusar token antigo derruba a família inteira
+- [x] T021 Implementar rate limiting em duas camadas em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/LimitadorTentativas.java`, com estado fora da memória local (R4)
+- [x] T022 Implementar comparação em **tempo constante** em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/VerificadorCredenciais.java`, executando hash fictício quando a conta não existe (R3)
+- [x] T023 Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/seguranca/TempoConstanteTest.java` medindo a latência de conta existente contra inexistente
 
 ### Contrato e erros
 
@@ -137,7 +137,17 @@ description: "Task list — Autenticação Acessível do Memora"
 - [ ] T047 [US2] Implementar `POST /v1/auth/entrar`, aceitando **qualquer canal verificado** (FR-051)
 - [ ] T048 [US2] Implementar `POST /v1/auth/sessao/renovar` com a rotação de T019
 - [ ] T049 [US2] Implementar bloqueio progressivo em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/BloqueioProgressivo.java` — 1, 5, 15, 60 min após 5 falhas (FR-014)
+  > ⚠️ **A escada já existe**, criada junto da T021 em 2026-07-29: a camada por
+  > conta do `LimitadorTentativas` não funciona sem ela, e deixar meio construído
+  > um limitador de tentativas é deixar um buraco aberto. `BloqueioProgressivo` e
+  > seus 5 testes estão prontos. **Resta a esta tarefa**: ligar o limitador no
+  > endpoint `POST /v1/auth/entrar` (T047) e devolver `429` com
+  > `tentar_novamente_em_segundos`.
 - [ ] T050 [US2] Escrever teste do cenário V6 — bloqueio progressivo devolve `tentar_novamente_em_segundos`
+  > A metade de baixo já está coberta (`BloqueioProgressivoTest` e
+  > `LimitadorTentativasTest`). Falta o cenário pelo endpoint, com a **revisão de
+  > UX obrigatória** do texto: o V6 reprova bloqueio tecnicamente correto com
+  > texto ríspido.
 
 ### Aplicativo
 
