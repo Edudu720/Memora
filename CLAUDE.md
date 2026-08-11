@@ -4,14 +4,17 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-10 — revisão da PR #11 do Henrique e correção dos
-achados
-**Estado**: **fase 2 completa no servidor**. Banco (T008-T014), núcleo de
-segurança (T015-T023) e contrato/erros (T024-T027) prontos, com **151 testes** no
-backend. Telas de cadastro da US1 contra repositório simulado; backend ainda
-**sem endpoints**.
-**Próximo: T030-T032** (repositório sobre o cliente gerado e armazenamento
-seguro) ou direto **T033-T037** (endpoints da US1). Ver seção 4.
+**Última sessão**: 2026-08-10 — revisão da PR #11, correções, e backend da US1
+**Estado**: fase 2 completa no servidor e **backend da US1 pronto** (T033-T037),
+com **206 testes**. `POST /v1/auth/cadastro` existe e cria conta com sessão. As
+telas ainda falam com `RepositorioAutenticacaoSimulado`.
+**Próximo: T030-T032** — trocar o simulado pelo cliente real e guardar
+credencial em `flutter_secure_storage`. A PR [#13](https://github.com/Edudu720/Memora/pull/13)
+está aberta e verde, aguardando revisão da equipe.
+
+> ⚠️ **Antes de criar qualquer endpoint autenticado, leia "A sessão-chamariz"**,
+> na seção 4. Existe token assinado por nós cujo sujeito não existe, de
+> propósito. **Assinatura válida não é autorização.**
 
 > ⚠️ **Antes de tocar no cliente da API, leia "Dívida deixada pelo T027"**, na
 > seção 4. O cliente agora é um pacote local em `app/pacotes/memora_api/`, com
@@ -214,7 +217,28 @@ cadastro aponta para conta criada na transação em curso e ainda não confirmad
 PostgreSQL entre todas as classes (padrão singleton container); herdar dela
 custa zero, subir um container por classe custaria ~15 s cada.
 
-### Cinco portões de segurança, cada um validado quebrando de propósito
+### A sessão-chamariz — leia antes de criar endpoint autenticado
+
+`POST /v1/auth/cadastro` responde `201` **idêntica** quando o canal já pertence a
+alguém, porque a FR-010 proíbe revelar a existência e o V2 reprova "qualquer
+diferença observável em corpo, código de status ou tempo". Como a resposta
+carrega uma sessão, não há como cumprir isso sem devolver uma sessão.
+
+O que volta nesse caso é um **JWT assinado de verdade para um UUID que não
+existe**, com refresh não gravado e nada criado no banco. Devolver a sessão da
+conta real entregaria a conta a quem soubesse o e-mail; devolver texto aleatório
+seria detectável, porque o token real é um JWT de três segmentos.
+
+**A consequência que atravessa a aplicação inteira**: existe token com assinatura
+válida cujo sujeito não corresponde a conta nenhuma. Todo caminho autenticado
+**precisa resolver o sujeito e recusar quando não encontrar**. Assinatura válida
+não é autorização. Quem esquecer disso transforma o chamariz em acesso.
+
+A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso o
+cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
+entrega o que o corpo escondeu — medido, não suposto.
+
+### Sete portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -223,6 +247,8 @@ custa zero, subir um container por classe custaria ~15 s cada.
 | Reuso de token derruba a família | `ReusoDeTokenTest` (V3) | Revoguei só o token reusado: reprovou com "B continuou funcionando" |
 | Falha do framework não vira 500 | `TratadorGlobalDeErrosTest` | Desliguei o `instanceof ErrorResponse`: reprovou com `expected:<404> but was:<500>` |
 | Chave de origem fraca não sobe | `ConfiguracaoDeRastreioTest` | Removi a checagem de tamanho: reprovou com "Expecting code to raise a throwable" nas três chaves curtas |
+| Latência não revela conta existente | `NaoRevelaExistenciaTest` (V2) | Movi o hash da senha para depois da consulta ao canal: reprovou com **11 ms contra 261 ms** |
+| Piso da senha bate com o da tela | `PoliticaDeSenhaTest` | Subi o piso do servidor para 12: o teste que lê `controlador_cadastro.dart` reprovou |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
 três realmente pegam.
