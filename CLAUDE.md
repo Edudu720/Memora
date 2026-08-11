@@ -5,12 +5,18 @@
 > análises já feitas.
 
 **Última sessão**: 2026-08-10 — revisão da PR #11, correções, e backend da US1
-**Estado**: fase 2 completa no servidor e **backend da US1 pronto** (T033-T037),
-com **206 testes**. `POST /v1/auth/cadastro` existe e cria conta com sessão. As
-telas ainda falam com `RepositorioAutenticacaoSimulado`.
-**Próximo: T030-T032** — trocar o simulado pelo cliente real e guardar
-credencial em `flutter_secure_storage`. A PR [#13](https://github.com/Edudu720/Memora/pull/13)
-está aberta e verde, aguardando revisão da equipe.
+**Estado**: fase 2 e o backend da US1 completos (**206 testes**), e o lado do
+aplicativo ligado ao contrato (**182 testes**). `POST /v1/auth/cadastro` existe;
+`RepositorioAutenticacaoApi` fala com ele pelo cliente gerado e guarda a sessão
+no Keystore.
+**Próximo: T045-T048 da feature 002**, ou os endpoints de entrada/renovação da
+US2. Ver seção 4.
+
+> ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`.**
+> A troca é de uma linha em `lib/demonstracao/casa_demonstracao.dart`, mas exige
+> decidir de onde vem a URL base do servidor — não há configuração de ambiente no
+> aplicativo, e `MemoraApi` hoje aponta para produção por padrão. **Isso não está
+> na spec**; decidir antes de trocar.
 
 > ⚠️ **Antes de criar qualquer endpoint autenticado, leia "A sessão-chamariz"**,
 > na seção 4. Existe token assinado por nós cujo sujeito não existe, de
@@ -249,6 +255,7 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Chave de origem fraca não sobe | `ConfiguracaoDeRastreioTest` | Removi a checagem de tamanho: reprovou com "Expecting code to raise a throwable" nas três chaves curtas |
 | Latência não revela conta existente | `NaoRevelaExistenciaTest` (V2) | Movi o hash da senha para depois da consulta ao canal: reprovou com **11 ms contra 261 ms** |
 | Piso da senha bate com o da tela | `PoliticaDeSenhaTest` | Subi o piso do servidor para 12: o teste que lê `controlador_cadastro.dart` reprovou |
+| Credencial não vai para armazenamento comum | `armazenamento_seguro_test.dart` (V8) | Gravei o token em `SharedPreferences` de propósito: reprovou com `Expected: empty / Actual: Set:['token']` |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
 três realmente pegam.

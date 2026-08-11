@@ -36,12 +36,23 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.5
 
+  # Token e refresh vao para o Keystore, nunca para shared_preferences
+  # (FR-036, R7). O cenario V8 inspeciona o aparelho depois da saida e reprova
+  # se sobrar qualquer credencial.
+  flutter_secure_storage: ^9.2.4
+
   # Cliente da API gerado de contracts/openapi.yaml (T027, R8). Mora fora de
   # lib/ porque o dart-dio gera um pacote completo, com pubspec próprio: dentro
   # de lib/ ele não seria dependência de ninguém, e código que nada importa não
   # compila nem quebra — fica invisível até o dia em que precisa funcionar.
   memora_api:
     path: pacotes/memora_api
+
+  # Declarado direto, e nao herdado do memora_api: a camada `data` usa Response
+  # e DioException nas proprias assinaturas. Depender disso por transitividade
+  # significaria o app quebrar no dia em que o cliente gerado trocasse de
+  # transporte.
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:

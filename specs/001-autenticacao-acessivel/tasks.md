@@ -79,9 +79,9 @@ description: "Task list — Autenticação Acessível do Memora"
 
 - [x] T028 [P] Criar entidades de domínio em `app/lib/features/autenticacao/domain/`
 - [x] T029 [P] Criar `RepositorioAutenticacao` (interface) em `domain/`
-- [ ] T030 Implementar `RepositorioAutenticacaoApi` em `data/`, sobre o cliente gerado
-- [ ] T031 Implementar armazenamento de credenciais com `flutter_secure_storage` em `app/lib/services/seguranca/` — **nunca** `SharedPreferences`
-- [ ] T032 Escrever teste do cenário V8 em `app/test/features/autenticacao/armazenamento_seguro_test.dart` — nenhuma credencial em armazenamento comum
+- [x] T030 Implementar `RepositorioAutenticacaoApi` em `data/`, sobre o cliente gerado
+- [x] T031 Implementar armazenamento de credenciais com `flutter_secure_storage` em `app/lib/services/seguranca/` — **nunca** `SharedPreferences`
+- [x] T032 Escrever teste do cenário V8 em `app/test/features/autenticacao/armazenamento_seguro_test.dart` — nenhuma credencial em armazenamento comum
 
 ---
 
