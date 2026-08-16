@@ -19,7 +19,10 @@ import org.springframework.security.web.SecurityFilterChain;
  * lembrança — publica endpoint desprotegido no dia em que alguém esquecer.
  *
  * <p>O cadastro é público pelo motivo óbvio: quem ainda não tem conta não tem
- * como se autenticar para criá-la.
+ * como se autenticar para criá-la. A entrada e a renovação são públicas pelo
+ * mesmo motivo em outra forma — são elas que <b>produzem</b> a credencial, e
+ * nenhuma delas confia em quem chama: uma exige a senha, a outra um refresh
+ * token que confere com o hash gravado.
  *
  * <h2>Sem sessão de servidor, e por isso sem CSRF</h2>
  *
@@ -42,6 +45,19 @@ public class ConfiguracaoDeSegurancaWeb {
     /** Caminho do cadastro, como o contrato o publica. */
     public static final String CAMINHO_CADASTRO = "/v1/auth/cadastro";
 
+    /** Caminho da entrada (T047). */
+    public static final String CAMINHO_ENTRAR = "/v1/auth/entrar";
+
+    /**
+     * Caminho da renovação de sessão (T048).
+     *
+     * <p>Público, e isso não é descuido: quem chega aqui está justamente com o
+     * token de acesso vencido — exigir autenticação para renovar seria exigir o
+     * que a operação existe para devolver. Quem autentica a chamada é o refresh
+     * token no corpo, conferido contra o hash gravado.
+     */
+    public static final String CAMINHO_RENOVAR = "/v1/auth/sessao/renovar";
+
     @Bean
     SecurityFilterChain cadeiaDeSeguranca(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
@@ -49,7 +65,11 @@ public class ConfiguracaoDeSegurancaWeb {
                         sessao -> sessao.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         rotas ->
-                                rotas.requestMatchers(HttpMethod.POST, CAMINHO_CADASTRO)
+                                rotas.requestMatchers(
+                                                HttpMethod.POST,
+                                                CAMINHO_CADASTRO,
+                                                CAMINHO_ENTRAR,
+                                                CAMINHO_RENOVAR)
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())

@@ -1,9 +1,9 @@
 package br.fatec.memora.autenticacao.api;
 
-import br.fatec.memora.autenticacao.api.DtosDeCadastro.CadastroRequisicao;
-import br.fatec.memora.autenticacao.api.DtosDeCadastro.CanalResposta;
-import br.fatec.memora.autenticacao.api.DtosDeCadastro.PessoaResposta;
-import br.fatec.memora.autenticacao.api.DtosDeCadastro.SessaoResposta;
+import br.fatec.memora.autenticacao.api.DtosDeAutenticacao.CadastroRequisicao;
+import br.fatec.memora.autenticacao.api.DtosDeAutenticacao.CanalResposta;
+import br.fatec.memora.autenticacao.api.DtosDeAutenticacao.PessoaResposta;
+import br.fatec.memora.autenticacao.api.DtosDeAutenticacao.SessaoResposta;
 import br.fatec.memora.autenticacao.aplicacao.ServicoDeCadastro;
 import br.fatec.memora.autenticacao.dominio.MascaradorDeCanal;
 import br.fatec.memora.autenticacao.dominio.TipoDeCanal;
