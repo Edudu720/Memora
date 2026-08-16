@@ -4,13 +4,13 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-10 — revisão da PR #11, correções, e backend da US1
-**Estado**: fase 2 e o backend da US1 completos (**206 testes**), e o lado do
-aplicativo ligado ao contrato (**182 testes**). `POST /v1/auth/cadastro` existe;
-`RepositorioAutenticacaoApi` fala com ele pelo cliente gerado e guarda a sessão
-no Keystore.
-**Próximo: T045-T048 da feature 002**, ou os endpoints de entrada/renovação da
-US2. Ver seção 4.
+**Última sessão**: 2026-08-15 — backend da US2 (T047-T050)
+**Estado**: fases 2 e 3 e o **backend da US2** completos (**244 testes**), e o
+lado do aplicativo ligado ao contrato (**182 testes**). Existem
+`POST /v1/auth/cadastro`, `POST /v1/auth/entrar` e
+`POST /v1/auth/sessao/renovar`. O aplicativo ainda só usa o cadastro.
+**Próximo: T051-T056** — as telas da US2 (login, renovação automática,
+expiração por inatividade). Ver seção 4.
 
 > ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`.**
 > A troca é de uma linha em `lib/demonstracao/casa_demonstracao.dart`, mas exige
@@ -88,7 +88,7 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 telas da US1 prontas; backend pendente |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1 completa; backend da US2 pronto, telas da US2 pendentes |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
@@ -223,6 +223,46 @@ cadastro aponta para conta criada na transação em curso e ainda não confirmad
 PostgreSQL entre todas as classes (padrão singleton container); herdar dela
 custa zero, subir um container por classe custaria ~15 s cada.
 
+### Os três endpoints que existem hoje
+
+`autenticacao/api/` — `ControladorCadastro` (T033) e `ControladorSessao`
+(T047, T048). `autenticacao/aplicacao/` — `ServicoDeCadastro`,
+`ServicoDeEntrada`, `ServicoDeRenovacao` e o record `SessaoDaPessoa`, que é a
+forma comum das três respostas.
+
+| Endpoint | Devolve | Recusa com |
+|---|---|---|
+| `POST /v1/auth/cadastro` | `201` + sessão | `400`, `429` |
+| `POST /v1/auth/entrar` | `200` + sessão | `401` genérico, `429` com espera |
+| `POST /v1/auth/sessao/renovar` | `200` + sessão | `401` genérico |
+
+**Os serviços devolvem resultado; quem lança exceção é o controlador.** Não é
+estilo: a recusa da entrada precisa **persistir** o contador de falhas, e lançar
+`FalhaDoMemora` de dentro do serviço desfaria a transação e levaria o contador
+junto — o limitador contaria até um para sempre e a FR-014 viraria enfeite.
+
+**O login aceita qualquer canal cadastrado, verificado ou não.** A T047 dizia
+"verificado", e estava errada: o cadastro cria canal não verificado e a
+confirmação de posse só chega na T058, então exigir verificação deixaria toda
+conta nova sem entrar. Quem autentica é a senha; o canal só localiza a conta. A
+FR-052 exige verificação na **recuperação**, que é onde mora o golpe da FR-062.
+Decisão de 2026-08-15; `data-model.md` e `openapi.yaml` corrigidos junto.
+
+**O tipo do canal não é pedido no login** (`TipoDoIdentificador`): a presença de
+`@` decide. Pedir o tipo devolveria à pessoa a pergunta "com qual dos dois você
+se cadastrou?", que é o que a FR-051 existe para evitar. Procurar como e-mail *e*
+como telefone foi recusado — o cadastro não valida formato, então nada impede um
+canal `EMAIL` gravado como `"11999998888"`, e duas contas disputariam o login.
+
+**A tentativa que estoura o limite já responde `429`**, não `401`. É o passo 2 do
+V6. E insistir durante o bloqueio **não conta nova falha**, senão quem tentasse
+três vezes durante a espera pularia dois degraus sem ter tido chance de acertar.
+
+**A auditoria de recusa é escrita antes de gravar a conta.**
+`registrarMesmoComRollback` abre transação própria; fazer isso com a linha da
+pessoa já travada pela transação de fora colocaria duas conexões do mesmo pool
+esperando uma pela outra a cada senha errada.
+
 ### A sessão-chamariz — leia antes de criar endpoint autenticado
 
 `POST /v1/auth/cadastro` responde `201` **idêntica** quando o canal já pertence a
@@ -244,7 +284,7 @@ A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso 
 cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
 entrega o que o corpo escondeu — medido, não suposto.
 
-### Sete portões de segurança, cada um validado quebrando de propósito
+### Dez portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -256,6 +296,8 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Latência não revela conta existente | `NaoRevelaExistenciaTest` (V2) | Movi o hash da senha para depois da consulta ao canal: reprovou com **11 ms contra 261 ms** |
 | Piso da senha bate com o da tela | `PoliticaDeSenhaTest` | Subi o piso do servidor para 12: o teste que lê `controlador_cadastro.dart` reprovou |
 | Credencial não vai para armazenamento comum | `armazenamento_seguro_test.dart` (V8) | Gravei o token em `SharedPreferences` de propósito: reprovou com `Expected: empty / Actual: Set:['token']` |
+| Latência do login não revela conta | `EntrarTest` | Pus `if (pessoa == null) return recusar(...)` antes do hash: reprovou com **18 ms contra 282 ms** |
+| Bloqueio correto com texto ríspido reprova | `BloqueioProgressivoNoLoginTest` (V6) | Troquei a mensagem por "Conta bloqueada: você excedeu o número de tentativas": a **escada continuou passando** e os 3 testes de texto reprovaram |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
 três realmente pegam.
@@ -325,29 +367,32 @@ depender de alguém reler este arquivo. Fechá-la também elimina os
 `unused_import` do cliente gerado, que existem justamente porque nenhuma
 operação declara resposta de erro.
 
-### Próxima tarefa: **T030-T032** ou **T033-T037**
+### Próxima tarefa: **T051-T056** — as telas da US2
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 2 e fase 3. Restam da fase 2 as
-tarefas do aplicativo (T030 repositório sobre o cliente gerado, T031
-armazenamento seguro, T032 teste do cenário V8). Depois vêm os endpoints da US1
-(T033-T037), que substituem o `RepositorioAutenticacaoSimulado`.
+`specs/001-autenticacao-acessivel/tasks.md`, fase 4, seção Aplicativo. O backend
+da US2 está pronto e testado; falta o lado que a pessoa vê:
 
-Quando os endpoints chegarem, o que já está pronto para eles:
-- `ServicoDeSessao.iniciar` devolve o `SessaoResposta` do contrato inteiro
-  (token de acesso, refresh, 900 s)
-- `ServicoDeSessao.renovar` devolve `Recusada(motivo)`. **O motivo é da
-  auditoria, não do cliente** — a resposta é `401` em todos os casos, senão
-  informa que aquele token um dia foi válido
-- `LimitadorTentativas.avaliar` devolve `Bloqueado(segundos)`, que é o
-  `tentar_novamente_em_segundos` do `429`
-- `FalhaDoMemora.bloqueio(segundos)` já converte esse `Bloqueado` no `429` do
-  contrato, com `tentar_novamente_em_segundos` preenchido
-- `RegistroDeAuditoria` cobre os 9 tipos de evento; o endpoint só escolhe **qual**
-  registrar e **com que desfecho**
+| Tarefa | O que é |
+|---|---|
+| T051 | `ControladorLogin`, com renovação automática de sessão |
+| T052 | `TelaLogin` sobre os componentes do Design System |
+| T053 | Pré-preencher o identificador do último acesso (FR-012) |
+| T054 | Textos de bloqueio na persona da Memora (FR-015) |
+| T055 | `MonitorDeSessao` — expiração por inatividade com aviso prévio (FR-017) |
+| T056 | Teste de widget do login, incluindo o estado bloqueado |
 
-**A troca do simulado pelo real é de uma linha**, em
-`lib/demonstracao/casa_demonstracao.dart`, porque as telas dependem apenas da
-interface `RepositorioAutenticacao`.
+O que o servidor já entrega para elas:
+- `POST /v1/auth/entrar` — `200` com sessão, `401` genérico, `429` com
+  `tentar_novamente_em_segundos`
+- `POST /v1/auth/sessao/renovar` — a T051 chama este quando o token de acesso
+  vence; o refresh **rotaciona a cada uso**, então a tela precisa guardar o novo
+- O `429` já traz a espera em segundos. **A T054 escreve o texto que a acompanha**
+  — o servidor manda o número, não a frase com o número dentro
+
+⚠️ **A T053 guarda o identificador do último acesso no aparelho.** Isso é dado
+pessoal em armazenamento local: pelo V8, credencial vai só para
+`flutter_secure_storage`. Identificador **não é credencial**, mas decidir onde
+ele mora é parte da tarefa, não detalhe.
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
 e análise estática contra valores literais. Protege o sistema a longo prazo, mas
@@ -462,6 +507,16 @@ o Maven:
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"; cd C:\Users\Edu\Documents\Memora\backend; .\mvnw test
 ```
 
+⚠️ **O Docker Desktop precisa estar rodando** — não basta estar instalado. Todo
+teste que herda de `TesteComBanco` sobe um PostgreSQL pelo Testcontainers, e com
+o daemon parado a falha aparece longe da causa: `NoClassDefFoundError: Could not
+initialize class TesteComBanco`, com a razão real (`Could not find a valid Docker
+environment`) enterrada no meio do rastro. Subir leva ~40 s:
+
+```powershell
+Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+```
+
 ---
 
 ## 6. Verificação — rode antes de dizer que terminou
@@ -559,6 +614,15 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   microssegundos e o `Instant` do Java carrega nanossegundos: comparar o valor
   gravado com o original falha de forma intermitente. Use
   `truncatedTo(ChronoUnit.MICROS)`.
+- **Para testar regra de tempo pelo endpoint, troque o `Clock` inteiro.** Um
+  `@TestConfiguration` com um `Clock` `@Primary` que o teste move na mão
+  (`BloqueioProgressivoNoLoginTest.RelogioAjustavel`) faz a escada de bloqueio
+  inteira caber em milissegundos, em vez dos 81 minutos que ela leva no relógio
+  do sistema. Adiantar o banco na marra não serve: quem compara `bloqueada_ate`
+  com o agora é o `LimitadorTentativas`, e é o agora **dele** que precisa andar.
+  O `@Import` do `@TestConfiguration` cria um contexto Spring próprio para a
+  classe — custo de uma subida a mais, e o container do Postgres continua sendo
+  o mesmo.
 - **Encoding no Windows tem duas armadilhas opostas**: `.ps1` com acento
   precisa de UTF-8 **com** BOM (senão o PowerShell 5.1 lê como ANSI e quebra o
   parser); `.java` precisa de UTF-8 **sem** BOM (senão o `javac` engasga).
@@ -597,28 +661,23 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 
 | Pendência | Com quem | Bloqueia? |
 |---|---|---|
-| **Contrato passar a documentar o `500`** | Eduardo — decisão de spec | Não, mas o servidor já responde algo que o contrato não prevê |
-| **Mover o cliente gerado para `app/pacotes/`** | Equipe | Não — hoje há contorno na análise estática |
+| **De onde vem a URL base do servidor** | Eduardo — não está na spec | **Sim, para o app falar com o backend.** Ver o aviso no topo deste arquivo |
+| **Contrato passar a documentar o `500`** (T027a) | Eduardo — decisão de spec | Não, mas o servidor já responde algo que o contrato não prevê |
 | **Normalizar as tags acentuadas do `openapi.yaml`** | Eduardo — decisão de spec | Não — nomes mutilados no cliente |
 | **Definir `MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem for implantar | **Sim, na implantação.** Sem ela a chave é sorteada a cada subida e o limite por origem da R4 zera junto; um WARN avisa |
-| Revisar as PRs #10 e #11 | Eduardo | Não — ambas `MERGEABLE`, CI verde |
-| Aceitar convite do repositório | Henrique-Sandrini e Du3101 | Não — Henrique já aceitou, com acesso de escrita |
+| Aceitar convite do repositório | Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
-### Onde a fila parou em 2026-07-30
+### Onde a fila parou em 2026-08-15
 
-`master` tem as PRs **#8** (fase 1) e **#9** (banco). Continuam abertas, por
-decisão do Henrique, para revisão com calma:
+**Nenhuma PR aberta.** As PRs #8 a #14 entraram todas na `master`: fase 1, banco,
+núcleo de segurança, contrato/erros/auditoria/cliente gerado, correções da
+revisão, backend da US1 e o lado do aplicativo da fase 2.
 
-- **[#10](https://github.com/Edudu720/Memora/pull/10)** — núcleo de segurança
-  (T018-T023), do Eduardo. Base ainda é `feature/001-fase2-banco`, **já dentro da
-  `master`**: precisa ser reapontada para `master` antes do merge.
-- **[#11](https://github.com/Edudu720/Memora/pull/11)** — contrato, erros,
-  auditoria e cliente gerado (T024-T027), do Henrique. Base é
-  `feature/001-fase2-seguranca`; entra depois da #10. As três decisões acima
-  estão escritas na descrição dela.
+A PR desta sessão é a do **backend da US2** (T047-T050), saindo direto da
+`master` — a fila empilhada acabou quando a #14 foi mergeada.
 
 > A proteção da branch `master` **não está ativa** — o GitHub exige plano Pro em
 > repositório privado. A regra de não commitar direto vale por acordo da equipe.
