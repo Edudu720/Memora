@@ -2,13 +2,31 @@ import '../domain/autenticacao.dart';
 
 /// Implementação **provisória** que simula o servidor.
 ///
-/// Existe para permitir construir e testar as telas antes de o backend estar
-/// de pé. Será substituída por `RepositorioAutenticacaoApi`, sobre o cliente
-/// gerado do contrato OpenAPI, quando os endpoints da fase 2 existirem.
+/// Existe para permitir construir e testar as telas sem o backend de pé. Será
+/// substituída por `RepositorioAutenticacaoApi`, sobre o cliente gerado do
+/// contrato OpenAPI.
 ///
 /// **Não vai para produção.** A troca é de uma linha, porque as telas dependem
 /// apenas de [RepositorioAutenticacao].
+///
+/// ## Por que ele imita o bloqueio progressivo
+///
+/// A tela de login precisa mostrar o estado bloqueado, e esse estado é o mais
+/// difícil de acertar: é onde a FR-015 exige acolhimento e onde o teste do
+/// cenário V6 bate. Um simulado que sempre aceita a senha deixaria esse caminho
+/// sem exercício nenhum até o dia da integração — que é tarde demais.
+///
+/// A escada reproduz a do servidor: 5 falhas seguidas bloqueiam por 1 minuto, e
+/// cada bloqueio seguinte sobe um degrau. Como no backend, **insistir durante a
+/// espera não conta falha nova** — senão quem tentasse três vezes bloqueada
+/// pularia dois degraus sem ter tido chance de acertar.
 class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
+  /// Quantas falhas seguidas disparam o primeiro bloqueio.
+  static const int falhasAteBloquear = 5;
+
+  /// A escada de espera, em segundos — igual à do `BloqueioProgressivo`.
+  static const List<int> escadaPadrao = <int>[60, 300, 900, 3600];
+
   /// Canais que fingimos já existir, para exercitar a FR-010.
   final Set<String> canaisJaCadastrados;
 
@@ -18,12 +36,32 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
   /// Força uma falha específica, para testar os caminhos de erro.
   final FalhaAutenticacao? falhaForcada;
 
+  /// Degraus de bloqueio, em segundos.
+  final List<int> escadaDeBloqueio;
+
+  /// Relógio, trocável no teste para a escada caber em milissegundos.
+  final DateTime Function() agora;
+
+  final Map<String, _ContaSimulada> _contas = <String, _ContaSimulada>{};
+
+  int _falhasSeguidas = 0;
+  int _bloqueiosAplicados = 0;
+  DateTime? _bloqueadaAte;
+  PessoaAutenticada? _ultimaSessao;
+
   /// Cria o repositório simulado.
   RepositorioAutenticacaoSimulado({
     Set<String>? canaisJaCadastrados,
     this.demora = const Duration(milliseconds: 700),
     this.falhaForcada,
-  }) : canaisJaCadastrados = canaisJaCadastrados ?? <String>{};
+    this.escadaDeBloqueio = escadaPadrao,
+    DateTime Function()? agora,
+  })  : canaisJaCadastrados = canaisJaCadastrados ?? <String>{},
+        agora = agora ?? DateTime.now;
+
+  /// Contas criadas nesta execução, para a demonstração poder entrar depois de
+  /// cadastrar. Exposto só para leitura, e só para teste.
+  Iterable<String> get identificadoresConhecidos => _contas.keys;
 
   @override
   Future<ResultadoAutenticacao> cadastrar(DadosDeCadastro dados) async {
@@ -37,13 +75,123 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
       );
     }
 
-    // Canal já cadastrado devolve o MESMO resultado de um cadastro novo.
-    // Qualquer diferença aqui revelaria a existência da conta (FR-010).
-    return AutenticacaoConcluida(
-      PessoaAutenticada(
-        id: 'simulado-${dados.canal.hashCode.abs()}',
-        nomeTratamento: dados.nomeTratamento,
+    final String chave = _normalizar(dados.canal);
+    final PessoaAutenticada pessoa = PessoaAutenticada(
+      id: 'simulado-${dados.canal.hashCode.abs()}',
+      nomeTratamento: dados.nomeTratamento,
+    );
+
+    // Canal já cadastrado devolve o MESMO resultado de um cadastro novo, e não
+    // sobrescreve a conta existente. Qualquer diferença observável aqui
+    // revelaria a existência da conta (FR-010).
+    if (!canaisJaCadastrados.contains(chave) && !_contas.containsKey(chave)) {
+      _contas[chave] = _ContaSimulada(senha: dados.senha, pessoa: pessoa);
+    }
+
+    _ultimaSessao = pessoa;
+    return AutenticacaoConcluida(pessoa);
+  }
+
+  @override
+  Future<ResultadoAutenticacao> entrar(DadosDeEntrada dados) async {
+    await Future<void>.delayed(demora);
+
+    if (falhaForcada != null) {
+      return AutenticacaoFalhou(
+        falhaForcada!,
+        tentarNovamenteEmSegundos:
+            falhaForcada == FalhaAutenticacao.muitasTentativas
+                ? escadaDeBloqueio.first
+                : null,
+      );
+    }
+
+    // Durante a espera a resposta é sempre a mesma, e NÃO conta falha nova.
+    final int restante = segundosDeBloqueioRestantes;
+    if (restante > 0) {
+      return AutenticacaoFalhou(
+        FalhaAutenticacao.muitasTentativas,
+        tentarNovamenteEmSegundos: restante,
+      );
+    }
+
+    final _ContaSimulada? conta = _contas[_normalizar(dados.identificador)];
+    final bool confere = conta != null && conta.senha == dados.senha;
+
+    if (!confere) {
+      _falhasSeguidas++;
+      if (_falhasSeguidas >= falhasAteBloquear) {
+        final int espera = escadaDeBloqueio[
+            _bloqueiosAplicados.clamp(0, escadaDeBloqueio.length - 1)];
+        _bloqueiosAplicados++;
+        _falhasSeguidas = 0;
+        _bloqueadaAte = agora().add(Duration(seconds: espera));
+        // A tentativa que estoura o limite já responde bloqueio, não recusa —
+        // é o passo 2 do cenário V6.
+        return AutenticacaoFalhou(
+          FalhaAutenticacao.muitasTentativas,
+          tentarNovamenteEmSegundos: espera,
+        );
+      }
+      // Recusa idêntica para conta inexistente e senha errada (FR-013).
+      return const AutenticacaoFalhou(FalhaAutenticacao.credenciaisInvalidas);
+    }
+
+    _falhasSeguidas = 0;
+    _bloqueiosAplicados = 0;
+    _bloqueadaAte = null;
+    _ultimaSessao = conta.pessoa;
+    return AutenticacaoConcluida(conta.pessoa);
+  }
+
+  @override
+  Future<ResultadoAutenticacao> renovarSessao() async {
+    await Future<void>.delayed(demora);
+
+    final PessoaAutenticada? pessoa = _ultimaSessao;
+    if (pessoa == null) {
+      return const AutenticacaoFalhou(FalhaAutenticacao.credenciaisInvalidas);
+    }
+    return AutenticacaoConcluida(pessoa);
+  }
+
+  @override
+  Future<void> encerrarSessao() async => _ultimaSessao = null;
+
+  /// Cria uma conta **sem passar pelo cadastro**, e sem abrir sessão.
+  ///
+  /// Existe para teste e demonstração. Dentro de `testWidgets` o relógio é
+  /// falso: `await cadastrar(...)` fica esperando um temporizador que só anda
+  /// quando alguém bombeia quadros, e o teste trava antes da primeira asserção.
+  void registrarConta({
+    required String identificador,
+    required String senha,
+    required String nome,
+  }) {
+    final String chave = _normalizar(identificador);
+    _contas[chave] = _ContaSimulada(
+      senha: senha,
+      pessoa: PessoaAutenticada(
+        id: 'simulado-${chave.hashCode.abs()}',
+        nomeTratamento: nome,
       ),
     );
   }
+
+  /// Quantos segundos faltam do bloqueio, ou zero se não há bloqueio.
+  int get segundosDeBloqueioRestantes {
+    final DateTime? ate = _bloqueadaAte;
+    if (ate == null) return 0;
+    final int falta = ate.difference(agora()).inSeconds;
+    return falta > 0 ? falta : 0;
+  }
+
+  String _normalizar(String valor) => valor.trim().toLowerCase();
+}
+
+class _ContaSimulada {
+  final String senha;
+  final PessoaAutenticada pessoa;
+
+  const _ContaSimulada({required this.senha, required this.pessoa});
 }

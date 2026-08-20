@@ -56,6 +56,24 @@ class DadosDeCadastro {
   });
 }
 
+/// Dados informados no login (FR-011).
+///
+/// Carrega **apenas identificador e senha**. Não existe campo de tipo aqui: quem
+/// decide se o valor é e-mail ou telefone é o servidor, pela presença do `@`.
+/// Perguntar o tipo devolveria à pessoa a pergunta *"com qual dos dois você se
+/// cadastrou?"* — que é exatamente o que a FR-051 existe para evitar.
+@immutable
+class DadosDeEntrada {
+  /// E-mail ou telefone com que a pessoa se cadastrou.
+  final String identificador;
+
+  /// Senha escolhida no cadastro.
+  final String senha;
+
+  /// Cria os dados de entrada.
+  const DadosDeEntrada({required this.identificador, required this.senha});
+}
+
 /// Falhas previstas da autenticação.
 ///
 /// São **códigos**, não mensagens: o texto exibido vive na camada de
@@ -118,4 +136,32 @@ abstract interface class RepositorioAutenticacao {
   /// Quando o canal já pertence a alguém, o resultado é **idêntico** ao de um
   /// cadastro novo, sem revelar a existência da conta (FR-010).
   Future<ResultadoAutenticacao> cadastrar(DadosDeCadastro dados);
+
+  /// Entra com identificador e senha (FR-011).
+  ///
+  /// A recusa é **sempre** [FalhaAutenticacao.credenciaisInvalidas], sem
+  /// distinguir conta inexistente de senha errada (FR-013). Depois de falhas
+  /// seguidas vem [FalhaAutenticacao.muitasTentativas], e aí
+  /// `tentarNovamenteEmSegundos` traz a espera que a FR-015 manda anunciar.
+  Future<ResultadoAutenticacao> entrar(DadosDeEntrada dados);
+
+  /// Troca o refresh guardado por uma sessão nova, sem pedir senha (FR-016).
+  ///
+  /// O refresh **rotaciona a cada uso**: a implementação precisa guardar o par
+  /// novo no lugar do antigo. Apresentar duas vezes o mesmo refresh é o que o
+  /// servidor trata como roubo, e ele derruba a família inteira de tokens.
+  Future<ResultadoAutenticacao> renovarSessao();
+
+  /// Encerra a sessão **neste aparelho**.
+  ///
+  /// Existe porque a FR-017 manda encerrar a sessão por inatividade, e não há
+  /// como encerrar nada sem isto: sem apagar a credencial local, o monitor
+  /// levaria a pessoa ao login e a renovação automática a colocaria de volta
+  /// dentro no mesmo instante.
+  ///
+  /// **É só o lado do aparelho.** Revogar a sessão no servidor depende de
+  /// `POST /v1/auth/sair`, que é a T074 e ainda não existe. Enquanto isso, o
+  /// refresh apagado aqui continua válido lá até vencer — limitação conhecida,
+  /// que a US4 fecha junto com a T077.
+  Future<void> encerrarSessao();
 }

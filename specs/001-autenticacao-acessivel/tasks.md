@@ -173,12 +173,56 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Aplicativo
 
-- [ ] T051 [US2] Criar `ControladorLogin` com renovação automática de sessão
-- [ ] T052 [US2] Criar `TelaLogin` usando os componentes do Design System
-- [ ] T053 [US2] Pré-preencher o identificador do último acesso em `app/lib/features/autenticacao/data/ultimo_acesso_local.dart` (FR-012)
-- [ ] T054 [US2] Escrever os textos de bloqueio em `app/lib/l10n/` na persona da Memora: acolhedores, com motivo e caminho de recuperação (FR-015)
-- [ ] T055 [US2] Implementar expiração por inatividade em `app/lib/features/autenticacao/domain/monitor_de_sessao.dart`, com aviso prévio (FR-017)
-- [ ] T056 [US2] Escrever teste de widget do login em `app/test/features/autenticacao/tela_login_test.dart`, incluindo o estado bloqueado
+- [x] T051 [US2] Criar `ControladorLogin` com renovação automática de sessão
+  > **A renovação vem antes do formulário.** `iniciar()` tenta `renovarSessao()`
+  > em silêncio e só mostra campo quando isso falha — é o cenário 1 da US2
+  > ("reabro e continuo conectada") e o 2 ("já vem preenchido, só falta a
+  > senha") no mesmo caminho. Mostrar o formulário primeiro faria a tela piscar
+  > entre "digite sua senha" e "bem-vinda de volta", o que para quem lê devagar
+  > é indistinguível de defeito.
+- [x] T052 [US2] Criar `TelaLogin` usando os componentes do Design System
+- [x] T053 [US2] Pré-preencher o identificador do último acesso em `app/lib/features/autenticacao/data/ultimo_acesso_local.dart` (FR-012)
+  > **Fica em `shared_preferences`, não no cofre.** Decisão de 2026-08-20.
+  > Identificador não é credencial, e cifrá-lo não protegeria nada: o propósito
+  > da FR-012 é **exibi-lo na tela**, já preenchido. Além disso, o cenário V8
+  > reprova se sobrar **qualquer coisa** no cofre depois de sair — guardar ali
+  > um dado que precisa sobreviver à saída obrigaria a afrouxar esse teste.
+- [x] T054 [US2] Escrever os textos de bloqueio em `app/lib/l10n/` na persona da Memora: acolhedores, com motivo e caminho de recuperação (FR-015)
+  > **É um arquivo Dart de constantes, não `flutter_localizations`.** A decisão
+  > D3 da feature 002 deixou idiomas fora de escopo com a "estrutura preparada";
+  > isto é a estrutura preparada. Montar `.arb` e geração de código mexeria em
+  > pubspec, build e CI para entregar zero comportamento novo.
+- [x] T055 [US2] Implementar expiração por inatividade em `app/lib/features/autenticacao/domain/monitor_de_sessao.dart`, com aviso prévio (FR-017)
+  > **30 minutos parado, com aviso 2 minutos antes.** A spec dizia "período
+  > prolongado" e não dava número. O prazo saiu da ameaça que a FR-017 mitiga na
+  > tabela da spec — **roubo de referência de sessão**, isto é, o celular
+  > esquecido na mesa — e não de "faz semanas que não abro", que já é coberto
+  > pela validade de 60 dias do refresh. Os 2 minutos de aviso são o tempo de
+  > alguém com dificuldade motora perceber, achar os óculos e acertar o botão;
+  > 1 minuto, o padrão bancário, expulsa exatamente quem este produto atende.
+- [x] T056 [US2] Escrever teste de widget do login em `app/test/features/autenticacao/tela_login_test.dart`, incluindo o estado bloqueado
+
+> **Duas decisões que apareceram ao implementar, e que valem revisar:**
+>
+> 1. **`RepositorioAutenticacao` ganhou `encerrarSessao()`**, porque sem apagar
+>    a credencial local a FR-017 não encerra nada: o monitor levaria a pessoa ao
+>    login e a renovação automática a colocaria de volta no mesmo instante. É
+>    **só o lado do aparelho** — `POST /v1/auth/sair` é a T074 e ainda não
+>    existe, então o refresh apagado aqui continua válido no servidor até
+>    vencer. A US4 fecha isso junto com a T077.
+> 2. **O botão "Esqueci minha senha" não aparece.** `TelaLogin.aoRecuperar` é
+>    opcional e hoje ninguém o preenche, porque a recuperação é a US3. Oferecer
+>    uma saída que não leva a lugar nenhum é pior do que não oferecer; o texto
+>    do bloqueio já menciona o caminho, que é o que a FR-015 exige.
+>
+> **O portão de texto foi validado quebrando de propósito.** Trocando a
+> mensagem de bloqueio por *"Conta bloqueada: você excedeu o número de
+> tentativas permitidas"*, a mecânica inteira **continuou passando** — escada,
+> botão sumindo, contagem regressiva, liberação automática — e só os três
+> testes de texto reprovaram. Mesmo achado do `BloqueioProgressivoNoLoginTest`
+> no backend. O portão da FR-012 também foi validado: movendo a gravação do
+> identificador para antes da resposta do servidor, reprovou com
+> `Expected: null / Actual: 'ana@email.com'`.
 
 ---
 

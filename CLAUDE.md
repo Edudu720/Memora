@@ -4,19 +4,28 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-15 — backend da US2 (T047-T050)
-**Estado**: fases 2 e 3 e o **backend da US2** completos (**244 testes**), e o
-lado do aplicativo ligado ao contrato (**182 testes**). Existem
+**Última sessão**: 2026-08-20 — telas da US2 (T051-T056)
+**Estado**: fases 2 e 3 completas, **backend da US2** completo (**244 testes**)
+e as **telas da US2** completas (**204 testes** no aplicativo). Existem
 `POST /v1/auth/cadastro`, `POST /v1/auth/entrar` e
-`POST /v1/auth/sessao/renovar`. O aplicativo ainda só usa o cadastro.
-**Próximo: T051-T056** — as telas da US2 (login, renovação automática,
-expiração por inatividade). Ver seção 4.
+`POST /v1/auth/sessao/renovar`. O aplicativo tem cadastro **e login**, com
+renovação automática de sessão, bloqueio progressivo com contagem regressiva e
+expiração por inatividade.
+**Próximo: T057-T065** — a US5, o modo assistido. Ver seção 4.
 
-> ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`.**
-> A troca é de uma linha em `lib/demonstracao/casa_demonstracao.dart`, mas exige
-> decidir de onde vem a URL base do servidor — não há configuração de ambiente no
-> aplicativo, e `MemoraApi` hoje aponta para produção por padrão. **Isso não está
-> na spec**; decidir antes de trocar.
+> ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`** —
+> agora para cadastro **e login**. A troca é de uma linha em
+> `lib/demonstracao/casa_demonstracao.dart`, mas exige decidir de onde vem a URL
+> base do servidor — não há configuração de ambiente no aplicativo, e `MemoraApi`
+> hoje aponta para produção por padrão. **Isso não está na spec**; decidir antes
+> de trocar.
+>
+> O simulado **reproduz a escada de bloqueio real** (5 falhas, depois 1 min) e
+> guarda as contas criadas na própria execução, para que cadastrar e depois
+> entrar funcione no aparelho. `registrarConta(...)` semeia conta sem passar pelo
+> cadastro — necessário em `testWidgets`, onde o relógio é falso e
+> `await cadastrar(...)` esperaria para sempre por um temporizador que só anda
+> quando alguém bombeia quadros.
 
 > ⚠️ **Antes de criar qualquer endpoint autenticado, leia "A sessão-chamariz"**,
 > na seção 4. Existe token assinado por nós cujo sujeito não existe, de
@@ -88,7 +97,7 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1 completa; backend da US2 pronto, telas da US2 pendentes |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1 e US2 completas; US5, US3 e US4 pendentes |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
@@ -114,6 +123,20 @@ execute as instruções manualmente. O resultado é idêntico.
 - **componentes/cartoes/**, **dialogos/**, **navegacao/**, **feedback/**
 
 `app/test/design_system/` — 139 testes.
+
+`app/lib/features/autenticacao/` — as telas das US1 e US2:
+- **domain/** — `autenticacao.dart` (contrato e entidades) e `monitor_de_sessao.dart`
+- **data/** — repositório sobre o cliente gerado, repositório simulado e
+  `ultimo_acesso_local.dart`
+- **presentation/** — `fluxo_autenticacao.dart` liga boas-vindas → cadastro →
+  login → dentro, com o monitor de sessão ativo só enquanto a pessoa está dentro
+- **presentation/telas/** — `TelaBoasVindas`, `TelaCadastro`, `TelaLogin`
+- **presentation/controladores/** — `ControladorCadastro`, `ControladorLogin`
+
+`app/lib/l10n/textos_autenticacao.dart` — os textos na voz da Memora. **Não é
+`flutter_localizations`**: é a "estrutura preparada" que a decisão D3 da feature
+002 pediu. Quando houver um segundo idioma, estas constantes viram `.arb` sem
+ninguém caçar frase dentro de widget.
 
 ### Regra de texto
 
@@ -298,6 +321,8 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Credencial não vai para armazenamento comum | `armazenamento_seguro_test.dart` (V8) | Gravei o token em `SharedPreferences` de propósito: reprovou com `Expected: empty / Actual: Set:['token']` |
 | Latência do login não revela conta | `EntrarTest` | Pus `if (pessoa == null) return recusar(...)` antes do hash: reprovou com **18 ms contra 282 ms** |
 | Bloqueio correto com texto ríspido reprova | `BloqueioProgressivoNoLoginTest` (V6) | Troquei a mensagem por "Conta bloqueada: você excedeu o número de tentativas": a **escada continuou passando** e os 3 testes de texto reprovaram |
+| O mesmo, agora na tela | `tela_login_test.dart` (FR-015) | Troquei `TextosAutenticacao.bloqueio` pela versão ríspida: escada, botão sumindo, contagem regressiva e liberação automática **continuaram passando**; só os 3 testes de texto reprovaram |
+| Identificador só é gravado depois do sucesso | `tela_login_test.dart` (FR-012) | Movi `lembrar()` para antes da resposta do servidor: reprovou com `Expected: null / Actual: 'ana@email.com'` |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
 três realmente pegam.
@@ -367,32 +392,44 @@ depender de alguém reler este arquivo. Fechá-la também elimina os
 `unused_import` do cliente gerado, que existem justamente porque nenhuma
 operação declara resposta de erro.
 
-### Próxima tarefa: **T051-T056** — as telas da US2
+### As telas da US2 — o que ficou decidido (T051-T056, 2026-08-20)
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 4, seção Aplicativo. O backend
-da US2 está pronto e testado; falta o lado que a pessoa vê:
+O login existe e funciona sobre o simulado. Três decisões saíram daqui e valem
+saber antes de mexer:
 
-| Tarefa | O que é |
-|---|---|
-| T051 | `ControladorLogin`, com renovação automática de sessão |
-| T052 | `TelaLogin` sobre os componentes do Design System |
-| T053 | Pré-preencher o identificador do último acesso (FR-012) |
-| T054 | Textos de bloqueio na persona da Memora (FR-015) |
-| T055 | `MonitorDeSessao` — expiração por inatividade com aviso prévio (FR-017) |
-| T056 | Teste de widget do login, incluindo o estado bloqueado |
+| Decisão | Escolha | Por quê |
+|---|---|---|
+| Onde mora o identificador do último acesso | `shared_preferences` | Não é credencial, e cifrá-lo não protege nada: o propósito da FR-012 é **exibi-lo na tela**. Guardá-lo no cofre obrigaria a afrouxar o V8, que reprova se sobrar **qualquer coisa** lá depois de sair |
+| Onde moram os textos | Arquivo Dart em `app/lib/l10n/` | É a "estrutura preparada" da decisão D3. `.arb` mexeria em pubspec, build e CI para entregar zero comportamento |
+| Prazo de inatividade | 30 min, aviso 2 min antes | A spec só dizia "período prolongado". O número veio da ameaça que a FR-017 mitiga na tabela da spec: **celular esquecido na mesa**, não "faz semanas que não abro" |
 
-O que o servidor já entrega para elas:
-- `POST /v1/auth/entrar` — `200` com sessão, `401` genérico, `429` com
-  `tentar_novamente_em_segundos`
-- `POST /v1/auth/sessao/renovar` — a T051 chama este quando o token de acesso
-  vence; o refresh **rotaciona a cada uso**, então a tela precisa guardar o novo
-- O `429` já traz a espera em segundos. **A T054 escreve o texto que a acompanha**
-  — o servidor manda o número, não a frase com o número dentro
+⚠️ **`RepositorioAutenticacao` ganhou `encerrarSessao()`, e ela é só local.**
+Sem apagar a credencial do aparelho a FR-017 não encerraria nada — o monitor
+levaria a pessoa ao login e a renovação automática a colocaria de volta no mesmo
+instante. Mas `POST /v1/auth/sair` é a **T074** e ainda não existe: o refresh
+apagado aqui **continua válido no servidor até vencer**. Chamá-lo hoje daria
+`404`, que o tratador converteria em `DADOS_INVALIDOS` e prenderia a pessoa numa
+tela de erro ao tentar sair. A US4 fecha isso com a T077.
 
-⚠️ **A T053 guarda o identificador do último acesso no aparelho.** Isso é dado
-pessoal em armazenamento local: pelo V8, credencial vai só para
-`flutter_secure_storage`. Identificador **não é credencial**, mas decidir onde
-ele mora é parte da tarefa, não detalhe.
+⚠️ **Cadastrar também grava o identificador do último acesso.** Achado ao
+implementar: só o login gravava, e cadastro **é** acesso bem-sucedido (FR-009) —
+quem criasse a conta teria que digitar o e-mail inteiro no primeiro login, que é
+a barreira que a FR-012 existe para remover. Quem grava é o `FluxoAutenticacao`
+(`_cadastrou`), não o `ControladorCadastro`, para o controlador do cadastro não
+passar a depender de armazenamento.
+
+⚠️ **O botão "Esqueci minha senha" não aparece.** `TelaLogin.aoRecuperar` é
+opcional e ninguém o preenche, porque a recuperação é a US3. Oferecer saída que
+não leva a lugar nenhum é pior que não oferecer — mesmo idioma do `aoJaTerConta`
+na `TelaBoasVindas`, que ficou nulo até esta sessão. O texto do bloqueio já
+menciona o caminho, que é o que a FR-015 exige.
+
+### Próxima tarefa: **T057-T065** — a US5, o modo assistido
+
+`specs/001-autenticacao-acessivel/tasks.md`, fase 5. Protege a autonomia de quem
+está sendo ajudada por um familiar: o acompanhante preenche, mas **nunca** vê a
+senha nem controla a recuperação. A T058 traz a confirmação de posse do canal,
+que é o que a T047 precisou adiar.
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
 e análise estática contra valores literais. Protege o sistema a longo prazo, mas
@@ -492,11 +529,21 @@ com três abas:
 
 | Aba | Conteúdo |
 |---|---|
-| **Cadastro** | Fluxo real da US1: boas-vindas, cadastro e confirmação |
+| **Entrar** | Fluxo real das US1 e US2: boas-vindas → cadastro → dentro → sair → login |
 | **Componentes** | Vitrine do Design System |
 | **Aparência** | Tela real de preferências, com pré-visualização |
 
 A casca sai quando o Hub existir.
+
+**Como ver o estado bloqueado no aparelho**: crie a conta pelo cadastro, saia,
+e erre a senha **5 vezes**. A quinta já responde bloqueio, com contagem
+regressiva de 1 minuto que libera o botão sozinha.
+
+**Como ver o aviso de inatividade sem esperar meia hora**: em
+`casa_demonstracao.dart`, passe prazos curtos ao `FluxoAutenticacao` —
+`inatividade: Duration(seconds: 30), avisoDeInatividade: Duration(seconds: 10)`.
+São os valores reais por padrão; o parâmetro existe justamente para não precisar
+mentir sobre eles no código.
 
 ### Backend
 
@@ -637,6 +684,18 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - **`@Modifying` em consulta de atualização precisa de
   `clearAutomatically = true`**, senão entidade já carregada na transação fica
   desatualizada depois da atualização em massa e o teste engana.
+- **Dentro de `testWidgets` o relógio é falso.** `await repo.cadastrar(...)` num
+  repositório que faz `Future.delayed` **nunca completa** se ninguém bombear
+  quadros — o arquivo inteiro trava e o relatório diz "did not complete" em
+  todos os casos, sem apontar a causa. Semeie estado pela via síncrona
+  (`RepositorioAutenticacaoSimulado.registrarConta`) ou use `tester.runAsync`.
+- **A checagem de temporizador pendente roda ANTES do `tearDown`.** Descartar o
+  controlador em `addTearDown` não salva de "A Timer is still pending": a
+  contagem precisa acabar **dentro do corpo do teste**. Custou uma rodada.
+- **Montar duas vezes o mesmo tipo de tela reaproveita o `State`.** Sem `key`
+  distinta, `initState` não roda na segunda montagem, o controlador novo fica
+  preso no estado inicial e o teste falha com "No element" ao procurar um campo
+  que nunca chegou a aparecer.
 - **Em teste de widget, role antes de tocar.** As telas do Memora são altas por
   causa da tipografia grande; `tester.tap` em elemento fora da dobra não registra.
   Use `ensureVisible` antes.
@@ -650,7 +709,10 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - ❌ Escrever cor, espaçamento ou tamanho literal fora dos tokens
 - ❌ Criar componente dentro de `features/` quando ele serve a mais de uma tela
 - ❌ Editar cliente de API gerado à mão
-- ❌ Guardar token em `SharedPreferences` — apenas `flutter_secure_storage`
+- ❌ Guardar token em `SharedPreferences` — apenas `flutter_secure_storage`.
+  (O identificador do último acesso **fica** em `SharedPreferences`, e isso não
+  é exceção à regra: ele não é credencial, e o V8 reprova se sobrar qualquer
+  coisa no cofre depois de sair)
 - ❌ Implementar sem spec aprovada
 - ❌ Afirmar que algo passa sem ter rodado a verificação
 - ❌ Supor requisito quando a spec é ambígua — pergunte
@@ -670,14 +732,19 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
-### Onde a fila parou em 2026-08-15
+### Onde a fila parou em 2026-08-20
 
 **Nenhuma PR aberta.** As PRs #8 a #14 entraram todas na `master`: fase 1, banco,
 núcleo de segurança, contrato/erros/auditoria/cliente gerado, correções da
 revisão, backend da US1 e o lado do aplicativo da fase 2.
 
-A PR desta sessão é a do **backend da US2** (T047-T050), saindo direto da
-`master` — a fila empilhada acabou quando a #14 foi mergeada.
+Duas coisas ainda **não estão na `master`**, e a fila empilhada voltou:
+
+1. `feature/001-fase4-us2-backend` — o **backend da US2** (T047-T050), commits
+   `657ef5c` e `e9651d7`. Entra primeiro.
+2. Em cima dela, as **telas da US2** (T051-T056). Quando a de baixo for
+   mergeada, esta precisa ser reapontada com `gh pr edit N --base master` —
+   senão o merge não chega à `master`.
 
 > A proteção da branch `master` **não está ativa** — o GitHub exige plano Pro em
 > repositório privado. A regra de não commitar direto vale por acordo da equipe.

@@ -3,8 +3,10 @@ import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simul
 import 'package:memora/features/autenticacao/domain/autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/controladores/controlador_cadastro.dart';
 
+import 'dubles_autenticacao.dart';
+
 /// Conta quantas vezes o cadastro foi efetivamente enviado.
-class _RepositorioContador implements RepositorioAutenticacao {
+class _RepositorioContador extends RepositorioDeTeste {
   int chamadas = 0;
 
   @override
@@ -18,7 +20,7 @@ class _RepositorioContador implements RepositorioAutenticacao {
 }
 
 /// Guarda os dados recebidos, para verificar a normalização.
-class _RepositorioEspiao implements RepositorioAutenticacao {
+class _RepositorioEspiao extends RepositorioDeTeste {
   DadosDeCadastro? recebidos;
 
   @override
