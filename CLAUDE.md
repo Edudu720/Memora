@@ -4,14 +4,29 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-20 — telas da US2 (T051-T056)
-**Estado**: fases 2 e 3 completas, **backend da US2** completo (**244 testes**)
-e as **telas da US2** completas (**204 testes** no aplicativo). Existem
+**Última sessão**: 2026-08-24 — relatório de progresso (PR #17)
+**Estado**: fases 2 e 3 completas, **backend da US2** completo (**245 testes**,
+251 com a PR #16) e as **telas da US2** completas (**204 testes** no
+aplicativo). Existem
 `POST /v1/auth/cadastro`, `POST /v1/auth/entrar` e
 `POST /v1/auth/sessao/renovar`. O aplicativo tem cadastro **e login**, com
 renovação automática de sessão, bloqueio progressivo com contagem regressiva e
 expiração por inatividade.
 **Próximo: T057-T065** — a US5, o modo assistido. Ver seção 4.
+
+> 📄 **Há um panorama completo em
+> [docs/relatorios/relatorio-de-progresso.md](docs/relatorios/relatorio-de-progresso.md)**
+> (PR #17): estado por fase, o que existe em código nos dois lados, os portões
+> de segurança, dívidas e fila de PRs. Este arquivo continua sendo a passagem de
+> contexto operacional; o relatório é o retrato para a equipe e a faculdade.
+>
+> **Os testes do backend são 245, não 244.** Este arquivo dizia 244 até
+> 2026-08-24; a soma dos relatórios do Surefire numa execução limpa dá **245**
+> na branch das telas da US2, e **251** com a PR #16. Conte antes de corrigir
+> de volta:
+> ```powershell
+> Select-String -Path backend/target/surefire-reports/*.xml -Pattern 'tests="(\d+)"' | ForEach-Object { [int]$_.Matches[0].Groups[1].Value } | Measure-Object -Sum
+> ```
 
 > ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`** —
 > agora para cadastro **e login**. A troca é de uma linha em
@@ -732,19 +747,26 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
-### Onde a fila parou em 2026-08-20
+### Onde a fila parou em 2026-08-24
 
-**Nenhuma PR aberta.** As PRs #8 a #14 entraram todas na `master`: fase 1, banco,
-núcleo de segurança, contrato/erros/auditoria/cliente gerado, correções da
-revisão, backend da US1 e o lado do aplicativo da fase 2.
+**Três PRs abertas.** As #1 a #14 entraram todas na `master`: especificações,
+fase 1, banco, núcleo de segurança, contrato/erros/auditoria/cliente gerado,
+correções da revisão, backend da US1 e o lado do aplicativo da fase 2.
 
-Duas coisas ainda **não estão na `master`**, e a fila empilhada voltou:
+| # | O quê | Base | Ordem |
+|---|---|---|---|
+| **#15** | Backend da US2 (T047-T050), commits `657ef5c` e `e9651d7` | `master` | 1º |
+| **#16** | Correções da revisão da #15, commits `894da10` e `a70faec` | `feature/001-fase4-us2-backend` | 2º — reapontar para `master` depois do merge da #15 |
+| **#17** | Relatório de progresso, em `docs/relatorios/` | `master` | Independente — entra quando quiser |
+| — | **Telas da US2** (T051-T056), branch `feature/001-fase4-us2-app` | — | ⚠️ **ainda sem PR aberta** |
 
-1. `feature/001-fase4-us2-backend` — o **backend da US2** (T047-T050), commits
-   `657ef5c` e `e9651d7`. Entra primeiro.
-2. Em cima dela, as **telas da US2** (T051-T056). Quando a de baixo for
-   mergeada, esta precisa ser reapontada com `gh pr edit N --base master` —
-   senão o merge não chega à `master`.
+⚠️ **A branch das telas da US2 está empilhada sobre
+`feature/001-fase4-us2-backend`, não sobre `fix/001-revisao-fase4-us2`.** Isso
+importa: a #16 fecha duas falhas latentes — conta `DESATIVADA` ressuscitada pelo
+próprio bloqueio, e renovação de sessão que não olhava o estado da conta.
+Confirme a ordem de integração antes de mergear, e lembre que a PR de cima
+precisa ser reapontada com `gh pr edit N --base master` quando a de baixo entrar
+— senão o merge não chega à `master`.
 
 > A proteção da branch `master` **não está ativa** — o GitHub exige plano Pro em
 > repositório privado. A regra de não commitar direto vale por acordo da equipe.
