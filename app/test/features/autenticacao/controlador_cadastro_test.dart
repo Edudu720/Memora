@@ -156,11 +156,48 @@ void main() {
     test('modo assistido é informado ao servidor (decisão D3)', () async {
       final _RepositorioEspiao espiao = _RepositorioEspiao();
       final ControladorCadastro c = _preenchido(espiao)
-        ..definirModoAssistido(true);
+        ..definirModoAssistido(true)
+        // Sem esta linha o cadastro NÃO é enviado, e é assim que deve ser: no
+        // modo assistido o formulário para na senha até o aparelho voltar para
+        // a pessoa dona da conta (FR-059). Ver o teste logo abaixo.
+        ..confirmarEntregaDoAparelho();
 
       await c.enviar();
 
       expect(espiao.recebidos!.modoAssistido, isTrue);
+    });
+  });
+
+  group('Entrega do aparelho — FR-059', () {
+    test('no modo assistido a senha só pode ser digitada após a entrega', () {
+      final ControladorCadastro c = _preenchido(_RepositorioEspiao())
+        ..definirModoAssistido(true);
+
+      expect(c.podeDigitarSenha, isFalse);
+      expect(c.podePedirOAparelho, isTrue);
+
+      c.confirmarEntregaDoAparelho();
+
+      expect(c.podeDigitarSenha, isTrue);
+    });
+
+    /// O portão da FR-059: sem a entrega, o cadastro não sai — nem que todo o
+    /// resto esteja preenchido. É o que impede o acompanhante de criar a senha.
+    test('sem a entrega, o cadastro não é enviado', () async {
+      final _RepositorioEspiao espiao = _RepositorioEspiao();
+      final ControladorCadastro c = _preenchido(espiao)
+        ..definirModoAssistido(true);
+
+      await c.enviar();
+
+      expect(espiao.recebidos, isNull);
+    });
+
+    test('sem acompanhante, a senha aparece desde o começo', () {
+      final ControladorCadastro c = _preenchido(_RepositorioEspiao());
+
+      expect(c.podeDigitarSenha, isTrue);
+      expect(c.podePedirOAparelho, isFalse);
     });
   });
 

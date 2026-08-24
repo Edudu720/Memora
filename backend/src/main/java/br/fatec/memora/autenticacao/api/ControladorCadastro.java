@@ -56,7 +56,10 @@ public class ControladorCadastro {
                         tipo,
                         requisicao.canal().valor(),
                         requisicao.senha(),
-                        requisicao.aparelhoDescricao());
+                        requisicao.aparelhoDescricao(),
+                        // Ausente e false sao a mesma coisa: o contrato declara
+                        // default false, e cadastro sem acompanhante e o caso comum.
+                        Boolean.TRUE.equals(requisicao.modoAssistido()));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(corpoDe(resultado));
     }

@@ -71,12 +71,54 @@ public class PessoaUsuaria {
      * @param criadaEm       instante da criação
      */
     public PessoaUsuaria(String nomeTratamento, String senhaHash, Instant criadaEm) {
+        this(nomeTratamento, senhaHash, criadaEm, EstadoDaConta.ATIVA);
+    }
+
+    /**
+     * Cria uma conta num estado escolhido — hoje, {@link EstadoDaConta#ATIVA} ou
+     * {@link EstadoDaConta#PENDENTE_VERIFICACAO} (T057).
+     *
+     * <p>O cadastro assistido usa a segunda forma: a conta existe, mas não
+     * serve para entrar enquanto a posse do canal não for confirmada (FR-062).
+     *
+     * @param estadoInicial nunca {@link EstadoDaConta#DESATIVADA}, que é
+     *     resultado de um ato posterior e não de nascimento
+     */
+    public PessoaUsuaria(
+            String nomeTratamento, String senhaHash, Instant criadaEm,
+            EstadoDaConta estadoInicial) {
         this.id = UUID.randomUUID();
         this.nomeTratamento = Objects.requireNonNull(nomeTratamento, "nomeTratamento");
         this.senhaHash = senhaHash;
-        this.estado = EstadoDaConta.ATIVA;
+        this.estado = exigirEstadoDeNascimento(estadoInicial);
         this.criadaEm = Objects.requireNonNull(criadaEm, "criadaEm");
         this.falhasConsecutivas = 0;
+    }
+
+    private static EstadoDaConta exigirEstadoDeNascimento(EstadoDaConta estado) {
+        Objects.requireNonNull(estado, "estadoInicial");
+        if (estado != EstadoDaConta.ATIVA && estado != EstadoDaConta.PENDENTE_VERIFICACAO) {
+            throw new IllegalArgumentException("Conta nao nasce em " + estado);
+        }
+        return estado;
+    }
+
+    /**
+     * Conclui a verificação de posse do canal e libera a conta (T057, FR-062).
+     *
+     * <p>Só age sobre conta {@link EstadoDaConta#PENDENTE_VERIFICACAO}. Chamar
+     * isto numa conta {@link EstadoDaConta#DESATIVADA} não a ressuscita, e numa
+     * conta já ativa não faz nada — verificar um segundo canal é operação
+     * comum e não pode mexer no ciclo de vida.
+     *
+     * @return {@code true} se esta chamada foi a que ativou a conta
+     */
+    public boolean concluirVerificacaoPendente() {
+        if (this.estado != EstadoDaConta.PENDENTE_VERIFICACAO) {
+            return false;
+        }
+        this.estado = EstadoDaConta.ATIVA;
+        return true;
     }
 
     /**
@@ -85,14 +127,17 @@ public class PessoaUsuaria {
      * <p>Zerar aqui é o que impede que falhas espalhadas ao longo de semanas
      * somem até bloquear uma conta legítima.
      *
-     * <p><b>Conta desativada não volta a ser ativa por aqui.</b> Ver
-     * {@link #bloquearAte}: {@link EstadoDaConta#DESATIVADA} é terminal, e
-     * reativar é ato explícito, não efeito colateral de um login.
+     * <p><b>Estado de ciclo de vida não vira {@code ATIVA} por aqui.</b> Ver
+     * {@link EstadoDaConta#ehDeCicloDeVida()}: {@link EstadoDaConta#DESATIVADA}
+     * é terminal e {@link EstadoDaConta#PENDENTE_VERIFICACAO} espera um ato
+     * explícito. Promover qualquer um dos dois como efeito colateral de um
+     * login é como a conta desativada ressuscitava antes da revisão da PR #15 —
+     * e seria como o cadastro assistido furaria a FR-062.
      */
     public void registrarEntradaBemSucedida(Instant quando) {
         this.falhasConsecutivas = 0;
         this.bloqueadaAte = null;
-        if (this.estado != EstadoDaConta.DESATIVADA) {
+        if (!this.estado.ehDeCicloDeVida()) {
             this.estado = EstadoDaConta.ATIVA;
         }
         this.ultimoAcessoEm = Objects.requireNonNull(quando, "quando");
@@ -112,18 +157,20 @@ public class PessoaUsuaria {
     /**
      * Bloqueia a conta temporariamente até o instante informado (FR-014).
      *
-     * <p><b>Uma conta desativada não perde esse estado ao ser bloqueada.</b>
+     * <p><b>Estado de ciclo de vida não se perde ao ser bloqueado.</b>
      * {@code estado} guarda duas coisas de naturezas diferentes: o ciclo de vida
-     * da conta ({@code ATIVA}, {@code DESATIVADA}) e uma tranca temporária cuja
-     * verdade real mora em {@code bloqueada_ate}. Sem esta guarda, cinco
-     * tentativas recusadas sobrescreveriam {@code DESATIVADA} com
+     * da conta ({@code PENDENTE_VERIFICACAO}, {@code DESATIVADA}) e uma tranca
+     * temporária cuja verdade real mora em {@code bloqueada_ate}. Sem esta
+     * guarda, cinco tentativas recusadas sobrescreveriam {@code DESATIVADA} com
      * {@code BLOQUEADA_TEMPORARIAMENTE}, e passado o prazo da tranca a conta
      * desativada entraria normalmente — apagando de quebra qualquer registro de
-     * que ela um dia foi desativada.
+     * que ela um dia foi desativada. Com {@code PENDENTE_VERIFICACAO} o efeito
+     * seria pior: a conta assistida sairia da espera sem ninguém ter confirmado
+     * canal nenhum.
      */
     public void bloquearAte(Instant limite) {
         this.bloqueadaAte = Objects.requireNonNull(limite, "limite");
-        if (this.estado != EstadoDaConta.DESATIVADA) {
+        if (!this.estado.ehDeCicloDeVida()) {
             this.estado = EstadoDaConta.BLOQUEADA_TEMPORARIAMENTE;
         }
     }

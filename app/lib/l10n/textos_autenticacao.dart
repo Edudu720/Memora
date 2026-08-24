@@ -157,4 +157,85 @@ abstract final class TextosAutenticacao {
   /// Mensagem exibida quando a sessão já expirou.
   static const String sessaoExpirada =
       'Faz um tempinho que você não usa o Memora. Vamos entrar de novo?';
+
+  // ---------------------------------------------------------------------------
+  // Modo assistido — FR-058 a FR-064
+  // ---------------------------------------------------------------------------
+
+  /// Título da tela que devolve o aparelho (FR-059).
+  static const String tituloEntregaDoAparelho = 'Agora é com você';
+
+  /// O pedido em si.
+  ///
+  /// Fala com **quem está ajudando**, não com a pessoa dona da conta, porque é
+  /// quem está com o aparelho na mão neste instante. Pedir de forma indireta
+  /// — "a senha deve ser criada pelo titular" — seria lido como formalidade e
+  /// ignorado.
+  static const String pedidoEntregaDoAparelho =
+      'A senha é a chave da conta, e ela precisa ser só de quem vai usar o '
+      'Memora. Por favor, devolva o celular agora, antes deste próximo passo.';
+
+  /// Explicação de por que isto não é desconfiança de quem ajuda.
+  ///
+  /// A FR-059 interrompe um gesto de cuidado, e sem explicação a interrupção
+  /// soa como acusação. O texto agradece antes de pedir.
+  static const String motivoEntregaDoAparelho =
+      'Você ajudou até aqui, e isso fez toda a diferença 😊 Só que ninguém '
+      'além dela deve saber essa senha — nem eu sei, nem consigo mostrar '
+      'depois.';
+
+  /// Rótulo do botão que segue para a senha.
+  static const String botaoAparelhoEntregue = 'Pronto, o celular está comigo';
+
+  /// Rótulo do botão que interrompe o cadastro antes da senha.
+  static const String botaoPrecisoDeAjudaComASenha = 'Prefiro fazer depois';
+
+  /// Título da tela que confirma a posse do canal (FR-062).
+  static const String tituloConfirmarCanal = 'Vamos confirmar que é você';
+
+  /// Explicação do porquê da confirmação.
+  ///
+  /// Diz o que a confirmação **compra para a pessoa** — poder recuperar a
+  /// conta —, e não o que ela protege contra, para não acusar quem ajudou.
+  static String pedidoConfirmarCanal(String canal) =>
+      'Enviei um número de 6 dígitos para $canal. Digite ele aqui para eu ter '
+      'certeza de que esse contato é seu — é por ele que você vai recuperar '
+      'sua conta se um dia esquecer a senha.';
+
+  /// Rótulo do campo de código.
+  static const String rotuloCodigo = 'O número que eu enviei';
+
+  /// Rótulo do botão que confirma o código.
+  static const String botaoConfirmarCodigo = 'Confirmar';
+
+  /// Rótulo do botão que pede outro código.
+  static const String botaoReenviarCodigo = 'Não recebi, envie outro';
+
+  /// Mensagem de código recusado.
+  ///
+  /// Não distingue errado de vencido: é uma recusa só, como no servidor.
+  static const String codigoNaoConfere =
+      'Esse número não conferiu. Ele vale por 10 minutinhos — se já passou, eu '
+      'posso te enviar outro 😊';
+
+  /// Confirmação de que outro código foi enviado.
+  static const String codigoReenviado =
+      'Pronto, enviei um número novo. O anterior não vale mais.';
+
+  /// Título da tela que conduz à primeira entrada sozinha (FR-063).
+  static const String tituloPrimeiraEntrada = 'Sua conta está pronta';
+
+  /// O convite para entrar sozinha.
+  ///
+  /// O objetivo da FR-063 é **autonomia demonstrada**: a pessoa precisa ver que
+  /// consegue, uma vez, com o acompanhante ainda por perto para o caso de algo
+  /// dar errado. Por isso o texto trata a entrada como um teste tranquilo, e
+  /// não como uma última burocracia.
+  static const String convitePrimeiraEntrada =
+      'Agora vamos fazer juntos uma coisa importante: você vai entrar sozinha, '
+      'uma vez, para ver que consegue. Se travar, quem está aí do lado pode '
+      'ajudar — mas quem digita a senha é você.';
+
+  /// Rótulo do botão que leva ao login.
+  static const String botaoEntrarSozinha = 'Quero entrar sozinha';
 }

@@ -9,7 +9,10 @@ import 'controladores/controlador_cadastro.dart';
 import 'controladores/controlador_login.dart';
 import 'telas/tela_boas_vindas.dart';
 import 'telas/tela_cadastro.dart';
+import 'telas/tela_confirmar_canal.dart';
+import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import 'telas/tela_primeira_entrada.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -54,7 +57,15 @@ class FluxoAutenticacao extends StatefulWidget {
   State<FluxoAutenticacao> createState() => _FluxoAutenticacaoState();
 }
 
-enum _Etapa { boasVindas, cadastro, login, dentro }
+enum _Etapa {
+  boasVindas,
+  cadastro,
+  entregaDoAparelho,
+  confirmarCanal,
+  primeiraEntrada,
+  login,
+  dentro,
+}
 
 class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   late final ControladorCadastro _cadastro =
@@ -75,6 +86,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   _Etapa _etapa = _Etapa.boasVindas;
   PessoaAutenticada? _pessoa;
   bool _avisoNaTela = false;
+
+  /// Conta recém-criada em modo assistido, à espera da confirmação de canal.
+  ///
+  /// Guardada separada de [_pessoa] de propósito: ela **não** está dentro do
+  /// aplicativo. A sessão existe e serve para confirmar o canal, e nada mais —
+  /// o servidor recusa a entrada dela enquanto a posse não for confirmada.
+  PessoaAutenticada? _aguardandoConfirmacao;
 
   @override
   void dispose() {
@@ -101,7 +119,40 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   Future<void> _cadastrou(PessoaAutenticada pessoa) async {
     await widget.ultimoAcesso.lembrar(_cadastro.canal.trim().toLowerCase());
     if (!mounted) return;
+
+    // Cadastro comum entra direto (FR-009). O assistido não: a conta existe,
+    // mas o servidor a mantém em espera até a posse do canal ser confirmada
+    // (FR-062), e entrar com ela seria recusado.
+    if (_cadastro.modoAssistido && pessoa.canalId != null) {
+      setState(() {
+        _aguardandoConfirmacao = pessoa;
+        _etapa = _Etapa.confirmarCanal;
+      });
+      return;
+    }
+
     _entrou(pessoa);
+  }
+
+  /// Posse confirmada: o cadastro assistido finalmente concluiu (FR-062).
+  ///
+  /// Daqui a pessoa **não** vai para dentro do aplicativo, e sim para a
+  /// primeira entrada sozinha (FR-063). Levá-la para dentro agora pularia
+  /// justamente a confirmação de autonomia que a User Story 5 existe para
+  /// produzir — e ela sairia dali sem nunca ter aberto a própria conta.
+  void _canalConfirmado() {
+    setState(() => _etapa = _Etapa.primeiraEntrada);
+  }
+
+  /// Encerra a sessão do cadastro e leva ao login (FR-063).
+  ///
+  /// Encerrar é o ponto: se a sessão continuasse de pé, "entrar sozinha" seria
+  /// teatro — a pessoa tocaria um botão e já estaria dentro, sem digitar nada.
+  Future<void> _entrarSozinha() async {
+    await widget.repositorio.encerrarSessao();
+    if (!mounted) return;
+    setState(() => _aguardandoConfirmacao = null);
+    _irParaLogin();
   }
 
   void _entrou(PessoaAutenticada pessoa) {
@@ -163,6 +214,25 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           controlador: _cadastro,
           aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
           aoConcluir: _cadastrou,
+          aoEntregarAparelho: () =>
+              setState(() => _etapa = _Etapa.entregaDoAparelho),
+        ),
+      _Etapa.entregaDoAparelho => TelaEntregaDoAparelho(
+          aoReceberOAparelho: () {
+            _cadastro.confirmarEntregaDoAparelho();
+            setState(() => _etapa = _Etapa.cadastro);
+          },
+          aoAdiar: () => setState(() => _etapa = _Etapa.cadastro),
+        ),
+      _Etapa.confirmarCanal => TelaConfirmarCanal(
+          repositorio: widget.repositorio,
+          canalId: _aguardandoConfirmacao!.canalId!,
+          canalVisivel: _cadastro.canal.trim(),
+          aoConfirmar: _canalConfirmado,
+        ),
+      _Etapa.primeiraEntrada => TelaPrimeiraEntrada(
+          nome: _aguardandoConfirmacao?.nomeTratamento ?? '',
+          aoEntrarSozinha: _entrarSozinha,
         ),
       _Etapa.login => TelaLogin(
           controlador: _login!,

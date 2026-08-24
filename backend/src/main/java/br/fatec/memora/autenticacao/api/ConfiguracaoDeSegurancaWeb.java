@@ -1,5 +1,9 @@
 package br.fatec.memora.autenticacao.api;
 
+import br.fatec.memora.autenticacao.infra.RepositorioPessoaUsuaria;
+import br.fatec.memora.autenticacao.seguranca.EmissorDeTokenDeAcesso;
+import br.fatec.memora.autenticacao.seguranca.FiltroDeTokenDeAcesso;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -7,6 +11,8 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Quem entra sem credencial, e quem não entra (T033).
@@ -58,8 +64,42 @@ public class ConfiguracaoDeSegurancaWeb {
      */
     public static final String CAMINHO_RENOVAR = "/v1/auth/sessao/renovar";
 
+    /**
+     * Traduz o token do cabeçalho em identidade (T058).
+     *
+     * <p>É um {@code @Bean} para receber as dependências pelo contêiner, mas
+     * <b>não</b> deve ser registrado como filtro de servlet automático — daí o
+     * {@link FilterRegistrationBean} logo abaixo. Sem ele, o Boot instala todo
+     * bean de {@code Filter} também fora da cadeia do Spring Security, e o
+     * filtro roda duas vezes por requisição.
+     */
     @Bean
-    SecurityFilterChain cadeiaDeSeguranca(HttpSecurity http) throws Exception {
+    FiltroDeTokenDeAcesso filtroDeTokenDeAcesso(
+            EmissorDeTokenDeAcesso emissor, RepositorioPessoaUsuaria pessoas) {
+        return new FiltroDeTokenDeAcesso(emissor, pessoas);
+    }
+
+    /** Impede o registro automático descrito em {@link #filtroDeTokenDeAcesso}. */
+    @Bean
+    FilterRegistrationBean<FiltroDeTokenDeAcesso> naoRegistrarFiltroDuasVezes(
+            FiltroDeTokenDeAcesso filtro) {
+        FilterRegistrationBean<FiltroDeTokenDeAcesso> registro =
+                new FilterRegistrationBean<>(filtro);
+        registro.setEnabled(false);
+        return registro;
+    }
+
+    @Bean
+    RespostaDeNaoAutenticado respostaDeNaoAutenticado(ObjectMapper json) {
+        return new RespostaDeNaoAutenticado(json);
+    }
+
+    @Bean
+    SecurityFilterChain cadeiaDeSeguranca(
+            HttpSecurity http,
+            FiltroDeTokenDeAcesso filtroDeToken,
+            RespostaDeNaoAutenticado semCredencial)
+            throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(
                         sessao -> sessao.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -73,6 +113,11 @@ public class ConfiguracaoDeSegurancaWeb {
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())
+                .addFilterBefore(filtroDeToken, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(
+                        erros ->
+                                erros.authenticationEntryPoint(semCredencial)
+                                        .accessDeniedHandler(semCredencial))
                 // Sem formulario de login e sem Basic: este servidor responde a
                 // um aplicativo, e o desafio "WWW-Authenticate" do Basic faz o
                 // navegador abrir uma caixa de dialogo que nao pertence a

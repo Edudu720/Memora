@@ -1,6 +1,7 @@
 package br.fatec.memora.autenticacao.aplicacao;
 
 import br.fatec.memora.autenticacao.dominio.CanalContato;
+import br.fatec.memora.autenticacao.dominio.EstadoDaConta;
 import br.fatec.memora.autenticacao.dominio.NormalizadorIdentificador;
 import br.fatec.memora.autenticacao.dominio.PessoaUsuaria;
 import br.fatec.memora.autenticacao.dominio.PoliticaDeSenha;
@@ -123,7 +124,7 @@ public class ServicoDeCadastro {
     @Transactional
     public Cadastrada cadastrar(
             String nomeTratamento, TipoDeCanal tipo, String valorInformado, String senha,
-            String aparelhoDescricao) {
+            String aparelhoDescricao, boolean modoAssistido) {
 
         String valor = NormalizadorIdentificador.normalizar(tipo, valorInformado);
         recusarSenhaFraca(senha);
@@ -137,7 +138,9 @@ public class ServicoDeCadastro {
         if (canais.findByValorHash(valorHash).isPresent()) {
             return chamariz(nomeTratamento, tipo, valor, agora);
         }
-        return criar(nomeTratamento, tipo, valor, valorHash, senhaHash, aparelhoDescricao, agora);
+        return criar(
+                nomeTratamento, tipo, valor, valorHash, senhaHash, aparelhoDescricao, agora,
+                modoAssistido);
     }
 
     /**
@@ -167,13 +170,38 @@ public class ServicoDeCadastro {
         throw FalhaDoMemora.de(CodigoDeErro.DADOS_INVALIDOS, mensagem);
     }
 
-    /** O caminho real: conta, canal principal, sessão e trilha. */
+    /**
+     * O caminho real: conta, canal principal, sessão e trilha.
+     *
+     * <h2>O que {@code modoAssistido} muda aqui (T057, FR-062)</h2>
+     *
+     * A conta nasce {@link EstadoDaConta#PENDENTE_VERIFICACAO} em vez de
+     * {@link EstadoDaConta#ATIVA}. Ela existe, tem canal e recebe sessão — mas
+     * não entra e não recupera acesso enquanto a posse do canal não for
+     * confirmada. O cenário V4 exige literalmente que "o cadastro assistido não
+     * conclui sem posse confirmada", e esta é a única forma de cumprir isso sem
+     * inverter a ordem: o canal só passa a existir <b>dentro</b> deste método, e
+     * o endpoint que confirma posse exige o token que só é emitido no fim dele.
+     *
+     * <p>A sessão devolvida serve para um caminho e nenhum outro — confirmar o
+     * canal. Quem escrever endpoint autenticado novo precisa recusar conta
+     * pendente, por {@code PessoaAutenticada.estaPendenteDeVerificacao()}.
+     *
+     * <p><b>{@code modoAssistido} não cria vínculo nenhum</b> (FR-064). Nada do
+     * acompanhante é gravado: nem identificador, nem permissão, nem registro de
+     * que ele existiu. É um sinal de fluxo que muda o estado inicial da conta e
+     * termina aí.
+     */
     private Cadastrada criar(
             String nomeTratamento, TipoDeCanal tipo, String valor, String valorHash,
-            String senhaHash, String aparelhoDescricao, Instant agora) {
+            String senhaHash, String aparelhoDescricao, Instant agora, boolean modoAssistido) {
+
+        EstadoDaConta estadoInicial =
+                modoAssistido ? EstadoDaConta.PENDENTE_VERIFICACAO : EstadoDaConta.ATIVA;
 
         PessoaUsuaria pessoa =
-                pessoas.saveAndFlush(new PessoaUsuaria(nomeTratamento, senhaHash, agora));
+                pessoas.saveAndFlush(
+                        new PessoaUsuaria(nomeTratamento, senhaHash, agora, estadoInicial));
 
         CanalContato canal =
                 canais.saveAndFlush(

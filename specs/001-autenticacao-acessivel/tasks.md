@@ -234,18 +234,38 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Backend
 
-- [ ] T057 [US5] Aceitar `modo_assistido` no cadastro e **exigir canal com posse confirmada** antes de concluir (FR-062)
-- [ ] T058 [US5] Implementar `POST /v1/canais/{id}/codigo` e `POST /v1/canais/{id}/verificar` com código de 6 dígitos, validade de 10 min e uso único (R5)
-- [ ] T059 [US5] Guardar o código **hasheado** em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/CodigoVerificacao.java`, nunca em texto puro
-- [ ] T060 [US5] Escrever teste do cenário V4 em `backend/src/test/java/br/fatec/memora/autenticacao/api/CanalNaoVerificadoTest.java`
+- [X] T057 [US5] Aceitar `modo_assistido` no cadastro e **exigir canal com posse confirmada** antes de concluir (FR-062)
+- [X] T058 [US5] Implementar `POST /v1/canais/{id}/codigo` e `POST /v1/canais/{id}/verificar` com código de 6 dígitos, validade de 10 min e uso único (R5)
+- [X] T059 [US5] Guardar o código **hasheado** em `backend/src/main/java/br/fatec/memora/autenticacao/dominio/CodigoVerificacao.java`, nunca em texto puro
+- [X] T060 [US5] Escrever teste do cenário V4 em `backend/src/test/java/br/fatec/memora/autenticacao/api/CanalNaoVerificadoTest.java`
 
 ### Aplicativo
 
-- [ ] T061 [US5] Adicionar a pergunta *"Tem alguém te ajudando agora?"* no início do cadastro (FR-058)
-- [ ] T062 [US5] Criar `TelaEntregaDoAparelho`, que interrompe o fluxo e pede que o aparelho volte à pessoa dona da conta (FR-059)
-- [ ] T063 [US5] Usar `CampoSenha` com `permitirRevelar: false` no modo assistido (FR-060)
-- [ ] T064 [US5] Criar `TelaPrimeiraEntrada`, conduzindo a pessoa a entrar sozinha ao final (FR-063)
-- [ ] T065 [US5] Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/api/ModoAssistidoSemVinculoTest.java` garantindo que não há vínculo nem permissão para o acompanhante (FR-064)
+- [X] T061 [US5] Adicionar a pergunta *"Tem alguém te ajudando agora?"* no início do cadastro (FR-058)
+- [X] T062 [US5] Criar `TelaEntregaDoAparelho`, que interrompe o fluxo e pede que o aparelho volte à pessoa dona da conta (FR-059)
+- [X] T063 [US5] Usar `CampoSenha` com `permitirRevelar: false` no modo assistido (FR-060)
+- [X] T064 [US5] Criar `TelaPrimeiraEntrada`, conduzindo a pessoa a entrar sozinha ao final (FR-063)
+- [X] T065 [US5] Escrever teste em `backend/src/test/java/br/fatec/memora/autenticacao/api/ModoAssistidoSemVinculoTest.java` garantindo que não há vínculo nem permissão para o acompanhante (FR-064)
+
+> **Três coisas que a fase 5 exigiu e não estavam escritas aqui.** Nenhuma é
+> requisito novo: são consequências de cumprir a FR-062.
+>
+> 1. **Estado `PENDENTE_VERIFICACAO`** (migration V3). A T057 manda exigir posse
+>    confirmada *antes de concluir* o cadastro, e o canal só passa a existir
+>    **dentro** do cadastro — a confirmação exige um token que só é emitido no
+>    fim dele. A conta assistida nasce em espera e só vira `ATIVA` quando a
+>    posse é confirmada.
+> 2. **Filtro de autenticação por token.** A T058 criou os dois primeiros
+>    endpoints autenticados do projeto, e não existia nada que resolvesse o
+>    token em identidade. O filtro **consulta o banco**: a sessão-chamariz da
+>    FR-010 é um JWT válido cujo sujeito não existe, e parar na assinatura a
+>    transformaria em acesso.
+> 3. **`TelaConfirmarCanal`**, no aplicativo. Sem ela a conta assistida nasce em
+>    espera e não há por onde sair: a pessoa fica com uma conta que existe e não
+>    entra.
+
+- [ ] T065a [US5] Implementar o **envio real** do código (`EnviadorDeCodigo`) — hoje só existe `EnviadorDeCodigoEmLog`, restrito a `@Profile("!producao")`. Sem provedor, a aplicação **não sobe** em produção, de propósito
+- [ ] T065b [US5] Decidir o que fazer com **conta assistida abandonada**: ela fica `PENDENTE_VERIFICACAO` para sempre e mantém o canal ocupado, então um novo cadastro com o mesmo e-mail cai no chamariz da FR-010 e a pessoa fica sem saída. Provável expurgo por idade
 
 ---
 

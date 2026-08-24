@@ -24,8 +24,27 @@ class PessoaAutenticada {
   /// Como a pessoa quer ser chamada. **Nunca é credencial** (FR-003).
   final String nomeTratamento;
 
+  /// Identificador do canal principal, quando o servidor o informa.
+  ///
+  /// É o que o cadastro assistido precisa para pedir e confirmar o código de
+  /// posse (FR-062): sem ele, o aplicativo teria a conta criada e nenhuma
+  /// forma de dizer *qual* canal está confirmando.
+  final String? canalId;
+
+  /// A posse do canal já foi confirmada?
+  ///
+  /// No cadastro comum isto começa `false` e não bloqueia nada. No modo
+  /// assistido é o que separa a conta que já pode ser usada da que ainda
+  /// espera — o servidor recusa a entrada enquanto for `false`.
+  final bool canalVerificado;
+
   /// Cria uma pessoa autenticada.
-  const PessoaAutenticada({required this.id, required this.nomeTratamento});
+  const PessoaAutenticada({
+    required this.id,
+    required this.nomeTratamento,
+    this.canalId,
+    this.canalVerificado = false,
+  });
 }
 
 /// Dados informados no cadastro.
@@ -164,4 +183,47 @@ abstract interface class RepositorioAutenticacao {
   /// refresh apagado aqui continua válido lá até vencer — limitação conhecida,
   /// que a US4 fecha junto com a T077.
   Future<void> encerrarSessao();
+
+  /// Pede que o servidor envie um código de 6 dígitos ao canal (T058, R5).
+  ///
+  /// Responde igual exista ou não o canal, e pertença ele a quem for: o
+  /// servidor devolve `202` sempre, para que este caminho não vire um oráculo
+  /// de quais identificadores existem. Pedir de novo **invalida** o código
+  /// anterior — quem tocar duas vezes em "reenviar" deve digitar o segundo.
+  Future<ResultadoDeCanal> enviarCodigoDeCanal(String canalId);
+
+  /// Confirma a posse do canal com o código recebido (FR-052, FR-062).
+  ///
+  /// É o que conclui o cadastro assistido: enquanto a posse não é confirmada, a
+  /// conta existe mas não entra. A recusa é uma só — código errado, vencido, já
+  /// usado e canal alheio dizem a mesma coisa.
+  Future<ResultadoDeCanal> confirmarCanal(String canalId, String codigo);
+}
+
+/// Resultado de uma operação sobre canal de contato.
+///
+/// Separado de [ResultadoAutenticacao] de propósito: confirmar um canal **não**
+/// produz sessão nem troca quem está autenticado. Reaproveitar o outro tipo
+/// obrigaria a inventar uma [PessoaAutenticada] onde não há nenhuma novidade
+/// sobre a pessoa.
+@immutable
+sealed class ResultadoDeCanal {
+  const ResultadoDeCanal();
+}
+
+/// A operação sobre o canal deu certo.
+@immutable
+class CanalConcluido extends ResultadoDeCanal {
+  /// Cria um resultado de sucesso.
+  const CanalConcluido();
+}
+
+/// A operação sobre o canal falhou.
+@immutable
+class CanalFalhou extends ResultadoDeCanal {
+  /// Qual falha ocorreu.
+  final FalhaAutenticacao falha;
+
+  /// Cria um resultado de falha.
+  const CanalFalhou(this.falha);
 }
