@@ -9,15 +9,21 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Os corpos de requisição e resposta do cadastro, como o contrato os define
- * (T033).
+ * Os corpos de requisição e resposta da autenticação, como o contrato os define
+ * (T033, T047, T048).
  *
  * <h2>Por que num arquivo só</h2>
  *
- * São cinco records curtos que só existem juntos: nenhum faz sentido sozinho, e
- * espalhá-los em cinco arquivos obrigaria a abrir cinco abas para conferir uma
+ * São records curtos que só existem juntos: nenhum faz sentido sozinho, e
+ * espalhá-los em sete arquivos obrigaria a abrir sete abas para conferir uma
  * resposta contra o {@code openapi.yaml}. Ficam aqui, na ordem em que aparecem
  * no contrato.
+ *
+ * <p>A classe se chamava {@code DtosDeCadastro} quando o cadastro era o único
+ * endpoint. {@link SessaoResposta} agora responde por três — cadastro, entrada e
+ * renovação —, e manter o nome antigo faria parecer que entrada e renovação
+ * devolvem outra coisa. Elas devolvem exatamente a mesma forma, e isso é
+ * requisito: o aplicativo tem um caminho só para guardar sessão.
  *
  * <h2>Nome que viaja escrito ao lado do campo</h2>
  *
@@ -27,12 +33,12 @@ import java.util.UUID;
  * contrato em silêncio, e o teste que pegaria isso é justamente o que ninguém
  * escreve.
  */
-public final class DtosDeCadastro {
+public final class DtosDeAutenticacao {
 
-    private DtosDeCadastro() {}
+    private DtosDeAutenticacao() {}
 
     /**
-     * O que o aplicativo envia.
+     * O que o aplicativo envia no cadastro.
      *
      * <p>As restrições repetem as do contrato. <b>Não são a política de senha</b>
      * — {@code senha} só é verificada aqui contra o vazio, porque a regra real
@@ -54,7 +60,29 @@ public final class DtosDeCadastro {
             @JsonProperty("tipo") @NotBlank String tipo,
             @JsonProperty("valor") @NotBlank String valor) {}
 
-    /** Sessão iniciada — o que o cadastro devolve, pela FR-009. */
+    /**
+     * O que o aplicativo envia na entrada (T047).
+     *
+     * <p><b>Não há campo {@code tipo} aqui, e isso é a FR-051 em forma de DTO.</b>
+     * A pessoa digita o que lembrar — e-mail ou telefone — e o servidor descobre
+     * qual é. Pedir o tipo transferiria para ela a pergunta "com qual dos dois
+     * você se cadastrou?", que é exatamente o que a FR-051 proíbe.
+     *
+     * <p>Assim como no cadastro, {@code senha} só é verificada contra o vazio:
+     * recusar por tamanho aqui devolveria {@code DADOS_INVALIDOS} para quem
+     * simplesmente errou a senha, revelando de quebra que a senha certa é mais
+     * longa que a digitada.
+     */
+    public record EntrarRequisicao(
+            @JsonProperty("identificador") @NotBlank String identificador,
+            @JsonProperty("senha") @NotBlank String senha,
+            @JsonProperty("aparelho_descricao") @Size(max = 120) String aparelhoDescricao) {}
+
+    /** O que o aplicativo envia para renovar a sessão (T048). */
+    public record RenovarRequisicao(
+            @JsonProperty("refresh_token") @NotBlank String refreshToken) {}
+
+    /** Sessão iniciada — o que cadastro, entrada e renovação devolvem. */
     public record SessaoResposta(
             @JsonProperty("token_acesso") String tokenAcesso,
             @JsonProperty("refresh_token") String refreshToken,

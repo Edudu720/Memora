@@ -74,6 +74,15 @@ description: "Task list — Autenticação Acessível do Memora"
 - [x] T026 [P] Adicionar Trace ID e Request ID em `backend/src/main/java/br/fatec/memora/comum/FiltroRastreio.java`
 - [x] T027 Gerar o cliente Dart em `app/pacotes/memora_api/` e verificar que compila contra o contrato
 - [ ] T027a Documentar em [contracts/openapi.yaml](contracts/openapi.yaml) as respostas de erro que o servidor já devolve e o contrato não prevê: `500` (`ERRO_INESPERADO`), `404` e `405`. **Dívida de spec, não de código** — hoje as três existem em `CodigoDeErro`/`TratadorGlobalDeErros` porque a alternativa era vazar o formato padrão do Spring, que carrega caminho e classe da exceção (FR-041). Fechar isto também elimina os `unused_import` que o gerador produz por não haver resposta de erro declarada
+  > **Acrescentado em 2026-08-15, ao fazer a T048**: vale revisar junto qual
+  > código o `POST /v1/auth/sessao/renovar` devolve no `401`. O contrato aponta
+  > para `CredenciaisInvalidas`, e é o que está implementado — mas o texto desse
+  > código é *"Esses dados não conferem"*, e quem falha ao renovar **não digitou
+  > nada**. O `SESSAO_EXPIRADA` existe, está sem uso, e o texto dele — *"Faz um
+  > tempinho que você não usa o Memora. Vamos entrar de novo?"* — descreve
+  > exatamente esta situação. Não há diferença de segurança entre os dois,
+  > desde que a resposta continue **uniforme** nos quatro motivos de recusa.
+  > Troca de uma linha em `ControladorSessao`, mas muda o contrato.
 
 ### Aplicativo — base da feature
 
@@ -135,20 +144,32 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Backend
 
-- [ ] T047 [US2] Implementar `POST /v1/auth/entrar`, aceitando **qualquer canal verificado** (FR-051)
-- [ ] T048 [US2] Implementar `POST /v1/auth/sessao/renovar` com a rotação de T019
-- [ ] T049 [US2] Implementar bloqueio progressivo em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/BloqueioProgressivo.java` — 1, 5, 15, 60 min após 5 falhas (FR-014)
-  > ⚠️ **A escada já existe**, criada junto da T021 em 2026-07-29: a camada por
-  > conta do `LimitadorTentativas` não funciona sem ela, e deixar meio construído
-  > um limitador de tentativas é deixar um buraco aberto. `BloqueioProgressivo` e
-  > seus 5 testes estão prontos. **Resta a esta tarefa**: ligar o limitador no
-  > endpoint `POST /v1/auth/entrar` (T047) e devolver `429` com
-  > `tentar_novamente_em_segundos`.
-- [ ] T050 [US2] Escrever teste do cenário V6 — bloqueio progressivo devolve `tentar_novamente_em_segundos`
-  > A metade de baixo já está coberta (`BloqueioProgressivoTest` e
-  > `LimitadorTentativasTest`). Falta o cenário pelo endpoint, com a **revisão de
-  > UX obrigatória** do texto: o V6 reprova bloqueio tecnicamente correto com
-  > texto ríspido.
+- [x] T047 [US2] Implementar `POST /v1/auth/entrar`, aceitando **qualquer canal cadastrado** (FR-051)
+  > ⚠️ **A tarefa dizia "qualquer canal verificado", e isso estava errado.** O
+  > cadastro cria o canal com `verificado = false` e o fluxo de confirmação de
+  > posse só chega na T058 (US5): exigir verificação aqui deixaria **toda conta
+  > sem conseguir entrar** até a fase 5 existir, contra a FR-011. A própria
+  > FR-051 fala em canais *cadastrados*; quem restringe canal não verificado é a
+  > FR-052, e ela restringe a **recuperação de acesso**, que é onde mora o golpe
+  > da FR-062. No login quem autentica é a senha; o canal só localiza a conta.
+  > **Decisão da equipe em 2026-08-15**: `data-model.md` (linha 71) e a descrição
+  > da operação no `openapi.yaml` foram corrigidos junto.
+- [x] T048 [US2] Implementar `POST /v1/auth/sessao/renovar` com a rotação de T019
+- [x] T049 [US2] Implementar bloqueio progressivo em `backend/src/main/java/br/fatec/memora/autenticacao/seguranca/BloqueioProgressivo.java` — 1, 5, 15, 60 min após 5 falhas (FR-014)
+  > A escada já existia desde a T021. Esta tarefa ligou o `LimitadorTentativas`
+  > ao `POST /v1/auth/entrar` e fez o `429` sair com
+  > `tentar_novamente_em_segundos`. **A tentativa que estoura o limite já
+  > responde `429`**, e não `401`: é o que o passo 2 do V6 descreve.
+- [x] T050 [US2] Escrever teste do cenário V6 — bloqueio progressivo devolve `tentar_novamente_em_segundos`
+  > `BloqueioProgressivoNoLoginTest`, 12 testes. Percorre os quatro degraus pelo
+  > endpoint com um **relógio ajustável** no lugar do `Clock` da aplicação —
+  > com o relógio do sistema o percurso levaria 81 minutos.
+  > **A revisão de UX foi automatizada na parte automatizável**: o texto precisa
+  > explicar o motivo, oferecer a recuperação e não usar tom de punição nem
+  > jargão. Validado quebrando: com a mensagem trocada por *"Conta bloqueada:
+  > você excedeu o número de tentativas permitidas"*, a escada continuou
+  > passando e os três testes de texto reprovaram — que é exatamente o caso que
+  > o V6 descreve.
 
 ### Aplicativo
 

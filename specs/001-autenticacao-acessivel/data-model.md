@@ -68,9 +68,15 @@ E-mail ou telefone. Uma pessoa pode ter os dois (D1), mas o cadastro exige apena
 **Regras de negócio**:
 - `(tipo, valor)` é **único em todo o sistema** — impede duas contas com o mesmo
   e-mail.
-- Login aceita **qualquer** canal verificado da pessoa (FR-051).
+- Login aceita **qualquer** canal cadastrado da pessoa, verificado ou não (FR-051).
+  > Esta linha dizia "qualquer canal **verificado**" até 2026-08-15. Estava errada
+  > por dois motivos: a FR-051 fala em canais *cadastrados*, e o cadastro cria o
+  > canal como não verificado — exigir verificação aqui deixaria toda conta nova
+  > sem conseguir entrar. No login quem autentica é a senha; o canal só localiza a
+  > conta. Decisão da equipe, registrada na T047.
 - Um canal **não verificado nunca** recebe código de recuperação. É a defesa contra
-  o cenário do acompanhante que cadastra o próprio contato (FR-062).
+  o cenário do acompanhante que cadastra o próprio contato (FR-062). **É aqui, e
+  não no login, que a verificação é obrigatória** (FR-052).
 
 **Transições de estado**:
 
