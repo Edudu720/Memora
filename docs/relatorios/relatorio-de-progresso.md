@@ -22,15 +22,19 @@ smartphone** — não faz por elas. A primeira feature entregável é a
 |---|---|
 | Features especificadas | 2 (001 Autenticação Acessível, 002 Design System) |
 | Requisitos funcionais escritos | 64 (feature 001) + 38 (feature 002) |
-| Tarefas concluídas | **56 de 89** na feature 001 · **44 de 53** na feature 002 |
-| Histórias de usuário entregues | **US1** (criar conta) e **US2** (voltar ao app) |
-| Endpoints implementados | 3 |
-| Testes automatizados | **204** no aplicativo + **250** no backend |
-| Linhas de código (sem o gerado) | ~10,2 mil de produção · ~7,8 mil de teste |
+| Tarefas concluídas | **65 de 91** na feature 001 · **44 de 53** na feature 002 |
+| Histórias de usuário entregues | **US1** (criar conta), **US2** (voltar ao app) e **US5** (modo assistido) |
+| Endpoints implementados | 5 — sendo os 2 primeiros **autenticados** |
+| Testes automatizados | **219** no aplicativo + **271** no backend |
+| Linhas de código (sem o gerado) | ~12,1 mil de produção · ~8,8 mil de teste |
 
-**Em uma frase**: as duas jornadas de entrada — criar conta e voltar depois —
-estão completas de ponta a ponta, com backend, telas, acessibilidade e uma
-bateria de portões de segurança que foram validados quebrando-os de propósito.
+**Em uma frase**: as três jornadas de entrada — criar conta, voltar depois e ser
+ajudada por um familiar sem entregar a senha — estão completas de ponta a ponta,
+com backend, telas, acessibilidade e uma bateria de portões de segurança que
+foram validados quebrando-os de propósito.
+
+> **Duas tarefas novas apareceram** entre este relatório e o anterior (89 → 91):
+> a T065a e a T065b, criadas ao implementar a US5. Ver a seção 10.
 
 ---
 
@@ -95,7 +99,7 @@ São **12 documentos de especificação** e **2 checklists** no repositório.
 | 2 — Fundação | Banco, entidades, núcleo de segurança, contrato de erro, auditoria | ✅ Completa (menos a T027a, dívida de spec) |
 | 3 — US1 | Criar conta e começar a usar | ✅ Completa (backend + telas) |
 | 4 — US2 | Voltar ao aplicativo depois | ✅ Completa (backend + telas) |
-| 5 — US5 | Modo assistido (familiar ajuda sem ver a senha) | ⬜ Próxima — T057-T065 |
+| 5 — US5 | Modo assistido (familiar ajuda sem ver a senha) | ✅ Completa (backend + telas) |
 | 6 — US3 | Recuperar o acesso | ⬜ Pendente — T066-T073 |
 | 7 — US4 | Sair da conta com segurança | ⬜ Pendente — T074-T078 |
 | 8 — Login social | Google e Facebook | ⬜ Pendente — T079-T083 |
@@ -176,13 +180,60 @@ registro da tentativa. Evento de **sucesso** não pode fazer isso: o evento de
 cadastro aponta para conta criada na transação em curso e ainda não confirmada,
 e a chave estrangeira quebraria. Há teste para os dois lados.
 
-### Os três endpoints que existem hoje
+### Os cinco endpoints que existem hoje
 
-| Endpoint | Devolve | Recusa com |
-|---|---|---|
-| `POST /v1/auth/cadastro` | `201` + sessão | `400`, `429` |
-| `POST /v1/auth/entrar` | `200` + sessão | `401` genérico, `429` com espera |
-| `POST /v1/auth/sessao/renovar` | `200` + sessão | `401` genérico |
+| Endpoint | Autenticado | Devolve | Recusa com |
+|---|---|---|---|
+| `POST /v1/auth/cadastro` | não | `201` + sessão | `400`, `429` |
+| `POST /v1/auth/entrar` | não | `200` + sessão | `401` genérico, `429` com espera |
+| `POST /v1/auth/sessao/renovar` | não | `200` + sessão | `401` genérico |
+| `POST /v1/canais/{id}/codigo` | **sim** | `202` sempre | `401` |
+| `POST /v1/canais/{id}/verificar` | **sim** | `200` + canal | `400` genérico, `401` |
+
+Os três primeiros são públicos porque **produzem** credencial: exigir uma seria
+exigir o que a operação existe para devolver. Os dois últimos são os **primeiros
+caminhos autenticados do projeto**, e trouxeram consigo uma peça que até então
+não existia — ver "O filtro que desarma o chamariz", adiante.
+
+**`/canais/{id}/codigo` responde `202` sempre**, exista o canal ou não e
+pertença ele a quem for. O contrato diz "código enviado, *se o canal for
+elegível*" justamente para permitir isso: responder `404` para canal alheio
+transformaria o endpoint num mapa de quais identificadores existem.
+
+### O filtro que desarma o chamariz
+
+`seguranca/FiltroDeTokenDeAcesso` traduz o token do cabeçalho em identidade — e
+**consulta o banco** em vez de parar na assinatura do JWT.
+
+Isso não é zelo excessivo. O cadastro responde `201` idêntica quando o canal já
+pertence a alguém (FR-010), e para isso devolve uma **sessão-chamariz**: um JWT
+que nós mesmos assinamos, para um sujeito que não existe. Um filtro que
+confiasse na assinatura transformaria o chamariz em acesso — bastaria tentar
+cadastrar com o e-mail de outra pessoa para receber um token que abriria estes
+endpoints. Foi testado quebrando: com o filtro confiando só na assinatura, o
+chamariz abriu o endpoint com `202` no lugar de `401`.
+
+### O estado que resolveu uma circularidade da spec
+
+A FR-062 exige canal com posse confirmada **antes de concluir** o cadastro
+assistido, e o cenário V4 é literal: *"o cadastro assistido não conclui sem
+posse confirmada"*.
+
+Só que o canal **passa a existir dentro do cadastro**, e confirmá-lo exige um
+token que só é emitido no fim dele. Como está escrito, o requisito é
+impossível de cumprir.
+
+A saída foi um estado intermediário — `PENDENTE_VERIFICACAO`, na migration V3.
+A conta nasce em espera, recebe sessão que serve para confirmar o canal e nada
+mais, e só vira `ATIVA` quando a posse é confirmada. Entrar é recusado enquanto
+isso, com a **mesma** recusa genérica de senha errada.
+
+⚠️ **`estado` agora guarda duas naturezas diferentes.**
+`PENDENTE_VERIFICACAO` e `DESATIVADA` são **ciclo de vida**; `ATIVA` e
+`BLOQUEADA_TEMPORARIAMENTE` são a **tranca temporária**, cuja verdade real mora
+em `bloqueada_ate`. Tranca nunca sobrescreve ciclo de vida — sem essa regra,
+cinco senhas erradas tirariam a conta assistida da espera e, passado um minuto,
+ela entraria sem ninguém ter confirmado canal nenhum.
 
 **Os serviços devolvem resultado; quem lança exceção é o controlador.** Não é
 estilo: a recusa da entrada precisa **persistir** o contador de falhas, e lançar
@@ -228,8 +279,18 @@ Duas regras de linguagem visual valem em todo o aplicativo:
 - **presentation/** — `fluxo_autenticacao.dart` liga boas-vindas → cadastro →
   login → dentro, com o monitor de sessão ativo **só enquanto a pessoa está
   dentro**
-- **telas/** — `TelaBoasVindas`, `TelaCadastro`, `TelaLogin`
+- **telas/** — `TelaBoasVindas`, `TelaCadastro`, `TelaLogin`,
+  `TelaEntregaDoAparelho`, `TelaConfirmarCanal` e `TelaPrimeiraEntrada`
 - **controladores/** — `ControladorCadastro`, `ControladorLogin`
+
+O fluxo assistido acrescenta três etapas entre o cadastro e o login:
+**entrega do aparelho** → senha (sem olhinho) → **confirmação do canal** →
+**primeira entrada sozinha**.
+
+⚠️ **No modo assistido o campo de senha não existe na árvore de widgets** até o
+aparelho voltar para a pessoa dona da conta. Um aviso no lugar disso seria lido
+depois de a senha já ter sido digitada — tarde demais, com o acompanhante já
+tendo visto o que a FR-060 protege.
 
 Os textos vivem em `app/lib/l10n/textos_autenticacao.dart`, na voz da Memora.
 Não é `flutter_localizations` — é a "estrutura preparada" que a decisão D3 da
@@ -239,9 +300,14 @@ feature 002 pediu: quando houver um segundo idioma, estas constantes viram
 ### O que dá para ver rodando hoje
 
 A tela inicial é uma **casca de demonstração** provisória, com três abas:
-**Entrar** (fluxo real das US1 e US2: boas-vindas → cadastro → dentro → sair →
-login), **Componentes** (vitrine do Design System) e **Aparência** (tela real de
-preferências). A casca sai quando o Hub existir.
+**Entrar** (fluxo real das US1, US2 e US5: boas-vindas → cadastro → dentro →
+sair → login, e o caminho assistido inteiro), **Componentes** (vitrine do Design
+System) e **Aparência** (tela real de preferências). A casca sai quando o Hub
+existir.
+
+**Para ver o modo assistido no aparelho**: no cadastro, toque em *"Tem alguém te
+ajudando agora?"*. O código de confirmação no simulado é **fixo, `123456`** — não
+há como ler um SMS numa demonstração. O servidor real sorteia.
 
 ⚠️ O fluxo roda hoje sobre o **repositório simulado**, não sobre o backend — a
 troca é de uma linha, mas depende de decidir de onde vem a URL base do servidor
@@ -269,10 +335,32 @@ confirmando que reprova.
 | Bloqueio correto com texto ríspido reprova | Troquei a mensagem por uma ríspida: a escada continuou passando e **só os 3 testes de texto reprovaram** |
 | O mesmo, agora na tela | Idem no `tela_login_test.dart`: contagem regressiva e liberação continuaram passando; só o texto reprovou |
 | Identificador só é gravado após sucesso | Movi `lembrar()` para antes da resposta: reprovou com `Expected: null` |
+| Bloqueio não ressuscita conta desativada | Tirei a guarda: a sexta tentativa devolveu **200** |
+| Renovação recusa conta desativada | Desliguei a checagem: `expected:<401> but was:<200>` |
+| Chamariz não vira acesso | Fiz o filtro confiar só na assinatura do JWT: `Status expected:<401> but was:<202>` |
+| Cadastro assistido não conclui sozinho | Fiz a conta assistida nascer `ATIVA`: **5 testes** reprovaram, um com `expected:<401> but was:<200>` |
+| Canal alheio não se verifica | Tirei o filtro por dono: `Status expected:<400> but was:<200>` |
+| Bloqueio não conclui cadastro assistido | Devolvi a tranca ao comportamento antigo: `expected: PENDENTE_VERIFICACAO` |
+| A senha para o acompanhante (FR-059) | Liberei o campo sem a entrega: **4 testes**, um com `Expected: null / Actual: Instance of 'DadosDeCadastro'` |
+| A primeira entrada é sozinha (FR-063) | Fiz a confirmação levar direto para dentro: `Found 0 widgets with type "TelaPrimeiraEntrada"` |
 
-Dois portões novos vieram da revisão da PR #15 e estão na PR #16: *bloqueio não
-ressuscita conta desativada* (a sexta tentativa devolvia **200**) e *renovação
-recusa conta desativada* (`expected:<401> but was:<200>`).
+São **vinte portões**, cada um provado por quebra.
+
+### Um portão que reprovou a si mesmo
+
+Vale registrar em separado, porque é a melhor justificativa do método.
+
+O portão da FR-060 — *no modo assistido a senha não pode ser revelada* —
+**passava mesmo com o portão quebrado**. Ao ligar `permitirRevelar: true` de
+propósito, o teste continuou verde. A causa: ele procurava
+`Icons.visibility_outlined`, e o `CampoSenha` usa `Icons.visibility`. O teste
+nunca encontrava nada, e "não encontrou nada" era exatamente o que ele esperava.
+
+Corrigido o ícone, o teste passou a reprovar com `Expected: no matching
+candidates / Actual: Found 1 widget with icon` — com a quebra ainda aplicada, o
+que prova que agora ele pega.
+
+**Um teste que passa não prova nada. Um teste que reprova quando deveria, sim.**
 
 ### A sessão-chamariz — a decisão de segurança mais delicada do projeto
 
@@ -301,18 +389,17 @@ latência entregaria o que o corpo escondeu — medido, não suposto.
 ## 8. Verificação — números medidos em 2026-08-24
 
 Todos os comandos abaixo foram executados nesta data, na branch
-`feature/001-fase4-us2-app`.
+`feature/001-fase5-us5`, e reproduzidos pelo CI na PR #19.
 
 | Verificação | Comando | Resultado |
 |---|---|---|
-| Análise estática do aplicativo | `flutter analyze` | ✅ **No issues found** (54 s) |
-| Testes do aplicativo | `flutter test` | ✅ **204 testes — All tests passed!** |
+| Análise estática do aplicativo | `flutter analyze` | ✅ **No issues found** |
+| Testes do aplicativo | `flutter test` | ✅ **219 testes — All tests passed!** |
 | Contraste da paleta | `python validar_paleta.py` | ✅ **Todos os pares aprovados**, WCAG 2.2 |
-| Testes do backend | `./mvnw clean test` | ✅ **250 testes, 0 falhas, 0 erros** |
+| Testes do backend | `./mvnw clean test` | ✅ **271 testes, 0 falhas, 0 erros** |
 
 O backend sobe um PostgreSQL real por Testcontainers — o Docker Desktop precisa
-estar rodando, senão a falha aparece longe da causa. Os 250 já incluem as
-correções da revisão (PR #16), mergeada em 2026-08-24.
+estar rodando, senão a falha aparece longe da causa.
 
 O CI (`.github/workflows/verificacao.yml`) roda quatro jobs em toda push e PR:
 contraste da paleta, build e testes do backend, análise e testes do aplicativo,
@@ -323,10 +410,10 @@ e o cliente gerado do contrato.
 | Suíte | Quantidade |
 |---|---|
 | Design System | 139 |
-| Autenticação (aplicativo) | 65 |
-| **Total aplicativo** | **204** |
-| **Backend** | **250** |
-| **Total do projeto** | **454** |
+| Autenticação (aplicativo) | 80 |
+| **Total aplicativo** | **219** |
+| **Backend** | **271** |
+| **Total do projeto** | **490** |
 
 > **Correção de registro — e a correção da correção.** A primeira versão deste
 > relatório dizia 245, corrigindo os 244 do `CLAUDE.md`. Ambos estavam errados,
@@ -336,7 +423,10 @@ e o cliente gerado do contrato.
 > que nunca foi commitada e não existe em `backend/src` nem em commit algum.
 > Valendo 1 teste, ela inflava toda contagem seguinte, porque `target/` está no
 > `.gitignore` e ninguém limpava. Numa execução com `clean`, o `Tests run:` do
-> Maven e a soma dos 26 XMLs concordam: **250**.
+> Maven e a soma dos 26 XMLs concordam — eram **250** naquele momento, e são
+> **271** com a US5. A lição que fica não é o número: é que **contagem de teste
+> se faz com `clean`**, e que um relatório órfão em `target/` sobrevive a
+> qualquer quantidade de convicção.
 
 ---
 
@@ -373,6 +463,52 @@ inexistente, e a trilha deliberadamente não guarda identificador (FR-040).
 
 ## 10. Dívidas e pendências abertas
 
+### Aberto hoje, ao implementar a US5 (2026-08-24)
+
+Três coisas que **não estavam previstas em tarefa nenhuma** e apareceram ao
+cumprir a FR-062. Nenhuma é requisito novo — todas são consequências de fazer o
+que a spec já pedia.
+
+| # | O que é | Por que importa | Estado |
+|---|---|---|---|
+| 1 | **Não existe envio de e-mail nem SMS** | A US5 depende de a pessoa **receber** um código. Nenhuma tarefa da feature 001 implementa envio; o `plan.md` cita "envio de código, provedores" ao desenhar a pasta `infra/`, e nada mais | **T065a** |
+| 2 | **Conta assistida abandonada trava o e-mail** | Quem desiste no meio fica `PENDENTE_VERIFICACAO` para sempre, com o canal ocupado. Recadastrar com o mesmo e-mail cai no chamariz da FR-010, e a pessoa fica **sem saída** | **T065b** |
+| 3 | **`TelaConfirmarCanal` não estava nas tarefas** | Já **resolvido** nesta entrega. Sem ela, a conta assistida nasceria em espera e não haveria por onde sair dela | Feito |
+
+**Sobre o envio (1), a escolha foi falhar alto.** Existe a porta
+`EnviadorDeCodigo` e um único adaptador, `EnviadorDeCodigoEmLog`, que escreve o
+código **em claro no log** e é `@Profile("!producao")`. Com o perfil `producao`
+ativo o bean não existe, nenhum outro foi escrito, e **a aplicação não sobe**.
+
+Isso diverge do padrão usado em `ConfiguracaoDeToken` e `ConfiguracaoDeRastreio`,
+onde a falta de configuração sorteia um valor e segue com um WARN. Lá o prejuízo
+é interno e reversível — sessões caem, uma contagem zera. Aqui, seguir adiante
+significaria responder `202` *"código enviado"* a uma pessoa que nunca receberá
+código nenhum, e deixá-la presa numa tela esperando uma mensagem que não vem.
+
+**Uma ressalva de segurança que precisa estar escrita**, e que não é dívida e
+sim limite do desenho: **confirmar posse não prova de quem é o canal.** Prova
+que quem digitou o código *alcança* aquele contato — e no cadastro assistido o
+acompanhante está ao lado, com o próprio telefone na mão. Quem de fato mitiga a
+FR-062 é a **entrega do aparelho** (FR-059) e a **primeira entrada sozinha**
+(FR-063). Está registrado no javadoc do `ServicoDeVerificacaoDeCanal`, para
+ninguém confiar no portão errado.
+
+### Corrigido hoje: um erro de registro que se propagava
+
+O `CLAUDE.md` já afirmou **244**, **245** e **251** testes de backend em
+momentos diferentes, e o próprio relatório anterior "corrigiu" 244 para 245 —
+errado também.
+
+A causa era um `TEST-...SondaCaminhoDesconhecidoTest.xml` de **10/08/2026**
+parado em `target/surefire-reports/`, de uma classe de sonda que nunca foi
+commitada e não existe em `backend/src` nem em commit algum de branch alguma.
+Valia 1 teste e era somado em toda contagem feita sem `clean`, porque `target/`
+está no `.gitignore` e ninguém limpava.
+
+**A correção não é o número, é o método**: contagem se faz com `clean test`, e o
+que vale é o `Tests run:` do Maven.
+
 ### Dívida técnica
 
 | Item | Impacto | Onde está rastreado |
@@ -383,6 +519,8 @@ inexistente, e a trilha deliberadamente não guarda identificador (FR-040).
 | springdoc fora do `pom.xml` | Sem documentação viva da API | Lacuna aberta desde a T002 |
 | `POST /v1/auth/sair` não existe | `encerrarSessao()` só apaga a credencial local; o refresh **continua válido no servidor até vencer** | **T074/T077**, US4 |
 | Versões diferentes do Flutter entre as máquinas | `pubspec.lock` oscila entre commits | CI usa `channel: stable` sem pino |
+| **Sem provedor de envio de código** | A US5 não fecha o ciclo de ponta a ponta; em `producao` a aplicação não sobe | **T065a** |
+| **Conta assistida abandonada** | Fica pendente para sempre e mantém o canal ocupado | **T065b** |
 
 ### Pendências que dependem de pessoas
 
@@ -390,6 +528,9 @@ inexistente, e a trilha deliberadamente não guarda identificador (FR-040).
 |---|---|---|
 | De onde vem a URL base do servidor | Eduardo | **Sim**, para o aplicativo falar com o backend |
 | Definir `MEMORA_CHAVE_ORIGEM` em produção (≥ 32 bytes) | Quem implantar | **Sim**, na implantação |
+| **Escolher provedor de e-mail/SMS** (T065a) | Equipe — nunca esteve na spec | **Sim**, na implantação: sem ele a aplicação não sobe em `producao` |
+| **Decidir o destino da conta assistida abandonada** (T065b) | Equipe | Não hoje — mas quem desiste no meio perde o e-mail |
+| **Confirmar a `TelaConfirmarCanal`** como parte da US5 | Eduardo | Não — já implementada; falta o aval de que era consequência, e não escopo novo |
 | Contrato documentar o `500` (T027a) | Eduardo | Não |
 | Normalizar as tags acentuadas | Eduardo | Não |
 | Aceitar convite do repositório | Du3101 | Não |
@@ -410,29 +551,37 @@ cada branch sai da anterior, não da `master`. Elas entram **na ordem**, e quand
 a de baixo é mergeada a de cima precisa ser reapontada
 (`gh pr edit N --base master`) — senão o merge não chega à `master`.
 
-### PRs mergeadas — 14
+### PRs mergeadas — 18
 
-Da #1 à #14: especificações das duas features, tokens e temas, componentes,
+Da #1 à #18: especificações das duas features, tokens e temas, componentes,
 fundação do backend, banco, núcleo de segurança, contrato/auditoria/cliente
-gerado, correções de revisão, backend da US1 e o lado do aplicativo da fase 2.
+gerado, correções de revisão, backend da US1, o lado do aplicativo da fase 2,
+o backend da US2, as correções da revisão dele, este relatório e as telas da US2.
 
-### Fila atual — duas PRs abertas e uma branch sem PR
+**A fila foi fechada em 2026-08-24**, na ordem que o empilhamento exigia: #15 →
+reapontar a #16 para `master` → #16 → #17 → #18.
+
+### Fila atual — uma PR aberta
 
 | # | Título | Base | Estado |
 |---|---|---|---|
-| **#15** | Backend da US2: entrada e renovação de sessão (T047-T050) | `master` | 🟡 Aberta — entra primeiro |
-| **#16** | Correções da revisão da PR #15 | `feature/001-fase4-us2-backend` | 🟡 Aberta — empilhada sobre a #15 |
-| — | Telas da US2 (T051-T056), em `feature/001-fase4-us2-app` | — | ⚠️ **Sem PR aberta** |
+| **#19** | Modo assistido — US5 completa (T057-T065) | `master` | 🟢 Aberta, CI verde nos quatro jobs |
 
-**Três commits estão fora da `master`** na linha das telas — `657ef5c` (backend
-da US2), `e9651d7` (passagem de contexto) e `44a2630` (telas da US2) — mais os
-dois commits da PR #16.
+A branch `feature/001-fase5-us5` saiu **da `master`**, e não da anterior — a
+primeira em várias fases que não nasce empilhada, porque a fila estava vazia
+quando ela começou.
 
-⚠️ **Ponto de atenção**: a branch das telas da US2 está empilhada sobre
-`feature/001-fase4-us2-backend`, **não** sobre a branch de correções
-(`fix/001-revisao-fase4-us2`). Ao integrar, confirme a ordem — as correções da
-#16 fecham duas falhas latentes de segurança: conta desativada ressuscitada pelo
-próprio bloqueio, e renovação de sessão que não olhava o estado da conta.
+### Uma lição de fluxo que custou quase um erro
+
+Quando a fila foi fechada, o merge da `master` de volta na branch das telas
+gerou **cinco blocos conflitantes no `CLAUDE.md`** — as duas linhas de trabalho
+tinham editado a mesma passagem de contexto.
+
+Resolver mantendo só um dos lados teria apagado, em silêncio, os avisos que a
+revisão da PR #15 havia acrescentado: a distinção entre `estado` e
+`bloqueada_ate`, duas regras novas de processo e dois portões de segurança.
+**Conflito em documentação de contexto não se resolve escolhendo um lado** — os
+dois lados costumam ser verdade.
 
 ---
 
@@ -440,17 +589,26 @@ próprio bloqueio, e renovação de sessão que não olhava o estado da conta.
 
 ### Imediato
 
-1. **Fechar a fila de PRs**: mergear a #15, reapontar a #16 para a `master`,
-   mergear, e então abrir a PR das telas da US2 já reapontada
+1. **Revisar e mergear a #19** (US5). O CI está verde, mas ela não tem revisão —
+   e foi justamente a revisão da #15 que encontrou duas falhas latentes de
+   segurança que ninguém tinha visto
 2. **Decidir de onde vem a URL base do servidor** — é o que separa o aplicativo
    de conversar com o backend real em vez do simulado
+3. **Escolher um provedor de e-mail/SMS** (T065a). Sem ele a US5 não fecha o
+   ciclo de ponta a ponta, e o servidor **não sobe** com o perfil `producao`
 
-### Próxima fase de implementação — **T057-T065, a US5 (modo assistido)**
+### Próxima fase de implementação — **T066-T078, as US3 e US4**
 
-Protege a autonomia de quem está sendo ajudada por um familiar: o acompanhante
-preenche, mas **nunca** vê a senha nem controla a recuperação. Traz junto a
-confirmação de posse do canal — código de 6 dígitos, validade de 10 min, uso
-único, guardado **hasheado** — que é o que a T047 precisou adiar.
+A **US3** é recuperar o acesso sozinha, sem contato humano. É onde mora o golpe
+que a FR-062 descreve, e ela só é segura porque a US5 acabou de tornar possível
+exigir canal **verificado**: a recuperação nunca envia código para canal cuja
+posse não foi confirmada.
+
+A **US4** fecha a saída deliberada — `POST /v1/auth/sair`, a T074 — e com ela a
+dívida de `encerrarSessao()`, que hoje apaga a credencial só no aparelho e deixa
+o refresh válido no servidor até vencer.
+
+**A feature 001 é desbloqueada ao final da fase 6** (T044 do plano de validação).
 
 ### Depois
 
@@ -497,9 +655,30 @@ Coisas descobertas medindo, não supondo:
 - **O Argon2 não pode rodar dentro da transação.** Achado na revisão da #15:
   vinte requisições simultâneas ao endpoint público seguravam as vinte conexões
   do pool por 240 ms cada, sem tocar no banco.
+- **Jackson mudou de pacote no Spring Boot 4.** `ObjectMapper` agora é
+  `tools.jackson.databind.ObjectMapper`; `com.fasterxml.jackson.databind` não
+  existe mais no classpath. As **anotações** (`@JsonProperty`) continuam no
+  pacote antigo, o que torna o erro confuso: metade dos imports antigos compila.
+- **Bean de `Filter` é registrado duas vezes.** Declarar um
+  `OncePerRequestFilter` como `@Bean` faz o Boot instalá-lo também como filtro
+  de servlet, fora da cadeia do Spring Security — ele passa a rodar duas vezes
+  por requisição. O antídoto é um `FilterRegistrationBean` com
+  `setEnabled(false)`.
+- **Hash lento não é sempre a resposta, e hash rápido também não.** O refresh
+  token usa SHA-256 porque tem 256 bits de entropia, onde Argon2 não compraria
+  nada. O código de verificação usa **Argon2**, porque tem 10⁶ possibilidades e
+  um resumo simples se inverte em tempo desprezível. A pergunta certa não é
+  "qual hash é mais forte", é **quanta entropia o segredo tem**.
+- **Contagem de teste se faz com `clean`.** Um relatório órfão do Surefire, de
+  uma classe que já não existe, sobrevive em `target/` e infla toda soma —
+  fez este projeto acreditar em três números errados seguidos.
+- **Um teste que passa pode estar procurando a coisa errada.** O portão da
+  FR-060 passava com o portão quebrado, porque o finder buscava um ícone que o
+  componente não usa. Só apareceu ao quebrar de propósito. **É por isso que se
+  quebra.**
 
 ---
 
-*Relatório gerado a partir do estado do repositório em 2026-08-24. Os números de
-teste, análise estática e contraste foram obtidos executando as verificações,
-não estimados.*
+*Relatório atualizado a partir do estado do repositório em 2026-08-24, após a
+entrega da US5. Os números de teste, análise estática e contraste foram obtidos
+executando as verificações, não estimados.*

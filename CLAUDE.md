@@ -893,6 +893,41 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 
 ## 10. Pendências que dependem de pessoas
 
+### Aberto em 2026-08-24, ao implementar a US5
+
+Três coisas apareceram ao cumprir a FR-062. **Nenhuma é requisito novo** — todas
+são consequências de fazer o que a spec já pedia, e por isso não passaram por
+`/speckit-clarify`. Se a equipe discordar dessa leitura, o lugar de resolver é a
+spec, não o código.
+
+| # | O quê | Estado |
+|---|---|---|
+| 1 | **Não existe envio de e-mail nem SMS.** Nenhuma tarefa da feature 001 implementa envio; o `plan.md` só cita "envio de código, provedores" ao desenhar a pasta `infra/` | **T065a**, aberta |
+| 2 | **Conta assistida abandonada trava o e-mail.** Fica `PENDENTE_VERIFICACAO` para sempre com o canal ocupado; recadastrar cai no chamariz da FR-010 e a pessoa fica sem saída | **T065b**, aberta |
+| 3 | **`TelaConfirmarCanal` não estava nas tarefas.** Sem ela a conta assistida nasce em espera e não há por onde sair | ✅ feita nesta entrega |
+
+**Sobre o envio, a escolha foi falhar alto.** Existe a porta `EnviadorDeCodigo`
+e um único adaptador, `EnviadorDeCodigoEmLog`, que escreve o código **em claro
+no log** e é `@Profile("!producao")`. Com o perfil `producao` o bean não existe,
+nenhum outro foi escrito, e **a aplicação não sobe**.
+
+Isso **diverge de propósito** do padrão de `ConfiguracaoDeToken` e
+`ConfiguracaoDeRastreio`, onde a falta de configuração sorteia um valor e segue
+com WARN. Lá o prejuízo é interno e reversível — sessões caem, uma contagem
+zera. Aqui, seguir adiante responderia `202` "código enviado" a quem nunca
+receberá nada, e a deixaria presa esperando uma mensagem que não vem.
+
+### O que foi corrigido hoje e não deve voltar
+
+- **A contagem de testes do backend.** Este arquivo já disse 244, 245 e 251.
+  São **271** agora (250 antes da US5), e o método é `mvnw clean test`. Ver o
+  aviso no topo.
+- **A tabela de portões tinha um portão decorativo.** O da FR-060 passava com o
+  portão quebrado. Corrigido e reprovado com a quebra aplicada, que é a única
+  prova que vale.
+
+
+
 | Pendência | Com quem | Bloqueia? |
 |---|---|---|
 | **De onde vem a URL base do servidor** | Eduardo — não está na spec | **Sim, para o app falar com o backend.** Ver o aviso no topo deste arquivo |
@@ -905,34 +940,37 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 | Aceitar convite do repositório | Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
+| **Revisar a PR #19** (US5) | Henrique | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
+| **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
-### Onde a fila parou em 2026-08-24 (fim do dia)
+### Onde a fila parou em 2026-08-24
 
-As PRs **#1 a #18** estão todas na `master`. A US5 está numa branch nova,
-`feature/001-fase5-us5`, tirada da `master` — a primeira em várias fases que
-**não** nasce empilhada.
+**As PRs #1 a #18 estão todas na `master`.** A fila foi fechada nesta data, na
+ordem que o empilhamento exigia: #15 → reapontar a #16 → #16 → #17 → #18.
 
-### Como a fila estava antes, no mesmo dia
-
-**Nenhuma PR aberta.** As #1 a #17 estão todas na `master`: especificações, fase
-1, banco, núcleo de segurança, contrato/erros/auditoria/cliente gerado, backend
-da US1, o lado do aplicativo da fase 2, o backend da US2 (#15), as correções da
-revisão dela (#16) e o relatório de progresso (#17).
-
-| # | O quê | Entrou |
+| # | O quê | Situação |
 |---|---|---|
-| **#15** | Backend da US2 (T047-T050) | 2026-08-24 |
-| **#16** | Correções da revisão da #15 | 2026-08-24, reapontada para `master` antes do merge |
-| **#17** | Relatório de progresso | 2026-08-24 |
+| #15 | Backend da US2 (T047-T050) | ✅ na `master` |
+| #16 | Correções da revisão da #15 | ✅ na `master`, reapontada antes do merge |
+| #17 | Relatório de progresso | ✅ na `master` |
+| #18 | Telas da US2 (T051-T056) | ✅ na `master` |
+| **#19** | **Modo assistido — US5 (T057-T065)** | 🟢 **Aberta**, CI verde, **sem revisão** |
 
-**A única coisa fora da `master` são as telas da US2** (T051-T056), na branch
-`feature/001-fase4-us2-app` — que traz a `master` mesclada de volta neste commit,
-para carregar as correções da #16.
+A branch da US5, `feature/001-fase5-us5`, saiu **da `master`** — a primeira em
+várias fases que não nasce empilhada, porque a fila estava vazia quando ela
+começou.
 
-⚠️ **A regra do empilhamento continua valendo**: quando a PR de baixo entra, a de
-cima precisa ser reapontada com `gh pr edit N --base master`, senão o merge não
-chega à `master`. Aconteceu com a #10 e quase aconteceu com a #16.
+⚠️ **A regra do empilhamento continua valendo** para quando houver fila de novo:
+quando a PR de baixo entra, a de cima precisa ser reapontada com
+`gh pr edit N --base master`, senão o merge não chega à `master`. Aconteceu com
+a #10 e quase aconteceu com a #16.
+
+⚠️ **Conflito de `CLAUDE.md` ao fechar fila é esperado, e não se resolve
+escolhendo um lado.** Ao trazer a `master` de volta para a branch das telas
+foram **cinco blocos conflitantes** — as duas linhas de trabalho editaram a
+mesma passagem de contexto. Ficar só com um lado teria apagado em silêncio os
+avisos que a revisão da #15 acrescentou. Os dois lados costumam ser verdade.
 
 > A proteção da branch `master` **não está ativa** — o GitHub exige plano Pro em
 > repositório privado. A regra de não commitar direto vale por acordo da equipe.
