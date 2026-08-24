@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import br.fatec.memora.autenticacao.dominio.EstadoDaConta;
+import br.fatec.memora.autenticacao.dominio.PessoaUsuaria;
 import br.fatec.memora.autenticacao.dominio.TipoDeEvento;
 import br.fatec.memora.autenticacao.infra.RepositorioCanalContato;
 import br.fatec.memora.autenticacao.infra.RepositorioEventoAutenticacao;
@@ -288,7 +290,64 @@ class EntrarTest extends TesteComBanco {
         }
     }
 
+    /**
+     * A guarda que recusa conta desativada.
+     *
+     * <p>Ela existia sem nenhum teste: os 244 passavam com a guarda funcionando
+     * e passariam iguais com ela removida. A reincidência do bloqueio — o
+     * caminho que chegava a apagar o {@code DESATIVADA} — está em
+     * {@link BloqueioProgressivoNoLoginTest}, porque precisa do relógio
+     * ajustável de lá.
+     */
+    @Nested
+    @DisplayName("Conta desativada não entra")
+    class ContaDesativada {
+
+        /** É a mesma resposta de senha errada, e precisa ser: FR-013. */
+        @Test
+        @DisplayName("senha certa em conta desativada devolve 401 CREDENCIAIS_INVALIDAS")
+        void desativadaNaoEntra() throws Exception {
+            cadastrar("Ana", "email", EMAIL);
+            desativarAConta();
+
+            entrar(EMAIL, SENHA)
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.codigo").value("CREDENCIAIS_INVALIDAS"));
+        }
+
+        @Test
+        @DisplayName("a recusa não abre sessão nenhuma")
+        void naoAbreSessao() throws Exception {
+            cadastrar("Ana", "email", EMAIL);
+            long depoisDoCadastro = sessoes.count();
+            desativarAConta();
+
+            entrar(EMAIL, SENHA);
+
+            assertThat(sessoes.count()).isEqualTo(depoisDoCadastro);
+        }
+
+        /** Entrar recusado não pode reativar o que foi desativado. */
+        @Test
+        @DisplayName("a conta continua desativada depois da tentativa")
+        void continuaDesativada() throws Exception {
+            cadastrar("Ana", "email", EMAIL);
+            desativarAConta();
+
+            entrar(EMAIL, SENHA);
+
+            assertThat(pessoas.findAll())
+                    .allMatch(pessoa -> pessoa.getEstado() == EstadoDaConta.DESATIVADA);
+        }
+    }
+
     // --- apoio ---------------------------------------------------------------
+
+    private void desativarAConta() {
+        PessoaUsuaria pessoa = pessoas.findAll().getFirst();
+        pessoa.desativar();
+        pessoas.saveAndFlush(pessoa);
+    }
 
     private ResultActions cadastrar(String nome, String tipo, String canal) throws Exception {
         String corpo =

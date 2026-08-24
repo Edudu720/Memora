@@ -23,7 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Entrada com identificador e senha (T047, T049, FR-011, FR-013, FR-014).
@@ -72,6 +73,7 @@ public class ServicoDeEntrada {
     private final ServicoDeSessao sessoes;
     private final RegistroDeAuditoria auditoria;
     private final Clock relogio;
+    private final TransactionTemplate transacao;
 
     public ServicoDeEntrada(
             RepositorioPessoaUsuaria pessoas,
@@ -81,7 +83,8 @@ public class ServicoDeEntrada {
             GeradorDeSegredoOpaco gerador,
             ServicoDeSessao sessoes,
             RegistroDeAuditoria auditoria,
-            Clock relogio) {
+            Clock relogio,
+            PlatformTransactionManager gerenciadorDeTransacao) {
         this.pessoas = pessoas;
         this.canais = canais;
         this.verificador = verificador;
@@ -90,6 +93,7 @@ public class ServicoDeEntrada {
         this.sessoes = sessoes;
         this.auditoria = auditoria;
         this.relogio = relogio;
+        this.transacao = new TransactionTemplate(gerenciadorDeTransacao);
     }
 
     /**
@@ -112,36 +116,112 @@ public class ServicoDeEntrada {
     /**
      * Executa a tentativa de entrada.
      *
+     * <h2>Três etapas, e o hash fora de transação nenhuma</h2>
+     *
+     * O método <b>não</b> é {@code @Transactional} inteiro, e isso é
+     * disponibilidade, não estilo. O Hibernate toma a conexão na primeira
+     * consulta e só a devolve no commit; com o Argon2 no meio, cada tentativa
+     * de entrada segurava uma conexão do pool por ~240 ms sem tocar no banco.
+     * Com {@code maximum-pool-size=20}, vinte requisições simultâneas a este
+     * endpoint — público, e que paga o hash até para conta inexistente —
+     * esgotavam o pool e faziam cadastro e renovação esperarem por conexão.
+     *
+     * <p>Daí a divisão: uma transação curta resolve a conta, o hash roda fora,
+     * outra transação curta grava o desfecho. O que a R3 exige continua de pé,
+     * porque o que ela mede é o hash rodar <b>sempre</b> — e ele roda.
+     *
      * @param identificadorInformado e-mail ou telefone, cru como veio da tela
      * @param aparelhoDescricao rótulo do aparelho, para a pessoa reconhecer a
      *     sessão depois; opcional
      */
-    @Transactional
     public Resultado entrar(
             String identificadorInformado, String senha, String aparelhoDescricao) {
 
         Instant agora = relogio.instant();
         String origemHash = ContextoDaRequisicao.atual().origemHash();
 
+        Preparacao preparacao =
+                transacao.execute(status -> preparar(identificadorInformado, origemHash, agora));
+
+        if (preparacao.bloqueada()) {
+            return new Resultado.Bloqueada(preparacao.tentarNovamenteEmSegundos());
+        }
+
+        // Sempre, e antes de qualquer decisao sobre a conta. Ver o cabecalho.
+        // Aqui nao ha transacao aberta, e portanto nenhuma conexao presa.
+        boolean senhaConfere = verificador.confere(senha, preparacao.senhaHash());
+
+        return transacao.execute(
+                status -> concluir(preparacao.pessoaId(), senhaConfere, aparelhoDescricao, agora));
+    }
+
+    /**
+     * O que a primeira transação apura: quem é a conta e se a porta está aberta.
+     *
+     * <p>Carrega apenas {@code pessoaId} e {@code senhaHash} em vez da entidade,
+     * porque a entidade sairia da transação desanexada e o passo seguinte não
+     * poderia gravá-la de qualquer forma.
+     */
+    private record Preparacao(
+            UUID pessoaId, String senhaHash, boolean bloqueada, long tentarNovamenteEmSegundos) {
+
+        /** Conta inexistente não tem id nem hash — o verificador sabe o que fazer. */
+        static Preparacao daConta(PessoaUsuaria pessoa) {
+            return new Preparacao(
+                    pessoa == null ? null : pessoa.getId(),
+                    pessoa == null ? null : pessoa.getSenhaHash(),
+                    false,
+                    0);
+        }
+
+        static Preparacao doBloqueio(long segundos) {
+            return new Preparacao(null, null, true, segundos);
+        }
+    }
+
+    private Preparacao preparar(String identificadorInformado, String origemHash, Instant agora) {
         PessoaUsuaria pessoa = contaDoIdentificador(identificadorInformado);
 
         LimitadorTentativas.Decisao decisao = limitador.avaliar(pessoa, origemHash, agora);
         if (decisao instanceof LimitadorTentativas.Decisao.Bloqueado bloqueado) {
-            // Tentativa durante bloqueio ainda em vigor: nada a contar, mas a
-            // trilha precisa enxergar a insistencia (FR-039).
-            auditoria.registrarMesmoComRollback(
-                    idDe(pessoa), TipoDeEvento.BLOQUEIO, ResultadoDoEvento.FALHA, agora);
-
-            return new Resultado.Bloqueada(bloqueado.tentarNovamenteEmSegundos());
+            // Bloqueio ainda em vigor: nada a contar e, de proposito, nada a
+            // gravar. Escrever um evento por tentativa dava a quem nao esta
+            // autenticado uma escrita sem teto na trilha, no caminho que para
+            // ele e o mais barato — este e o unico que nao paga o Argon2. Com
+            // retencao de 12 meses, insistir era encher a tabela de graca.
+            //
+            // A trilha nao fica cega: as FALHA_ENTRADA que produziram o bloqueio
+            // estao la, e o BLOQUEIO em si e escrito uma vez, quando aplicado,
+            // em `recusar`. O que se perde e a contagem da insistencia depois de
+            // fechada a porta, e ela nao vale uma escrita ilimitada (FR-039).
+            return Preparacao.doBloqueio(bloqueado.tentarNovamenteEmSegundos());
         }
 
-        // Sempre, e antes de qualquer decisao sobre a conta. Ver o cabecalho.
-        boolean senhaConfere = verificador.confere(senha, senhaHashDe(pessoa));
+        return Preparacao.daConta(pessoa);
+    }
+
+    /**
+     * O desfecho, na segunda transação.
+     *
+     * <p>A conta é recarregada porque a instância da primeira transação já veio
+     * desanexada — gravar por cima dela não levaria a alteração ao banco.
+     */
+    private Resultado concluir(
+            UUID pessoaId, boolean senhaConfere, String aparelhoDescricao, Instant agora) {
+
+        PessoaUsuaria pessoa = pessoaId == null ? null : pessoas.findById(pessoaId).orElse(null);
 
         if (!senhaConfere) {
             // Cobre os dois casos que a FR-013 obriga a tratar igual: conta que
             // nao existe e senha que nao confere. Aqui `pessoa` pode ser nula.
             return recusar(pessoa, agora);
+        }
+
+        if (pessoa == null) {
+            // Senha conferiu e a conta sumiu entre as duas transacoes. Nao
+            // acontece na pratica — `confere` com hash nulo sempre devolve
+            // false —, mas devolver sessao para conta nenhuma seria pior.
+            return new Resultado.Recusada();
         }
 
         // Conta desativada nao entra. A verificacao vem DEPOIS do hash de
@@ -167,11 +247,6 @@ public class ServicoDeEntrada {
         return canais.findByValorHash(gerador.hashDe(valor))
                 .flatMap(canal -> pessoas.findById(canal.getPessoaId()))
                 .orElse(null);
-    }
-
-    /** Conta inexistente não tem hash — e o verificador sabe o que fazer com isso. */
-    private String senhaHashDe(PessoaUsuaria pessoa) {
-        return pessoa == null ? null : pessoa.getSenhaHash();
     }
 
     private UUID idDe(PessoaUsuaria pessoa) {

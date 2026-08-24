@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import br.fatec.memora.autenticacao.dominio.PessoaUsuaria;
 import br.fatec.memora.autenticacao.dominio.TipoDeEvento;
 import br.fatec.memora.autenticacao.infra.RepositorioCanalContato;
 import br.fatec.memora.autenticacao.infra.RepositorioEventoAutenticacao;
@@ -201,7 +202,53 @@ class RenovarSessaoTest extends TesteComBanco {
         }
     }
 
+    /**
+     * Desativar a conta precisa fechar as duas portas.
+     *
+     * <p>A entrada já recusava conta desativada e a renovação não olhava o
+     * estado da conta. Como cada renovação rotaciona o refresh e reinicia os 60
+     * dias de validade, quem já tivesse o token seguiria dentro para sempre:
+     * bastava renovar antes dos 15 minutos do token de acesso vencerem.
+     */
+    @Nested
+    @DisplayName("Conta desativada não renova")
+    class ContaDesativada {
+
+        @Test
+        @DisplayName("renovar com conta desativada devolve 401 CREDENCIAIS_INVALIDAS")
+        void desativadaNaoRenova() throws Exception {
+            String refresh = refreshDe(cadastrar().andReturn());
+            desativarAConta();
+
+            renovar(refresh)
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.codigo").value("CREDENCIAIS_INVALIDAS"));
+        }
+
+        /**
+         * A rotação acima já foi confirmada quando a recusa acontece: o token
+         * velho morreu e o novo não chegou a quem chamou. Insistir com o velho
+         * cai na detecção de reuso — e continua sendo 401.
+         */
+        @Test
+        @DisplayName("insistir com o mesmo refresh continua recusado")
+        void insistirContinuaRecusado() throws Exception {
+            String refresh = refreshDe(cadastrar().andReturn());
+            desativarAConta();
+
+            renovar(refresh).andExpect(status().isUnauthorized());
+
+            renovar(refresh).andExpect(status().isUnauthorized());
+        }
+    }
+
     // --- apoio ---------------------------------------------------------------
+
+    private void desativarAConta() {
+        PessoaUsuaria pessoa = pessoas.findAll().getFirst();
+        pessoa.desativar();
+        pessoas.saveAndFlush(pessoa);
+    }
 
     private ResultActions cadastrar() throws Exception {
         String corpo =
