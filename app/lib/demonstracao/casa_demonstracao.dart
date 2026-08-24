@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../design_system/design_system.dart';
 import '../features/autenticacao/data/repositorio_autenticacao_simulado.dart';
-import '../features/autenticacao/presentation/fluxo_cadastro.dart';
+import '../features/autenticacao/data/ultimo_acesso_local.dart';
+import '../features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'tela_componentes.dart';
 
-/// Casca provisória para testar o Design System no aparelho.
+/// Casca provisória para testar o Design System e os fluxos no aparelho.
 ///
-/// Substituída pelas telas reais quando a feature 001 for implementada.
+/// Substituída pelas telas reais quando o Hub existir.
 class CasaDemonstracao extends StatefulWidget {
+  /// Onde fica o identificador do último acesso (FR-012).
+  final UltimoAcesso ultimoAcesso;
+
   /// Cria a casca de demonstração.
-  const CasaDemonstracao({super.key});
+  const CasaDemonstracao({required this.ultimoAcesso, super.key});
 
   @override
   State<CasaDemonstracao> createState() => _CasaDemonstracaoState();
@@ -20,12 +24,18 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
   int _indice = 0;
 
   static const List<ItemNavegacao> _destinos = <ItemNavegacao>[
-    ItemNavegacao(icone: Icons.person_add_outlined, rotulo: 'Cadastro'),
+    ItemNavegacao(icone: Icons.login_outlined, rotulo: 'Entrar'),
     ItemNavegacao(icone: Icons.widgets_outlined, rotulo: 'Componentes'),
     ItemNavegacao(icone: Icons.palette_outlined, rotulo: 'Aparência'),
   ];
 
-  /// Repositório simulado: o backend ainda não expõe o endpoint de cadastro.
+  /// Repositório simulado: o aplicativo ainda não sabe de onde vem a URL base do
+  /// servidor, e essa decisão não está na spec. Trocar por
+  /// `RepositorioAutenticacaoApi` é uma linha, quando a URL for definida.
+  ///
+  /// O simulado reproduz a escada de bloqueio real (5 falhas seguidas, depois
+  /// 1 minuto), para que o estado bloqueado da FR-015 possa ser visto no
+  /// aparelho e não só no teste.
   final RepositorioAutenticacaoSimulado _repositorio =
       RepositorioAutenticacaoSimulado();
 
@@ -35,7 +45,10 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
       body: IndexedStack(
         index: _indice,
         children: <Widget>[
-          FluxoCadastro(repositorio: _repositorio),
+          FluxoAutenticacao(
+            repositorio: _repositorio,
+            ultimoAcesso: widget.ultimoAcesso,
+          ),
           const TelaComponentes(),
           const TelaAparencia(),
         ],

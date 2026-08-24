@@ -79,6 +79,88 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
     }
   }
 
+  @override
+  Future<ResultadoAutenticacao> entrar(DadosDeEntrada dados) async {
+    try {
+      final Response<api.SessaoResposta> resposta =
+          await _api.getSessoApi().authEntrarPost(
+                entrarRequisicao: api.EntrarRequisicao(
+                  identificador: dados.identificador,
+                  senha: dados.senha,
+                ),
+              );
+
+      final api.SessaoResposta? sessao = resposta.data;
+      if (sessao == null) {
+        return const AutenticacaoFalhou(FalhaAutenticacao.inesperada);
+      }
+
+      await _cofre.guardarSessao(
+        tokenAcesso: sessao.tokenAcesso,
+        refreshToken: sessao.refreshToken,
+      );
+
+      return AutenticacaoConcluida(
+        PessoaAutenticada(
+          id: sessao.pessoa.id ?? '',
+          nomeTratamento: sessao.pessoa.nomeTratamento ?? '',
+        ),
+      );
+    } on DioException catch (excecao) {
+      return _falhaDe(excecao);
+    }
+  }
+
+  @override
+  Future<ResultadoAutenticacao> renovarSessao() async {
+    // Sem refresh guardado não há o que renovar. Vale devolver a recusa sem
+    // tocar a rede: uma chamada com corpo vazio geraria um 400 e um evento de
+    // auditoria para algo que já sabíamos aqui.
+    final String? refresh = await _cofre.refreshToken();
+    if (refresh == null || refresh.isEmpty) {
+      return const AutenticacaoFalhou(FalhaAutenticacao.credenciaisInvalidas);
+    }
+
+    try {
+      final Response<api.SessaoResposta> resposta =
+          await _api.getSessoApi().authSessaoRenovarPost(
+                authSessaoRenovarPostRequest:
+                    api.AuthSessaoRenovarPostRequest(refreshToken: refresh),
+              );
+
+      final api.SessaoResposta? sessao = resposta.data;
+      if (sessao == null) {
+        return const AutenticacaoFalhou(FalhaAutenticacao.inesperada);
+      }
+
+      // A gravação do par novo NÃO é detalhe de arrumação. O refresh rotaciona
+      // a cada uso: se guardarmos o antigo, a próxima renovação apresenta um
+      // token já gasto — que é exatamente o sinal que o servidor trata como
+      // roubo, derrubando a família inteira e expulsando a pessoa da conta.
+      await _cofre.guardarSessao(
+        tokenAcesso: sessao.tokenAcesso,
+        refreshToken: sessao.refreshToken,
+      );
+
+      return AutenticacaoConcluida(
+        PessoaAutenticada(
+          id: sessao.pessoa.id ?? '',
+          nomeTratamento: sessao.pessoa.nomeTratamento ?? '',
+        ),
+      );
+    } on DioException catch (excecao) {
+      return _falhaDe(excecao);
+    }
+  }
+
+  @override
+  Future<void> encerrarSessao() async {
+    // Só o cofre. `POST /v1/auth/sair` é a T074 e ainda não existe no servidor:
+    // chamá-lo hoje daria 404, que o tratador converteria em DADOS_INVALIDOS e
+    // deixaria a pessoa presa numa tela de erro ao tentar sair.
+    await _cofre.limpar();
+  }
+
   api.CanalRequisicaoTipoEnum _tipoDoContrato(TipoCanal tipo) => switch (tipo) {
         TipoCanal.email => api.CanalRequisicaoTipoEnum.email,
         TipoCanal.telefone => api.CanalRequisicaoTipoEnum.telefone,

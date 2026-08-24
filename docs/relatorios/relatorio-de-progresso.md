@@ -25,7 +25,7 @@ smartphone** — não faz por elas. A primeira feature entregável é a
 | Tarefas concluídas | **56 de 89** na feature 001 · **44 de 53** na feature 002 |
 | Histórias de usuário entregues | **US1** (criar conta) e **US2** (voltar ao app) |
 | Endpoints implementados | 3 |
-| Testes automatizados | **204** no aplicativo + **245** no backend |
+| Testes automatizados | **204** no aplicativo + **250** no backend |
 | Linhas de código (sem o gerado) | ~10,2 mil de produção · ~7,8 mil de teste |
 
 **Em uma frase**: as duas jornadas de entrada — criar conta e voltar depois —
@@ -308,11 +308,11 @@ Todos os comandos abaixo foram executados nesta data, na branch
 | Análise estática do aplicativo | `flutter analyze` | ✅ **No issues found** (54 s) |
 | Testes do aplicativo | `flutter test` | ✅ **204 testes — All tests passed!** |
 | Contraste da paleta | `python validar_paleta.py` | ✅ **Todos os pares aprovados**, WCAG 2.2 |
-| Testes do backend | `./mvnw test` | ✅ **245 testes, 0 falhas, 0 erros** |
+| Testes do backend | `./mvnw clean test` | ✅ **250 testes, 0 falhas, 0 erros** |
 
 O backend sobe um PostgreSQL real por Testcontainers — o Docker Desktop precisa
-estar rodando, senão a falha aparece longe da causa. A branch de correções da
-revisão (PR #16) leva o total a **251**.
+estar rodando, senão a falha aparece longe da causa. Os 250 já incluem as
+correções da revisão (PR #16), mergeada em 2026-08-24.
 
 O CI (`.github/workflows/verificacao.yml`) roda quatro jobs em toda push e PR:
 contraste da paleta, build e testes do backend, análise e testes do aplicativo,
@@ -325,11 +325,18 @@ e o cliente gerado do contrato.
 | Design System | 139 |
 | Autenticação (aplicativo) | 65 |
 | **Total aplicativo** | **204** |
-| **Backend** | **245** |
-| **Total do projeto** | **449** |
+| **Backend** | **250** |
+| **Total do projeto** | **454** |
 
-> Correção de registro: o `CLAUDE.md` afirmava 244 testes no backend. A contagem
-> real, somada dos relatórios do Surefire nesta execução, é **245**.
+> **Correção de registro — e a correção da correção.** A primeira versão deste
+> relatório dizia 245, corrigindo os 244 do `CLAUDE.md`. Ambos estavam errados,
+> e pelo mesmo motivo: a contagem vinha de somar os XMLs de
+> `target/surefire-reports/` **sem `clean`**, e havia ali um
+> `TEST-...SondaCaminhoDesconhecidoTest.xml` de 10/08/2026 — uma classe de sonda
+> que nunca foi commitada e não existe em `backend/src` nem em commit algum.
+> Valendo 1 teste, ela inflava toda contagem seguinte, porque `target/` está no
+> `.gitignore` e ninguém limpava. Numa execução com `clean`, o `Tests run:` do
+> Maven e a soma dos 26 XMLs concordam: **250**.
 
 ---
 

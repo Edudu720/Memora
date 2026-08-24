@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'demonstracao/casa_demonstracao.dart';
 import 'design_system/design_system.dart';
+import 'features/autenticacao/data/ultimo_acesso_local.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 
 Future<void> main() async {
@@ -11,7 +12,11 @@ Future<void> main() async {
   final ControladorAparencia controlador = ControladorAparencia(repositorio);
   await controlador.carregar();
 
-  runApp(AplicativoMemora(controlador: controlador));
+  final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
+
+  runApp(
+    AplicativoMemora(controlador: controlador, ultimoAcesso: ultimoAcesso),
+  );
 }
 
 /// Raiz do aplicativo Memora.
@@ -23,8 +28,15 @@ class AplicativoMemora extends StatelessWidget {
   /// Controla o tema e a ampliação de texto escolhidos pela pessoa.
   final ControladorAparencia controlador;
 
+  /// Onde fica o identificador do último acesso (FR-012).
+  final UltimoAcesso ultimoAcesso;
+
   /// Cria a raiz do aplicativo.
-  const AplicativoMemora({required this.controlador, super.key});
+  const AplicativoMemora({
+    required this.controlador,
+    required this.ultimoAcesso,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +58,7 @@ class AplicativoMemora extends StatelessWidget {
               fatorDoAplicativo: atual.escalaTexto,
               child: child!,
             ),
-            home: const CasaDemonstracao(),
+            home: CasaDemonstracao(ultimoAcesso: ultimoAcesso),
           );
         },
       ),
