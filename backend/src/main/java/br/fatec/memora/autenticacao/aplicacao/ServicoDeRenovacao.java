@@ -1,6 +1,7 @@
 package br.fatec.memora.autenticacao.aplicacao;
 
 import br.fatec.memora.autenticacao.dominio.CanalContato;
+import br.fatec.memora.autenticacao.dominio.EstadoDaConta;
 import br.fatec.memora.autenticacao.dominio.PessoaUsuaria;
 import br.fatec.memora.autenticacao.infra.RepositorioCanalContato;
 import br.fatec.memora.autenticacao.infra.RepositorioPessoaUsuaria;
@@ -100,6 +101,19 @@ public class ServicoDeRenovacao {
             // acontecer, e defeito nosso — e o certo e recusar, nao devolver
             // sessao para uma conta que ninguem consegue mais identificar.
             LOG.error("Sessao renovada sem conta correspondente. Investigar o vinculo.");
+            return new Resultado.Recusada();
+        }
+
+        if (pessoa.get().getEstado() == EstadoDaConta.DESATIVADA) {
+            // Simetria com o ServicoDeEntrada, e nao zelo extra: sem esta linha,
+            // desativar a conta fecharia so a porta da frente. Quem ja tem o
+            // refresh continuaria rotacionando a cada 15 min, e como a rotacao
+            // reinicia os 60 dias de VALIDADE_DO_REFRESH, o acesso nunca
+            // terminaria.
+            //
+            // A rotacao acima ja foi confirmada: o token velho morreu e o novo
+            // nao chega a quem chamou, entao a familia fica orfa. Insistir com o
+            // token velho cai na deteccao de reuso e derruba a familia inteira.
             return new Resultado.Recusada();
         }
 

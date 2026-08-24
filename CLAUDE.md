@@ -4,13 +4,21 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-15 — backend da US2 (T047-T050)
-**Estado**: fases 2 e 3 e o **backend da US2** completos (**244 testes**), e o
+**Última sessão**: 2026-08-16 — revisão da PR #15, pelo Henrique, na máquina dele
+**Estado**: fases 2 e 3 e o **backend da US2** completos (**250 testes**), e o
 lado do aplicativo ligado ao contrato (**182 testes**). Existem
 `POST /v1/auth/cadastro`, `POST /v1/auth/entrar` e
 `POST /v1/auth/sessao/renovar`. O aplicativo ainda só usa o cadastro.
 **Próximo: T051-T056** — as telas da US2 (login, renovação automática,
 expiração por inatividade). Ver seção 4.
+
+> ⚠️ **Confira o GitHub antes de decidir o que fazer.** Este arquivo já ficou
+> para trás uma vez: em 2026-08-16 ele apontava T030-T032 como próximo passo, e
+> as duas fases seguintes já estavam mergeadas havia dias. Uma sessão inteira
+> quase começou pelo lugar errado. `gh pr list --state all` custa segundos.
+
+> ⚠️ **`estado` da conta não é o mesmo que `bloqueada_ate`.** Ver "Duas coisas
+> que a revisão da #15 mudou", na seção 4, antes de escrever em `estado`.
 
 > ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`.**
 > A troca é de uma linha em `lib/demonstracao/casa_demonstracao.dart`, mas exige
@@ -263,6 +271,58 @@ três vezes durante a espera pularia dois degraus sem ter tido chance de acertar
 pessoa já travada pela transação de fora colocaria duas conexões do mesmo pool
 esperando uma pela outra a cada senha errada.
 
+### Duas coisas que a revisão da #15 mudou — não desfaça sem ler
+
+**1. `estado` da conta e `bloqueada_ate` são coisas separadas.**
+
+`EstadoDaConta` guarda o **ciclo de vida** (`ATIVA`, `DESATIVADA`). A tranca
+temporária do bloqueio tem sua verdade em `bloqueada_ate`, e
+`BLOQUEADA_TEMPORARIAMENTE` é só o reflexo dela. Misturar os dois já custou um
+defeito real: `bloquearAte` escrevia por cima de `DESATIVADA`, e cinco recusas
+apagavam o marcador — passada a tranca, a conta desativada entrava e
+`registrarEntradaBemSucedida` ainda a devolvia a `ATIVA`.
+
+Hoje **`DESATIVADA` é terminal**: nem `bloquearAte` nem
+`registrarEntradaBemSucedida` saem dele, e existe `PessoaUsuaria.desativar()`
+para entrar nele. Reativar é ato explícito, e ainda não existe — quando a US4
+criar, será um método novo, nunca um efeito colateral de login.
+
+**Toda porta que a desativação fecha precisa ser fechada nos dois lados.**
+`entrar` recusava conta desativada e `sessao/renovar` não: como a renovação
+rotaciona o refresh e reinicia os 60 dias, quem já tivesse o token seguiria
+dentro para sempre. Ao criar endpoint autenticado novo, pergunte o mesmo.
+
+**2. O Argon2 não roda dentro de transação.**
+
+`ServicoDeEntrada.entrar` **não** é `@Transactional`. São duas transações curtas
+por `TransactionTemplate` — uma resolve a conta e a decisão do limitador, outra
+grava o desfecho —, com o hash entre elas, fora de transação.
+
+O motivo é disponibilidade: o Hibernate toma a conexão na primeira consulta e só
+a devolve no commit, então o hash de ~240 ms segurava uma conexão do pool sem
+tocar no banco. Com `maximum-pool-size=20`, vinte requisições simultâneas ao
+endpoint **público** esgotavam o pool e faziam cadastro e renovação esperarem.
+
+**A R3 continua de pé**, porque o que ela exige é o hash rodar *sempre*,
+inclusive sem conta — e ele roda. `TempoConstanteTest` e o
+`mesmaOrdemDeGrandeza` do `EntrarTest` seguem passando.
+
+> ⚠️ `ServicoDeCadastro` **ainda tem o mesmo padrão** e não foi tocado nesta
+> revisão. O cadastro é menos atraente para força bruta, mas a conta é a mesma.
+> Vale medir antes de decidir se muda.
+
+**3. O caminho bloqueado não escreve na trilha por tentativa.**
+
+Escrevia um evento `BLOQUEIO` por requisição — no único caminho que não paga o
+Argon2. Era escrita ilimitada, de graça, para quem não está autenticado, numa
+tabela com retenção de 12 meses.
+
+**O que se perde está registrado**: a contagem da insistência depois de fechada
+a porta. O `BLOQUEIO` continua escrito uma vez, quando aplicado, e as
+`FALHA_ENTRADA` que o produziram seguem na trilha. Se a equipe quiser a
+insistência de volta, o caminho é contá-la de forma limitada — **não** voltar ao
+INSERT por requisição.
+
 ### A sessão-chamariz — leia antes de criar endpoint autenticado
 
 `POST /v1/auth/cadastro` responde `201` **idêntica** quando o canal já pertence a
@@ -284,7 +344,7 @@ A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso 
 cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
 entrega o que o corpo escondeu — medido, não suposto.
 
-### Dez portões de segurança, cada um validado quebrando de propósito
+### Doze portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -298,9 +358,12 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Credencial não vai para armazenamento comum | `armazenamento_seguro_test.dart` (V8) | Gravei o token em `SharedPreferences` de propósito: reprovou com `Expected: empty / Actual: Set:['token']` |
 | Latência do login não revela conta | `EntrarTest` | Pus `if (pessoa == null) return recusar(...)` antes do hash: reprovou com **18 ms contra 282 ms** |
 | Bloqueio correto com texto ríspido reprova | `BloqueioProgressivoNoLoginTest` (V6) | Troquei a mensagem por "Conta bloqueada: você excedeu o número de tentativas": a **escada continuou passando** e os 3 testes de texto reprovaram |
+| Bloqueio não ressuscita conta desativada | `BloqueioProgressivoNoLoginTest` | Tirei a guarda de `bloquearAte`: a sexta tentativa devolveu **200**, com `expected:<CLIENT_ERROR> but was:<SUCCESSFUL>` |
+| Renovação recusa conta desativada | `RenovarSessaoTest` | Pus `if (false && ...)` na checagem: reprovou com `expected:<401> but was:<200>` nos dois testes |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
-três realmente pegam.
+doze realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
+conta desativada entrar sem teste nenhum e furada, na revisão da #15.
 
 ### Duas decisões que divergem da pesquisa — reabra se discordar
 
@@ -642,6 +705,25 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   Use `ensureVisible` antes.
 - **`.specify/feature.json`** aponta a feature ativa e **conflita** quando duas
   branches o alteram. Resolva mantendo a feature em que você está.
+- **O Hibernate segura a conexão do commit até o fim da transação.** Ela é
+  tomada na primeira consulta JDBC e só volta no commit — então qualquer coisa
+  cara **entre** as duas prende uma conexão do pool sem tocar no banco. Foi como
+  o Argon2 de 240 ms virou limite de disponibilidade em `entrar`. Para tirar
+  trabalho pesado de dentro da transação sem depender de proxy do Spring, use
+  `TransactionTemplate`: `@Transactional` em método privado **não funciona**,
+  porque a chamada não passa pelo proxy.
+- **Enum de domínio que mistura dois eixos vira defeito.** `EstadoDaConta`
+  guardava ciclo de vida e tranca temporária na mesma coluna, e o bloqueio
+  apagava a desativação. Se dois valores de um enum podem valer ao mesmo tempo,
+  eles não pertencem ao mesmo enum.
+- **`Docker Desktop.exe` precisa estar de pé antes dos testes do backend.**
+  Testcontainers falha com "failed to connect to the docker API at npipe". Subir
+  o Docker leva ~1 min; `.\mvnw test-compile` roda sem ele e já pega erro de
+  compilação, o que economiza a espera quando o problema é sintático.
+- **Teste que passa não prova portão nenhum — e isso já falhou aqui.** A guarda
+  de conta desativada entrou na #15 anunciada na descrição da PR, sem um único
+  teste, e furada. `git grep <a constante que a guarda usa>` em
+  `backend/src/test/` custa segundos e teria mostrado.
 
 ---
 
@@ -651,6 +733,9 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - ❌ Criar componente dentro de `features/` quando ele serve a mais de uma tela
 - ❌ Editar cliente de API gerado à mão
 - ❌ Guardar token em `SharedPreferences` — apenas `flutter_secure_storage`
+- ❌ Empurrar correção de revisão para a branch de outra pessoa — vai em PR
+  própria, empilhada
+- ❌ Entregar guarda de segurança sem um teste que a exercite
 - ❌ Implementar sem spec aprovada
 - ❌ Afirmar que algo passa sem ter rodado a verificação
 - ❌ Supor requisito quando a spec é ambígua — pergunte
@@ -665,22 +750,45 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 | **Contrato passar a documentar o `500`** (T027a) | Eduardo — decisão de spec | Não, mas o servidor já responde algo que o contrato não prevê |
 | **Normalizar as tags acentuadas do `openapi.yaml`** | Eduardo — decisão de spec | Não — nomes mutilados no cliente |
 | **Definir `MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem for implantar | **Sim, na implantação.** Sem ela a chave é sorteada a cada subida e o limite por origem da R4 zera junto; um WARN avisa |
+| **Revisar e mergear a #15, depois a #16** | Eduardo | Não, mas a fase 4 não fecha sem as duas |
+| **Especificar a feature 003 — o produto em si** | Equipe | **Sim, para o Memora existir.** As 001 e 002 são fundação: identidade e vocabulário visual. O Hub, os tutoriais e o ensino não têm spec |
 | Aceitar convite do repositório | Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
-### Onde a fila parou em 2026-08-15
+### Onde a fila parou em 2026-08-16
 
-**Nenhuma PR aberta.** As PRs #8 a #14 entraram todas na `master`: fase 1, banco,
-núcleo de segurança, contrato/erros/auditoria/cliente gerado, correções da
-revisão, backend da US1 e o lado do aplicativo da fase 2.
+**Duas PRs abertas, empilhadas, e a ordem importa:**
 
-A PR desta sessão é a do **backend da US2** (T047-T050), saindo direto da
-`master` — a fila empilhada acabou quando a #14 foi mergeada.
+- **[#15](https://github.com/Edudu720/Memora/pull/15)** — backend da US2
+  (T047-T050), do Eduardo. Base `master`, CI verde nos quatro jobs. **Entra
+  primeiro.** O aval da T047 que ela pedia já foi dado no comentário da revisão.
+- **[#16](https://github.com/Edudu720/Memora/pull/16)** — correções da revisão
+  da #15, do Henrique. Base `feature/001-fase4-us2-backend`. Entra depois.
+
+⚠️ **Quando a #15 for mergeada, a #16 precisa ser reapontada** para `master`
+(`gh pr edit 16 --base master`), senão o merge não chega lá. Foi o que aconteceu
+com a #10.
+
+As PRs #8 a #14 já estão na `master`: fase 1, banco, núcleo de segurança,
+contrato/erros/auditoria/cliente gerado, correções da revisão, backend da US1 e
+o lado do aplicativo da fase 2.
 
 > A proteção da branch `master` **não está ativa** — o GitHub exige plano Pro em
 > repositório privado. A regra de não commitar direto vale por acordo da equipe.
+
+### Como se revisa aqui — o padrão que a #12 criou e a #16 repetiu
+
+**Correção de revisão vai em branch e PR próprias, empilhadas sobre a PR
+revisada.** Não se empurra para a branch de quem escreveu. O diff da revisão
+fica separado do trabalho original, e quem escreveu vê o que mudou em vez de
+descobrir depois.
+
+O comentário na PR revisada traz o veredito, a tabela dos achados e o ponteiro
+para a PR de correção. Elogio específico entra junto — a #12 e a #16 fizeram
+isso, e não é gentileza: dizer **qual** decisão estava certa evita que ela seja
+desfeita na próxima passagem.
 
 ---
 

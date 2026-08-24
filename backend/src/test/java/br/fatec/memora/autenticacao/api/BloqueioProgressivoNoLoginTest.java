@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import br.fatec.memora.autenticacao.dominio.EstadoDaConta;
+import br.fatec.memora.autenticacao.dominio.PessoaUsuaria;
 import br.fatec.memora.autenticacao.dominio.TipoDeEvento;
 import br.fatec.memora.autenticacao.infra.RepositorioCanalContato;
 import br.fatec.memora.autenticacao.infra.RepositorioEventoAutenticacao;
@@ -208,6 +210,42 @@ class BloqueioProgressivoNoLoginTest extends TesteComBanco {
     }
 
     /**
+     * O bloqueio temporário não pode devolver ao ar uma conta desativada.
+     *
+     * <p>{@code estado} guarda duas coisas de naturezas diferentes — o ciclo de
+     * vida da conta e uma tranca cuja verdade mora em {@code bloqueada_ate} —, e
+     * era o bloqueio que apagava o {@code DESATIVADA} escrevendo por cima.
+     * Cinco recusas bastavam para a guarda de {@code ServicoDeEntrada} deixar de
+     * enxergar o que devia recusar.
+     */
+    @Nested
+    @DisplayName("Bloqueio não ressuscita conta desativada")
+    class ContaDesativadaContinuaDesativada {
+
+        @Test
+        @DisplayName("cinco recusas e a espera vencida não devolvem a conta")
+        void bloqueioNaoReativa() throws Exception {
+            desativarAConta();
+
+            // A senha esta certa em todas: quem recusa e o estado da conta. Cada
+            // recusa conta uma falha, e a quinta aplica o bloqueio de 1 minuto,
+            // que e onde o estado era sobrescrito.
+            for (int tentativa = 1; tentativa <= 5; tentativa++) {
+                entrar(SENHA).andExpect(status().is4xxClientError());
+            }
+
+            relogio.avancar(Duration.ofSeconds(61));
+
+            // Sem a correcao, esta e a tentativa que devolvia 200 e ainda
+            // gravava ATIVA: a tranca ja vencera e o DESATIVADA nao existia mais.
+            entrar(SENHA).andExpect(status().is4xxClientError());
+
+            assertThat(pessoas.findAll())
+                    .allMatch(pessoa -> pessoa.getEstado() == EstadoDaConta.DESATIVADA);
+        }
+    }
+
+    /**
      * A revisão de UX que o V6 torna obrigatória.
      *
      * <p>O cenário é explícito: <i>"bloqueio tecnicamente correto com texto
@@ -302,6 +340,12 @@ class BloqueioProgressivoNoLoginTest extends TesteComBanco {
 
     private ResultActions errarSenha() throws Exception {
         return entrar(SENHA_ERRADA);
+    }
+
+    private void desativarAConta() {
+        PessoaUsuaria pessoa = pessoas.findAll().getFirst();
+        pessoa.desativar();
+        pessoas.saveAndFlush(pessoa);
     }
 
     private void errarSenha(int vezes) throws Exception {

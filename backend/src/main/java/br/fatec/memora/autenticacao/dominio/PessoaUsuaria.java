@@ -84,11 +84,17 @@ public class PessoaUsuaria {
      *
      * <p>Zerar aqui é o que impede que falhas espalhadas ao longo de semanas
      * somem até bloquear uma conta legítima.
+     *
+     * <p><b>Conta desativada não volta a ser ativa por aqui.</b> Ver
+     * {@link #bloquearAte}: {@link EstadoDaConta#DESATIVADA} é terminal, e
+     * reativar é ato explícito, não efeito colateral de um login.
      */
     public void registrarEntradaBemSucedida(Instant quando) {
         this.falhasConsecutivas = 0;
         this.bloqueadaAte = null;
-        this.estado = EstadoDaConta.ATIVA;
+        if (this.estado != EstadoDaConta.DESATIVADA) {
+            this.estado = EstadoDaConta.ATIVA;
+        }
         this.ultimoAcessoEm = Objects.requireNonNull(quando, "quando");
     }
 
@@ -103,10 +109,33 @@ public class PessoaUsuaria {
         this.falhasConsecutivas++;
     }
 
-    /** Bloqueia a conta temporariamente até o instante informado (FR-014). */
+    /**
+     * Bloqueia a conta temporariamente até o instante informado (FR-014).
+     *
+     * <p><b>Uma conta desativada não perde esse estado ao ser bloqueada.</b>
+     * {@code estado} guarda duas coisas de naturezas diferentes: o ciclo de vida
+     * da conta ({@code ATIVA}, {@code DESATIVADA}) e uma tranca temporária cuja
+     * verdade real mora em {@code bloqueada_ate}. Sem esta guarda, cinco
+     * tentativas recusadas sobrescreveriam {@code DESATIVADA} com
+     * {@code BLOQUEADA_TEMPORARIAMENTE}, e passado o prazo da tranca a conta
+     * desativada entraria normalmente — apagando de quebra qualquer registro de
+     * que ela um dia foi desativada.
+     */
     public void bloquearAte(Instant limite) {
         this.bloqueadaAte = Objects.requireNonNull(limite, "limite");
-        this.estado = EstadoDaConta.BLOQUEADA_TEMPORARIAMENTE;
+        if (this.estado != EstadoDaConta.DESATIVADA) {
+            this.estado = EstadoDaConta.BLOQUEADA_TEMPORARIAMENTE;
+        }
+    }
+
+    /**
+     * Desativa a conta.
+     *
+     * <p>Estado terminal por decisão: nem o bloqueio temporário nem uma entrada
+     * bem-sucedida saem dele. Reativar é ato explícito, e ainda não existe.
+     */
+    public void desativar() {
+        this.estado = EstadoDaConta.DESATIVADA;
     }
 
     /** Troca o hash da senha. Quem revoga as sessões é a camada de segurança. */
