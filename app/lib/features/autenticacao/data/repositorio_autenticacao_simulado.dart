@@ -220,6 +220,90 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     return const CanalConcluido();
   }
 
+  /// Identificadores que pediram recuperação e para os quais um código
+  /// **realmente** existe. Só para teste.
+  ///
+  /// Repare que este mapa fica vazio quando a conta não existe — e que
+  /// [solicitarRecuperacao] devolve sucesso do mesmo jeito. É a FR-019 em
+  /// miniatura: por fora as duas situações são indistinguíveis; por dentro
+  /// só uma delas tem código.
+  final Map<String, String> recuperacoesPedidas = <String, String>{};
+
+  @override
+  Future<ResultadoDeCanal> solicitarRecuperacao(String identificador) async {
+    await Future<void>.delayed(demora);
+
+    if (falhaForcada != null) {
+      return CanalFalhou(falhaForcada!);
+    }
+
+    final String chave = _normalizar(identificador);
+    final _ContaSimulada? conta = _contas[chave];
+
+    // Conta pendente de verificação não recebe código: a recuperação só aceita
+    // canal com posse confirmada (FR-052). Sem essa regra, o acompanhante que
+    // cadastrasse o próprio contato controlaria a recuperação da conta alheia
+    // para sempre, que é a FR-062 furada por caminho lateral.
+    if (conta != null && !conta.pendenteDeVerificacao) {
+      recuperacoesPedidas[chave] = codigoDaDemonstracao;
+    }
+
+    // Sucesso **sempre**, inclusive sem conta. Devolver falha aqui quando o
+    // identificador não existe seria dizer "essa conta não existe" com outras
+    // palavras — e a tela, que só sabe ler este resultado, contaria.
+    return const CanalConcluido();
+  }
+
+  @override
+  Future<ResultadoAutenticacao> confirmarRecuperacao({
+    required String identificador,
+    required String codigo,
+    required String novaSenha,
+  }) async {
+    await Future<void>.delayed(demora);
+
+    if (falhaForcada != null) {
+      return AutenticacaoFalhou(
+        falhaForcada!,
+        tentarNovamenteEmSegundos:
+            falhaForcada == FalhaAutenticacao.muitasTentativas
+                ? escadaDeBloqueio.first
+                : null,
+      );
+    }
+
+    final String chave = _normalizar(identificador);
+    final _ContaSimulada? conta = _contas[chave];
+    final String? esperado = recuperacoesPedidas[chave];
+
+    // Recusa única: código errado, nunca pedido e conta inexistente dizem a
+    // mesma coisa. Esta é a etapa em que já não há o que esconder sobre a
+    // existência da conta — mas há sobre **em que ponto** quem está tentando
+    // chegou, e é isso que a recusa única nega.
+    if (conta == null || esperado == null || codigo != esperado) {
+      return const AutenticacaoFalhou(FalhaAutenticacao.dadosInvalidos);
+    }
+
+    // Uso único (FR-020): o código sai do mapa antes de a senha trocar.
+    recuperacoesPedidas.remove(chave);
+
+    final _ContaSimulada trocada = _ContaSimulada(
+      senha: novaSenha,
+      pessoa: conta.pessoa,
+      canalId: conta.canalId,
+    );
+    _contas[chave] = trocada;
+
+    // Trocar a senha limpa o bloqueio: quem chegou aqui provou posse do canal,
+    // e continuar barrada depois disso seria punir a pessoa certa.
+    _falhasSeguidas = 0;
+    _bloqueiosAplicados = 0;
+    _bloqueadaAte = null;
+    _ultimaSessao = trocada.pessoa;
+
+    return AutenticacaoConcluida(trocada.pessoa);
+  }
+
   _ContaSimulada? _contaDoCanal(String canalId) {
     for (final _ContaSimulada conta in _contas.values) {
       if (conta.canalId == canalId) return conta;

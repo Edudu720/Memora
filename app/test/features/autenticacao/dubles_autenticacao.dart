@@ -35,6 +35,22 @@ abstract class RepositorioDeTeste implements RepositorioAutenticacao {
   @override
   Future<ResultadoDeCanal> confirmarCanal(String canalId, String codigo) =>
       throw UnimplementedError('confirmarCanal não deveria ser chamado aqui');
+
+  @override
+  Future<ResultadoDeCanal> solicitarRecuperacao(String identificador) =>
+      throw UnimplementedError(
+        'solicitarRecuperacao não deveria ser chamado aqui',
+      );
+
+  @override
+  Future<ResultadoAutenticacao> confirmarRecuperacao({
+    required String identificador,
+    required String codigo,
+    required String novaSenha,
+  }) =>
+      throw UnimplementedError(
+        'confirmarRecuperacao não deveria ser chamado aqui',
+      );
 }
 
 /// [UltimoAcesso] guardado em memória, para teste sem plataforma.

@@ -7,12 +7,14 @@ import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
 import 'controladores/controlador_cadastro.dart';
 import 'controladores/controlador_login.dart';
+import 'controladores/controlador_recuperacao.dart';
 import 'telas/tela_boas_vindas.dart';
 import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
 import 'telas/tela_primeira_entrada.dart';
+import 'telas/tela_recuperacao.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -64,6 +66,7 @@ enum _Etapa {
   confirmarCanal,
   primeiraEntrada,
   login,
+  recuperacao,
   dentro,
 }
 
@@ -83,6 +86,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// velho decidindo o que a pessoa vê.
   ControladorLogin? _login;
 
+  /// Recriado a cada visita à recuperação, pelo mesmo motivo do login: um
+  /// controlador que já concluiu uma troca abriria a tela na etapa final.
+  ControladorRecuperacao? _recuperacao;
+
   _Etapa _etapa = _Etapa.boasVindas;
   PessoaAutenticada? _pessoa;
   bool _avisoNaTela = false;
@@ -98,6 +105,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   void dispose() {
     _cadastro.dispose();
     _login?.dispose();
+    _recuperacao?.dispose();
     _monitor.dispose();
     super.dispose();
   }
@@ -108,6 +116,38 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _login = ControladorLogin(widget.repositorio, widget.ultimoAcesso);
       _etapa = _Etapa.login;
     });
+  }
+
+  /// Leva à recuperação de acesso, levando junto o identificador da tela de
+  /// login (FR-012).
+  ///
+  /// Quem toca em "esqueci minha senha" costuma ter o campo já preenchido —
+  /// pelo último acesso ou pela própria tentativa que acabou de falhar. Pedir
+  /// de novo o que está na tela anterior desfaria a barreira que a FR-012
+  /// removeu, justamente para quem já está com dificuldade.
+  void _irParaRecuperacao() {
+    _recuperacao?.dispose();
+    setState(() {
+      _recuperacao = ControladorRecuperacao(
+        widget.repositorio,
+        identificadorInicial: _login?.identificador ?? '',
+      );
+      _etapa = _Etapa.recuperacao;
+    });
+  }
+
+  /// Senha trocada: a pessoa entra com a sessão que a troca emitiu.
+  ///
+  /// Lembrar o identificador aqui é o mesmo raciocínio do cadastro — trocar a
+  /// senha é um acesso bem-sucedido, e quem acabou de recuperar a conta é
+  /// exatamente quem não deveria ter que digitar o e-mail inteiro na próxima
+  /// vez.
+  Future<void> _recuperou(PessoaAutenticada pessoa) async {
+    await widget.ultimoAcesso.lembrar(
+      _recuperacao!.identificador.trim().toLowerCase(),
+    );
+    if (!mounted) return;
+    _entrou(pessoa);
   }
 
   /// Conclusão do cadastro, que já é um acesso autenticado (FR-009).
@@ -238,6 +278,12 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           controlador: _login!,
           aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
           aoEntrar: _entrou,
+          aoRecuperar: _irParaRecuperacao,
+        ),
+      _Etapa.recuperacao => TelaRecuperacao(
+          controlador: _recuperacao!,
+          aoVoltar: () => setState(() => _etapa = _Etapa.login),
+          aoConcluir: _recuperou,
         ),
       // Qualquer toque adia a expiração — inclusive rolar a tela, que é
       // atividade de quem está lendo, não de quem foi embora.

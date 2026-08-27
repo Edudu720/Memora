@@ -198,6 +198,39 @@ abstract interface class RepositorioAutenticacao {
   /// conta existe mas não entra. A recusa é uma só — código errado, vencido, já
   /// usado e canal alheio dizem a mesma coisa.
   Future<ResultadoDeCanal> confirmarCanal(String canalId, String codigo);
+
+  /// Pede um código para recuperar o acesso (FR-018, FR-019).
+  ///
+  /// **Responde igual exista a conta ou não.** O servidor devolve `202`
+  /// sempre, e este método devolve [CanalConcluido] sempre que a chamada
+  /// chegar — inclusive para um identificador que não pertence a ninguém.
+  /// [CanalFalhou] aqui significa *não consegui perguntar*, e nunca *essa
+  /// conta não existe*: distinguir os dois casos daria a quem tentasse a lista
+  /// de quem tem conta no Memora, que é o que a FR-019 existe para negar.
+  ///
+  /// Só vai para canal **verificado** — é o que a FR-052 exige, e o que o modo
+  /// assistido da US5 tornou possível: sem posse confirmada, um acompanhante
+  /// que cadastrasse o próprio contato controlaria a recuperação da conta
+  /// alheia para sempre (FR-062).
+  Future<ResultadoDeCanal> solicitarRecuperacao(String identificador);
+
+  /// Define a senha nova com o código recebido (FR-020, FR-021).
+  ///
+  /// Devolve sessão porque a troca **já é um acesso**: a pessoa provou posse
+  /// do canal e escolheu a senha, e mandá-la digitar de novo o que acabou de
+  /// criar seria burocracia. O contrato responde `200` com sessão por isso.
+  ///
+  /// A recusa é **uma só** — código errado, vencido e já usado dizem a mesma
+  /// coisa, como na confirmação de canal. Separá-los contaria a quem está
+  /// adivinhando em que ponto do espaço de códigos ele chegou.
+  ///
+  /// Do outro lado, o servidor **revoga todas as sessões** (FR-021) e notifica
+  /// pelo canal cadastrado (FR-022). Nada disso é responsabilidade daqui.
+  Future<ResultadoAutenticacao> confirmarRecuperacao({
+    required String identificador,
+    required String codigo,
+    required String novaSenha,
+  });
 }
 
 /// Resultado de uma operação sobre canal de contato.
