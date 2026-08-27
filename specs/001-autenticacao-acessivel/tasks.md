@@ -284,10 +284,10 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Aplicativo
 
-- [ ] T070 [US3] Criar `TelaRecuperacao` usando `CampoCodigo`
-- [ ] T071 [US3] Exibir aviso permanente em `app/lib/features/autenticacao/presentation/widgets/aviso_antigolpe.dart` — o Memora **nunca** pede senha por telefone, mensagem ou e-mail (FR-023)
-- [ ] T072 [US3] Tratar código expirado em `app/lib/features/autenticacao/presentation/controladores/controlador_recuperacao.dart`, com caminho para solicitar outro
-- [ ] T073 [US3] Escrever teste de widget em `app/test/features/autenticacao/tela_recuperacao_test.dart`
+- [X] T070 [US3] Criar `TelaRecuperacao` usando `CampoCodigo`
+- [X] T071 [US3] Exibir aviso permanente em `app/lib/features/autenticacao/presentation/widgets/aviso_antigolpe.dart` — o Memora **nunca** pede senha por telefone, mensagem ou e-mail (FR-023)
+- [X] T072 [US3] Tratar código expirado em `app/lib/features/autenticacao/presentation/controladores/controlador_recuperacao.dart`, com caminho para solicitar outro
+- [X] T073 [US3] Escrever teste de widget em `app/test/features/autenticacao/tela_recuperacao_test.dart`
 
 ---
 
