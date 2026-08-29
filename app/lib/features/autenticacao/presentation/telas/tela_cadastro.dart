@@ -80,19 +80,19 @@ class _TelaCadastroState extends State<TelaCadastro> {
 
   /// Texto de erro na persona da Memora: acolhedor e sem culpar a pessoa.
   String _mensagemDe(FalhaAutenticacao falha) => switch (falha) {
-        FalhaAutenticacao.semConexao =>
-          'Não consegui falar com a internet agora. Seus dados continuam '
-              'aqui, é só tentar de novo.',
-        FalhaAutenticacao.muitasTentativas =>
-          'Tudo bem, acontece! Vamos esperar alguns minutinhos antes de '
-              'tentar de novo.',
-        FalhaAutenticacao.dadosInvalidos =>
-          'Alguma informação não foi aceita. Pode conferir comigo?',
-        FalhaAutenticacao.credenciaisInvalidas =>
-          'Esses dados não conferem. Vamos tentar de novo com calma?',
-        FalhaAutenticacao.inesperada =>
-          'Algo não saiu como eu esperava. Vamos tentar mais uma vez?',
-      };
+    FalhaAutenticacao.semConexao =>
+      'Não consegui falar com a internet agora. Seus dados continuam '
+          'aqui, é só tentar de novo.',
+    FalhaAutenticacao.muitasTentativas =>
+      'Tudo bem, acontece! Vamos esperar alguns minutinhos antes de '
+          'tentar de novo.',
+    FalhaAutenticacao.dadosInvalidos =>
+      'Alguma informação não foi aceita. Pode conferir comigo?',
+    FalhaAutenticacao.credenciaisInvalidas =>
+      'Esses dados não conferem. Vamos tentar de novo com calma?',
+    FalhaAutenticacao.inesperada =>
+      'Algo não saiu como eu esperava. Vamos tentar mais uma vez?',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -113,125 +113,129 @@ class _TelaCadastroState extends State<TelaCadastro> {
             top: false,
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(MemoraEspacamento.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const TextoMemora(
-                    'Vou te pedir só o necessário. Nada de CPF, banco ou '
-                    'documento — eu nunca preciso disso 😊',
-                  ),
-
-                  // Modo assistido (decisão D3): perguntado logo no início.
-                  const SizedBox(height: MemoraEspacamento.xl),
-                  OpcaoSelecionavel(
-                    rotulo: 'Tem alguém te ajudando agora?',
-                    descricao: c.modoAssistido
-                        ? 'Na hora da senha eu vou pedir o celular de volta '
-                            'para você'
-                        : 'Toque aqui se um filho ou neto estiver junto',
-                    selecionada: c.modoAssistido,
-                    aoSelecionar: () =>
-                        c.definirModoAssistido(!c.modoAssistido),
-                  ),
-
-                  const SizedBox(height: MemoraEspacamento.xxl),
-                  CampoTexto(
-                    key: TelaCadastro.chaveNome,
-                    rotulo: 'Como posso te chamar?',
-                    textoAjuda: 'É assim que eu vou falar com você',
-                    erro: c.erroNome,
-                    aoMudar: c.informarNome,
-                    habilitado: !c.enviando,
-                  ),
-
-                  const SizedBox(height: MemoraEspacamento.xl),
-                  const TextoMemora.tituloSecao('Como você quer entrar?'),
-                  const SizedBox(height: MemoraEspacamento.sm),
-                  const TextoMemora.apoio(
-                    'Escolha só um. O outro você pode adicionar depois.',
-                  ),
-                  const SizedBox(height: MemoraEspacamento.md),
-                  for (final TipoCanal tipo in TipoCanal.values) ...<Widget>[
-                    OpcaoSelecionavel(
-                      rotulo: tipo.rotulo,
-                      selecionada: c.tipoCanal == tipo,
-                      aoSelecionar: () => c.escolherTipoCanal(tipo),
+              child: CartaoComAvatar(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    const TextoMemora(
+                      'Vou te pedir só o necessário. Nada de CPF, banco ou '
+                      'documento — eu nunca preciso disso 😊',
                     ),
-                    const SizedBox(height: MemoraEspacamento.sm),
-                  ],
 
-                  const SizedBox(height: MemoraEspacamento.md),
-                  CampoTexto(
-                    key: TelaCadastro.chaveCanal,
-                    rotulo: c.tipoCanal == TipoCanal.email
-                        ? 'Seu e-mail'
-                        : 'Seu telefone',
-                    textoAjuda: c.tipoCanal == TipoCanal.email
-                        ? 'Usamos para você entrar e recuperar a senha'
-                        : 'Usamos para você entrar e recuperar a senha',
-                    erro: c.erroCanal,
-                    tipoTeclado: c.tipoCanal == TipoCanal.email
-                        ? TextInputType.emailAddress
-                        : TextInputType.phone,
-                    aoMudar: c.informarCanal,
-                    habilitado: !c.enviando,
-                  ),
-
-                  const SizedBox(height: MemoraEspacamento.xl),
-                  // No modo assistido o formulário PARA aqui, e o campo de
-                  // senha só aparece depois que o aparelho volta para a pessoa
-                  // dona da conta (FR-059). Um aviso no lugar disso seria lido
-                  // depois de a senha já ter sido digitada — tarde demais, com
-                  // o acompanhante já tendo visto o que este modo protege.
-                  if (!c.podeDigitarSenha)
-                    BotaoPrimario(
-                      key: TelaCadastro.chavePedirAparelho,
-                      rotulo: 'Agora vamos criar a senha',
-                      icone: Icons.arrow_forward,
-                      aoTocar: c.podePedirOAparelho && widget.aoEntregarAparelho != null
-                          ? widget.aoEntregarAparelho
-                          : null,
-                    )
-                  else ...<Widget>[
-                    // Regras exibidas ANTES de digitar (FR-008).
-                    RegrasDeSenha(atendidas: c.regrasAtendidas),
-                    const SizedBox(height: MemoraEspacamento.md),
-                    CampoSenha(
-                      key: TelaCadastro.chaveSenha,
-                      rotulo: 'Crie sua senha',
-                      textoAjuda: 'Use uma frase que só você lembre',
-                      aoMudar: c.informarSenha,
-                      // No modo assistido, revelar a senha entregaria ao
-                      // acompanhante o segredo que este modo protege (FR-060).
-                      permitirRevelar: !c.modoAssistido,
-                    ),
-                  ],
-
-                  if (c.estado == EstadoCadastro.comErro &&
-                      c.falha != null) ...<Widget>[
+                    // Modo assistido (decisão D3): perguntado logo no início.
                     const SizedBox(height: MemoraEspacamento.xl),
-                    MensagemErro(
-                      mensagem: _mensagemDe(c.falha!),
-                      aoTentarNovamente: c.tentarNovamente,
+                    OpcaoSelecionavel(
+                      rotulo: 'Tem alguém te ajudando agora?',
+                      descricao: c.modoAssistido
+                          ? 'Na hora da senha eu vou pedir o celular de volta '
+                                'para você'
+                          : 'Toque aqui se um filho ou neto estiver junto',
+                      selecionada: c.modoAssistido,
+                      aoSelecionar: () =>
+                          c.definirModoAssistido(!c.modoAssistido),
                     ),
-                  ],
 
-                  const SizedBox(height: MemoraEspacamento.xxl),
-                  // Enquanto a senha não pode ser digitada não existe o que
-                  // enviar, e dois botões primários na mesma tela dividiriam a
-                  // atenção de quem precisa de um caminho só.
-                  if (c.podeDigitarSenha)
-                    if (c.enviando)
-                      const Carregando(mensagem: 'Estou criando sua conta...')
-                    else
-                      BotaoPrimario(
-                        key: TelaCadastro.chaveEnviar,
-                        rotulo: 'Criar minha conta',
-                        icone: Icons.check,
-                        aoTocar: c.podeEnviar ? c.enviar : null,
+                    const SizedBox(height: MemoraEspacamento.xxl),
+                    CampoTexto(
+                      key: TelaCadastro.chaveNome,
+                      rotulo: 'Como posso te chamar?',
+                      textoAjuda: 'É assim que eu vou falar com você',
+                      erro: c.erroNome,
+                      aoMudar: c.informarNome,
+                      habilitado: !c.enviando,
+                    ),
+
+                    const SizedBox(height: MemoraEspacamento.xl),
+                    const TextoMemora.tituloSecao('Como você quer entrar?'),
+                    const SizedBox(height: MemoraEspacamento.sm),
+                    const TextoMemora.apoio(
+                      'Escolha só um. O outro você pode adicionar depois.',
+                    ),
+                    const SizedBox(height: MemoraEspacamento.md),
+                    for (final TipoCanal tipo in TipoCanal.values) ...<Widget>[
+                      OpcaoSelecionavel(
+                        rotulo: tipo.rotulo,
+                        selecionada: c.tipoCanal == tipo,
+                        aoSelecionar: () => c.escolherTipoCanal(tipo),
                       ),
-                  const SizedBox(height: MemoraEspacamento.xxl),
-                ],
+                      const SizedBox(height: MemoraEspacamento.sm),
+                    ],
+
+                    const SizedBox(height: MemoraEspacamento.md),
+                    CampoTexto(
+                      key: TelaCadastro.chaveCanal,
+                      rotulo: c.tipoCanal == TipoCanal.email
+                          ? 'Seu e-mail'
+                          : 'Seu telefone',
+                      textoAjuda: c.tipoCanal == TipoCanal.email
+                          ? 'Usamos para você entrar e recuperar a senha'
+                          : 'Usamos para você entrar e recuperar a senha',
+                      erro: c.erroCanal,
+                      tipoTeclado: c.tipoCanal == TipoCanal.email
+                          ? TextInputType.emailAddress
+                          : TextInputType.phone,
+                      aoMudar: c.informarCanal,
+                      habilitado: !c.enviando,
+                    ),
+
+                    const SizedBox(height: MemoraEspacamento.xl),
+                    // No modo assistido o formulário PARA aqui, e o campo de
+                    // senha só aparece depois que o aparelho volta para a pessoa
+                    // dona da conta (FR-059). Um aviso no lugar disso seria lido
+                    // depois de a senha já ter sido digitada — tarde demais, com
+                    // o acompanhante já tendo visto o que este modo protege.
+                    if (!c.podeDigitarSenha)
+                      BotaoPrimario(
+                        key: TelaCadastro.chavePedirAparelho,
+                        rotulo: 'Agora vamos criar a senha',
+                        icone: Icons.arrow_forward,
+                        aoTocar:
+                            c.podePedirOAparelho &&
+                                widget.aoEntregarAparelho != null
+                            ? widget.aoEntregarAparelho
+                            : null,
+                      )
+                    else ...<Widget>[
+                      // Regras exibidas ANTES de digitar (FR-008).
+                      RegrasDeSenha(atendidas: c.regrasAtendidas),
+                      const SizedBox(height: MemoraEspacamento.md),
+                      CampoSenha(
+                        key: TelaCadastro.chaveSenha,
+                        rotulo: 'Crie sua senha',
+                        textoAjuda: 'Use uma frase que só você lembre',
+                        aoMudar: c.informarSenha,
+                        // No modo assistido, revelar a senha entregaria ao
+                        // acompanhante o segredo que este modo protege (FR-060).
+                        permitirRevelar: !c.modoAssistido,
+                      ),
+                    ],
+
+                    if (c.estado == EstadoCadastro.comErro &&
+                        c.falha != null) ...<Widget>[
+                      const SizedBox(height: MemoraEspacamento.xl),
+                      MensagemErro(
+                        mensagem: _mensagemDe(c.falha!),
+                        aoTentarNovamente: c.tentarNovamente,
+                      ),
+                    ],
+
+                    const SizedBox(height: MemoraEspacamento.xxl),
+                    // Enquanto a senha não pode ser digitada não existe o que
+                    // enviar, e dois botões primários na mesma tela dividiriam a
+                    // atenção de quem precisa de um caminho só.
+                    if (c.podeDigitarSenha)
+                      if (c.enviando)
+                        const Carregando(mensagem: 'Estou criando sua conta...')
+                      else
+                        BotaoPrimario(
+                          key: TelaCadastro.chaveEnviar,
+                          rotulo: 'Criar minha conta',
+                          icone: Icons.check,
+                          aoTocar: c.podeEnviar ? c.enviar : null,
+                        ),
+                    const SizedBox(height: MemoraEspacamento.xxl),
+                  ],
+                ),
               ),
             ),
           ),
