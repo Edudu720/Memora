@@ -26,28 +26,51 @@ barato de construir, e insustentável nos três pontos acima.
 
 ---
 
-## R2 — Modelo: `claude-opus-5`
+## R2 — O provedor de IA fica em aberto
 
-**Decisão**: `claude-opus-5`, com **thinking adaptativo** e **streaming**.
+**Decisão**: a escolha do provedor e do modelo é **da equipe**, e não deste
+plano. O que o plano fixa é a **porta** que a protege.
 
-**Motivo**: é o padrão da plataforma, e a tarefa não é trivial — a assistente
-precisa entender pedido escrito com erro de digitação (FR-007), decidir se
-ensina ou oferece executar (FR-014), e nunca inventar caminho (FR-012). Um passo
-a passo inventado leva uma pessoa idosa a tocar em coisas que ela não pretendia.
+**Motivo**: a escolha envolve custo recorrente, conta a ser criada e paga, e
+critérios que ninguém mediu ainda. Fixá-la aqui seria decidir por preferência —
+e o Princípio IV existe para impedir exatamente isso.
 
-| Modelo | Entrada / Saída por 1M | Observação |
-|---|---|---|
-| `claude-opus-5` | **US$ 5 / US$ 25** | Escolhido |
-| `claude-sonnet-5` | US$ 2 / US$ 10 | Troca de uma linha, se a equipe quiser |
-| `claude-haiku-4-5` | US$ 1 / US$ 5 | Mais barato; menos confiável no julgamento de ensinar × executar |
+**Como isso não trava a feature**: o resto do sistema conhece apenas
+`ClienteDaAssistente`, uma porta com um método. O adaptador do provedor é a
+única classe que importa o SDK dele.
 
-**A troca de modelo é uma linha** em `ClienteClaude`. Baixar o modelo é decisão
-da equipe, não do plano — e vale medir com conversas reais antes, porque o
-prejuízo de um passo a passo errado recai sobre quem tem menos condição de
-perceber o erro.
+Consequência prática, e é grande: **quase toda a feature é construída sem
+provedor nenhum.** Hub, catálogos, `AutorizadorDeAcao`, trilha, telas, o
+armazenamento local da conversa e todos os testes rodam contra
+`ClienteDaAssistenteSimulado`, com roteiros fixos. Só a última fatia depende da
+escolha — e ela é uma classe.
 
-**Streaming** porque o público é o que menos tolera tela parada: ver a resposta
-aparecendo é o que diferencia *"está pensando"* de *"travou"* (SC-007).
+### O que precisa ser verdade, seja qual for o provedor
+
+| Requisito | Por quê |
+|---|---|
+| **Chamada de ferramenta** (o modelo consegue pedir uma ação estruturada) | Sem isso, a sugestão viria como texto solto e o `AutorizadorDeAcao` teria que interpretar prosa — que é exatamente o tipo de análise frágil que a FR-022 evita |
+| **Streaming** | O público do Memora é o que menos tolera tela parada: ver a resposta aparecendo é o que diferencia *"está pensando"* de *"travou"* (SC-007) |
+| **Instrução de sistema** que a mensagem da pessoa não sobrescreve | A FR-034: conteúdo externo é dado, nunca instrução |
+| **Português do Brasil** com qualidade | A persona da Memora é acolhedora e sem jargão. Tradução malfeita quebra a voz antes de quebrar o conteúdo |
+| **Custo previsível por token**, com preço público | A R3 faz o custo crescer com os turnos; sem preço claro não dá para dimensionar o teto da R7 |
+| **Retenção de dados conhecida** | O que trafega é conversa de pessoa idosa. Provedor que treina com o que recebe é incompatível com a classificação Confidencial da spec |
+
+O último item merece peso: **a D3 recusou guardar a conversa no nosso servidor
+para não criar um acervo sobre pessoas idosas.** Escolher um provedor que guarde
+e treine com esse conteúdo desfaria a decisão por fora, e ninguém perceberia lendo
+o nosso código.
+
+### Como decidir
+
+Rode o mesmo punhado de conversas reais nos candidatos, com a persona já escrita,
+e compare: acerta o passo a passo do aplicativo de verdade? Inventa caminho
+quando não sabe (FR-012)? Respeita *um passo por vez* (FR-008)? Oferece executar
+antes de ensinar (FR-014)?
+
+**Não escolha por preço na tabela.** Um passo a passo inventado leva a pessoa a
+tocar no que não pretendia, e o prejuízo recai sobre quem tem menos condição de
+perceber o erro — o custo por token é a parte barata da conta.
 
 ---
 
@@ -144,8 +167,8 @@ esbarra nele —, o lugar de resolver é a spec.
 
 ## R8 — Sem provedor configurado, a aplicação não sobe
 
-**Decisão**: sem a chave da API, o bean do `ClienteClaude` não existe e o perfil
-`producao` **não sobe**. Em desenvolvimento, um `ClienteDaAssistenteSimulado`
+**Decisão**: sem a chave da API, o bean do adaptador não existe e o perfil
+`producao` **não sobe**. Em desenvolvimento, `ClienteDaAssistenteSimulado`
 responde com roteiros fixos.
 
 **Motivo**: é a mesma escolha do `EnviadorDeCodigo` na US5 da feature 001, e pelo
@@ -191,6 +214,7 @@ a feature 001 já estabeleceu.
 
 | # | O quê | Para quem |
 |---|---|---|
-| 1 | **Conta e chave da Claude API**, e quem paga | Equipe — bloqueia a integração real |
+| 1 | **Escolher o provedor de IA e o modelo**, contra os critérios da R2 | Equipe — **não bloqueia a construção**, só a última fatia |
+| 1b | **Conta e chave do provedor escolhido**, e quem paga | Equipe — bloqueia a integração real |
 | 2 | **Semear o catálogo**: quais aplicativos entram como cotidianos e quais serviços entram como sensíveis | Equipe — decide o alcance da assistente |
 | 3 | **Teto de conversas por dia**: qual número | Equipe — número arbitrário sem uso real para medir |

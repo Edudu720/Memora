@@ -24,8 +24,10 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"; cd backend; .\mvnw clean test
 cd app; flutter analyze; flutter test
 ```
 
-Sem chave da Claude API configurada, o perfil `producao` **não sobe** (R8), e o
-desenvolvimento usa o cliente simulado.
+O **provedor de IA ainda não foi escolhido** (R2). Todos os cenários abaixo
+rodam contra `ClienteDaAssistenteSimulado`, com roteiros fixos — inclusive os
+portões de segurança, que não dependem de qual modelo responde. Sem chave
+configurada, o perfil `producao` **não sobe** (R8).
 
 ---
 

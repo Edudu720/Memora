@@ -8,7 +8,14 @@
 
 O Hub substitui a tela provisória `_TelaDentro` e é o destino do caminho de volta
 de todas as telas. A assistente conversa por um endpoint **autenticado** do
-backend, que fala com a Claude API — a chave nunca chega ao aparelho.
+backend, e é o backend que fala com o provedor de IA — a chave nunca chega ao
+aparelho.
+
+**O provedor ainda não foi escolhido** (decisão da equipe, ver
+[R2](research.md#r2--o-provedor-de-ia-fica-em-aberto)). Isso não trava nada: ele
+entra atrás da porta `ClienteDaAssistente`, e quase toda a feature — Hub,
+catálogos, o autorizador, a trilha, as telas — é construída e testada contra o
+cliente simulado, sem depender de qual provedor será.
 
 A decisão que organiza toda a arquitetura é a **FR-022**: *a saída do modelo não
 é autorização*. O modelo pode **sugerir** abrir um aplicativo; quem decide se
@@ -24,8 +31,9 @@ que o catálogo não permita** — que é a diferença entre um assistente e um 
 **Language/Version**: Java 21 (backend) · Dart 3.11 / Flutter 3.41 (aplicativo)
 
 **Primary Dependencies**: Spring Boot 4.1, Spring Security, Spring Data JPA ·
-`com.anthropic:anthropic-java` 2.34.0 · Flutter, `dio` (já presente pelo cliente
-gerado)
+Flutter, `dio` (já presente pelo cliente gerado) · **provedor de IA a definir**
+pela equipe — entra como dependência só do adaptador, atrás da porta
+`ClienteDaAssistente`
 
 **Storage**: PostgreSQL 16 — **catálogo de serviços** e **trilha de auditoria**.
 O conteúdo das conversas **não** é persistido no servidor (FR-047); ele vive no
@@ -83,6 +91,7 @@ justificadas no [research.md](research.md):
 | Decisão | Por que o simples não serve |
 |---|---|
 | Conversa enviada inteira a cada turno | A FR-047 proíbe guardar conteúdo no servidor. Sessão no servidor seria mais barata em tokens e criaria o acervo que a D3 recusou |
+| Porta + adaptador para o provedor de IA | O provedor está em aberto. Chamar o SDK direto do serviço amarraria a feature a uma escolha que a equipe ainda não fez, e a troca exigiria mexer na regra de negócio |
 | Catálogo no banco, e não em arquivo de configuração | A FR-022 exige autorização consultável e auditável; mudança de catálogo não pode exigir novo build para tirar um aplicativo do ar |
 
 ## Project Structure
@@ -121,8 +130,9 @@ backend/src/main/java/br/fatec/memora/assistente/
 │   ├── CategoriaDoServico.java         # SENSIVEL | COTIDIANO
 │   └── EventoDaAssistente.java         # trilha, somente inserção
 ├── infra/
-│   ├── ClienteDaAssistente.java        # porta
-│   ├── ClienteClaude.java              # adaptador sobre anthropic-java
+│   ├── ClienteDaAssistente.java        # porta — o resto do sistema só a conhece
+│   ├── ClienteDaAssistenteSimulado.java # roteiros fixos, para construir sem provedor
+│   ├── <Provedor>ClienteDaAssistente.java # adaptador do provedor escolhido
 │   ├── PersonaDaMemora.java            # o system prompt, versionado
 │   └── repositorios Spring Data
 └── seguranca/
@@ -157,7 +167,7 @@ levou a US3 da feature 001 a ter uma tela com três etapas.
 ## Como a conversa acontece
 
 ```
- app                        backend                       Claude API
+ app                        backend                    provedor de IA
   │                            │                              │
   │ POST /assistente/conversa  │                              │
   │  (histórico + mensagem) ──▶│                              │
@@ -201,10 +211,10 @@ por conta, e o que fazer sem provedor configurado.
 
 | Princípio | Situação após o desenho |
 |---|---|
-| I | ✅ O `AutorizadorDeAcao` é o portão, e o `LimitePorConta` impede que o custo da API vire negação de serviço |
+| I | ✅ O `AutorizadorDeAcao` é o portão, e o `LimitePorConta` impede que o custo da API vire negação de serviço. A porta `ClienteDaAssistente` também é de segurança: nenhuma regra de autorização mora no adaptador do provedor |
 | II | ✅ `PersonaDaMemora` é versionada e testada; a recusa de serviço sensível não depende do texto do modelo |
 | III | ✅ Sem componente visual novo fora do Design System |
 | IV | ✅ Nenhum requisito inventado; o limite de gasto é decisão de arquitetura, registrada no research |
-| V | ✅ `dominio` não conhece `infra`; `ClienteDaAssistente` é porta, e o adaptador Claude é substituível |
+| V | ✅ `dominio` não conhece `infra`; `ClienteDaAssistente` é porta, e o adaptador do provedor é substituível — que é o que mantém a escolha em aberto |
 | VI | ✅ Confirmação no app, autorização no backend, trilha imutável no banco |
 | VII | ✅ O ensino é a instrução central da persona, e a SC-003 é o portão de saída |
