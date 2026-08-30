@@ -76,16 +76,25 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     }
 
     final String chave = _normalizar(dados.canal);
+    final String canalId = 'canal-${chave.hashCode.abs()}';
     final PessoaAutenticada pessoa = PessoaAutenticada(
       id: 'simulado-${dados.canal.hashCode.abs()}',
       nomeTratamento: dados.nomeTratamento,
+      canalId: canalId,
     );
 
     // Canal já cadastrado devolve o MESMO resultado de um cadastro novo, e não
     // sobrescreve a conta existente. Qualquer diferença observável aqui
     // revelaria a existência da conta (FR-010).
     if (!canaisJaCadastrados.contains(chave) && !_contas.containsKey(chave)) {
-      _contas[chave] = _ContaSimulada(senha: dados.senha, pessoa: pessoa);
+      _contas[chave] = _ContaSimulada(
+        senha: dados.senha,
+        pessoa: pessoa,
+        // A conta assistida existe mas nao entra ate a posse ser confirmada,
+        // como o servidor faz com PENDENTE_VERIFICACAO.
+        pendenteDeVerificacao: dados.modoAssistido,
+        canalId: canalId,
+      );
     }
 
     _ultimaSessao = pessoa;
@@ -116,7 +125,12 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     }
 
     final _ContaSimulada? conta = _contas[_normalizar(dados.identificador)];
-    final bool confere = conta != null && conta.senha == dados.senha;
+    // Conta assistida que ainda nao confirmou o canal nao entra, e a recusa e a
+    // mesma de senha errada: dizer "confirme seu canal" contaria a quem tentou
+    // que aquele identificador tem conta (FR-013).
+    final bool confere = conta != null &&
+        conta.senha == dados.senha &&
+        !conta.pendenteDeVerificacao;
 
     if (!confere) {
       _falhasSeguidas++;
@@ -158,6 +172,61 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
   @override
   Future<void> encerrarSessao() async => _ultimaSessao = null;
 
+  /// O código que o simulado sempre "envia".
+  ///
+  /// Fixo de propósito: não há como ler um SMS numa demonstração, e sortear
+  /// seis dígitos que ninguém consegue descobrir tornaria o modo assistido
+  /// impossível de mostrar no aparelho. **O servidor real sorteia** — ver
+  /// `GeradorDeCodigoNumerico`.
+  static const String codigoDaDemonstracao = '123456';
+
+  /// Códigos pedidos nesta execução, por canal. Só para teste.
+  final Map<String, String> codigosEnviados = <String, String>{};
+
+  @override
+  Future<ResultadoDeCanal> enviarCodigoDeCanal(String canalId) async {
+    await Future<void>.delayed(demora);
+
+    if (falhaForcada != null) {
+      return CanalFalhou(falhaForcada!);
+    }
+
+    // Responde igual exista o canal ou não, como o servidor: o `202` do
+    // contrato existe justamente para este caminho não virar oráculo.
+    codigosEnviados[canalId] = codigoDaDemonstracao;
+    return const CanalConcluido();
+  }
+
+  @override
+  Future<ResultadoDeCanal> confirmarCanal(String canalId, String codigo) async {
+    await Future<void>.delayed(demora);
+
+    if (falhaForcada != null) {
+      return CanalFalhou(falhaForcada!);
+    }
+
+    if (codigo != codigoDaDemonstracao) {
+      return const CanalFalhou(FalhaAutenticacao.dadosInvalidos);
+    }
+
+    final _ContaSimulada? conta = _contaDoCanal(canalId);
+    if (conta == null) {
+      return const CanalFalhou(FalhaAutenticacao.dadosInvalidos);
+    }
+
+    // Confirmar a posse é o que conclui o cadastro assistido: daqui em diante a
+    // conta entra.
+    conta.pendenteDeVerificacao = false;
+    return const CanalConcluido();
+  }
+
+  _ContaSimulada? _contaDoCanal(String canalId) {
+    for (final _ContaSimulada conta in _contas.values) {
+      if (conta.canalId == canalId) return conta;
+    }
+    return null;
+  }
+
   /// Cria uma conta **sem passar pelo cadastro**, e sem abrir sessão.
   ///
   /// Existe para teste e demonstração. Dentro de `testWidgets` o relógio é
@@ -167,14 +236,19 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     required String identificador,
     required String senha,
     required String nome,
+    bool pendenteDeVerificacao = false,
   }) {
     final String chave = _normalizar(identificador);
+    final String canalId = 'canal-${chave.hashCode.abs()}';
     _contas[chave] = _ContaSimulada(
       senha: senha,
       pessoa: PessoaAutenticada(
         id: 'simulado-${chave.hashCode.abs()}',
         nomeTratamento: nome,
+        canalId: canalId,
       ),
+      pendenteDeVerificacao: pendenteDeVerificacao,
+      canalId: canalId,
     );
   }
 
@@ -193,5 +267,16 @@ class _ContaSimulada {
   final String senha;
   final PessoaAutenticada pessoa;
 
-  const _ContaSimulada({required this.senha, required this.pessoa});
+  /// A conta existe mas nao entra ate a posse do canal ser confirmada
+  /// (FR-062). Deixa de ser verdade quando o codigo certo e digitado.
+  bool pendenteDeVerificacao;
+
+  final String canalId;
+
+  _ContaSimulada({
+    required this.senha,
+    required this.pessoa,
+    required this.canalId,
+    this.pendenteDeVerificacao = false,
+  });
 }

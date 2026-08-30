@@ -69,10 +69,7 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
       );
 
       return AutenticacaoConcluida(
-        PessoaAutenticada(
-          id: sessao.pessoa.id ?? '',
-          nomeTratamento: sessao.pessoa.nomeTratamento ?? dados.nomeTratamento,
-        ),
+        _pessoaDe(sessao, padraoDoNome: dados.nomeTratamento),
       );
     } on DioException catch (excecao) {
       return _falhaDe(excecao);
@@ -100,12 +97,7 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
         refreshToken: sessao.refreshToken,
       );
 
-      return AutenticacaoConcluida(
-        PessoaAutenticada(
-          id: sessao.pessoa.id ?? '',
-          nomeTratamento: sessao.pessoa.nomeTratamento ?? '',
-        ),
-      );
+      return AutenticacaoConcluida(_pessoaDe(sessao));
     } on DioException catch (excecao) {
       return _falhaDe(excecao);
     }
@@ -142,12 +134,7 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
         refreshToken: sessao.refreshToken,
       );
 
-      return AutenticacaoConcluida(
-        PessoaAutenticada(
-          id: sessao.pessoa.id ?? '',
-          nomeTratamento: sessao.pessoa.nomeTratamento ?? '',
-        ),
-      );
+      return AutenticacaoConcluida(_pessoaDe(sessao));
     } on DioException catch (excecao) {
       return _falhaDe(excecao);
     }
@@ -159,6 +146,100 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
     // chamá-lo hoje daria 404, que o tratador converteria em DADOS_INVALIDOS e
     // deixaria a pessoa presa numa tela de erro ao tentar sair.
     await _cofre.limpar();
+  }
+
+  @override
+  Future<ResultadoDeCanal> enviarCodigoDeCanal(String canalId) async {
+    if (!await _autenticarChamada()) {
+      return const CanalFalhou(FalhaAutenticacao.credenciaisInvalidas);
+    }
+
+    try {
+      await _api.getCanaisDeContatoApi().canaisCanalIdCodigoPost(
+            canalId: canalId,
+          );
+      return const CanalConcluido();
+    } on DioException catch (excecao) {
+      return _falhaDeCanal(excecao);
+    }
+  }
+
+  @override
+  Future<ResultadoDeCanal> confirmarCanal(String canalId, String codigo) async {
+    if (!await _autenticarChamada()) {
+      return const CanalFalhou(FalhaAutenticacao.credenciaisInvalidas);
+    }
+
+    try {
+      await _api.getCanaisDeContatoApi().canaisCanalIdVerificarPost(
+            canalId: canalId,
+            canaisCanalIdVerificarPostRequest:
+                api.CanaisCanalIdVerificarPostRequest(codigo: codigo),
+          );
+      return const CanalConcluido();
+    } on DioException catch (excecao) {
+      return _falhaDeCanal(excecao);
+    }
+  }
+
+  /// Traduz a pessoa do contrato, com o canal principal junto.
+  ///
+  /// O canal escolhido é o marcado como `principal`; não havendo nenhum, cai no
+  /// primeiro. Hoje a resposta traz sempre um só, mas a FR-050 prevê um segundo
+  /// canal adicionado depois do primeiro acesso — e aí "o primeiro da lista"
+  /// deixaria de ser o certo sem aviso nenhum.
+  PessoaAutenticada _pessoaDe(
+    api.SessaoResposta sessao, {
+    String padraoDoNome = '',
+  }) {
+    final List<api.Canal> canais = sessao.pessoa.canais ?? const <api.Canal>[];
+    final api.Canal? principal = canais.isEmpty
+        ? null
+        : canais.firstWhere(
+            (api.Canal canal) => canal.principal ?? false,
+            orElse: () => canais.first,
+          );
+
+    return PessoaAutenticada(
+      id: sessao.pessoa.id ?? '',
+      nomeTratamento: sessao.pessoa.nomeTratamento ?? padraoDoNome,
+      canalId: principal?.id,
+      canalVerificado: principal?.verificado ?? false,
+    );
+  }
+
+  /// Põe o token de acesso no cliente gerado antes de uma chamada autenticada.
+  ///
+  /// Estes são os **primeiros** caminhos autenticados do aplicativo: até aqui
+  /// todos os endpoints eram públicos, e por isso nada configurava o cabeçalho.
+  ///
+  /// O nome `tokenDeAcesso` não é escolha nossa — é a chave do `securityScheme`
+  /// no `openapi.yaml`, e é por ela que o interceptor gerado casa o token com a
+  /// operação. Mudá-la no contrato quebra isto em silêncio, sem erro de
+  /// compilação.
+  Future<bool> _autenticarChamada() async {
+    final String? token = await _cofre.tokenAcesso();
+    if (token == null || token.isEmpty) {
+      return false;
+    }
+    _api.setBearerAuth('tokenDeAcesso', token);
+    return true;
+  }
+
+  /// Converte a falha do transporte em falha de canal.
+  ///
+  /// Reaproveita a tradução de [_falhaDe] em vez de duplicar a tabela de
+  /// códigos: o servidor devolve os mesmos, e duas tabelas divergiriam na
+  /// primeira vez que alguém acrescentasse um.
+  ResultadoDeCanal _falhaDeCanal(DioException excecao) {
+    final ResultadoAutenticacao traduzida = _falhaDe(excecao);
+    return switch (traduzida) {
+      AutenticacaoFalhou(:final FalhaAutenticacao falha) => CanalFalhou(falha),
+      // Inalcancavel: _falhaDe so produz falha. O ramo existe porque o switch e
+      // exaustivo, e transformar sucesso em sucesso aqui seria mentira.
+      AutenticacaoConcluida() =>
+        const CanalFalhou(FalhaAutenticacao.inesperada),
+    };
   }
 
   api.CanalRequisicaoTipoEnum _tipoDoContrato(TipoCanal tipo) => switch (tipo) {

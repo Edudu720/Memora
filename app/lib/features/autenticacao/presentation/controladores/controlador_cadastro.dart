@@ -67,6 +67,7 @@ class ControladorCadastro extends ChangeNotifier {
   String _senha = '';
   TipoCanal _tipoCanal = TipoCanal.email;
   bool _modoAssistido = false;
+  bool _aparelhoEntregue = false;
 
   EstadoCadastro _estado = EstadoCadastro.preenchendo;
   FalhaAutenticacao? _falha;
@@ -84,6 +85,13 @@ class ControladorCadastro extends ChangeNotifier {
 
   /// Se há acompanhante ajudando (decisão D3).
   bool get modoAssistido => _modoAssistido;
+
+  /// A senha já pode ser digitada?
+  ///
+  /// No modo assistido, **não** até o aparelho voltar para a pessoa dona da
+  /// conta (FR-059). Enquanto isto for falso a tela esconde o campo de senha —
+  /// que é o que "interromper o fluxo ao chegar na senha" significa na prática.
+  bool get podeDigitarSenha => !_modoAssistido || _aparelhoEntregue;
 
   /// Estado atual do formulário.
   EstadoCadastro get estado => _estado;
@@ -106,7 +114,22 @@ class ControladorCadastro extends ChangeNotifier {
 
   /// O formulário pode ser enviado.
   bool get podeEnviar =>
-      _nome.trim().length >= 2 && _canalValido && senhaValida && !enviando;
+      _nome.trim().length >= 2 &&
+      _canalValido &&
+      senhaValida &&
+      podeDigitarSenha &&
+      !enviando;
+
+  /// O cadastro já pode pedir o aparelho de volta (FR-059).
+  ///
+  /// Exige nome e canal preenchidos: interromper antes disso devolveria o
+  /// aparelho no meio do preenchimento, que é justamente a parte em que a ajuda
+  /// é bem-vinda.
+  bool get podePedirOAparelho =>
+      _modoAssistido &&
+      !_aparelhoEntregue &&
+      _nome.trim().length >= 2 &&
+      _canalValido;
 
   bool get _canalValido {
     final String v = _canal.trim();
@@ -161,8 +184,18 @@ class ControladorCadastro extends ChangeNotifier {
   }
 
   /// Liga ou desliga o modo assistido.
+  ///
+  /// Desligar **não** apaga o fato de o aparelho já ter sido entregue: quem
+  /// chegou até a senha e desmarcou a opção continua com o aparelho na mão, e
+  /// esconder o campo de novo seria um passo sem sentido.
   void definirModoAssistido(bool assistido) {
     _modoAssistido = assistido;
+    notifyListeners();
+  }
+
+  /// Registra que o aparelho voltou à pessoa dona da conta (FR-059).
+  void confirmarEntregaDoAparelho() {
+    _aparelhoEntregue = true;
     notifyListeners();
   }
 

@@ -26,6 +26,9 @@ class TelaCadastro extends StatefulWidget {
   /// Chave do botão que envia o cadastro.
   static const Key chaveEnviar = Key('cadastro.enviar');
 
+  /// Chave do botão que pede o aparelho de volta, no modo assistido.
+  static const Key chavePedirAparelho = Key('cadastro.pedir_aparelho');
+
   /// Controlador do formulário.
   final ControladorCadastro controlador;
 
@@ -35,11 +38,19 @@ class TelaCadastro extends StatefulWidget {
   /// Acionada ao voltar.
   final VoidCallback? aoVoltar;
 
+  /// Acionada quando o modo assistido chega na senha (FR-059).
+  ///
+  /// Opcional para que a tela continue montável sozinha em teste e na vitrine.
+  /// Sem ela, o botão que pede o aparelho aparece desabilitado — nunca some:
+  /// um modo assistido sem saída visível seria pior que um botão inerte.
+  final VoidCallback? aoEntregarAparelho;
+
   /// Cria a tela de cadastro.
   const TelaCadastro({
     required this.controlador,
     required this.aoConcluir,
     this.aoVoltar,
+    this.aoEntregarAparelho,
     super.key,
   });
 
@@ -167,18 +178,34 @@ class _TelaCadastroState extends State<TelaCadastro> {
                   ),
 
                   const SizedBox(height: MemoraEspacamento.xl),
-                  // Regras exibidas ANTES de digitar (FR-008).
-                  RegrasDeSenha(atendidas: c.regrasAtendidas),
-                  const SizedBox(height: MemoraEspacamento.md),
-                  CampoSenha(
-                    key: TelaCadastro.chaveSenha,
-                    rotulo: 'Crie sua senha',
-                    textoAjuda: 'Use uma frase que só você lembre',
-                    aoMudar: c.informarSenha,
-                    // No modo assistido, revelar a senha entregaria ao
-                    // acompanhante o segredo que este modo protege (FR-060).
-                    permitirRevelar: !c.modoAssistido,
-                  ),
+                  // No modo assistido o formulário PARA aqui, e o campo de
+                  // senha só aparece depois que o aparelho volta para a pessoa
+                  // dona da conta (FR-059). Um aviso no lugar disso seria lido
+                  // depois de a senha já ter sido digitada — tarde demais, com
+                  // o acompanhante já tendo visto o que este modo protege.
+                  if (!c.podeDigitarSenha)
+                    BotaoPrimario(
+                      key: TelaCadastro.chavePedirAparelho,
+                      rotulo: 'Agora vamos criar a senha',
+                      icone: Icons.arrow_forward,
+                      aoTocar: c.podePedirOAparelho && widget.aoEntregarAparelho != null
+                          ? widget.aoEntregarAparelho
+                          : null,
+                    )
+                  else ...<Widget>[
+                    // Regras exibidas ANTES de digitar (FR-008).
+                    RegrasDeSenha(atendidas: c.regrasAtendidas),
+                    const SizedBox(height: MemoraEspacamento.md),
+                    CampoSenha(
+                      key: TelaCadastro.chaveSenha,
+                      rotulo: 'Crie sua senha',
+                      textoAjuda: 'Use uma frase que só você lembre',
+                      aoMudar: c.informarSenha,
+                      // No modo assistido, revelar a senha entregaria ao
+                      // acompanhante o segredo que este modo protege (FR-060).
+                      permitirRevelar: !c.modoAssistido,
+                    ),
+                  ],
 
                   if (c.estado == EstadoCadastro.comErro &&
                       c.falha != null) ...<Widget>[
@@ -190,15 +217,19 @@ class _TelaCadastroState extends State<TelaCadastro> {
                   ],
 
                   const SizedBox(height: MemoraEspacamento.xxl),
-                  if (c.enviando)
-                    const Carregando(mensagem: 'Estou criando sua conta...')
-                  else
-                    BotaoPrimario(
-                      key: TelaCadastro.chaveEnviar,
-                      rotulo: 'Criar minha conta',
-                      icone: Icons.check,
-                      aoTocar: c.podeEnviar ? c.enviar : null,
-                    ),
+                  // Enquanto a senha não pode ser digitada não existe o que
+                  // enviar, e dois botões primários na mesma tela dividiriam a
+                  // atenção de quem precisa de um caminho só.
+                  if (c.podeDigitarSenha)
+                    if (c.enviando)
+                      const Carregando(mensagem: 'Estou criando sua conta...')
+                    else
+                      BotaoPrimario(
+                        key: TelaCadastro.chaveEnviar,
+                        rotulo: 'Criar minha conta',
+                        icone: Icons.check,
+                        aoTocar: c.podeEnviar ? c.enviar : null,
+                      ),
                   const SizedBox(height: MemoraEspacamento.xxl),
                 ],
               ),

@@ -104,6 +104,14 @@ public class ServicoDeRenovacao {
             return new Resultado.Recusada();
         }
 
+        // Compara com DESATIVADA em vez de usar permiteEntrar(): conta
+        // PENDENTE_VERIFICACAO PRECISA renovar. Ela nao entra pela porta da
+        // frente (ServicoDeEntrada recusa), mas esta no meio de confirmar o
+        // canal, e o token de acesso vale 15 minutos. Recusar a renovacao aqui
+        // deixaria sem sessao quem demorasse mais que isso para digitar o
+        // codigo — e sem saida, porque o canal ja esta ocupado pela propria
+        // conta pendente e um novo cadastro cairia no chamariz da FR-010. A
+        // pessoa ficaria permanentemente fora, com o e-mail dela queimado.
         if (pessoa.get().getEstado() == EstadoDaConta.DESATIVADA) {
             // Simetria com o ServicoDeEntrada, e nao zelo extra: sem esta linha,
             // desativar a conta fecharia so a porta da frente. Quem ja tem o

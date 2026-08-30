@@ -224,10 +224,13 @@ public class ServicoDeEntrada {
             return new Resultado.Recusada();
         }
 
-        // Conta desativada nao entra. A verificacao vem DEPOIS do hash de
-        // proposito: adiantada, ela responderia mais rapido que uma senha errada
-        // e diria a quem mede que aquele identificador tem conta.
-        if (pessoa.getEstado() == EstadoDaConta.DESATIVADA) {
+        // Conta desativada nao entra, e conta que ainda espera confirmacao de
+        // canal tambem nao (FR-062): deixa-la entrar concluiria na pratica o
+        // cadastro assistido que o V4 manda nao concluir. A verificacao vem
+        // DEPOIS do hash de proposito: adiantada, ela responderia mais rapido
+        // que uma senha errada e diria a quem mede que aquele identificador tem
+        // conta.
+        if (!pessoa.getEstado().permiteEntrar()) {
             return recusar(pessoa, agora);
         }
 
