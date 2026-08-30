@@ -102,13 +102,24 @@ public class EventoDaAssistente {
      * <p>Fábrica separada para que a ausência de serviço seja escolha explícita
      * de quem chama, e não um {@code null} esquecido — mesmo raciocínio de
      * {@code EventoAutenticacao.semConta}.
+     *
+     * <p><b>Aceita o pedido mesmo sem serviço</b>, e essa combinação é o caso
+     * mais importante da trilha: quando o modelo sugere abrir algo que o
+     * catálogo recusa, não há serviço a apontar — o pacote não existe lá —, mas
+     * há um pedido, e é ele que diz o que estava sendo tentado.
+     *
+     * <p>Uma versão anterior desta fábrica descartava o pedido, e o evento
+     * {@code ACAO_RECUSADA} — o mais valioso de todos — era gravado vazio. O
+     * cenário H6 pegou isso.
      */
     public static EventoDaAssistente semServico(
             UUID pessoaId,
             TipoDeEventoDaAssistente tipo,
+            String pedidoResumido,
             String origemHash,
             Instant ocorridoEm) {
-        return new EventoDaAssistente(pessoaId, tipo, null, null, origemHash, ocorridoEm);
+        return new EventoDaAssistente(
+                pessoaId, tipo, null, pedidoResumido, origemHash, ocorridoEm);
     }
 
     private EventoDaAssistente(

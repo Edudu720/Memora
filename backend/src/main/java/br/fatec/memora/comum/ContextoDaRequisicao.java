@@ -45,7 +45,25 @@ public record ContextoDaRequisicao(String traceId, String requestId, String orig
         ATUAL.set(contexto);
     }
 
-    static void limpar() {
+    /**
+     * Reinstala um contexto em <b>outra thread</b>.
+     *
+     * <p>Existe para resposta transmitida: o {@code SseEmitter} escreve numa
+     * thread diferente da que recebeu a requisição, e {@code ThreadLocal} não
+     * atravessa esse limite. Sem reinstalar, a trilha sairia sem origem de
+     * rede — perdendo justamente o campo que permite notar rajadas da mesma
+     * origem.
+     *
+     * <p>Quem chama <b>precisa</b> chamar {@link #limpar()} num {@code finally}.
+     * Em pool de threads o descuido não deixa o contexto vazio: deixa o de
+     * outra pessoa.
+     */
+    public static void instalar(ContextoDaRequisicao contexto) {
+        ATUAL.set(contexto);
+    }
+
+    /** Remove o contexto da thread atual. Sempre num {@code finally}. */
+    public static void limpar() {
         ATUAL.remove();
     }
 
