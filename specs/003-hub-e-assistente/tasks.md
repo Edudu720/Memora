@@ -102,14 +102,15 @@ lugar para onde eu sempre volto*.
 **Teste independente**: entregar o aparelho a uma pessoa de 65+ recém-cadastrada,
 sem instrução, e pedir que ela diga em voz alta o que cada porta faz.
 
-- [ ] T024 [P] [US1] Criar `app/lib/features/hub/domain/hub.dart` com as portas e o que cada uma abre
-- [ ] T025 [US1] Criar `app/lib/features/hub/presentation/telas/tela_hub.dart`, com nome escrito **e** ilustração em cada porta (FR-002)
-- [ ] T026 [US1] Fazer o Hub exibir **apenas** portas construídas (FR-003) — porta que não abre nada não aparece
-- [ ] T027 [US1] Substituir a `_TelaDentro` provisória de `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart` pelo Hub
-- [ ] T028 [US1] Garantir o caminho de volta ao Hub, sempre na mesma posição, em todas as telas da feature (FR-005)
-- [ ] T029 [P] [US1] Desenhar as ilustrações das portas em `app/assets/ilustracoes/`, no estilo já estabelecido
-- [ ] T030 [US1] Escrever o cenário **H1** em `app/test/features/hub/tela_hub_test.dart`: percorrer as portas e navegar para cada uma
-- [ ] T031 [US1] Quebrar o T026 — acrescentar uma porta *Planos* apontando para tela inexistente — e **confirmar que o T030 reprova**
+- [X] T024 [P] [US1] Criar `app/lib/features/hub/domain/hub.dart` com as portas e o que cada uma abre
+- [X] T025 [US1] Criar `app/lib/features/hub/presentation/telas/tela_hub.dart`, com nome escrito **e** ilustração em cada porta (FR-002)
+- [X] T026 [US1] Fazer o Hub exibir **apenas** portas construídas (FR-003) — porta que não abre nada não aparece
+- [X] T027 [US1] Substituir a `_TelaDentro` provisória de `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart` pelo Hub
+- [X] T028 [US1] Garantir o caminho de volta ao Hub, sempre na mesma posição, em todas as telas da feature (FR-005)
+- [X] T029 [P] [US1] Desenhar as ilustrações das portas em `app/assets/ilustracoes/`, no estilo já estabelecido
+  > **Resolvida com ícone, não com ilustração.** O Hub reusa o casal no cabeçalho, e cada porta leva **ícone grande + rótulo + descrição** — que é o que a FR-002 pede (nome escrito **e** elemento visual). Cinco ilustrações distintas competiriam entre si numa tela cujo trabalho é ser lida rápido, e ícone com texto é mais legível a 200% de ampliação.
+- [X] T030 [US1] Escrever o cenário **H1** em `app/test/features/hub/tela_hub_test.dart`: percorrer as portas e navegar para cada uma
+- [X] T031 [US1] Quebrar o T026 — acrescentar uma porta *Planos* apontando para tela inexistente — e **confirmar que o T030 reprova**
 
 ---
 
