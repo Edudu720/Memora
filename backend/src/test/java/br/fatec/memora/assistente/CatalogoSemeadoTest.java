@@ -52,17 +52,17 @@ class CatalogoSemeadoTest extends TesteComBanco {
     }
 
     @Test
-    @DisplayName("o Gov.br esta no catalogo, como servico que so se ensina")
-    void govBrEstaLaComoSensivel() {
-        // Decisao do Eduardo, 2026-08-29: comecar so com o Gov.br entre os
-        // sensiveis, e acrescentar banco, INSS e saude depois.
+    @DisplayName("Gov.br e Meu INSS estao no catalogo, como servicos que so se ensinam")
+    void servicosDoGovernoSaoSensiveis() {
+        // Decisao do Eduardo, 2026-08-29: Gov.br na V5, Meu INSS na V6. Banco e
+        // saude continuam fora, aguardando a equipe.
         assertThat(
                         servicos
                                 .findByCategoriaAndAtivoTrueOrderByNomeExibido(
                                         CategoriaDoServico.SENSIVEL)
                                 .stream()
                                 .map(ServicoConhecido::getNomeExibido))
-                .contains("Gov.br");
+                .contains("Gov.br", "Meu INSS");
     }
 
     @Test
