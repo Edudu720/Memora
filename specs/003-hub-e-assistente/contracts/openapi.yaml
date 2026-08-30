@@ -1,0 +1,272 @@
+openapi: 3.1.0
+
+info:
+  title: Memora — API da Assistente
+  version: 1.0.0
+  description: |
+    Contrato dos endpoints da feature 003. **Acrescenta** ao contrato da
+    feature 001; não o substitui. As tags aqui são ASCII de propósito — as
+    acentuadas da 001 saíram mutiladas no cliente gerado (`sesso_api.dart`), e a
+    T027a existe para corrigir aquilo.
+
+    ## O que este contrato reflete
+
+    - A resposta do modelo **não é autorização** (FR-022). O campo `acao` só
+      aparece quando o servidor já autorizou contra o catálogo.
+    - Nenhum endpoint devolve conteúdo de conversa (FR-047): o servidor não o
+      guarda, e o histórico viaja no pedido.
+    - Serviço `SENSIVEL` nunca traz `identificador_android` (FR-041).
+
+servers:
+  - url: https://api.memora.app/v1
+    description: Produção
+  - url: http://localhost:8080/v1
+    description: Desenvolvimento local
+
+tags:
+  - name: Assistente
+  - name: Catalogo
+
+paths:
+  /assistente/conversa:
+    post:
+      tags: [Assistente]
+      summary: Conversar com a assistente
+      description: |
+        Recebe o histórico e a mensagem nova, e transmite a resposta por
+        **Server-Sent Events**. O público do Memora é o que menos tolera tela
+        parada: ver o texto aparecendo é o que diferencia "está pensando" de
+        "travou" (SC-007).
+
+        O campo `acao` de um evento `acao` **já passou** pelo catálogo. Sugestão
+        do modelo que não passa nunca chega aqui.
+      security:
+        - tokenDeAcesso: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mensagem]
+              properties:
+                mensagem:
+                  type: string
+                  maxLength: 2000
+                  description: O que a pessoa escreveu agora.
+                historico:
+                  type: array
+                  maxItems: 40
+                  description: |
+                    A conversa até aqui, guardada no aparelho (FR-047). O
+                    servidor não a persiste.
+                  items:
+                    $ref: '#/components/schemas/Mensagem'
+      responses:
+        '200':
+          description: Fluxo de eventos da resposta.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/EventoDaConversa'
+        '401':
+          description: |
+            Sessão inválida. Inclui o caso do token da sessão-chamariz, cujo
+            sujeito não existe (FR-010 da feature 001).
+        '429':
+          description: |
+            Limite diário de conversas atingido (R7 do research). Traz
+            `tentar_novamente_em_segundos`.
+
+  /assistente/acao:
+    post:
+      tags: [Assistente]
+      summary: Registrar que a pessoa confirmou e o aplicativo executou
+      description: |
+        Escreve a trilha da FR-020. Quem abre o outro aplicativo é o Flutter,
+        depois da confirmação; este endpoint só registra que aconteceu.
+
+        O servidor **reconfere** a autorização antes de gravar: um pedido de
+        registro para serviço sensível é recusado e vira `ACAO_RECUSADA` na
+        trilha — se ele chegou aqui, algo está errado, e o registro disso vale
+        mais do que a recusa silenciosa.
+      security:
+        - tokenDeAcesso: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [servico_id, pedido_resumido]
+              properties:
+                servico_id:
+                  type: string
+                  format: uuid
+                pedido_resumido:
+                  type: string
+                  description: |
+                    O que a pessoa pediu. **Truncado no servidor** a 120
+                    caracteres — confiar o corte ao aparelho transformaria um
+                    campo de tabela imutável em texto livre.
+      responses:
+        '201':
+          description: Registrado.
+        '400':
+          description: Serviço desconhecido, inativo ou sensível.
+        '401':
+          description: Sessão inválida.
+
+  /assistente/catalogo:
+    get:
+      tags: [Catalogo]
+      summary: Listar os serviços que a Memora conhece
+      description: |
+        Alimenta as portas *Serviços do dia a dia* e *Meus aplicativos*. Cada
+        item diz, antes do toque, se a Memora **ensina** ou **ensina e abre**
+        (FR-045).
+      security:
+        - tokenDeAcesso: []
+      parameters:
+        - name: categoria
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [sensivel, cotidiano]
+          description: Omitido, devolve as duas listas.
+      responses:
+        '200':
+          description: Os serviços ativos.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  servicos:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Servico'
+        '401':
+          description: Sessão inválida.
+
+  /assistente/registro:
+    get:
+      tags: [Assistente]
+      summary: O que a Memora fez em meu nome
+      description: |
+        A FR-023. Devolve as ações executadas, em linguagem comum. Orientação
+        apenas ensinada **não** aparece aqui (FR-025) — ela não foi executada
+        por ninguém além da própria pessoa.
+      security:
+        - tokenDeAcesso: []
+      responses:
+        '200':
+          description: As ações registradas, da mais recente para a mais antiga.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acoes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AcaoRegistrada'
+        '401':
+          description: Sessão inválida.
+
+components:
+  securitySchemes:
+    tokenDeAcesso:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        O mesmo esquema da feature 001. O nome da chave importa: é por ele que o
+        interceptor do cliente gerado casa o token com a operação.
+
+  schemas:
+    Mensagem:
+      type: object
+      required: [autor, texto]
+      properties:
+        autor:
+          type: string
+          enum: [pessoa, memora]
+        texto:
+          type: string
+          maxLength: 4000
+
+    EventoDaConversa:
+      description: |
+        Um evento do fluxo SSE. `texto` chega em pedaços; `acao` chega no
+        máximo uma vez e **só quando autorizada**; `fim` encerra.
+      oneOf:
+        - type: object
+          properties:
+            tipo: { type: string, enum: [texto] }
+            trecho: { type: string }
+        - type: object
+          properties:
+            tipo: { type: string, enum: [acao] }
+            acao: { $ref: '#/components/schemas/AcaoAutorizada' }
+        - type: object
+          properties:
+            tipo: { type: string, enum: [fim] }
+        - type: object
+          properties:
+            tipo: { type: string, enum: [erro] }
+            mensagem:
+              type: string
+              description: Texto já pronto para a pessoa, na voz da Memora.
+
+    AcaoAutorizada:
+      description: |
+        Uma sugestão que **passou pelo catálogo**. A presença deste objeto já é
+        a autorização — o aplicativo não precisa, e não deve, decidir de novo.
+      type: object
+      required: [servico_id, nome_exibido, identificador_android]
+      properties:
+        servico_id:
+          type: string
+          format: uuid
+        nome_exibido:
+          type: string
+        identificador_android:
+          type: string
+          description: Presente sempre — serviço sensível nunca chega aqui.
+
+    Servico:
+      type: object
+      required: [id, nome_exibido, categoria, memora_pode_abrir]
+      properties:
+        id:
+          type: string
+          format: uuid
+        nome_exibido:
+          type: string
+        descricao_curta:
+          type: string
+        categoria:
+          type: string
+          enum: [sensivel, cotidiano]
+        memora_pode_abrir:
+          type: boolean
+          description: |
+            Redundante com `categoria`, e de propósito: é o que a tela exibe
+            (FR-045), e derivar isso na tela espalharia a regra da FR-041 por
+            dois lugares.
+        identificador_android:
+          type: string
+          description: Ausente quando `sensivel`.
+
+    AcaoRegistrada:
+      type: object
+      properties:
+        nome_exibido:
+          type: string
+        pedido_resumido:
+          type: string
+        ocorrido_em:
+          type: string
+          format: date-time

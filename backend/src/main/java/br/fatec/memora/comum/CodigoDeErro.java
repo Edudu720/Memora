@@ -82,6 +82,19 @@ public enum CodigoDeErro {
                     + "uma senha nova 😊"),
 
     /**
+     * A pessoa esgotou a cota diária de conversas com a assistente (R7).
+     *
+     * <p>Separado de {@link #MUITAS_TENTATIVAS} de propósito, embora os dois
+     * sejam {@code 429}: aquele acontece quando alguém erra a senha várias
+     * vezes, e o texto dele fala em proteger a conta e criar senha nova. Quem
+     * esbarra <b>aqui</b> não errou nada — só conversou bastante. Reaproveitar
+     * a frase sugeriria a ela que fez algo errado.
+     */
+    LIMITE_DE_CONVERSAS(
+            HttpStatus.TOO_MANY_REQUESTS,
+            "Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui."),
+
+    /**
      * Falha não prevista. Ver a segunda divergência anotada nesta classe.
      *
      * <p>O texto não pede para "tentar mais tarde" nem menciona erro de sistema:

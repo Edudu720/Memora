@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/design_system.dart';
+import '../features/assistente/data/abridor_de_aplicativo.dart';
+import '../features/assistente/data/repositorio_assistente_simulado.dart';
 import '../features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import '../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../features/autenticacao/presentation/fluxo_autenticacao.dart';
@@ -39,6 +41,11 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
   final RepositorioAutenticacaoSimulado _repositorio =
       RepositorioAutenticacaoSimulado();
 
+  /// A assistente, tambem simulada. O provedor de IA ainda nao foi escolhido
+  /// (R2 do research), e o Hub inteiro funciona sem ele.
+  final RepositorioAssistenteSimulado _assistente =
+      RepositorioAssistenteSimulado();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +55,8 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
           FluxoAutenticacao(
             repositorio: _repositorio,
             ultimoAcesso: widget.ultimoAcesso,
+            assistente: _assistente,
+            abridor: const AbridorDeAplicativoAndroid(),
           ),
           const TelaComponentes(),
           const TelaAparencia(),

@@ -4,24 +4,29 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-27 — **telas da US3** (T070-T073), empilhadas sobre a #19
-**Estado**: fases 2, 3 e 4 completas, a **US5 (modo assistido)** completa, e as
-**telas da US3** feitas — **271 testes** no backend e **231** no aplicativo.
-Existem `POST /v1/auth/cadastro`, `POST /v1/auth/entrar`,
-`POST /v1/auth/sessao/renovar` e os dois primeiros endpoints **autenticados**:
-`POST /v1/canais/{id}/codigo` e `POST /v1/canais/{id}/verificar`. O aplicativo
-tem cadastro, login, renovação automática, bloqueio progressivo, expiração por
-inatividade, o **cadastro assistido inteiro** — entrega do aparelho, senha sem
-olhinho, confirmação de canal e primeira entrada sozinha — e agora a
-**recuperação de acesso**, sobre o simulado.
-**Próximo: T066-T069** — o backend da US3, que é o que falta para a recuperação
-sair do simulado. Depois a US4 (T074-T078). Ver seção 4.
+**Última sessão**: 2026-08-29 — **a feature 003 nasceu e foi implementada até a
+fase 7**: spec, plano, 74 tarefas e 58 delas feitas. O Memora deixou de ser
+fundação e virou produto.
+**Estado**: **301 testes** no backend e **294** no aplicativo. A feature 001
+está completa até a US5, com a US3 só no aplicativo e a US4 pendente. A feature
+003 tem **Hub, conversa que ensina, catálogos, execução com confirmação e
+registro** — tudo funcionando contra simulado, **sem provedor de IA escolhido**.
+**Próximo: a fase 8 da 003** (T061-T068), que é a única que depende da escolha
+do provedor. Depois a fase 9, de validação. Ver seção 4-B.
 
-> ⚠️ **A US3 está pela metade, e a metade que existe é a de cima.** As telas
-> funcionam contra o `RepositorioAutenticacaoSimulado`; os dois endpoints
-> (`/auth/recuperacao/solicitar` e `/auth/recuperacao/confirmar`) **não
-> existem** no servidor. O `RepositorioAutenticacaoApi` já os chama pelo cliente
-> gerado — compila, e responderia `404`. Não anuncie a US3 como pronta.
+> ⚠️ **O provedor de IA NÃO foi escolhido, e isso é uma decisão em aberto da
+> equipe** (R2 do research da 003). A arquitetura foi desenhada para que isso
+> não bloqueasse nada: tudo conversa com a porta `ClienteDaAssistente`, e o
+> `ClienteDaAssistenteSimulado` responde. **Não escolha por conta própria** —
+> os seis critérios estão em `specs/003-hub-e-assistente/research.md`, e o que
+> mais pesa é retenção de dados: um provedor que treine com o que recebe
+> desfaria a decisão D3 por fora, sem aparecer no nosso código.
+
+> ⚠️ **A US3 da feature 001 continua pela metade, e a metade que existe é a de
+> cima.** As telas funcionam contra o `RepositorioAutenticacaoSimulado`; os dois
+> endpoints (`/auth/recuperacao/solicitar` e `/auth/recuperacao/confirmar`)
+> **não existem** no servidor. O `RepositorioAutenticacaoApi` já os chama pelo
+> cliente gerado — compila, e responderia `404`. Não anuncie a US3 como pronta.
 
 > ⚠️ **Confira o GitHub antes de decidir o que fazer.** Este arquivo já ficou
 > para trás uma vez: em 2026-08-16 ele apontava T030-T032 como próximo passo, e
@@ -37,7 +42,8 @@ sair do simulado. Depois a US4 (T074-T078). Ver seção 4.
 > de segurança, dívidas e fila de PRs. Este arquivo continua sendo a passagem de
 > contexto operacional; o relatório é o retrato para a equipe e a faculdade.
 >
-> **São 250 testes no backend, e a soma do Surefire mente sem `clean`.** Este
+> **São 301 testes no backend e 294 no aplicativo (2026-08-29), e a soma do
+> Surefire mente sem `clean`.** Este
 > arquivo já disse 244, 245 e 251. Em 2026-08-24 a causa apareceu: havia um
 > `TEST-...SondaCaminhoDesconhecidoTest.xml` de **10/08** parado em
 > `target/surefire-reports/`, de uma classe de sonda que nunca foi commitada e
@@ -151,7 +157,8 @@ execute as instruções manualmente. O resultado é idêntico.
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
 | **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1, US2 e US5 completas; **US3 só no aplicativo**; US4 pendente |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas, mais o visual do protótipo e as ilustrações |
+| **003 — Hub e a assistente** | ✅ | ✅ | ✅ | 🟡 **58 de 74 tarefas**; falta só a fatia do provedor de IA e a validação |
 
 ### O que já existe em código
 
@@ -602,34 +609,119 @@ vazamento.
 estava nulo desde a US2 justamente porque não havia para onde ir. O
 `FluxoAutenticacao` o preenche, e leva o identificador junto (FR-012).
 
-### Próxima tarefa: **T066-T069** — o backend da US3
+## 4-B. A feature 003 — Hub e a assistente que ensina
 
-`specs/001-autenticacao-acessivel/tasks.md`, fase 6. São os dois endpoints que
-faltam para a recuperação sair do simulado:
+Feita em 2026-08-29, do zero até a fase 7. É a primeira feature **do produto**:
+as 001 e 002 são fundação, e nenhuma delas responde para que o Memora serve.
 
-| Tarefa | O quê |
-|---|---|
-| T066 | `POST /v1/auth/recuperacao/solicitar`, respondendo `202` **sempre** (FR-019) |
-| T067 | `POST /v1/auth/recuperacao/confirmar`, revogando **todas** as sessões (FR-021) |
-| T068 | `NotificadorDeConta` — avisar pelo canal quando a senha mudar (FR-022) |
-| T069 | Teste do cenário V5 |
+### A decisão que organiza tudo
+
+**A saída do modelo não é autorização.** O modelo pode *sugerir* abrir um
+aplicativo; quem decide é uma consulta determinística ao catálogo, no banco,
+**depois** da resposta. Sugestão que não passa morre no servidor, e a pessoa
+nunca vê o oferecimento.
+
+Alguém pode convencer um modelo. Ninguém convence uma linha de tabela.
+
+### As três decisões de spec (D1, D2, D3)
+
+| # | Decisão | Por quê |
+|---|---|---|
+| **D1** | A lista fechada tem **uma** ação: abrir aplicativo cotidiano | Abrir é reversível. Enviar mensagem e ligar ficaram de fora por serem irreversíveis, e por serem o que um golpista pediria |
+| **D2** | **Quanto mais sensível o serviço, menos a Memora toca nele** | Gov.br e Meu INSS ela **só ensina**, nem com pedido e confirmação. Abrir o banco pela pessoa treinaria nela o gesto que o golpista precisa que ela tenha |
+| **D3** | A conversa fica **só no aparelho** | No servidor viraria acervo Confidencial sobre a intimidade de quem é alvo preferencial de golpe no Brasil |
+
+A tela de **Planos** do Arquivo X ficou como **Futuro**, fora de escopo:
+monetização nunca foi discutida pela equipe.
+
+### O que existe em código
+
+`backend/.../assistente/`:
+- **dominio/** — `ServicoConhecido`, `CategoriaDoServico` (SENSIVEL/COTIDIANO),
+  `EventoDaAssistente` (`@Immutable`), `UsoDaAssistente`
+- **aplicacao/** — `AutorizadorDeAcao` (**a FR-022 mora aqui**),
+  `ServicoDeConversa`, `ServicoDeRegistro`
+- **infra/** — a porta `ClienteDaAssistente`, o simulado, `PersonaDaMemora`
+- **seguranca/** — `LimitePorConta`, teto diário de conversas
+- **api/** — `ControladorConversa` (SSE), `ControladorCatalogo`,
+  `ControladorRegistro`
+
+Migrations **V4** (estrutura), **V5** (catálogo inicial) e **V6** (Meu INSS).
+
+`app/lib/features/hub/` e `app/lib/features/assistente/` — Hub com 5 portas,
+conversa, catálogo (uma tela parametrizada), registro, `ConversaLocal` e
+`AbridorDeAplicativo`.
+
+### ⚠️ A FR-041 é restrição de banco, não regra de código
+
+```sql
+CONSTRAINT ck_servico_sensivel_nao_abre CHECK (
+    (categoria = 'SENSIVEL'  AND identificador_android IS NULL)
+    OR
+    (categoria = 'COTIDIANO' AND identificador_android IS NOT NULL)
+)
+```
+
+**Serviço sensível não tem como ser aberto porque falta o dado necessário para
+abri-lo.** Não existe caminho de código que contorne a ausência de um pacote.
+Quem mudar a categoria de um banco para `COTIDIANO` vai ter que preencher o
+pacote junto — gesto visível na revisão. Uma verificação em Java alguém remove
+sem querer.
+
+### ⚠️ O Android 11 limita ACRESCENTAR aplicativo, não tirar
+
+Desde o Android 11, o aplicativo só enxerga pacotes declarados em `<queries>`
+no `AndroidManifest.xml`. O catálogo no banco continua permitindo **tirar** um
+aplicativo do ar sem novo build (era o objetivo da R6) — mas **acrescentar** um
+abrível exige mexer no manifesto e publicar versão nova na loja.
+
+Não usamos `QUERY_ALL_PACKAGES`: a Play Store restringe severamente, e ela daria
+ao Memora visibilidade de tudo que a pessoa tem instalado.
+
+### ⚠️ O simulado do aplicativo precisa espelhar o catálogo do banco
+
+Eles são mundos separados, e **nenhum teste pega a divergência** — ela só
+aparece rodando no emulador. Aconteceu nesta sessão: a demonstração mostrava
+serviços que a migration não tinha. A cada mudança de catálogo, mexa nos dois.
+
+### ⚠️ Por que o simulado é ferramenta de segurança, e não andaime
+
+O cenário **H3** precisa que a assistente sugira abrir o banco. Um modelo real,
+bem instruído, provavelmente **não** sugeriria — e um teste que depende de o
+modelo se comportar mal para provar que a defesa funciona não prova nada.
+
+No `ClienteDaAssistenteSimulado` a sugestão maliciosa é produzida sob comando,
+em toda execução. **É a diferença entre torcer para o portão ser testado e
+testá-lo.**
+
+### O que falta na 003
+
+| Fase | Tarefas | Situação |
+|---|---|---|
+| **8 — o provedor** | T061-T068 | **Espera a equipe escolher.** Só esta fase depende |
+| 9 — validação | T069-T074 | Depois da 8. Inclui o **V10 com 5 pessoas de 65+** |
+
+Também ficaram adiadas a **T021** e a **T036** (gerar o cliente Dart da 003):
+gerariam cliente para endpoints cujo contrato ainda não foi fundido com o da
+001 — decisão de spec.
+
+---
+
+### O que ainda falta na feature 001
+
+**T066-T069** — o backend da US3, os dois endpoints que faltam para a
+recuperação sair do simulado. Depois a **US4** (T074-T078): a saída deliberada
+e a troca de senha.
 
 ⚠️ **A T066 só envia para canal verificado** (FR-052), e é aí que a US5 paga o
 que prometeu: sem posse confirmada, o acompanhante que cadastrasse o próprio
-contato controlaria a recuperação da conta alheia para sempre (FR-062). O
-simulado já reproduz essa regra — conta `PENDENTE_VERIFICACAO` não recebe
-código, e a resposta continua sendo a mesma por fora.
+contato controlaria a recuperação da conta alheia para sempre (FR-062).
 
 ⚠️ **A T068 esbarra na T065a.** Notificar exige o mesmo `EnviadorDeCodigo` que
 não tem provedor real, e com o perfil `producao` a aplicação não sobe sem ele.
 
-Depois vem a **US4** (T074-T078): a saída deliberada e a troca de senha.
-
-Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
-e análise estática contra valores literais. Protege o sistema a longo prazo, mas
-não entrega produto.
-
-**A feature 001 é desbloqueada ao final da fase 6** (T044).
+Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de
+componentes e análise estática contra valores literais.
 
 ---
 
@@ -935,6 +1027,27 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   **não funciona em arquivo novo**, então as quebras seguintes não reverteram e
   contaminaram umas às outras. Commite primeiro; aí o revert é confiável para
   todos os arquivos.
+- **`Future.delayed(Duration.zero)` ainda agenda um timer.** Dentro de
+  `testWidgets` o relógio é falso: um `await` no corpo do teste **nunca
+  completa**, e o caso morre em "did not complete" depois de MINUTOS, sem
+  apontar a causa. Custou duas rodadas na feature 003. A saída foi o próprio
+  simulado não criar timer quando a demora é zero — um arquivo de teste passou
+  de 5 minutos travado para 1 segundo. Alternativa pontual: `tester.runAsync`.
+- **I/O de arquivo real também não completa dentro de `testWidgets`**, pelo
+  mesmo motivo. Disco vai para `test` puro; teste de widget usa dublê em
+  memória.
+- **Teste que chama `deleteAll()` num banco compartilhado apaga o dado do
+  produto.** Três testes da 003 faziam isso e, quando o catálogo real foi
+  semeado por migration, eles colidiram na unicidade **e** deixaram o teste
+  seguinte com um banco vazio. O container do Postgres é um só para a suíte
+  (`TesteComBanco`): cada teste apaga apenas o que criou, e usa dados fictícios
+  (`com.teste.*`) que não disputem com o catálogo real.
+- **Simulado e banco são mundos separados, e nenhum teste liga os dois.** A
+  divergência entre o catálogo do `RepositorioAssistenteSimulado` e o das
+  migrations só apareceu ao rodar no emulador. A cada mudança de catálogo, mexa
+  nos dois lados.
+- **`NoClassDefFoundError: TesteComBanco` significa Docker parado**, e não
+  defeito de código. Aconteceu de novo nesta sessão, com 18 erros de uma vez.
 - **Teste que passa não prova portão nenhum — e isso já falhou aqui.** A guarda
   de conta desativada entrou na #15 anunciada na descrição da PR, sem um único
   teste, e furada. `git grep <a constante que a guarda usa>` em
@@ -1005,13 +1118,33 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | **Definir `MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem for implantar | **Sim, na implantação.** Sem ela a chave é sorteada a cada subida e o limite por origem da R4 zera junto; um WARN avisa |
 | **Provedor de envio de e-mail/SMS** (T065a) | Equipe — nunca esteve na spec | **Sim, na implantação.** Com o perfil `producao` a aplicação não sobe sem um `EnviadorDeCodigo`, de propósito |
 | **O que fazer com conta assistida abandonada** (T065b) | Equipe | Não hoje — mas quem desiste no meio fica sem conseguir recadastrar com o mesmo e-mail |
-| **Especificar a feature 003 — o produto em si** | Equipe | **Sim, para o Memora existir.** As 001 e 002 são fundação: identidade e vocabulário visual. O Hub, os tutoriais e o ensino não têm spec |
+| **Escolher o provedor de IA** (R2 da 003) | Equipe | **Sim, para a assistente pensar.** Não bloqueia a construção — só a fase 8. Seis critérios em `specs/003-hub-e-assistente/research.md`; o que mais pesa é retenção de dados |
+| **Conta e chave do provedor**, e quem paga | Equipe | **Sim, na implantação** |
+| **Teto diário de conversas** — hoje `TETO_PADRAO = 20`, provisório | Equipe | Não, mas o número foi escolhido sem uso real para medir |
+| **Bancos e serviços de saúde no catálogo** | Equipe | Não — hoje há Gov.br e Meu INSS entre os sensíveis. Cada acréscimo é uma migration |
 | Aceitar convite do repositório | Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | **Revisar as PRs #19 (US5) e #20 (telas da US3)** | Henrique | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
 | **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
+
+### Onde a fila parou em 2026-08-29
+
+**Cinco PRs abertas**, e a ordem importa: cada uma sai da anterior.
+
+| # | O quê | Base | Situação |
+|---|---|---|---|
+| **#19** | Modo assistido — US5 (T057-T065) | `master` | Aberta, **sem revisão** |
+| **#20** | Telas da US3 (T070-T073) | #19 | Aberta |
+| **#21** | Visual das telas, vindo do protótipo | #20 | Aberta |
+| **#23** | **Feature 003 — fases 1 a 7** | #21 | Aberta |
+| **#22** | **Spec, plano e tarefas da 003** | `master` | Aberta, **independente da fila** |
+
+A #22 sai da `master` de propósito: é documentação, e não deve esperar código.
+
+⚠️ **Quando a de baixo entrar, a de cima precisa de `gh pr edit N --base master`**,
+senão o merge não chega à `master`. Já quase aconteceu com a #10 e a #16.
 
 ### Onde a fila parou em 2026-08-24
 
