@@ -13,6 +13,8 @@ import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../hub/domain/hub.dart';
+import '../../hub/presentation/telas/tela_hub.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 
@@ -243,6 +245,31 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _irParaLogin();
   }
 
+  /// As portas que **de fato existem** hoje (FR-003).
+  ///
+  /// Esta lista é curta de propósito, e vai crescer uma porta por entrega.
+  /// Acrescentar aqui *Conversar com a Memora* antes de a tela existir daria à
+  /// pessoa um botão que não abre nada — e porta que não abre é pior que porta
+  /// que não existe, porque quem toca conclui que quebrou o aparelho.
+  ///
+  /// A `TelaAparencia` já existe desde a feature 002, e é a primeira porta
+  /// legítima do Hub: ela resolve um problema real de quem enxerga pouco.
+  List<PortaDoHub> _portasConstruidas() {
+    return <PortaDoHub>[
+      PortaDoHub(
+        rotulo: 'Como eu vejo o Memora',
+        descricao: 'Deixar a letra maior, mudar as cores, enxergar melhor',
+        icone: Icons.palette_outlined,
+        principal: true,
+        aoAbrir: () => Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (BuildContext _) => const _PaginaDeAparencia(),
+          ),
+        ),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return switch (_etapa) {
@@ -290,8 +317,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _Etapa.dentro => Listener(
           behavior: HitTestBehavior.translucent,
           onPointerDown: (_) => _monitor.registrarAtividade(),
-          child: _TelaDentro(
+          child: TelaHub(
             nome: _pessoa?.nomeTratamento ?? '',
+            portas: _portasConstruidas(),
             aoSair: _sair,
           ),
         ),
@@ -299,45 +327,27 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   }
 }
 
-/// Confirmação de que a pessoa entrou — provisória até o Hub existir.
-class _TelaDentro extends StatelessWidget {
-  final String nome;
-  final Future<void> Function() aoSair;
-
-  const _TelaDentro({required this.nome, required this.aoSair});
+/// A tela de aparência com barra superior, para o caminho de volta ao Hub.
+///
+/// A `TelaAparencia` nasceu na feature 002 sem barra: ela era uma aba da casca
+/// de demonstração, e aba não precisa de "voltar". Dentro do Hub ela precisa —
+/// a FR-005 exige que o caminho de volta esteja **sempre na mesma posição**, em
+/// todas as telas.
+///
+/// Envolver aqui, em vez de mexer na tela do Design System, mantém o componente
+/// utilizável nos dois contextos.
+class _PaginaDeAparencia extends StatelessWidget {
+  const _PaginaDeAparencia();
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-
     return Scaffold(
-      backgroundColor: cores.fundo,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(MemoraEspacamento.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: MemoraEspacamento.xxxl),
-              Icon(Icons.check_circle, size: 72, color: cores.sucesso),
-              const SizedBox(height: MemoraEspacamento.xl),
-              TextoMemora.tituloTela(
-                'Prontinho, $nome!',
-                alinhamento: TextAlign.center,
-              ),
-              const SizedBox(height: MemoraEspacamento.md),
-              const TextoMemora(
-                'Você está dentro. Daqui em diante eu vou te mostrar o '
-                'caminho — nunca fazer no seu lugar 😊',
-                alinhamento: TextAlign.center,
-              ),
-              const SizedBox(height: MemoraEspacamento.xxxl),
-              BotaoSecundario(rotulo: 'Sair da conta', aoTocar: aoSair),
-              const SizedBox(height: MemoraEspacamento.xxl),
-            ],
-          ),
-        ),
+      backgroundColor: context.memora.cores.fundo,
+      appBar: BarraSuperior(
+        titulo: 'Como eu vejo o Memora',
+        aoVoltar: () => Navigator.of(context).pop(),
       ),
+      body: const TelaAparencia(),
     );
   }
 }
