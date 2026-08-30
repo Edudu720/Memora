@@ -122,17 +122,19 @@ e aprende o caminho, um passo por vez.
 **Teste independente**: realizar a tarefa guiada pela Memora e depois repeti-la
 **sem** ela. A segunda tentativa é o teste.
 
-- [ ] T032 [US2] Criar `aplicacao/ServicoDeConversa.java`, montando persona + catálogo + histórico e transmitindo a resposta
-- [ ] T033 [US2] Criar `api/ControladorConversa.java` com `POST /v1/assistente/conversa`, respondendo por **SSE**
-- [ ] T034 [US2] Aplicar o `LimitePorConta` no controlador, respondendo `429` com espera e texto acolhedor
-- [ ] T035 [P] [US2] Criar `app/lib/features/assistente/data/conversa_local.dart` — a conversa no aparelho (FR-047). **Não vai no cofre nem em `SharedPreferences`**; escolher e justificar o armazenamento, conforme a decisão aberta em [data-model.md](data-model.md)
+- [X] T032 [US2] Criar `aplicacao/ServicoDeConversa.java`, montando persona + catálogo + histórico e transmitindo a resposta
+- [X] T033 [US2] Criar `api/ControladorConversa.java` com `POST /v1/assistente/conversa`, respondendo por **SSE**
+- [X] T034 [US2] Aplicar o `LimitePorConta` no controlador, respondendo `429` com espera e texto acolhedor
+- [X] T035 [P] [US2] Criar `app/lib/features/assistente/data/conversa_local.dart` — a conversa no aparelho (FR-047)
+  > **Decisão tomada: arquivo no diretório privado do aplicativo**, via `path_provider`. O cofre está descartado porque o V8 reprova se sobrar qualquer coisa lá; `SharedPreferences` é armazenamento comum, e a conversa é Confidencial. Apagada ao sair da conta (FR-048).
 - [ ] T036 [P] [US2] Criar `app/lib/features/assistente/data/repositorio_assistente_api.dart`, consumindo o SSE
-- [ ] T037 [US2] Criar `app/lib/features/assistente/presentation/controladores/controlador_conversa.dart`, com o passo a passo e o estado de espera
-- [ ] T038 [US2] Criar `app/lib/features/assistente/presentation/telas/tela_conversa.dart`, com o aviso antigolpe permanente (FR-033) reusando o idioma da `TelaRecuperacao`
-- [ ] T039 [US2] Implementar a retomada de passo a passo interrompido (FR-049) e o apagar conversa (FR-050)
-- [ ] T040 [US2] Escrever o cenário **H2** em `app/test/features/assistente/tela_conversa_test.dart`: um passo por vez, e nenhuma oferta de executar no primeiro turno
-- [ ] T041 [US2] Quebrar o T037 — oferecer executar já na primeira resposta — e **confirmar que o T040 reprova**
-- [ ] T042 [US2] Escrever o cenário **H6** em `backend/src/test/java/br/fatec/memora/assistente/ConversaNaoPersisteTest.java`: varrer as tabelas procurando o texto das mensagens
+  > **Adiada junto com a T021.** Depende do cliente gerado, e gerá-lo agora produziria um cliente para endpoints que o servidor tem mas o contrato ainda não fundiu. As telas rodam contra o simulado até lá.
+- [X] T037 [US2] Criar `app/lib/features/assistente/presentation/controladores/controlador_conversa.dart`, com o passo a passo e o estado de espera
+- [X] T038 [US2] Criar `app/lib/features/assistente/presentation/telas/tela_conversa.dart`, com o aviso antigolpe permanente (FR-033) reusando o idioma da `TelaRecuperacao`
+- [X] T039 [US2] Implementar a retomada de passo a passo interrompido (FR-049) e o apagar conversa (FR-050)
+- [X] T040 [US2] Escrever o cenário **H2** em `app/test/features/assistente/tela_conversa_test.dart`: um passo por vez, e nenhuma oferta de executar no primeiro turno
+- [X] T041 [US2] Quebrar o T037 — oferecer executar já na primeira resposta — e **confirmar que o T040 reprova**
+- [X] T042 [US2] Escrever o cenário **H6** em `backend/src/test/java/br/fatec/memora/assistente/ConversaNaoPersisteTest.java`: varrer as tabelas procurando o texto das mensagens
 
 ---
 
