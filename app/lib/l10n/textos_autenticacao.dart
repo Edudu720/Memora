@@ -238,4 +238,106 @@ abstract final class TextosAutenticacao {
 
   /// Rótulo do botão que leva ao login.
   static const String botaoEntrarSozinha = 'Quero entrar sozinha';
+
+  // ---------------------------------------------------------------------------
+  // Recuperação de acesso — FR-018 a FR-023
+  // ---------------------------------------------------------------------------
+
+  /// Título da tela de recuperação.
+  ///
+  /// Fala do **resultado** — uma senha nova —, e não do problema. "Recuperação
+  /// de acesso" é vocabulário de sistema; quem chega aqui só sabe que não
+  /// consegue entrar.
+  static const String tituloRecuperacao = 'Vamos criar uma senha nova';
+
+  /// Convite da primeira etapa.
+  static const String conviteRecuperacao =
+      'Esquecer senha acontece com todo mundo, e tem conserto. Me diga o '
+      'e-mail ou telefone da sua conta que eu envio um número para você.';
+
+  /// Rótulo do botão que pede o código.
+  static const String botaoPedirCodigo = 'Me envie o número';
+
+  /// Mensagem exibida enquanto o pedido é enviado.
+  static const String pedindoCodigo = 'Estou enviando...';
+
+  /// Confirmação do pedido — **idêntica exista a conta ou não** (FR-019).
+  ///
+  /// Este texto é o portão de segurança desta tela. A FR-019 manda confirmar
+  /// com mensagem idêntica independentemente de a conta existir, e é aqui que
+  /// isso vive: o servidor responde `202` sempre justamente para o aplicativo
+  /// poder dizer uma coisa só.
+  ///
+  /// O **"se"** não é hesitação, é a frase inteira. Trocá-lo por *"enviei um
+  /// número para você"* transformaria esta tela num oráculo de quais e-mails
+  /// têm conta no Memora — que é o insumo do ataque direcionado descrito na
+  /// tabela de ameaças da spec.
+  ///
+  /// Repetir o identificador digitado é seguro: quem o lê é quem acabou de
+  /// escrevê-lo, e ver o próprio e-mail na tela é o que denuncia o erro de
+  /// digitação antes de a pessoa ficar dez minutos esperando um número que foi
+  /// para o lugar errado.
+  static String recuperacaoSolicitada(String identificador) =>
+      'Se existir uma conta com $identificador, acabei de enviar um número de '
+      '6 dígitos para lá. Ele vale por 10 minutinhos.';
+
+  /// Rótulo do campo da senha nova.
+  static const String rotuloSenhaNova = 'Sua senha nova';
+
+  /// Ajuda do campo da senha nova.
+  static const String ajudaSenhaNova =
+      'Escolha uma que você lembre. Se quiser conferir, toque no olhinho';
+
+  /// Rótulo do botão que conclui a troca.
+  static const String botaoTrocarSenha = 'Salvar minha senha nova';
+
+  /// Mensagem exibida enquanto a troca acontece.
+  static const String trocandoSenha = 'Estou guardando sua senha nova...';
+
+  /// Rótulo do botão que volta para pedir outro número.
+  static const String botaoPedirOutroCodigo = 'Pedir outro número';
+
+  /// Aviso de que a troca derruba as outras sessões (FR-021).
+  ///
+  /// A revogação é boa notícia contada na hora certa: quem chega aqui pode
+  /// estar recuperando a conta **porque** alguém entrou nela. Dizer que os
+  /// outros aparelhos saíram é o que transforma um efeito técnico em segurança
+  /// percebida.
+  static const String avisoSessoesEncerradas =
+      'Sua senha nova já está valendo. Se o Memora estivesse aberto em outro '
+      'aparelho, ele saiu da conta agora — só esta senha entra daqui em diante.';
+
+  /// Título do aviso permanente contra golpe (FR-023).
+  static const String tituloAvisoAntigolpe = 'Eu nunca peço sua senha';
+
+  /// O aviso em si.
+  ///
+  /// A FR-023 exige aviso **permanente** de que o Memora nunca solicita senha
+  /// por telefone, mensagem ou e-mail. O texto vai além e inclui o **número de
+  /// 6 dígitos**, porque é ele que o golpe desta tela pede: o golpista dispara
+  /// a recuperação com o e-mail da vítima, liga dizendo ser o suporte e pede
+  /// "o código que acabou de chegar". Avisar só sobre a senha deixaria de fora
+  /// exatamente o dado que está na tela.
+  static const String avisoAntigolpe =
+      'Nem eu, nem ninguém que diga trabalhar no Memora, vai te pedir sua '
+      'senha ou esse número de 6 dígitos — nem por telefone, nem por mensagem, '
+      'nem por e-mail. Se alguém pedir, é golpe: pode desligar sem responder.';
+
+  /// Espera por excesso de tentativas **dentro da recuperação**.
+  ///
+  /// Não reaproveita [bloqueio] de propósito: aquele texto termina oferecendo
+  /// criar uma senha nova, e quem lê este já está exatamente nisso. Mandar a
+  /// pessoa para o caminho em que ela se encontra é o tipo de frase que faz
+  /// alguém concluir que o aparelho travou.
+  static String esperaNaRecuperacao(int segundos) =>
+      'Foram várias tentativas seguidas, então preciso dar uma pausa de '
+      '${esperaHumana(segundos)}. Não é nada que você fez de errado — é o que '
+      'impede outra pessoa de ficar tentando adivinhar esse número.';
+
+  /// Rótulo do botão que conclui a recuperação e entra na conta.
+  ///
+  /// Não reaproveita [botaoContinuar], que pertence ao aviso de inatividade e
+  /// diz *"estou aqui, pode continuar"* — resposta a uma pergunta que ninguém
+  /// fez nesta tela.
+  static const String botaoEntrarComSenhaNova = 'Entrar na minha conta';
 }

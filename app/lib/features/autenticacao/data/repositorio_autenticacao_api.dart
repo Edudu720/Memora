@@ -182,6 +182,62 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
     }
   }
 
+  @override
+  Future<ResultadoDeCanal> solicitarRecuperacao(String identificador) async {
+    try {
+      await _api.getRecuperaoDeAcessoApi().authRecuperacaoSolicitarPost(
+            authRecuperacaoSolicitarPostRequest:
+                api.AuthRecuperacaoSolicitarPostRequest(
+              identificador: identificador,
+            ),
+          );
+      return const CanalConcluido();
+    } on DioException catch (excecao) {
+      // Só falha de transporte chega aqui. O servidor responde `202` exista a
+      // conta ou não (FR-019), então não há resposta de "não encontrei" para
+      // traduzir — e se um dia houver, ela vira `inesperada` e aparece, em vez
+      // de virar um "essa conta não existe" silencioso na tela.
+      return _falhaDeCanal(excecao);
+    }
+  }
+
+  @override
+  Future<ResultadoAutenticacao> confirmarRecuperacao({
+    required String identificador,
+    required String codigo,
+    required String novaSenha,
+  }) async {
+    try {
+      final Response<api.SessaoResposta> resposta =
+          await _api.getRecuperaoDeAcessoApi().authRecuperacaoConfirmarPost(
+                authRecuperacaoConfirmarPostRequest:
+                    api.AuthRecuperacaoConfirmarPostRequest(
+                  identificador: identificador,
+                  codigo: codigo,
+                  novaSenha: novaSenha,
+                ),
+              );
+
+      final api.SessaoResposta? sessao = resposta.data;
+      if (sessao == null) {
+        return const AutenticacaoFalhou(FalhaAutenticacao.inesperada);
+      }
+
+      // A sessão nova precisa ser guardada mesmo com a troca tendo revogado
+      // todas as outras (FR-021): a que acabou de nascer é justamente a que
+      // sobreviveu, e não guardá-la deixaria a pessoa do lado de fora logo
+      // depois de ela ter feito tudo certo.
+      await _cofre.guardarSessao(
+        tokenAcesso: sessao.tokenAcesso,
+        refreshToken: sessao.refreshToken,
+      );
+
+      return AutenticacaoConcluida(_pessoaDe(sessao));
+    } on DioException catch (excecao) {
+      return _falhaDe(excecao);
+    }
+  }
+
   /// Traduz a pessoa do contrato, com o canal principal junto.
   ///
   /// O canal escolhido é o marcado como `principal`; não havendo nenhum, cai no

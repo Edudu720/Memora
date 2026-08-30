@@ -4,16 +4,24 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-24 — fila de PRs fechada (#15 a #18) e **US5 feita**
-**Estado**: fases 2, 3 e 4 completas, e a **US5 (modo assistido)** completa —
-**271 testes** no backend e **219** no aplicativo. Existem
-`POST /v1/auth/cadastro`, `POST /v1/auth/entrar`,
+**Última sessão**: 2026-08-27 — **telas da US3** (T070-T073), empilhadas sobre a #19
+**Estado**: fases 2, 3 e 4 completas, a **US5 (modo assistido)** completa, e as
+**telas da US3** feitas — **271 testes** no backend e **231** no aplicativo.
+Existem `POST /v1/auth/cadastro`, `POST /v1/auth/entrar`,
 `POST /v1/auth/sessao/renovar` e os dois primeiros endpoints **autenticados**:
 `POST /v1/canais/{id}/codigo` e `POST /v1/canais/{id}/verificar`. O aplicativo
 tem cadastro, login, renovação automática, bloqueio progressivo, expiração por
-inatividade e o **cadastro assistido inteiro**: entrega do aparelho, senha sem
-olhinho, confirmação de canal e primeira entrada sozinha.
-**Próximo: T066-T078** — a US3 (recuperar acesso) e a US4. Ver seção 4.
+inatividade, o **cadastro assistido inteiro** — entrega do aparelho, senha sem
+olhinho, confirmação de canal e primeira entrada sozinha — e agora a
+**recuperação de acesso**, sobre o simulado.
+**Próximo: T066-T069** — o backend da US3, que é o que falta para a recuperação
+sair do simulado. Depois a US4 (T074-T078). Ver seção 4.
+
+> ⚠️ **A US3 está pela metade, e a metade que existe é a de cima.** As telas
+> funcionam contra o `RepositorioAutenticacaoSimulado`; os dois endpoints
+> (`/auth/recuperacao/solicitar` e `/auth/recuperacao/confirmar`) **não
+> existem** no servidor. O `RepositorioAutenticacaoApi` já os chama pelo cliente
+> gerado — compila, e responderia `404`. Não anuncie a US3 como pronta.
 
 > ⚠️ **Confira o GitHub antes de decidir o que fazer.** Este arquivo já ficou
 > para trás uma vez: em 2026-08-16 ele apontava T030-T032 como próximo passo, e
@@ -142,7 +150,7 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1, US2 e US5 completas; US3 e US4 pendentes |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1, US2 e US5 completas; **US3 só no aplicativo**; US4 pendente |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas |
 
 ### O que já existe em código
@@ -404,7 +412,7 @@ A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso 
 cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
 entrega o que o corpo escondeu — medido, não suposto.
 
-### Vinte portões de segurança, cada um validado quebrando de propósito
+### Vinte e cinco portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -428,9 +436,14 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Bloqueio não conclui cadastro assistido | `CanalNaoVerificadoTest` | Devolvi `bloquearAte` a `!= DESATIVADA`: reprovou com `expected: PENDENTE_VERIFICACAO` — 5 senhas erradas tiravam a conta da espera |
 | A senha para o acompanhante (FR-059) | `controlador_cadastro_test.dart` e `fluxo_assistido_test.dart` | Fiz `podeDigitarSenha => true`: **4 testes** reprovaram, um com `Expected: null / Actual: Instance of 'DadosDeCadastro'` — o acompanhante criou a senha |
 | A primeira entrada é sozinha (FR-063) | `fluxo_assistido_test.dart` | Fiz a confirmação levar direto para dentro: **4 testes** reprovaram com `Found 0 widgets with type "TelaPrimeiraEntrada"` |
+| A recuperação não revela conta (FR-019) | `tela_recuperacao_test.dart` | Fiz `solicitarRecuperacao` falhar sem conta: **3 testes** reprovaram, o primeiro com `Expected: true / Actual: <false>` — a tela parou na primeira etapa e contou |
+| O aviso antigolpe é permanente (FR-023) | `tela_recuperacao_test.dart` | Deixei o aviso só na primeira etapa: reprovou com `Found 0 widgets with type "AvisoAntigolpe"` |
+| O número recusado sai do campo | `tela_recuperacao_test.dart` | Tirei a limpeza do código: reprovou com `Expected: empty / Actual: '000000'` |
+| A troca conta que as sessões caíram (FR-021) | `tela_recuperacao_test.dart` | Troquei o aviso por "Pronto!": reprovou com `Found 0 widgets with text "Sua senha nova já está valendo..."` |
+| O código de recuperação é de uso único (FR-020) | `tela_recuperacao_test.dart` | Não removi o código do mapa: reprovou com `expected AutenticacaoFalhou but was AutenticacaoConcluida` |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
-vinte realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
+vinte e cinco realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
 conta desativada entrar sem teste nenhum e furada, na revisão da #15.
 
 ### Duas decisões que divergem da pesquisa — reabra se discordar
@@ -557,12 +570,60 @@ responderia `202` "código enviado" a quem nunca receberá nada. Está na **T065
 ocupado. Quem desistir no meio não consegue recadastrar com o mesmo e-mail — cai
 no chamariz da FR-010. Está na **T065b**.
 
-### Próxima tarefa: **T066-T078** — a US3 e a US4
+### As telas da US3 — recuperar o acesso (T070-T073, 2026-08-27)
 
-`specs/001-autenticacao-acessivel/tasks.md`, fases 6 e 7. A US3 é recuperar o
-acesso sozinha, e é onde mora o golpe da FR-062 — a recuperação só aceita canal
-**verificado**, o que a US5 acabou de tornar possível. A US4 fecha a saída
-deliberada (T074) e a troca de senha.
+Uma tela, `TelaRecuperacao`, com **três etapas** no `ControladorRecuperacao`:
+pedir o número, digitar código e senha nova, e a confirmação.
+
+| Decisão | Escolha | Por quê |
+|---|---|---|
+| Uma tela ou três | **Uma** | O aviso antigolpe da FR-023 é **permanente**. Duplicá-lo em três arquivos é como ele começa a divergir — basta alguém melhorar a frase de um |
+| Onde fica o aviso | **No topo, antes do convite** | Quem está sendo enganado ao telefone é conduzido direto ao campo. Aviso embaixo do formulário só é lido por quem já não precisava dele |
+| Depois de trocar a senha | **Uma terceira etapa**, com botão | Entrar em silêncio desperdiçaria a FR-021. Quem recupera a conta pode estar fazendo isso **porque** alguém entrou nela: saber que os outros aparelhos saíram é a notícia que importa |
+| "Não recebi" | **Volta à primeira etapa** | Diferente da `TelaConfirmarCanal`, onde o canal foi digitado três telas antes e está certo. Aqui o endereço acabou de ser escrito por alguém com dificuldade, e **o motivo mais comum de "não recebi" é a digitação errada** |
+| Regras da senha nova | **As mesmas do cadastro**, reusando `RegraDeSenha` | Senha criada aqui vale o mesmo que a criada lá. `RegraDeSenha` **fica em `controlador_cadastro.dart`**: `PoliticaDeSenhaTest`, no backend, lê esse arquivo para conferir que o piso bate com o do servidor — movê-la quebra o portão |
+
+⚠️ **O aviso da FR-023 fala do número, não só da senha.** O texto da spec
+menciona senha; o golpe **desta tela** pede o código de 6 dígitos — o golpista
+dispara a recuperação com o e-mail da vítima, liga dizendo ser o suporte e pede
+"o código que acabou de chegar". Avisar só sobre a senha deixaria de fora
+exatamente o dado que está na tela. Há teste que reprova se o texto perder
+qualquer um dos dois.
+
+⚠️ **O `RepositorioAutenticacao` ganhou dois métodos, e o primeiro nunca falha
+por conta inexistente.** `solicitarRecuperacao` devolve `CanalConcluido`
+**sempre** que a chamada chegar. `CanalFalhou` ali significa *não consegui
+perguntar* — nunca *essa conta não existe*. O controlador segue de etapa sem
+ramo para o segundo caso, de propósito: quem for acrescentar um vai ter que
+inventar de onde essa informação veio, e é aí que percebe que inventá-la é o
+vazamento.
+
+⚠️ **O botão "Esqueci minha senha" agora aparece.** `TelaLogin.aoRecuperar`
+estava nulo desde a US2 justamente porque não havia para onde ir. O
+`FluxoAutenticacao` o preenche, e leva o identificador junto (FR-012).
+
+### Próxima tarefa: **T066-T069** — o backend da US3
+
+`specs/001-autenticacao-acessivel/tasks.md`, fase 6. São os dois endpoints que
+faltam para a recuperação sair do simulado:
+
+| Tarefa | O quê |
+|---|---|
+| T066 | `POST /v1/auth/recuperacao/solicitar`, respondendo `202` **sempre** (FR-019) |
+| T067 | `POST /v1/auth/recuperacao/confirmar`, revogando **todas** as sessões (FR-021) |
+| T068 | `NotificadorDeConta` — avisar pelo canal quando a senha mudar (FR-022) |
+| T069 | Teste do cenário V5 |
+
+⚠️ **A T066 só envia para canal verificado** (FR-052), e é aí que a US5 paga o
+que prometeu: sem posse confirmada, o acompanhante que cadastrasse o próprio
+contato controlaria a recuperação da conta alheia para sempre (FR-062). O
+simulado já reproduz essa regra — conta `PENDENTE_VERIFICACAO` não recebe
+código, e a resposta continua sendo a mesma por fora.
+
+⚠️ **A T068 esbarra na T065a.** Notificar exige o mesmo `EnviadorDeCodigo` que
+não tem provedor real, e com o perfil `producao` a aplicação não sobe sem ele.
+
+Depois vem a **US4** (T074-T078): a saída deliberada e a troca de senha.
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de componentes
 e análise estática contra valores literais. Protege o sistema a longo prazo, mas
@@ -866,6 +927,14 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   Testcontainers falha com "failed to connect to the docker API at npipe". Subir
   o Docker leva ~1 min; `.\mvnw test-compile` roda sem ele e já pega erro de
   compilação, o que economiza a espera quando o problema é sintático.
+- **Commite antes de quebrar um portão de propósito.** O jeito natural de
+  desfazer a quebra é `git checkout -- <arquivo>`, e ele reverte para o **HEAD**
+  — levando junto todo o trabalho não commitado daquele arquivo. Aconteceu nesta
+  sessão: a quebra da FR-019 foi desfeita e os dois métodos novos do
+  `RepositorioAutenticacaoSimulado` sumiram com ela. Pior, `git checkout --`
+  **não funciona em arquivo novo**, então as quebras seguintes não reverteram e
+  contaminaram umas às outras. Commite primeiro; aí o revert é confiável para
+  todos os arquivos.
 - **Teste que passa não prova portão nenhum — e isso já falhou aqui.** A guarda
   de conta desativada entrou na #15 anunciada na descrição da PR, sem um único
   teste, e furada. `git grep <a constante que a guarda usa>` em
@@ -940,7 +1009,7 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | Aceitar convite do repositório | Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
-| **Revisar a PR #19** (US5) | Henrique | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
+| **Revisar as PRs #19 (US5) e #20 (telas da US3)** | Henrique | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
 | **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
@@ -956,10 +1025,13 @@ ordem que o empilhamento exigia: #15 → reapontar a #16 → #16 → #17 → #18
 | #17 | Relatório de progresso | ✅ na `master` |
 | #18 | Telas da US2 (T051-T056) | ✅ na `master` |
 | **#19** | **Modo assistido — US5 (T057-T065)** | 🟢 **Aberta**, CI verde, **sem revisão** |
+| **#20** | **Telas da US3 (T070-T073)** | 🟢 **Aberta**, empilhada sobre a #19 |
 
 A branch da US5, `feature/001-fase5-us5`, saiu **da `master`** — a primeira em
 várias fases que não nasce empilhada, porque a fila estava vazia quando ela
-começou.
+começou. A da US3, `feature/001-fase6-us3-app`, saiu **dela**, então a fila
+voltou a existir: quando a #19 entrar, a #20 precisa de
+`gh pr edit 20 --base master` antes do merge.
 
 ⚠️ **A regra do empilhamento continua valendo** para quando houver fila de novo:
 quando a PR de baixo entra, a de cima precisa ser reapontada com
