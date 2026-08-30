@@ -52,9 +52,9 @@ modelo real que provavelmente não sugeriria.
 
 ## Phase 1: Setup
 
-- [ ] T001 Criar a estrutura `backend/src/main/java/br/fatec/memora/assistente/{api,aplicacao,dominio,infra,seguranca}/`
-- [ ] T002 [P] Criar a estrutura `app/lib/features/hub/{domain,presentation}/` e `app/lib/features/assistente/{domain,data,presentation}/`
-- [ ] T003 [P] Acrescentar os textos da feature em `app/lib/l10n/textos_assistente.dart`, na voz da Memora
+- [X] T001 Criar a estrutura `backend/src/main/java/br/fatec/memora/assistente/{api,aplicacao,dominio,infra,seguranca}/`
+- [X] T002 [P] Criar a estrutura `app/lib/features/hub/{domain,presentation}/` e `app/lib/features/assistente/{domain,data,presentation}/`
+- [X] T003 [P] Acrescentar os textos da feature em `app/lib/l10n/textos_assistente.dart`, na voz da Memora
 
 ---
 
@@ -64,32 +64,33 @@ modelo real que provavelmente não sugeriria.
 
 ### Banco e domínio
 
-- [ ] T004 Criar `backend/src/main/resources/db/migration/V4__assistente.sql` com `servico_conhecido` e `evento_da_assistente`, conforme [data-model.md](data-model.md)
-- [ ] T005 Na mesma migration, adicionar a restrição `CHECK` que exige `identificador_android IS NULL` quando `categoria = 'SENSIVEL'` — é a FR-041 escrita no banco, e não no código
-- [ ] T006 Na mesma migration, adicionar o gatilho de somente-inserção em `evento_da_assistente`, no molde de `tg_evento_somente_insercao`
-- [ ] T007 [P] Criar `dominio/CategoriaDoServico.java` com `SENSIVEL` e `COTIDIANO`, gravados em MAIÚSCULAS como os demais enums do projeto
-- [ ] T008 [P] Criar a entidade `dominio/ServicoConhecido.java`
-- [ ] T009 [P] Criar a entidade `dominio/EventoDaAssistente.java`, `@Immutable` e sem método que altere estado
-- [ ] T010 Criar os repositórios Spring Data em `infra/`, com os índices declarados em [data-model.md](data-model.md)
-- [ ] T011 Escrever `backend/src/test/java/br/fatec/memora/assistente/dominio/PortoesDoEsquemaDaAssistenteTest.java` provando, por SQL avulso, que o banco recusa `UPDATE` na trilha **e** recusa serviço `SENSIVEL` com pacote preenchido
+- [X] T004 Criar `backend/src/main/resources/db/migration/V4__assistente.sql` com `servico_conhecido` e `evento_da_assistente`, conforme [data-model.md](data-model.md)
+- [X] T005 Na mesma migration, adicionar a restrição `CHECK` que exige `identificador_android IS NULL` quando `categoria = 'SENSIVEL'` — é a FR-041 escrita no banco, e não no código
+- [X] T006 Na mesma migration, adicionar o gatilho de somente-inserção em `evento_da_assistente`, no molde de `tg_evento_somente_insercao`
+- [X] T007 [P] Criar `dominio/CategoriaDoServico.java` com `SENSIVEL` e `COTIDIANO`, gravados em MAIÚSCULAS como os demais enums do projeto
+- [X] T008 [P] Criar a entidade `dominio/ServicoConhecido.java`
+- [X] T009 [P] Criar a entidade `dominio/EventoDaAssistente.java`, `@Immutable` e sem método que altere estado
+- [X] T010 Criar os repositórios Spring Data em `infra/`, com os índices declarados em [data-model.md](data-model.md)
+- [X] T011 Escrever `backend/src/test/java/br/fatec/memora/assistente/dominio/PortoesDoEsquemaDaAssistenteTest.java` provando, por SQL avulso, que o banco recusa `UPDATE` na trilha **e** recusa serviço `SENSIVEL` com pacote preenchido
 
 ### O portão central
 
-- [ ] T012 Criar `infra/ClienteDaAssistente.java` — a porta, com um método e nenhuma dependência de provedor
-- [ ] T013 Criar `infra/ClienteDaAssistenteSimulado.java`, com roteiros fixos e a capacidade de **sugerir uma ação arbitrária sob comando do teste** — sem isso o cenário H3 não tem como ser exercido
-- [ ] T014 Criar `aplicacao/AutorizadorDeAcao.java`: consulta o catálogo e só autoriza serviço existente, ativo e `COTIDIANO`. **A FR-022 mora aqui**
-- [ ] T015 Escrever `backend/src/test/java/br/fatec/memora/assistente/aplicacao/AutorizadorDeAcaoTest.java` cobrindo serviço sensível, inexistente, inativo e cotidiano
-- [ ] T016 Escrever o cenário **H3** em `backend/src/test/java/br/fatec/memora/assistente/api/SugestaoNaoEhAutorizacaoTest.java`: o simulado sugere abrir o banco, e a ação **não** chega ao aplicativo
-- [ ] T017 Quebrar o T014 de propósito — fazer o autorizador confiar na sugestão — e **confirmar que o T016 reprova**. Desfazer depois. Commitar antes de quebrar
+- [X] T012 Criar `infra/ClienteDaAssistente.java` — a porta, com um método e nenhuma dependência de provedor
+- [X] T013 Criar `infra/ClienteDaAssistenteSimulado.java`, com roteiros fixos e a capacidade de **sugerir uma ação arbitrária sob comando do teste** — sem isso o cenário H3 não tem como ser exercido
+- [X] T014 Criar `aplicacao/AutorizadorDeAcao.java`: consulta o catálogo e só autoriza serviço existente, ativo e `COTIDIANO`. **A FR-022 mora aqui**
+- [X] T015 Escrever `backend/src/test/java/br/fatec/memora/assistente/aplicacao/AutorizadorDeAcaoTest.java` cobrindo serviço sensível, inexistente, inativo e cotidiano
+- [X] T016 Escrever o cenário **H3** em `backend/src/test/java/br/fatec/memora/assistente/api/SugestaoNaoEhAutorizacaoTest.java`: o simulado sugere abrir o banco, e a ação **não** chega ao aplicativo
+- [X] T017 Quebrar o T014 de propósito — fazer o autorizador confiar na sugestão — e **confirmar que o T016 reprova**. Desfazer depois. Commitar antes de quebrar
 
 ### Contrato, persona e limite
 
-- [ ] T018 [P] Criar `infra/PersonaDaMemora.java` com o system prompt versionado: ensinar antes de executar (FR-014), um passo por vez (FR-008), nunca inventar caminho (FR-012), nunca pedir senha (FR-032)
-- [ ] T019 [P] Criar `seguranca/LimitePorConta.java` — teto diário de conversas, com estado no banco, no molde do `LimitadorTentativas`
-- [ ] T020 [P] Acrescentar os códigos de erro novos a `comum/CodigoDeErro.java`, com texto na voz da Memora
+- [X] T018 [P] Criar `infra/PersonaDaMemora.java` com o system prompt versionado: ensinar antes de executar (FR-014), um passo por vez (FR-008), nunca inventar caminho (FR-012), nunca pedir senha (FR-032)
+- [X] T019 [P] Criar `seguranca/LimitePorConta.java` — teto diário de conversas, com estado no banco, no molde do `LimitadorTentativas`
+- [X] T020 [P] Acrescentar os códigos de erro novos a `comum/CodigoDeErro.java`, com texto na voz da Memora
 - [ ] T021 Gerar o cliente Dart a partir de [contracts/openapi.yaml](contracts/openapi.yaml) para `app/pacotes/memora_api/`, com o script existente
-- [ ] T022 [P] Criar `app/lib/features/assistente/domain/assistente.dart` — contrato, mensagem, orientação, passo e ação
-- [ ] T023 [P] Criar `app/lib/features/assistente/data/repositorio_assistente_simulado.dart`, para as telas serem construídas sem backend
+  > **Adiada de propósito.** Gerar agora produziria um cliente para endpoints que ainda não existem, e o script aponta para o contrato da feature 001 — fundir os dois contratos é decisão de spec, não de implementação. Fica para quando os controladores da fase 4 existirem.
+- [X] T022 [P] Criar `app/lib/features/assistente/domain/assistente.dart` — contrato, mensagem, orientação, passo e ação
+- [X] T023 [P] Criar `app/lib/features/assistente/data/repositorio_assistente_simulado.dart`, para as telas serem construídas sem backend
 
 ---
 
