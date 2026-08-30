@@ -340,4 +340,42 @@ abstract final class TextosAutenticacao {
   /// diz *"estou aqui, pode continuar"* — resposta a uma pergunta que ninguém
   /// fez nesta tela.
   static const String botaoEntrarComSenhaNova = 'Entrar na minha conta';
+
+  // ---------------------------------------------------------------------------
+  // Boas-vindas
+  // ---------------------------------------------------------------------------
+
+  /// Apresentação, ao lado do casal.
+  ///
+  /// Diz **o que o Memora é** antes de dizer o que ele faz. A tela anterior a
+  /// esta é a loja de aplicativos, e quem chega aqui muitas vezes não escolheu
+  /// instalar — foi um filho que instalou.
+  ///
+  /// Os asteriscos marcam os trechos realçados (ver `TextoComDestaque`).
+  static const String apresentacao =
+      '*Memora* — eu te ensino a usar o celular, no seu ritmo.';
+
+  /// O que a pessoa vai aprender.
+  ///
+  /// Coisas concretas, e não "integração no mundo digital". Quem tem
+  /// dificuldade com o aparelho não sabe o que essa expressão promete; sabe
+  /// muito bem o que é *ver as fotos dos netos*.
+  static const String oQueVouEnsinar =
+      'Aqui você aprende a *mandar mensagem*, *ver as fotos* de quem você ama '
+      'e *fazer chamada de vídeo* — uma coisa de cada vez, sem pressa nenhuma.';
+
+  /// A promessa que separa o Memora de um assistente.
+  ///
+  /// O Princípio VII da Constituição é **ensinar, nunca substituir**, e é isto
+  /// que a pessoa precisa entender antes de qualquer cadastro: o aplicativo
+  /// mostra o caminho para que da próxima vez ela consiga sozinha.
+  static const String promessa =
+      'Eu mostro o caminho e *você faz*. E não faço nada sem te avisar '
+      'antes 😊';
+
+  /// Rótulo da única ação principal da tela.
+  static const String botaoComecar = 'Começar minha jornada';
+
+  /// Caminho discreto para quem já tem conta.
+  static const String botaoJaTenhoConta = 'Já tenho uma conta';
 }

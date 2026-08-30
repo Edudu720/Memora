@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 60" width="300" height="60" role="img">
+  <!--
+    A linha que atravessa a tela de boas-vindas, como na figura 4 do prototipo.
+
+    Desenhada com `currentColor` de proposito: quem decide a cor e o tema, pelo
+    `colorFilter` de `IlustracaoMemora`. Uma linha preta fixa desapareceria no
+    tema escuro e brigaria com o de alto contraste — que existe justamente para
+    quem enxerga pouco.
+
+    Sobe no fim. E decoracao, mas decoracao que conta a mesma historia do
+    produto: a jornada vai para frente.
+  -->
+  <path d="M0 44 L54 30 L96 40 L150 12 L204 34 L252 20 L300 26"
+        fill="none" stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
