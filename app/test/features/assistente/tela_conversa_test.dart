@@ -67,7 +67,7 @@ void main() {
     await t.pumpWidget(
       MaterialApp(
         theme: TemasMemora.claro,
-        home: TelaConversa(controlador: c, aoAbrirAplicativo: (_) async {}),
+        home: TelaConversa(controlador: c),
       ),
     );
     await avancar(t);

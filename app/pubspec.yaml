@@ -53,6 +53,10 @@ dependencies:
   # porque depender de transitiva quebra sem aviso quando a de cima muda.
   path_provider: ^2.1.5
 
+  # Abre outro aplicativo Android depois da confirmacao da pessoa (FR-015).
+  # Quem abre e o aplicativo, nunca o servidor — ver R10 do research.
+  android_intent_plus: ^5.3.0
+
   # Cliente da API gerado de contracts/openapi.yaml (T027, R8). Mora fora de
   # lib/ porque o dart-dio gera um pacote completo, com pubspec próprio: dentro
   # de lib/ ele não seria dependência de ninguém, e código que nada importa não

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../l10n/textos_assistente.dart';
+import '../../data/abridor_de_aplicativo.dart';
 import '../../data/conversa_local.dart';
 import '../../domain/assistente.dart';
 
@@ -40,9 +43,15 @@ enum EstadoConversa {
 class ControladorConversa extends ChangeNotifier {
   final RepositorioAssistente _repositorio;
   final ConversaLocal _local;
+  final AbridorDeAplicativo? _abridor;
 
   /// Cria o controlador.
-  ControladorConversa(this._repositorio, this._local);
+  ///
+  /// [abridor] é opcional: sem ele a Memora conversa e ensina, mas não abre
+  /// nada. É o mesmo raciocínio da porta do Hub — funcionalidade que não existe
+  /// não deve ser oferecida.
+  ControladorConversa(this._repositorio, this._local, {AbridorDeAplicativo? abridor})
+      : _abridor = abridor;
 
   final List<MensagemDaConversa> _mensagens = <MensagemDaConversa>[];
 
@@ -172,9 +181,20 @@ class ControladorConversa extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// A pessoa confirmou, e o aplicativo já foi aberto.
+  /// A pessoa confirmou: abre o aplicativo, registra e mostra o caminho.
   ///
-  /// Registra a ação (FR-020) e limpa a oferta.
+  /// ## A ordem importa
+  ///
+  /// Abre **primeiro**, registra depois. Registrar antes gravaria na trilha
+  /// imutável uma ação que talvez não aconteça — e a FR-023 mostra esse
+  /// registro à pessoa, que veria "abri o WhatsApp" numa tarde em que ele nunca
+  /// abriu.
+  ///
+  /// ## O caminho percorrido não é gentileza
+  ///
+  /// A FR-019 manda mostrá-lo, e o motivo é o Princípio VII: se a pessoa só vê
+  /// o resultado, ela aprendeu que a Memora resolve. Vendo o caminho, ela tem
+  /// chance de reconhecê-lo sozinha da próxima vez.
   Future<void> confirmarAcao() async {
     final AcaoAutorizada? acao = _acaoOferecida;
     if (acao == null) return;
@@ -182,10 +202,36 @@ class ControladorConversa extends ChangeNotifier {
     _acaoOferecida = null;
     notifyListeners();
 
+    final bool abriu =
+        await _abridor?.abrir(acao.identificadorAndroid) ?? false;
+
+    if (!abriu) {
+      // Aplicativo não instalado, ou fora do `<queries>` do manifesto. A
+      // pessoa recebe uma frase, nunca um erro técnico — e a ação NÃO é
+      // registrada, porque ela não aconteceu.
+      _dizer(TextosAssistente.naoConsegiAbrir(acao.nomeExibido));
+      return;
+    }
+
+    _dizer(TextosAssistente.caminhoPercorrido(acao.nomeExibido));
+
     await _repositorio.registrarAcao(
       servicoId: acao.servicoId,
       pedidoResumido: _ultimoPedido,
     );
+  }
+
+  /// Acrescenta uma fala da Memora à conversa, e guarda.
+  void _dizer(String texto) {
+    _mensagens.add(
+      MensagemDaConversa(
+        autor: AutorDaMensagem.memora,
+        texto: texto,
+        momento: DateTime.now(),
+      ),
+    );
+    unawaited(_local.guardar(_mensagens));
+    notifyListeners();
   }
 
   /// Volta ao estado de espera depois de um erro.

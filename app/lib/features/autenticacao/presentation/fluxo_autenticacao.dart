@@ -14,6 +14,7 @@ import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/conversa_local.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
@@ -55,6 +56,11 @@ class FluxoAutenticacao extends StatefulWidget {
   /// não existe, e sem repositório não há o que listar.
   final RepositorioAssistente? assistente;
 
+  /// Quem abre outro aplicativo, depois da confirmação da pessoa.
+  ///
+  /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
+  final AbridorDeAplicativo? abridor;
+
   /// Quanto tempo parado até a sessão cair (FR-017).
   final Duration inatividade;
 
@@ -65,6 +71,7 @@ class FluxoAutenticacao extends StatefulWidget {
   const FluxoAutenticacao({
     required this.repositorio,
     this.assistente,
+    this.abridor,
     required this.ultimoAcesso,
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
@@ -283,7 +290,11 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoAbrir: () => Navigator.of(context).push<void>(
             MaterialPageRoute<void>(
               builder: (BuildContext contexto) => TelaConversa(
-                controlador: ControladorConversa(assistente, ConversaLocal()),
+                controlador: ControladorConversa(
+                  assistente,
+                  ConversaLocal(),
+                  abridor: widget.abridor,
+                ),
                 aoVoltar: () => Navigator.of(contexto).pop(),
               ),
             ),

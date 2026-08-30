@@ -41,16 +41,12 @@ class TelaConversa extends StatefulWidget {
   /// Controlador da tela.
   final ControladorConversa controlador;
 
-  /// Abre o aplicativo — quem faz isso é o aplicativo, nunca o servidor.
-  final Future<void> Function(AcaoAutorizada acao)? aoAbrirAplicativo;
-
   /// Volta ao Hub.
   final VoidCallback? aoVoltar;
 
   /// Cria a tela de conversa.
   const TelaConversa({
     required this.controlador,
-    this.aoAbrirAplicativo,
     this.aoVoltar,
     super.key,
   });
@@ -98,12 +94,6 @@ class _TelaConversaState extends State<TelaConversa> {
       if (!_rolagem.hasClients) return;
       _rolagem.jumpTo(_rolagem.position.maxScrollExtent);
     });
-  }
-
-  Future<void> _confirmarAbertura(AcaoAutorizada acao) async {
-    await widget.aoAbrirAplicativo?.call(acao);
-    if (!mounted) return;
-    await widget.controlador.confirmarAcao();
   }
 
   @override
@@ -182,7 +172,7 @@ class _TelaConversaState extends State<TelaConversa> {
                             c.acaoOferecida!.nomeExibido,
                           ),
                           rotuloRecusar: TextosAssistente.botaoPrefiroTentar,
-                          aoConfirmar: () => _confirmarAbertura(c.acaoOferecida!),
+                          aoConfirmar: c.confirmarAcao,
                           aoRecusar: c.recusarAcao,
                         ),
                         const SizedBox(height: MemoraEspacamento.md),

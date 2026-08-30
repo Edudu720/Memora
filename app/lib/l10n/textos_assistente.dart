@@ -155,4 +155,23 @@ class TextosAssistente {
   /// Qualquer outra falha.
   static const String inesperada =
       'Algo não saiu como eu esperava. Vamos tentar mais uma vez?';
+
+  /// O caminho que a Memora percorreu, mostrado depois de abrir (FR-019).
+  ///
+  /// A ação executada não pode terminar em silêncio. A FR-019 manda mostrar o
+  /// caminho **depois**, e o motivo é o Princípio VII: se a pessoa só vê o
+  /// resultado, ela aprendeu que a Memora resolve. Vendo o caminho, ela tem
+  /// chance de reconhecê-lo da próxima vez.
+  static String caminhoPercorrido(String aplicativo) =>
+      'Pronto, abri o $aplicativo 😊 Olha o caminho que eu fiz, para você '
+      'reconhecer da próxima vez: toquei no ícone dele na sua tela inicial. '
+      'É só isso — quando quiser tentar, eu fico aqui do lado.';
+
+  /// O aplicativo não estava instalado, ou não abriu.
+  ///
+  /// Não culpa a pessoa e não usa palavra técnica. "Não encontrei no seu
+  /// celular" é o que aconteceu, dito do jeito que ela entende.
+  static String naoConsegiAbrir(String aplicativo) =>
+      'Não encontrei o $aplicativo no seu celular. Pode ser que ele não esteja '
+      'instalado ainda — quer que eu te mostre como procurar na loja?';
 }

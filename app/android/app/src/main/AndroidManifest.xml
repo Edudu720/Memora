@@ -1,4 +1,31 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        Os aplicativos que a Memora pode abrir (FR-017a).
+
+        A partir do Android 11 um aplicativo so enxerga os pacotes que declara
+        aqui. Sem esta lista, `AbridorDeAplicativo` nao consegue nem verificar
+        se o WhatsApp existe no aparelho — a consulta volta vazia como se ele
+        nao estivesse instalado.
+
+        CONSEQUENCIA QUE A EQUIPE PRECISA CONHECER: o catalogo mora no banco
+        justamente para que TIRAR um aplicativo do ar nao exija novo build
+        (R6 do research). Isso continua verdade. Mas ACRESCENTAR um aplicativo
+        abrivel exige mexer aqui e publicar versao nova na loja — o Android
+        impoe esse limite, e nenhuma escolha de arquitetura nossa o contorna.
+
+        Nao usamos QUERY_ALL_PACKAGES de proposito: a Play Store restringe
+        severamente essa permissao, e ela daria ao Memora visibilidade de tudo
+        que a pessoa tem instalado — um dado que nao precisamos e nao queremos.
+    -->
+    <queries>
+        <package android:name="com.whatsapp"/>
+        <package android:name="com.facebook.katana"/>
+        <package android:name="com.instagram.android"/>
+        <package android:name="com.google.android.youtube"/>
+        <package android:name="com.google.android.apps.photos"/>
+        <package android:name="org.telegram.messenger"/>
+    </queries>
+
     <application
         android:label="memora"
         android:name="${applicationName}"

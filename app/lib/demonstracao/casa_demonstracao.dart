@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../design_system/design_system.dart';
+import '../features/assistente/data/abridor_de_aplicativo.dart';
 import '../features/assistente/data/repositorio_assistente_simulado.dart';
 import '../features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import '../features/autenticacao/data/ultimo_acesso_local.dart';
@@ -55,6 +56,7 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
             repositorio: _repositorio,
             ultimoAcesso: widget.ultimoAcesso,
             assistente: _assistente,
+            abridor: const AbridorDeAplicativoAndroid(),
           ),
           const TelaComponentes(),
           const TelaAparencia(),
