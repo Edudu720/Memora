@@ -146,12 +146,13 @@ a Memora toca nele.
 **Teste independente**: pedir que ela abra o banco, de várias formas e
 insistindo, e verificar que ela ensina e nunca abre.
 
-- [ ] T043 [US5] Criar `api/ControladorCatalogo.java` com `GET /v1/assistente/catalogo`
-- [ ] T044 [US5] Semear o catálogo na migration, separando serviços sensíveis de aplicativos cotidianos — **depende da pendência 2 do research**
-- [ ] T045 [US5] Criar `app/lib/features/assistente/presentation/telas/tela_catalogo.dart`, **uma tela parametrizada** pela categoria, servindo às duas portas
-- [ ] T046 [US5] Deixar claro em cada item, antes do toque, se a Memora **ensina** ou **ensina e abre** (FR-045)
-- [ ] T047 [US5] Tratar aplicativo não instalado como ensinável, avisando a pessoa (FR-046)
-- [ ] T048 [US5] Escrever o cenário **H4** em `app/test/features/assistente/servico_sensivel_test.dart`: recusa idêntica sob insistência repetida
+- [X] T043 [US5] Criar `api/ControladorCatalogo.java` com `GET /v1/assistente/catalogo`
+- [X] T044 [US5] Semear o catálogo na migration, separando serviços sensíveis de aplicativos cotidianos
+  > **Lista definida em 2026-08-29, com dados de uso real.** Entre pessoas de 60+ no Brasil o WhatsApp tem 58,7% de penetração e o Instagram 26,3% (74,5% dos idosos já usam internet — IBGE 2025). Entram como **cotidianos**: WhatsApp, Facebook, Instagram, YouTube, Google Fotos e Telegram. Câmera, galeria e telefone ficaram de fora apesar do uso altíssimo — o pacote muda por fabricante, e abrir o aplicativo errado é pior que não abrir. Em **sensíveis**, só o **Gov.br** por decisão do Eduardo; banco, INSS e saúde entram em migrations próprias.
+- [X] T045 [US5] Criar `app/lib/features/assistente/presentation/telas/tela_catalogo.dart`, **uma tela parametrizada** pela categoria, servindo às duas portas
+- [X] T046 [US5] Deixar claro em cada item, antes do toque, se a Memora **ensina** ou **ensina e abre** (FR-045)
+- [X] T047 [US5] Tratar aplicativo não instalado como ensinável, avisando a pessoa (FR-046)
+- [X] T048 [US5] Escrever o cenário **H4** em `app/test/features/assistente/servico_sensivel_test.dart`: recusa idêntica sob insistência repetida
 
 ---
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
+import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
@@ -13,6 +14,11 @@ import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../assistente/data/conversa_local.dart';
+import '../../assistente/domain/assistente.dart';
+import '../../assistente/presentation/controladores/controlador_conversa.dart';
+import '../../assistente/presentation/telas/tela_catalogo.dart';
+import '../../assistente/presentation/telas/tela_conversa.dart';
 import '../../hub/domain/hub.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
 import 'telas/tela_primeira_entrada.dart';
@@ -42,6 +48,13 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Onde fica o identificador do último acesso (FR-012).
   final UltimoAcesso ultimoAcesso;
 
+  /// De onde vêm a conversa e o catálogo da assistente.
+  ///
+  /// **Opcional de propósito.** Sem ele, as portas da assistente não aparecem
+  /// no Hub — é a FR-003 de novo: porta que não abre nada é pior que porta que
+  /// não existe, e sem repositório não há o que listar.
+  final RepositorioAssistente? assistente;
+
   /// Quanto tempo parado até a sessão cair (FR-017).
   final Duration inatividade;
 
@@ -51,6 +64,7 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Cria o fluxo de autenticação.
   const FluxoAutenticacao({
     required this.repositorio,
+    this.assistente,
     required this.ultimoAcesso,
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
@@ -255,12 +269,56 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// A `TelaAparencia` já existe desde a feature 002, e é a primeira porta
   /// legítima do Hub: ela resolve um problema real de quem enxerga pouco.
   List<PortaDoHub> _portasConstruidas() {
+    final RepositorioAssistente? assistente = widget.assistente;
+
     return <PortaDoHub>[
+      // A ação principal do Hub, quando a assistente existe: é ela a razão de
+      // o Memora existir.
+      if (assistente != null)
+        PortaDoHub(
+          rotulo: TextosAssistente.portaConversa,
+          descricao: TextosAssistente.descricaoConversa,
+          icone: Icons.chat_bubble_outline,
+          principal: true,
+          aoAbrir: () => Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (BuildContext contexto) => TelaConversa(
+                controlador: ControladorConversa(assistente, ConversaLocal()),
+                aoVoltar: () => Navigator.of(contexto).pop(),
+              ),
+            ),
+          ),
+        ),
+
+      if (assistente != null)
+        PortaDoHub(
+          rotulo: TextosAssistente.portaAplicativos,
+          descricao: TextosAssistente.descricaoAplicativos,
+          icone: Icons.apps_outlined,
+          aoAbrir: () => _abrirCatalogo(
+            assistente,
+            CategoriaDoServico.cotidiano,
+          ),
+        ),
+
+      if (assistente != null)
+        PortaDoHub(
+          rotulo: TextosAssistente.portaServicos,
+          descricao: TextosAssistente.descricaoServicos,
+          icone: Icons.account_balance_outlined,
+          aoAbrir: () => _abrirCatalogo(
+            assistente,
+            CategoriaDoServico.sensivel,
+          ),
+        ),
+
       PortaDoHub(
         rotulo: 'Como eu vejo o Memora',
         descricao: 'Deixar a letra maior, mudar as cores, enxergar melhor',
         icone: Icons.palette_outlined,
-        principal: true,
+        // Principal apenas quando nao ha assistente: duas acoes de mesmo peso
+        // dividem a atencao de quem precisa de um caminho so.
+        principal: assistente == null,
         aoAbrir: () => Navigator.of(context).push<void>(
           MaterialPageRoute<void>(
             builder: (BuildContext _) => const _PaginaDeAparencia(),
@@ -268,6 +326,26 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         ),
       ),
     ];
+  }
+
+  /// Abre o catálogo de uma categoria.
+  ///
+  /// Uma tela só serve às duas portas: elas mostram a mesma coisa com uma regra
+  /// diferente, e duas telas quase iguais divergem na primeira melhoria feita
+  /// em uma delas.
+  void _abrirCatalogo(
+    RepositorioAssistente assistente,
+    CategoriaDoServico categoria,
+  ) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext contexto) => TelaCatalogo(
+          repositorio: assistente,
+          categoria: categoria,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   @override

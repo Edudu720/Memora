@@ -62,13 +62,20 @@ class ConversaNaoPersisteTest extends TesteComBanco {
     private JdbcTemplate jdbc;
 
     private UUID pessoaId;
+    private UUID criado;
 
     @BeforeEach
     void preparar() {
         pessoaId = inserirPessoa();
-        servicos.save(
-                ServicoConhecido.cotidiano(
-                        "WhatsApp", "com.whatsapp", "Mensagens", Instant.now()));
+        criado =
+                servicos
+                        .save(
+                                ServicoConhecido.cotidiano(
+                                        "Mensagens de teste",
+                                        "com.teste.mensagens",
+                                        "Mensagens",
+                                        Instant.now()))
+                        .getId();
         assistente.limpar().responderCom(SEGREDO_DA_MEMORA);
     }
 
@@ -76,7 +83,8 @@ class ConversaNaoPersisteTest extends TesteComBanco {
     void limpar() {
         jdbc.execute("DELETE FROM evento_da_assistente");
         jdbc.execute("DELETE FROM uso_da_assistente");
-        servicos.deleteAll();
+        // So o que este teste criou: deleteAll apagaria o catalogo da V5.
+        servicos.deleteById(criado);
         jdbc.execute("DELETE FROM pessoa_usuaria");
         assistente.limpar();
     }

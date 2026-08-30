@@ -9,8 +9,10 @@ import br.fatec.memora.assistente.infra.ClienteDaAssistenteSimulado;
 import br.fatec.memora.assistente.infra.RepositorioServicoConhecido;
 import br.fatec.memora.suporte.TesteComBanco;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,19 +49,37 @@ class SugestaoNaoEhAutorizacaoTest extends TesteComBanco {
     @Autowired
     private RepositorioServicoConhecido servicos;
 
+    private final List<UUID> criados = new ArrayList<>();
+
     @BeforeEach
     void semear() {
-        servicos.save(
-                ServicoConhecido.cotidiano(
-                        "YouTube", "com.google.android.youtube", "Videos", Instant.now()));
-        servicos.save(
-                ServicoConhecido.sensivel("Banco", "Conta e pagamentos", Instant.now()));
+        // Pacote ficticio: o catalogo real vem da migration V5, e reusar um
+        // pacote de la faria este teste disputar a unicidade com o produto.
+        criados.add(
+                servicos
+                        .save(
+                                ServicoConhecido.cotidiano(
+                                        "Video de teste",
+                                        "com.teste.video",
+                                        "Videos",
+                                        Instant.now()))
+                        .getId());
+        criados.add(
+                servicos
+                        .save(
+                                ServicoConhecido.sensivel(
+                                        "Banco de teste",
+                                        "Conta e pagamentos",
+                                        Instant.now()))
+                        .getId());
         assistente.limpar();
     }
 
+    /** Apaga so o que criou: o container e compartilhado pela suite. */
     @AfterEach
     void limpar() {
-        servicos.deleteAll();
+        criados.forEach(servicos::deleteById);
+        criados.clear();
         assistente.limpar();
     }
 
@@ -104,13 +124,13 @@ class SugestaoNaoEhAutorizacaoTest extends TesteComBanco {
     void cotidianoPassa() {
         // Sem este caso, um autorizador que recusasse absolutamente tudo
         // passaria nos tres testes acima e a feature nao funcionaria.
-        assistente.sugerirAbrir("com.google.android.youtube");
+        assistente.sugerirAbrir("com.teste.video");
 
         Optional<AutorizadorDeAcao.AcaoAutorizada> acao =
                 autorizador.autorizar(conversar().sugestao());
 
         assertThat(acao).isPresent();
-        assertThat(acao.get().nomeExibido()).isEqualTo("YouTube");
+        assertThat(acao.get().nomeExibido()).isEqualTo("Video de teste");
     }
 
     private ClienteDaAssistente.Resposta conversar() {

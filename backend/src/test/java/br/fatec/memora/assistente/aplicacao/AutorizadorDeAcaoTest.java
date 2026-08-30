@@ -7,6 +7,9 @@ import br.fatec.memora.assistente.infra.ClienteDaAssistente;
 import br.fatec.memora.assistente.infra.RepositorioServicoConhecido;
 import br.fatec.memora.suporte.TesteComBanco;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,20 +40,45 @@ class AutorizadorDeAcaoTest extends TesteComBanco {
     @Autowired
     private RepositorioServicoConhecido servicos;
 
-    private static final String PACOTE_COTIDIANO = "com.whatsapp";
+    // Pacote ficticio, e nao "com.whatsapp": o catalogo real e semeado pela
+    // migration V5, e reusar um pacote de la faria este teste disputar a
+    // restricao de unicidade com o proprio produto.
+    private static final String PACOTE_COTIDIANO = "com.teste.cotidiano";
+
+    private final List<UUID> criados = new ArrayList<>();
 
     @BeforeEach
     void semear() {
-        servicos.save(
-                ServicoConhecido.cotidiano(
-                        "WhatsApp", PACOTE_COTIDIANO, "Mensagens", Instant.now()));
-        servicos.save(
-                ServicoConhecido.sensivel("Meu INSS", "Beneficios e aposentadoria", Instant.now()));
+        criados.add(
+                servicos
+                        .save(
+                                ServicoConhecido.cotidiano(
+                                        "Aplicativo de teste",
+                                        PACOTE_COTIDIANO,
+                                        "Mensagens",
+                                        Instant.now()))
+                        .getId());
+        criados.add(
+                servicos
+                        .save(
+                                ServicoConhecido.sensivel(
+                                        "Servico sensivel de teste",
+                                        "Beneficios",
+                                        Instant.now()))
+                        .getId());
     }
 
+    /**
+     * Apaga apenas o que este teste criou.
+     *
+     * <p>{@code deleteAll()} apagaria o catalogo semeado pela migration V5, e o
+     * proximo teste a rodar no mesmo container encontraria um banco vazio. O
+     * container e compartilhado pela suite inteira — ver {@code TesteComBanco}.
+     */
     @AfterEach
     void limpar() {
-        servicos.deleteAll();
+        criados.forEach(servicos::deleteById);
+        criados.clear();
     }
 
     @Test
@@ -59,7 +87,7 @@ class AutorizadorDeAcaoTest extends TesteComBanco {
         Optional<AutorizadorDeAcao.AcaoAutorizada> acao = autorizar(PACOTE_COTIDIANO);
 
         assertThat(acao).isPresent();
-        assertThat(acao.get().nomeExibido()).isEqualTo("WhatsApp");
+        assertThat(acao.get().nomeExibido()).isEqualTo("Aplicativo de teste");
         assertThat(acao.get().identificadorAndroid()).isEqualTo(PACOTE_COTIDIANO);
     }
 
@@ -72,10 +100,10 @@ class AutorizadorDeAcaoTest extends TesteComBanco {
     @Test
     @DisplayName("servico tirado do ar deixa de ser autorizavel no mesmo instante")
     void inativoEhRecusado() {
-        ServicoConhecido whatsapp =
+        ServicoConhecido cotidiano =
                 servicos.findByIdentificadorAndroidAndAtivoTrue(PACOTE_COTIDIANO).orElseThrow();
-        whatsapp.desativar(Instant.now());
-        servicos.save(whatsapp);
+        cotidiano.desativar(Instant.now());
+        servicos.save(cotidiano);
 
         // Nao depende de publicar versao nova do aplicativo: e o que a R6
         // buscava ao por o catalogo no banco em vez de num arquivo compilado.
@@ -88,7 +116,7 @@ class AutorizadorDeAcaoTest extends TesteComBanco {
         // O aplicativo do Meu INSS existe e a pessoa o usa. O que nao existe e
         // uma linha no catalogo que ligue um pacote a ele — a restricao do banco
         // impede que exista. A FR-041 se cumpre por ausencia de dado.
-        assertThat(autorizar("br.gov.meuinss")).isEmpty();
+        assertThat(autorizar("br.gov.servicosensivel")).isEmpty();
     }
 
     @Test
