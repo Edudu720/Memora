@@ -20,6 +20,7 @@ import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
 import '../../assistente/presentation/telas/tela_catalogo.dart';
 import '../../assistente/presentation/telas/tela_conversa.dart';
+import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
 import 'telas/tela_primeira_entrada.dart';
@@ -320,6 +321,21 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoAbrir: () => _abrirCatalogo(
             assistente,
             CategoriaDoServico.sensivel,
+          ),
+        ),
+
+      if (assistente != null)
+        PortaDoHub(
+          rotulo: TextosAssistente.portaRegistro,
+          descricao: TextosAssistente.descricaoRegistro,
+          icone: Icons.history_outlined,
+          aoAbrir: () => Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (BuildContext contexto) => TelaRegistro(
+                repositorio: assistente,
+                aoVoltar: () => Navigator.of(contexto).pop(),
+              ),
+            ),
           ),
         ),
 

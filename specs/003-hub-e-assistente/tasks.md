@@ -163,15 +163,15 @@ insistindo, e verificar que ela ensina e nunca abre.
 **Teste independente**: declarar dificuldade e verificar que ela oferece,
 confirma antes, executa, e depois mostra o caminho percorrido.
 
-- [ ] T049 [US3] Fazer o `ServicoDeConversa` declarar a ferramenta `abrir_aplicativo` e passar a sugestão pelo `AutorizadorDeAcao` antes de emitir o evento `acao`
-- [ ] T050 [US3] Criar `api/ControladorRegistro.java` com `POST /v1/assistente/acao`, **truncando `pedido_resumido` no servidor** — confiar o corte ao aparelho transformaria um campo de tabela imutável em texto livre
-- [ ] T051 [US3] Exibir a oferta com `ConfirmacaoMemora`, declarando o que será feito antes de qualquer coisa (FR-015)
-- [ ] T052 [US3] Fazer a recusa encerrar o assunto, sem repetir a oferta na mesma conversa (FR-016)
-- [ ] T053 [US3] Exibir o aviso de saída do Memora antes de abrir o outro aplicativo (FR-021), reusando o idioma da feature 001
-- [ ] T054 [US3] Abrir o aplicativo pelo Flutter após a confirmação, e registrar a execução
-- [ ] T055 [US3] Mostrar o caminho percorrido depois da execução (FR-019)
-- [ ] T056 [US3] Escrever os cenários **H7** e **H8** em `app/test/features/assistente/acao_confirmada_test.dart`
-- [ ] T057 [US3] Quebrar o T051 — abrir direto ao receber a ação autorizada — e **confirmar que o T056 reprova**
+- [X] T049 [US3] Fazer o `ServicoDeConversa` declarar a ferramenta `abrir_aplicativo` e passar a sugestão pelo `AutorizadorDeAcao` antes de emitir o evento `acao`
+- [X] T050 [US3] Criar `api/ControladorRegistro.java` com `POST /v1/assistente/acao`, **truncando `pedido_resumido` no servidor** — confiar o corte ao aparelho transformaria um campo de tabela imutável em texto livre
+- [X] T051 [US3] Exibir a oferta com `ConfirmacaoMemora`, declarando o que será feito antes de qualquer coisa (FR-015)
+- [X] T052 [US3] Fazer a recusa encerrar o assunto, sem repetir a oferta na mesma conversa (FR-016)
+- [X] T053 [US3] Exibir o aviso de saída do Memora antes de abrir o outro aplicativo (FR-021), reusando o idioma da feature 001
+- [X] T054 [US3] Abrir o aplicativo pelo Flutter após a confirmação, e registrar a execução
+- [X] T055 [US3] Mostrar o caminho percorrido depois da execução (FR-019)
+- [X] T056 [US3] Escrever os cenários **H7** e **H8** em `app/test/features/assistente/acao_confirmada_test.dart`
+- [X] T057 [US3] Quebrar o T051 — abrir direto ao receber a ação autorizada — e **confirmar que o T056 reprova**
 
 ---
 
@@ -179,9 +179,9 @@ confirma antes, executa, e depois mostra o caminho percorrido.
 
 **Meta**: o log do Princípio VI serve à pessoa, e não só à equipe.
 
-- [ ] T058 [P] [US4] Criar `aplicacao/ServicoDeRegistro.java` e `GET /v1/assistente/registro`
-- [ ] T059 [US4] Criar `app/lib/features/assistente/presentation/telas/tela_registro.dart`, em linguagem comum
-- [ ] T060 [US4] Escrever o cenário **H9** em `app/test/features/assistente/tela_registro_test.dart`: ação executada aparece, tarefa só ensinada não
+- [X] T058 [P] [US4] Criar `aplicacao/ServicoDeRegistro.java` e `GET /v1/assistente/registro`
+- [X] T059 [US4] Criar `app/lib/features/assistente/presentation/telas/tela_registro.dart`, em linguagem comum
+- [X] T060 [US4] Escrever o cenário **H9** em `app/test/features/assistente/tela_registro_test.dart`: ação executada aparece, tarefa só ensinada não
 
 ---
 

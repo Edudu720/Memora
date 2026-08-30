@@ -174,4 +174,44 @@ class TextosAssistente {
   static String naoConsegiAbrir(String aplicativo) =>
       'Não encontrei o $aplicativo no seu celular. Pode ser que ele não esteja '
       'instalado ainda — quer que eu te mostre como procurar na loja?';
+
+  // ---------------------------------------------------------------------------
+  // Registro — US4
+  // ---------------------------------------------------------------------------
+
+  /// O que esta tela é, dito antes da lista.
+  ///
+  /// Explica o **propósito** do registro, e não o seu funcionamento: a pessoa
+  /// precisa saber que pode conferir, não que existe uma tabela imutável.
+  static const String explicacaoDoRegistro =
+      'Sempre que eu abrir alguma coisa no seu lugar, eu anoto aqui. Assim '
+      'você pode conferir quando quiser 😊';
+
+  /// Quando não há nada registrado.
+  ///
+  /// Lista vazia aqui é **boa notícia**, e o texto diz isso. Um "nada
+  /// encontrado" faria a pessoa achar que perdeu alguma coisa.
+  static const String registroVazio =
+      'Ainda não precisei fazer nada no seu lugar. Continue assim que logo '
+      'você não vai mais precisar de mim para isso 😊';
+
+  /// O que foi feito, numa frase.
+  static String oQueFoiFeito(String aplicativo, String pedido) =>
+      pedido.isEmpty
+          ? 'Abri o $aplicativo para você'
+          : 'Abri o $aplicativo, porque você me pediu: "$pedido"';
+
+  /// Quando aconteceu, do jeito que uma pessoa fala.
+  ///
+  /// Data por extenso, e não `dd/MM/yyyy HH:mm`: quem lê isto não está
+  /// auditando um sistema, está lembrando de um dia.
+  static String quandoAconteceu(DateTime momento) {
+    const List<String> meses = <String>[
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+    ];
+    final String hora = momento.hour.toString().padLeft(2, '0');
+    final String minuto = momento.minute.toString().padLeft(2, '0');
+    return '${momento.day} de ${meses[momento.month - 1]}, às ${hora}h$minuto';
+  }
 }

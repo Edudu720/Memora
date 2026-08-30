@@ -67,6 +67,23 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
     ),
   ];
 
+  /// Espera a demora simulada, **sem criar timer quando ela é zero**.
+  ///
+  /// ## Por que isto não é micro-otimização
+  ///
+  /// `Future.delayed(Duration.zero)` ainda agenda um timer. Dentro de
+  /// `testWidgets` o relógio é falso, e um `await` no corpo do teste — sem
+  /// ninguém bombeando quadros — **nunca completa**: o caso morre em "did not
+  /// complete" depois de minutos, sem apontar a causa.
+  ///
+  /// Já custou duas rodadas nesta feature. Com o atalho, `demora: Duration.zero`
+  /// significa de verdade "não espere", e o teste pode chamar o repositório
+  /// direto, sem `runAsync`.
+  Future<void> _esperar() async {
+    if (demora == Duration.zero) return;
+    await Future<void>.delayed(demora);
+  }
+
   /// Ações registradas nesta execução. Só para teste.
   final List<AcaoRegistrada> acoesRegistradas = <AcaoRegistrada>[];
 
@@ -76,7 +93,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
   }) async {
-    await Future<void>.delayed(demora);
+    await _esperar();
 
     if (falhaForcada != null) {
       return AssistenteFalhou(
@@ -124,7 +141,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
 
   @override
   Future<List<ServicoDoCatalogo>> catalogo() async {
-    await Future<void>.delayed(demora);
+    await _esperar();
     return catalogoDaDemonstracao;
   }
 
@@ -133,7 +150,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
     required String servicoId,
     required String pedidoResumido,
   }) async {
-    await Future<void>.delayed(demora);
+    await _esperar();
     final ServicoDoCatalogo servico = catalogoDaDemonstracao.firstWhere(
       (ServicoDoCatalogo s) => s.id == servicoId,
       orElse: () => catalogoDaDemonstracao.first,
@@ -150,7 +167,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
 
   @override
   Future<List<AcaoRegistrada>> registro() async {
-    await Future<void>.delayed(demora);
+    await _esperar();
     return List<AcaoRegistrada>.unmodifiable(acoesRegistradas);
   }
 

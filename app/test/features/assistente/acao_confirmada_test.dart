@@ -68,17 +68,15 @@ void main() {
     await avancar(t);
   }
 
-  /// Confirma a acao no laco de eventos REAL.
+  /// Confirma a acao e deixa a tela reagir.
   ///
-  /// `await c.confirmarAcao()` direto no corpo do teste **nunca completa**: o
-  /// repositorio simulado usa `Future.delayed`, e dentro de `testWidgets` o
-  /// relogio e falso — o timer so anda se alguem bombear quadros, e o `await`
-  /// impede que isso aconteca. O caso morre em "did not complete" depois de
-  /// minutos.
-  ///
-  /// `runAsync` roda no laco real, onde o timer completa sozinho.
+  /// Funciona com `await` direto porque `RepositorioAssistenteSimulado` nao
+  /// cria timer quando `demora` e zero. Sem esse cuidado, um
+  /// `Future.delayed(Duration.zero)` dentro de `testWidgets` nunca completa —
+  /// o relogio e falso, e o `await` impede que alguem bombeie quadros. Custou
+  /// duas rodadas desta feature antes de ser corrigido na raiz.
   Future<void> confirmar(WidgetTester t, ControladorConversa c) async {
-    await t.runAsync(() => c.confirmarAcao());
+    await c.confirmarAcao();
     await avancar(t);
   }
 
