@@ -128,7 +128,7 @@ void main() {
         (WidgetTester t) async {
       await montarCatalogo(t, CategoriaDoServico.sensivel);
 
-      expect(find.byKey(TelaCatalogo.chaveDoItem('Meu INSS')), findsOneWidget);
+      expect(find.byKey(TelaCatalogo.chaveDoItem('Gov.br')), findsOneWidget);
       expect(find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')), findsNothing);
     });
   });

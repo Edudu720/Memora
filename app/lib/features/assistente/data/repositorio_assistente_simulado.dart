@@ -51,17 +51,14 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
     ),
-    ServicoDoCatalogo(
-      id: 'meu-inss',
-      nomeExibido: 'Meu INSS',
-      descricaoCurta: 'Ver seu benefício e agendar atendimento',
-      categoria: CategoriaDoServico.sensivel,
-      memoraPodeAbrir: false,
-    ),
+    // Um sensível só, espelhando a migration V5: a equipe decidiu começar com
+    // o Gov.br e acrescentar banco, INSS e saúde depois. Um simulado que
+    // mostrasse serviços que o catálogo real não tem faria a demonstração
+    // prometer o que o produto não entrega.
     ServicoDoCatalogo(
       id: 'gov-br',
       nomeExibido: 'Gov.br',
-      descricaoCurta: 'Serviços do governo',
+      descricaoCurta: 'Documentos, benefícios e agendamentos do governo',
       categoria: CategoriaDoServico.sensivel,
       memoraPodeAbrir: false,
     ),
