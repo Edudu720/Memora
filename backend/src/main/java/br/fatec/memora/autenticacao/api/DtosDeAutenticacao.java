@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 import java.util.UUID;
@@ -81,6 +82,41 @@ public final class DtosDeAutenticacao {
     /** O que o aplicativo envia para renovar a sessão (T048). */
     public record RenovarRequisicao(
             @JsonProperty("refresh_token") @NotBlank String refreshToken) {}
+
+    /**
+     * O que o aplicativo envia para pedir o código de recuperação (T066).
+     *
+     * <p>Um campo só, pelo mesmo motivo da {@link EntrarRequisicao}: quem
+     * esqueceu a senha não deve ter de lembrar também com qual dos dois canais
+     * se cadastrou (FR-051).
+     */
+    public record RecuperacaoSolicitarRequisicao(
+            @JsonProperty("identificador") @NotBlank String identificador) {}
+
+    /**
+     * O que o aplicativo envia para definir a senha nova (T067).
+     *
+     * <p>O {@code @Pattern} de seis dígitos é validação de <b>formato</b>, e
+     * recusá-lo aqui não conta nada: um código com letras não existe em
+     * nenhuma conta. Já {@code novaSenha} passa apenas pelo {@code @NotBlank} —
+     * a política de senha é aplicada no controlador, para que a recusa por
+     * senha fraca traga o texto que explica o que fazer.
+     */
+    public record RecuperacaoConfirmarRequisicao(
+            @JsonProperty("identificador") @NotBlank String identificador,
+            @JsonProperty("codigo") @NotBlank @Pattern(regexp = "^[0-9]{6}$") String codigo,
+            @JsonProperty("nova_senha") @NotBlank String novaSenha,
+            @JsonProperty("aparelho_descricao") @Size(max = 120) String aparelhoDescricao) {}
+
+    /**
+     * A resposta do {@code 202} da solicitação.
+     *
+     * <p>Existe como record em vez de corpo vazio porque o contrato publica um
+     * texto, e esse texto é a única coisa que a pessoa vai ler. Ele é
+     * <b>idêntico</b> exista ou não a conta (FR-019) — daí ele nascer de uma
+     * constante, e não de um caminho de código que poderia divergir.
+     */
+    public record RecuperacaoAceitaResposta(@JsonProperty("mensagem") String mensagem) {}
 
     /** Sessão iniciada — o que cadastro, entrada e renovação devolvem. */
     public record SessaoResposta(
