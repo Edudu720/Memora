@@ -4,15 +4,14 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-08-29 — **a feature 003 nasceu e foi implementada até a
-fase 7**: spec, plano, 74 tarefas e 58 delas feitas. O Memora deixou de ser
-fundação e virou produto.
-**Estado**: **301 testes** no backend e **294** no aplicativo. A feature 001
-está completa até a US5, com a US3 só no aplicativo e a US4 pendente. A feature
+**Última sessão**: 2026-09-08 — **o backend da US3** (T066-T069), pelo Henrique,
+na máquina dele. A recuperação de acesso deixou de ser meia feature.
+**Estado**: **321 testes** no backend (eram 301) e **294** no aplicativo. A
+feature 001 está completa até a US5 **e a US3 inteira**; falta a US4. A feature
 003 tem **Hub, conversa que ensina, catálogos, execução com confirmação e
 registro** — tudo funcionando contra simulado, **sem provedor de IA escolhido**.
-**Próximo: a fase 8 da 003** (T061-T068), que é a única que depende da escolha
-do provedor. Depois a fase 9, de validação. Ver seção 4-B.
+**Próximo: a US4 da 001** (T074-T078) ou **a fase 8 da 003** (T061-T068), que
+espera a escolha do provedor. Ver seção 4-B.
 
 > ⚠️ **O provedor de IA NÃO foi escolhido, e isso é uma decisão em aberto da
 > equipe** (R2 do research da 003). A arquitetura foi desenhada para que isso
@@ -22,11 +21,11 @@ do provedor. Depois a fase 9, de validação. Ver seção 4-B.
 > mais pesa é retenção de dados: um provedor que treine com o que recebe
 > desfaria a decisão D3 por fora, sem aparecer no nosso código.
 
-> ⚠️ **A US3 da feature 001 continua pela metade, e a metade que existe é a de
-> cima.** As telas funcionam contra o `RepositorioAutenticacaoSimulado`; os dois
-> endpoints (`/auth/recuperacao/solicitar` e `/auth/recuperacao/confirmar`)
-> **não existem** no servidor. O `RepositorioAutenticacaoApi` já os chama pelo
-> cliente gerado — compila, e responderia `404`. Não anuncie a US3 como pronta.
+> ✅ **A US3 fechou em 2026-09-08.** Os dois endpoints existem
+> (`/auth/recuperacao/solicitar` e `/auth/recuperacao/confirmar`) e o
+> `RepositorioAutenticacaoApi` já não recebe `404`. Ver "O backend da US3", na
+> seção 4. **Continua sem provedor de envio** (T065a): o código e o aviso de
+> troca de senha vão para o log, e o perfil `producao` não sobe sem substituto.
 
 > ⚠️ **Confira o GitHub antes de decidir o que fazer.** Este arquivo já ficou
 > para trás uma vez: em 2026-08-16 ele apontava T030-T032 como próximo passo, e
@@ -419,7 +418,7 @@ A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso 
 cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
 entrega o que o corpo escondeu — medido, não suposto.
 
-### Vinte e cinco portões de segurança, cada um validado quebrando de propósito
+### Trinta portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -448,10 +447,20 @@ entrega o que o corpo escondeu — medido, não suposto.
 | O número recusado sai do campo | `tela_recuperacao_test.dart` | Tirei a limpeza do código: reprovou com `Expected: empty / Actual: '000000'` |
 | A troca conta que as sessões caíram (FR-021) | `tela_recuperacao_test.dart` | Troquei o aviso por "Pronto!": reprovou com `Found 0 widgets with text "Sua senha nova já está valendo..."` |
 | O código de recuperação é de uso único (FR-020) | `tela_recuperacao_test.dart` | Não removi o código do mapa: reprovou com `expected AutenticacaoFalhou but was AutenticacaoConcluida` |
+| Trocar a senha derruba **todas** as sessões (FR-021) | `TrocaDeSenhaRevogaSessoesTest` (V5) | Comentei `revogarSessoesDaPessoa`: **2 testes** reprovaram, o primeiro com `expected:<401> but was:<200>` — o refresh antigo continuou renovando |
+| Só canal verificado recebe código (FR-052) | `TrocaDeSenhaRevogaSessoesTest` | Tirei o `!isVerificado()`: reprovou com `Expecting empty but was: ["562181"]` — o golpe da FR-062 acontecendo em uma linha |
+| Latência da recuperação não revela conta (FR-019) | `NaoRevelaExistenciaTest` (V2) | Movi o hash do código para depois da consulta ao canal: reprovou com **9 ms contra 274 ms** |
+| A sessão da recuperação sobrevive à revogação | `TrocaDeSenhaRevogaSessoesTest` | Inverti a ordem — emitir antes de revogar: reprovou com `expected:<200> but was:<401>`, a sessão nova morreu junto com as velhas |
+| Trocar a senha destranca a conta bloqueada | `TrocaDeSenhaRevogaSessoesTest` | Tirei o `registrarEntradaBemSucedida`: reprovou com `expected: null` — a pessoa trocava a senha e continuava trancada do lado de fora |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
-vinte e cinco realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
+trinta realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
 conta desativada entrar sem teste nenhum e furada, na revisão da #15.
+
+⚠️ **Os cinco portões da recuperação passaram todos na primeira execução**, e
+isso não significou nada até cada um ser quebrado. Os cinco pegaram exatamente o
+que deveriam, e nenhum pegou o do vizinho — que é o segundo passo que o achado
+do `ControladorLogin` ensinou a fazer.
 
 ### Duas decisões que divergem da pesquisa — reabra se discordar
 
@@ -609,6 +618,57 @@ vazamento.
 estava nulo desde a US2 justamente porque não havia para onde ir. O
 `FluxoAutenticacao` o preenche, e leva o identificador junto (FR-012).
 
+### O backend da US3 — recuperar o acesso (T066-T069, 2026-09-08)
+
+`autenticacao/aplicacao/ServicoDeRecuperacao.java` e
+`autenticacao/api/ControladorRecuperacao.java`. Fecha o buraco que existia desde
+a PR #20: as telas chamavam dois endpoints que respondiam `404`.
+
+| Endpoint | Devolve | Recusa com |
+|---|---|---|
+| `POST /v1/auth/recuperacao/solicitar` | `202` **sempre** | `429` só por origem |
+| `POST /v1/auth/recuperacao/confirmar` | `200` + sessão | `400` genérico, `429` |
+
+**Conta bloqueada recupera, sim — e a troca destranca.** A tela de bloqueio
+oferece "Criar uma senha nova" como saída; recusar a recuperação por causa do
+bloqueio faria dela porta pintada na parede. Por isso `solicitar` **não** olha
+`bloqueada_ate` (só a camada por origem), e a confirmação chama
+`registrarEntradaBemSucedida`, que limpa falhas e a tranca. Sem essa limpeza, a
+pessoa faria tudo certo e continuaria trancada do lado de fora — resolvendo
+metade do problema.
+
+**A ordem de três linhas é o cenário V5.** Revogar **todas** as sessões vem
+antes de emitir a nova. Invertida, a sessão recém-criada morre junto com as
+velhas e a pessoa sai da recuperação com um token morto. E precisa ser todas as
+sessões da pessoa, não só a família da atual: quem troca a senha por suspeitar
+de invasão está justamente tentando expulsar uma sessão que não é dela.
+
+**Nenhum Argon2 dentro de transação, de novo.** `confirmar` paga **dois** hashes
+(~480 ms): conferir o código e codificar a senha nova. É o mesmo
+`TransactionTemplate` que a revisão da #15 aplicou em `ServicoDeEntrada`, pelo
+mesmo motivo — conexão presa sem tocar no banco, em endpoint público. Duas
+transações curtas, os hashes entre elas.
+
+**O hash roda antes da consulta ao canal, nos dois caminhos.** Terceiro endpoint
+público a precisar disso, e o portão mediu **9 ms contra 274 ms** quando
+quebrado. `ServicoDeCadastro` e `ServicoDeEntrada` já faziam; suspeite disso em
+qualquer endpoint público novo.
+
+**A porta `NotificadorDeConta` ficou em `aplicacao/`, não em `infra/`** como a
+T068 escreve — mesma divisão que `EnviadorDeCodigo` já usa, e o que o Princípio
+V pede. O adaptador é `infra/NotificadorDeContaEmLog.java`, `@Profile("!producao")`.
+
+⚠️ **Continua sem provedor de envio** (T065a). Sem ele, o código de recuperação
+e o aviso de senha alterada vão para o log, e o perfil `producao` não sobe. A
+FR-022 está implementada e não chega a ninguém em produção — é a mesma lacuna do
+modo assistido, agora em dois lugares.
+
+⚠️ **A confirmação não exige canal verificado por argumento separado**: ela
+localiza o canal e recusa se não for verificado, igual ao `solicitar`. Se alguém
+acrescentar um caminho de troca de senha autenticado (a US4 vai), lembre que a
+regra precisa valer lá também — a mesma lição que a #15 deixou sobre conta
+desativada em `entrar` e `renovar`.
+
 ## 4-B. A feature 003 — Hub e a assistente que ensina
 
 Feita em 2026-08-29, do zero até a fase 7. É a primeira feature **do produto**:
@@ -709,16 +769,18 @@ gerariam cliente para endpoints cujo contrato ainda não foi fundido com o da
 
 ### O que ainda falta na feature 001
 
-**T066-T069** — o backend da US3, os dois endpoints que faltam para a
-recuperação sair do simulado. Depois a **US4** (T074-T078): a saída deliberada
-e a troca de senha.
+A **US4** (T074-T078) é o que resta: a saída deliberada e a troca de senha.
+A US3 fechou em 2026-09-08 — ver "O backend da US3", acima.
 
-⚠️ **A T066 só envia para canal verificado** (FR-052), e é aí que a US5 paga o
-que prometeu: sem posse confirmada, o acompanhante que cadastrasse o próprio
-contato controlaria a recuperação da conta alheia para sempre (FR-062).
+⚠️ **A T077 depende de uma decisão de spec que ninguém tomou**: a contradição
+FR-012 × FR-026, o identificador do último acesso sobreviver ou não à saída da
+conta. `UltimoAcessoLocal.esquecer()` existe e ninguém o chama. Vale um
+`/speckit-clarify` antes de implementá-la.
 
-⚠️ **A T068 esbarra na T065a.** Notificar exige o mesmo `EnviadorDeCodigo` que
-não tem provedor real, e com o perfil `producao` a aplicação não sobe sem ele.
+⚠️ **A T074 é endpoint autenticado novo**, e por isso precisa responder à
+pergunta da #15: toda porta que a desativação fecha está fechada nos dois lados?
+E a da sessão-chamariz: o sujeito do token é resolvido e recusado quando não
+existe?
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de
 componentes e análise estática contra valores literais.
@@ -859,10 +921,16 @@ cd app; flutter analyze; flutter test
 ```
 
 ```powershell
-python specs/002-design-system/ferramentas/validar_paleta.py
+py specs/002-design-system/ferramentas/validar_paleta.py
 ```
 
 Os três precisam passar. O CI (`.github/workflows/verificacao.yml`) roda os mesmos.
+
+⚠️ **Na máquina do Henrique é `py`, não `python`.** Existe Python 3.14 em
+`AppData\Local\Programs\Python\Python314`, mas quem está no PATH é o **alias da
+Microsoft Store** — ele não executa nada e ainda devolve um texto sugerindo
+instalar da loja, com código de saída 49. Parece Python ausente e não é. O
+launcher `py` acha a instalação real.
 
 ### ⚠️ Sintaxe de comando
 
