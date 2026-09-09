@@ -870,6 +870,23 @@ cd C:\Users\Edu\Documents\Memora\app; flutter run
 
 Com o app rodando: `r` recarrega na hora, `R` reinicia, `q` encerra.
 
+⚠️ **Emulador parado em `offline` com ~950 MB é falta de RAM, não defeito
+gráfico.** Na máquina do Henrique isso aconteceu em 2026-09-08: o `adb devices`
+mostrava `emulator-5554 offline` indefinidamente e o `qemu-system-x86_64`
+estacionava perto de 1 GB sem nunca crescer. **Havia 0,6 GB livres de 16 GB** —
+Rocket League com 1,6 GB, mais Docker (`vmmemWSL`), Discord e o backend Java. O
+emulador precisa de vários GB e simplesmente não avança sem eles.
+
+O sintoma engana porque é idêntico ao de um problema de renderização, e o
+caminho errado custa tempo. **Cheque a memória primeiro** — é uma linha:
+
+```powershell
+$os = Get-CimInstance Win32_OperatingSystem; "Livre: {0:N1} GB" -f ($os.FreePhysicalMemory/1MB)
+```
+
+Rodar backend, Docker e emulador ao mesmo tempo nesta máquina exige fechar jogo
+e o que mais estiver aberto. Não há folga para os três mais um jogo.
+
 ### O que existe para ver
 
 A tela inicial é uma **casca de demonstração** (`lib/demonstracao/`), provisória,
@@ -911,6 +928,54 @@ environment`) enterrada no meio do rastro. Subir leva ~40 s:
 ```powershell
 Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 ```
+
+### O aplicativo falando com o servidor (2026-09-08)
+
+Até esta data o aplicativo **nunca** havia trocado um byte com o backend: tudo
+rodava contra simulado, e a escolha estava dentro de um widget. Hoje ela vem de
+`--dart-define`, resolvida uma vez em `services/ambiente/composicao.dart`.
+
+**Os três passos, na ordem:**
+
+```powershell
+docker compose up -d
+```
+
+```powershell
+$env:MEMORA_CHAVE_ORIGEM = "chave-de-desenvolvimento-com-mais-de-32-bytes-para-o-hmac"; cd backend; .\mvnw spring-boot:run
+```
+
+```powershell
+$env:TEMP="C:\memora-tmp"; $env:TMP="C:\memora-tmp"; cd app; flutter run --dart-define=MEMORA_URL_BASE=http://10.0.2.2:8080/v1 --dart-define=MEMORA_SERVIDOR_REAL=true
+```
+
+⚠️ **`10.0.2.2`, nunca `localhost`.** Dentro do emulador, `localhost` é o
+**próprio emulador** — o Spring Boot da sua máquina é invisível dali. O erro é
+`Connection refused`, que parece servidor fora do ar e manda para o lado errado.
+Em aparelho físico nem um nem outro serve: use o IP da máquina na rede.
+
+⚠️ **Sem os dois `--dart-define` o app usa simulado**, e isso é o padrão de
+propósito: quem clona e roda `flutter run` vê o aplicativo funcionando em vez de
+uma tela de erro de rede.
+
+⚠️ **`spring-boot:run` com `Out-String` no PowerShell não mostra nada.**
+`Out-String` acumula até o processo terminar, e um servidor não termina — o log
+fica vazio e parece que a subida travou. Redirecione para arquivo:
+`Start-Process .\mvnw.cmd -ArgumentList "spring-boot:run" -RedirectStandardOutput C:\memora-tmp\backend.log -NoNewWindow`.
+
+**O código de verificação sai no log do backend**, pelo `EnviadorDeCodigoEmLog`.
+É assim que se exercita a recuperação sem provedor de envio:
+
+```powershell
+Select-String -Path C:\memora-tmp\backend.log -Pattern "Codigo de verificacao" | Select-Object -Last 1
+```
+
+**O que já foi exercitado ponta a ponta contra o servidor real** (não só em
+teste): cadastro `201`, login `200`, recuperação `202` idêntica para conta
+existente e inexistente — **926 ms contra 887 ms**, indistinguível —, canal não
+verificado sem receber nada, código emitido e confirmado, **as duas sessões
+antigas mortas com `401` e a nova viva com `200`**, senha antiga recusada e
+notificação disparada.
 
 ---
 
