@@ -378,4 +378,41 @@ abstract final class TextosAutenticacao {
 
   /// Caminho discreto para quem já tem conta.
   static const String botaoJaTenhoConta = 'Já tenho uma conta';
+
+  // --- Sair da conta (US4, T075 e T076) ------------------------------------
+
+  /// Título da tela de perfil.
+  static const String tituloPerfil = 'Minha conta';
+
+  /// Rótulo do botão que inicia a saída.
+  ///
+  /// "Sair da minha conta", e não "Sair" nem "Logout". Um "Sair" sozinho, numa
+  /// tela cheia de opções, pode ser lido como *sair desta tela* — e a pessoa
+  /// que quer voltar para o Hub tocaria nele achando que é um botão de voltar.
+  static const String botaoSair = 'Sair da minha conta';
+
+  /// A pergunta da confirmação (FR-025).
+  static const String perguntaSair = 'Quer mesmo sair da sua conta?';
+
+  /// O que a pessoa precisa saber antes de confirmar.
+  ///
+  /// Diz **o que vai acontecer depois**, e não o que ela está perdendo. "Você
+  /// vai precisar da sua senha" é uma informação prática; "você perderá o
+  /// acesso" soa como punição para quem só quer emprestar o telefone.
+  static const String avisoSair =
+      'Para entrar de novo, você vai precisar da sua senha. Seus dados '
+      'continuam guardados, viu? 😊';
+
+  /// Confirmação da saída.
+  static const String botaoConfirmarSaida = 'Sim, quero sair';
+
+  /// Recusa da saída.
+  ///
+  /// "Não, quero ficar" em vez de "Cancelar": quem hesita diante de "Cancelar"
+  /// precisa decidir o que exatamente está sendo cancelado — a saída ou a
+  /// pergunta.
+  static const String botaoFicar = 'Não, quero ficar';
+
+  /// Enquanto a saída acontece.
+  static const String saindo = 'Estou te desconectando...';
 }

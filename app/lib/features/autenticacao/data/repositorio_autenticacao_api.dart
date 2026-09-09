@@ -142,9 +142,23 @@ class RepositorioAutenticacaoApi implements RepositorioAutenticacao {
 
   @override
   Future<void> encerrarSessao() async {
-    // Só o cofre. `POST /v1/auth/sair` é a T074 e ainda não existe no servidor:
-    // chamá-lo hoje daria 404, que o tratador converteria em DADOS_INVALIDOS e
-    // deixaria a pessoa presa numa tela de erro ao tentar sair.
+    // Avisa o servidor primeiro, para que o refresh de 60 dias seja revogado
+    // (T074). So depois limpa o cofre: invertida, a ordem apagaria o token que
+    // autentica a propria chamada de saida.
+    if (await _autenticarChamada()) {
+      try {
+        await _api.getSessoApi().authSairPost();
+      } on DioException catch (_) {
+        // Sair NUNCA falha para a pessoa. Servidor fora do ar, rede caida ou
+        // token ja vencido nao podem prende-la dentro da conta — e a limpeza
+        // local abaixo e o que de fato tira o acesso deste aparelho.
+        //
+        // O preco de engolir o erro e uma sessao que sobrevive no servidor ate
+        // vencer. O preco de propaga-lo seria uma pessoa idosa vendo "erro ao
+        // sair" e concluindo que continua conectada — sem saber que nao esta.
+      }
+    }
+
     await _cofre.limpar();
   }
 

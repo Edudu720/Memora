@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'demonstracao/casa_demonstracao.dart';
 import 'design_system/design_system.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
+import 'services/ambiente/ambiente.dart';
+import 'services/ambiente/composicao.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
+import 'services/seguranca/cofre_de_credenciais.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +17,24 @@ Future<void> main() async {
 
   final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
 
+  // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
+  // lugar. Ver `services/ambiente/composicao.dart`.
+  final Composicao composicao = Composicao.resolver(
+    ambiente: Ambiente.doAmbiente(),
+    cofre: CofreSeguroDoSistema(),
+  );
+
+  final String? aviso = composicao.avisoDeIntegracaoParcial;
+  if (aviso != null) {
+    debugPrint('[Memora] $aviso');
+  }
+
   runApp(
-    AplicativoMemora(controlador: controlador, ultimoAcesso: ultimoAcesso),
+    AplicativoMemora(
+      controlador: controlador,
+      ultimoAcesso: ultimoAcesso,
+      composicao: composicao,
+    ),
   );
 }
 
@@ -31,10 +50,14 @@ class AplicativoMemora extends StatelessWidget {
   /// Onde fica o identificador do último acesso (FR-012).
   final UltimoAcesso ultimoAcesso;
 
+  /// Com quem o aplicativo conversa — servidor real ou simulado.
+  final Composicao composicao;
+
   /// Cria a raiz do aplicativo.
   const AplicativoMemora({
     required this.controlador,
     required this.ultimoAcesso,
+    required this.composicao,
     super.key,
   });
 
@@ -58,7 +81,10 @@ class AplicativoMemora extends StatelessWidget {
               fatorDoAplicativo: atual.escalaTexto,
               child: child!,
             ),
-            home: CasaDemonstracao(ultimoAcesso: ultimoAcesso),
+            home: CasaDemonstracao(
+              ultimoAcesso: ultimoAcesso,
+              composicao: composicao,
+            ),
           );
         },
       ),

@@ -4,14 +4,27 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-09-08 — **o backend da US3** (T066-T069), pelo Henrique,
-na máquina dele. A recuperação de acesso deixou de ser meia feature.
-**Estado**: **321 testes** no backend (eram 301) e **294** no aplicativo. A
-feature 001 está completa até a US5 **e a US3 inteira**; falta a US4. A feature
-003 tem **Hub, conversa que ensina, catálogos, execução com confirmação e
-registro** — tudo funcionando contra simulado, **sem provedor de IA escolhido**.
-**Próximo: a US4 da 001** (T074-T078) ou **a fase 8 da 003** (T061-T068), que
-espera a escolha do provedor. Ver seção 4-B.
+**Última sessão**: 2026-09-08 — **a feature 001 ficou completa**, pelo Henrique,
+na máquina dele: backend da US3 (T066-T069), a US4 inteira (T074-T078) e a
+primeira conversa real entre o aplicativo e o servidor.
+**Estado**: **334 testes** no backend (eram 301) e **315** no aplicativo (eram
+294). A **feature 001 está completa** — só a fase 8, do login social, continua
+fora, e ela tem bloqueio externo. A feature 003 tem **Hub, conversa que ensina,
+catálogos, execução com confirmação e registro** — tudo contra simulado, **sem
+provedor de IA escolhido**.
+**Próximo: a fase 8 da 003** (T061-T068), que espera a escolha do provedor, ou
+**a fase 9** (validação), cujo T070 não depende dela. Ver seção 4-B.
+
+> 🔴 **O que falta para haver produto não é código, e isso precisa entrar na
+> fila agora.** Levantamento de 2026-09-08: três das quatro coisas que separam
+> o repositório de um Memora entregue dependem de decisão ou contratação, não
+> de esforço nosso — **provedor de IA** (sem ele a assistente não pensa),
+> **provedor de envio** (sem ele nenhum código chega a ninguém) e o **teste com
+> 5 pessoas de 65+**, que é portão de saída obrigatório das features 001 e 002.
+> A quarta era a integração aplicativo↔servidor, e essa foi feita hoje.
+>
+> O risco, com prazo de entrega em novembro: chegar lá com centenas de testes
+> verdes e um aplicativo que não faz o que promete.
 
 > ⚠️ **O provedor de IA NÃO foi escolhido, e isso é uma decisão em aberto da
 > equipe** (R2 do research da 003). A arquitetura foi desenhada para que isso
@@ -418,7 +431,7 @@ A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso 
 cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
 entrega o que o corpo escondeu — medido, não suposto.
 
-### Trinta portões de segurança, cada um validado quebrando de propósito
+### Trinta e quatro portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -452,9 +465,13 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Latência da recuperação não revela conta (FR-019) | `NaoRevelaExistenciaTest` (V2) | Movi o hash do código para depois da consulta ao canal: reprovou com **9 ms contra 274 ms** |
 | A sessão da recuperação sobrevive à revogação | `TrocaDeSenhaRevogaSessoesTest` | Inverti a ordem — emitir antes de revogar: reprovou com `expected:<200> but was:<401>`, a sessão nova morreu junto com as velhas |
 | Trocar a senha destranca a conta bloqueada | `TrocaDeSenhaRevogaSessoesTest` | Tirei o `registrarEntradaBemSucedida`: reprovou com `expected: null` — a pessoa trocava a senha e continuava trancada do lado de fora |
+| Sair encerra **de verdade** (FR-026) | `SairEncerraSessaoTest` | Pus `if (false)` na revogação: **3 testes** reprovaram, o principal com `expected:<401> but was:<200>` — o refresh de 60 dias continuou renovando depois do `204` |
+| Sair encerra **só este aparelho** (FR-024) | `SairEncerraSessaoTest` | Troquei por `revogarSessoesDaPessoa`: **2 testes** reprovaram com `expected:<200> but was:<401>` — o tablet caiu junto com o celular |
+| Sair exige confirmação (FR-025) | `saida_limpa_armazenamento_test.dart` | Liguei o botão direto no `_sair`: **4 testes** reprovaram com `Found 0 widgets with key [<'perfil.confirmacao'>]` |
+| A credencial sai do aparelho (FR-026) | `saida_limpa_armazenamento_test.dart` | Comentei o `_cofre.limpar()`: reprovou com `Expected: null / Actual: 'refresh-de-60-dias'` |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
-trinta realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
+trinta e quatro realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
 conta desativada entrar sem teste nenhum e furada, na revisão da #15.
 
 ⚠️ **Os cinco portões da recuperação passaram todos na primeira execução**, e
@@ -769,18 +786,63 @@ gerariam cliente para endpoints cujo contrato ainda não foi fundido com o da
 
 ### O que ainda falta na feature 001
 
-A **US4** (T074-T078) é o que resta: a saída deliberada e a troca de senha.
-A US3 fechou em 2026-09-08 — ver "O backend da US3", acima.
+**Nada, exceto a fase 8** — login social (T079-T083), que tem bloqueio externo
+não levantado: registrar o aplicativo no Google e no Facebook, obter client IDs,
+e aprovação no Facebook não é rápida. Confirmar **antes** de a fase chegar.
 
-⚠️ **A T077 depende de uma decisão de spec que ninguém tomou**: a contradição
-FR-012 × FR-026, o identificador do último acesso sobreviver ou não à saída da
-conta. `UltimoAcessoLocal.esquecer()` existe e ninguém o chama. Vale um
-`/speckit-clarify` antes de implementá-la.
+A US3 fechou em 2026-09-08, e a **US4 também** — ver as duas seções acima.
 
-⚠️ **A T074 é endpoint autenticado novo**, e por isso precisa responder à
-pergunta da #15: toda porta que a desativação fecha está fechada nos dois lados?
-E a da sessão-chamariz: o sujeito do token é resolvido e recusado quando não
-existe?
+### A US4 — sair da conta (T074-T078, 2026-09-08)
+
+`ServicoDeSaida`, `POST /v1/auth/sair` no `ControladorSessao`, e no aplicativo
+`TelaPerfil` + `services/seguranca/limpeza_de_sessao.dart`.
+
+⚠️ **O JWT ganhou o campo `fam`, e isso atravessa o sistema inteiro.** O `sub`
+identifica a pessoa, e uma pessoa tem várias sessões — sem o campo não havia
+**o que** encerrar. `EmissorDeTokenDeAcesso.emitir` agora exige o `familiaId`,
+`sujeitoDoToken` devolve os dois, e `PessoaAutenticada` carrega a família.
+
+**É a família, não a linha de sessão.** A renovação cria uma linha nova a cada
+rotação; a família é o que atravessa as rotações e significa "este aparelho,
+desde que entrou". Revogar a linha deixaria o refresh vivo depois da primeira
+renovação — há teste para isso.
+
+**Token sem o campo revoga todas as sessões.** É o token emitido antes da T074 e
+ainda dentro dos 15 minutos: na dúvida sobre qual aparelho encerrar, encerrar
+demais protege; encerrar de menos deixa alguém conectado achando que saiu.
+
+**`revogarFamiliaDaPessoa` amarra a família à pessoa.** O claim é assinado por
+nós e não é manipulável de fora — a cláusula é defesa em profundidade, custa
+nada (mesmo índice) e transforma um eventual defeito nosso na emissão, que hoje
+seria negação de serviço contra sessão alheia, em comando que não afeta linha
+nenhuma.
+
+**Sair nunca falha para a pessoa.** `RepositorioAutenticacaoApi.encerrarSessao`
+avisa o servidor e **engole a falha de rede**. O preço é uma sessão que
+sobrevive até vencer; o preço de propagar seria uma pessoa idosa vendo "erro ao
+sair" e concluindo que continua conectada — sem saber que não está. E a limpeza
+local, que é o que de fato tira o acesso deste aparelho, acontece de qualquer
+jeito.
+
+**A `ConfirmacaoMemora` comum passou a aceitar `aviso`.** Antes era só da
+variante irreversível. Sair não destrói nada e não merece o tom grave —
+reservá-lo ao que é de fato irreversível é o que faz esse tom continuar
+significando alguma coisa —, mas "você vai precisar da senha para voltar" é a
+informação que transforma a pergunta numa decisão.
+
+### ✅ A contradição FR-012 × FR-026 foi resolvida
+
+**O identificador do último acesso permanece; toda credencial vai embora.**
+Decisão do Henrique em 2026-09-08, registrada na `spec.md` ao lado da FR-026.
+
+Apagá-lo tornaria a FR-012 inútil justamente no caso mais comum — a pessoa sai
+e volta depois —, e para o público que tem mais dificuldade em digitar um e-mail
+inteiro. O que a FR-026 protege de verdade continua protegido: quem pega o
+aparelho encontra um e-mail preenchido e **nenhuma forma de entrar com ele**.
+
+`LimpezaDeSessao.executar(esquecerTudo: true)` faz a leitura literal, para
+aparelho compartilhado ou que será vendido. **Não é o padrão**, e mudar isso é
+uma linha só, num lugar só.
 
 Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de
 componentes e análise estática contra valores literais.
@@ -870,6 +932,23 @@ cd C:\Users\Edu\Documents\Memora\app; flutter run
 
 Com o app rodando: `r` recarrega na hora, `R` reinicia, `q` encerra.
 
+⚠️ **Emulador parado em `offline` com ~950 MB é falta de RAM, não defeito
+gráfico.** Na máquina do Henrique isso aconteceu em 2026-09-08: o `adb devices`
+mostrava `emulator-5554 offline` indefinidamente e o `qemu-system-x86_64`
+estacionava perto de 1 GB sem nunca crescer. **Havia 0,6 GB livres de 16 GB** —
+Rocket League com 1,6 GB, mais Docker (`vmmemWSL`), Discord e o backend Java. O
+emulador precisa de vários GB e simplesmente não avança sem eles.
+
+O sintoma engana porque é idêntico ao de um problema de renderização, e o
+caminho errado custa tempo. **Cheque a memória primeiro** — é uma linha:
+
+```powershell
+$os = Get-CimInstance Win32_OperatingSystem; "Livre: {0:N1} GB" -f ($os.FreePhysicalMemory/1MB)
+```
+
+Rodar backend, Docker e emulador ao mesmo tempo nesta máquina exige fechar jogo
+e o que mais estiver aberto. Não há folga para os três mais um jogo.
+
 ### O que existe para ver
 
 A tela inicial é uma **casca de demonstração** (`lib/demonstracao/`), provisória,
@@ -911,6 +990,54 @@ environment`) enterrada no meio do rastro. Subir leva ~40 s:
 ```powershell
 Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 ```
+
+### O aplicativo falando com o servidor (2026-09-08)
+
+Até esta data o aplicativo **nunca** havia trocado um byte com o backend: tudo
+rodava contra simulado, e a escolha estava dentro de um widget. Hoje ela vem de
+`--dart-define`, resolvida uma vez em `services/ambiente/composicao.dart`.
+
+**Os três passos, na ordem:**
+
+```powershell
+docker compose up -d
+```
+
+```powershell
+$env:MEMORA_CHAVE_ORIGEM = "chave-de-desenvolvimento-com-mais-de-32-bytes-para-o-hmac"; cd backend; .\mvnw spring-boot:run
+```
+
+```powershell
+$env:TEMP="C:\memora-tmp"; $env:TMP="C:\memora-tmp"; cd app; flutter run --dart-define=MEMORA_URL_BASE=http://10.0.2.2:8080/v1 --dart-define=MEMORA_SERVIDOR_REAL=true
+```
+
+⚠️ **`10.0.2.2`, nunca `localhost`.** Dentro do emulador, `localhost` é o
+**próprio emulador** — o Spring Boot da sua máquina é invisível dali. O erro é
+`Connection refused`, que parece servidor fora do ar e manda para o lado errado.
+Em aparelho físico nem um nem outro serve: use o IP da máquina na rede.
+
+⚠️ **Sem os dois `--dart-define` o app usa simulado**, e isso é o padrão de
+propósito: quem clona e roda `flutter run` vê o aplicativo funcionando em vez de
+uma tela de erro de rede.
+
+⚠️ **`spring-boot:run` com `Out-String` no PowerShell não mostra nada.**
+`Out-String` acumula até o processo terminar, e um servidor não termina — o log
+fica vazio e parece que a subida travou. Redirecione para arquivo:
+`Start-Process .\mvnw.cmd -ArgumentList "spring-boot:run" -RedirectStandardOutput C:\memora-tmp\backend.log -NoNewWindow`.
+
+**O código de verificação sai no log do backend**, pelo `EnviadorDeCodigoEmLog`.
+É assim que se exercita a recuperação sem provedor de envio:
+
+```powershell
+Select-String -Path C:\memora-tmp\backend.log -Pattern "Codigo de verificacao" | Select-Object -Last 1
+```
+
+**O que já foi exercitado ponta a ponta contra o servidor real** (não só em
+teste): cadastro `201`, login `200`, recuperação `202` idêntica para conta
+existente e inexistente — **926 ms contra 887 ms**, indistinguível —, canal não
+verificado sem receber nada, código emitido e confirmado, **as duas sessões
+antigas mortas com `401` e a nova viva com `200`**, senha antiga recusada e
+notificação disparada.
 
 ---
 
@@ -1180,7 +1307,7 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 
 | Pendência | Com quem | Bloqueia? |
 |---|---|---|
-| **De onde vem a URL base do servidor** | Eduardo — não está na spec | **Sim, para o app falar com o backend.** Ver o aviso no topo deste arquivo |
+| ~~**De onde vem a URL base do servidor**~~ | — | ✅ **Resolvida em 2026-09-08** sem precisar decidir: vem de `--dart-define`, num lugar só (`services/ambiente/composicao.dart`). A spec não precisava escolher *uma* URL, precisava que existisse *um lugar* onde ela é escolhida |
 | **Contrato passar a documentar o `500`** (T027a) | Eduardo — decisão de spec | Não, mas o servidor já responde algo que o contrato não prevê |
 | **Normalizar as tags acentuadas do `openapi.yaml`** | Eduardo — decisão de spec | Não — nomes mutilados no cliente |
 | **Definir `MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem for implantar | **Sim, na implantação.** Sem ela a chave é sorteada a cada subida e o limite por origem da R4 zera junto; um WARN avisa |
@@ -1193,7 +1320,8 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | Aceitar convite do repositório | Du3101 | Não — Henrique já aceitou, com acesso de escrita |
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
-| **Revisar as PRs #19 (US5) e #20 (telas da US3)** | Henrique | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
+| **Revisar as PRs de 2026-09-08** — [#24](https://github.com/Edudu720/Memora/pull/24) (backend da US3) e a da integração + US4 | Eduardo | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
+| **Registrar app no Google e no Facebook** (client IDs, PKCE) | Equipe — ninguém levantou ainda | **Sim, para a fase 8 da 001.** Aprovação no Facebook não é rápida, e é o único pedaço da feature 001 que continua aberto |
 | **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 

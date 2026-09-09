@@ -252,7 +252,11 @@ public class ServicoDeCadastro {
                 tipo,
                 valor,
                 UUID.randomUUID(),
-                emissor.emitir(sujeitoInexistente, agora),
+                // A familia tambem e sorteada, e tambem nao existe. O token do
+                // chamariz precisa ter a MESMA forma do real (V2): um a menos
+                // de campo bastaria para distinguir os dois caminhos olhando o
+                // JWT decodificado, que qualquer um faz sem chave nenhuma.
+                emissor.emitir(sujeitoInexistente, UUID.randomUUID(), agora),
                 gerador.gerar(),
                 EmissorDeTokenDeAcesso.VALIDADE.toSeconds());
     }

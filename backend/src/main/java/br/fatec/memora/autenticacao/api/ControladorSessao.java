@@ -7,14 +7,17 @@ import br.fatec.memora.autenticacao.api.DtosDeAutenticacao.RenovarRequisicao;
 import br.fatec.memora.autenticacao.api.DtosDeAutenticacao.SessaoResposta;
 import br.fatec.memora.autenticacao.aplicacao.ServicoDeEntrada;
 import br.fatec.memora.autenticacao.aplicacao.ServicoDeRenovacao;
+import br.fatec.memora.autenticacao.aplicacao.ServicoDeSaida;
 import br.fatec.memora.autenticacao.aplicacao.SessaoDaPessoa;
 import br.fatec.memora.autenticacao.dominio.MascaradorDeCanal;
+import br.fatec.memora.autenticacao.seguranca.PessoaAutenticada;
 import br.fatec.memora.comum.CodigoDeErro;
 import br.fatec.memora.comum.FalhaDoMemora;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,10 +53,13 @@ public class ControladorSessao {
 
     private final ServicoDeEntrada entrada;
     private final ServicoDeRenovacao renovacao;
+    private final ServicoDeSaida saida;
 
-    public ControladorSessao(ServicoDeEntrada entrada, ServicoDeRenovacao renovacao) {
+    public ControladorSessao(
+            ServicoDeEntrada entrada, ServicoDeRenovacao renovacao, ServicoDeSaida saida) {
         this.entrada = entrada;
         this.renovacao = renovacao;
+        this.saida = saida;
     }
 
     /** Entrada com identificador e senha (FR-011). */
@@ -101,6 +107,29 @@ public class ControladorSessao {
             case ServicoDeRenovacao.Resultado.Recusada ignorada ->
                     throw FalhaDoMemora.de(CodigoDeErro.CREDENCIAIS_INVALIDAS);
         };
+    }
+
+    /**
+     * Encerra a sessão deste aparelho (T074, FR-024).
+     *
+     * <h2>Autenticado, e sem corpo</h2>
+     *
+     * O que encerrar vem do próprio token, no campo {@code fam} — não do
+     * cliente. Pedir o refresh token no corpo faria o aplicativo enviar o
+     * segredo de 60 dias numa operação que não precisa dele, e daria a quem
+     * capturasse a requisição justamente o que ela existe para invalidar.
+     *
+     * <h2>Conta pendente também sai</h2>
+     *
+     * Não há guarda de {@code estaPendenteDeVerificacao} aqui, e isso é
+     * deliberado: quem está no meio do cadastro assistido precisa poder desistir.
+     * Impedir a saída prenderia a pessoa exatamente no fluxo que a FR-062 quer
+     * que ela consiga abandonar — e sair só revoga, nunca concede.
+     */
+    @PostMapping("/sair")
+    public ResponseEntity<Void> sair(@AuthenticationPrincipal PessoaAutenticada pessoa) {
+        saida.sair(pessoa.id(), pessoa.familiaId());
+        return ResponseEntity.noContent().build();
     }
 
     /**

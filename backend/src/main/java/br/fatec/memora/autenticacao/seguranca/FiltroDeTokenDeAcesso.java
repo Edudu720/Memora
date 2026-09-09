@@ -95,13 +95,14 @@ public class FiltroDeTokenDeAcesso extends OncePerRequestFilter {
             return;
         }
 
-        Optional<UUID> sujeito = emissor.pessoaDoToken(token.get());
+        Optional<EmissorDeTokenDeAcesso.SujeitoDoToken> sujeito =
+                emissor.sujeitoDoToken(token.get());
         if (sujeito.isEmpty()) {
             return;
         }
 
         // A consulta que desarma o chamariz. Ver o cabecalho desta classe.
-        Optional<PessoaUsuaria> pessoa = pessoas.findById(sujeito.get());
+        Optional<PessoaUsuaria> pessoa = pessoas.findById(sujeito.get().pessoaId());
         if (pessoa.isEmpty()) {
             return;
         }
@@ -111,7 +112,8 @@ public class FiltroDeTokenDeAcesso extends OncePerRequestFilter {
             return;
         }
 
-        PessoaAutenticada autenticada = new PessoaAutenticada(pessoa.get().getId(), estado);
+        PessoaAutenticada autenticada =
+                new PessoaAutenticada(pessoa.get().getId(), estado, sujeito.get().familiaId());
 
         UsernamePasswordAuthenticationToken autenticacao =
                 new UsernamePasswordAuthenticationToken(autenticada, null, List.of());

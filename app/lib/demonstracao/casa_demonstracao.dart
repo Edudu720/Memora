@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../design_system/design_system.dart';
 import '../features/assistente/data/abridor_de_aplicativo.dart';
-import '../features/assistente/data/repositorio_assistente_simulado.dart';
-import '../features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import '../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../features/autenticacao/presentation/fluxo_autenticacao.dart';
+import '../services/ambiente/composicao.dart';
 import 'tela_componentes.dart';
 
 /// Casca provisória para testar o Design System e os fluxos no aparelho.
@@ -15,8 +14,15 @@ class CasaDemonstracao extends StatefulWidget {
   /// Onde fica o identificador do último acesso (FR-012).
   final UltimoAcesso ultimoAcesso;
 
+  /// Com quem o aplicativo conversa. Resolvido na subida, nunca aqui.
+  final Composicao composicao;
+
   /// Cria a casca de demonstração.
-  const CasaDemonstracao({required this.ultimoAcesso, super.key});
+  const CasaDemonstracao({
+    required this.ultimoAcesso,
+    required this.composicao,
+    super.key,
+  });
 
   @override
   State<CasaDemonstracao> createState() => _CasaDemonstracaoState();
@@ -31,21 +37,6 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
     ItemNavegacao(icone: Icons.palette_outlined, rotulo: 'Aparência'),
   ];
 
-  /// Repositório simulado: o aplicativo ainda não sabe de onde vem a URL base do
-  /// servidor, e essa decisão não está na spec. Trocar por
-  /// `RepositorioAutenticacaoApi` é uma linha, quando a URL for definida.
-  ///
-  /// O simulado reproduz a escada de bloqueio real (5 falhas seguidas, depois
-  /// 1 minuto), para que o estado bloqueado da FR-015 possa ser visto no
-  /// aparelho e não só no teste.
-  final RepositorioAutenticacaoSimulado _repositorio =
-      RepositorioAutenticacaoSimulado();
-
-  /// A assistente, tambem simulada. O provedor de IA ainda nao foi escolhido
-  /// (R2 do research), e o Hub inteiro funciona sem ele.
-  final RepositorioAssistenteSimulado _assistente =
-      RepositorioAssistenteSimulado();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,9 +44,11 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
         index: _indice,
         children: <Widget>[
           FluxoAutenticacao(
-            repositorio: _repositorio,
+            // Quem escolheu entre real e simulado foi a Composicao, na subida.
+            // Esta tela nao sabe — e nao deve saber — com qual dos dois fala.
+            repositorio: widget.composicao.autenticacao,
             ultimoAcesso: widget.ultimoAcesso,
-            assistente: _assistente,
+            assistente: widget.composicao.assistente,
             abridor: const AbridorDeAplicativoAndroid(),
           ),
           const TelaComponentes(),

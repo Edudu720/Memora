@@ -53,14 +53,50 @@ public class EmissorDeTokenDeAcesso {
     }
 
     /**
+     * Nome do campo que diz de qual sessao o token nasceu.
+     *
+     * <p>Curto de proposito: cada requisicao carrega o token inteiro, e nome de
+     * campo tambem ocupa bytes.
+     */
+    public static final String CAMPO_FAMILIA = "fam";
+
+    /**
+     * Quem o token diz ser, e de qual sessao ele veio.
+     *
+     * <p><b>Nada aqui e autorizacao.</b> O token pode estar perfeitamente
+     * assinado e apontar para conta que nao existe — ver a sessao-chamariz em
+     * {@code ServicoDeCadastro}. Quem resolve isso e o
+     * {@link FiltroDeTokenDeAcesso}, consultando o banco.
+     *
+     * @param familiaId a linhagem de sessao; {@code null} em token emitido antes
+     *     de este campo existir, e por isso quem usa precisa tratar a ausencia
+     */
+    public record SujeitoDoToken(UUID pessoaId, UUID familiaId) {}
+
+    /**
      * Emite um token para a pessoa informada.
+     *
+     * <h2>Por que o token carrega a familia da sessao (T074)</h2>
+     *
+     * Sem isto, {@code POST /v1/auth/sair} nao teria como saber <b>o que</b>
+     * encerrar: o {@code sub} identifica a pessoa, e uma pessoa tem varias
+     * sessoes. As alternativas eram piores — pedir o refresh token no corpo
+     * mudaria o contrato e faria o aplicativo enviar o segredo de 60 dias numa
+     * operacao que nao precisa dele; revogar todas as sessoes transformaria
+     * "sair deste aparelho" em "derrubar todos os meus aparelhos", que e outra
+     * funcionalidade e nao a que a FR-024 pede.
+     *
+     * <p>E a <b>familia</b>, e nao a linha da sessao, porque a renovacao cria
+     * uma linha nova a cada rotacao. A familia e o que atravessa as rotacoes e
+     * representa "este aparelho, desde que entrou".
      *
      * @param agora instante de referencia; recebido em vez de lido do relogio
      *     para que o teste consiga produzir token ja vencido
      */
-    public String emitir(UUID pessoaId, Instant agora) {
+    public String emitir(UUID pessoaId, UUID familiaId, Instant agora) {
         JwtClaimsSet conteudo = JwtClaimsSet.builder()
                 .subject(pessoaId.toString())
+                .claim(CAMPO_FAMILIA, familiaId.toString())
                 .issuedAt(agora)
                 .expiresAt(agora.plus(VALIDADE))
                 .build();
@@ -82,11 +118,41 @@ public class EmissorDeTokenDeAcesso {
      * esquecer de tratar.
      */
     public Optional<UUID> pessoaDoToken(String token) {
+        return sujeitoDoToken(token).map(SujeitoDoToken::pessoaId);
+    }
+
+    /**
+     * Quem e o token e de qual sessao ele veio, se ele for valido.
+     *
+     * <p>A familia vem como {@code null} quando o campo nao esta presente. Isso
+     * acontece com token emitido antes da T074 e ainda dentro dos 15 minutos de
+     * validade — a alternativa, recusar o token, deslogaria todo mundo no
+     * momento da implantacao sem ganho nenhum de seguranca.
+     */
+    public Optional<SujeitoDoToken> sujeitoDoToken(String token) {
         try {
             Jwt decodificado = decodificador.decode(token);
-            return Optional.of(UUID.fromString(decodificado.getSubject()));
+            return Optional.of(
+                    new SujeitoDoToken(
+                            UUID.fromString(decodificado.getSubject()),
+                            familiaDe(decodificado)));
         } catch (JwtException | IllegalArgumentException tokenRuim) {
             return Optional.empty();
+        }
+    }
+
+    /** A familia do token, ou {@code null} — inclusive se vier escrita torta. */
+    private static UUID familiaDe(Jwt decodificado) {
+        String bruto = decodificado.getClaimAsString(CAMPO_FAMILIA);
+        if (bruto == null) {
+            return null;
+        }
+        try {
+            return UUID.fromString(bruto);
+        } catch (IllegalArgumentException naoEhUuid) {
+            // Campo presente e ilegivel nao invalida o token: ele foi assinado
+            // por nos, e quem usa a familia ja precisa tratar a ausencia.
+            return null;
         }
     }
 }

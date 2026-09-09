@@ -16,11 +16,14 @@ import java.util.UUID;
  * {@code PessoaAutenticada} depois de a conta ter sido encontrada no banco. Ver
  * {@link FiltroDeTokenDeAcesso} para o motivo de isso não ser opcional.
  */
-public record PessoaAutenticada(UUID id, EstadoDaConta estado) {
+/// @param familiaId de qual sessão veio o token; {@code null} em token emitido
+///     antes de a T074 existir e ainda dentro dos 15 minutos de validade
+public record PessoaAutenticada(UUID id, EstadoDaConta estado, UUID familiaId) {
 
     public PessoaAutenticada {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(estado, "estado");
+        // familiaId aceita nulo de proposito: ver o parametro.
     }
 
     /**
