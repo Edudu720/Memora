@@ -65,6 +65,26 @@ public class ConfiguracaoDeSegurancaWeb {
     public static final String CAMINHO_RENOVAR = "/v1/auth/sessao/renovar";
 
     /**
+     * Caminho da solicitação de recuperação (T066).
+     *
+     * <p>Público pelo motivo mais direto de todos: quem esqueceu a senha não tem
+     * como se autenticar para pedir outra. O que protege esta operação não é
+     * token nenhum — é o código chegar num canal cuja posse já foi provada
+     * (FR-052), e a resposta ser idêntica exista ou não a conta (FR-019).
+     */
+    public static final String CAMINHO_RECUPERACAO_SOLICITAR = "/v1/auth/recuperacao/solicitar";
+
+    /**
+     * Caminho da confirmação da senha nova (T067).
+     *
+     * <p>Também público, e pela mesma razão. Aqui quem autentica a chamada é o
+     * código de 6 dígitos conferido contra o hash gravado — uso único, dez
+     * minutos de prazo e cinco tentativas, as três proteções cobrindo as falhas
+     * uma da outra.
+     */
+    public static final String CAMINHO_RECUPERACAO_CONFIRMAR = "/v1/auth/recuperacao/confirmar";
+
+    /**
      * Traduz o token do cabeçalho em identidade (T058).
      *
      * <p>É um {@code @Bean} para receber as dependências pelo contêiner, mas
@@ -109,7 +129,9 @@ public class ConfiguracaoDeSegurancaWeb {
                                                 HttpMethod.POST,
                                                 CAMINHO_CADASTRO,
                                                 CAMINHO_ENTRAR,
-                                                CAMINHO_RENOVAR)
+                                                CAMINHO_RENOVAR,
+                                                CAMINHO_RECUPERACAO_SOLICITAR,
+                                                CAMINHO_RECUPERACAO_CONFIRMAR)
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())

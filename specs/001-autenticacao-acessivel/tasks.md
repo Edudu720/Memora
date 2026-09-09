@@ -277,10 +277,11 @@ description: "Task list — Autenticação Acessível do Memora"
 
 ### Backend
 
-- [ ] T066 [US3] Implementar `POST /v1/auth/recuperacao/solicitar`, respondendo `202` **sempre** (FR-019)
-- [ ] T067 [US3] Implementar `POST /v1/auth/recuperacao/confirmar`, revogando **todas** as sessões (FR-021)
-- [ ] T068 [US3] Notificar pelo canal cadastrado em `backend/src/main/java/br/fatec/memora/autenticacao/infra/NotificadorDeConta.java` quando a senha mudar (FR-022)
-- [ ] T069 [US3] Escrever teste do cenário V5 em `backend/src/test/java/br/fatec/memora/autenticacao/api/TrocaDeSenhaRevogaSessoesTest.java`
+- [X] T066 [US3] Implementar `POST /v1/auth/recuperacao/solicitar`, respondendo `202` **sempre** (FR-019)
+- [X] T067 [US3] Implementar `POST /v1/auth/recuperacao/confirmar`, revogando **todas** as sessões (FR-021)
+- [X] T068 [US3] Notificar pelo canal cadastrado quando a senha mudar (FR-022) — a porta ficou em `aplicacao/NotificadorDeConta.java` e o adaptador em `infra/NotificadorDeContaEmLog.java`, seguindo a divisão que `EnviadorDeCodigo` já usa. **Continua sem provedor real**, como a T065a
+- [X] T069 [US3] Escrever teste do cenário V5 em `backend/src/test/java/br/fatec/memora/autenticacao/api/TrocaDeSenhaRevogaSessoesTest.java`
+- [X] T069a [US3] Acrescentar o portão de latência da recuperação ao `NaoRevelaExistenciaTest` (V2, FR-019) — o terceiro endpoint público, e o terceiro a hashear antes da consulta ao canal
 
 ### Aplicativo
 

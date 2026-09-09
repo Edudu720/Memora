@@ -203,7 +203,77 @@ class NaoRevelaExistenciaTest extends TesteComBanco {
         }
     }
 
+    @Nested
+    @DisplayName("Recuperacao de acesso (T066, FR-019)")
+    class Recuperacao {
+
+        /**
+         * A FR-019 pede resposta identica exista ou nao a conta, e o corpo do
+         * 202 e uma constante justamente para nao poder divergir.
+         */
+        @Test
+        @DisplayName("as duas solicitacoes tem exatamente a mesma forma")
+        void mesmaForma() throws Exception {
+            cadastrar("Ana", CANAL);
+            verificarOCanal();
+
+            JsonNode existente = corpoDe(solicitar(CANAL).andReturn());
+            JsonNode inexistente = corpoDe(solicitar("ninguem@gmail.com").andReturn());
+
+            assertThat(caminhos(inexistente)).isEqualTo(caminhos(existente));
+            assertThat(inexistente).isEqualTo(existente);
+        }
+
+        /**
+         * O mesmo portao que ja reprovou duas vezes neste projeto, agora no
+         * terceiro endpoint publico. O caminho com conta gasta ~240 ms hasheando
+         * o codigo; se esse hash so rodasse quando existe alguem a quem enviar, a
+         * resposta ao identificador desconhecido voltaria em milissegundos e a
+         * latencia entregaria o que o corpo escondeu.
+         *
+         * <p>A margem e generosa de proposito: o alvo nao e cronometrar a JVM, e
+         * sim reprovar quem <b>mover</b> o hash para depois da consulta ao canal.
+         */
+        @Test
+        @DisplayName("os dois caminhos levam tempos da mesma ordem de grandeza")
+        void mesmaOrdemDeGrandeza() throws Exception {
+            cadastrar("Ana", CANAL);
+            verificarOCanal();
+            solicitar(CANAL); // aquece a JVM
+
+            long comConta = duracaoDaSolicitacao(CANAL);
+            long semConta = duracaoDaSolicitacao("ninguem@gmail.com");
+
+            assertThat(semConta)
+                    .as("sem conta (%d ms) contra com conta (%d ms)", semConta, comConta)
+                    .isGreaterThan(comConta / 4);
+        }
+
+        private long duracaoDaSolicitacao(String identificador) throws Exception {
+            long inicio = System.nanoTime();
+            solicitar(identificador);
+            return (System.nanoTime() - inicio) / 1_000_000;
+        }
+    }
+
     // --- apoio ---------------------------------------------------------------
+
+    /** Confirma a posse do canal recem-criado — sem isso a FR-052 barra o envio. */
+    private void verificarOCanal() {
+        var canal = canais.findAll().getFirst();
+        canal.marcarComoVerificado(java.time.Instant.now());
+        canais.saveAndFlush(canal);
+    }
+
+    private org.springframework.test.web.servlet.ResultActions solicitar(String identificador)
+            throws Exception {
+        return mockMvc.perform(
+                post("/v1/auth/recuperacao/solicitar")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"identificador": "%s"}
+                                """.formatted(identificador)));
+    }
 
     private org.springframework.test.web.servlet.ResultActions cadastrar(String nome, String canal)
             throws Exception {
