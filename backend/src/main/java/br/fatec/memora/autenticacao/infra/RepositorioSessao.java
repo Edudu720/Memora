@@ -74,4 +74,27 @@ public interface RepositorioSessao extends JpaRepository<Sessao, UUID> {
                AND s.revogadaEm IS NULL
             """)
     int revogarSessoesDaPessoa(@Param("pessoaId") UUID pessoaId, @Param("quando") Instant quando);
+
+    /**
+     * Revoga uma família, <b>desde que ela seja da pessoa informada</b> (T074).
+     *
+     * <p>O {@code familiaId} vem de um campo do JWT que nós mesmos assinamos, e
+     * portanto não é manipulável de fora. A cláusula por pessoa está aqui como
+     * defesa em profundidade: ela custa nada — o índice usado é o mesmo — e
+     * transforma um eventual defeito nosso na emissão do token, que hoje seria
+     * uma negação de serviço contra a sessão alheia, em um comando que
+     * simplesmente não afeta nenhuma linha.
+     */
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+            UPDATE Sessao s
+               SET s.revogadaEm = :quando
+             WHERE s.familiaId = :familiaId
+               AND s.pessoaId = :pessoaId
+               AND s.revogadaEm IS NULL
+            """)
+    int revogarFamiliaDaPessoa(
+            @Param("familiaId") UUID familiaId,
+            @Param("pessoaId") UUID pessoaId,
+            @Param("quando") Instant quando);
 }

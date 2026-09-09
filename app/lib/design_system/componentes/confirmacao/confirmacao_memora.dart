@@ -52,15 +52,21 @@ class ConfirmacaoMemora extends StatefulWidget {
   final bool irreversivel;
 
   /// Cria uma confirmação comum.
+  ///
+  /// O [aviso] é opcional aqui e obrigatório na variante irreversível: nem toda
+  /// confirmação precisa explicar o que vem depois, mas várias ganham com isso.
+  /// Sair da conta é o caso — "você vai precisar da senha para voltar" é a
+  /// informação que transforma a pergunta numa decisão informada, sem que a
+  /// ação seja destrutiva o bastante para merecer o tom grave da irreversível.
   const ConfirmacaoMemora({
     required this.pergunta,
     required this.rotuloConfirmar,
     required this.rotuloRecusar,
     required this.aoConfirmar,
     required this.aoRecusar,
+    this.aviso,
     super.key,
-  })  : irreversivel = false,
-        aviso = null;
+  }) : irreversivel = false;
 
   /// Cria uma confirmação de ação **irreversível**.
   ///

@@ -242,6 +242,19 @@ entrar sozinha ao final.
 - **FR-025**: O sistema MUST exigir confirmação explícita antes de encerrar a sessão.
 - **FR-026**: O sistema MUST remover do aparelho todo dado pessoal e toda credencial
   ao encerrar a sessão.
+  > **Esclarecimento de 2026-09-08 (Henrique).** Esta exigência cruzava com a
+  > FR-012, que manda preencher previamente o identificador do último acesso —
+  > e identificador é dado pessoal. As duas se encontravam no caso mais comum de
+  > todos: a pessoa sai da conta e volta depois.
+  >
+  > **Decisão: o identificador permanece; toda credencial é removida.** Apagá-lo
+  > tornaria a FR-012 inútil justamente quando ela mais serve, para o público
+  > que tem mais dificuldade em digitar um e-mail inteiro. O que a FR-026
+  > protege — o acesso à conta — continua integralmente protegido: quem pegar o
+  > aparelho encontra um e-mail preenchido e nenhuma forma de entrar com ele.
+  >
+  > `LimpezaDeSessao.executar(esquecerTudo: true)` faz a leitura literal, para
+  > aparelho compartilhado ou que será vendido. Não é o padrão.
 
 ### Requisitos de Acessibilidade *(obrigatórios — Princípio III)*
 

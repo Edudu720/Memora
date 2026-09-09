@@ -298,11 +298,11 @@ description: "Task list — Autenticação Acessível do Memora"
 
 **Teste independente**: sair e verificar que nenhum dado pessoal permanece acessível.
 
-- [ ] T074 [US4] Implementar `POST /v1/auth/sair` revogando a sessão atual
-- [ ] T075 [US4] Adicionar a saída em `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart`, a no máximo dois toques (FR-024)
-- [ ] T076 [US4] Usar `ConfirmacaoMemora` em `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart` antes de encerrar (FR-025)
-- [ ] T077 [US4] Limpar dado pessoal e credencial em `app/lib/services/seguranca/limpeza_de_sessao.dart` (FR-026)
-- [ ] T078 [US4] Escrever teste em `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart`
+- [X] T074 [US4] Implementar `POST /v1/auth/sair` revogando a sessão atual. **Exigiu acrescentar o campo `fam` ao JWT**: o `sub` identifica a pessoa, e uma pessoa tem várias sessões — sem ele não havia o que encerrar
+- [X] T075 [US4] Adicionar a saída em `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart`, a no máximo dois toques (FR-024)
+- [X] T076 [US4] Usar `ConfirmacaoMemora` em `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart` antes de encerrar (FR-025)
+- [X] T077 [US4] Limpar dado pessoal e credencial em `app/lib/services/seguranca/limpeza_de_sessao.dart` (FR-026). **A contradição FR-012 × FR-026 foi decidida em 2026-09-08**: o identificador do último acesso **fica**, toda credencial vai embora. Ver o cabeçalho da classe
+- [X] T078 [US4] Escrever teste em `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart`
 
 ---
 

@@ -22,9 +22,25 @@ class EmissorDeTokenDeAcessoTest {
     void tokenCarregaAPessoa() {
         UUID pessoaId = UUID.randomUUID();
 
-        String token = emissor.emitir(pessoaId, Instant.now());
+        String token = emissor.emitir(pessoaId, UUID.randomUUID(), Instant.now());
 
         assertThat(emissor.pessoaDoToken(token)).contains(pessoaId);
+    }
+
+    /**
+     * Sem este campo, {@code POST /v1/auth/sair} nao teria o que encerrar: o
+     * {@code sub} diz quem e a pessoa, e uma pessoa tem varias sessoes (T074).
+     */
+    @Test
+    @DisplayName("o token diz de qual sessao ele veio")
+    void tokenCarregaAFamilia() {
+        UUID pessoaId = UUID.randomUUID();
+        UUID familiaId = UUID.randomUUID();
+
+        String token = emissor.emitir(pessoaId, familiaId, Instant.now());
+
+        assertThat(emissor.sujeitoDoToken(token))
+                .contains(new EmissorDeTokenDeAcesso.SujeitoDoToken(pessoaId, familiaId));
     }
 
     @Test
@@ -38,7 +54,9 @@ class EmissorDeTokenDeAcessoTest {
     @DisplayName("token vencido e recusado")
     void tokenVencidoEhRecusado() {
         String vencido = emissor.emitir(
-                UUID.randomUUID(), Instant.now().minus(Duration.ofMinutes(30)));
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                Instant.now().minus(Duration.ofMinutes(30)));
 
         assertThat(emissor.pessoaDoToken(vencido)).isEmpty();
     }
@@ -47,7 +65,8 @@ class EmissorDeTokenDeAcessoTest {
     @DisplayName("token assinado com outra chave e recusado")
     void tokenDeOutraChaveEhRecusado() {
         String forjado =
-                new EmissorDeTokenDeAcesso(chaveAleatoria()).emitir(UUID.randomUUID(), Instant.now());
+                new EmissorDeTokenDeAcesso(chaveAleatoria())
+                        .emitir(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
 
         assertThat(emissor.pessoaDoToken(forjado)).isEmpty();
     }
@@ -55,7 +74,7 @@ class EmissorDeTokenDeAcessoTest {
     @Test
     @DisplayName("token com o conteudo alterado e recusado")
     void tokenAlteradoEhRecusado() {
-        String token = emissor.emitir(UUID.randomUUID(), Instant.now());
+        String token = emissor.emitir(UUID.randomUUID(), UUID.randomUUID(), Instant.now());
         String[] partes = token.split("\\.");
         // Troca um caractere do conteudo, preservando a assinatura original.
         String conteudoAlterado = (partes[1].charAt(0) == 'a' ? "b" : "a") + partes[1].substring(1);

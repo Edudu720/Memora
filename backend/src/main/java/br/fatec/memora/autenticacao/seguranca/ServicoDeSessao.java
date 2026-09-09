@@ -101,14 +101,14 @@ public class ServicoDeSessao {
     public SessaoEmitida iniciar(UUID pessoaId, String aparelhoDescricao, Instant agora) {
         String refresh = gerador.gerar();
 
-        sessoes.saveAndFlush(Sessao.iniciarFamilia(
+        Sessao primeira = sessoes.saveAndFlush(Sessao.iniciarFamilia(
                 pessoaId,
                 gerador.hashDe(refresh),
                 aparelhoDescricao,
                 agora,
                 agora.plus(VALIDADE_DO_REFRESH)));
 
-        return emitir(pessoaId, refresh, agora);
+        return emitir(pessoaId, primeira.getFamiliaId(), refresh, agora);
     }
 
     /**
@@ -186,13 +186,16 @@ public class ServicoDeSessao {
         anterior.substituirPor(nova);
         sessoes.saveAndFlush(anterior);
 
-        return emitir(anterior.getPessoaId(), refresh, agora);
+        // A familia atravessa a rotacao: e o que faz "sair deste aparelho"
+        // continuar significando o mesmo aparelho depois de 60 renovacoes.
+        return emitir(anterior.getPessoaId(), anterior.getFamiliaId(), refresh, agora);
     }
 
-    private SessaoEmitida emitir(UUID pessoaId, String refresh, Instant agora) {
+    private SessaoEmitida emitir(
+            UUID pessoaId, UUID familiaId, String refresh, Instant agora) {
         return new SessaoEmitida(
                 pessoaId,
-                emissor.emitir(pessoaId, agora),
+                emissor.emitir(pessoaId, familiaId, agora),
                 refresh,
                 EmissorDeTokenDeAcesso.VALIDADE.toSeconds());
     }
