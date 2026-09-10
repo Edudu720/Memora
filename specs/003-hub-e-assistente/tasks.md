@@ -204,7 +204,7 @@ confirma antes, executa, e depois mostra o caminho percorrido.
 ## Phase 9: Validação final
 
 - [ ] T069 Executar os cenários **H1 a H11** de [quickstart.md](quickstart.md) de forma automatizada
-- [ ] T070 [P] Escrever os testes de acessibilidade em `app/test/acessibilidade/` para as telas do Hub, da conversa, do catálogo e do registro (FR-026 a FR-030)
+- [X] T070 [P] Escrever os testes de acessibilidade em `app/test/acessibilidade/` para as telas do Hub, da conversa, do catálogo e do registro (FR-026 a FR-030)
 - [ ] T071 Executar **H12** — 5 pessoas de 65+ anos, sem instrução e sem ajuda, **incluindo o passo em que repetem a tarefa sozinhas**
 - [ ] T072 Verificar SC-001 a SC-010 de [spec.md](spec.md) contra os resultados observados
 - [ ] T073 Revisões obrigatórias conforme `.specify/memory/constitution.md`: código, UX, acessibilidade, performance, segurança e arquitetura

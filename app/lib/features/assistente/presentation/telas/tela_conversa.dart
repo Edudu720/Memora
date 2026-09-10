@@ -183,28 +183,39 @@ class _TelaConversaState extends State<TelaConversa> {
 
                 Padding(
                   padding: const EdgeInsets.all(MemoraEspacamento.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      CampoTexto(
-                        key: TelaConversa.chaveCampo,
-                        rotulo: TextosAssistente.rotuloMensagem,
-                        textoAjuda: TextosAssistente.ajudaMensagem,
-                        controlador: _campo,
-                        aoMudar: c.escrever,
-                        habilitado: !c.respondendo,
+                  // Mesmo teto que o aviso, e pelo mesmo motivo (ver a nota
+                  // do T070 em `_AvisoAntigolpe`): o rótulo e a ajuda do
+                  // `CampoTexto` crescem junto com o texto, e sozinhos já
+                  // empurravam o botão de enviar para fora da tela em 200%.
+                  // Acima do teto, rolar esta faixa alcança o botão — mesma
+                  // linguagem de interação que a lista de mensagens já usa.
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 300),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          CampoTexto(
+                            key: TelaConversa.chaveCampo,
+                            rotulo: TextosAssistente.rotuloMensagem,
+                            textoAjuda: TextosAssistente.ajudaMensagem,
+                            controlador: _campo,
+                            aoMudar: c.escrever,
+                            habilitado: !c.respondendo,
+                          ),
+                          const SizedBox(height: MemoraEspacamento.md),
+                          if (c.respondendo)
+                            const Carregando(mensagem: TextosAssistente.pensando)
+                          else
+                            BotaoPrimario(
+                              key: TelaConversa.chaveEnviar,
+                              rotulo: TextosAssistente.botaoEnviar,
+                              icone: Icons.send,
+                              aoTocar: c.podeEnviar ? c.enviar : null,
+                            ),
+                        ],
                       ),
-                      const SizedBox(height: MemoraEspacamento.md),
-                      if (c.respondendo)
-                        const Carregando(mensagem: TextosAssistente.pensando)
-                      else
-                        BotaoPrimario(
-                          key: TelaConversa.chaveEnviar,
-                          rotulo: TextosAssistente.botaoEnviar,
-                          icone: Icons.send,
-                          aoTocar: c.podeEnviar ? c.enviar : null,
-                        ),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -222,6 +233,27 @@ class _TelaConversaState extends State<TelaConversa> {
 /// preenchimento forte. Informação de alta importância continua sendo
 /// informação, e não usa a linguagem de ação.
 class _AvisoAntigolpe extends StatelessWidget {
+  /// Teto de altura, com o texto passando a rolar **dentro da própria caixa**
+  /// depois dele.
+  ///
+  /// Achado ao escrever o T070: sem teto, este aviso sozinho vai de 364 px
+  /// (escala 1.0) para **1324 px** em 390×844 na escala 2.0 — mais alto que a
+  /// tela inteira, derrubando campo de mensagem e botão de enviar para fora
+  /// dela. A FR-027 exige que a conversa continue utilizável em 200%, e o
+  /// aviso não pode simplesmente encolher ou resumir o texto: a FR-033 exige
+  /// o aviso completo, sempre.
+  ///
+  /// A rolagem interna resolve as duas coisas: o aviso continua permanente
+  /// (nunca desaparece, nunca fecha) e o texto inteiro continua alcançável,
+  /// só que sem competir pelo espaço do resto da tela. Em 100%, 364 px cabe
+  /// com folga dentro do teto — a aparência de hoje não muda.
+  ///
+  /// 420 px foi medido só no aparelho de 390 dp de largura. Um aparelho bem
+  /// mais estreito quebraria a linha em mais pedaços e poderia se aproximar
+  /// do teto já em 100%; vale medir num aparelho estreito de verdade antes de
+  /// considerar isto fechado.
+  static const double _alturaMaxima = 420;
+
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
@@ -235,6 +267,7 @@ class _AvisoAntigolpe extends StatelessWidget {
       child: ExcludeSemantics(
         child: Container(
           width: double.infinity,
+          constraints: const BoxConstraints(maxHeight: _alturaMaxima),
           padding: const EdgeInsets.all(MemoraEspacamento.md),
           decoration: BoxDecoration(
             color: cores.superficieAlt,
@@ -246,8 +279,10 @@ class _AvisoAntigolpe extends StatelessWidget {
             children: <Widget>[
               Icon(Icons.shield_outlined, size: 24, color: cores.perigo),
               const SizedBox(width: MemoraEspacamento.sm),
-              const Expanded(
-                child: TextoMemora.apoio(TextosAssistente.avisoAntigolpe),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: TextoMemora.apoio(TextosAssistente.avisoAntigolpe),
+                ),
               ),
             ],
           ),
