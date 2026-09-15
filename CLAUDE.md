@@ -4,41 +4,58 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-09-10 — **T070 da feature 003 feita**: os testes de
-acessibilidade do Hub, da conversa, do catálogo e do registro (FR-026 a
-FR-030), em `app/test/acessibilidade/`. No caminho, achou e corrigiu um
-overflow real na tela de conversa em 200% de zoom — ver o achado logo abaixo.
-**Estado**: **334 testes** no backend e **346** no aplicativo (eram 315 — as
-31 novas são deste arquivo). A feature 001 está completa, só a fase 8 (login
-social) fora, com bloqueio externo. A feature 003 tem **Hub, conversa que
-ensina, catálogos, execução com confirmação e registro** — tudo contra
-simulado, **sem provedor de IA escolhido** — e agora também a T070 da fase 9.
+**Última sessão**: 2026-09-15 — **revisão da PR #27** (T070), pelo Henrique. A
+PR entrou na `master` (#27 mergeada) e a revisão virou PR própria, com o teto
+de altura da conversa passando de pixel para fração da tela.
+**Estado**: **334 testes** no backend e **400** no aplicativo (eram 346). A
+feature 001 está completa, só a fase 8 (login social) fora, com bloqueio
+externo. A feature 003 tem **Hub, conversa que ensina, catálogos, execução com
+confirmação e registro** — tudo contra simulado, **sem provedor de IA
+escolhido** — e a T070 da fase 9 feita.
 **Próximo: a fase 8 da 003** (T061-T068), que espera a escolha do provedor, ou
 o resto da **fase 9** (T069, T071-T074 — T071 exige as 5 pessoas de 65+). Ver
 seção 4-B.
 
-> 🔴 **Achado e corrigido nesta sessão: a tela de conversa estourava a tela
-> inteira em 200% de zoom.** Medido num aparelho real (390×844): o aviso
-> antigolpe sozinho ia de 364 px (100%) para **1324 px** (200%) — mais alto
-> que a tela — e derrubava o campo de mensagem e o botão de enviar para fora
-> dela, quebrando a FR-027 exatamente no teto de ampliação que a própria
-> `escalaTextoLimitada` permite. Corrigido em `tela_conversa.dart`: o aviso e
-> a faixa do campo+botão agora têm altura máxima, com o próprio texto rolando
-> **dentro da caixa** depois dela — nenhum dos dois desaparece (a FR-033
-> continua de pé), só param de tomar a tela inteira. Zero mudança visível em
-> 100%: os tetos (420 px e 300 px) foram medidos acima da altura natural
-> nessa escala. **Só testado em 390 dp de largura** — vale medir num aparelho
-> mais estreito antes de considerar fechado.
+> ⚠️ **Há um plano de pentest não commitado** em `docs/seguranca/`
+> (`plano-de-pentest.md` e o PDF), escrito em 2026-09-11 e nunca executado nem
+> versionado. Ele descreve escopo, ferramentas e, por ponto de ataque,
+> hipótese/evidência/impacto/correção. O resultado vai num relatório separado,
+> depois da execução. **Decidir se entra no repositório** — hoje ele existe só
+> na máquina do Henrique.
+
+> 🔴 **Teto de layout se mede em fração de tela, nunca em pixel — e isso custou
+> duas rodadas.** O T070 achou que a tela de conversa estourava em 200%: o
+> aviso antigolpe ia de 364 px (100%) para **1324 px** (200%) num 390×844,
+> derrubando campo e botão de enviar para fora da tela. Corrigiu com tetos
+> fixos de 420 px e 300 px, medidos naquele aparelho — e a revisão mediu os
+> outros: com esses tetos, um **360×800** (Galaxy A/M, o mais comum no Brasil)
+> ainda estourava 40 px em 200%, e um **360×640** estourava 133 px **já em
+> 100%**, sem zoom nenhum. Hoje um `LayoutBuilder` dá a altura disponível e as
+> duas faixas ficam em **45% e 42%** dela; os 13% restantes são o piso da lista
+> de mensagens. Zero estouro nas 12 combinações de aparelho × escala.
 >
-> **A causa de isto ter passado despercebido até agora**: testes de
+> ⚠️ **E o portão da FR-027 estava decorativo.** Ele verificava
+> `takeException() == null` e "o campo existe" — as duas coisas são verdade com
+> a **conversa reduzida a 4 px de altura**. Não estourar não é continuar
+> utilizável. Hoje ele exige altura mínima para a lista e o botão de enviar
+> alcançável, e foi provado quebrando: com os tetos fixos de volta, **10 das 12
+> combinações reprovam**, inclusive o 390×844 a 150%, que a versão antiga
+> deixava passar.
+>
+> **A causa de isto ter passado despercebido até então**: testes de
 > acessibilidade que fazem `MediaQuery(data: MediaQueryData(size: ...))` —
 > inclusive o `cadastro_acessibilidade_test.dart` da feature 001 — **não
 > mudam o tamanho real usado no layout**, só o valor que `MediaQuery.of` lê.
 > As restrições de verdade vêm da janela do teste, que por padrão é bem maior
 > que qualquer Android. O jeito certo é `tester.view.physicalSize` (ver
 > qualquer arquivo em `app/test/acessibilidade/`). Vale desconfiar de
-> qualquer teste de ampliação anterior a esta sessão — ele pode estar
+> qualquer teste de ampliação anterior a 2026-09-10 — ele pode estar
 > passando contra uma tela que nenhum aparelho tem.
+>
+> **E não basta um aparelho.** A matriz está em
+> `app/test/acessibilidade/aparelhos.dart`: 390×844, 360×800, 360×640 e
+> 320×568, cruzada com 1.0 / 1.5 / 2.0 nos quatro arquivos. Rodar num aparelho
+> só foi exatamente o que escondeu o estouro do 360×640 em 100%.
 
 > 🔴 **O que falta para haver produto não é código, e isso precisa entrar na
 > fila agora.** Levantamento de 2026-09-08: três das quatro coisas que separam
@@ -1268,6 +1285,14 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   nos dois lados.
 - **`NoClassDefFoundError: TesteComBanco` significa Docker parado**, e não
   defeito de código. Aconteceu de novo nesta sessão, com 18 erros de uma vez.
+- **Teto de altura em pixel só cabe no aparelho em que foi medido.** Os 420 px
+  do aviso antigolpe foram calibrados num 390×844 e estouravam num 360×640 já
+  em 100%. `LayoutBuilder` + fração da altura disponível não tem esse problema,
+  porque a conta é refeita em cada aparelho. Vale para qualquer
+  `BoxConstraints(maxHeight:)` que não seja de um ícone.
+- **Testar num aparelho só esconde layout quebrado.** Os quatro arquivos de
+  acessibilidade rodavam em 390×844 — o mais folgado. A matriz de
+  `aparelhos.dart` custa segundos e pegou dois estouros que ninguém via.
 - **Teste que passa não prova portão nenhum — e isso já falhou aqui.** A guarda
   de conta desativada entrou na #15 anunciada na descrição da PR, sem um único
   teste, e furada. `git grep <a constante que a guarda usa>` em
@@ -1349,6 +1374,22 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | **Registrar app no Google e no Facebook** (client IDs, PKCE) | Equipe — ninguém levantou ainda | **Sim, para a fase 8 da 001.** Aprovação no Facebook não é rápida, e é o único pedaço da feature 001 que continua aberto |
 | **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
+
+### Onde a fila parou em 2026-09-15
+
+**A fila está vazia de novo** — e ficou, por dias, com uma PR verde parada.
+
+| # | O quê | Situação |
+|---|---|---|
+| #24, #26 | Backend da US3 e a integração + US4 | ✅ na `master` (2026-09-09) |
+| **#27** | **T070 — testes de acessibilidade do Hub e da assistente** | ✅ na `master` (2026-09-15), revisada e aprovada |
+| **#28** | **Correção da revisão da #27** — teto proporcional e o portão da FR-027 | 🟢 **Aberta**, base `master` |
+
+⚠️ **A #27 ficou 5 dias aberta com CI verde e sem revisão nenhuma.** Não é
+detalhe de processo: a revisão dela achou que o conserto do T070 só valia no
+aparelho em que foi medido, e achou um portão decorativo. **O que a fila custa
+quando para é isso.** Confira `gh pr list --state open` no começo de cada
+sessão — foi assim que esta começou.
 
 ### Onde a fila parou em 2026-08-29
 
