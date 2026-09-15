@@ -5,6 +5,8 @@ import 'package:memora/features/assistente/data/repositorio_assistente_simulado.
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 
+import 'aparelhos.dart';
+
 /// Acessibilidade do catálogo — T070, FR-026 a FR-030.
 ///
 /// Cobre as duas categorias (sensível e cotidiana): são a mesma tela
@@ -22,13 +24,14 @@ void main() {
     WidgetTester t,
     CategoriaDoServico categoria, {
     double escala = 1.0,
+    Size aparelho = referencia,
   }) async {
     // `MediaQuery(data: MediaQueryData(size: ...))` sozinho NAO muda as
     // restricoes reais de layout, so o valor que widgets leem via
     // `MediaQuery.of`. Isto muda a janela de fato — ver a nota equivalente em
     // `conversa_acessibilidade_test.dart`, onde a diferenca escondeu um
     // overflow real.
-    t.view.physicalSize = const Size(390, 844);
+    t.view.physicalSize = aparelho;
     t.view.devicePixelRatio = 1.0;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
@@ -62,23 +65,31 @@ void main() {
   });
 
   group('Texto ampliado — FR-027', () {
-    for (final double escala in <double>[1.0, 1.5, 2.0]) {
-      testWidgets(
-          'servicos sensiveis, com a explicacao extra da FR-042, nao '
-          'quebram em escala $escala', (WidgetTester t) async {
-        await montar(t, CategoriaDoServico.sensivel, escala: escala);
+    // A matriz de aparelhos entrou na revisao da PR #27: ate entao tudo rodava
+    // num 390x844, e foi assim que o overflow da tela de conversa passou.
+    for (final Size aparelho in aparelhos) {
+      for (final double escala in <double>[1.0, 1.5, 2.0]) {
+        testWidgets(
+            'servicos sensiveis, com a explicacao extra da FR-042, nao '
+            'quebram em ${nomeDo(aparelho)}, escala $escala',
+            (WidgetTester t) async {
+          await montar(t, CategoriaDoServico.sensivel,
+              escala: escala, aparelho: aparelho);
 
-        expect(t.takeException(), isNull);
-        expect(find.byKey(TelaCatalogo.chaveLista), findsOneWidget);
-      });
+          expect(t.takeException(), isNull);
+          expect(find.byKey(TelaCatalogo.chaveLista), findsOneWidget);
+        });
 
-      testWidgets('servicos cotidianos nao quebram em escala $escala',
-          (WidgetTester t) async {
-        await montar(t, CategoriaDoServico.cotidiano, escala: escala);
+        testWidgets(
+            'servicos cotidianos nao quebram em ${nomeDo(aparelho)}, '
+            'escala $escala', (WidgetTester t) async {
+          await montar(t, CategoriaDoServico.cotidiano,
+              escala: escala, aparelho: aparelho);
 
-        expect(t.takeException(), isNull);
-        expect(find.byKey(TelaCatalogo.chaveLista), findsOneWidget);
-      });
+          expect(t.takeException(), isNull);
+          expect(find.byKey(TelaCatalogo.chaveLista), findsOneWidget);
+        });
+      }
     }
   });
 

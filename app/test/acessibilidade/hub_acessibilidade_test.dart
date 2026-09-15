@@ -4,6 +4,8 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/hub/domain/hub.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 
+import 'aparelhos.dart';
+
 /// Acessibilidade do Hub — T070, FR-026 a FR-030.
 ///
 /// A funcionalidade do Hub (FR-002, FR-003, FR-045) já tem teste próprio em
@@ -39,8 +41,12 @@ void main() {
   /// `MediaQuery.of`. Sem isto, o teste roda contra a janela padrão do
   /// `flutter test`, bem maior que qualquer Android, e esconde overflow real
   /// (foi assim que o de `tela_conversa.dart` passou despercebido até o T070).
-  Future<void> montar(WidgetTester t, {double escala = 1.0}) async {
-    t.view.physicalSize = const Size(390, 844);
+  Future<void> montar(
+    WidgetTester t, {
+    double escala = 1.0,
+    Size aparelho = referencia,
+  }) async {
+    t.view.physicalSize = aparelho;
     t.view.devicePixelRatio = 1.0;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
@@ -72,10 +78,14 @@ void main() {
   });
 
   group('Texto ampliado — FR-027', () {
-    for (final double escala in <double>[1.0, 1.5, 2.0]) {
-      testWidgets('o Hub com tres portas nao quebra em escala $escala',
+    // A matriz de aparelhos entrou na revisao da PR #27: ate entao tudo rodava
+    // num 390x844, e foi assim que o overflow da tela de conversa passou.
+    for (final Size aparelho in aparelhos) {
+      for (final double escala in <double>[1.0, 1.5, 2.0]) {
+      testWidgets('o Hub com tres portas nao quebra em '
+          '${nomeDo(aparelho)}, escala $escala',
           (WidgetTester t) async {
-        await montar(t, escala: escala);
+        await montar(t, escala: escala, aparelho: aparelho);
 
         expect(t.takeException(), isNull);
         // Continua utilizavel: a saudacao e ao menos uma porta seguem visiveis
@@ -86,6 +96,7 @@ void main() {
         await t.ensureVisible(primeiraPorta);
         expect(primeiraPorta, findsOneWidget);
       });
+      }
     }
   });
 

@@ -10,6 +10,8 @@ import 'package:memora/features/assistente/presentation/controladores/controlado
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
+import 'aparelhos.dart';
+
 /// Acessibilidade da conversa — T070, FR-026 a FR-030.
 ///
 /// A funcionalidade (FR-014, FR-016, FR-033) já tem teste próprio em
@@ -61,13 +63,14 @@ void main() {
     WidgetTester t,
     ControladorConversa c, {
     double escala = 1.0,
+    Size aparelho = referencia,
   }) async {
     // `MediaQuery(data: MediaQueryData(size: ...))` NÃO muda o tamanho real
     // usado no layout — só o valor que widgets leem via `MediaQuery.of`. As
     // restrições de verdade vêm da janela do teste, que por padrão é bem
     // maior que qualquer Android (foi assim que um overflow real ficou
     // escondido ao escrever este arquivo). Isto aqui muda a janela de fato.
-    t.view.physicalSize = const Size(390, 844);
+    t.view.physicalSize = aparelho;
     t.view.devicePixelRatio = 1.0;
     addTearDown(t.view.resetPhysicalSize);
     addTearDown(t.view.resetDevicePixelRatio);
@@ -107,16 +110,45 @@ void main() {
   });
 
   group('Texto ampliado — FR-027', () {
-    for (final double escala in <double>[1.0, 1.5, 2.0]) {
-      testWidgets('a conversa nao quebra em escala $escala',
-          (WidgetTester t) async {
-        final ControladorConversa c = controladorCom();
-        addTearDown(c.dispose);
-        await montar(t, c, escala: escala);
+    for (final Size aparelho in aparelhos) {
+      final String nome = nomeDo(aparelho);
 
-        expect(t.takeException(), isNull);
-        expect(find.byKey(TelaConversa.chaveCampo), findsOneWidget);
-      });
+      for (final double escala in <double>[1.0, 1.5, 2.0]) {
+        testWidgets('a conversa continua utilizavel em $nome, escala $escala',
+            (WidgetTester t) async {
+          final ControladorConversa c = controladorCom();
+          addTearDown(c.dispose);
+          await montar(t, c, escala: escala, aparelho: aparelho);
+
+          expect(t.takeException(), isNull,
+              reason: 'nada pode estourar a tela em $nome a $escala');
+
+          // ⚠️ As três asserções abaixo existem porque a versão anterior
+          // deste teste — `takeException()` mais "o campo existe" — passava
+          // com a conversa reduzida a **4 px** de altura em 200%. Não
+          // estourar não é o mesmo que continuar utilizável, e a FR-027 pede
+          // a segunda coisa.
+          expect(find.byKey(TelaConversa.chaveCampo), findsOneWidget);
+
+          final double alturaDaLista =
+              t.getSize(find.byType(ListView).first).height;
+          expect(alturaDaLista, greaterThanOrEqualTo(48),
+              reason: 'a conversa precisa sobrar com pelo menos uma linha '
+                  'legivel; em $nome a $escala sobraram '
+                  '${alturaDaLista.toStringAsFixed(0)} px');
+
+          // Alcançável: rolar a faixa de baixo tem que trazer o botão de
+          // enviar para dentro da tela. Sem isto, uma tela em que o botão
+          // ficou fora e é inalcançável passaria pelas duas asserções acima.
+          final Finder enviar = find.byKey(TelaConversa.chaveEnviar);
+          await t.ensureVisible(enviar);
+          final Rect botao = t.getRect(enviar);
+          expect(botao.top, greaterThanOrEqualTo(0));
+          expect(botao.bottom, lessThanOrEqualTo(aparelho.height),
+              reason: 'o botao de enviar precisa caber na tela depois de '
+                  'rolada a faixa que o contem');
+        });
+      }
     }
   });
 
