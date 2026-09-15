@@ -4,10 +4,12 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-09-15 — **revisão da PR #27** (T070), pelo Henrique. A
-PR entrou na `master` (#27 mergeada) e a revisão virou PR própria, com o teto
-de altura da conversa passando de pixel para fração da tela.
-**Estado**: **334 testes** no backend e **400** no aplicativo (eram 346). A
+**Última sessão**: 2026-09-15 — **revisão da PR #27** (T070) e a auditoria que
+ela pediu, pelo Henrique. Entraram na `master`: a #27, a #28 (teto da conversa
+vira fração da tela), a #29 (plano de pentest) e a #30 (o `Flexible` do
+"Mostrar senha"). Duas PRs de conserto saíram de uma revisão — e os dois
+defeitos eram **layout que só quebrava em aparelho que ninguém testava**.
+**Estado**: **334 testes** no backend e **431** no aplicativo (eram 346). A
 feature 001 está completa, só a fase 8 (login social) fora, com bloqueio
 externo. A feature 003 tem **Hub, conversa que ensina, catálogos, execução com
 confirmação e registro** — tudo contra simulado, **sem provedor de IA
@@ -52,19 +54,35 @@ seção 4-B.
 > deixava passar.
 >
 > **A causa de isto ter passado despercebido até então**: testes de
-> acessibilidade que fazem `MediaQuery(data: MediaQueryData(size: ...))` —
-> inclusive o `cadastro_acessibilidade_test.dart` da feature 001 — **não
+> acessibilidade que fazem `MediaQuery(data: MediaQueryData(size: ...))` **não
 > mudam o tamanho real usado no layout**, só o valor que `MediaQuery.of` lê.
-> As restrições de verdade vêm da janela do teste, que por padrão é bem maior
-> que qualquer Android. O jeito certo é `tester.view.physicalSize` (ver
-> qualquer arquivo em `app/test/acessibilidade/`). Vale desconfiar de
-> qualquer teste de ampliação anterior a 2026-09-10 — ele pode estar
-> passando contra uma tela que nenhum aparelho tem.
+> As restrições de verdade vêm da janela do teste, que é **800×600** — mais
+> larga que qualquer telefone. O jeito certo é `tester.view.physicalSize`.
 >
 > **E não basta um aparelho.** A matriz está em
-> `app/test/acessibilidade/aparelhos.dart`: 390×844, 360×800, 360×640 e
-> 320×568, cruzada com 1.0 / 1.5 / 2.0 nos quatro arquivos. Rodar num aparelho
-> só foi exatamente o que escondeu o estouro do 360×640 em 100%.
+> `app/test/suporte/aparelhos.dart`: 390×844, 360×800, 360×640 e 320×568,
+> cruzada com 1.0 / 1.5 / 2.0. Rodar num aparelho só foi exatamente o que
+> escondeu o estouro do 360×640 em 100%.
+
+> ✅ **A suspeita sobre os testes antigos foi auditada em 2026-09-15, e havia
+> defeito de verdade.** O `cadastro_acessibilidade_test.dart` declarava
+> `size: Size(390, 844)` e rodava em 800×600. Apontado para telefone, reprovou:
+> o controle **"Mostrar senha"** do `CampoSenha` estava numa `Row` sem
+> `Flexible`, então exigia a largura natural do rótulo — que cresce com a
+> ampliação. Estouro **horizontal** de 31 px num 320×568 **já em 100%**, 78 px
+> num 390×844 a 150% e 265 px a 200%, nas **três** telas que pedem senha
+> (cadastro, login, recuperação). Conserto de uma linha, o mesmo que o
+> `BotaoBase` já fazia.
+>
+> **As oito telas da autenticação foram varridas** na matriz de 4 aparelhos ×
+> 3 escalas: com o `Flexible`, zero estouro em 96 combinações. O portão é
+> duplo, e de propósito — `campo_senha_ampliacao_test.dart` (componente) e o
+> `cadastro_acessibilidade_test.dart` (tela). Quebrando o `Flexible`, **17
+> casos reprovam**, e o do 320×568 a 100% **só a tela pega**: um componente
+> isolado tem mais largura que o mesmo componente dentro do cartão.
+>
+> ⚠️ **Texto dentro de `Row` quase sempre quer `Flexible`.** É a mesma família
+> do teto fixo da conversa: largura natural não sabe quanto de tela existe.
 
 > 🔴 **O que falta para haver produto não é código, e isso precisa entrar na
 > fila agora.** Levantamento de 2026-09-08: três das quatro coisas que separam
@@ -1302,6 +1320,11 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - **Testar num aparelho só esconde layout quebrado.** Os quatro arquivos de
   acessibilidade rodavam em 390×844 — o mais folgado. A matriz de
   `aparelhos.dart` custa segundos e pegou dois estouros que ninguém via.
+- **Texto solto dentro de `Row` estoura a largura.** Sem `Flexible`, um `Text`
+  exige a largura natural dele, e ela cresce com a ampliação — foi assim que o
+  rótulo "Mostrar senha" passou 265 px da tela em 200%. O `BotaoBase` já fazia
+  certo desde sempre; o `CampoSenha` não. Ao escrever `Row` com texto dentro,
+  a pergunta é "e se este texto dobrar de tamanho?".
 - **Teste que passa não prova portão nenhum — e isso já falhou aqui.** A guarda
   de conta desativada entrou na #15 anunciada na descrição da PR, sem um único
   teste, e furada. `git grep <a constante que a guarda usa>` em
@@ -1392,7 +1415,9 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 |---|---|---|
 | #24, #26 | Backend da US3 e a integração + US4 | ✅ na `master` (2026-09-09) |
 | **#27** | **T070 — testes de acessibilidade do Hub e da assistente** | ✅ na `master` (2026-09-15), revisada e aprovada |
-| **#28** | **Correção da revisão da #27** — teto proporcional e o portão da FR-027 | 🟢 **Aberta**, base `master` |
+| **#28** | Correção da revisão da #27 — teto proporcional e o portão da FR-027 | ✅ na `master` |
+| **#29** | Plano de pentest e o `.gitattributes` | ✅ na `master` |
+| **#30** | Auditoria da ampliação — o `Flexible` do "Mostrar senha" | 🟢 **Aberta**, base `master` |
 
 ⚠️ **A #27 ficou 5 dias aberta com CI verde e sem revisão nenhuma.** Não é
 detalhe de processo: a revisão dela achou que o conserto do T070 só valia no
