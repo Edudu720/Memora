@@ -4,16 +4,41 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-09-08 — **a feature 001 ficou completa**, pelo Henrique,
-na máquina dele: backend da US3 (T066-T069), a US4 inteira (T074-T078) e a
-primeira conversa real entre o aplicativo e o servidor.
-**Estado**: **334 testes** no backend (eram 301) e **315** no aplicativo (eram
-294). A **feature 001 está completa** — só a fase 8, do login social, continua
-fora, e ela tem bloqueio externo. A feature 003 tem **Hub, conversa que ensina,
-catálogos, execução com confirmação e registro** — tudo contra simulado, **sem
-provedor de IA escolhido**.
+**Última sessão**: 2026-09-10 — **T070 da feature 003 feita**: os testes de
+acessibilidade do Hub, da conversa, do catálogo e do registro (FR-026 a
+FR-030), em `app/test/acessibilidade/`. No caminho, achou e corrigiu um
+overflow real na tela de conversa em 200% de zoom — ver o achado logo abaixo.
+**Estado**: **334 testes** no backend e **346** no aplicativo (eram 315 — as
+31 novas são deste arquivo). A feature 001 está completa, só a fase 8 (login
+social) fora, com bloqueio externo. A feature 003 tem **Hub, conversa que
+ensina, catálogos, execução com confirmação e registro** — tudo contra
+simulado, **sem provedor de IA escolhido** — e agora também a T070 da fase 9.
 **Próximo: a fase 8 da 003** (T061-T068), que espera a escolha do provedor, ou
-**a fase 9** (validação), cujo T070 não depende dela. Ver seção 4-B.
+o resto da **fase 9** (T069, T071-T074 — T071 exige as 5 pessoas de 65+). Ver
+seção 4-B.
+
+> 🔴 **Achado e corrigido nesta sessão: a tela de conversa estourava a tela
+> inteira em 200% de zoom.** Medido num aparelho real (390×844): o aviso
+> antigolpe sozinho ia de 364 px (100%) para **1324 px** (200%) — mais alto
+> que a tela — e derrubava o campo de mensagem e o botão de enviar para fora
+> dela, quebrando a FR-027 exatamente no teto de ampliação que a própria
+> `escalaTextoLimitada` permite. Corrigido em `tela_conversa.dart`: o aviso e
+> a faixa do campo+botão agora têm altura máxima, com o próprio texto rolando
+> **dentro da caixa** depois dela — nenhum dos dois desaparece (a FR-033
+> continua de pé), só param de tomar a tela inteira. Zero mudança visível em
+> 100%: os tetos (420 px e 300 px) foram medidos acima da altura natural
+> nessa escala. **Só testado em 390 dp de largura** — vale medir num aparelho
+> mais estreito antes de considerar fechado.
+>
+> **A causa de isto ter passado despercebido até agora**: testes de
+> acessibilidade que fazem `MediaQuery(data: MediaQueryData(size: ...))` —
+> inclusive o `cadastro_acessibilidade_test.dart` da feature 001 — **não
+> mudam o tamanho real usado no layout**, só o valor que `MediaQuery.of` lê.
+> As restrições de verdade vêm da janela do teste, que por padrão é bem maior
+> que qualquer Android. O jeito certo é `tester.view.physicalSize` (ver
+> qualquer arquivo em `app/test/acessibilidade/`). Vale desconfiar de
+> qualquer teste de ampliação anterior a esta sessão — ele pode estar
+> passando contra uma tela que nenhum aparelho tem.
 
 > 🔴 **O que falta para haver produto não é código, e isso precisa entrar na
 > fila agora.** Levantamento de 2026-09-08: três das quatro coisas que separam
@@ -776,7 +801,7 @@ testá-lo.**
 | Fase | Tarefas | Situação |
 |---|---|---|
 | **8 — o provedor** | T061-T068 | **Espera a equipe escolher.** Só esta fase depende |
-| 9 — validação | T069-T074 | Depois da 8. Inclui o **V10 com 5 pessoas de 65+** |
+| 9 — validação | T069, T071-T074 | ✅ T070 feita (2026-09-10). O resto não depende da fase 8 — T071 é o **V10 com 5 pessoas de 65+** |
 
 Também ficaram adiadas a **T021** e a **T036** (gerar o cliente Dart da 003):
 gerariam cliente para endpoints cujo contrato ainda não foi fundido com o da
