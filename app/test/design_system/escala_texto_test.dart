@@ -35,6 +35,20 @@ Widget _comEscala(Widget filho, double escala) {
 const List<double> _escalas = <double>[1.0, 1.5, 2.0];
 
 void main() {
+  // SONDA: a janela do teste passa a ser a de um aparelho de verdade.
+  setUp(() {
+    final TestWidgetsFlutterBinding b =
+        TestWidgetsFlutterBinding.ensureInitialized();
+    b.platformDispatcher.implicitView!.physicalSize = const Size(390, 844);
+    b.platformDispatcher.implicitView!.devicePixelRatio = 1.0;
+  });
+  tearDown(() {
+    final TestWidgetsFlutterBinding b =
+        TestWidgetsFlutterBinding.ensureInitialized();
+    b.platformDispatcher.implicitView!.resetPhysicalSize();
+    b.platformDispatcher.implicitView!.resetDevicePixelRatio();
+  });
+
   group('Componentes sobrevivem ao texto ampliado — FR-025 e SC-003', () {
     for (final double escala in _escalas) {
       testWidgets('BotaoPrimario em escala $escala',

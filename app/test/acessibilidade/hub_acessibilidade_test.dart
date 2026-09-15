@@ -4,7 +4,7 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/hub/domain/hub.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 
-import 'aparelhos.dart';
+import '../suporte/aparelhos.dart';
 
 /// Acessibilidade do Hub — T070, FR-026 a FR-030.
 ///

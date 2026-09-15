@@ -99,9 +99,19 @@ class _CampoSenhaState extends State<CampoSenha> {
                         ),
                         const SizedBox(width: MemoraEspacamento.sm),
                         // Rótulo por extenso: ícone de olho sozinho é ambíguo.
-                        TextoMemora(
-                          _revelada ? 'Esconder senha' : 'Mostrar senha',
-                          cor: cores.primaria,
+                        //
+                        // O `Flexible` não é enfeite. Sem ele o rótulo exige a
+                        // largura natural, e ela cresce com a ampliação: num
+                        // 320×568 estourava 31 px pela direita **já em 100%**,
+                        // e 265 px em 200%. Com ele o texto quebra em duas
+                        // linhas — o mesmo que o `BotaoBase` já faz. Encurtar
+                        // o rótulo não é alternativa: ele existe justamente
+                        // porque o ícone sozinho não diz o que faz.
+                        Flexible(
+                          child: TextoMemora(
+                            _revelada ? 'Esconder senha' : 'Mostrar senha',
+                            cor: cores.primaria,
+                          ),
                         ),
                       ],
                     ),

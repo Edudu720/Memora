@@ -24,6 +24,20 @@ Future<void> _tocar(WidgetTester tester, Finder alvo) async {
 }
 
 void main() {
+  // SONDA: a janela do teste passa a ser a de um aparelho de verdade.
+  setUp(() {
+    final TestWidgetsFlutterBinding b =
+        TestWidgetsFlutterBinding.ensureInitialized();
+    b.platformDispatcher.implicitView!.physicalSize = const Size(390, 844);
+    b.platformDispatcher.implicitView!.devicePixelRatio = 1.0;
+  });
+  tearDown(() {
+    final TestWidgetsFlutterBinding b =
+        TestWidgetsFlutterBinding.ensureInitialized();
+    b.platformDispatcher.implicitView!.resetPhysicalSize();
+    b.platformDispatcher.implicitView!.resetDevicePixelRatio();
+  });
+
   group('ConfirmacaoMemora — corrige os botões SIM/NÃO do protótipo', () {
     testWidgets('empilha na vertical, não lado a lado',
         (WidgetTester tester) async {
