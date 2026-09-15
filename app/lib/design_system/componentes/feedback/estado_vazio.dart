@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
 import '../botoes/botao_primario.dart';
 import '../texto/texto_memora.dart';
@@ -47,7 +48,9 @@ class EstadoVazio extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Icon(icone, size: 56, color: cores.textoSuave),
+          Icon(icone,
+              size: MemoraDimensoes.iconeEstadoVazio,
+              color: cores.textoSuave),
           const SizedBox(height: MemoraEspacamento.lg),
           TextoMemora.tituloSecao(titulo, alinhamento: TextAlign.center),
           const SizedBox(height: MemoraEspacamento.sm),

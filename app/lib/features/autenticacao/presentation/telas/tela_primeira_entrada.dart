@@ -54,7 +54,9 @@ class TelaPrimeiraEntrada extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               const SizedBox(height: MemoraEspacamento.xxl),
-              Icon(Icons.emoji_events_outlined, size: 72, color: cores.sucesso),
+              Icon(Icons.emoji_events_outlined,
+                  size: MemoraDimensoes.iconeCelebracao,
+                  color: cores.sucesso),
               const SizedBox(height: MemoraEspacamento.xl),
               TextoMemora.tituloTela(
                 nome.isEmpty

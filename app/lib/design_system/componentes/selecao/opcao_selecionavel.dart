@@ -82,7 +82,7 @@ class OpcaoSelecionavel extends StatelessWidget {
                           ? Icons.check_circle
                           : Icons.circle_outlined,
                       color: selecionada ? cores.primaria : cores.borda,
-                      size: 28,
+                      size: MemoraDimensoes.iconeDestaque,
                     ),
                     const SizedBox(width: MemoraEspacamento.lg),
                     Expanded(

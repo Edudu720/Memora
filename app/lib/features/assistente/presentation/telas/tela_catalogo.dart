@@ -182,7 +182,7 @@ class _ItemDoCatalogo extends StatelessWidget {
                     servico.memoraPodeAbrir
                         ? Icons.check_circle_outline
                         : Icons.school_outlined,
-                    size: 18,
+                    size: MemoraDimensoes.iconePequeno,
                     color: cores.textoSuave,
                   ),
                   const SizedBox(width: MemoraEspacamento.xs),

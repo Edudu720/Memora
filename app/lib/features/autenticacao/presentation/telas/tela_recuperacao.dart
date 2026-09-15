@@ -229,7 +229,9 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
 
   List<Widget> _concluida(ControladorRecuperacao c, MemoraCores cores) =>
       <Widget>[
-        Icon(Icons.check_circle, size: 72, color: cores.sucesso),
+        Icon(Icons.check_circle,
+            size: MemoraDimensoes.iconeCelebracao,
+            color: cores.sucesso),
         const SizedBox(height: MemoraEspacamento.xl),
         const TextoMemora(
           TextosAutenticacao.avisoSessoesEncerradas,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
@@ -58,7 +59,9 @@ class DestaqueInformacao extends StatelessWidget {
               Row(
                 children: <Widget>[
                   if (icone != null) ...<Widget>[
-                    Icon(icone, size: 20, color: cores.texto),
+                    Icon(icone,
+                        size: MemoraDimensoes.iconePequeno,
+                        color: cores.texto),
                     const SizedBox(width: MemoraEspacamento.sm),
                   ],
                   Flexible(

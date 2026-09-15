@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
 import '../texto/texto_memora.dart';
 
@@ -29,10 +30,10 @@ class Carregando extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             SizedBox(
-              width: 40,
-              height: 40,
+              width: MemoraDimensoes.indicadorDeTela,
+              height: MemoraDimensoes.indicadorDeTela,
               child: CircularProgressIndicator(
-                strokeWidth: 4,
+                strokeWidth: MemoraDimensoes.espessuraIndicadorDeTela,
                 valueColor: AlwaysStoppedAnimation<Color>(cores.primaria),
               ),
             ),

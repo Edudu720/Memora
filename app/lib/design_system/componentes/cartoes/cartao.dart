@@ -37,7 +37,7 @@ class Cartao extends StatelessWidget {
         border: Border.all(color: cores.borda),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: MemoraElevacao.sombra,
             blurRadius: MemoraElevacao.cartao * 4,
             offset: const Offset(0, MemoraElevacao.cartao),
           ),

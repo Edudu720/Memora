@@ -95,7 +95,7 @@ class _CampoSenhaState extends State<CampoSenha> {
                         Icon(
                           _revelada ? Icons.visibility_off : Icons.visibility,
                           color: cores.primaria,
-                          size: 24,
+                          size: MemoraDimensoes.iconePadrao,
                         ),
                         const SizedBox(width: MemoraEspacamento.sm),
                         // Rótulo por extenso: ícone de olho sozinho é ambíguo.
