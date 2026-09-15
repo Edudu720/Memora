@@ -1,0 +1,20 @@
+# Arquivos que o git NAO pode tratar como texto.
+#
+# Com `core.autocrlf=true` — o padrao do Git for Windows, e o que esta ativo nas
+# duas maquinas do projeto — o git converte LF em CRLF ao gravar no disco. Num
+# arquivo binario isso nao e uma diferenca de estilo: e corrupcao silenciosa,
+# que so aparece quando alguem tenta abrir o arquivo depois de um clone.
+#
+# Ao acrescentar `docs/seguranca/plano-de-pentest.pdf`, o `git add` avisou
+# "LF will be replaced by CRLF" para o PDF. Daqui em diante, nao avisa mais.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.jar binary
+*.keystore binary
