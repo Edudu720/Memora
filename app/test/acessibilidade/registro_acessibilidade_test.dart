@@ -4,7 +4,7 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 
-import 'aparelhos.dart';
+import '../suporte/aparelhos.dart';
 
 /// Acessibilidade do registro — T070, FR-026 a FR-030.
 ///

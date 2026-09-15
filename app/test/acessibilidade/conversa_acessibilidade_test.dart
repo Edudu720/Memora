@@ -10,7 +10,7 @@ import 'package:memora/features/assistente/presentation/controladores/controlado
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
-import 'aparelhos.dart';
+import '../suporte/aparelhos.dart';
 
 /// Acessibilidade da conversa — T070, FR-026 a FR-030.
 ///

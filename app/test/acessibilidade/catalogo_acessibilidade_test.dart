@@ -5,7 +5,7 @@ import 'package:memora/features/assistente/data/repositorio_assistente_simulado.
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 
-import 'aparelhos.dart';
+import '../suporte/aparelhos.dart';
 
 /// Acessibilidade do catálogo — T070, FR-026 a FR-030.
 ///
