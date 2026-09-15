@@ -16,12 +16,21 @@ escolhido** — e a T070 da fase 9 feita.
 o resto da **fase 9** (T069, T071-T074 — T071 exige as 5 pessoas de 65+). Ver
 seção 4-B.
 
-> ⚠️ **Há um plano de pentest não commitado** em `docs/seguranca/`
-> (`plano-de-pentest.md` e o PDF), escrito em 2026-09-11 e nunca executado nem
-> versionado. Ele descreve escopo, ferramentas e, por ponto de ataque,
-> hipótese/evidência/impacto/correção. O resultado vai num relatório separado,
-> depois da execução. **Decidir se entra no repositório** — hoje ele existe só
-> na máquina do Henrique.
+> 🔒 **O plano de pentest está em [`docs/seguranca/plano-de-pentest.md`](docs/seguranca/plano-de-pentest.md)**
+> (PR #29), escrito em 2026-09-11 e versionado em 2026-09-15. Ele é o **plano**:
+> escopo, ferramentas e, para cada um dos 12 pontos de ataque, hipótese de
+> falha, evidência a coletar, impacto e correção esperada. **Nunca foi
+> executado** — o relatório de resultados é trabalho separado, e o caso 4.7
+> (fazer o modelo abrir serviço sensível) é o que mais vale rodar, porque é o
+> cenário H3 atacado por fora, em vez de por teste nosso.
+>
+> ⚠️ **Um `.gitattributes` entrou junto, e ele evita corrupção silenciosa.** Com
+> `core.autocrlf=true` — o padrão do Git for Windows, ativo nas duas máquinas —
+> o git converteria LF em CRLF **dentro do PDF**, e isso só apareceria quando
+> alguém tentasse abrir o arquivo depois de um clone. Qualquer binário novo
+> (PDF, PNG, fonte, `.jar`) precisa estar lá **antes** de ser commitado. O PDF
+> do plano é **derivado do `.md`** e vai divergir dele: quem editar o texto
+> regenera o PDF, ou tira o PDF do repositório.
 
 > 🔴 **Teto de layout se mede em fração de tela, nunca em pixel — e isso custou
 > duas rodadas.** O T070 achou que a tela de conversa estourava em 200%: o
