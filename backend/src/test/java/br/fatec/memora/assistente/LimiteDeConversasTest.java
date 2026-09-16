@@ -122,9 +122,13 @@ class LimiteDeConversasTest extends TesteComBanco {
                 .doesNotContain("bloquead")
                 .doesNotContain("erro");
 
+        // O acento importa: a primeira versao deste teste procurava "amanha"
+        // sem til e reprovou no CI contra um texto perfeitamente correto. O
+        // portao estava errado, nao o codigo — e so o CI viu, porque o Docker
+        // nao subia nesta maquina.
         assertThat(texto)
                 .as("precisa dizer que ha um amanha, senao a pessoa acha que perdeu o acesso")
-                .containsIgnoringCase("amanha");
+                .containsIgnoringCase("amanhã");
     }
 
     @Test
