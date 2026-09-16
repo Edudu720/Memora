@@ -10,7 +10,8 @@ a #27, a #28 (teto da conversa vira fração da tela), a #29 (plano de pentest) 
 a #30 (o `Flexible` do "Mostrar senha"); a #31 (galeria e portão dos tokens)
 está aberta. Duas PRs de conserto saíram de uma revisão, e os dois defeitos
 eram **layout que só quebrava em aparelho que ninguém testava**.
-**Estado**: **334 testes** no backend e **448** no aplicativo (eram 346). A
+**Estado**: **334 testes** no backend (mais os do H5/H10, na #32) e **460**
+no aplicativo (eram 346). A
 feature 001 está completa, só a fase 8 (login social) fora, com bloqueio
 externo. A feature 003 tem **Hub, conversa que ensina, catálogos, execução com
 confirmação e registro** — tudo contra simulado, **sem provedor de IA
@@ -239,7 +240,7 @@ execute as instruções manualmente. O resultado é idêntico.
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
 | **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1, US2 e US5 completas; **US3 só no aplicativo**; US4 pendente |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 **T001-T048 feitas** — só a fase 8 (validação com pessoas) fora |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 **T001-T049 e T052 feitas** — faltam T050/T051 (5 pessoas) e T053 (revisões) |
 | **003 — Hub e a assistente** | ✅ | ✅ | ✅ | 🟡 **58 de 74 tarefas**; falta só a fatia do provedor de IA e a validação |
 
 ### O que já existe em código
@@ -946,6 +947,40 @@ uma linha só, num lugar só.
 
 A **fase 7 da feature 002 fechou em 2026-09-15** (T045-T048). Ver "A galeria
 e o portão dos tokens", logo abaixo.
+
+### A fase 8 da 002 — o que a T049 encontrou (2026-09-15)
+
+A tabela **"Onde cada cenário roda"**, no fim do
+[quickstart.md da 002](specs/002-design-system/quickstart.md), aponta qual teste
+é qual cenário — V1 a V10.
+
+🔴 **O V5 estava sendo dado como automatizado sem nada o automatizando.** O
+cenário mandava rodar `flutter analyze` para detectar valor literal fora dos
+tokens, e **não existe lint do Dart para isso**. Só passou a ser verdade com o
+`validar_tokens.py` da T046. Corrigido no texto do cenário.
+
+⚠️ **V9 e V10 não tinham teste nenhum.** Agora têm, e os dois foram escritos
+contra o problema de amanhã:
+
+- o do **V9** é portão de **código-fonte**: toda animação em `app/lib/` precisa
+  passar por `MemoraMovimento.efetiva`. A primeira versão varria a galeria
+  montada e **não servia** — a `ListView` é preguiçosa, e os componentes
+  animados nem chegavam à árvore;
+- o do **V10** compara o barril `design_system.dart` com a galeria, e reprova
+  nomeando o componente ausente. Provado tirando o `CampoCodigo` de propósito.
+
+⚠️ **Animação do Material não obedece a "reduzir movimento", e não é nossa.**
+Montar um botão traz seis `ImplicitlyAnimatedWidget` do Flutter, todos em
+200 ms, nenhum consultando `disableAnimations`. Um portão que exigisse zero de
+todos reprovaria contra código que não temos como consertar. O V9 vale para o
+que é nosso, e o que importa — que nenhuma informação dependa **só** do
+movimento — tem caso próprio.
+
+**As divergências do protótipo estão em
+[docs/design/divergencias-do-prototipo.md](docs/design/divergencias-do-prototipo.md)**
+(T052, FR-038), cada uma com a medição que a justificou. O resumo:
+**o protótipo acertou a paleta e errou o tamanho** — a expectativa da equipe era
+a oposta, e a medição desmentiu.
 
 ### A galeria e o portão dos tokens (T045-T048, 2026-09-15)
 

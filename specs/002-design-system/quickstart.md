@@ -95,10 +95,16 @@ tela desligada. Se não der para navegar às cegas, o componente não está pron
 **Cobre**: FR-002, FR-032 · SC-004, SC-008
 
 ```bash
-flutter analyze
+py specs/002-design-system/ferramentas/validar_tokens.py
 ```
 
-**Esperado**: cor ou espaçamento literal em código de feature é sinalizado como erro.
+**Esperado**: cor, espaçamento, raio ou tamanho literal em `app/lib/` sai com
+código 1 e o arquivo:linha de cada um.
+
+⚠️ **Este comando era `flutter analyze` até 2026-09-15, e `flutter analyze` nunca
+detectou isso** — não há lint do Dart para "valor visual fora do token". Enquanto o
+cenário dizia isso, o V5 estava sendo dado como automatizado sem nada o
+automatizando. A T046 escreveu a ferramenta; o portão está no CI como job próprio.
 
 **Teste de verdade**: construir uma tela nova sem escrever nenhum valor visual
 literal. Se não for possível, falta componente ou falta token.
@@ -174,3 +180,58 @@ incompleta é documentação que ninguém confia.
 - [ ] Revisões de código, UX, acessibilidade, performance, segurança e arquitetura
 
 **Só depois disso a feature 001 é desbloqueada para implementação.**
+
+---
+
+## Onde cada cenário roda (T049, 2026-09-15)
+
+Mesmo mapa que o `quickstart.md` da feature 003 ganhou na T069: "executar de
+forma automatizada" só é verificável se dá para apontar **qual teste é qual
+cenário**.
+
+| Cenário | Onde | Automatizado? |
+|---|---|---|
+| **V1** contraste | `ferramentas/validar_paleta.py` (48 pares, job de CI) + `test/design_system/contraste_test.dart` (51 pares no lado Dart) | ✅ |
+| **V2** área de toque | `test/design_system/area_toque_test.dart` | ✅ |
+| **V3** texto em 2,0 | `test/design_system/escala_texto_test.dart`, `galeria_test.dart` e `test/acessibilidade/` | ✅ |
+| **V4** semântica | `test/design_system/informacao_nao_e_acao_test.dart` e os `isSemantics` espalhados | 🟡 **parcial** — o passo do TalkBack com a tela desligada é manual e **não foi feito** |
+| **V5** nenhum literal | `ferramentas/validar_tokens.py` (job de CI) | ✅ **desde 2026-09-15** |
+| **V6** troca de tema | `test/design_system/preferencias/aparencia_test.dart` | ✅ |
+| **V7** informação × ação | 5 pessoas de 65+ | ❌ **não automatizável** |
+| **V8** confirmação | 5 pessoas de 65+ | ❌ **não automatizável** |
+| **V9** redução de movimento | `test/design_system/reducao_de_movimento_test.dart` | ✅ **desde 2026-09-15** |
+| **V10** galeria completa | `test/design_system/galeria_completa_test.dart` | ✅ **desde 2026-09-15** |
+
+Rodar todos:
+
+```powershell
+cd app; flutter analyze; flutter test
+```
+
+```powershell
+py specs/002-design-system/ferramentas/validar_paleta.py; py specs/002-design-system/ferramentas/validar_tokens.py
+```
+
+### O que a T049 encontrou
+
+**1. O V5 estava sendo dado como automatizado e não era.** Ver o aviso no
+próprio cenário, acima.
+
+**2. O V9 e o V10 não tinham teste nenhum.** Os dois agora têm, e os dois foram
+escritos contra o problema de amanhã, não o de hoje:
+
+- o do **V9** é um portão de **código-fonte**: toda animação em `app/lib/`
+  precisa passar por `MemoraMovimento.efetiva`. A primeira versão varria a
+  galeria montada e **não servia** — a `ListView` é preguiçosa e os componentes
+  animados nem chegavam à árvore. Um portão que olha para uma árvore incompleta
+  aprova o errado;
+- o do **V10** compara o barril `design_system.dart` com a galeria. Provado
+  quebrando: tirei o `CampoCodigo` da galeria e ele reprovou nomeando o
+  componente e o arquivo.
+
+**3. Animação do Material não obedece à preferência, e não é nossa.** Montar um
+botão traz seis `ImplicitlyAnimatedWidget` do Flutter (`AnimatedTheme`,
+`AnimatedPhysicalModel`, `AnimatedDefaultTextStyle`, `_MaterialInterior`), todos
+em 200 ms, nenhum consultando `disableAnimations`. O V9 vale para o que é nosso;
+o que o Material anima sozinho está fora do nosso alcance, e o que importa — que
+nenhuma informação dependa **só** do movimento — tem caso próprio.
