@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import '../domain/assistente.dart';
+import '../../../services/seguranca/limpeza_de_sessao.dart';
 
 /// A conversa guardada **no aparelho**, e em nenhum outro lugar (FR-047).
 ///
@@ -28,7 +29,7 @@ import '../domain/assistente.dart';
 /// Tudo, ao sair da conta (FR-048). A conversa não sobrevive à saída pelo mesmo
 /// motivo que a credencial não sobrevive: o aparelho pode não estar mais com a
 /// pessoa.
-class ConversaLocal {
+class ConversaLocal implements DadoLocalDaPessoa {
   /// Nome do arquivo dentro do diretório privado.
   static const String nomeDoArquivo = 'conversa_com_a_memora.json';
 
@@ -85,6 +86,7 @@ class ConversaLocal {
   }
 
   /// Apaga a conversa (FR-048, FR-050).
+  @override
   Future<void> apagar() async {
     try {
       await (await _arquivo()).delete();

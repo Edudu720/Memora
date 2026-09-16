@@ -5,6 +5,8 @@ import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 
+import '../features/autenticacao/dubles_autenticacao.dart';
+
 /// O ambiente e a composição — a peça que liga o aplicativo ao servidor.
 ///
 /// O que estes testes protegem é menos a configuração e mais **duas escolhas**:
@@ -85,6 +87,7 @@ void main() {
           usaServidorReal: false,
         ),
         cofre: _CofreDeMentira(),
+      ultimoAcesso: UltimoAcessoEmMemoria(),
       );
 
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoSimulado>());
@@ -97,6 +100,7 @@ void main() {
           usaServidorReal: true,
         ),
         cofre: _CofreDeMentira(),
+      ultimoAcesso: UltimoAcessoEmMemoria(),
       );
 
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoApi>());
@@ -111,6 +115,7 @@ void main() {
           usaServidorReal: true,
         ),
         cofre: _CofreDeMentira(),
+      ultimoAcesso: UltimoAcessoEmMemoria(),
       );
 
       expect(real.avisoDeIntegracaoParcial, isNotNull);
@@ -124,6 +129,7 @@ void main() {
           usaServidorReal: false,
         ),
         cofre: _CofreDeMentira(),
+      ultimoAcesso: UltimoAcessoEmMemoria(),
       );
 
       expect(simulada.avisoDeIntegracaoParcial, isNull);

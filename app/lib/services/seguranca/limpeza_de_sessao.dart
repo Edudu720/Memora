@@ -27,16 +27,30 @@ import 'cofre_de_credenciais.dart';
 /// coisa. Se a limpeza falhar no meio, o que já terá acontecido é o que mais
 /// importa: o refresh de 60 dias, que é o que realmente abre a conta, já não
 /// está lá.
+///
+/// ## A conversa sai junto (FR-048 da feature 003)
+///
+/// A decisão D3 da feature 003 é que a conversa **fica só no aparelho**, e o
+/// motivo é que no servidor ela viraria acervo sobre a intimidade de quem é
+/// alvo preferencial de golpe no Brasil. Essa decisão só se sustenta inteira
+/// se a conversa **sai** do aparelho quando a pessoa sai da conta: senão o
+/// acervo continua existindo, só que na mão de quem pegar o telefone.
+///
+/// Por isso [dadosLocais] é uma lista, e não um campo de conversa: o que a
+/// saída leva vai crescer, e o lugar de listar é aqui — um só.
 class LimpezaDeSessao {
   final CofreDeCredenciais _cofre;
   final UltimoAcesso _ultimoAcesso;
+  final List<DadoLocalDaPessoa> _dadosLocais;
 
-  /// Cria a limpeza sobre o cofre e o registro de último acesso.
+  /// Cria a limpeza sobre o cofre, o último acesso e os dados locais.
   const LimpezaDeSessao({
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
+    List<DadoLocalDaPessoa> dadosLocais = const <DadoLocalDaPessoa>[],
   })  : _cofre = cofre,
-        _ultimoAcesso = ultimoAcesso;
+        _ultimoAcesso = ultimoAcesso,
+        _dadosLocais = dadosLocais;
 
   /// Remove do aparelho o que a saída leva.
   ///
@@ -47,8 +61,28 @@ class LimpezaDeSessao {
     // Primeiro e sempre: o que abre a conta.
     await _cofre.limpar();
 
+    // Depois o conteúdo. A ordem importa se a limpeza falhar no meio: é
+    // melhor sobrar conversa sem credencial do que credencial sem conversa.
+    //
+    // Isto NÃO é condicionado a `esquecerTudo`. O identificador do último
+    // acesso fica por uma decisão registrada da equipe; a conversa não tem
+    // decisão nenhuma a favor de ficar, e a FR-048 manda apagar.
+    for (final DadoLocalDaPessoa dado in _dadosLocais) {
+      await dado.apagar();
+    }
+
     if (esquecerTudo) {
       await _ultimoAcesso.esquecer();
     }
   }
+}
+
+/// Algo guardado no aparelho que a saída da conta precisa levar.
+///
+/// Existe para que [LimpezaDeSessao], que mora em `services/`, não precise
+/// conhecer nenhuma feature: quem sabe o que é uma conversa é a feature 003,
+/// e o que chega aqui é só "isto se apaga".
+abstract interface class DadoLocalDaPessoa {
+  /// Remove o dado do aparelho.
+  Future<void> apagar();
 }

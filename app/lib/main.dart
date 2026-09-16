@@ -22,6 +22,7 @@ Future<void> main() async {
   final Composicao composicao = Composicao.resolver(
     ambiente: Ambiente.doAmbiente(),
     cofre: CofreSeguroDoSistema(),
+    ultimoAcesso: ultimoAcesso,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
