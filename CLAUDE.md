@@ -10,8 +10,8 @@ a #27, a #28 (teto da conversa vira fração da tela), a #29 (plano de pentest) 
 a #30 (o `Flexible` do "Mostrar senha"); a #31 (galeria e portão dos tokens)
 está aberta. Duas PRs de conserto saíram de uma revisão, e os dois defeitos
 eram **layout que só quebrava em aparelho que ninguém testava**.
-**Estado**: **334 testes** no backend (mais os do H5/H10, na #32) e **460**
-no aplicativo (eram 346). A
+**Estado**: **346 testes** no backend (eram 334) e **460** no aplicativo
+(eram 346). A
 feature 001 está completa, só a fase 8 (login social) fora, com bloqueio
 externo. A feature 003 tem **Hub, conversa que ensina, catálogos, execução com
 confirmação e registro** — tudo contra simulado, **sem provedor de IA
@@ -1420,6 +1420,15 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   nos dois lados.
 - **`NoClassDefFoundError: TesteComBanco` significa Docker parado**, e não
   defeito de código. Aconteceu de novo nesta sessão, com 18 erros de uma vez.
+- **`FATAL: sorry, too many clients already` significa contexto Spring demais,
+  e o sintoma aparece na classe errada.** Toda classe com `@TestConfiguration`
+  ou `@TestPropertySource` ganha contexto próprio, e cada um abre um Hikari de
+  20 conexões. Cinco contextos são 100 — exatamente o `max_connections` padrão
+  do PostgreSQL. Acrescentar o `LimiteDeConversasTest` derrubou **18 testes de
+  recuperação de acesso** que ninguém tinha tocado, porque o contexto *deles*
+  foi o que não subiu. Hoje o container sobe com `max_connections=200`. Se
+  voltar a aparecer, a pergunta é "quantos contextos existem agora?", não "o
+  que essa classe quebrou?".
 - **Teto de altura em pixel só cabe no aparelho em que foi medido.** Os 420 px
   do aviso antigolpe foram calibrados num 390×844 e estouravam num 360×640 já
   em 100%. `LayoutBuilder` + fração da altura disponível não tem esse problema,
