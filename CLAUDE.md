@@ -4,12 +4,13 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-09-15 — **revisão da PR #27** (T070) e a auditoria que
-ela pediu, pelo Henrique. Entraram na `master`: a #27, a #28 (teto da conversa
-vira fração da tela), a #29 (plano de pentest) e a #30 (o `Flexible` do
-"Mostrar senha"). Duas PRs de conserto saíram de uma revisão — e os dois
-defeitos eram **layout que só quebrava em aparelho que ninguém testava**.
-**Estado**: **334 testes** no backend e **431** no aplicativo (eram 346). A
+**Última sessão**: 2026-09-15 — **revisão da PR #27** (T070), a auditoria que
+ela pediu, e a **fase 7 da feature 002**, pelo Henrique. Entraram na `master`:
+a #27, a #28 (teto da conversa vira fração da tela), a #29 (plano de pentest) e
+a #30 (o `Flexible` do "Mostrar senha"); a #31 (galeria e portão dos tokens)
+está aberta. Duas PRs de conserto saíram de uma revisão, e os dois defeitos
+eram **layout que só quebrava em aparelho que ninguém testava**.
+**Estado**: **334 testes** no backend e **448** no aplicativo (eram 346). A
 feature 001 está completa, só a fase 8 (login social) fora, com bloqueio
 externo. A feature 003 tem **Hub, conversa que ensina, catálogos, execução com
 confirmação e registro** — tudo contra simulado, **sem provedor de IA
@@ -238,7 +239,7 @@ execute as instruções manualmente. O resultado é idêntico.
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
 | **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1, US2 e US5 completas; **US3 só no aplicativo**; US4 pendente |
-| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 T001-T044 feitas, mais o visual do protótipo e as ilustrações |
+| **002 — Design System** | ✅ | ✅ | ✅ | 🟡 **T001-T048 feitas** — só a fase 8 (validação com pessoas) fora |
 | **003 — Hub e a assistente** | ✅ | ✅ | ✅ | 🟡 **58 de 74 tarefas**; falta só a fatia do provedor de IA e a validação |
 
 ### O que já existe em código
@@ -913,8 +914,46 @@ aparelho encontra um e-mail preenchido e **nenhuma forma de entrar com ele**.
 aparelho compartilhado ou que será vendido. **Não é o padrão**, e mudar isso é
 uma linha só, num lugar só.
 
-Continua em aberto a **fase 7 da feature 002** (T045-T048): galeria de
-componentes e análise estática contra valores literais.
+A **fase 7 da feature 002 fechou em 2026-09-15** (T045-T048). Ver "A galeria
+e o portão dos tokens", logo abaixo.
+
+### A galeria e o portão dos tokens (T045-T048, 2026-09-15)
+
+`app/lib/design_system/galeria/galeria_memora.dart` monta **todo** componente
+em **todo** estado, com troca de tema e de ampliação por dentro. Ela vive na
+aba "Componentes" da casca de demonstração e **substituiu** a vitrine antiga
+(`demonstracao/tela_componentes.dart`, apagada): duas listas dos mesmos
+componentes é como elas começam a divergir.
+
+⚠️ **`GaleriaMemora.paraDesenvolvimento()` devolve `null` fora do
+`kDebugMode`**, e isso é a R9. Quem chama trata o `null` — o resultado é que,
+num build de release, **não existe botão** que leve à galeria, em vez de
+existir um botão que leva a uma recusa. Há teste prendendo esse contrato: se
+alguém trocar o retorno por `Widget` não-anulável, ele para de compilar.
+
+⚠️ **Montar a galeria é teste de fumaça do sistema inteiro.**
+`test/design_system/galeria_test.dart` a monta na matriz de aparelhos × escalas
+× três temas. Componente que estoure em qualquer combinação estoura ali, sem
+ninguém escrever caso para ele — e foi assim que a **própria galeria** apareceu
+estourando 18 px em 200%, antes de existir por cinco minutos.
+
+**O portão da FR-032 é `specs/002-design-system/ferramentas/validar_tokens.py`**,
+com job próprio no CI. Ele varre `app/lib/` atrás de cor, espaçamento, raio e
+tamanho literais. A pasta `tokens/` é a única isenta — é ali que valor literal
+deixa de ser literal e vira nome. `Colors.transparent` é o único permitido, e a
+razão está escrita ao lado dele: é a **ausência** de cor, e não pode divergir
+do sistema porque não tem valor que possa divergir.
+
+⚠️ **Ele achou a erosão já instalada**: sete tamanhos de ícone (18, 20, 22, 24,
+28, 56, 72), nenhum declarado, quatro deles para a mesma situação. Espaçamento
+estava limpo; de cor, só a sombra do `Cartao`. Os tokens novos estão em
+`MemoraDimensoes` (ícone em 4 degraus, borda em 3, indicador, largura de
+leitura) e `MemoraElevacao.sombra`.
+
+⚠️ **Quatro pontos mudaram de tamanho**, todos para maior, todos por 2 dp: três
+`22→24` (botão, erro de campo, regras de senha) e um `18→20` (catálogo). Era
+isso ou inventar um degrau de 22 e um de 18 só para preservar o que ninguém
+tinha decidido.
 
 ---
 
@@ -1120,7 +1159,11 @@ cd app; flutter analyze; flutter test
 py specs/002-design-system/ferramentas/validar_paleta.py
 ```
 
-Os três precisam passar. O CI (`.github/workflows/verificacao.yml`) roda os mesmos.
+```powershell
+py specs/002-design-system/ferramentas/validar_tokens.py
+```
+
+Os quatro precisam passar. O CI (`.github/workflows/verificacao.yml`) roda os mesmos.
 
 ⚠️ **Na máquina do Henrique é `py`, não `python`.** Existe Python 3.14 em
 `AppData\Local\Programs\Python\Python314`, mas quem está no PATH é o **alias da
@@ -1417,7 +1460,8 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | **#27** | **T070 — testes de acessibilidade do Hub e da assistente** | ✅ na `master` (2026-09-15), revisada e aprovada |
 | **#28** | Correção da revisão da #27 — teto proporcional e o portão da FR-027 | ✅ na `master` |
 | **#29** | Plano de pentest e o `.gitattributes` | ✅ na `master` |
-| **#30** | Auditoria da ampliação — o `Flexible` do "Mostrar senha" | 🟢 **Aberta**, base `master` |
+| **#30** | Auditoria da ampliação — o `Flexible` do "Mostrar senha" | ✅ na `master` |
+| **#31** | Fase 7 da 002 — galeria, portão dos tokens e guia de uso | 🟢 **Aberta**, base `master` |
 
 ⚠️ **A #27 ficou 5 dias aberta com CI verde e sem revisão nenhuma.** Não é
 detalhe de processo: a revisão dela achou que o conserto do T070 só valia no

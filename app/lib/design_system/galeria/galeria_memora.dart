@@ -1,0 +1,528 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/material.dart';
+
+import '../design_system.dart';
+
+/// A galeria do Design System — T045, FR-033 e R9.
+///
+/// ## Para que ela serve
+///
+/// Documentação viva: todo componente, em todos os estados, nos três temas e
+/// em toda a faixa de ampliação de texto. É o lugar onde se descobre que um
+/// estado ficou feio **antes** de ele chegar numa tela real, e é o checklist
+/// visual da revisão — "este componente existe? em que estados?" tem resposta
+/// em um lugar só.
+///
+/// ## Por que não é Storybook
+///
+/// A R9 recusou: uma dependência a mais e um segundo ambiente de execução. A
+/// galeria roda no mesmo motor do aplicativo de verdade, então o que se vê
+/// aqui é o que a pessoa vê. Um catálogo que renderiza diferente do produto é
+/// pior que catálogo nenhum, porque ele mente com autoridade.
+///
+/// ## Só em build de desenvolvimento
+///
+/// [paraDesenvolvimento] devolve `null` fora do modo de depuração. Quem
+/// oferece o caminho até aqui precisa lidar com esse `null` — e o resultado
+/// é que, num build de release, **não existe botão** que leve à galeria, em
+/// vez de existir um botão que leva a uma recusa.
+class GaleriaMemora extends StatefulWidget {
+  /// Cria a galeria.
+  const GaleriaMemora({super.key});
+
+  /// A galeria, ou `null` num build que não é de desenvolvimento.
+  static Widget? paraDesenvolvimento() =>
+      kDebugMode ? const GaleriaMemora() : null;
+
+  @override
+  State<GaleriaMemora> createState() => _GaleriaMemoraState();
+}
+
+class _GaleriaMemoraState extends State<GaleriaMemora> {
+  MemoraTemaId _tema = MemoraTemaId.claro;
+  double _escala = MemoraDimensoes.escalaTextoMin;
+
+  final TextEditingController _texto = TextEditingController(text: 'Ana Maria');
+  final TextEditingController _senha = TextEditingController();
+  final TextEditingController _codigo = TextEditingController();
+
+  bool _opcaoMarcada = true;
+  int _abaAtiva = 0;
+  String _ultimoToque = 'nenhum';
+
+  @override
+  void dispose() {
+    _texto.dispose();
+    _senha.dispose();
+    _codigo.dispose();
+    super.dispose();
+  }
+
+  void _tocou(String o) => setState(() => _ultimoToque = o);
+
+  @override
+  Widget build(BuildContext context) {
+    // A galeria troca o tema **só para dentro dela**. Trocar a preferência
+    // real do aplicativo faria o visitante sair daqui com a aparência mudada
+    // sem ter pedido — e a `TelaAparencia`, que é a forma legítima de mudar,
+    // está listada aqui embaixo como mais um componente.
+    final ThemeData tema = TemasMemora.porId(_tema);
+
+    return Theme(
+      data: tema,
+      child: Builder(
+        builder: (BuildContext context) {
+          final MemoraCores cores = context.memora.cores;
+
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(_escala),
+            ),
+            child: Scaffold(
+              backgroundColor: cores.fundo,
+              body: SafeArea(
+                child: Column(
+                  children: <Widget>[
+                    // `Flexible` com `Expanded` embaixo, e nao um filho fixo:
+                    // a faixa de controles cresce com a ampliacao, e em 200%
+                    // ela estourava a tela por 18 px. Medida absoluta nao sabe
+                    // quanto de tela existe — a mesma licao que a revisao da
+                    // PR #27 deixou, agora dentro da propria galeria.
+                    //
+                    // Com flex 1 contra 2, os controles ficam em no maximo um
+                    // terco da altura e rolam por dentro depois disso.
+                    Flexible(
+                      child: SingleChildScrollView(
+                        child: _Controles(
+                          tema: _tema,
+                          escala: _escala,
+                          aoTrocarTema: (MemoraTemaId t) =>
+                              setState(() => _tema = t),
+                          aoTrocarEscala: (double e) =>
+                              setState(() => _escala = e),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: ListView(
+                        padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                        children: _secoes(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<Widget> _secoes(BuildContext context) {
+    return <Widget>[
+      const _Secao('Texto', 'Cinco estilos, e nada fora deles.'),
+      const TextoMemora.tituloTela('Título de tela'),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const TextoMemora.tituloSecao('Título de seção'),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const TextoMemora('Corpo — o texto comum, que a pessoa lê para entender '
+          'o que está acontecendo.'),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const TextoMemora('Corpo forte', estilo: EstiloTexto.corpoForte),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const TextoMemora.apoio('Apoio — explica, sem competir com o corpo.'),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const TextoComDestaque(
+        'Destaque dentro da frase: o código é *482913* e ele vence hoje.',
+      ),
+
+      const _Secao('Ação', 'Pílula e preenchimento. Informação nunca usa '
+          'nenhum dos dois — é assim que dá para saber, de longe, o que '
+          'responde ao toque.'),
+      BotaoPrimario(rotulo: 'Continuar', aoTocar: () => _tocou('primário')),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoPrimario(
+        rotulo: 'Continuar com ícone',
+        icone: Icons.arrow_forward,
+        aoTocar: () => _tocou('primário com ícone'),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const BotaoPrimario(rotulo: 'Enviando...', carregando: true),
+      const SizedBox(height: MemoraEspacamento.md),
+      const BotaoPrimario(rotulo: 'Desabilitado'),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(rotulo: 'Voltar', aoTocar: () => _tocou('secundário')),
+      const SizedBox(height: MemoraEspacamento.md),
+      const BotaoSecundario(rotulo: 'Secundário desabilitado'),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoTerciario(
+        rotulo: 'Agora não',
+        aoTocar: () => _tocou('terciário'),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoPerigo(
+        rotulo: 'Apagar minha conta',
+        icone: Icons.delete_outline,
+        aoTocar: () => _tocou('perigo'),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      _UltimoToque(valor: _ultimoToque),
+
+      const _Secao('Informação', 'Sem pílula, sem preenchimento e **sem '
+          'callback de toque**: a ausência de API é o que garante que um dado '
+          'não vire botão por engano.'),
+      ListaInformacao(
+        titulo: 'Seus dados',
+        campos: const <CampoInformacao>[
+          CampoInformacao(rotulo: 'Nome', valor: 'Ana Maria Ferreira'),
+          CampoInformacao(
+            rotulo: 'E-mail',
+            valor: 'ana.maria@email.com',
+            icone: Icons.mail_outline,
+          ),
+        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const DestaqueInformacao(
+        rotulo: 'Seu código',
+        valor: '482913',
+        icone: Icons.vpn_key_outlined,
+      ),
+
+      const _Secao('Campos', 'Normal, com erro, senha e código.'),
+      CampoTexto(
+        rotulo: 'Como posso te chamar?',
+        textoAjuda: 'É assim que eu vou falar com você',
+        controlador: _texto,
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const CampoTexto(
+        rotulo: 'Seu e-mail',
+        textoAjuda: 'Usamos para você entrar',
+        erro: 'Faltou o @ nesse endereço',
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const CampoTexto(
+        rotulo: 'Campo desabilitado',
+        textoAjuda: 'Não dá para digitar agora',
+        habilitado: false,
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      CampoSenha(
+        rotulo: 'Crie uma senha',
+        textoAjuda: 'Pelo menos 8 letras ou números',
+        controlador: _senha,
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const CampoSenha(
+        rotulo: 'Senha sem olhinho (FR-060)',
+        textoAjuda: 'No cadastro assistido não há como revelar',
+        permitirRevelar: false,
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      CampoCodigo(
+        rotulo: 'Digite o código que chegou',
+        textoAjuda: 'São 6 números',
+        controlador: _codigo,
+      ),
+
+      const _Secao('Seleção'),
+      OpcaoSelecionavel(
+        rotulo: 'Tem alguém te ajudando agora?',
+        descricao: 'Toque aqui se um filho ou neto estiver junto',
+        selecionada: _opcaoMarcada,
+        aoSelecionar: () => setState(() => _opcaoMarcada = !_opcaoMarcada),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      OpcaoSelecionavel(
+        rotulo: 'Sem descrição',
+        selecionada: !_opcaoMarcada,
+        aoSelecionar: () => setState(() => _opcaoMarcada = !_opcaoMarcada),
+      ),
+
+      const _Secao('Confirmação', 'A variante irreversível tem tom grave, e '
+          'reservá-lo ao que é de fato irreversível é o que faz esse tom '
+          'continuar significando alguma coisa.'),
+      ConfirmacaoMemora(
+        pergunta: 'Quer mesmo sair da sua conta?',
+        aviso: 'Você vai precisar da senha para voltar',
+        rotuloConfirmar: 'Sim, sair',
+        rotuloRecusar: 'Ficar',
+        aoConfirmar: () => _tocou('saiu'),
+        aoRecusar: () => _tocou('ficou'),
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      ConfirmacaoMemora.irreversivel(
+        pergunta: 'Apagar sua conta para sempre?',
+        aviso: 'Isso não tem como ser desfeito',
+        rotuloConfirmar: 'Apagar tudo',
+        rotuloRecusar: 'Não apagar',
+        aoConfirmar: () => _tocou('apagou'),
+        aoRecusar: () => _tocou('desistiu'),
+      ),
+
+      const _Secao('Retorno ao usuário'),
+      const Carregando(mensagem: 'Estou pensando...'),
+      const SizedBox(height: MemoraEspacamento.lg),
+      MensagemErro(
+        mensagem: 'Não consegui falar com a internet agora.',
+        aoTentarNovamente: () => _tocou('tentou de novo'),
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const MensagemErro(mensagem: 'Erro sem botão de tentar de novo.'),
+      const SizedBox(height: MemoraEspacamento.lg),
+      EstadoVazio(
+        titulo: 'Nenhuma conversa ainda',
+        explicacao: 'Quando você me perguntar alguma coisa, ela aparece aqui.',
+        icone: Icons.chat_bubble_outline,
+        rotuloAcao: 'Conversar com a Memora',
+        aoAgir: () => _tocou('foi conversar'),
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const EstadoVazio(
+        titulo: 'Estado vazio sem ação',
+        explicacao: 'Nem todo vazio tem para onde mandar a pessoa.',
+        icone: Icons.folder_open_outlined,
+      ),
+
+      const _Secao('Cartões e ilustração'),
+      const Cartao(child: TextoMemora('Um cartão comum.')),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const CartaoComAvatar(
+        child: TextoMemora('Um cartão com a Memora ao lado, que é como ela '
+            'aparece quando está falando com você.'),
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const Row(
+        children: <Widget>[
+          AvatarMemora(tamanho: MemoraDimensoes.iconeEstadoVazio),
+          SizedBox(width: MemoraEspacamento.lg),
+          IlustracaoMemora(
+            Ilustracao.pessoaComCelular,
+            altura: MemoraDimensoes.iconeCelebracao,
+            descricao: 'Pessoa segurando um celular',
+          ),
+        ],
+      ),
+
+      const _Secao('Sobreposições', 'Diálogo e folha inferior abrem por cima '
+          'do conteúdo — toque para ver.'),
+      BotaoSecundario(
+        rotulo: 'Abrir diálogo',
+        aoTocar: () => DialogoMemora.mostrar(
+          context,
+          dialogo: DialogoMemora(
+            titulo: 'Tudo certo!',
+            mensagem: 'Sua senha nova já está valendo.',
+            rotuloConfirmar: 'Entendi',
+            aoConfirmar: () => Navigator.of(context).pop(),
+          ),
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir folha inferior',
+        aoTocar: () => FolhaInferior.mostrar(
+          context,
+          folha: const FolhaInferior(
+            titulo: 'Como eu te ajudo',
+            child: TextoMemora('Eu mostro o caminho. Quem faz é você — assim, '
+                'da próxima vez, você consegue sozinha.'),
+          ),
+        ),
+      ),
+
+      const _Secao('Navegação'),
+      const BarraSuperior(titulo: 'Barra sem voltar'),
+      const SizedBox(height: MemoraEspacamento.md),
+      BarraSuperior(titulo: 'Barra com voltar', aoVoltar: () => _tocou('voltou')),
+      const SizedBox(height: MemoraEspacamento.lg),
+      NavegacaoInferior(
+        itens: const <ItemNavegacao>[
+          ItemNavegacao(icone: Icons.home_outlined, rotulo: 'Início'),
+          ItemNavegacao(icone: Icons.chat_bubble_outline, rotulo: 'Conversar'),
+          ItemNavegacao(icone: Icons.person_outline, rotulo: 'Meu perfil'),
+        ],
+        indiceAtivo: _abaAtiva,
+        aoSelecionar: (int i) => setState(() => _abaAtiva = i),
+      ),
+
+      const SizedBox(height: MemoraEspacamento.xxl),
+    ];
+  }
+}
+
+/// A faixa que troca tema e ampliação sem sair da galeria.
+class _Controles extends StatelessWidget {
+  final MemoraTemaId tema;
+  final double escala;
+  final ValueChanged<MemoraTemaId> aoTrocarTema;
+  final ValueChanged<double> aoTrocarEscala;
+
+  const _Controles({
+    required this.tema,
+    required this.escala,
+    required this.aoTrocarTema,
+    required this.aoTrocarEscala,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraCores cores = context.memora.cores;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(MemoraEspacamento.lg),
+      decoration: BoxDecoration(
+        color: cores.superficie,
+        border: Border(
+          bottom: BorderSide(
+            color: cores.borda,
+            width: MemoraDimensoes.bordaEnfase,
+          ),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const TextoMemora.tituloSecao('Galeria do Design System'),
+          const SizedBox(height: MemoraEspacamento.md),
+          // `Wrap`, e não `Row`: são seis controles com rótulo escrito, e em
+          // 200% eles não cabem lado a lado. `Row` estouraria a largura — que
+          // é exatamente o defeito que a auditoria da ampliação encontrou.
+          Wrap(
+            spacing: MemoraEspacamento.sm,
+            runSpacing: MemoraEspacamento.sm,
+            children: <Widget>[
+              for (final MemoraTemaId t in MemoraTemaId.values)
+                _Pastilha(
+                  rotulo: switch (t) {
+                    MemoraTemaId.claro => 'Claro',
+                    MemoraTemaId.escuro => 'Escuro',
+                    MemoraTemaId.altoContraste => 'Alto contraste',
+                  },
+                  ativa: t == tema,
+                  aoTocar: () => aoTrocarTema(t),
+                ),
+            ],
+          ),
+          const SizedBox(height: MemoraEspacamento.sm),
+          Wrap(
+            spacing: MemoraEspacamento.sm,
+            runSpacing: MemoraEspacamento.sm,
+            children: <Widget>[
+              for (final double e in <double>[1.0, 1.5, 2.0])
+                _Pastilha(
+                  rotulo: '${(e * 100).toInt()}%',
+                  ativa: e == escala,
+                  aoTocar: () => aoTrocarEscala(e),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Um seletor da faixa de controles.
+///
+/// Não usa `BotaoSecundario` de propósito: a galeria precisa mostrar o estado
+/// "escolhido", e o Design System não tem botão com estado selecionado — se
+/// tivesse, ele estaria listado aqui em vez disto.
+class _Pastilha extends StatelessWidget {
+  final String rotulo;
+  final bool ativa;
+  final VoidCallback aoTocar;
+
+  const _Pastilha({
+    required this.rotulo,
+    required this.ativa,
+    required this.aoTocar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraCores cores = context.memora.cores;
+
+    return Semantics(
+      button: true,
+      selected: ativa,
+      label: rotulo,
+      onTap: aoTocar,
+      child: ExcludeSemantics(
+        child: Material(
+          color: ativa ? cores.primaria : cores.superficieAlt,
+          borderRadius: BorderRadius.circular(MemoraRaio.pilula),
+          child: InkWell(
+            onTap: aoTocar,
+            borderRadius: BorderRadius.circular(MemoraRaio.pilula),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: MemoraDimensoes.alvoMinimo,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MemoraEspacamento.lg,
+                  vertical: MemoraEspacamento.sm,
+                ),
+                child: Center(
+                  child: TextoMemora(
+                    rotulo,
+                    estilo: EstiloTexto.corpoForte,
+                    cor: ativa ? cores.sobrePrimaria : cores.texto,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Cabeçalho de seção da galeria.
+class _Secao extends StatelessWidget {
+  final String titulo;
+  final String? explicacao;
+
+  const _Secao(this.titulo, [this.explicacao]);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: MemoraEspacamento.xxl,
+        bottom: MemoraEspacamento.md,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextoMemora.tituloSecao(titulo),
+          if (explicacao != null) ...<Widget>[
+            const SizedBox(height: MemoraEspacamento.xs),
+            TextoMemora.apoio(explicacao!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Mostra qual foi o último componente tocado.
+///
+/// Serve para provar que o que parece clicável **é** clicável, e que o que
+/// parece informação não responde a toque nenhum.
+class _UltimoToque extends StatelessWidget {
+  final String valor;
+
+  const _UltimoToque({required this.valor});
+
+  @override
+  Widget build(BuildContext context) {
+    return CampoInformacao(rotulo: 'Último toque', valor: valor);
+  }
+}

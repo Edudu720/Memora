@@ -45,12 +45,13 @@ PERMITIDOS = {
 
 REGRAS = [
     ("cor", re.compile(r"Color\(0x[0-9a-fA-F]+\)|Colors\.[a-zA-Z]+")),
-    ("espacamento", re.compile(r"EdgeInsets\.[a-zA-Z]+\(\s*-?\d")),
-    ("raio", re.compile(r"BorderRadius\.circular\(\s*-?\d")),
+    ("espacamento",
+     re.compile(r"EdgeInsets\.[a-zA-Z]+\(\s*-?\d+(?:\.\d+)?")),
+    ("raio", re.compile(r"BorderRadius\.circular\(\s*-?\d+(?:\.\d+)?")),
     ("tamanho", re.compile(
         r"\b(size|width|height|fontSize|strokeWidth|maxHeight|maxWidth"
         r"|minHeight|minWidth|elevation|blurRadius|letterSpacing)"
-        r":\s*-?\d")),
+        r":\s*-?\d+(?:\.\d+)?")),
 ]
 
 

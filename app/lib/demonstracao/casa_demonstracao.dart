@@ -5,7 +5,6 @@ import '../features/assistente/data/abridor_de_aplicativo.dart';
 import '../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../features/autenticacao/presentation/fluxo_autenticacao.dart';
 import '../services/ambiente/composicao.dart';
-import 'tela_componentes.dart';
 
 /// Casca provisória para testar o Design System e os fluxos no aparelho.
 ///
@@ -51,7 +50,10 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
             assistente: widget.composicao.assistente,
             abridor: const AbridorDeAplicativoAndroid(),
           ),
-          const TelaComponentes(),
+          // A galeria E a vitrine: ter duas listas dos mesmos componentes e
+          // como elas comecam a divergir. Fora do modo de depuracao ela nao
+          // existe (R9), e a aba mostra por que — em vez de abrir vazia.
+          GaleriaMemora.paraDesenvolvimento() ?? const _GaleriaForaDeDebug(),
           const TelaAparencia(),
         ],
       ),
@@ -59,6 +61,33 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
         itens: _destinos,
         indiceAtivo: _indice,
         aoSelecionar: (int i) => setState(() => _indice = i),
+      ),
+    );
+  }
+}
+
+/// O que aparece na aba da galeria num build que nao e de desenvolvimento.
+///
+/// A R9 quer a galeria so em desenvolvimento. Esconder a aba inteira mudaria
+/// a contagem de destinos e o indice de todas as outras; dizer o porque custa
+/// menos e nao mente.
+class _GaleriaForaDeDebug extends StatelessWidget {
+  const _GaleriaForaDeDebug();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(MemoraEspacamento.xl),
+          child: EstadoVazio(
+            titulo: 'A galeria so existe em desenvolvimento',
+            explicacao:
+                'Ela e ferramenta de quem constroi o Memora, nao de quem usa. '
+                'Rode em modo de depuracao para abri-la.',
+            icone: Icons.construction_outlined,
+          ),
+        ),
       ),
     );
   }
