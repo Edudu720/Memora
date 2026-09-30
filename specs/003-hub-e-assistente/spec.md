@@ -43,6 +43,18 @@ um aplicativo que a pessoa não sabe usar, operado por alguém que ela não vê.
 
 ---
 
+## Clarifications
+
+### Session 2026-09-30
+
+- Q: O que o provedor de IA pode guardar da conversa que recebe a cada turno? → A: Proibido treinar com ela; retenção só para monitoramento de abuso, por no máximo 30 dias, documentada em contrato ou termos do provedor (FR-051).
+- Q: Quanto tempo a espera pela resposta pode durar (SC-007)? → A: As primeiras palavras aparecem em até 5 s; sem resposta em 30 s, a espera é encerrada, a Memora explica que o problema é a conexão e oferece tentar de novo (FR-052).
+- Q: Qual o limite diário de conversas por conta? → A: 20 por dia, ajustável na configuração do servidor sem nova versão do aplicativo, e revisto depois do teste com as 5 pessoas de 65+ (FR-053).
+- Q: Por quanto tempo a conversa fica guardada no aparelho? → A: Mensagens com mais de 30 dias são apagadas sozinhas, sem ação da pessoa (FR-054).
+- Q: Por quanto tempo o servidor guarda o registro de ações da assistente? → A: 12 meses para o registro; o resumo do pedido é apagado antes, aos 90 dias, e o fato de a ação ter acontecido permanece (FR-055).
+
+---
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Chegar ao Hub e saber o que fazer (Priority: P1)
@@ -200,7 +212,8 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   aplicativo e volta depois: precisa poder retomar ou recomeçar sem se sentir
   perdida.
 - **A internet cai durante a conversa.** A assistente precisa de conexão; a
-  pessoa precisa entender que o problema é a internet, e não ela.
+  pessoa precisa entender que o problema é a internet, e não ela. O mesmo vale
+  para a resposta que não chega: depois de 30 segundos, a espera acaba (FR-052).
 - **A assistente não sabe a resposta.** Dizer *"não sei"* com clareza é melhor do
   que inventar um caminho que não existe — um passo a passo errado faz a pessoa
   tocar em coisas que ela não pretendia.
@@ -244,6 +257,15 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   Ela MUST NOT inventar um caminho.
 - **FR-013**: A assistente MUST deixar claro que é um programa, sem repetir o
   aviso a ponto de atrapalhar a conversa.
+- **FR-052**: Se a resposta não começar a aparecer em **30 segundos**, a espera
+  MUST ser encerrada: a Memora MUST dizer, em linguagem comum, que o problema é
+  a conexão e não a pessoa, e MUST oferecer tentar de novo sem que a pessoa
+  precise reescrever o pedido.
+- **FR-053**: Cada conta MUST ter um limite de **20 conversas por dia**. O
+  número MUST ser ajustável na configuração do servidor, sem nova versão do
+  aplicativo, e MUST ser revisto depois do teste com as 5 pessoas de 65+. Ao
+  atingir o limite, a Memora MUST avisar com gentileza, sem atribuir a causa à
+  pessoa, e dizer que a conversa volta a ser possível no dia seguinte.
 
 ### Requisitos Funcionais — A assistente executa
 
@@ -310,14 +332,24 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **FR-049**: A pessoa MUST conseguir retomar um passo a passo interrompido, ou
   recomeçá-lo, ao reabrir o aplicativo.
 - **FR-050**: A pessoa MUST conseguir apagar a conversa quando quiser.
+- **FR-054**: Mensagens guardadas há mais de **30 dias** MUST ser apagadas do
+  aparelho automaticamente, sem depender de ação da pessoa. Um passo a passo
+  interrompido nesse intervalo continua podendo ser retomado (FR-049).
 
 ### Requisitos Funcionais — Registro visível
 
 - **FR-023**: A pessoa MUST conseguir ver o que a assistente executou em seu
-  nome: o quê, quando e a partir de qual pedido.
+  nome: o quê e quando, e — nos primeiros 90 dias — a partir de qual pedido
+  (FR-055).
 - **FR-024**: O registro MUST estar em linguagem comum, legível por quem não é
   técnico.
 - **FR-025**: Orientação apenas ensinada MUST NOT aparecer como ação executada.
+- **FR-055**: O registro de ações MUST ser guardado por **12 meses** e então
+  expurgado — o mesmo prazo da trilha de autenticação da feature 001. O resumo
+  do pedido que originou a ação MUST ser apagado antes, aos **90 dias**; o fato
+  de a ação ter acontecido, e quando, permanece até o fim dos 12 meses. Depois
+  dos 90 dias, o registro visível mostra a ação sem o pedido, e diz isso em
+  linguagem comum em vez de deixar um espaço vazio.
 
 ### Requisitos de Acessibilidade *(obrigatórios — Princípio III)*
 
@@ -348,6 +380,12 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   nem sobre a conta da pessoa (Princípio VI).
 - **FR-036**: O registro de ações MUST NOT conter senha, código, token nem
   conteúdo de mensagem privada.
+- **FR-051**: O serviço externo que gera as respostas da assistente MUST NOT
+  usar o conteúdo das conversas para treinar modelos. Ele MAY retê-lo apenas
+  para monitoramento de abuso, por **no máximo 30 dias**, e essas duas
+  garantias MUST estar documentadas no contrato ou nos termos publicados do
+  serviço **antes** de ele receber a primeira conversa real. Sem isso, a FR-047
+  seria cumprida no nosso servidor e desfeita no dele.
 
 ### Requisitos Contra Engenharia Social *(obrigatórios — Princípio II)*
 
@@ -377,7 +415,9 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **Ação executável**: abrir um aplicativo cotidiano. É a única, e pertence a
   uma lista fechada definida fora do modelo de conversa.
 - **Registro de ação**: o que a assistente executou, quando, a partir de qual
-  pedido e com qual confirmação. Não se altera depois de escrito.
+  pedido e com qual confirmação. Não se altera depois de escrito, com uma
+  única exceção: o resumo do pedido é apagado aos 90 dias (FR-055). O registro
+  inteiro é expurgado aos 12 meses.
 
 ---
 
@@ -397,9 +437,10 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **SC-005**: Em 100% das execuções, a pessoa vê a declaração do que será feito
   **antes** de confirmar.
 - **SC-006**: Nenhuma ação executada deixa de aparecer no registro visível.
-- **SC-007**: A assistente responde ao primeiro pedido em tempo que não leve a
-  pessoa a achar que o aplicativo travou; havendo demora, o estado de espera é
-  perceptível.
+- **SC-007**: Em ao menos 95% das respostas, as primeiras palavras da
+  assistente aparecem em até **5 segundos** depois do envio; enquanto não
+  aparecem, o estado de espera é perceptível (FR-029). Nenhuma espera passa de
+  **30 segundos** sem que a pessoa receba a explicação da FR-052.
 - **SC-008**: Todas as telas desta feature passam nas verificações automatizadas
   de contraste, alvo de toque e ampliação a 200%.
 - **SC-009**: Em 100% das tentativas, incluindo pedido explícito e insistência
@@ -458,14 +499,18 @@ conversa — o vínculo que a FR-064 daquela feature nega continua negado aqui.
 | Pedido de senha ou código pela conversa | Tomada de conta | FR-032 e FR-033: a assistente nunca pede, e o aviso é permanente |
 | Ação irreversível executada por engano | Perda de dados ou de dinheiro | FR-037: irreversível não entra na lista, nem com confirmação |
 | Vazamento do conteúdo da conversa | Exposição da intimidade da pessoa | Classificação Confidencial; FR-036 mantém segredo fora do registro |
+| Aparelho perdido, emprestado ou vendido com a pessoa ainda conectada | Meses de conversa expostos a quem pegar o celular | FR-054: nada com mais de 30 dias fica no aparelho |
 | A pessoa acredita falar com um humano | Confiança indevida em orientação errada | FR-013 e FR-039 |
 | A Memora abre o aplicativo do banco e treina o gesto de deixar outro entrar | Tomada de conta bancária por terceiro | FR-041: recusa estrutural, mesmo com pedido e confirmação |
 | Conversa guardada no servidor vira acervo sobre pessoa idosa | Perfil detalhado de alvo preferencial de golpe | FR-047: conteúdo só no aparelho |
+| Conta comprometida dispara conversas sem parar | Custo em reais e assistente fora do ar para todas as pessoas | FR-053: limite diário por conta |
+| O serviço externo que gera as respostas guarda ou treina com as conversas | O mesmo acervo, fora do nosso controle e sem aparecer no nosso código | FR-051: treino proibido; retenção de no máximo 30 dias, só para abuso, documentada antes da primeira conversa real |
 
 ### Monitoramento e registro
 
-Toda ação executada gera registro auditável (FR-020), sem segredo (FR-036), e
-visível para a própria pessoa (FR-023).
+Toda ação executada gera registro auditável (FR-020), sem segredo (FR-036),
+visível para a própria pessoa (FR-023), e guardado por 12 meses — com o resumo
+do pedido, que é Confidencial, apagado aos 90 (FR-055).
 
 ---
 

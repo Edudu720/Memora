@@ -278,3 +278,33 @@ contrato OpenAPI é a fonte da verdade e o cliente é gerado a partir dele.
 - **T071 não é opcional.** É o único item que nenhum teste automatizado
   substitui, e o passo em que a pessoa repete a tarefa **sozinha** é a feature
   inteira medida em número.
+
+---
+
+## Phase 10: Convergence
+
+> Gerada por `/speckit-converge` em 2026-09-30, depois da clarificação que
+> acrescentou as FR-051 a FR-055. Cada tarefa aponta a origem e o tipo de lacuna.
+> **As tarefas não saem da ordem de gravidade**: as HIGH vêm primeiro.
+
+- [ ] T075 Fazer o `LimitePorConta` contar **conversas**, não turnos: hoje `ServicoDeConversa.conversar` registra um uso a cada mensagem, e o teto de 20 vira 20 mensagens por dia. Definir o que inicia uma conversa (primeiro turno sem histórico, ou depois de um intervalo) e ajustar o H10 em `LimiteDeConversasTest.java` per FR-053 (contradicts)
+- [ ] T076 Reescrever a regra de serviço sensível em `infra/PersonaDaMemora.java`: hoje ela diz "nunca abre **nem ensina a acessar**" e "você só ENSINA" na mesma frase. Deve dizer sem ambiguidade que ensina o caminho e nunca abre, e ensinar é exatamente o que a US5 pede per US5/AC1, FR-042 (contradicts)
+- [ ] T077 Fazer cada item do catálogo levar à conversa já com o pedido de ensinar aquele serviço, preenchendo `aoEscolher` em `fluxo_autenticacao.dart`; trocar o estado vazio "Em breve…" de `tela_catalogo.dart`, que o H1 proíbe. Hoje todo item é um botão desabilitado — a porta que não abre da FR-003 per FR-003, FR-042, FR-043, FR-044 (contradicts)
+- [ ] T078 Encerrar a espera em 30 s no `ControladorConversa` do aplicativo, com texto que diz que o problema é a conexão; fazer `tentarNovamente()` **reenviar** `_ultimoPedido` em vez de só limpar o estado; corrigir `TextosAssistente.semConexao`, que promete "o que você escreveu continua aqui" com o rascunho já apagado; alinhar o `TIMEOUT_MS` de 120 s do servidor. Com teste de widget per FR-052, SC-007 (missing)
+- [ ] T079 Filtrar senha, código e sequência longa de dígitos do `pedido_resumido` **no servidor**, antes de gravar em `evento_da_assistente`, e estender o H9 para reprovar se "meu código é 123456" chegar ao registro per FR-036 (partial)
+- [ ] T080 Implementar a retenção da trilha: expurgo aos 12 meses e resumo do pedido apagado aos 90 dias. **Exige decisão de plano antes**, porque `tg_evento_assistente_somente_insercao` recusa todo `UPDATE`: mover o resumo para tabela própria, que aceite `DELETE` (recomendado — o gatilho continua sem exceção), ou abrir exceção para anular só aquela coluna. Registrar a escolha no `data-model.md` e testar em `PortoesDoEsquemaDaAssistenteTest` per FR-055 (missing)
+- [ ] T081 Fazer `TelaRegistro` dizer, em linguagem comum, que o pedido de uma ação com mais de 90 dias já foi apagado, em vez de exibir só "Abri o X para você" per FR-055, FR-024 (missing)
+- [ ] T082 Apagar do aparelho as mensagens com mais de 30 dias em `data/conversa_local.dart`, usando o `momento` que a mensagem já guarda, com teste de unidade per FR-054 (missing)
+- [ ] T083 Impedir de forma determinística que a oferta de executar volte depois de recusada na mesma conversa — marca no `ControladorConversa` e a recusa entrando no histórico enviado ao servidor —, e testar que um segundo "não consegui" não produz oferta per FR-016, US3/AC2 (partial)
+- [ ] T084 Fazer a Memora dizer que é um programa, uma vez por conversa e sem repetir: instrução na `PersonaDaMemora` e texto no convite inicial da `TelaConversa` per FR-013 (missing)
+- [ ] T085 Acrescentar à `TelaConversa` um controle visível para apagar a conversa e recomeçar, ligado a `apagarConversa()`, com confirmação — hoje o método só é chamado por teste per FR-050, FR-049 (missing)
+- [ ] T086 Exigir na ADR-002 (T062) a evidência da FR-051 — link para o contrato ou os termos do provedor que proíbem treino e limitam a retenção a 30 dias — e fazer da ausência dela um bloqueio para a primeira conversa real per FR-051 (missing)
+- [ ] T087 Acrescentar à `PersonaDaMemora` a recusa explicada de pedido financeiro ou irreversível ("transfere R$ 500 para o Carlos"), sem contorno; criar o roteiro no simulado e um teste per FR-018, FR-031, FR-037, US3/AC4 (partial)
+- [ ] T088 Decidir se `ACAO_RECUSADA` pode guardar o texto cru do chat em `pedido_resumido`: hoje guarda (`ServicoDeConversa.java:125`), o que põe no servidor conteúdo de conversa — inclusive texto de golpe colado — fora do caso que a FR-023 justifica. Justificar na spec ou deixar de gravar, e ajustar `ConversaNaoPersisteTest` per FR-047 (contradicts)
+- [ ] T089 Verificar se o aplicativo está instalado **antes** de marcá-lo como "ensina e abre" no catálogo e antes de oferecer abri-lo; hoje isso só é descoberto depois da confirmação per FR-046 (partial)
+- [ ] T090 Dar saída, na persona e no simulado, para "não achei o botão" quando a tela do outro aplicativo mudou, sem culpar a pessoa e sem cair direto na oferta de abrir per spec Edge Cases (missing)
+- [ ] T091 Testar o Hub **real** — as portas de `_portasConstruidas()` — cabendo sem rolagem no texto padrão, e fazer o H1 reprovar com a quebra "Planos" que o quickstart descreve; hoje ele usa portas sintéticas e não pegaria a quebra per FR-004, FR-003 (partial)
+- [ ] T092 Calcular o dia do `LimitePorConta` no fuso de São Paulo: com `Clock.systemUTC()` o dia vira às 21h, e quem ouve "vamos continuar amanhã" às 20h é liberado uma hora depois per FR-053 (partial)
+- [ ] T093 Verificar com o modelo real, na T069, que a recusa a serviço sensível é **idêntica** sob insistência — o H4 de hoje só prova o simulado, que devolve texto fixo per FR-038 (partial)
+- [ ] T094 [P] Testar que o "Voltar" está na mesma posição nas telas de conversa, catálogo, registro e aparência, e acrescentar verificação de contraste por tela em `app/test/acessibilidade/` per FR-005, SC-008 (partial)
+- [ ] T095 [P] Registrar duas decisões que o código tomou sem a spec: a porta "Ajuda" da US1/AC1 não existe (e `portaAjuda`, `descricaoAjuda` e `vocePodeFazerSozinha` estão sem uso), e o H10 responde por evento SSE com `200` em vez de `429` com espera — corrigir quickstart ou código per US1/AC1, quickstart H10 (unrequested)
