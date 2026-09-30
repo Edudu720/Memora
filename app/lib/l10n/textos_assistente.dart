@@ -156,10 +156,19 @@ class TextosAssistente {
   // Falhas
   // ---------------------------------------------------------------------------
 
-  /// Sem conexão.
+  /// Sem conexão, nas telas em que a pessoa não escreveu nada.
   static const String semConexao =
-      'Não consegui falar com a internet agora. O que você escreveu continua '
-      'aqui, é só tentar de novo.';
+      'Não consegui falar com a internet agora. Vamos tentar de novo?';
+
+  /// A resposta não veio — sem internet, ou 30 s sem nenhuma palavra (FR-052).
+  ///
+  /// Diz que o problema é a conexão **e não a pessoa**: quem já tem medo de ter
+  /// quebrado o aparelho conclui isso sozinho, se ninguém disser o contrário. E
+  /// "o que você escreveu continua aqui" é verdade — o controlador devolve a
+  /// pergunta ao campo, e o tentar de novo a reenvia.
+  static const String semRespostaDaConversa =
+      'A internet não me deixou responder agora — não foi nada que você fez. '
+      'O que você escreveu continua aqui, é só tentar de novo.';
 
   /// A cota diária acabou (R7).
   ///

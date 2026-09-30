@@ -62,7 +62,20 @@ class ControladorConversa extends ChangeNotifier {
   })  : _abridor = abridor,
         _rascunho = rascunhoInicial;
 
+  /// Quanto tempo esperar pela **primeira** palavra da resposta (FR-052).
+  ///
+  /// Conta até o primeiro trecho, e não até o fim: uma resposta longa que já
+  /// está aparecendo não é cortada no meio. Bem abaixo dos 120 s do servidor,
+  /// que é o teto da conexão inteira.
+  static const Duration esperaMaxima = Duration(seconds: 30);
+
   final List<MensagemDaConversa> _mensagens = <MensagemDaConversa>[];
+
+  /// Conta os envios. Uma resposta que chega com número velho — depois de a
+  /// espera acabar, ou de um tentar de novo — é descartada, senão a pessoa
+  /// recebe duas respostas para uma pergunta.
+  int _envio = 0;
+  Timer? _cronometro;
 
   EstadoConversa _estado = EstadoConversa.abrindo;
   FalhaDaAssistente? _falha;
@@ -105,7 +118,7 @@ class ControladorConversa extends ChangeNotifier {
   /// Texto do erro atual, na voz da Memora.
   String? get mensagemDeErro => switch (_falha) {
         null => null,
-        FalhaDaAssistente.semConexao => TextosAssistente.semConexao,
+        FalhaDaAssistente.semConexao => TextosAssistente.semRespostaDaConversa,
         FalhaDaAssistente.limiteDeConversas => TextosAssistente.limiteDeConversas,
         FalhaDaAssistente.sessaoExpirada => TextosAssistente.sessaoExpirada,
         FalhaDaAssistente.inesperada => TextosAssistente.inesperada,
@@ -138,25 +151,41 @@ class ControladorConversa extends ChangeNotifier {
     _trechoEmCurso = '';
     _estado = EstadoConversa.respondendo;
 
-    _mensagens.add(
-      MensagemDaConversa(
-        autor: AutorDaMensagem.pessoa,
-        texto: pergunta,
-        momento: DateTime.now(),
-      ),
+    final int esteEnvio = ++_envio;
+    final MensagemDaConversa fala = MensagemDaConversa(
+      autor: AutorDaMensagem.pessoa,
+      texto: pergunta,
+      momento: DateTime.now(),
     );
+    _mensagens.add(fala);
     notifyListeners();
+
+    _cronometro?.cancel();
+    _cronometro = Timer(esperaMaxima, () {
+      if (esteEnvio != _envio) return;
+      _envio++;
+      _trechoEmCurso = '';
+      _devolverPergunta(fala);
+      _falha = FalhaDaAssistente.semConexao;
+      _estado = EstadoConversa.comErro;
+      notifyListeners();
+    });
 
     final RespostaDaAssistente resposta = await _repositorio.conversar(
       mensagem: pergunta,
       // O histórico viaja porque o servidor não o guarda (FR-047).
       historico: List<MensagemDaConversa>.unmodifiable(_mensagens),
       aoReceberTrecho: (String trecho) {
+        if (esteEnvio != _envio) return;
+        // A primeira palavra chegou: a espera da FR-052 acabou bem.
+        _cronometro?.cancel();
         _trechoEmCurso += trecho;
         notifyListeners();
       },
     );
 
+    if (esteEnvio != _envio) return; // chegou depois do corte
+    _cronometro?.cancel();
     _trechoEmCurso = '';
 
     switch (resposta) {
@@ -174,10 +203,20 @@ class ControladorConversa extends ChangeNotifier {
         await _local.guardar(_mensagens);
 
       case AssistenteFalhou(:final FalhaDaAssistente falha):
+        _devolverPergunta(fala);
         _falha = falha;
         _estado = EstadoConversa.comErro;
     }
     notifyListeners();
+  }
+
+  /// Tira da conversa a fala que ficou sem resposta, e a devolve ao campo.
+  ///
+  /// É o que torna verdade o "o que você escreveu continua aqui" (FR-052), e o
+  /// que impede a pergunta de aparecer duas vezes quando for reenviada.
+  void _devolverPergunta(MensagemDaConversa fala) {
+    _mensagens.remove(fala);
+    _rascunho = fala.texto;
   }
 
   /// A pessoa recusou a oferta de abrir (FR-016).
@@ -243,11 +282,24 @@ class ControladorConversa extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Volta ao estado de espera depois de um erro.
+  /// Depois de um erro: sem internet, **reenvia** a pergunta (FR-052).
+  ///
+  /// A pessoa não precisa reescrever — ela já está no campo. Nas demais falhas
+  /// (o limite do dia, a sessão que caiu), reenviar não resolveria nada, e o
+  /// botão só devolve a tela à espera.
   void tentarNovamente() {
+    final bool reenviar =
+        _falha == FalhaDaAssistente.semConexao && _rascunho.trim().isNotEmpty;
     _falha = null;
     _estado = EstadoConversa.aguardando;
     notifyListeners();
+    if (reenviar) unawaited(enviar());
+  }
+
+  @override
+  void dispose() {
+    _cronometro?.cancel();
+    super.dispose();
   }
 
   /// Apaga a conversa (FR-050).
