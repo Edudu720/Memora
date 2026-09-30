@@ -50,6 +50,7 @@ um aplicativo que a pessoa não sabe usar, operado por alguém que ela não vê.
 - Q: O que o provedor de IA pode guardar da conversa que recebe a cada turno? → A: Proibido treinar com ela; retenção só para monitoramento de abuso, por no máximo 30 dias, documentada em contrato ou termos do provedor (FR-051).
 - Q: Quanto tempo a espera pela resposta pode durar (SC-007)? → A: As primeiras palavras aparecem em até 5 s; sem resposta em 30 s, a espera é encerrada, a Memora explica que o problema é a conexão e oferece tentar de novo (FR-052).
 - Q: Qual o limite diário de conversas por conta? → A: 20 por dia, ajustável na configuração do servidor sem nova versão do aplicativo, e revisto depois do teste com as 5 pessoas de 65+ (FR-053).
+- Q: O que conta como "uma conversa" para o limite diário? → A: Uma conversa nova começa depois de 30 minutos sem mensagem da pessoa, ou depois de 30 turnos na mesma conversa (FR-053).
 - Q: Por quanto tempo a conversa fica guardada no aparelho? → A: Mensagens com mais de 30 dias são apagadas sozinhas, sem ação da pessoa (FR-054).
 - Q: Por quanto tempo o servidor guarda o registro de ações da assistente? → A: 12 meses para o registro; o resumo do pedido é apagado antes, aos 90 dias, e o fato de a ação ter acontecido permanece (FR-055).
 
@@ -266,6 +267,11 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   aplicativo, e MUST ser revisto depois do teste com as 5 pessoas de 65+. Ao
   atingir o limite, a Memora MUST avisar com gentileza, sem atribuir a causa à
   pessoa, e dizer que a conversa volta a ser possível no dia seguinte.
+  **Uma conversa** é a sequência de turnos da pessoa sem pausa de 30 minutos
+  ou mais — o mesmo prazo da inatividade da feature 001 — e com no máximo 30
+  turnos; passado qualquer um dos dois, a mensagem seguinte abre uma conversa
+  nova. Uma conversa já em curso quando o limite é atingido MUST poder
+  continuar até terminar: a pessoa não é interrompida no meio de um passo.
 
 ### Requisitos Funcionais — A assistente executa
 

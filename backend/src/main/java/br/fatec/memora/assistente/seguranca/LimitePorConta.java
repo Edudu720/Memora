@@ -47,10 +47,11 @@ public class LimitePorConta {
     /**
      * Teto padrão de conversas por dia.
      *
-     * <p><b>Número provisório</b>: a pendência 3 do research pede que a equipe o
-     * defina, e ninguém tem uso real para medir ainda. Vinte é generoso o
-     * bastante para não incomodar quem usa o produto como ele foi pensado, e
-     * baixo o bastante para uma conta comprometida não esvaziar a cota.
+     * <p>Decidido na FR-053 (2026-09-30): vinte, ajustável por
+     * {@code memora.assistente.conversas-por-dia} sem nova versão do
+     * aplicativo, e revisto depois do teste com as 5 pessoas de 65+. O pior dia
+     * de uma conta comprometida é 20 × {@link UsoDaAssistente#TURNOS_POR_CONVERSA}
+     * turnos.
      */
     public static final int TETO_PADRAO = 20;
 
@@ -68,29 +69,34 @@ public class LimitePorConta {
         this.teto = teto;
     }
 
-    /** A conta já esgotou a cota de hoje? */
-    @Transactional(readOnly = true)
-    public boolean atingiuOTeto(UUID pessoaId) {
-        return usos.findByPessoaIdAndDia(pessoaId, hoje())
-                .map(uso -> uso.atingiu(teto))
-                .orElse(false);
-    }
-
     /**
-     * Conta mais uma conversa aberta hoje.
+     * Registra um turno e diz se ele pode seguir (FR-053).
+     *
+     * <p>Quem decide se o turno continua a conversa ou abre outra é
+     * {@link UsoDaAssistente#registrarTurno}; aqui só se carrega, grava e
+     * devolve.
+     *
+     * <p>⚠️ Não há trava de linha: dois turnos simultâneos da mesma conta leem o
+     * mesmo estado, e o teto pode ser passado por um. Já era assim antes da
+     * FR-053. Para uma pessoa digitando é inalcançável; para um robô, a
+     * diferença é de uma conversa — e fechar isso é trava pessimista na
+     * consulta, não mudança aqui.
      *
      * <p>Chame <b>antes</b> de falar com o provedor, e não depois: contar só o
      * que deu certo permitiria gastar a cota inteira em chamadas que falham no
      * fim, que é exatamente o que um atacante faria.
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void registrarConversa(UUID pessoaId) {
+    public UsoDaAssistente.Desfecho registrarTurno(UUID pessoaId) {
         LocalDate hoje = hoje();
         UsoDaAssistente uso =
                 usos.findByPessoaIdAndDia(pessoaId, hoje)
                         .orElseGet(() -> UsoDaAssistente.primeiroDoDia(pessoaId, hoje));
-        uso.registrarConversa();
-        usos.save(uso);
+        UsoDaAssistente.Desfecho desfecho = uso.registrarTurno(relogio.instant(), teto);
+        if (desfecho != UsoDaAssistente.Desfecho.TETO_ATINGIDO) {
+            usos.save(uso);
+        }
+        return desfecho;
     }
 
     /** Quantas conversas ainda cabem hoje. */

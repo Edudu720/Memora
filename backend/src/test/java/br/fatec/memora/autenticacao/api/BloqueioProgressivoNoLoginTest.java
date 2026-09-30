@@ -12,12 +12,9 @@ import br.fatec.memora.autenticacao.infra.RepositorioCanalContato;
 import br.fatec.memora.autenticacao.infra.RepositorioEventoAutenticacao;
 import br.fatec.memora.autenticacao.infra.RepositorioPessoaUsuaria;
 import br.fatec.memora.autenticacao.infra.RepositorioSessao;
+import br.fatec.memora.suporte.RelogioAjustavel;
 import br.fatec.memora.suporte.TesteComBanco;
-import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import org.junit.jupiter.api.AfterEach;
@@ -26,11 +23,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -57,7 +51,7 @@ import tools.jackson.databind.ObjectMapper;
  * é exatamente para isto que ele foi injetado.
  */
 @AutoConfigureMockMvc
-@Import(BloqueioProgressivoNoLoginTest.RelogioDeTeste.class)
+@Import(RelogioAjustavel.NoContexto.class)
 @DisplayName("V6 — bloqueio progressivo com texto acolhedor")
 class BloqueioProgressivoNoLoginTest extends TesteComBanco {
 
@@ -360,53 +354,5 @@ class BloqueioProgressivoNoLoginTest extends TesteComBanco {
 
     private JsonNode corpoDe(MvcResult resultado) throws Exception {
         return json.readTree(resultado.getResponse().getContentAsString());
-    }
-
-    /**
-     * Relógio que o teste move na mão, no lugar do {@code Clock} da aplicação.
-     *
-     * <p>Substituir o relógio inteiro, e não só adiantar o banco, é o que faz o
-     * teste exercitar o mesmo caminho da produção: quem compara
-     * {@code bloqueada_ate} com o agora é o {@code LimitadorTentativas}, e é o
-     * agora dele que precisa andar.
-     */
-    static final class RelogioAjustavel extends Clock {
-
-        private static final Instant INICIO = Instant.parse("2026-08-15T12:00:00Z");
-
-        private Instant momento = INICIO;
-
-        void reiniciar() {
-            momento = INICIO;
-        }
-
-        void avancar(Duration quanto) {
-            momento = momento.plus(quanto);
-        }
-
-        @Override
-        public ZoneId getZone() {
-            return ZoneOffset.UTC;
-        }
-
-        @Override
-        public Clock withZone(ZoneId zona) {
-            return this;
-        }
-
-        @Override
-        public Instant instant() {
-            return momento;
-        }
-    }
-
-    @TestConfiguration
-    static class RelogioDeTeste {
-
-        @Bean
-        @Primary
-        RelogioAjustavel relogioAjustavel() {
-            return new RelogioAjustavel();
-        }
     }
 }
