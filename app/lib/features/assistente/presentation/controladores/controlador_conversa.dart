@@ -50,15 +50,24 @@ class ControladorConversa extends ChangeNotifier {
   /// [abridor] é opcional: sem ele a Memora conversa e ensina, mas não abre
   /// nada. É o mesmo raciocínio da porta do Hub — funcionalidade que não existe
   /// não deve ser oferecida.
-  ControladorConversa(this._repositorio, this._local, {AbridorDeAplicativo? abridor})
-      : _abridor = abridor;
+  ///
+  /// [rascunhoInicial] abre a conversa com uma pergunta já escrita — é como o
+  /// catálogo leva a pessoa até aqui (T077). Fica no campo, e **não** é
+  /// enviada: quem envia é a pessoa.
+  ControladorConversa(
+    this._repositorio,
+    this._local, {
+    AbridorDeAplicativo? abridor,
+    String rascunhoInicial = '',
+  })  : _abridor = abridor,
+        _rascunho = rascunhoInicial;
 
   final List<MensagemDaConversa> _mensagens = <MensagemDaConversa>[];
 
   EstadoConversa _estado = EstadoConversa.abrindo;
   FalhaDaAssistente? _falha;
   AcaoAutorizada? _acaoOferecida;
-  String _rascunho = '';
+  String _rascunho;
   String _trechoEmCurso = '';
   String _ultimoPedido = '';
 

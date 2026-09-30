@@ -133,6 +133,25 @@ class TextosAssistente {
       'governo, alguém poderia ligar dizendo ser do suporte e pedir a mesma '
       'coisa. Assim você fica mais segura 😊';
 
+  /// A pergunta que já vem escrita ao tocar num serviço do catálogo (T077).
+  ///
+  /// Pede para **ensinar**, e não para abrir, nas duas categorias: a Memora
+  /// ensina antes de oferecer qualquer coisa (FR-014). Sem artigo antes do
+  /// nome, para não errar o gênero de um serviço que ainda vai entrar.
+  static String perguntaSobre(String servico) =>
+      'Você me ensina a usar $servico?';
+
+  /// Título do catálogo sem itens.
+  static const String catalogoVazioTitulo = 'Ainda não tem nada aqui';
+
+  /// Explicação do catálogo sem itens.
+  ///
+  /// Não promete "em breve" (H1): promessa sem data, para quem já tem medo de
+  /// ter quebrado o aparelho, é o mesmo que porta que não abre. Aponta o que
+  /// funciona hoje.
+  static const String catalogoVazioExplicacao =
+      'Mas você pode me perguntar sobre qualquer aplicativo na conversa 😊';
+
   // ---------------------------------------------------------------------------
   // Falhas
   // ---------------------------------------------------------------------------

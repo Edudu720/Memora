@@ -56,7 +56,10 @@ class TelaConversa extends StatefulWidget {
 }
 
 class _TelaConversaState extends State<TelaConversa> {
-  final TextEditingController _campo = TextEditingController();
+  // Nasce com o rascunho: quem chega do catálogo já vê a pergunta, sem esperar
+  // a conversa guardada terminar de ser lida (T077).
+  late final TextEditingController _campo =
+      TextEditingController(text: widget.controlador.rascunho);
   final ScrollController _rolagem = ScrollController();
 
   @override

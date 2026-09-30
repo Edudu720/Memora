@@ -120,9 +120,8 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
               const Carregando()
             else if (servicos.isEmpty)
               const EstadoVazio(
-                titulo: 'Ainda não tem nada aqui',
-                explicacao: 'Em breve eu vou conhecer mais coisas para te '
-                    'mostrar 😊',
+                titulo: TextosAssistente.catalogoVazioTitulo,
+                explicacao: TextosAssistente.catalogoVazioExplicacao,
                 icone: Icons.apps_outlined,
               )
             else

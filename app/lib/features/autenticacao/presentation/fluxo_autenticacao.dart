@@ -70,6 +70,11 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
   final AbridorDeAplicativo? abridor;
 
+  /// Onde a conversa fica guardada no aparelho (FR-047).
+  ///
+  /// Trocável no teste de widget, onde I/O de arquivo real nunca completa.
+  final ConversaLocal Function() conversaLocal;
+
   /// Quanto tempo parado até a sessão cair (FR-017).
   final Duration inatividade;
 
@@ -81,6 +86,7 @@ class FluxoAutenticacao extends StatefulWidget {
     required this.repositorio,
     this.assistente,
     this.abridor,
+    this.conversaLocal = ConversaLocal.new,
     required this.ultimoAcesso,
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
@@ -304,18 +310,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           descricao: TextosAssistente.descricaoConversa,
           icone: Icons.chat_bubble_outline,
           principal: true,
-          aoAbrir: () => Navigator.of(context).push<void>(
-            MaterialPageRoute<void>(
-              builder: (BuildContext contexto) => TelaConversa(
-                controlador: ControladorConversa(
-                  assistente,
-                  ConversaLocal(),
-                  abridor: widget.abridor,
-                ),
-                aoVoltar: () => Navigator.of(contexto).pop(),
-              ),
-            ),
-          ),
+          aoAbrir: () => _abrirConversa(assistente),
         ),
 
       if (assistente != null)
@@ -385,6 +380,34 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
+          // Sem isto, todo item era um botão desabilitado: a porta que não
+          // abre da FR-003, nas duas portas de serviço do Hub (T077).
+          aoEscolher: (ServicoDoCatalogo servico) => _abrirConversa(
+            assistente,
+            rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre a conversa, opcionalmente com uma pergunta já escrita.
+  ///
+  /// A pergunta fica no campo e não é enviada: quem envia é a pessoa.
+  void _abrirConversa(
+    RepositorioAssistente assistente, {
+    String rascunho = '',
+  }) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext contexto) => TelaConversa(
+          controlador: ControladorConversa(
+            assistente,
+            widget.conversaLocal(),
+            abridor: widget.abridor,
+            rascunhoInicial: rascunho,
+          ),
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
       ),
