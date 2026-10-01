@@ -401,8 +401,11 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   }) {
     Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (BuildContext contexto) => TelaConversa(
-          controlador: ControladorConversa(
+        // Quem cria é dono: o controlador nasce e morre com a rota, e não
+        // sobra cronômetro nem resposta em voo depois de a pessoa sair da
+        // tela — ou da conta (FR-048).
+        builder: (BuildContext contexto) => _DonaDaConversa(
+          criar: () => ControladorConversa(
             assistente,
             widget.conversaLocal(),
             abridor: widget.abridor,
@@ -468,6 +471,38 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           ),
         ),
     };
+  }
+}
+
+/// Cria o [ControladorConversa] e o descarta quando a rota sai.
+///
+/// O `State` só é destruído depois da animação de saída, então a tela nunca
+/// reconstrói sobre um controlador já descartado.
+class _DonaDaConversa extends StatefulWidget {
+  final ControladorConversa Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonaDaConversa({required this.criar, required this.aoVoltar});
+
+  @override
+  State<_DonaDaConversa> createState() => _DonaDaConversaState();
+}
+
+class _DonaDaConversaState extends State<_DonaDaConversa> {
+  late final ControladorConversa _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaConversa(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
   }
 }
 

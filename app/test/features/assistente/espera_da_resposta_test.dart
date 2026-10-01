@@ -75,6 +75,16 @@ class _ConversaEmMemoria implements ConversaLocal {
   Future<void> apagar() async => _guardadas = <MensagemDaConversa>[];
 }
 
+class _ConversaQueConta extends _ConversaEmMemoria {
+  int gravacoes = 0;
+
+  @override
+  Future<void> guardar(List<MensagemDaConversa> mensagens) async {
+    gravacoes++;
+    await super.guardar(mensagens);
+  }
+}
+
 const String _pergunta = 'como vejo a foto do meu neto?';
 
 void main() {
@@ -202,6 +212,33 @@ void main() {
     expect(controlador.rascunho, _pergunta);
     expect(falasDaPessoa(), isEmpty);
     controlador.dispose();
+  });
+
+  testWidgets('resposta que chega depois do descarte não regrava a conversa',
+      (WidgetTester t) async {
+    // FR-048: depois de sair da tela (ou da conta, com a conversa já apagada
+    // pela LimpezaDeSessao), uma resposta tardia não pode chamar `guardar`.
+    final _RepositorioControlado repo = _RepositorioControlado();
+    final _ConversaQueConta local = _ConversaQueConta();
+    final ControladorConversa c =
+        ControladorConversa(repo, local, rascunhoInicial: _pergunta);
+    await c.iniciar();
+
+    unawaited(c.enviar());
+    await t.pump();
+
+    c.dispose();
+    final int gravacoesAntes = local.gravacoes;
+
+    repo.pendentes.first
+        .complete(const AssistenteRespondeu('resposta tardia'));
+    await t.pump();
+    // O cronômetro de 30 s também não pode disparar depois do descarte.
+    await t.pump(ControladorConversa.esperaMaxima);
+
+    expect(local.gravacoes, gravacoesAntes,
+        reason: 'resposta tardia regravaria a conversa que a saida apagou');
+    expect(t.takeException(), isNull);
   });
 
   test('o texto diz que o problema é a conexão, e não a pessoa (FR-052)', () {
