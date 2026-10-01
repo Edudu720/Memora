@@ -195,15 +195,15 @@ confirma antes, executa, e depois mostra o caminho percorrido.
 - [ ] T063 Criar o adaptador em `infra/`, implementando `ClienteDaAssistente` — a **única** classe que importa o SDK do provedor
 - [ ] T064 Configurar a chave por variável de ambiente, **sem padrão no repositório**, e fazer o perfil `producao` não subir sem ela (R8)
 - [ ] T065 Aplicar cache do bloco estável — persona e catálogo antes do histórico — e o teto de turnos por conversa (R3)
-- [ ] T066 Escrever o cenário **H5** em `backend/src/test/java/br/fatec/memora/assistente/InjecaoNaoViraAcaoTest.java`, com texto de golpe colado no chat
-- [ ] T067 Escrever o cenário **H10**, do limite diário, em `backend/src/test/java/br/fatec/memora/assistente/LimiteDeConversasTest.java`
+- [X] T066 Escrever o cenário **H5** em `backend/src/test/java/br/fatec/memora/assistente/InjecaoNaoViraAcaoTest.java`, com texto de golpe colado no chat
+- [X] T067 Escrever o cenário **H10**, do limite diário, em `backend/src/test/java/br/fatec/memora/assistente/LimiteDeConversasTest.java`
 - [ ] T068 Medir custo e latência reais de uma conversa típica e registrar no [research.md](research.md)
 
 ---
 
 ## Phase 9: Validação final
 
-- [ ] T069 Executar os cenários **H1 a H11** de [quickstart.md](quickstart.md) de forma automatizada
+- [X] T069 Executar os cenários **H1 a H11** de [quickstart.md](quickstart.md) de forma automatizada
 - [X] T070 [P] Escrever os testes de acessibilidade em `app/test/acessibilidade/` para as telas do Hub, da conversa, do catálogo e do registro (FR-026 a FR-030)
 - [ ] T071 Executar **H12** — 5 pessoas de 65+ anos, sem instrução e sem ajuda, **incluindo o passo em que repetem a tarefa sozinhas**
 - [ ] T072 Verificar SC-001 a SC-010 de [spec.md](spec.md) contra os resultados observados
@@ -308,3 +308,13 @@ contrato OpenAPI é a fonte da verdade e o cliente é gerado a partir dele.
 - [ ] T093 Verificar com o modelo real, na T069, que a recusa a serviço sensível é **idêntica** sob insistência — o H4 de hoje só prova o simulado, que devolve texto fixo per FR-038 (partial)
 - [ ] T094 [P] Testar que o "Voltar" está na mesma posição nas telas de conversa, catálogo, registro e aparência, e acrescentar verificação de contraste por tela em `app/test/acessibilidade/` per FR-005, SC-008 (partial)
 - [ ] T095 [P] Registrar duas decisões que o código tomou sem a spec: a porta "Ajuda" da US1/AC1 não existe (e `portaAjuda`, `descricaoAjuda` e `vocePodeFazerSozinha` estão sem uso), e o H10 responde por evento SSE com `200` em vez de `429` com espera — corrigir quickstart ou código per US1/AC1, quickstart H10 (unrequested)
+
+### Achados da revisão das PRs #31-#34 que não bloquearam o merge (2026-10-01)
+
+> Os que bloqueavam foram corrigidos na PR de revisão. Estes ficaram porque
+> pedem decisão, ou porque o custo hoje é baixo.
+
+- [ ] T096 Cancelar de verdade a requisição SSE quando a espera de 30 s vence (T078): hoje o `ControladorConversa` só descarta a resposta, a conexão continua aberta e o servidor segue gerando — e, com o provedor real, cobrando. Um "tentar de novo" abre um segundo turno no servidor per FR-052, R7
+- [ ] T097 Escrever o H3/H5 **de ponta a ponta pelo `ServicoDeConversa`**: hoje os dois chamam `AutorizadorDeAcao.autorizar` direto, e um `ServicoDeConversa` que deixasse de chamar o autorizador não reprovaria nenhum dos dois. Usar um serviço sensível **do catálogo** (hoje o H5 usa um pacote que não existe, e a camada `podeSerAberto()` nunca é exercida), e fazer as quatro variações de texto colado deixarem de ser o mesmo teste ou admitir no comentário que são
+- [ ] T098 Decidir se a FR-027 ("reduzir movimento") vale para transição de rota, diálogo e folha inferior. O portão do V9 só vê `duration:` em `app/lib/`, e as transições de `MaterialPageRoute`, `showDialog` e `showModalBottomSheet` são configuráveis (`PageTransitionsTheme`, `transitionDuration`) — não são "do Material, fora do nosso alcance" como o texto do V9 diz. **Decisão de spec**
+- [ ] T099 Reduzir o pool do Hikari nos testes (`spring.datasource.hikari.maximum-pool-size`/`minimum-idle`) em vez de depender de `max_connections=200`: com 20 conexões por contexto, o limite volta com uns cinco contextos novos
