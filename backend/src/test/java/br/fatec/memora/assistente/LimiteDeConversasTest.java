@@ -6,10 +6,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import br.fatec.memora.assistente.aplicacao.ServicoDeConversa;
 import br.fatec.memora.assistente.dominio.EventoDaAssistente;
 import br.fatec.memora.assistente.dominio.TipoDeEventoDaAssistente;
+import br.fatec.memora.assistente.dominio.UsoDaAssistente;
 import br.fatec.memora.assistente.infra.ClienteDaAssistenteSimulado;
 import br.fatec.memora.assistente.infra.RepositorioEventoDaAssistente;
 import br.fatec.memora.comum.CodigoDeErro;
+import br.fatec.memora.suporte.RelogioAjustavel;
 import br.fatec.memora.suporte.TesteComBanco;
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.TestPropertySource;
 
@@ -61,6 +65,7 @@ import org.springframework.test.context.TestPropertySource;
  * o transporte.
  */
 @TestPropertySource(properties = "memora.assistente.conversas-por-dia=3")
+@Import(RelogioAjustavel.NoContexto.class)
 @DisplayName("H10 — o custo nao vira negacao de servico")
 class LimiteDeConversasTest extends TesteComBanco {
 
@@ -74,11 +79,14 @@ class LimiteDeConversasTest extends TesteComBanco {
 
     @Autowired private JdbcTemplate jdbc;
 
+    @Autowired private RelogioAjustavel relogio;
+
     private UUID pessoaId;
     private UUID outraPessoaId;
 
     @BeforeEach
     void preparar() {
+        relogio.reiniciar();
         pessoaId = inserirPessoa("Ana");
         outraPessoaId = inserirPessoa("Bento");
         assistente.limpar().responderCom("Vou te mostrar o caminho.");
@@ -182,8 +190,59 @@ class LimiteDeConversasTest extends TesteComBanco {
         assertThat(conversar(outraPessoaId)).isNotNull();
     }
 
+    @Test
+    @DisplayName("mensagens seguidas sao uma conversa so, e nao gastam o teto (FR-053)")
+    void mensagensSeguidasNaoGastam() {
+        // O defeito que a FR-053 corrigiu: cada turno contava, e o teto de 20
+        // virava 20 mensagens — um passo a passo dificil acabava com o dia.
+        conversar(pessoaId);
+        for (int i = 0; i < TETO * 3; i++) {
+            relogio.avancar(Duration.ofMinutes(2));
+            assertThat(continuar(pessoaId)).isNotNull();
+        }
+
+        assertThat(conversasContadas(pessoaId)).isEqualTo(1);
+        assertThat(eventosDoTipo(pessoaId, TipoDeEventoDaAssistente.CONVERSA_INICIADA))
+                .as("a trilha registra a conversa, e nao cada turno")
+                .hasSize(1);
+    }
+
+    @Test
+    @DisplayName("no teto, a conversa em curso continua ate terminar (FR-053)")
+    void conversaEmCursoContinuaNoTeto() {
+        for (int i = 1; i <= TETO; i++) {
+            conversar(pessoaId);
+        }
+
+        // A terceira conversa acabou de abrir; a pessoa esta no meio dela.
+        relogio.avancar(Duration.ofMinutes(5));
+        assertThat(continuar(pessoaId)).isNotNull();
+
+        // Meia hora depois, e outra conversa — e essa nao cabe mais.
+        assertThatThrownBy(() -> conversar(pessoaId))
+                .isInstanceOf(ServicoDeConversa.LimiteAtingido.class);
+    }
+
+    /** Abre uma conversa nova: meia hora de pausa, e o turno. */
     private ServicoDeConversa.Resultado conversar(UUID quem) {
+        relogio.avancar(UsoDaAssistente.PAUSA_QUE_ENCERRA_A_CONVERSA);
+        return continuar(quem);
+    }
+
+    /** Um turno, sem andar o relogio: segue a conversa em curso, se houver. */
+    private ServicoDeConversa.Resultado continuar(UUID quem) {
         return conversa.conversar(quem, "como vejo as fotos do meu neto?", List.of(), t -> {});
+    }
+
+    private Integer conversasContadas(UUID quem) {
+        return jdbc.queryForObject(
+                "SELECT conversas FROM uso_da_assistente WHERE pessoa_id = ?",
+                Integer.class,
+                quem);
+    }
+
+    private List<EventoDaAssistente> eventosDoTipo(UUID quem, TipoDeEventoDaAssistente tipo) {
+        return eventos.findByPessoaIdAndTipoOrderByOcorridoEmDesc(quem, tipo);
     }
 
     private List<EventoDaAssistente> limitesNaTrilha(UUID quem) {

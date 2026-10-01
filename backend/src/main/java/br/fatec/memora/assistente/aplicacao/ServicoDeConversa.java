@@ -94,12 +94,19 @@ public class ServicoDeConversa {
             List<ClienteDaAssistente.Turno> historico,
             Consumer<String> aoReceberTrecho) {
 
-        if (limite.atingiuOTeto(pessoaId)) {
-            registrar(pessoaId, TipoDeEventoDaAssistente.LIMITE_ATINGIDO, null, null);
-            throw new LimiteAtingido();
+        // Um turno não é uma conversa (FR-053): só o que abre conversa nova conta
+        // no teto, e só ele vira CONVERSA_INICIADA na trilha.
+        switch (limite.registrarTurno(pessoaId)) {
+            case TETO_ATINGIDO -> {
+                registrar(pessoaId, TipoDeEventoDaAssistente.LIMITE_ATINGIDO, null, null);
+                throw new LimiteAtingido();
+            }
+            case NOVA_CONVERSA ->
+                    registrar(pessoaId, TipoDeEventoDaAssistente.CONVERSA_INICIADA, null, null);
+            case CONTINUA -> {
+                // a conversa em curso segue, sem contar de novo
+            }
         }
-        limite.registrarConversa(pessoaId);
-        registrar(pessoaId, TipoDeEventoDaAssistente.CONVERSA_INICIADA, null, null);
 
         List<ServicoConhecido> catalogo = servicos.findByAtivoTrueOrderByNomeExibido();
 

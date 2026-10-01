@@ -6,12 +6,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Quantas conversas uma conta abriu em um dia (R7 do research).
+ * Quantas conversas uma conta abriu em um dia (R7 do research, FR-053).
+ *
+ * <p>Conta <b>conversas</b>, e não turnos. A primeira versão contava cada
+ * mensagem, e o teto de 20 virava 20 mensagens por dia — o bastante para um
+ * único passo a passo difícil acabar com o dia da pessoa.
  *
  * <h2>Por que isto existe, se não estava na spec</h2>
  *
@@ -44,8 +50,31 @@ public class UsoDaAssistente {
     @Column(nullable = false, updatable = false)
     private LocalDate dia;
 
+    /**
+     * Pausa que encerra uma conversa: o mesmo prazo da inatividade da feature
+     * 001. Quem ficou meia hora sem escrever voltou para outra coisa.
+     */
+    public static final Duration PAUSA_QUE_ENCERRA_A_CONVERSA = Duration.ofMinutes(30);
+
+    /**
+     * Turnos que cabem numa conversa. Sem este teto, contar conversas em vez de
+     * turnos tiraria o freio de custo: uma "conversa" só, sem pausa, poderia ter
+     * mil turnos. Com ele, o pior dia de uma conta é teto × 30 turnos.
+     */
+    public static final int TURNOS_POR_CONVERSA = 30;
+
     @Column(nullable = false)
     private int conversas;
+
+    /**
+     * Quando foi o último turno. Um instante, e nada do que foi dito: o conteúdo
+     * continua só no aparelho (FR-047).
+     */
+    @Column(name = "ultimo_turno_em")
+    private Instant ultimoTurnoEm;
+
+    @Column(name = "turnos_na_conversa", nullable = false)
+    private int turnosNaConversa;
 
     /** Exigido pelo JPA. Não usar em código de aplicação. */
     protected UsoDaAssistente() {
@@ -60,14 +89,52 @@ public class UsoDaAssistente {
         return uso;
     }
 
-    /** Registra mais uma conversa aberta neste dia. */
-    public void registrarConversa() {
-        this.conversas++;
+    /**
+     * Registra um turno da pessoa, e decide se ele abre conversa nova (FR-053).
+     *
+     * <p>Uma conversa nova começa quando nenhuma está em curso: é o primeiro
+     * turno do dia, passou {@link #PAUSA_QUE_ENCERRA_A_CONVERSA} desde o último
+     * turno, ou a atual já tem {@link #TURNOS_POR_CONVERSA}. Só a conversa
+     * <b>nova</b> esbarra no teto — a que está em curso continua, porque cortar
+     * a pessoa no meio de um passo a passo é pior do que deixá-la terminar.
+     *
+     * <p>Recusado, o turno não muda nada: nem conta, nem reinicia a pausa.
+     *
+     * @param agora o instante do turno
+     * @param teto  quantas conversas cabem no dia
+     * @return o que este turno foi
+     */
+    public Desfecho registrarTurno(Instant agora, int teto) {
+        Objects.requireNonNull(agora, "agora");
+
+        boolean emCurso =
+                ultimoTurnoEm != null
+                        && Duration.between(ultimoTurnoEm, agora)
+                                        .compareTo(PAUSA_QUE_ENCERRA_A_CONVERSA) < 0
+                        && turnosNaConversa < TURNOS_POR_CONVERSA;
+
+        if (emCurso) {
+            turnosNaConversa++;
+            ultimoTurnoEm = agora;
+            return Desfecho.CONTINUA;
+        }
+        if (conversas >= teto) {
+            return Desfecho.TETO_ATINGIDO;
+        }
+        conversas++;
+        turnosNaConversa = 1;
+        ultimoTurnoEm = agora;
+        return Desfecho.NOVA_CONVERSA;
     }
 
-    /** O teto já foi atingido? */
-    public boolean atingiu(int teto) {
-        return conversas >= teto;
+    /** O que um turno foi, para o limite diário. */
+    public enum Desfecho {
+        /** Abriu uma conversa, e ela contou no teto do dia. */
+        NOVA_CONVERSA,
+        /** Seguiu a conversa em curso, sem contar no teto. */
+        CONTINUA,
+        /** Precisaria abrir conversa nova, e o teto do dia já foi atingido. */
+        TETO_ATINGIDO
     }
 
     public UUID getPessoaId() {
