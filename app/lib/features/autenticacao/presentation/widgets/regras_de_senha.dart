@@ -45,7 +45,7 @@ class RegrasDeSenha extends StatelessWidget {
                       atendidas[i]
                           ? Icons.check_circle
                           : Icons.radio_button_unchecked,
-                      size: 22,
+                      size: MemoraDimensoes.iconePadrao,
                       color: atendidas[i] ? cores.sucesso : cores.textoSuave,
                     ),
                     const SizedBox(width: MemoraEspacamento.sm),

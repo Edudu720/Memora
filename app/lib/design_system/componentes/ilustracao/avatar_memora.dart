@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import 'ilustracao_memora.dart';
 
 /// O retrato circular que fica sobre a borda de cima do cartão.
@@ -47,7 +48,8 @@ class AvatarMemora extends StatelessWidget {
           // A borda usa a cor de fundo da tela, não uma linha: é ela que
           // recorta o círculo do cartão quando ele fica por cima da borda,
           // como no protótipo.
-          border: Border.all(color: cores.fundo, width: 5),
+          border: Border.all(
+              color: cores.fundo, width: MemoraDimensoes.bordaAvatar),
         ),
         clipBehavior: Clip.antiAlias,
         child: Align(

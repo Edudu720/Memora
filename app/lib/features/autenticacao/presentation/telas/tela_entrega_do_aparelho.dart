@@ -64,7 +64,7 @@ class TelaEntregaDoAparelho extends StatelessWidget {
               const SizedBox(height: MemoraEspacamento.xxl),
               Icon(
                 Icons.pan_tool_alt_outlined,
-                size: 72,
+                size: MemoraDimensoes.iconeCelebracao,
                 color: cores.primaria,
               ),
               const SizedBox(height: MemoraEspacamento.xl),

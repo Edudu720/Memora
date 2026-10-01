@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
@@ -80,7 +81,9 @@ class CampoInformacao extends StatelessWidget {
               Row(
                 children: <Widget>[
                   if (icone != null) ...<Widget>[
-                    Icon(icone, size: 20, color: cores.textoSuave),
+                    Icon(icone,
+                        size: MemoraDimensoes.iconePequeno,
+                        color: cores.textoSuave),
                     const SizedBox(width: MemoraEspacamento.sm),
                   ],
                   Flexible(

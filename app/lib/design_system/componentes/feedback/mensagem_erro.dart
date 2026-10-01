@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
@@ -49,7 +50,8 @@ class MensagemErro extends StatelessWidget {
           decoration: BoxDecoration(
             color: cores.superficie,
             borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-            border: Border.all(color: cores.perigo, width: 2),
+            border: Border.all(
+                color: cores.perigo, width: MemoraDimensoes.bordaEnfase),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +61,9 @@ class MensagemErro extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   // Ícone E texto: cor sozinha não comunica.
-                  Icon(Icons.error_outline, color: cores.perigo, size: 28),
+                  Icon(Icons.error_outline,
+                      color: cores.perigo,
+                      size: MemoraDimensoes.iconeDestaque),
                   const SizedBox(width: MemoraEspacamento.md),
                   Expanded(child: TextoMemora(mensagem)),
                 ],

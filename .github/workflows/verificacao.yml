@@ -23,6 +23,20 @@ jobs:
       - name: Validar os 48 pares dos três temas
         run: python specs/002-design-system/ferramentas/validar_paleta.py
 
+  tokens:
+    # T047 — o portão da FR-032. Sem ele, valor literal volta na terceira tela
+    # e a consistência se perde sem ninguém ver. Quando esta regra foi escrita,
+    # havia sete tamanhos de ícone diferentes no aplicativo, nenhum declarado.
+    name: Valor literal fora dos tokens (FR-032)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Varrer app/lib/ atrás de cor, espaçamento e tamanho literais
+        run: python specs/002-design-system/ferramentas/validar_tokens.py
+
   backend:
     name: Build e testes do backend
     runs-on: ubuntu-latest

@@ -117,7 +117,7 @@ class CampoTexto extends StatelessWidget {
                   borderRadius: BorderRadius.circular(MemoraRaio.padrao),
                   borderSide: BorderSide(
                     color: temErro ? cores.perigo : cores.primaria,
-                    width: 3,
+                    width: MemoraDimensoes.bordaSelecao,
                   ),
                 ),
                 disabledBorder: OutlineInputBorder(
@@ -134,7 +134,9 @@ class CampoTexto extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(Icons.error_outline, color: cores.perigo, size: 22),
+              Icon(Icons.error_outline,
+                  color: cores.perigo,
+                  size: MemoraDimensoes.iconePadrao),
               const SizedBox(width: MemoraEspacamento.sm),
               Expanded(
                 child: TextoMemora(erro!, estilo: EstiloTexto.apoio,

@@ -57,7 +57,8 @@ class AvisoAntigolpe extends StatelessWidget {
             borderRadius: BorderRadius.circular(MemoraRaio.padrao),
             // A borda é o que separa este bloco do resto da tela sem recorrer a
             // preenchimento forte, que o leria como botão.
-            border: Border.all(color: cores.perigo, width: 2),
+            border: Border.all(
+                color: cores.perigo, width: MemoraDimensoes.bordaEnfase),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,7 +67,9 @@ class AvisoAntigolpe extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Icon(Icons.shield_outlined, size: 28, color: cores.perigo),
+                  Icon(Icons.shield_outlined,
+                      size: MemoraDimensoes.iconeDestaque,
+                      color: cores.perigo),
                   const SizedBox(width: MemoraEspacamento.sm),
                   Expanded(
                     child: TextoMemora(

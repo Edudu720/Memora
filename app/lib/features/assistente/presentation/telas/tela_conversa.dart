@@ -292,12 +292,15 @@ class _AvisoAntigolpe extends StatelessWidget {
           decoration: BoxDecoration(
             color: cores.superficieAlt,
             borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-            border: Border.all(color: cores.perigo, width: 2),
+            border: Border.all(
+                color: cores.perigo, width: MemoraDimensoes.bordaEnfase),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(Icons.shield_outlined, size: 24, color: cores.perigo),
+              Icon(Icons.shield_outlined,
+                  size: MemoraDimensoes.iconePadrao,
+                  color: cores.perigo),
               const SizedBox(width: MemoraEspacamento.sm),
               Expanded(
                 child: SingleChildScrollView(
@@ -329,7 +332,9 @@ class _Balao extends StatelessWidget {
     return Align(
       alignment: daMemora ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 320),
+        constraints: const BoxConstraints(
+          maxWidth: MemoraDimensoes.larguraMaximaDeLeitura,
+        ),
         padding: const EdgeInsets.all(MemoraEspacamento.md),
         decoration: BoxDecoration(
           color: daMemora ? cores.superficieAlt : cores.superficie,

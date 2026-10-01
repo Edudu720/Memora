@@ -188,12 +188,12 @@ nem visualmente nem semanticamente.
 
 ## Phase 7: US5 — Sistema que não se degrada (P3)
 
-- [ ] **T045** [US5] Criar `galeria/` — todos os componentes, todos os estados, três
+- [X] **T045** [US5] Criar `galeria/` — todos os componentes, todos os estados, três
       temas; disponível apenas em build de desenvolvimento (R9)
-- [ ] **T046** [US5] Configurar regra de análise estática que sinaliza cor,
+- [X] **T046** [US5] Configurar regra de análise estática que sinaliza cor,
       espaçamento ou tamanho literal fora dos tokens (FR-032)
-- [ ] **T047** [US5] Adicionar essa regra ao portão da verificação contínua
-- [ ] **T048** [US5] Escrever o guia de uso do Design System em
+- [X] **T047** [US5] Adicionar essa regra ao portão da verificação contínua
+- [X] **T048** [US5] Escrever o guia de uso do Design System em
       `docs/design/como-usar-o-design-system.md`
 
 ---

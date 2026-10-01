@@ -106,7 +106,9 @@ class BotaoBase extends StatelessWidget {
 
   BoxBorder? _borda(MemoraCores c) => switch (estilo) {
         EstiloBotao.secundario =>
-          Border.all(color: _habilitado ? c.primaria : c.borda, width: 2),
+          Border.all(
+              color: _habilitado ? c.primaria : c.borda,
+              width: MemoraDimensoes.bordaEnfase),
         _ => null,
       };
 
@@ -122,16 +124,16 @@ class BotaoBase extends StatelessWidget {
       children: <Widget>[
         if (carregando) ...<Widget>[
           SizedBox(
-            width: 20,
-            height: 20,
+            width: MemoraDimensoes.indicadorEmBotao,
+            height: MemoraDimensoes.indicadorEmBotao,
             child: CircularProgressIndicator(
-              strokeWidth: 2.5,
+              strokeWidth: MemoraDimensoes.espessuraIndicadorEmBotao,
               valueColor: AlwaysStoppedAnimation<Color>(conteudo),
             ),
           ),
           const SizedBox(width: MemoraEspacamento.sm),
         ] else if (icone != null) ...<Widget>[
-          Icon(icone, size: 22, color: conteudo),
+          Icon(icone, size: MemoraDimensoes.iconePadrao, color: conteudo),
           const SizedBox(width: MemoraEspacamento.sm),
         ],
         Flexible(

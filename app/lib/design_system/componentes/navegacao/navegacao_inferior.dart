@@ -110,7 +110,7 @@ class _Item extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Icon(item.icone, color: cor, size: 28),
+                  Icon(item.icone, color: cor, size: MemoraDimensoes.iconeDestaque),
                   const SizedBox(height: MemoraEspacamento.xs),
                   // Rótulo escrito, sempre.
                   TextoMemora(
