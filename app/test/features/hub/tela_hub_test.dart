@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/hub/domain/hub.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/l10n/textos_autenticacao.dart';
 
 /// Cenario H1 do quickstart — o Hub nao mostra porta que nao abre (T030).
 ///
@@ -158,6 +159,11 @@ void main() {
       await t.ensureVisible(sair);
       await t.tap(sair);
       await t.pumpAndSettle();
+
+      // O primeiro toque so pergunta (FR-025); o segundo sai.
+      expect(saiu, isFalse);
+      await t.tap(find.text(TextosAutenticacao.botaoConfirmarSaida));
+      await t.pump();
 
       expect(saiu, isTrue);
     });
