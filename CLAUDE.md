@@ -266,9 +266,9 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1, US2 e US5 completas; **US3 só no aplicativo**; US4 pendente |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1 a US5 completas, nos dois lados; falta a fase 8 (login social), com bloqueio externo |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 **T001-T049 e T052 feitas** — faltam T050/T051 (5 pessoas) e T053 (revisões) |
-| **003 — Hub e a assistente** | ✅ | ✅ | ✅ | 🟡 **58 de 74 tarefas**; falta só a fatia do provedor de IA e a validação |
+| **003 — Hub e a assistente** | ✅ | ✅ | ✅ | 🟡 **66 de 99 tarefas** (2026-10-01); faltam a fatia do provedor de IA, o resto da validação e a fase 10 (T079-T099) |
 
 ### O que já existe em código
 
@@ -907,8 +907,9 @@ se corrige o texto ou o transporte.
 
 | Fase | Tarefas | Situação |
 |---|---|---|
-| **8 — o provedor** | T061-T068 | **Espera a equipe escolher.** Só esta fase depende |
-| 9 — validação | T069, T071-T074 | ✅ T070 feita (2026-09-10). O resto não depende da fase 8 — T071 é o **V10 com 5 pessoas de 65+** |
+| **8 — o provedor** | T061-T065, T068 | **Espera a equipe escolher.** T066 e T067 já foram feitas na T069, sem modelo real |
+| 9 — validação | T071-T074 | ✅ T069 e T070 feitas. O resto não depende da fase 8 — T071 é o **H12 com 5 pessoas de 65+** |
+| 10 — convergência | T079-T099 | ✅ T075-T078 feitas (#34). As T096-T099 saíram da revisão de 2026-10-01; a T098 é decisão de spec (a FR-027 vale para transição de rota e diálogo?) |
 
 Também ficaram adiadas a **T021** e a **T036** (gerar o cliente Dart da 003):
 gerariam cliente para endpoints cujo contrato ainda não foi fundido com o da
@@ -1410,6 +1411,14 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - **Contagem de teste: use `clean`.** Somar os XMLs de `target/surefire-reports/`
   sem limpar inclui relatório órfão de classe que não existe mais — foi o que
   fez este arquivo dizer 244, 245 e 251 em vez de 250. Ver o aviso no topo.
+- **Mesmo com `clean`, o atributo `tests="..."` dos XMLs conta a menos.** Em
+  2026-10-01 a soma dele deu **359**, contra 361 de verdade. A
+  `NaoRevelaExistenciaTest` tem dois `@Nested` com métodos de mesmo nome
+  (`mesmaForma`, `mesmaOrdemDeGrandeza`), e o Surefire funde os dois no
+  atributo: diz 8 onde há 10 — e o `.txt` da classe diz `Tests run: 0`. Conte
+  os elementos `<testcase` (`grep -ho '<testcase ' TEST-*.xml | wc -l`), que
+  bate com os `@Test` do fonte. Se o `Tests run:` final do Maven sofre do
+  mesmo defeito, ninguém mediu ainda.
 - **Teste que passa pode estar procurando a coisa errada.** O teste do "olhinho"
   da FR-060 passava mesmo com `permitirRevelar: true`, porque procurava
   `Icons.visibility_outlined` e o `CampoSenha` usa `Icons.visibility`. Só
@@ -1558,9 +1567,21 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | GitHub Student Pack aprovado | Eduardo (enviado) | Não — libera proteção de branch |
 | Corrigir contradições do Arquivo X (voz, offline) | Equipe | Não — ver [requisitos-atualizados.md](docs/referencia/requisitos-atualizados.md) |
 | **Revisar as PRs de 2026-09-08** — [#24](https://github.com/Edudu720/Memora/pull/24) (backend da US3) e a da integração + US4 | Eduardo | Não, mas a #16 existe porque a revisão da #15 achou duas falhas latentes que ninguém tinha visto |
+| **A `TelaPerfil` continua sem uso em `app/lib`** — apagar, ou virar um perfil de verdade? | Equipe — levantado na #35 | Não. A saída real passa por `SaidaComConfirmacao`; a `TelaPerfil` só existe para o `saida_limpa_armazenamento_test.dart`, que hoje testa uma tela que o aplicativo não mostra |
+| **O aviso de inatividade usa o `Navigator` raiz**, e o fluxo vive dentro de uma aba da casca de demonstração | Equipe — levantado na #35 | Não hoje. Funciona, mas precisa ser revisto quando a casca sair |
 | **Registrar app no Google e no Facebook** (client IDs, PKCE) | Equipe — ninguém levantou ainda | **Sim, para a fase 8 da 001.** Aprovação no Facebook não é rápida, e é o único pedaço da feature 001 que continua aberto |
 | **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
+
+### Onde a fila parou em 2026-10-01
+
+**A fila está vazia.** A #31 até a #35 entraram na `master`, nesta ordem, e a
+#35 é a PR de correção da revisão das quatro anteriores, empilhada sobre a #34.
+
+| # | O quê | Situação |
+|---|---|---|
+| #31-#34 | Galeria e portão dos tokens, T069, T049/T052 e T075-T078 | ✅ na `master`, revisadas em 2026-10-01 |
+| **#35** | Correções da revisão das #31 a #34 — catálogo, teto diário, sessão no Hub e galeria | ✅ na `master` (2026-10-01) |
 
 ### Onde a fila parou em 2026-09-15
 
