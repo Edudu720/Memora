@@ -251,6 +251,22 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _irParaLogin();
   }
 
+  /// Uma rota aberta de dentro do fluxo, com a atividade contada (FR-017).
+  ///
+  /// **Toda** rota que o fluxo empurra passa por aqui. O `Listener` do Hub nao
+  /// alcanca o que o Navigator poe por cima dele, e sem isto quem conversa por
+  /// 28 minutos seria avisado e expulso sem ter ficado parado um segundo.
+  /// Num lugar so, para que uma rota nova nao esqueca.
+  Route<void> _rota({required WidgetBuilder builder}) {
+    return MaterialPageRoute<void>(
+      builder: (BuildContext contexto) => Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => _monitor.registrarAtividade(),
+        child: builder(contexto),
+      ),
+    );
+  }
+
   /// Fecha tudo o que foi aberto por cima do fluxo (conversa, catalogo,
   /// registro, aparencia).
   ///
@@ -356,7 +372,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           descricao: TextosAssistente.descricaoRegistro,
           icone: Icons.history_outlined,
           aoAbrir: () => Navigator.of(context).push<void>(
-            MaterialPageRoute<void>(
+            _rota(
               builder: (BuildContext contexto) => TelaRegistro(
                 repositorio: assistente,
                 aoVoltar: () => Navigator.of(contexto).pop(),
@@ -373,7 +389,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         // dividem a atencao de quem precisa de um caminho so.
         principal: assistente == null,
         aoAbrir: () => Navigator.of(context).push<void>(
-          MaterialPageRoute<void>(
+          _rota(
             builder: (BuildContext _) => const _PaginaDeAparencia(),
           ),
         ),
@@ -391,7 +407,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     CategoriaDoServico categoria,
   ) {
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
+      _rota(
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
@@ -415,7 +431,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     String rascunho = '',
   }) {
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
+      _rota(
         // Quem cria é dono: o controlador nasce e morre com a rota, e não
         // sobra cronômetro nem resposta em voo depois de a pessoa sair da
         // tela — ou da conta (FR-048).
