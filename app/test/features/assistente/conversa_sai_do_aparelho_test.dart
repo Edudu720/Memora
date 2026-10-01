@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/autenticacao/data/ultimo_acesso_local.dart';
@@ -96,10 +98,13 @@ void main() {
 
       // Sem isto, um arquivo travado pelo sistema deixaria a pessoa sem saber
       // se saiu ou não. O que importa mais — a credencial — ja foi.
-      await comFalha.executar();
+      await comFalha.executar(esquecerTudo: true);
 
       expect(await cofre.tokenAcesso(), isNull);
-      expect(await conversa.ler(), isEmpty);
+      expect(await conversa.ler(), isEmpty,
+          reason: 'o item depois do que falhou precisa ser apagado');
+      expect(await ultimoAcesso.identificador(), isNull,
+          reason: 'esquecerTudo roda depois dos dados locais');
     });
   });
 }
@@ -130,6 +135,7 @@ class _ConversaQueFalha implements DadoLocalDaPessoa {
   Future<void> apagar() async {
     // `ConversaLocal.apagar` engole a própria exceção, mas nada garante que o
     // próximo item da lista faça o mesmo. A limpeza não pode depender disso.
+    throw const FileSystemException('arquivo travado');
   }
 }
 
