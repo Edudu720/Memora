@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_assistente.dart';
+import '../../../../l10n/textos_autenticacao.dart';
+import '../../../autenticacao/presentation/widgets/saida_com_confirmacao.dart';
 import '../../domain/hub.dart';
 
 /// O lugar para onde a pessoa sempre volta (T025, US1).
@@ -35,6 +37,9 @@ class TelaHub extends StatelessWidget {
   /// Chave do botão de sair.
   static const Key chaveSair = Key('hub.sair');
 
+  /// Chave da confirmação que vem depois do toque em sair (FR-025).
+  static const Key chaveConfirmacaoSaida = Key('hub.confirmacao');
+
   /// Chave de uma porta, pelo rótulo.
   static Key chaveDaPorta(String rotulo) => Key('hub.porta.$rotulo');
 
@@ -44,7 +49,7 @@ class TelaHub extends StatelessWidget {
   /// As portas construídas. Ver a nota sobre a FR-003.
   final List<PortaDoHub> portas;
 
-  /// Encerra a sessão.
+  /// Encerra a sessão, depois que a pessoa confirmou.
   final Future<void> Function() aoSair;
 
   /// Cria o Hub.
@@ -91,11 +96,16 @@ class TelaHub extends StatelessWidget {
               ],
 
               const SizedBox(height: MemoraEspacamento.xl),
-              BotaoTerciario(
-                key: TelaHub.chaveSair,
-                rotulo: 'Sair da minha conta',
-                aoTocar: aoSair,
-                larguraTotal: true,
+              // Sair pede confirmação (FR-025), a mesma da tela de perfil.
+              SaidaComConfirmacao(
+                chaveConfirmacao: TelaHub.chaveConfirmacaoSaida,
+                aoConfirmar: aoSair,
+                botao: (VoidCallback aoTocar) => BotaoTerciario(
+                  key: TelaHub.chaveSair,
+                  rotulo: TextosAutenticacao.botaoSair,
+                  aoTocar: aoTocar,
+                  larguraTotal: true,
+                ),
               ),
               const SizedBox(height: MemoraEspacamento.xxl),
             ],

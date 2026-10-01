@@ -4,21 +4,48 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-09-15 — **revisão da PR #27** (T070), a auditoria que
-ela pediu, e a **fase 7 da feature 002**, pelo Henrique. Entraram na `master`:
-a #27, a #28 (teto da conversa vira fração da tela), a #29 (plano de pentest) e
-a #30 (o `Flexible` do "Mostrar senha"); a #31 (galeria e portão dos tokens)
-está aberta. Duas PRs de conserto saíram de uma revisão, e os dois defeitos
-eram **layout que só quebrava em aparelho que ninguém testava**.
-**Estado**: **346 testes** no backend (eram 334) e **460** no aplicativo
-(eram 346). A
-feature 001 está completa, só a fase 8 (login social) fora, com bloqueio
-externo. A feature 003 tem **Hub, conversa que ensina, catálogos, execução com
-confirmação e registro** — tudo contra simulado, **sem provedor de IA
-escolhido** — e a T070 da fase 9 feita.
+**Última sessão**: 2026-10-01 — **revisão das PRs #31 a #34** e a PR de
+correção que saiu dela, pelo Henrique. Ver "A revisão de 2026-10-01", logo
+abaixo, antes de mexer em sessão, galeria ou no teto diário.
+**Estado**: **361 testes** no backend e **481** no aplicativo, todos com
+execução limpa. A feature 001 está completa, só a fase 8 (login social) fora,
+com bloqueio externo. A feature 003 tem Hub, conversa que ensina, catálogos,
+execução com confirmação e registro — tudo contra simulado, **sem provedor de
+IA escolhido** —, as fases 9 (T069, T070) e as T075-T078 da fase 10 feitas.
 **Próximo: a fase 8 da 003** (T061-T068), que espera a escolha do provedor, ou
-o resto da **fase 9** (T069, T071-T074 — T071 exige as 5 pessoas de 65+). Ver
+a **fase 10** (T079-T099, quase toda sem dependência externa) ou o resto da **fase 9** (T071-T074 — T071 exige as 5 pessoas de 65+). Ver
 seção 4-B.
+
+> 🔴 **A revisão de 2026-10-01 achou a sessão furada em três lugares, e nenhum
+> estava na lista do que revisar.** Os quatro agentes de revisão olharam as PRs;
+> foi ao consertar a FR-048 que apareceu o resto:
+>
+> - **"Sair" no Hub saía com um toque, sem confirmação (FR-025).** A
+>   `TelaPerfil`, que tem a pergunta, não era usada em lugar nenhum desde que o
+>   Hub existe — o portão da FR-025 testava uma tela que o aplicativo não
+>   mostra. Hoje os dois pontos usam `SaidaComConfirmacao`.
+> - **A inatividade expirava por baixo das telas abertas pelo Hub.** Conversa,
+>   catálogo e registro são rotas do `Navigator`; trocar a etapa do fluxo
+>   deixava a conversa na tela do celular esquecido. Hoje `_fecharRotasAbertas`.
+> - **Tocar dentro dessas telas não contava como atividade** — o `Listener`
+>   envolvia só o Hub. Quem conversasse 28 minutos era expulso. Hoje toda rota
+>   do fluxo nasce em `_rota(...)`, que já traz o `Listener`.
+>
+> **Testar o componente não prova a tela que o aplicativo mostra.** Os três
+> portões novos montam o `FluxoAutenticacao` de verdade
+> (`test/features/autenticacao/fluxo_dentro_da_conta.dart`).
+>
+> Os outros achados, todos corrigidos e provados quebrando: o teste de portões
+> do esquema **apagava o catálogo semeado** (o CI da #34 ficou vermelho só
+> porque a ordem das classes mudou — o defeito vinha da `master`); o teto
+> diário era **contornável por requisições paralelas** (hoje upsert + trava
+> pessimista, e o primeiro uso do dia não colide mais na chave); a
+> `LimpezaDeSessao` **parava no primeiro item que falhasse**, e o teste disso
+> era decorativo; o controlador da conversa **nunca era descartado** e uma
+> resposta tardia regravava a conversa depois da saída; o teste de fumaça da
+> galeria **só media o topo da `ListView`**; o `validar_tokens.py` não via
+> `EdgeInsets.symmetric(horizontal: 12)` nem `Radius.circular(8)` (hoje tem
+> `--autoteste` no CI). O que não bloqueou virou T096-T099 da 003.
 
 > 🔒 **O plano de pentest está em [`docs/seguranca/plano-de-pentest.md`](docs/seguranca/plano-de-pentest.md)**
 > (PR #29), escrito em 2026-09-11 e versionado em 2026-09-15. Ele é o **plano**:
@@ -502,7 +529,7 @@ A senha é hasheada **nos dois caminhos, antes da consulta ao canal**. Sem isso 
 cadastro contra canal existente responde em ~11 ms contra ~261 ms, e a latência
 entrega o que o corpo escondeu — medido, não suposto.
 
-### Trinta e quatro portões de segurança, cada um validado quebrando de propósito
+### Trinta e oito portões de segurança, cada um validado quebrando de propósito
 
 | Portão | Onde | Como foi provado |
 |---|---|---|
@@ -538,11 +565,15 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Trocar a senha destranca a conta bloqueada | `TrocaDeSenhaRevogaSessoesTest` | Tirei o `registrarEntradaBemSucedida`: reprovou com `expected: null` — a pessoa trocava a senha e continuava trancada do lado de fora |
 | Sair encerra **de verdade** (FR-026) | `SairEncerraSessaoTest` | Pus `if (false)` na revogação: **3 testes** reprovaram, o principal com `expected:<401> but was:<200>` — o refresh de 60 dias continuou renovando depois do `204` |
 | Sair encerra **só este aparelho** (FR-024) | `SairEncerraSessaoTest` | Troquei por `revogarSessoesDaPessoa`: **2 testes** reprovaram com `expected:<200> but was:<401>` — o tablet caiu junto com o celular |
-| Sair exige confirmação (FR-025) | `saida_limpa_armazenamento_test.dart` | Liguei o botão direto no `_sair`: **4 testes** reprovaram com `Found 0 widgets with key [<'perfil.confirmacao'>]` |
+| Sair exige confirmação (FR-025) | `saida_limpa_armazenamento_test.dart` e, **pelo Hub de verdade**, `fluxo_sair_confirma_test.dart` | Liguei o botão direto no `_sair`: **4 testes** reprovaram com `Found 0 widgets with key [<'perfil.confirmacao'>]`. ⚠️ Até 2026-10-01 só a `TelaPerfil` era testada — e ela não aparecia no aplicativo; o Hub saía com um toque. No Hub, a mesma quebra reprova **5 testes** |
+| A inatividade fecha o que está aberto (FR-017) | `fluxo_rotas_e_inatividade_test.dart` | Comentei o `popUntil`: reprovou com `Found 1 widget with key [<'conversa.campo'>]` — a conversa ficou por cima do login |
+| Tocar na conversa conta como atividade (FR-017) | `fluxo_rotas_e_inatividade_test.dart` | Troquei o `onPointerDown` por `(_) {}`: a pessoa foi expulsa no meio da conversa |
+| Sair apaga a conversa, pelo fluxo real (FR-048) | `fluxo_limpeza_de_sessao_test.dart` | Comentei cada `limpeza?.executar()`: reprovou só o caso correspondente, `Expected: <1> Actual: <0>` |
+| Teto diário resiste a rajada (R7) | `LimiteDeConversasTest` | Voltei ao ler-decidir-gravar sem trava: 40 turnos simultâneos deram `duplicate key ... pk_uso_da_assistente` |
 | A credencial sai do aparelho (FR-026) | `saida_limpa_armazenamento_test.dart` | Comentei o `_cofre.limpar()`: reprovou com `Expected: null / Actual: 'refresh-de-60-dias'` |
 
 **Faça o mesmo com qualquer portão novo.** Foi assim que descobrimos que os
-trinta e quatro realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
+trinta e oito realmente pegam — e foi a **ausência** desse hábito que deixou a guarda de
 conta desativada entrar sem teste nenhum e furada, na revisão da #15.
 
 ⚠️ **Os cinco portões da recuperação passaram todos na primeira execução**, e
@@ -996,11 +1027,18 @@ num build de release, **não existe botão** que leve à galeria, em vez de
 existir um botão que leva a uma recusa. Há teste prendendo esse contrato: se
 alguém trocar o retorno por `Widget` não-anulável, ele para de compilar.
 
-⚠️ **Montar a galeria é teste de fumaça do sistema inteiro.**
-`test/design_system/galeria_test.dart` a monta na matriz de aparelhos × escalas
-× três temas. Componente que estoure em qualquer combinação estoura ali, sem
-ninguém escrever caso para ele — e foi assim que a **própria galeria** apareceu
-estourando 18 px em 200%, antes de existir por cinco minutos.
+⚠️ **Percorrer a galeria é teste de fumaça do sistema inteiro — mas só se
+rolar.** A lista é uma `ListView`, que só constrói e mede o que está na janela:
+a primeira versão de `test/design_system/galeria_test.dart` montava a galeria e
+olhava `takeException()`, e o campo de senha, o de código, a confirmação e a
+navegação **nunca eram construídos**. Hoje o teste rola a lista inteira, em
+passos de meia janela, checando exceção a cada passo, e no fim afirma que 14
+tipos de componente — um de cada região, até a `NavegacaoInferior`, o último —
+chegaram a ser construídos. Isso roda na matriz de 4 aparelhos × 3 escalas, e
+nos **três temas** só no aparelho mais estreito (320×568) a 200%. Provado: com
+um estouro horizontal no fim da lista, o teste antigo passava e o novo reprova
+nos 15 casos. A própria galeria apareceu estourando 18 px em 200%, antes de
+existir por cinco minutos.
 
 **O portão da FR-032 é `specs/002-design-system/ferramentas/validar_tokens.py`**,
 com job próprio no CI. Ele varre `app/lib/` atrás de cor, espaçamento, raio e
@@ -1535,7 +1573,8 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | **#28** | Correção da revisão da #27 — teto proporcional e o portão da FR-027 | ✅ na `master` |
 | **#29** | Plano de pentest e o `.gitattributes` | ✅ na `master` |
 | **#30** | Auditoria da ampliação — o `Flexible` do "Mostrar senha" | ✅ na `master` |
-| **#31** | Fase 7 da 002 — galeria, portão dos tokens e guia de uso | 🟢 **Aberta**, base `master` |
+| **#31** | Fase 7 da 002 — galeria, portão dos tokens e guia de uso | ✅ revisada em 2026-10-01 |
+| **#32-#34** | T069, T049/T052 e T075-T078 | ✅ revisadas em 2026-10-01, com a PR de correção empilhada sobre a #34 |
 
 ⚠️ **A #27 ficou 5 dias aberta com CI verde e sem revisão nenhuma.** Não é
 detalhe de processo: a revisão dela achou que o conserto do T070 só valia no

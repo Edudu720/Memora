@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import 'cofre_de_credenciais.dart';
 
@@ -67,8 +69,17 @@ class LimpezaDeSessao {
     // Isto NÃO é condicionado a `esquecerTudo`. O identificador do último
     // acesso fica por uma decisão registrada da equipe; a conversa não tem
     // decisão nenhuma a favor de ficar, e a FR-048 manda apagar.
+    //
+    // Cada item tem a própria proteção: um que lance exceção não pode deixar
+    // os seguintes — nem o `esquecerTudo` — sem rodar. A saída nunca falha
+    // para a pessoa (mesma filosofia de `encerrarSessao`): a credencial, que é
+    // o que de fato tira o acesso, já saiu acima.
     for (final DadoLocalDaPessoa dado in _dadosLocais) {
-      await dado.apagar();
+      try {
+        await dado.apagar();
+      } catch (erro) {
+        debugPrint('Limpeza de sessao: um dado local nao foi apagado ($erro).');
+      }
     }
 
     if (esquecerTudo) {

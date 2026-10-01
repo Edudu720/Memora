@@ -40,6 +40,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @DisplayName("Portoes do esquema da assistente")
 class PortoesDoEsquemaDaAssistenteTest extends TesteComBanco {
 
+    // Marcador e pacotes ficticios: "com.whatsapp" colidiria com o catalogo real
+    // em ux_servico_pacote, e o marcador permite apagar so o que e nosso.
+    private static final String MARCADOR = "Servico de teste";
+    private static final String PACOTE_TESTE = "com.teste.portoes";
+
     @Autowired
     private JdbcTemplate jdbc;
 
@@ -47,7 +52,10 @@ class PortoesDoEsquemaDaAssistenteTest extends TesteComBanco {
     void limpar() {
         jdbc.execute("DELETE FROM evento_da_assistente");
         jdbc.execute("DELETE FROM uso_da_assistente");
-        jdbc.execute("DELETE FROM servico_conhecido");
+        // So o que e deste teste. O catalogo real e semeado pelas migrations
+        // V5/V6 e o container e um so para a suite: apagar a tabela inteira
+        // deixaria CatalogoSemeadoTest (e qualquer outro) com o banco vazio.
+        jdbc.update("DELETE FROM servico_conhecido WHERE nome_exibido = ?", MARCADOR);
         jdbc.execute("DELETE FROM pessoa_usuaria");
     }
 
@@ -77,7 +85,7 @@ class PortoesDoEsquemaDaAssistenteTest extends TesteComBanco {
         assertThatCode(
                         () -> {
                             inserirServico("SENSIVEL", null);
-                            inserirServico("COTIDIANO", "com.whatsapp");
+                            inserirServico("COTIDIANO", PACOTE_TESTE);
                         })
                 .doesNotThrowAnyException();
     }
@@ -93,9 +101,9 @@ class PortoesDoEsquemaDaAssistenteTest extends TesteComBanco {
     @Test
     @DisplayName("dois servicos ativos nao disputam o mesmo pacote")
     void pacoteEhUnicoEntreAtivos() {
-        inserirServico("COTIDIANO", "com.instagram.android");
+        inserirServico("COTIDIANO", "com.teste.unico");
 
-        assertThatThrownBy(() -> inserirServico("COTIDIANO", "com.instagram.android"))
+        assertThatThrownBy(() -> inserirServico("COTIDIANO", "com.teste.unico"))
                 .isInstanceOf(DataAccessException.class)
                 .hasMessageContaining("ux_servico_pacote");
     }
@@ -181,9 +189,10 @@ class PortoesDoEsquemaDaAssistenteTest extends TesteComBanco {
                 INSERT INTO servico_conhecido
                     (id, nome_exibido, categoria, identificador_android,
                      descricao_curta, ativo, criado_em, atualizado_em)
-                VALUES (?, 'Servico', ?, ?, 'descricao', TRUE, now(), now())
+                VALUES (?, ?, ?, ?, 'descricao', TRUE, now(), now())
                 """,
                 UUID.randomUUID(),
+                MARCADOR,
                 categoria,
                 pacote);
     }

@@ -12,9 +12,18 @@ import br.fatec.memora.assistente.infra.RepositorioEventoDaAssistente;
 import br.fatec.memora.comum.CodigoDeErro;
 import br.fatec.memora.suporte.RelogioAjustavel;
 import br.fatec.memora.suporte.TesteComBanco;
+import br.fatec.memora.assistente.seguranca.LimitePorConta;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -80,6 +89,8 @@ class LimiteDeConversasTest extends TesteComBanco {
     @Autowired private JdbcTemplate jdbc;
 
     @Autowired private RelogioAjustavel relogio;
+
+    @Autowired private LimitePorConta limite;
 
     private UUID pessoaId;
     private UUID outraPessoaId;
@@ -221,6 +232,52 @@ class LimiteDeConversasTest extends TesteComBanco {
         // Meia hora depois, e outra conversa — e essa nao cabe mais.
         assertThatThrownBy(() -> conversar(pessoaId))
                 .isInstanceOf(ServicoDeConversa.LimiteAtingido.class);
+    }
+
+    @Test
+    @DisplayName("turnos simultaneos da mesma conta contam todos, sem erro (corrida no contador)")
+    void turnosSimultaneosNaoSePerdem() throws Exception {
+        // Relogio parado: os 40 turnos sao da mesma conversa ate o 30o, e o 31o
+        // abre a segunda. Em qualquer ordem de chegada o resultado e o mesmo:
+        // 2 conversas novas, 38 continuacoes, nenhum recusado (teto 3), e o
+        // contador termina com 2 conversas e 10 turnos na atual.
+        // Sem trava, todos leem o mesmo estado: a primeira chamada do dia
+        // colide na chave primaria e o contador perde atualizacoes.
+        final int turnos = 40;
+        ExecutorService pool = Executors.newFixedThreadPool(8);
+        CountDownLatch largada = new CountDownLatch(1);
+        try {
+            List<Future<UsoDaAssistente.Desfecho>> futuros = new ArrayList<>();
+            for (int i = 0; i < turnos; i++) {
+                futuros.add(
+                        pool.submit(
+                                () -> {
+                                    largada.await();
+                                    return limite.registrarTurno(pessoaId);
+                                }));
+            }
+            largada.countDown();
+
+            Map<UsoDaAssistente.Desfecho, Long> desfechos = new HashMap<>();
+            for (Future<UsoDaAssistente.Desfecho> futuro : futuros) {
+                desfechos.merge(futuro.get(30, TimeUnit.SECONDS), 1L, Long::sum);
+            }
+
+            assertThat(desfechos)
+                    .containsEntry(UsoDaAssistente.Desfecho.NOVA_CONVERSA, 2L)
+                    .containsEntry(UsoDaAssistente.Desfecho.CONTINUA, 38L)
+                    .doesNotContainKey(UsoDaAssistente.Desfecho.TETO_ATINGIDO);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        assertThat(conversasContadas(pessoaId)).isEqualTo(2);
+        assertThat(
+                        jdbc.queryForObject(
+                                "SELECT turnos_na_conversa FROM uso_da_assistente WHERE pessoa_id = ?",
+                                Integer.class,
+                                pessoaId))
+                .isEqualTo(10);
     }
 
     /** Abre uma conversa nova: meia hora de pausa, e o turno. */

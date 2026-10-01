@@ -76,6 +76,7 @@ class ControladorConversa extends ChangeNotifier {
   /// recebe duas respostas para uma pergunta.
   int _envio = 0;
   Timer? _cronometro;
+  bool _descartado = false;
 
   EstadoConversa _estado = EstadoConversa.abrindo;
   FalhaDaAssistente? _falha;
@@ -126,9 +127,11 @@ class ControladorConversa extends ChangeNotifier {
 
   /// Lê a conversa guardada e prepara a tela (FR-049).
   Future<void> iniciar() async {
+    final List<MensagemDaConversa> guardadas = await _local.ler();
+    if (_descartado) return;
     _mensagens
       ..clear()
-      ..addAll(await _local.ler());
+      ..addAll(guardadas);
     _estado = EstadoConversa.aguardando;
     notifyListeners();
   }
@@ -271,6 +274,7 @@ class ControladorConversa extends ChangeNotifier {
 
   /// Acrescenta uma fala da Memora à conversa, e guarda.
   void _dizer(String texto) {
+    if (_descartado) return;
     _mensagens.add(
       MensagemDaConversa(
         autor: AutorDaMensagem.memora,
@@ -298,6 +302,12 @@ class ControladorConversa extends ChangeNotifier {
 
   @override
   void dispose() {
+    // Invalida o que está em voo. Sem isto, uma resposta que chegue depois de
+    // a pessoa sair da tela — ou da conta, quando a `LimpezaDeSessao` já
+    // apagou a conversa — chamaria `_local.guardar` e a REGRAVARIA no
+    // aparelho (FR-048).
+    _descartado = true;
+    _envio++;
     _cronometro?.cancel();
     super.dispose();
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_autenticacao.dart';
 import '../../domain/autenticacao.dart';
+import '../widgets/saida_com_confirmacao.dart';
 
 /// Tela de perfil, de onde se sai da conta (T075, T076, US4).
 ///
@@ -63,19 +64,6 @@ class TelaPerfil extends StatefulWidget {
 }
 
 class _TelaPerfilState extends State<TelaPerfil> {
-  bool _confirmando = false;
-  bool _saindo = false;
-
-  Future<void> _sair() async {
-    setState(() => _saindo = true);
-    await widget.aoSair();
-
-    if (!mounted) {
-      return;
-    }
-    widget.aoSairConcluido();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,12 +78,18 @@ class _TelaPerfilState extends State<TelaPerfil> {
               const SizedBox(height: MemoraEspacamento.xl),
               _dados(),
               const SizedBox(height: MemoraEspacamento.xxxl),
-              if (_saindo)
-                const Carregando(mensagem: TextosAutenticacao.saindo)
-              else if (_confirmando)
-                _confirmacao()
-              else
-                _botaoSair(),
+              // O primeiro toque abre a confirmação e o segundo confirma
+              // (FR-025); o conjunto é o mesmo do Hub.
+              SaidaComConfirmacao(
+                chaveConfirmacao: TelaPerfil.chaveConfirmacao,
+                aoConfirmar: widget.aoSair,
+                aoConcluir: widget.aoSairConcluido,
+                botao: (VoidCallback aoTocar) => BotaoSecundario(
+                  key: TelaPerfil.chaveSair,
+                  rotulo: TextosAutenticacao.botaoSair,
+                  aoTocar: aoTocar,
+                ),
+              ),
             ],
           ),
         ),
@@ -112,32 +106,6 @@ class _TelaPerfilState extends State<TelaPerfil> {
           valor: widget.pessoa.nomeTratamento,
         ),
       ],
-    );
-  }
-
-  /// O primeiro toque.
-  Widget _botaoSair() {
-    return BotaoSecundario(
-      key: TelaPerfil.chaveSair,
-      rotulo: TextosAutenticacao.botaoSair,
-      aoTocar: () => setState(() => _confirmando = true),
-    );
-  }
-
-  /// O segundo toque, e o último (FR-025).
-  ///
-  /// Não é [ConfirmacaoMemora.irreversivel]: sair não destrói nada, e a pessoa
-  /// entra de novo com a senha. Reservar o tom grave para o que é de fato
-  /// irreversível é o que faz esse tom continuar significando alguma coisa.
-  Widget _confirmacao() {
-    return ConfirmacaoMemora(
-      key: TelaPerfil.chaveConfirmacao,
-      pergunta: TextosAutenticacao.perguntaSair,
-      aviso: TextosAutenticacao.avisoSair,
-      rotuloConfirmar: TextosAutenticacao.botaoConfirmarSaida,
-      rotuloRecusar: TextosAutenticacao.botaoFicar,
-      aoConfirmar: _sair,
-      aoRecusar: () => setState(() => _confirmando = false),
     );
   }
 }

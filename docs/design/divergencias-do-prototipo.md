@@ -8,10 +8,14 @@
 > medido ao lado, e a ferramenta que o produziu. Onde não há medição, está
 > escrito que não há.
 
-**Método**: as medições vieram de três ferramentas em
+**Método**: duas das medições vieram de ferramentas versionadas em
 `specs/002-design-system/ferramentas/` — `amostrar_cores.py` (2.962.440 pixels
-em 36 telas), `medir_botoes.py` e `validar_paleta.py` (48 pares de contraste nos
-três temas). Todas são reexecutáveis.
+em 36 telas; só reexecutável por quem tiver as imagens do protótipo) e
+`validar_paleta.py` (51 pares de contraste nos três temas; reexecutável por
+qualquer um). **A medição dos botões SIM/NÃO (seção 1) foi feita com um script
+avulso que nunca entrou no repositório** — `medir_botoes.py` não existe em
+nenhum commit. Os números daquela seção são o registro, e **não podem ser
+reproduzidos a partir do repositório**.
 
 ---
 
@@ -30,7 +34,7 @@ sem ganho nenhum.
 |---|---|---|
 | Altura | **24 px** | **48 dp** (`alvoMinimo`), **56 dp** em decisão (`alvoDecisao`) |
 
-**Medição** (`medir_botoes.py`, tela de Chatbot):
+**Medição** (tela de Chatbot; script avulso que não foi commitado, ver o aviso do Método):
 
 | Botão | Cor | Tamanho | Contraste com texto preto |
 |---|---|---|---|
@@ -77,11 +81,11 @@ atendia à WCAG. `#1040F8` é a cor do projeto e continua sendo.
 
 | Cor | Ocorrência | Contraste | Por quê |
 |---|---|---|---|
-| `#7090E8` | 0,10% | **3,07:1** | Abaixo de 4,5:1 — não pode carregar texto |
+| `#7090E8` | 0,10% | **3,07:1** com branco, **2,89:1** com o fundo `#F8F8F8`; 6,15:1 com texto `#111111` | Como cor de texto ou de rótulo sobre fundo claro, fica abaixo de 4,5:1; só serve de preenchimento com texto escuro, e a primária já ocupa o papel de preenchimento com texto branco |
 
 Ela não entrou na paleta em papel nenhum. Aparecia em 0,10% dos pixels, o que
-sugere uso decorativo; mas um token existe para ser usado, e um token que não
-pode receber texto é uma armadilha esperando alguém.
+sugere uso decorativo; mas um token existe para ser usado, e um token
+com papel ambíguo (texto escuro? preenchimento? foreground?) é uma armadilha esperando alguém.
 
 ### Derivadas — sem contraparte no protótipo
 

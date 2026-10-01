@@ -109,6 +109,7 @@ void main() {
       );
 
       await _tocarNaChave(t, TelaHub.chaveSair);
+      await _tocarNoTexto(t, TextosAutenticacao.botaoConfirmarSaida);
       await _avancar(t, 6);
 
       expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
@@ -126,6 +127,7 @@ void main() {
 
       await _cadastrar(t);
       await _tocarNaChave(t, TelaHub.chaveSair);
+      await _tocarNoTexto(t, TextosAutenticacao.botaoConfirmarSaida);
       await _avancar(t, 6);
 
       expect(
