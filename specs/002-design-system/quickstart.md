@@ -21,7 +21,7 @@ O portão de contraste é executável **antes de existir qualquer código Flutte
 python specs/002-design-system/ferramentas/validar_paleta.py
 ```
 
-Sai com código 0 se todos os 48 pares passarem, e 1 se algum reprovar — pronto para
+Sai com código 0 se todos os 51 pares passarem, e 1 se algum reprovar — pronto para
 entrar na verificação contínua.
 
 Também é possível reproduzir a derivação da paleta:
@@ -39,7 +39,7 @@ python specs/002-design-system/ferramentas/amostrar_cores.py
 **Cobre**: FR-003, FR-018, FR-024, FR-035 · SC-001, SC-007
 
 1. Rodar o validador de paleta.
-2. **Esperado**: 48 pares aprovados; alto contraste ≥ 7:1 no texto.
+2. **Esperado**: 51 pares aprovados; alto contraste ≥ 7:1 no texto.
 3. Alterar um token para um valor ruim de propósito.
 4. **Esperado**: o validador falha e retorna código 1.
 
@@ -191,7 +191,7 @@ cenário**.
 
 | Cenário | Onde | Automatizado? |
 |---|---|---|
-| **V1** contraste | `ferramentas/validar_paleta.py` (48 pares, job de CI) + `test/design_system/contraste_test.dart` (51 pares no lado Dart) | ✅ |
+| **V1** contraste | `ferramentas/validar_paleta.py` (17 pares × 3 temas = 51, job de CI) + `test/design_system/contraste_test.dart` (os mesmos 51 no lado Dart) | ✅ |
 | **V2** área de toque | `test/design_system/area_toque_test.dart` | ✅ |
 | **V3** texto em 2,0 | `test/design_system/escala_texto_test.dart`, `galeria_test.dart` e `test/acessibilidade/` | ✅ |
 | **V4** semântica | `test/design_system/informacao_nao_e_acao_test.dart` e os `isSemantics` espalhados | 🟡 **parcial** — o passo do TalkBack com a tela desligada é manual e **não foi feito** |

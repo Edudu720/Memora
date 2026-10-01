@@ -111,7 +111,7 @@ Registradas com a medição que as justificou. Detalhamento em
 | Após cadastrar, ia para o Login | Entra direto no aplicativo | Pedir a senha recém-criada causa desistência |
 | *"Mexa como quiser"* nas cores | Três temas curados e validados | Escolha livre quebra a garantia de contraste |
 | Botão "Idiomas" | Removido enquanto houver um idioma | Opção que não faz nada desgasta a confiança |
-| Azul `#7090E8` | Removido da paleta | **Medido**: 3,07:1, reprova |
+| Azul `#7090E8` | Removido da paleta | **Medido**: 3,07:1 com branco, reprova como texto |
 | Azul `#1040F8` | **Mantido** | **Medido**: 6,75:1, aprovado |
 
 ---

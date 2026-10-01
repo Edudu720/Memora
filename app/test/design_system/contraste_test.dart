@@ -34,7 +34,7 @@ class _Par {
   const _Par(this.nome, this.frente, this.fundo, {this.grafico = false});
 }
 
-/// Os mesmos 16 pares por tema verificados em
+/// Os mesmos 17 pares por tema verificados em
 /// `specs/002-design-system/ferramentas/validar_paleta.py`.
 const List<_Par> _pares = <_Par>[
   _Par('texto sobre fundo', _texto, _fundo),

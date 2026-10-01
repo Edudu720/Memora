@@ -13,7 +13,7 @@ componentes com acessibilidade garantida **por construção**, não por discipli
 
 A paleta foi **derivada por medição**, não por escolha estética: 2,9 milhões de
 pixels amostrados das 38 telas do protótipo, seguidos de validação de contraste de
-48 pares nos três temas. O resultado preserva a identidade visual do projeto — o
+51 pares nos três temas. O resultado preserva a identidade visual do projeto — o
 azul `#1040F8` do protótipo já atendia à WCAG.
 
 Esta feature **desbloqueia** a 001 e todas as seguintes.
@@ -83,7 +83,7 @@ specs/002-design-system/
 ├── quickstart.md              # Fase 1 — validação
 ├── ferramentas/
 │   ├── amostrar_cores.py      # Amostragem do protótipo (executável)
-│   ├── medir_botoes.py        # Medição dos botões SIM/NÃO (executável)
+│   ├── (medir_botoes.py não está no repositório: a medição dos botões SIM/NÃO não é reexecutável)
 │   └── validar_paleta.py      # Portão de contraste (executável, passando)
 └── checklists/requirements.md
 ```
@@ -182,7 +182,7 @@ Registro para a defesa acadêmica, conforme FR-038.
 | Dados do Perfil como pílulas azuis | Componente de informação distinto | Impossível distinguir dado de ação |
 | "Mexa como quiser" nas cores | Três temas curados | Escolha livre quebra a garantia de contraste |
 | Botão "Idiomas" | Removido por ora | Opção que não faz nada desgasta a confiança |
-| `#7090E8` | Removido da paleta | 3,07:1 — reprova |
+| `#7090E8` | Removido da paleta | 3,07:1 sobre branco — reprova como texto; sem papel na paleta |
 | `#1040F8` | **Mantido** | 6,75:1 — aprovado, identidade preservada |
 
 ---

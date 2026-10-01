@@ -19,12 +19,12 @@
 | `#D8D8D8` | 12,37% | Superfície de cartão | 14,73:1 com texto preto |
 | `#1040F8` | 3,76% | **Cor primária** | **6,75:1** com texto branco ✅ |
 | `#78B8D8` | 0,68% | Balão do chat | 9,64:1 com texto preto ✅ |
-| `#7090E8` | 0,10% | Azul claro | **3,07:1** ❌ reprova |
+| `#7090E8` | 0,10% | Azul claro | **3,07:1** com branco (2,89:1 com o fundo) ❌ como texto; 6,15:1 com texto escuro |
 
 **Decisão**: manter `#1040F8` como cor primária e `#D8D8D8` como superfície. **A
 identidade visual do Memora é preservada** — ela já atende à WCAG.
 
-**Descartado**: `#7090E8` não pode carregar texto (3,07:1). Não entra na paleta.
+**Descartado**: `#7090E8` não serve como texto sobre fundo claro (3,07:1 com branco) nem leva texto branco por cima; só leva texto escuro (6,15:1), papel que a paleta não precisa. Não entra na paleta.
 
 **Rationale**: a expectativa inicial era de que a paleta do protótipo precisasse ser
 substituída. A medição desmentiu. Corrigir o que não está quebrado seria
@@ -32,7 +32,7 @@ descaracterizar o projeto sem ganho.
 
 ### Paleta final validada
 
-**48 pares testados nos três temas. Todos aprovados.** Ver
+**51 pares testados nos três temas. Todos aprovados.** Ver
 `ferramentas/validar_paleta.py` para os valores e a verificação reproduzível.
 
 Margens mais apertadas (as que exigem atenção em qualquer alteração futura):
@@ -47,7 +47,7 @@ Margens mais apertadas (as que exigem atenção em qualquer alteração futura):
 
 ## R2 — O defeito dos botões SIM/NÃO, medido
 
-Medição direta da tela de Chatbot (`ferramentas/medir_botoes.py`):
+Medição direta da tela de Chatbot (feita com um script avulso que nunca foi commitado; **não é reexecutável pelo repositório**):
 
 | Botão | Cor | Tamanho | Contraste com texto preto |
 |---|---|---|---|
@@ -165,7 +165,7 @@ grande.
 
 | Portão | Ferramenta | Verifica |
 |---|---|---|
-| Contraste | `ferramentas/validar_paleta.py` | 48 pares nos 3 temas (FR-030) |
+| Contraste | `ferramentas/validar_paleta.py` | 51 pares nos 3 temas (FR-030) |
 | Área de toque e semântica | `flutter_test` com `meetsGuideline` | 48 dp e rótulos (FR-031, FR-010) |
 | Valor literal | regra de análise estática | Cor ou espaçamento fora dos tokens (FR-032) |
 
