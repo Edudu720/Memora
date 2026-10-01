@@ -7,6 +7,9 @@ import '../../features/autenticacao/data/repositorio_autenticacao_simulado.dart'
 import '../../features/autenticacao/domain/autenticacao.dart';
 import '../seguranca/cofre_de_credenciais.dart';
 import 'ambiente.dart';
+import '../../features/assistente/data/conversa_local.dart';
+import '../../features/autenticacao/data/ultimo_acesso_local.dart';
+import '../seguranca/limpeza_de_sessao.dart';
 
 /// Monta as dependências do aplicativo, uma vez, na subida.
 ///
@@ -43,11 +46,15 @@ class Composicao {
   /// A assistente. **Sempre simulada por ora** — ver o cabeçalho.
   final RepositorioAssistente assistente;
 
+  /// O que a saída da conta tira do aparelho (FR-026, FR-048).
+  final LimpezaDeSessao limpeza;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
+    required this.limpeza,
   });
 
   /// Resolve as dependências a partir do ambiente.
@@ -58,6 +65,7 @@ class Composicao {
   factory Composicao.resolver({
     required Ambiente ambiente,
     required CofreDeCredenciais cofre,
+    required UltimoAcesso ultimoAcesso,
   }) {
     ambiente.exigirTlsForaDeDepuracao();
 
@@ -72,6 +80,16 @@ class Composicao {
       ambiente: ambiente,
       autenticacao: autenticacao,
       assistente: RepositorioAssistenteSimulado(),
+      // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
+      // precisa ser: a ordem exige que o token que autentica a chamada de
+      // saida so va embora depois que ela volta. Limpar duas vezes nao custa
+      // nada e mantem esta lista sendo a resposta completa para "o que a
+      // saida leva" — que e o valor de existir um lugar so.
+      limpeza: LimpezaDeSessao(
+        cofre: cofre,
+        ultimoAcesso: ultimoAcesso,
+        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal()],
+      ),
     );
   }
 

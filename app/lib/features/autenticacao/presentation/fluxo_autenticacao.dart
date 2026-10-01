@@ -25,6 +25,7 @@ import '../../hub/domain/hub.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
+import '../../../services/seguranca/limpeza_de_sessao.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -57,6 +58,13 @@ class FluxoAutenticacao extends StatefulWidget {
   /// não existe, e sem repositório não há o que listar.
   final RepositorioAssistente? assistente;
 
+  /// O que a saída da conta tira do aparelho (FR-026, FR-048).
+  ///
+  /// Opcional porque o teste de widget que só exercita telas não precisa
+  /// dela — mas, quando existe, ela roda em **toda** saída, inclusive a
+  /// automática por inatividade.
+  final LimpezaDeSessao? limpeza;
+
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
@@ -77,6 +85,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
     super.key,
+    this.limpeza,
   });
 
   @override
@@ -230,6 +239,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   Future<void> _sair() async {
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
+    await widget.limpeza?.executar();
     if (!mounted) return;
     _irParaLogin();
   }
@@ -256,6 +266,12 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   Future<void> _expirarPorInatividade() async {
     await widget.repositorio.encerrarSessao();
+
+    // A conversa sai aqui tambem, e nao so na saida deliberada. A FR-017
+    // existe para o celular esquecido na mesa — e e exatamente nesse caso
+    // que outra pessoa esta com o aparelho na mao. Apagar so no botao "sair"
+    // protegeria justamente quem nao precisava de protecao.
+    await widget.limpeza?.executar();
     if (!mounted) return;
 
     // Fecha o aviso antes de trocar de tela: deixá-lo aberto por cima do login

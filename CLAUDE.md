@@ -841,6 +841,36 @@ No `ClienteDaAssistenteSimulado` a sugestão maliciosa é produzida sob comando,
 em toda execução. **É a diferença entre torcer para o portão ser testado e
 testá-lo.**
 
+### A T069 e o que ela encontrou (2026-09-15)
+
+A tabela **"Onde cada cenário roda"**, no fim do
+[quickstart.md](specs/003-hub-e-assistente/quickstart.md), aponta qual teste é
+qual cenário. `H1` a `H11` estão automatizados; o `H12` são cinco pessoas.
+
+🔴 **A FR-048 não estava implementada, e a `LimpezaDeSessao` era código morto.**
+Sair da conta **não apagava a conversa do aparelho**, e a classe que deveria
+fazer isso não era usada por ninguém em `lib/` — só por um teste. A saída real
+chamava `_cofre.limpar()` direto, de dentro do `RepositorioAutenticacaoApi`.
+Consequência colateral: `esquecerTudo: true`, que este arquivo descrevia como
+"uma linha só, num lugar só", **não existia em lugar nenhum do aplicativo**.
+
+Hoje a `LimpezaDeSessao` recebe `List<DadoLocalDaPessoa>`, vem da `Composicao`
+e roda em **toda** saída — inclusive a automática por inatividade, que é
+justamente o caso do celular esquecido na mesa. O cofre continua sendo limpo
+também pelo repositório, e precisa: a ordem exige que o token que autentica a
+chamada de saída só vá embora depois que ela volta.
+
+⚠️ **T066 e T067 não pertenciam à fase 8.** A `tasks.md` os coloca junto com a
+escolha do provedor, e nenhum dos dois depende dela: o H5 é provado com o
+simulado **obedecendo** à injeção (depender de um modelo real resistir provaria
+menos), e o teto diário é inteiramente nosso. Os dois foram escritos na T069.
+
+⚠️ **O H10 diverge do que acontece no fio.** O cenário espera `429` com espera;
+a conversa é **SSE**, então quando a cota acaba o stream já respondeu `200` e o
+limite viaja como evento `erro` com `LIMITE_DE_CONVERSAS`. Não há campo de
+espera no corpo. Não é defeito — é o cenário descrevendo outra coisa. Decidir
+se corrige o texto ou o transporte.
+
 ### O que falta na 003
 
 | Fase | Tarefas | Situação |

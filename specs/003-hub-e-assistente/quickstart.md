@@ -202,3 +202,60 @@ tentativa; **3 de 5 conseguem repetir a tarefa sozinhas**.
 > O passo 4 é a feature inteira. Uma assistente que responde muito bem e cujas
 > pessoas não conseguem repetir nada sozinhas **reprova aqui** — por mais
 > satisfeitas que elas digam estar. É o Princípio VII virando número.
+
+---
+
+## Onde cada cenário roda (T069, 2026-09-15)
+
+"Executar de forma automatizada" só é verificável se dá para apontar **qual
+teste é qual cenário**. A tabela abaixo é esse apontamento, e o `@DisplayName`
+/ o cabeçalho de cada arquivo repete o número do cenário — procurar por `H3`
+no repositório leva ao lugar certo.
+
+| Cenário | Onde | Lado |
+|---|---|---|
+| **H1** | `app/test/features/hub/tela_hub_test.dart` | aplicativo |
+| **H2** | `app/test/features/assistente/tela_conversa_test.dart` | aplicativo |
+| **H3** 🔨 | `backend/.../assistente/SugestaoNaoEhAutorizacaoTest.java` | servidor |
+| **H4** | `app/test/features/assistente/servico_sensivel_test.dart` + a restrição `ck_servico_sensivel_nao_abre` (V4) | ambos |
+| **H5** | `backend/.../assistente/InjecaoNaoViraAcaoTest.java` | servidor |
+| **H6** 🔨 | `backend/.../assistente/ConversaNaoPersisteTest.java` (servidor) + `app/test/features/assistente/conversa_sai_do_aparelho_test.dart` (passos 4 e 5) | ambos |
+| **H7** 🔨 | `app/test/features/assistente/acao_confirmada_test.dart` | aplicativo |
+| **H8** | `app/test/features/assistente/acao_confirmada_test.dart` | aplicativo |
+| **H9** | `app/test/features/assistente/tela_registro_test.dart` | aplicativo |
+| **H10** | `backend/.../assistente/LimiteDeConversasTest.java` | servidor |
+| **H11** | `app/test/acessibilidade/` (T070) | aplicativo |
+| **H12** | ❌ **não automatizável** — são cinco pessoas | — |
+
+Rodar todos:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-21"; cd backend; .\mvnw clean test
+```
+
+```powershell
+cd app; flutter analyze; flutter test
+```
+
+### Três coisas que a T069 encontrou, e que este arquivo não previa
+
+**1. O H6 tinha metade sem teste, e a metade que faltava não funcionava.** Os
+passos 4 e 5 — sair da conta e a conversa não estar mais no aparelho (FR-048) —
+não eram cobertos por nada, e ao escrever o teste apareceu por quê: a
+`LimpezaDeSessao` **não apagava a conversa**, e ela **não era usada por ninguém
+em `lib/`** — só por um teste. A saída real chamava `_cofre.limpar()` direto,
+de dentro do repositório. Corrigido: a limpeza agora recebe os dados locais e é
+chamada em toda saída, inclusive a automática por inatividade.
+
+**2. O H5 e o H10 estavam na fase 8, e nenhum dos dois depende do provedor.**
+A `tasks.md` os coloca em T066 e T067, junto com a escolha do modelo. Mas o H5
+é provado com o simulado **obedecendo** à injeção — depender de um modelo real
+resistir provaria menos, não mais —, e o teto diário é inteiramente nosso. Os
+dois foram escritos aqui.
+
+**3. O H10 diverge do que acontece no fio.** O cenário espera `429` com espera.
+A conversa é **SSE**: quando a cota acaba, o stream já respondeu `200`, então o
+limite viaja como evento `erro` com o código `LIMITE_DE_CONVERSAS`. E não há
+campo de espera no corpo — a espera é "amanhã", que a frase já diz. Nenhuma das
+duas é defeito; as duas divergem do texto acima. **Decidir se corrige o cenário
+ou o transporte.**

@@ -47,6 +47,7 @@ class _CasaDemonstracaoState extends State<CasaDemonstracao> {
             // Esta tela nao sabe — e nao deve saber — com qual dos dois fala.
             repositorio: widget.composicao.autenticacao,
             ultimoAcesso: widget.ultimoAcesso,
+            limpeza: widget.composicao.limpeza,
             assistente: widget.composicao.assistente,
             abridor: const AbridorDeAplicativoAndroid(),
           ),
