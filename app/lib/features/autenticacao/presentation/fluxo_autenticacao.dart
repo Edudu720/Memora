@@ -247,7 +247,21 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     await widget.repositorio.encerrarSessao();
     await widget.limpeza?.executar();
     if (!mounted) return;
+    _fecharRotasAbertas();
     _irParaLogin();
+  }
+
+  /// Fecha tudo o que foi aberto por cima do fluxo (conversa, catalogo,
+  /// registro, aparencia).
+  ///
+  /// Trocar a etapa nao basta: essas telas sao rotas do Navigator e ficariam
+  /// por cima do login, com a conversa ainda na tela do celular esquecido na
+  /// mesa — a ameaca exata da FR-017. Volta-se a rota **deste fluxo**, e nao a
+  /// primeira: ele pode viver dentro de uma aba.
+  void _fecharRotasAbertas() {
+    final Route<dynamic>? rotaDoFluxo = ModalRoute.of(context);
+    if (rotaDoFluxo == null) return;
+    Navigator.of(context).popUntil((Route<dynamic> r) => r == rotaDoFluxo);
   }
 
   Future<void> _avisarDeInatividade(int segundosRestantes) async {
@@ -286,6 +300,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       Navigator.of(context).pop();
       _avisoNaTela = false;
     }
+    _fecharRotasAbertas();
     _irParaLogin();
   }
 
