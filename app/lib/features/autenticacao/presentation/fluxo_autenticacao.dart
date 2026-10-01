@@ -247,7 +247,37 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     await widget.repositorio.encerrarSessao();
     await widget.limpeza?.executar();
     if (!mounted) return;
+    _fecharRotasAbertas();
     _irParaLogin();
+  }
+
+  /// Uma rota aberta de dentro do fluxo, com a atividade contada (FR-017).
+  ///
+  /// **Toda** rota que o fluxo empurra passa por aqui. O `Listener` do Hub nao
+  /// alcanca o que o Navigator poe por cima dele, e sem isto quem conversa por
+  /// 28 minutos seria avisado e expulso sem ter ficado parado um segundo.
+  /// Num lugar so, para que uma rota nova nao esqueca.
+  Route<void> _rota({required WidgetBuilder builder}) {
+    return MaterialPageRoute<void>(
+      builder: (BuildContext contexto) => Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => _monitor.registrarAtividade(),
+        child: builder(contexto),
+      ),
+    );
+  }
+
+  /// Fecha tudo o que foi aberto por cima do fluxo (conversa, catalogo,
+  /// registro, aparencia).
+  ///
+  /// Trocar a etapa nao basta: essas telas sao rotas do Navigator e ficariam
+  /// por cima do login, com a conversa ainda na tela do celular esquecido na
+  /// mesa — a ameaca exata da FR-017. Volta-se a rota **deste fluxo**, e nao a
+  /// primeira: ele pode viver dentro de uma aba.
+  void _fecharRotasAbertas() {
+    final Route<dynamic>? rotaDoFluxo = ModalRoute.of(context);
+    if (rotaDoFluxo == null) return;
+    Navigator.of(context).popUntil((Route<dynamic> r) => r == rotaDoFluxo);
   }
 
   Future<void> _avisarDeInatividade(int segundosRestantes) async {
@@ -286,6 +316,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       Navigator.of(context).pop();
       _avisoNaTela = false;
     }
+    _fecharRotasAbertas();
     _irParaLogin();
   }
 
@@ -341,7 +372,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           descricao: TextosAssistente.descricaoRegistro,
           icone: Icons.history_outlined,
           aoAbrir: () => Navigator.of(context).push<void>(
-            MaterialPageRoute<void>(
+            _rota(
               builder: (BuildContext contexto) => TelaRegistro(
                 repositorio: assistente,
                 aoVoltar: () => Navigator.of(contexto).pop(),
@@ -358,7 +389,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         // dividem a atencao de quem precisa de um caminho so.
         principal: assistente == null,
         aoAbrir: () => Navigator.of(context).push<void>(
-          MaterialPageRoute<void>(
+          _rota(
             builder: (BuildContext _) => const _PaginaDeAparencia(),
           ),
         ),
@@ -376,7 +407,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     CategoriaDoServico categoria,
   ) {
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
+      _rota(
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
@@ -400,7 +431,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     String rascunho = '',
   }) {
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
+      _rota(
         // Quem cria é dono: o controlador nasce e morre com a rota, e não
         // sobra cronômetro nem resposta em voo depois de a pessoa sair da
         // tela — ou da conta (FR-048).

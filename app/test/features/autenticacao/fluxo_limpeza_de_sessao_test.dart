@@ -90,6 +90,13 @@ void main() {
     await t.ensureVisible(sair);
     await t.pump();
     await t.tap(sair);
+    await avancar(t);
+
+    // Sair pede confirmacao (FR-025): o segundo toque e o que encerra.
+    final Finder confirmar = find.text(TextosAutenticacao.botaoConfirmarSaida);
+    await t.ensureVisible(confirmar);
+    await t.pump();
+    await t.tap(confirmar);
     await avancar(t, 6);
 
     expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
