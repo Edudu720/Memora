@@ -200,11 +200,11 @@ nem visualmente nem semanticamente.
 
 ## Phase 8: Validação final
 
-- [ ] **T049** Executar V1 a V6, V9 e V10 de [quickstart.md](quickstart.md)
+- [X] **T049** Executar V1 a V6, V9 e V10 de [quickstart.md](quickstart.md)
 - [ ] **T050** Executar **V7** — 5 pessoas de 65+ anos apontando o que acham
       clicável na tela de perfil. Meta: **zero** campos de informação apontados
 - [ ] **T051** Executar **V8** — confirmação sem toque acidental, com o mesmo grupo
-- [ ] **T052** Registrar em `docs/design/divergencias-do-prototipo.md` cada
+- [X] **T052** Registrar em `docs/design/divergencias-do-prototipo.md` cada
       divergência com a medição que a justificou (FR-038)
 - [ ] **T053** Revisões obrigatórias: código, UX, acessibilidade, performance,
       segurança e arquitetura
