@@ -182,7 +182,7 @@ presente, porque procurava o ícone errado. Só apareceu ao ser quebrado.
 
 `tokens/cores.dart` é a contraparte em código de `validar_paleta.py`. **Alterar
 um valor lá sem rodar o validador é como um par de contraste reprova em
-silêncio.** São 48 pares nos três temas, e o de alto contraste exige 7:1 onde os
+silêncio.** São 51 pares nos três temas, e o de alto contraste exige 7:1 onde os
 outros exigem 4,5:1.
 
 O azul `#1040F8` veio do protótipo e mede 6,75:1 com texto branco. A identidade

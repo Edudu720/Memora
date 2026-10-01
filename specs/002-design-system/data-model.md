@@ -7,7 +7,7 @@
 
 ## Tokens de cor
 
-Valores validados em `ferramentas/validar_paleta.py`. **48 pares, 3 temas, todos
+Valores validados em `ferramentas/validar_paleta.py`. **51 pares, 3 temas, todos
 aprovados.** Alterar qualquer valor exige rodar o validador novamente.
 
 | Token | Papel | Claro | Escuro | Alto contraste |
@@ -27,7 +27,7 @@ aprovados.** Alterar qualquer valor exige rodar o validador novamente.
 **Origem**: `fundo`, `superficie_alt` e `primaria` foram **amostrados do protótipo**
 (R1). Os demais foram derivados e ajustados até passarem no validador.
 
-**Removido**: `#7090E8` — 3,07:1 sobre branco, reprova. Não existe na paleta.
+**Removido**: `#7090E8` — 3,07:1 sobre branco, reprova como texto (só aceita texto escuro, 6,15:1, papel que a paleta não precisa). Não existe na paleta.
 
 ### Regra de composição
 

@@ -996,11 +996,18 @@ num build de release, **não existe botão** que leve à galeria, em vez de
 existir um botão que leva a uma recusa. Há teste prendendo esse contrato: se
 alguém trocar o retorno por `Widget` não-anulável, ele para de compilar.
 
-⚠️ **Montar a galeria é teste de fumaça do sistema inteiro.**
-`test/design_system/galeria_test.dart` a monta na matriz de aparelhos × escalas
-× três temas. Componente que estoure em qualquer combinação estoura ali, sem
-ninguém escrever caso para ele — e foi assim que a **própria galeria** apareceu
-estourando 18 px em 200%, antes de existir por cinco minutos.
+⚠️ **Percorrer a galeria é teste de fumaça do sistema inteiro — mas só se
+rolar.** A lista é uma `ListView`, que só constrói e mede o que está na janela:
+a primeira versão de `test/design_system/galeria_test.dart` montava a galeria e
+olhava `takeException()`, e o campo de senha, o de código, a confirmação e a
+navegação **nunca eram construídos**. Hoje o teste rola a lista inteira, em
+passos de meia janela, checando exceção a cada passo, e no fim afirma que 14
+tipos de componente — um de cada região, até a `NavegacaoInferior`, o último —
+chegaram a ser construídos. Isso roda na matriz de 4 aparelhos × 3 escalas, e
+nos **três temas** só no aparelho mais estreito (320×568) a 200%. Provado: com
+um estouro horizontal no fim da lista, o teste antigo passava e o novo reprova
+nos 15 casos. A própria galeria apareceu estourando 18 px em 200%, antes de
+existir por cinco minutos.
 
 **O portão da FR-032 é `specs/002-design-system/ferramentas/validar_tokens.py`**,
 com job próprio no CI. Ele varre `app/lib/` atrás de cor, espaçamento, raio e

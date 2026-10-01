@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validar os 48 pares dos três temas
+      - name: Validar os 51 pares dos três temas
         run: python specs/002-design-system/ferramentas/validar_paleta.py
 
   tokens:
