@@ -76,11 +76,14 @@ public class LimitePorConta {
      * {@link UsoDaAssistente#registrarTurno}; aqui só se carrega, grava e
      * devolve.
      *
-     * <p>⚠️ Não há trava de linha: dois turnos simultâneos da mesma conta leem o
-     * mesmo estado, e o teto pode ser passado por um. Já era assim antes da
-     * FR-053. Para uma pessoa digitando é inalcançável; para um robô, a
-     * diferença é de uma conversa — e fechar isso é trava pessimista na
-     * consulta, não mudança aqui.
+     * <p>Turnos simultâneos da mesma conta são serializados no banco. Primeiro
+     * {@code INSERT ... ON CONFLICT DO NOTHING} garante a linha do dia (dois
+     * primeiros usos não colidem na chave), depois a linha é lida com trava
+     * pessimista: quem chega depois espera o commit de quem chegou antes e lê o
+     * estado já gravado. Sem a trava, N requisições paralelas leriam o mesmo
+     * contador e todas passariam — o contador subiria 1 em vez de N, e um robô
+     * contornaria o teto inteiro. É uma trava por conta e por dia, então contas
+     * diferentes não esperam umas pelas outras.
      *
      * <p>Chame <b>antes</b> de falar com o provedor, e não depois: contar só o
      * que deu certo permitiria gastar a cota inteira em chamadas que falham no
@@ -89,9 +92,13 @@ public class LimitePorConta {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UsoDaAssistente.Desfecho registrarTurno(UUID pessoaId) {
         LocalDate hoje = hoje();
+        usos.garantirLinhaDoDia(pessoaId, hoje);
         UsoDaAssistente uso =
-                usos.findByPessoaIdAndDia(pessoaId, hoje)
-                        .orElseGet(() -> UsoDaAssistente.primeiroDoDia(pessoaId, hoje));
+                usos.findParaAtualizar(pessoaId, hoje)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "a linha do dia deveria existir depois do upsert"));
         UsoDaAssistente.Desfecho desfecho = uso.registrarTurno(relogio.instant(), teto);
         if (desfecho != UsoDaAssistente.Desfecho.TETO_ATINGIDO) {
             usos.save(uso);
