@@ -42,6 +42,18 @@ public class ServicoConhecido {
     @Column(nullable = false, updatable = false)
     private UUID id;
 
+    /**
+     * Identificador estável do item, igual em qualquer banco (V8, feature 004).
+     *
+     * <p>É o que liga o item ao guia de passo a passo embarcado no aplicativo: o
+     * {@code id} é um UUID sorteado em cada banco e não serve para isso. O
+     * {@code id} continua sendo o que a trilha de auditoria referencia — a
+     * chave só acrescenta um nome que não muda. ASCII minúsculo, números e
+     * hífen; o banco recusa qualquer outra coisa e recusa repetição.
+     */
+    @Column(nullable = false, updatable = false, length = 40)
+    private String chave;
+
     @Column(name = "nome_exibido", nullable = false, length = 80)
     private String nomeExibido;
 
@@ -77,9 +89,9 @@ public class ServicoConhecido {
      * sensível abrível.
      */
     public static ServicoConhecido sensivel(
-            String nomeExibido, String descricaoCurta, Instant agora) {
+            String chave, String nomeExibido, String descricaoCurta, Instant agora) {
         return new ServicoConhecido(
-                CategoriaDoServico.SENSIVEL, nomeExibido, null, descricaoCurta, agora);
+                chave, CategoriaDoServico.SENSIVEL, nomeExibido, null, descricaoCurta, agora);
     }
 
     /**
@@ -89,11 +101,13 @@ public class ServicoConhecido {
      *     abrir, e a restrição do banco recusaria a linha
      */
     public static ServicoConhecido cotidiano(
+            String chave,
             String nomeExibido,
             String identificadorAndroid,
             String descricaoCurta,
             Instant agora) {
         return new ServicoConhecido(
+                chave,
                 CategoriaDoServico.COTIDIANO,
                 nomeExibido,
                 Objects.requireNonNull(identificadorAndroid, "identificadorAndroid"),
@@ -102,12 +116,14 @@ public class ServicoConhecido {
     }
 
     private ServicoConhecido(
+            String chave,
             CategoriaDoServico categoria,
             String nomeExibido,
             String identificadorAndroid,
             String descricaoCurta,
             Instant agora) {
         this.id = UUID.randomUUID();
+        this.chave = Objects.requireNonNull(chave, "chave");
         this.categoria = Objects.requireNonNull(categoria, "categoria");
         this.nomeExibido = Objects.requireNonNull(nomeExibido, "nomeExibido");
         this.identificadorAndroid = identificadorAndroid;
@@ -137,6 +153,10 @@ public class ServicoConhecido {
 
     public UUID getId() {
         return id;
+    }
+
+    public String getChave() {
+        return chave;
     }
 
     public String getNomeExibido() {
@@ -183,7 +203,7 @@ public class ServicoConhecido {
 
     @Override
     public String toString() {
-        return "ServicoConhecido[id=%s, nome=%s, categoria=%s, ativo=%s]"
-                .formatted(id, nomeExibido, categoria, ativo);
+        return "ServicoConhecido[id=%s, chave=%s, nome=%s, categoria=%s, ativo=%s]"
+                .formatted(id, chave, nomeExibido, categoria, ativo);
     }
 }

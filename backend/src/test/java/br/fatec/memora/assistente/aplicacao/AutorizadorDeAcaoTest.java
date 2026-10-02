@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import br.fatec.memora.assistente.dominio.ServicoConhecido;
 import br.fatec.memora.assistente.infra.ClienteDaAssistente;
 import br.fatec.memora.assistente.infra.RepositorioServicoConhecido;
+import br.fatec.memora.suporte.ChaveDeTeste;
 import br.fatec.memora.suporte.TesteComBanco;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ class AutorizadorDeAcaoTest extends TesteComBanco {
                 servicos
                         .save(
                                 ServicoConhecido.cotidiano(
+                                        ChaveDeTeste.nova(),
                                         "Aplicativo de teste",
                                         PACOTE_COTIDIANO,
                                         "Mensagens",
@@ -62,6 +64,7 @@ class AutorizadorDeAcaoTest extends TesteComBanco {
                 servicos
                         .save(
                                 ServicoConhecido.sensivel(
+                                        ChaveDeTeste.nova(),
                                         "Servico sensivel de teste",
                                         "Beneficios",
                                         Instant.now()))

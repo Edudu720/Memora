@@ -37,26 +37,62 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
   /// o servidor recusa.
   static const List<ServicoDoCatalogo> catalogoDaDemonstracao =
       <ServicoDoCatalogo>[
+    // Espelha o catálogo real (migrations V5, V6 e V8). Um simulado que
+    // mostrasse serviços que o banco não tem faria a demonstração prometer o
+    // que o produto não entrega — apareceu ao rodar no emulador. Agora há teste
+    // que pega a divergência de chaves (catalogo_e_guias_test.dart); a
+    // descrição e a categoria continuam por conta de quem mexe no catálogo.
     ServicoDoCatalogo(
       id: 'whatsapp',
+      chave: 'whatsapp',
       nomeExibido: 'WhatsApp',
       descricaoCurta: 'Mandar mensagem e fazer chamada de vídeo',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
     ),
     ServicoDoCatalogo(
+      id: 'facebook',
+      chave: 'facebook',
+      nomeExibido: 'Facebook',
+      descricaoCurta: 'Ver o que a família e os amigos postaram',
+      categoria: CategoriaDoServico.cotidiano,
+      memoraPodeAbrir: true,
+    ),
+    ServicoDoCatalogo(
+      id: 'instagram',
+      chave: 'instagram',
+      nomeExibido: 'Instagram',
+      descricaoCurta: 'Ver fotos e vídeos de quem você segue',
+      categoria: CategoriaDoServico.cotidiano,
+      memoraPodeAbrir: true,
+    ),
+    ServicoDoCatalogo(
       id: 'youtube',
+      chave: 'youtube',
       nomeExibido: 'YouTube',
       descricaoCurta: 'Ver vídeos',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
     ),
-    // Espelha o catálogo real (migrations V5 e V6). Um simulado que mostrasse
-    // serviços que o banco não tem faria a demonstração prometer o que o
-    // produto não entrega — apareceu ao rodar no emulador, e vale manter os
-    // dois lados iguais a cada mudança de catálogo.
+    ServicoDoCatalogo(
+      id: 'google-fotos',
+      chave: 'google-fotos',
+      nomeExibido: 'Google Fotos',
+      descricaoCurta: 'Ver as fotos que você tirou e as que te enviaram',
+      categoria: CategoriaDoServico.cotidiano,
+      memoraPodeAbrir: true,
+    ),
+    ServicoDoCatalogo(
+      id: 'telegram',
+      chave: 'telegram',
+      nomeExibido: 'Telegram',
+      descricaoCurta: 'Outro jeito de mandar mensagem',
+      categoria: CategoriaDoServico.cotidiano,
+      memoraPodeAbrir: true,
+    ),
     ServicoDoCatalogo(
       id: 'gov-br',
+      chave: 'gov-br',
       nomeExibido: 'Gov.br',
       descricaoCurta: 'Documentos, benefícios e agendamentos do governo',
       categoria: CategoriaDoServico.sensivel,
@@ -64,6 +100,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
     ),
     ServicoDoCatalogo(
       id: 'meu-inss',
+      chave: 'meu-inss',
       nomeExibido: 'Meu INSS',
       descricaoCurta: 'Ver seu benefício, extrato e agendar atendimento',
       categoria: CategoriaDoServico.sensivel,

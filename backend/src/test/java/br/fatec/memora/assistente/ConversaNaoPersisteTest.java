@@ -7,6 +7,7 @@ import br.fatec.memora.assistente.dominio.ServicoConhecido;
 import br.fatec.memora.assistente.infra.ClienteDaAssistente;
 import br.fatec.memora.assistente.infra.ClienteDaAssistenteSimulado;
 import br.fatec.memora.assistente.infra.RepositorioServicoConhecido;
+import br.fatec.memora.suporte.ChaveDeTeste;
 import br.fatec.memora.suporte.TesteComBanco;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ class ConversaNaoPersisteTest extends TesteComBanco {
                 servicos
                         .save(
                                 ServicoConhecido.cotidiano(
+                                        ChaveDeTeste.nova(),
                                         "Mensagens de teste",
                                         "com.teste.mensagens",
                                         "Mensagens",

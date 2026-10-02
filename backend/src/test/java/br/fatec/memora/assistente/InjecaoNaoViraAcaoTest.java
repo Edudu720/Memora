@@ -7,6 +7,7 @@ import br.fatec.memora.assistente.dominio.ServicoConhecido;
 import br.fatec.memora.assistente.infra.ClienteDaAssistente;
 import br.fatec.memora.assistente.infra.ClienteDaAssistenteSimulado;
 import br.fatec.memora.assistente.infra.RepositorioServicoConhecido;
+import br.fatec.memora.suporte.ChaveDeTeste;
 import br.fatec.memora.suporte.TesteComBanco;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -85,12 +86,14 @@ class InjecaoNaoViraAcaoTest extends TesteComBanco {
                 servicos
                         .save(
                                 ServicoConhecido.sensivel(
+                                        ChaveDeTeste.nova(),
                                         "Banco de teste", "Conta e pagamentos", Instant.now()))
                         .getId());
         criados.add(
                 servicos
                         .save(
                                 ServicoConhecido.cotidiano(
+                                        ChaveDeTeste.nova(),
                                         "Video de teste",
                                         "com.teste.video",
                                         "Videos",
