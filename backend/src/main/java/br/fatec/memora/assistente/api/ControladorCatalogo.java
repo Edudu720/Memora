@@ -48,6 +48,7 @@ public class ControladorCatalogo {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record ServicoResposta(
             @JsonProperty("id") UUID id,
+            @JsonProperty("chave") String chave,
             @JsonProperty("nome_exibido") String nomeExibido,
             @JsonProperty("descricao_curta") String descricaoCurta,
             @JsonProperty("categoria") String categoria,
@@ -103,6 +104,7 @@ public class ControladorCatalogo {
     private ServicoResposta corpoDe(ServicoConhecido servico) {
         return new ServicoResposta(
                 servico.getId(),
+                servico.getChave(),
                 servico.getNomeExibido(),
                 servico.getDescricaoCurta(),
                 servico.getCategoria().name().toLowerCase(Locale.ROOT),

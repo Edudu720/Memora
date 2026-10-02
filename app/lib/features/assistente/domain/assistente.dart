@@ -82,7 +82,17 @@ enum CategoriaDoServico {
 @immutable
 class ServicoDoCatalogo {
   /// Identificador.
+  ///
+  /// É o que o servidor usa para o resto — a trilha de auditoria, por exemplo.
+  /// Muda de banco para banco; não serve para ligar o item ao que vive fora dele.
   final String id;
+
+  /// Identificador estável, igual em qualquer banco.
+  ///
+  /// É o que liga o item ao guia de passo a passo embarcado no aplicativo
+  /// (feature 004). Só letras minúsculas, números e hífen, até 40 caracteres —
+  /// a mesma restrição que o banco aplica.
+  final String chave;
 
   /// Como a pessoa o chama.
   final String nomeExibido;
@@ -103,6 +113,7 @@ class ServicoDoCatalogo {
   /// Cria um serviço do catálogo.
   const ServicoDoCatalogo({
     required this.id,
+    required this.chave,
     required this.nomeExibido,
     required this.descricaoCurta,
     required this.categoria,

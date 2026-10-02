@@ -238,11 +238,19 @@ components:
 
     Servico:
       type: object
-      required: [id, nome_exibido, categoria, memora_pode_abrir]
+      required: [id, chave, nome_exibido, categoria, memora_pode_abrir]
       properties:
         id:
           type: string
           format: uuid
+        chave:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          maxLength: 40
+          description: |
+            Identificador estável do item, igual em qualquer banco. É o que liga o
+            item ao guia de passo a passo embarcado no aplicativo. O `id` continua
+            sendo o que a trilha de auditoria referencia.
         nome_exibido:
           type: string
         descricao_curta:

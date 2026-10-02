@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import br.fatec.memora.suporte.ChaveDeTeste;
 import br.fatec.memora.suporte.TesteComBanco;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -187,11 +188,12 @@ class PortoesDoEsquemaDaAssistenteTest extends TesteComBanco {
         jdbc.update(
                 """
                 INSERT INTO servico_conhecido
-                    (id, nome_exibido, categoria, identificador_android,
+                    (id, chave, nome_exibido, categoria, identificador_android,
                      descricao_curta, ativo, criado_em, atualizado_em)
-                VALUES (?, ?, ?, ?, 'descricao', TRUE, now(), now())
+                VALUES (?, ?, ?, ?, ?, 'descricao', TRUE, now(), now())
                 """,
                 UUID.randomUUID(),
+                ChaveDeTeste.nova(),
                 MARCADOR,
                 categoria,
                 pacote);
