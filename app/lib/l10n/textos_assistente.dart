@@ -224,10 +224,9 @@ class TextosAssistente {
       'você não vai mais precisar de mim para isso 😊';
 
   /// O que foi feito, numa frase.
-  static String oQueFoiFeito(String aplicativo, String pedido) =>
-      pedido.isEmpty
-          ? 'Abri o $aplicativo para você'
-          : 'Abri o $aplicativo, porque você me pediu: "$pedido"';
+  static String oQueFoiFeito(String aplicativo, String pedido) => pedido.isEmpty
+      ? 'Abri o $aplicativo para você'
+      : 'Abri o $aplicativo, porque você me pediu: "$pedido"';
 
   /// Quando aconteceu, do jeito que uma pessoa fala.
   ///
@@ -235,8 +234,18 @@ class TextosAssistente {
   /// auditando um sistema, está lembrando de um dia.
   static String quandoAconteceu(DateTime momento) {
     const List<String> meses = <String>[
-      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+      'janeiro',
+      'fevereiro',
+      'março',
+      'abril',
+      'maio',
+      'junho',
+      'julho',
+      'agosto',
+      'setembro',
+      'outubro',
+      'novembro',
+      'dezembro',
     ];
     final String hora = momento.hour.toString().padLeft(2, '0');
     final String minuto = momento.minute.toString().padLeft(2, '0');
