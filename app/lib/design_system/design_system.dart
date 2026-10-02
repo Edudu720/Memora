@@ -22,6 +22,8 @@ export 'componentes/feedback/estado_vazio.dart';
 export 'componentes/feedback/mensagem_erro.dart';
 export 'componentes/ilustracao/avatar_memora.dart';
 export 'componentes/ilustracao/ilustracao_memora.dart';
+export 'componentes/ilustracao/medalhao_de_ilustracao.dart';
+export 'componentes/ilustracao/memora_personagem.dart';
 export 'componentes/informacao/campo_informacao.dart';
 export 'componentes/informacao/destaque_informacao.dart';
 export 'componentes/informacao/lista_informacao.dart';

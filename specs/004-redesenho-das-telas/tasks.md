@@ -22,11 +22,11 @@ cenários que são portão de saída da feature.
 
 ## ⚠️ A ordem desta lista tem um propósito
 
-1. **A fonte vem antes de qualquer tela.** A Atkinson Hyperlegible Next é mais
-   larga que a Roboto, e trocá-la pode estourar telas que hoje passam (R3).
-   A T009 roda a suíte inteira com a fonte nova e corrige o que quebrar
-   **antes** de existir tela nova — senão um estouro antigo parece defeito da
-   tela nova.
+1. **A fonte vem antes de qualquer tela.** A T009 roda a suíte inteira com a
+   família nova e confere que **nada mudou**: a matriz mede com a fonte
+   quadrada do `flutter test`, pessimista nas duas direções (R3, corrigida ao
+   implementar). Se algum resultado mudar, algum teste passou a carregar fonte,
+   e isso se investiga antes de existir tela nova.
 2. **A US2 vem antes da US1**, embora as duas sejam P1. O Início e o Hub são as
    telas mais vistas e fixam a linguagem que as outras copiam (R14). A fase da
    US2 **termina numa revisão de design da equipe** (T044): se ela reprovar,
@@ -84,16 +84,16 @@ cenários que são portão de saída da feature.
 
 ### A fonte e os tokens
 
-- [ ] T007 Aplicar a família em todos os estilos e criar `MemoraTipografia.destaque` (~36) em `app/lib/design_system/tokens/tipografia.dart`, e ligar a família ao `ThemeData` em `app/lib/design_system/temas/temas_memora.dart`. Carregar a fonte nos testes (`FontLoader`) num auxiliar em `app/test/suporte/fonte.dart`, para a matriz medir com a fonte real e não com a de teste
+- [ ] T007 Aplicar a família em todos os estilos e criar `MemoraTipografia.destaque` (~36) em `app/lib/design_system/tokens/tipografia.dart`, e ligar a família ao `ThemeData` em `app/lib/design_system/temas/temas_memora.dart`. Criar em `app/test/suporte/fonte.dart` um auxiliar que carrega a Atkinson com `FontLoader` **só para o álbum de telas** (T043); a matriz continua com a fonte quadrada do `flutter test`, que é pessimista nas duas direções (R3)
 - [ ] T008 [P] Acrescentar a `app/lib/design_system/tokens/dimensoes.dart` os tokens de [contracts/componentes.md](contracts/componentes.md): `ilustracaoCartao`, `ilustracaoCabecalho`, `ilustracaoHeroi`, `pisoDeIlustracao` e as frações `tetoDoAvisoAberto = 0.5` e `alturaMinimaDaTarefa = 0.5`
-- [ ] T009 Rodar `flutter test` inteiro com a fonte nova (depois de T007) e **corrigir cada estouro nas telas que já existem** em `app/lib/features/` e `app/lib/design_system/`, numa PR própria antes de qualquer tela nova. Registrar na PR quais telas quebraram e por quantos px — se nenhuma quebrar, conferir que a T007 de fato carregou a fonte nos testes
+- [ ] T009 Rodar `flutter test` inteiro com a família nova (depois de T007) e **conferir que nenhum resultado mudou** em relação aos 481 de antes: a matriz não carrega fonte, então a troca de família não pode mexer nela (R3). Se algo mudar, investigar qual teste passou a carregar fonte antes de seguir
 
 ### Ilustrações e a Memora
 
 - [ ] T010 [P] Desenhar a Memora em SVG, a partir do robô do wireframe, com quatro expressões: `app/assets/ilustracoes/memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg` e `memora_preocupada.svg`; registrar em `LICENCAS.md`
 - [ ] T011 [P] Selecionar e recolorir com a paleta as ilustrações de licença aberta (R4): pessoas; portas do Hub (conversa, aplicativos, serviços sociais, ajuda, registro); os 8 assuntos da Ajuda; os 3 grupos de Configurações; estados vazio e erro; aplicativo genérico; e os **pictogramas** dos 9 serviços sociais (prédio, documento, carteira, envelope…), **sem logotipo oficial** (R7). Tudo em `app/assets/ilustracoes/`, cada arquivo com linha em `LICENCAS.md`
 - [ ] T012 Acrescentar as ilustrações novas ao enum `Ilustracao` e o **medalhão** claro para os temas escuro e de alto contraste em `app/lib/design_system/componentes/ilustracao/ilustracao_memora.dart`; estender `app/test/design_system/ilustracao_e_destaque_test.dart` para conferir que toda ilustração do enum carrega e que, nos temas escuros, as coloridas estão sobre medalhão
-- [ ] T013 Criar `MemoraPersonagem` em `app/lib/design_system/componentes/ilustracao/memora_personagem.dart` (expressões, decorativa por padrão, anunciada com `descricao`), migrar todos os usos do `AvatarMemora` e apagar `avatar_memora.dart`
+- [ ] T013 Criar `MemoraPersonagem` em `app/lib/design_system/componentes/ilustracao/memora_personagem.dart` (expressões, decorativa por padrão, anunciada com `descricao`). **É componente novo**: o `AvatarMemora` que já existe é o retrato do casal no cartão do cadastro e do login, e não o rosto da Memora — ele continua (correção feita ao implementar)
 
 ### Componentes comuns
 

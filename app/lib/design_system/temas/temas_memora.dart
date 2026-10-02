@@ -31,6 +31,9 @@ abstract final class TemasMemora {
 
     return ThemeData(
       useMaterial3: true,
+      // Os componentes do Material (diálogo, campo, folha) herdam a família
+      // daqui; os nossos já a recebem pelos estilos de MemoraTipografia.
+      fontFamily: MemoraTipografia.familia,
       brightness: brilho,
       scaffoldBackgroundColor: c.fundo,
       colorScheme: ColorScheme(
@@ -47,7 +50,8 @@ abstract final class TemasMemora {
         surfaceContainerHighest: c.superficieAlt,
       ),
       textTheme: TextTheme(
-        displayLarge: MemoraTipografia.tituloTela.copyWith(color: c.texto),
+        displayLarge: MemoraTipografia.destaque.copyWith(color: c.texto),
+        displayMedium: MemoraTipografia.tituloTela.copyWith(color: c.texto),
         headlineMedium: MemoraTipografia.tituloSecao.copyWith(color: c.texto),
         bodyLarge: MemoraTipografia.corpo.copyWith(color: c.texto),
         bodyMedium: MemoraTipografia.corpo.copyWith(color: c.texto),

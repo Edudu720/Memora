@@ -33,6 +33,8 @@ TEMAS = {
             "fundo":            "#F8F8F8",  # amostrado do prototipo
             "superficie":       "#FFFFFF",
             "superficie_alt":   "#D8D8D8",  # amostrado do prototipo
+            "destaque":         "#E3EAFF",  # feature 004
+            "medalhao":         "#E3EAFF",  # decorativo, sem par: nada se escreve sobre ele
             "primaria":         "#1040F8",  # amostrado do prototipo
             "sobre_primaria":   "#FFFFFF",
             "texto":            "#111111",
@@ -49,6 +51,8 @@ TEMAS = {
             "fundo":            "#101216",
             "superficie":       "#1B1E24",
             "superficie_alt":   "#2A2E36",
+            "destaque":         "#22305A",  # feature 004
+            "medalhao":         "#DCE5FF",  # claro de proposito, ver cores.dart
             "primaria":         "#9CB8FF",
             "sobre_primaria":   "#06132E",
             "texto":            "#F2F4F8",
@@ -65,6 +69,8 @@ TEMAS = {
             "fundo":            "#000000",
             "superficie":       "#000000",
             "superficie_alt":   "#1A1A1A",
+            "destaque":         "#10245A",  # feature 004
+            "medalhao":         "#DCE5FF",
             "primaria":         "#8FB4FF",
             "sobre_primaria":   "#000000",
             "texto":            "#FFFFFF",
@@ -96,6 +102,12 @@ PARES = [
     ("borda",          "fundo",          "grafico"),
     ("borda",          "superficie",     "grafico"),
     ("primaria",       "superficie_alt", "grafico"),
+    # feature 004: o tom suave da primaria. Ele NUNCA e o unico sinal de estado
+    # (mede so 1,1 a 1,6:1 contra fundo e superficie); o que importa e o que
+    # se escreve por cima dele.
+    ("texto",          "destaque",       "texto"),
+    ("texto_suave",    "destaque",       "texto"),
+    ("primaria",       "destaque",       "texto"),
 ]
 
 def main():

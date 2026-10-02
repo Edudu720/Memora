@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
-import '../../tokens/tipografia.dart';
 import 'texto_memora.dart';
 
 /// Frase com palavras-chave realçadas, como nas telas do protótipo.
@@ -71,13 +70,7 @@ class TextoComDestaque extends StatelessWidget {
     return resultado;
   }
 
-  TextStyle get _base => switch (estilo) {
-    EstiloTexto.tituloTela => MemoraTipografia.tituloTela,
-    EstiloTexto.tituloSecao => MemoraTipografia.tituloSecao,
-    EstiloTexto.corpo => MemoraTipografia.corpo,
-    EstiloTexto.corpoForte => MemoraTipografia.corpoForte,
-    EstiloTexto.apoio => MemoraTipografia.apoio,
-  };
+  TextStyle get _base => estilo.base;
 
   @override
   Widget build(BuildContext context) {

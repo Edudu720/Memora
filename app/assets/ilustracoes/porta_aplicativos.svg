@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
+  <!--
+    Porta "Meus aplicativos": um celular com a grade de aplicativos.
+
+    Desenho original da equipe (feature 004, T011), no estilo da Memora: formas
+    planas e arredondadas, sem contorno, cores da marca. Sem fundo: quem desenha
+    o medalhao e o IlustracaoMemora.
+  -->
+  <rect x="30" y="8" width="60" height="104" rx="14" fill="#0B1B4D"/>
+  <rect x="36" y="18" width="48" height="80" rx="6" fill="#F4F7FF"/>
+  <rect x="50" y="102" width="20" height="4" rx="2" fill="#8FB4FF"/>
+  <rect x="42" y="26" width="16" height="16" rx="5" fill="#1040F8"/>
+  <rect x="62" y="26" width="16" height="16" rx="5" fill="#FFC83D"/>
+  <rect x="42" y="48" width="16" height="16" rx="5" fill="#FF9FB2"/>
+  <rect x="62" y="48" width="16" height="16" rx="5" fill="#5B80FF"/>
+  <rect x="42" y="70" width="16" height="16" rx="5" fill="#8FB4FF"/>
+  <rect x="62" y="70" width="16" height="16" rx="5" fill="#1040F8"/>
+</svg>

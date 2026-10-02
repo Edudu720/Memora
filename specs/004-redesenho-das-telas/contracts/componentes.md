@@ -86,7 +86,7 @@ barra sozinha seria informação só visual.
 
 ## `MemoraPersonagem`
 
-Substitui o `AvatarMemora`. Expressões: `neutra`, `falando`, `comemorando`,
+Componente **novo** — não confundir com o `AvatarMemora`, que é o retrato do casal no cartão do cadastro e do login e continua existindo. Expressões: `neutra`, `falando`, `comemorando`,
 `preocupada`. Decorativa por padrão; com `descricao`, anunciada. Nos temas escuro
 e de alto contraste, sobre medalhão claro (R4).
 

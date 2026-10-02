@@ -103,9 +103,32 @@ que autoriza embarcar a fonte. Se não for OFL, a decisão volta para cá.
 ⚠️ **Binário novo precisa entrar no `.gitattributes` antes do commit** — é a
 regra que a PR #29 deixou, para `core.autocrlf` não corromper o `.ttf`.
 
-⚠️ **A Atkinson é mais larga que a Roboto.** A matriz de estouro inteira precisa
-rodar de novo com ela, nas telas que já existem, antes de qualquer tela nova.
-É a primeira tarefa da fase de fundação.
+~~⚠️ **A Atkinson é mais larga que a Roboto.** A matriz de estouro inteira precisa
+rodar de novo com ela, nas telas que já existem, antes de qualquer tela nova.~~
+
+✅ **Corrigido ao implementar (2026-10-01): a matriz nunca mediu com a Roboto.**
+O `flutter test` desenha todo texto com uma fonte **quadrada**, de 1 em por
+caractere, seja qual for a família pedida. Medido: "Esqueci minha senha" a
+18 sp ocupa **342 px** na matriz e **168 px** com a Atkinson carregada. Com a
+altura de linha fixada, como em todo estilo de `MemoraTipografia`, as duas têm
+a mesma altura por linha (27 px a 1,5), e a quadrada quebra mais linhas: o
+mesmo parágrafo em 200 px ocupa 162 px de altura contra 81.
+
+A matriz é, portanto, **pessimista nas duas direções**, e isso é o que se quer:
+o que passa nela passa com a fonte real. Decisões:
+
+- **A matriz continua com a fonte quadrada**, de propósito. Carregar a Atkinson
+  nela tiraria metade da margem.
+- **Só o álbum de telas (R13) carrega a Atkinson**, porque ele existe para
+  olhar, não para reprovar.
+- **A troca de família não pode mudar nenhum resultado da matriz.** Se mudar, é
+  sinal de que algum teste passou a carregar fonte, e é isso que se investiga.
+
+⚠️ Vale lembrar o outro lado: os estouros que a matriz já achou (o "Mostrar
+senha" de 31 px no 320×568, por exemplo) foram medidos com texto duas vezes
+mais largo que o real. Continuam sendo defeito — a margem existe para cobrir
+fonte de sistema, escala do fabricante e texto que ainda vai mudar —, mas o
+número em px não é o que a pessoa vê.
 
 ---
 

@@ -34,7 +34,7 @@ class _Par {
   const _Par(this.nome, this.frente, this.fundo, {this.grafico = false});
 }
 
-/// Os mesmos 17 pares por tema verificados em
+/// Os mesmos 20 pares por tema verificados em
 /// `specs/002-design-system/ferramentas/validar_paleta.py`.
 const List<_Par> _pares = <_Par>[
   _Par('texto sobre fundo', _texto, _fundo),
@@ -57,11 +57,17 @@ const List<_Par> _pares = <_Par>[
   _Par('borda sobre fundo', _borda, _fundo, grafico: true),
   _Par('borda sobre superficie', _borda, _superficie, grafico: true),
   _Par('primaria sobre superficieAlt', _primaria, _superficieAlt, grafico: true),
+  // Feature 004: o tom suave da primaria. Nunca e o unico sinal de estado;
+  // o que se verifica e o que se escreve por cima dele.
+  _Par('texto sobre destaque', _texto, _destaque),
+  _Par('textoSuave sobre destaque', _textoSuave, _destaque),
+  _Par('primaria sobre destaque', _primaria, _destaque),
 ];
 
 Color _fundo(MemoraCores c) => c.fundo;
 Color _superficie(MemoraCores c) => c.superficie;
 Color _superficieAlt(MemoraCores c) => c.superficieAlt;
+Color _destaque(MemoraCores c) => c.destaque;
 Color _primaria(MemoraCores c) => c.primaria;
 Color _sobrePrimaria(MemoraCores c) => c.sobrePrimaria;
 Color _texto(MemoraCores c) => c.texto;
@@ -97,8 +103,8 @@ void main() {
       });
     }
 
-    test('o validador cobre exatamente 51 pares', () {
-      expect(_pares.length * MemoraTheme.todos.length, 51);
+    test('o validador cobre exatamente 60 pares', () {
+      expect(_pares.length * MemoraTheme.todos.length, 60);
     });
   });
 

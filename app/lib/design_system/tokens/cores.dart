@@ -4,7 +4,7 @@ import 'package:flutter/painting.dart';
 /// Cores semânticas do Memora.
 ///
 /// Os valores desta classe são a **contraparte em código** de
-/// `specs/002-design-system/ferramentas/validar_paleta.py`, que valida os 48
+/// `specs/002-design-system/ferramentas/validar_paleta.py`, que valida os 60
 /// pares de contraste dos três temas segundo a WCAG 2.2.
 ///
 /// **Nunca altere um valor aqui sem rodar o validador.** O teste
@@ -24,6 +24,23 @@ class MemoraCores {
 
   /// Superfície secundária, para agrupamentos internos.
   final Color superficieAlt;
+
+  /// Tom suave da primária: pílula do destino ativo, medalhão das ilustrações
+  /// e fundo de ilustração dos cartões (feature 004).
+  ///
+  /// **Nunca é o único sinal de estado.** Contra [fundo] e [superficie] ele mede
+  /// só 1,1 a 1,6:1 — é reforço visual, não informação. Quem marca o destino
+  /// ativo é o traço em [primaria] e o negrito. Sobre ele, [texto],
+  /// [textoSuave] e [primaria] passam como texto (`validar_paleta.py`).
+  final Color destaque;
+
+  /// O círculo **claro** atrás de toda ilustração colorida, nos três temas.
+  ///
+  /// Claro mesmo nos temas escuros, de propósito: a Memora e as pessoas têm
+  /// cores próprias, e sobre um fundo azul-marinho a cabeça azul da Memora
+  /// sumia (medido no álbum de rascunho da T010). É o mesmo recurso dos
+  /// círculos amarelos do wireframe. Decorativo: nada se escreve sobre ele.
+  final Color medalhao;
 
   /// Ação principal e identidade visual do Memora.
   final Color primaria;
@@ -54,6 +71,8 @@ class MemoraCores {
     required this.fundo,
     required this.superficie,
     required this.superficieAlt,
+    required this.destaque,
+    required this.medalhao,
     required this.primaria,
     required this.sobrePrimaria,
     required this.texto,
@@ -69,6 +88,8 @@ class MemoraCores {
     fundo: Color(0xFFF8F8F8),
     superficie: Color(0xFFFFFFFF),
     superficieAlt: Color(0xFFD8D8D8),
+    destaque: Color(0xFFE3EAFF),
+    medalhao: Color(0xFFE3EAFF),
     primaria: Color(0xFF1040F8),
     sobrePrimaria: Color(0xFFFFFFFF),
     texto: Color(0xFF111111),
@@ -84,6 +105,8 @@ class MemoraCores {
     fundo: Color(0xFF101216),
     superficie: Color(0xFF1B1E24),
     superficieAlt: Color(0xFF2A2E36),
+    destaque: Color(0xFF22305A),
+    medalhao: Color(0xFFDCE5FF),
     primaria: Color(0xFF9CB8FF),
     sobrePrimaria: Color(0xFF06132E),
     texto: Color(0xFFF2F4F8),
@@ -101,6 +124,8 @@ class MemoraCores {
     fundo: Color(0xFF000000),
     superficie: Color(0xFF000000),
     superficieAlt: Color(0xFF1A1A1A),
+    destaque: Color(0xFF10245A),
+    medalhao: Color(0xFFDCE5FF),
     primaria: Color(0xFF8FB4FF),
     sobrePrimaria: Color(0xFF000000),
     texto: Color(0xFFFFFFFF),
@@ -116,6 +141,8 @@ class MemoraCores {
     Color? fundo,
     Color? superficie,
     Color? superficieAlt,
+    Color? destaque,
+    Color? medalhao,
     Color? primaria,
     Color? sobrePrimaria,
     Color? texto,
@@ -129,6 +156,8 @@ class MemoraCores {
       fundo: fundo ?? this.fundo,
       superficie: superficie ?? this.superficie,
       superficieAlt: superficieAlt ?? this.superficieAlt,
+      destaque: destaque ?? this.destaque,
+      medalhao: medalhao ?? this.medalhao,
       primaria: primaria ?? this.primaria,
       sobrePrimaria: sobrePrimaria ?? this.sobrePrimaria,
       texto: texto ?? this.texto,
@@ -146,6 +175,8 @@ class MemoraCores {
       fundo: Color.lerp(a.fundo, b.fundo, t)!,
       superficie: Color.lerp(a.superficie, b.superficie, t)!,
       superficieAlt: Color.lerp(a.superficieAlt, b.superficieAlt, t)!,
+      destaque: Color.lerp(a.destaque, b.destaque, t)!,
+      medalhao: Color.lerp(a.medalhao, b.medalhao, t)!,
       primaria: Color.lerp(a.primaria, b.primaria, t)!,
       sobrePrimaria: Color.lerp(a.sobrePrimaria, b.sobrePrimaria, t)!,
       texto: Color.lerp(a.texto, b.texto, t)!,
