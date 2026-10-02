@@ -21,6 +21,10 @@ import 'fluxo_dentro_da_conta.dart';
 /// no Hub: um botao de sair do lado das portas custava a sessao inteira a um
 /// toque errado. O portao e o mesmo -- a pergunta antes de sair --, e o
 /// primeiro teste abaixo e o que prova que a saida nao voltou a esses dois.
+/// Qualquer texto que fale em sair, e nao so o rotulo de hoje: um "Sair" escrito
+/// por cima da constante passaria por um teste que procurasse a constante.
+final RegExp _sair = RegExp('sair', caseSensitive: false);
+
 void main() {
   late FluxoDentroDaConta fluxo;
 
@@ -36,7 +40,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(TelaInicio),
-        matching: find.text(TextosAutenticacao.botaoSair),
+        matching: find.textContaining(_sair),
       ),
       findsNothing,
       reason: 'o Inicio nao pode oferecer a saida (FR-019)',
@@ -47,7 +51,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(TelaHub),
-        matching: find.text(TextosAutenticacao.botaoSair),
+        matching: find.textContaining(_sair),
       ),
       findsNothing,
       reason: 'o Hub nao pode oferecer a saida (FR-019)',
