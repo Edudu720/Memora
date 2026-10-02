@@ -20,14 +20,6 @@ import '../autenticacao/fluxo_dentro_da_conta.dart';
 /// Até a feature 004 o aplicativo abria numa casca de demonstração, com abas
 /// "Entrar", "Componentes" e "Aparência". Era o diagnóstico 2 da spec: quem
 /// abria o Memora via a vitrine do Design System antes de ver o produto.
-class _PreferenciaEmMemoria implements RepositorioPreferenciaAparencia {
-  @override
-  Future<PreferenciaAparencia> carregar() async => PreferenciaAparencia.padrao;
-
-  @override
-  Future<void> salvar(PreferenciaAparencia preferencia) async {}
-}
-
 void main() {
   test('a casca de demonstração não existe mais em lib/', () {
     expect(Directory('lib/demonstracao').existsSync(), isFalse);
@@ -48,7 +40,7 @@ void main() {
   ) async {
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
     final ControladorAparencia aparencia = ControladorAparencia(
-      _PreferenciaEmMemoria(),
+      PreferenciaEmMemoria(),
     );
     await t.pumpWidget(
       AplicativoMemora(
