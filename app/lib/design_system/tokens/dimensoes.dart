@@ -111,8 +111,12 @@ abstract final class MemoraDimensoes {
   // tira de vez abaixo de [pisoDeIlustracao] — o texto e a ação, nunca.
   // ---------------------------------------------------------------------------
 
-  /// 56 dp — a ilustração de um cartão de porta, ao lado do nome.
-  static const double ilustracaoCartao = 56;
+  /// 48 dp — a ilustração de um cartão de porta, ao lado do nome.
+  ///
+  /// Eram 56. Com 56, a porta tinha 80 dp de altura só por causa do desenho, e
+  /// quatro portas mais o cabeçalho não cabiam sem rolar no 320×568, que é o
+  /// que a FR-017 exige do Hub. 48 continua acima do [pisoDeIlustracao].
+  static const double ilustracaoCartao = 48;
 
   /// 72 dp — a ilustração ou o rosto da Memora no cabeçalho de uma tela.
   static const double ilustracaoCabecalho = 72;
