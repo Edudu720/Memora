@@ -16,7 +16,7 @@ O topo de toda tela interna.
 
 | Entrada | Obrigatória | Comportamento |
 |---|---|---|
-| `titulo` | sim | No máximo duas linhas; acima disso, reticências e o título inteiro no rótulo semântico |
+| `titulo` | sim | **Nunca cortado.** A primeira versão limitava a duas linhas com reticências, e "Como eu vejo o Memora" saía cortado a 150% (revisão da #38); o leitor de tela recebia o título inteiro, a pessoa que enxerga pouco não |
 | `aoVoltar` | não | Sem ela, não há "Voltar" (raiz de destino) |
 | `ilustracao` ou `memora` | não | À direita. Some quando a altura disponível é pouca (regra 7 da R2) |
 
@@ -35,19 +35,19 @@ Uma porta: do Hub, da Ajuda, de Configurações.
 | `principal` | não | Destaque de ação principal (FR-002). No máximo um por tela |
 
 **É ação**, então usa **pílula e preenchimento** (FR-012 da 002): forma de
-pílula, a principal em primária e as demais no `destaque`. **Não é um
+pílula, a principal em primária e as demais no `destaque` **com borda em primária** (só o `destaque` mede 1,13:1 contra o fundo). O raio é `MemoraRaio.porta` (40), e não o de pílula: com 999 o Flutter reduz o raio à metade do menor lado, e a 150% o texto saía da forma (revisão da #38). **Não é um
 `Cartao`** — o `Cartao` não é clicável, e um cartão tocável seria uma terceira
 linguagem visual. Informação nunca usa este componente.
 
 ## `AvisoCompacto`
 
-O aviso permanente que não ocupa a tela (R5).
+O aviso permanente que não ocupa a tela (R5). **Só a conversa o usa**; a recuperação de acesso mantém o aviso inteiro (FR-049, revisão da #36).
 
 | Entrada | Obrigatória | Comportamento |
 |---|---|---|
 | `titulo` | sim | Sempre na árvore — é o que os portões procuram. Fechado, sempre à vista; aberto, rola junto com o texto completo, e só o botão fica fixo (a 200% num 320×568, título e botão fixos já passavam da metade da tela) |
-| `resumo` | sim | Uma linha, visível fechado |
-| `textoCompleto` | sim | Visível só aberto. Aberto, o aviso não passa de 50% da altura disponível; o resto rola dentro dele |
+| `resumo` | sim | Visível fechado, **inteiro** — nunca cortado, porque é o que a maioria lê. MUST conter o núcleo do aviso (na conversa, "senha" e "código") (FR-049) |
+| `textoCompleto` | sim | Visível só aberto. Aberto, o aviso não passa de 50% da altura que **sobra** da tela, descontado o teclado (lido da `View`: o `Scaffold` o apaga do `MediaQuery`); o resto rola dentro dele |
 | `expressao` | não | Rosto da Memora "preocupada" ao lado |
 
 Fechado por padrão. A escolha de abrir **não** é lembrada entre telas: quem

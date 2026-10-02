@@ -58,15 +58,32 @@ Valem para **as três pilhas**, não só para a ativa:
 - **Quando a sessão expira**, todas as rotas das três pilhas são fechadas antes
   de o login aparecer. Nenhuma tela interna fica por baixo do login (achado 7).
 
+## Diálogos
+
+`DialogoMemora.mostrar` abre o diálogo **no `Navigator` que o contexto de quem
+chama encontra** (`useRootNavigator: false`). Com um `Navigator` por destino,
+o padrão do `showDialog` — o de fora — fazia "Entendi" fechar a tela de trás e
+deixar o diálogo aberto (revisão da #38). O aviso de inatividade e a pergunta
+"Fechar o Memora?" são abertos com contexto acima das pilhas, e por isso ficam
+no de fora — e é o `popUntil` do fluxo que os tira na expiração.
+
 ## Saída
 
 - "Sair" existe **só** em Configurações → Conta (FR-019), sempre com a
   confirmação da FR-025 da 001.
-- "Sair e esquecer este aparelho" fica ao lado, como ação secundária, e usa
+- "Sair e esquecer este aparelho" **não fica ao lado** do "Sair": é a mais
+  destrutiva das duas, e o Princípio II proíbe ação destrutiva adjacente à
+  comum. Fica separada, abaixo, com uma frase dizendo para que serve
+  (aparelho compartilhado ou que vai ser vendido), e usa
   `LimpezaDeSessao.executar(esquecerTudo: true)`.
 
 ## O que sai do aplicativo
 
 Toda saída do Memora é anunciada **antes**, com o destino escrito (Princípio
-II): abrir aplicativo cotidiano, compartilhar, abrir a loja oficial. A
-assistente e o passo a passo usam o mesmo aviso.
+II): abrir aplicativo cotidiano (sempre pela conversa, FR-027) e
+compartilhar. A assistente usa o mesmo aviso.
+
+**O Memora não abre a loja oficial**: ele **ensina** a abri-la, pelo assunto
+"Como baixar um aplicativo" e pelo passo de baixar do guia de um aplicativo
+não instalado (FR-036). Abrir a loja pela pessoa treinaria o gesto que o
+golpe "instale este aplicativo" precisa (revisão da #36).
