@@ -43,13 +43,22 @@ class DialogoMemora extends StatelessWidget {
     super.key,
   });
 
-  /// Exibe o diálogo.
+  /// Exibe o diálogo no `Navigator` que [context] encontra.
+  ///
+  /// **Não no de fora**, que é o padrão do `showDialog`. Desde a casca da
+  /// feature 004 há um `Navigator` por destino, e quem fecha o diálogo com
+  /// `Navigator.of(context).pop()` acha o do destino: com o diálogo no de
+  /// fora, "Entendi" fechava a tela de trás e deixava o diálogo aberto
+  /// (revisão da #38). No mesmo `Navigator`, o `pop()` fecha o diálogo — e um
+  /// diálogo aberto dentro de um destino sai da árvore junto com a casca
+  /// quando a sessão expira.
   static Future<void> mostrar(
     BuildContext context, {
     required DialogoMemora dialogo,
   }) {
     return showDialog<void>(
       context: context,
+      useRootNavigator: false,
       builder: (BuildContext _) => dialogo,
     );
   }

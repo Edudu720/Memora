@@ -289,8 +289,19 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   ///
   /// **Nunca** no `Navigator` de fora: a tela ficaria por cima da barra
   /// inferior e fora da casca — onde sobreviveria à saída da conta.
+  ///
+  /// Sem casca — uma tela fora da conta, como a apresentação da US1 —, não há
+  /// onde empilhar. Calar isso transformaria o toque numa porta que não abre
+  /// nada (FR-003 da 003); o `assert` grita em desenvolvimento, e em produção
+  /// o toque simplesmente não faz nada, em vez de derrubar o aplicativo
+  /// (revisão da #38).
   void _empilhar(Route<void> rota) {
-    _casca.currentState?.empilhar<void>(rota);
+    final CascaInternaState? casca = _casca.currentState;
+    assert(
+      casca != null,
+      '_empilhar sem casca: só há onde abrir telas com a pessoa dentro da conta',
+    );
+    casca?.empilhar<void>(rota);
   }
 
   /// Fecha o que ainda estiver por cima do fluxo no `Navigator` de fora.
