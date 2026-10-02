@@ -83,8 +83,9 @@ void main() {
   }
 
   group('H2 — ensinar vem antes de fazer (FR-014)', () {
-    testWidgets('a primeira resposta ensina e NAO oferece abrir nada',
-        (WidgetTester t) async {
+    testWidgets('a primeira resposta ensina e NAO oferece abrir nada', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
       await montar(t, c);
@@ -97,8 +98,9 @@ void main() {
       expect(find.byKey(TelaConversa.chaveConfirmarAbrir), findsNothing);
     });
 
-    testWidgets('a oferta aparece quando a pessoa declara dificuldade',
-        (WidgetTester t) async {
+    testWidgets('a oferta aparece quando a pessoa declara dificuldade', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
       await montar(t, c);
@@ -111,8 +113,9 @@ void main() {
       expect(find.byKey(TelaConversa.chaveConfirmarAbrir), findsOneWidget);
     });
 
-    testWidgets('recusar encerra o assunto, e a oferta nao volta (FR-016)',
-        (WidgetTester t) async {
+    testWidgets('recusar encerra o assunto, e a oferta nao volta (FR-016)', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
       await montar(t, c);
@@ -125,8 +128,9 @@ void main() {
       expect(find.byKey(TelaConversa.chaveConfirmarAbrir), findsNothing);
     });
 
-    testWidgets('servico sensivel nunca vira oferta (FR-041)',
-        (WidgetTester t) async {
+    testWidgets('servico sensivel nunca vira oferta (FR-041)', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
       await montar(t, c);
@@ -138,8 +142,9 @@ void main() {
   });
 
   group('FR-033 — o aviso antigolpe e permanente', () {
-    testWidgets('esta na tela desde antes da primeira pergunta',
-        (WidgetTester t) async {
+    testWidgets('esta na tela desde antes da primeira pergunta', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
       await montar(t, c);
@@ -147,8 +152,9 @@ void main() {
       expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
     });
 
-    testWidgets('continua la depois de a conversa acontecer',
-        (WidgetTester t) async {
+    testWidgets('continua la depois de a conversa acontecer', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
       await montar(t, c);
@@ -168,8 +174,9 @@ void main() {
   });
 
   group('A conversa e retomada — FR-049 e FR-050', () {
-    testWidgets('reabrir o aplicativo traz a conversa de volta',
-        (WidgetTester t) async {
+    testWidgets('reabrir o aplicativo traz a conversa de volta', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa primeira = controladorCom();
       addTearDown(primeira.dispose);
       await montar(t, primeira);
@@ -201,10 +208,12 @@ void main() {
   });
 
   group('Falhas', () {
-    testWidgets('o limite diario aparece sem culpar a pessoa',
-        (WidgetTester t) async {
-      final ControladorConversa c =
-          controladorCom(falha: FalhaDaAssistente.limiteDeConversas);
+    testWidgets('o limite diario aparece sem culpar a pessoa', (
+      WidgetTester t,
+    ) async {
+      final ControladorConversa c = controladorCom(
+        falha: FalhaDaAssistente.limiteDeConversas,
+      );
       addTearDown(c.dispose);
       await montar(t, c);
 
@@ -282,8 +291,9 @@ void main() {
     });
 
     test('arquivo corrompido nao impede conversar de novo', () async {
-      await File('${temporario.path}/${ConversaLocal.nomeDoArquivo}')
-          .writeAsString('isto nao e json');
+      await File(
+        '${temporario.path}/${ConversaLocal.nomeDoArquivo}',
+      ).writeAsString('isto nao e json');
 
       // Perder a conversa e aceitavel; ficar sem assistente nao e.
       expect(await disco.ler(), isEmpty);

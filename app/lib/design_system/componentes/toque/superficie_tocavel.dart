@@ -49,6 +49,10 @@ class SuperficieTocavel extends StatefulWidget {
   /// Com sombra de cartão quando em repouso.
   final bool sombra;
 
+  /// Para o leitor de tela: é o item escolhido de um grupo (o destino ativo
+  /// da barra inferior). Nulo, a superfície não faz parte de grupo nenhum.
+  final bool? selecionada;
+
   /// Conteúdo.
   final Widget child;
 
@@ -61,6 +65,7 @@ class SuperficieTocavel extends StatefulWidget {
     this.aoTocar,
     this.dica,
     this.sombra = false,
+    this.selecionada,
     super.key,
   });
 
@@ -76,14 +81,12 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final bool habilitada = widget.aoTocar != null;
-    final Duration transicao = MemoraMovimento.efetiva(
-      MemoraMovimento.rapido,
-      reduzirMovimento: MediaQuery.disableAnimationsOf(context),
-    );
+    final bool reduzir = MediaQuery.disableAnimationsOf(context);
 
     return Semantics(
       button: true,
       enabled: habilitada,
+      selected: widget.selecionada,
       label: widget.rotulo,
       hint: widget.dica,
       // Sem onTap na própria Semantics, o TalkBack anuncia o botão e o
@@ -92,9 +95,15 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
       child: ExcludeSemantics(
         child: AnimatedScale(
           scale: _pressionada ? MemoraMovimento.escalaPressionado : 1,
-          duration: transicao,
+          duration: MemoraMovimento.efetiva(
+            MemoraMovimento.rapido,
+            reduzirMovimento: reduzir,
+          ),
           child: AnimatedContainer(
-            duration: transicao,
+            duration: MemoraMovimento.efetiva(
+              MemoraMovimento.rapido,
+              reduzirMovimento: reduzir,
+            ),
             decoration: BoxDecoration(
               color: widget.fundo,
               borderRadius: widget.raio,

@@ -48,27 +48,32 @@ class FluxoDentroDaConta {
   }) async {
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
     final RepositorioAutenticacaoSimulado repositorio =
-        RepositorioAutenticacaoSimulado(demora: Duration.zero)
-          ..registrarConta(
-            identificador: 'ana@email.com',
-            senha: 'uma frase que so eu lembro',
-            nome: 'Ana',
-          );
+        RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
+          identificador: 'ana@email.com',
+          senha: 'uma frase que so eu lembro',
+          nome: 'Ana',
+        );
 
+    // O `EscopoAparencia` em volta, como no `main.dart` de verdade: sem ele, a
+    // tela de aparência — que a casca abre em Ajustes — não encontra quem a
+    // controla. Um arnês que monta menos que o aplicativo testa menos que ele.
     await t.pumpWidget(
-      MaterialApp(
-        theme: TemasMemora.claro,
-        home: FluxoAutenticacao(
-          repositorio: repositorio,
-          assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
-          conversaLocal: _ConversaEmMemoria.new,
-          ultimoAcesso: ultimoAcesso,
-          inatividade: inatividade,
-          avisoDeInatividade: aviso,
-          limpeza: LimpezaDeSessao(
-            cofre: cofre,
+      EscopoAparencia(
+        controlador: ControladorAparencia(PreferenciaEmMemoria()),
+        child: MaterialApp(
+          theme: TemasMemora.claro,
+          home: FluxoAutenticacao(
+            repositorio: repositorio,
+            assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+            conversaLocal: _ConversaEmMemoria.new,
             ultimoAcesso: ultimoAcesso,
-            dadosLocais: <DadoLocalDaPessoa>[dado],
+            inatividade: inatividade,
+            avisoDeInatividade: aviso,
+            limpeza: LimpezaDeSessao(
+              cofre: cofre,
+              ultimoAcesso: ultimoAcesso,
+              dadosLocais: <DadoLocalDaPessoa>[dado],
+            ),
           ),
         ),
       ),
@@ -81,8 +86,11 @@ class FluxoDentroDaConta {
     await tocar(t, find.byKey(TelaLogin.chaveEntrar));
     await avancar(t, 6);
 
-    expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget,
-        reason: 'o cenario pressupoe a pessoa dentro da conta');
+    expect(
+      find.byKey(TelaHub.chaveSaudacao),
+      findsOneWidget,
+      reason: 'o cenario pressupoe a pessoa dentro da conta',
+    );
     expect(dado.apagamentos, 0);
   }
 }
@@ -140,4 +148,14 @@ class CofreQueRegistra implements CofreDeCredenciais {
 
   @override
   Future<void> limpar() async => limpezas++;
+}
+
+/// Preferência de aparência que não toca o disco: dentro de `testWidgets`,
+/// I/O de arquivo real nunca completa.
+class PreferenciaEmMemoria implements RepositorioPreferenciaAparencia {
+  @override
+  Future<PreferenciaAparencia> carregar() async => PreferenciaAparencia.padrao;
+
+  @override
+  Future<void> salvar(PreferenciaAparencia preferencia) async {}
 }

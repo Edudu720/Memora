@@ -37,12 +37,11 @@ void main() {
     cofre = _CofreQueRegistra();
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
     final RepositorioAutenticacaoSimulado repositorio =
-        RepositorioAutenticacaoSimulado(demora: Duration.zero)
-          ..registrarConta(
-            identificador: 'ana@email.com',
-            senha: 'uma frase que so eu lembro',
-            nome: 'Ana',
-          );
+        RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
+          identificador: 'ana@email.com',
+          senha: 'uma frase que so eu lembro',
+          nome: 'Ana',
+        );
 
     await t.pumpWidget(
       MaterialApp(
@@ -77,13 +76,17 @@ void main() {
     await t.tap(entrar);
     await avancar(t, 6);
 
-    expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget,
-        reason: 'o cenario pressupoe a pessoa dentro da conta');
+    expect(
+      find.byKey(TelaHub.chaveSaudacao),
+      findsOneWidget,
+      reason: 'o cenario pressupoe a pessoa dentro da conta',
+    );
     expect(dado.apagamentos, 0);
   }
 
-  testWidgets('sair da conta apaga o dado local da pessoa',
-      (WidgetTester t) async {
+  testWidgets('sair da conta apaga o dado local da pessoa', (
+    WidgetTester t,
+  ) async {
     await montarDentro(t);
 
     final Finder sair = find.byKey(TelaHub.chaveSair);
@@ -100,13 +103,17 @@ void main() {
     await avancar(t, 6);
 
     expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
-    expect(dado.apagamentos, 1,
-        reason: 'a saida deliberada precisa chamar a LimpezaDeSessao');
+    expect(
+      dado.apagamentos,
+      1,
+      reason: 'a saida deliberada precisa chamar a LimpezaDeSessao',
+    );
     expect(cofre.limpezas, greaterThan(0));
   });
 
-  testWidgets('a saída por inatividade também apaga o dado local',
-      (WidgetTester t) async {
+  testWidgets('a saída por inatividade também apaga o dado local', (
+    WidgetTester t,
+  ) async {
     await montarDentro(
       t,
       inatividade: const Duration(seconds: 3),
@@ -119,9 +126,13 @@ void main() {
     await avancar(t, 8);
 
     expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
-    expect(dado.apagamentos, 1,
-        reason: 'o celular esquecido na mesa e o caso que a FR-017 existe '
-            'para cobrir, e e ali que a conversa precisa sair');
+    expect(
+      dado.apagamentos,
+      1,
+      reason:
+          'o celular esquecido na mesa e o caso que a FR-017 existe '
+          'para cobrir, e e ali que a conversa precisa sair',
+    );
   });
 }
 

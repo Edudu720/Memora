@@ -307,6 +307,123 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
       ),
 
+      const _Secao('A Memora e as ilustrações', 'O rosto dela, em quatro '
+          'expressões, e as ilustrações coloridas sempre sobre o medalhão '
+          'claro — nos três temas.'),
+      Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
+            MemoraPersonagem(expressao: e),
+        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          MedalhaoDeIlustracao(
+            Ilustracao.portaConversa,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.portaAplicativos,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.portaServicos,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.portaAjuda,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.portaRegistro,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.estadoVazio,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.estadoErro,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+          MedalhaoDeIlustracao(
+            Ilustracao.aplicativoGenerico,
+            tamanho: MemoraDimensoes.ilustracaoCartao,
+          ),
+        ],
+      ),
+
+      const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
+          'cartão. No máximo uma principal por tela. A desabilitada só existe '
+          'aqui: porta que não abre não é mostrada (FR-018).'),
+      CartaoDePorta(
+        nome: 'Conversar com a Memora',
+        explicacao: 'Pergunte do seu jeito, que eu te mostro o caminho',
+        ilustracao: Ilustracao.portaConversa,
+        principal: true,
+        aoAbrir: () => _tocou('porta principal'),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      CartaoDePorta(
+        nome: 'Meus aplicativos',
+        explicacao: 'Aprender a usar os aplicativos do dia a dia',
+        ilustracao: Ilustracao.portaAplicativos,
+        aoAbrir: () => _tocou('porta'),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const CartaoDePorta(
+        nome: 'Porta desabilitada',
+        explicacao: 'Assim ela apareceria, se aparecesse',
+        ilustracao: Ilustracao.portaAjuda,
+        aoAbrir: null,
+      ),
+
+      const _Secao('Avisos', 'Sempre na tela, sem tomar a tela. Toque em '
+          '"Ler o aviso inteiro".'),
+      const AvisoCompacto(
+        titulo: 'O Memora nunca pede a sua senha',
+        resumo: 'Nem por mensagem, nem por ligação.',
+        textoCompleto: 'Se alguém ligar dizendo ser do Memora e pedir a sua '
+            'senha ou o número que chegou no seu celular, desligue. Ninguém do '
+            'Memora pede isso, nunca.',
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const AvisoCompacto(
+        titulo: 'Aviso sem a Memora',
+        resumo: 'Com o escudo no lugar do rosto.',
+        textoCompleto: 'Para os lugares onde o rosto dela já está na tela.',
+        comMemora: false,
+      ),
+
+      const _Secao('Conversa', 'Quem disse é dito por posição, rosto e nome — '
+          'nunca só pela cor.'),
+      BalaoDeFala(
+        autor: AutorDoBalao.memora,
+        texto: 'Quer que eu abra o WhatsApp para você?',
+        opcoes: <OpcaoDoBalao>[
+          OpcaoDoBalao(
+            rotulo: 'Sim, pode abrir',
+            aoEscolher: () => _tocou('sim'),
+          ),
+          const OpcaoDoBalao(
+            rotulo: 'Opção já escolhida',
+            aoEscolher: null,
+          ),
+        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const BalaoDeFala(
+        autor: AutorDoBalao.pessoa,
+        texto: 'Não consegui abrir.',
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const BalaoDeFala.escrevendo(),
+
       const _Secao('Sobreposições', 'Diálogo e folha inferior abrem por cima '
           'do conteúdo — toque para ver.'),
       BotaoSecundario(
@@ -335,6 +452,15 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       ),
 
       const _Secao('Navegação'),
+      CabecalhoDeTela(
+        titulo: 'Cabeçalho com voltar e a Memora',
+        aoVoltar: () => _tocou('voltou'),
+        memora: ExpressaoDaMemora.neutra,
+      ),
+      const CabecalhoDeTela(
+        titulo: 'Cabeçalho na raiz, com ilustração',
+        ilustracao: Ilustracao.portaAjuda,
+      ),
       const BarraSuperior(titulo: 'Barra sem voltar'),
       const SizedBox(height: MemoraEspacamento.md),
       BarraSuperior(titulo: 'Barra com voltar', aoVoltar: () => _tocou('voltou')),

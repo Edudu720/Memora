@@ -35,10 +35,10 @@ RepositorioAutenticacaoSimulado _comContaDeAna({
     demora: Duration.zero,
     escadaDeBloqueio: escada,
   )..registrarConta(
-      identificador: 'ana@email.com',
-      senha: _senhaDeAna,
-      nome: 'Ana',
-    );
+    identificador: 'ana@email.com',
+    senha: _senhaDeAna,
+    nome: 'Ana',
+  );
 }
 
 /// Monta a tela e deixa a renovação automática terminar.
@@ -75,10 +75,8 @@ Future<ControladorLogin> _montar(
   return c;
 }
 
-Finder _entrada(Key chave) => find.descendant(
-      of: find.byKey(chave),
-      matching: find.byType(TextField),
-    );
+Finder _entrada(Key chave) =>
+    find.descendant(of: find.byKey(chave), matching: find.byType(TextField));
 
 Future<void> _preencher(WidgetTester t, Key chave, String valor) async {
   await t.ensureVisible(_entrada(chave));
@@ -120,7 +118,8 @@ void main() {
       expect(
         find.byType(TextField),
         findsNWidgets(2),
-        reason: 'A FR-011 é literal: identificador e senha. Qualquer campo a '
+        reason:
+            'A FR-011 é literal: identificador e senha. Qualquer campo a '
             'mais é uma decisão devolvida a quem já achava difícil entrar.',
       );
     });
@@ -131,7 +130,8 @@ void main() {
       expect(
         find.byType(OpcaoSelecionavel),
         findsNothing,
-        reason: 'Escolher entre e-mail e telefone devolve à pessoa a pergunta '
+        reason:
+            'Escolher entre e-mail e telefone devolve à pessoa a pergunta '
             '"com qual dos dois eu me cadastrei?" — que é o que a FR-051 '
             'existe para evitar. Quem decide é o servidor, pela presença do @.',
       );
@@ -139,8 +139,9 @@ void main() {
   });
 
   group('Pré-preenchimento do último acesso — FR-012', () {
-    testWidgets('traz o identificador de quem entrou por último',
-        (WidgetTester t) async {
+    testWidgets('traz o identificador de quem entrou por último', (
+      WidgetTester t,
+    ) async {
       await _montar(
         t,
         repositorio: _comContaDeAna(),
@@ -152,25 +153,30 @@ void main() {
         'ana@email.com',
         reason: 'O cenário 2 da US2 diz que só a senha deveria faltar.',
       );
-      expect(find.text(TextosAutenticacao.identificadorLembrado),
-          findsOneWidget);
+      expect(
+        find.text(TextosAutenticacao.identificadorLembrado),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('aparelho novo começa com o campo vazio',
-        (WidgetTester t) async {
+    testWidgets('aparelho novo começa com o campo vazio', (
+      WidgetTester t,
+    ) async {
       await _montar(t, repositorio: _comContaDeAna());
 
       expect(_textoDoCampo(t, TelaLogin.chaveIdentificador), '');
       expect(
         find.text(TextosAutenticacao.identificadorLembrado),
         findsNothing,
-        reason: 'Dizer "deixei preenchido do seu último acesso" com o campo '
+        reason:
+            'Dizer "deixei preenchido do seu último acesso" com o campo '
             'vazio é uma frase que não descreve nada do que está na tela.',
       );
     });
 
-    testWidgets('o aviso some quando a pessoa edita o campo',
-        (WidgetTester t) async {
+    testWidgets('o aviso some quando a pessoa edita o campo', (
+      WidgetTester t,
+    ) async {
       await _montar(
         t,
         repositorio: _comContaDeAna(),
@@ -182,25 +188,24 @@ void main() {
       expect(
         find.text(TextosAutenticacao.identificadorLembrado),
         findsNothing,
-        reason: 'O aviso mentiria sobre um valor que a pessoa acabou de '
+        reason:
+            'O aviso mentiria sobre um valor que a pessoa acabou de '
             'digitar ela mesma.',
       );
     });
 
-    testWidgets('só grava o identificador depois que o login dá certo',
-        (WidgetTester t) async {
+    testWidgets('só grava o identificador depois que o login dá certo', (
+      WidgetTester t,
+    ) async {
       final UltimoAcessoEmMemoria memoria = UltimoAcessoEmMemoria();
-      await _montar(
-        t,
-        repositorio: _comContaDeAna(),
-        ultimoAcesso: memoria,
-      );
+      await _montar(t, repositorio: _comContaDeAna(), ultimoAcesso: memoria);
 
       await _tentar(t, senha: 'senha errada');
       expect(
         memoria.valor,
         isNull,
-        reason: 'Gravar na tentativa transformaria um erro de digitação em '
+        reason:
+            'Gravar na tentativa transformaria um erro de digitação em '
             'pré-preenchimento errado para sempre.',
       );
 
@@ -210,14 +215,17 @@ void main() {
   });
 
   group('Recusa genérica — FR-013', () {
-    testWidgets('senha errada e conta inexistente dizem a MESMA coisa',
-        (WidgetTester t) async {
+    testWidgets('senha errada e conta inexistente dizem a MESMA coisa', (
+      WidgetTester t,
+    ) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
 
       await _montar(t, repositorio: repo);
       await _tentar(t, senha: 'senha errada');
-      final bool comSenhaErrada =
-          find.text(TextosAutenticacao.credenciaisInvalidas).evaluate().isNotEmpty;
+      final bool comSenhaErrada = find
+          .text(TextosAutenticacao.credenciaisInvalidas)
+          .evaluate()
+          .isNotEmpty;
 
       await _montar(t, repositorio: _comContaDeAna(), chave: 'segunda');
       await _tentar(
@@ -225,13 +233,16 @@ void main() {
         identificador: 'ninguem@email.com',
         senha: 'qualquer coisa',
       );
-      final bool comContaInexistente =
-          find.text(TextosAutenticacao.credenciaisInvalidas).evaluate().isNotEmpty;
+      final bool comContaInexistente = find
+          .text(TextosAutenticacao.credenciaisInvalidas)
+          .evaluate()
+          .isNotEmpty;
 
       expect(
         comSenhaErrada && comContaInexistente,
         isTrue,
-        reason: 'Distinguir os dois casos entrega a um golpista a lista de '
+        reason:
+            'Distinguir os dois casos entrega a um golpista a lista de '
             'quem tem conta no Memora, que é o insumo do ataque direcionado '
             'descrito na tabela de ameaças.',
       );
@@ -239,8 +250,9 @@ void main() {
   });
 
   group('Bloqueio progressivo — FR-014 e FR-015', () {
-    testWidgets('a quinta falha bloqueia, e o botão sai do ar',
-        (WidgetTester t) async {
+    testWidgets('a quinta falha bloqueia, e o botão sai do ar', (
+      WidgetTester t,
+    ) async {
       await _montar(t, repositorio: _comContaDeAna());
 
       for (int i = 0; i < 5; i++) {
@@ -250,21 +262,24 @@ void main() {
       expect(
         find.byKey(TelaLogin.chaveContagem),
         findsOneWidget,
-        reason: 'Sem a contagem, "tente mais tarde" obriga a pessoa a '
+        reason:
+            'Sem a contagem, "tente mais tarde" obriga a pessoa a '
             'adivinhar quando o mais tarde chegou.',
       );
       expect(
         find.byKey(TelaLogin.chaveEntrar),
         findsNothing,
-        reason: 'Botão que continua ali e não responde é onde o idoso conclui '
+        reason:
+            'Botão que continua ali e não responde é onde o idoso conclui '
             'que o aparelho quebrou.',
       );
 
       await _esperarOBloqueioPassar(t);
     });
 
-    testWidgets('a espera termina sozinha e o botão volta',
-        (WidgetTester t) async {
+    testWidgets('a espera termina sozinha e o botão volta', (
+      WidgetTester t,
+    ) async {
       await _montar(t, repositorio: _comContaDeAna(escada: <int>[3]));
 
       for (int i = 0; i < 5; i++) {
@@ -280,14 +295,16 @@ void main() {
       expect(
         find.byKey(TelaLogin.chaveEntrar),
         findsOneWidget,
-        reason: 'Exigir que a pessoa saia e volte à tela para destravar seria '
+        reason:
+            'Exigir que a pessoa saia e volte à tela para destravar seria '
             'uma instrução que ninguém deu a ela.',
       );
       expect(find.byKey(TelaLogin.chaveContagem), findsNothing);
     });
 
-    testWidgets('a mensagem acolhe, explica e oferece saída',
-        (WidgetTester t) async {
+    testWidgets('a mensagem acolhe, explica e oferece saída', (
+      WidgetTester t,
+    ) async {
       await _montar(t, repositorio: _comContaDeAna());
 
       for (int i = 0; i < 5; i++) {
@@ -307,7 +324,8 @@ void main() {
       expect(
         find.textContaining('criar uma nova com você'),
         findsOneWidget,
-        reason: 'A FR-015 exige o caminho de recuperação. Quem esqueceu a '
+        reason:
+            'A FR-015 exige o caminho de recuperação. Quem esqueceu a '
             'senha não sai da espera esperando mais.',
       );
 
@@ -316,8 +334,9 @@ void main() {
   });
 
   group('Sessão mantida entre usos — FR-016', () {
-    testWidgets('quem tem sessão válida entra sem ver formulário nenhum',
-        (WidgetTester t) async {
+    testWidgets('quem tem sessão válida entra sem ver formulário nenhum', (
+      WidgetTester t,
+    ) async {
       PessoaAutenticada? entrou;
 
       await _montar(
@@ -329,13 +348,15 @@ void main() {
       expect(
         entrou?.nomeTratamento,
         'Ana',
-        reason: 'O cenário 1 da US2 é literal: reabro e continuo conectada '
+        reason:
+            'O cenário 1 da US2 é literal: reabro e continuo conectada '
             'sem digitar nada.',
       );
       expect(
         find.byKey(TelaLogin.chaveEntrar),
         findsNothing,
-        reason: 'Pedir a senha a quem já tem sessão válida é a barreira que a '
+        reason:
+            'Pedir a senha a quem já tem sessão válida é a barreira que a '
             'FR-016 existe para remover.',
       );
     });

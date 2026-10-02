@@ -20,3 +20,4 @@ e ela precisa permitir alteração (recolorimos tudo com a paleta).
 | `memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg`, `memora_preocupada.svg` | Desenho original da equipe, a partir do robô do wireframe (Figuras 5-7 e 15). As quatro saem do mesmo script e compartilham a geometria (feature 004, T010) | Própria | — |
 | `porta_conversa.svg`, `porta_aplicativos.svg`, `porta_servicos.svg`, `porta_ajuda.svg`, `porta_registro.svg` | Desenho original da equipe, para as portas do Hub (feature 004, T011). `porta_servicos` **não** usa logotipo de órgão nenhum (R7) | Própria | — |
 | `estado_vazio.svg`, `estado_erro.svg`, `aplicativo_generico.svg` | Desenho original da equipe (feature 004, T011) | Própria | — |
+| `ajuste_aparencia.svg` | Desenho original da equipe, para o ajuste de aparência (feature 004, T011) | Própria | — |

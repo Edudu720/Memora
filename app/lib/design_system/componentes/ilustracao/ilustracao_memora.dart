@@ -63,7 +63,14 @@ enum Ilustracao {
   estadoErro('estado_erro'),
 
   /// Aplicativo cujo ícone o aparelho não forneceu (R7).
-  aplicativoGenerico('aplicativo_generico');
+  aplicativoGenerico('aplicativo_generico'),
+
+  // ---------------------------------------------------------------------------
+  // Ajustes (feature 004)
+  // ---------------------------------------------------------------------------
+
+  /// "Como eu vejo o Memora": a letra grande e a paleta.
+  ajusteAparencia('ajuste_aparencia');
 
   const Ilustracao(this._arquivo, {this.colorida = true});
 

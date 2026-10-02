@@ -35,28 +35,31 @@ void main() {
   });
 
   group('V8 — nenhuma credencial em armazenamento comum', () {
-    test('cadastro guarda a sessão no cofre, e não em SharedPreferences',
-        () async {
-      final RepositorioAutenticacaoApi repositorio = _repositorioQueResponde(
-        cofre,
-        _respostaDeSessao(),
-      );
+    test(
+      'cadastro guarda a sessão no cofre, e não em SharedPreferences',
+      () async {
+        final RepositorioAutenticacaoApi repositorio = _repositorioQueResponde(
+          cofre,
+          _respostaDeSessao(),
+        );
 
-      final ResultadoAutenticacao resultado =
-          await repositorio.cadastrar(_dados);
+        final ResultadoAutenticacao resultado = await repositorio.cadastrar(
+          _dados,
+        );
 
-      expect(resultado, isA<AutenticacaoConcluida>());
-      expect(cofre.tokenGuardado, 'jwt.de.teste');
-      expect(cofre.refreshGuardado, 'refresh-opaco-de-teste');
+        expect(resultado, isA<AutenticacaoConcluida>());
+        expect(cofre.tokenGuardado, 'jwt.de.teste');
+        expect(cofre.refreshGuardado, 'refresh-opaco-de-teste');
 
-      final SharedPreferences preferencias =
-          await SharedPreferences.getInstance();
-      expect(
-        preferencias.getKeys(),
-        isEmpty,
-        reason: 'nenhuma credencial pode encostar em armazenamento comum',
-      );
-    });
+        final SharedPreferences preferencias =
+            await SharedPreferences.getInstance();
+        expect(
+          preferencias.getKeys(),
+          isEmpty,
+          reason: 'nenhuma credencial pode encostar em armazenamento comum',
+        );
+      },
+    );
 
     test('nenhum valor guardado contém a senha digitada', () async {
       final RepositorioAutenticacaoApi repositorio = _repositorioQueResponde(
@@ -93,8 +96,9 @@ void main() {
         ),
       );
 
-      final ResultadoAutenticacao resultado =
-          await repositorio.cadastrar(_dados);
+      final ResultadoAutenticacao resultado = await repositorio.cadastrar(
+        _dados,
+      );
 
       expect(
         (resultado as AutenticacaoFalhou).falha,
@@ -160,14 +164,14 @@ const DadosDeCadastro _dados = DadosDeCadastro(
 );
 
 api.SessaoResposta _respostaDeSessao() => api.SessaoResposta(
-      tokenAcesso: 'jwt.de.teste',
-      refreshToken: 'refresh-opaco-de-teste',
-      expiraEmSegundos: 900,
-      pessoa: api.PessoaResposta(
-        id: '11111111-1111-1111-1111-111111111111',
-        nomeTratamento: 'Ana',
-      ),
-    );
+  tokenAcesso: 'jwt.de.teste',
+  refreshToken: 'refresh-opaco-de-teste',
+  expiraEmSegundos: 900,
+  pessoa: api.PessoaResposta(
+    id: '11111111-1111-1111-1111-111111111111',
+    nomeTratamento: 'Ana',
+  ),
+);
 
 DioException _erroDoServidor(int status, Map<String, dynamic> corpo) {
   final RequestOptions opcoes = RequestOptions(path: '/auth/cadastro');
@@ -201,9 +205,10 @@ RepositorioAutenticacaoApi _repositorioQueFalha(
   final Dio dio = Dio();
   dio.interceptors.add(
     InterceptorsWrapper(
-      onRequest: (RequestOptions opcoes, RequestInterceptorHandler manipulador) {
-        manipulador.reject(excecao);
-      },
+      onRequest:
+          (RequestOptions opcoes, RequestInterceptorHandler manipulador) {
+            manipulador.reject(excecao);
+          },
     ),
   );
   return RepositorioAutenticacaoApi(

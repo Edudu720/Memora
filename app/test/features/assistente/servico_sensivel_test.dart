@@ -64,11 +64,7 @@ void main() {
 
       for (final String pedido in insistencias) {
         final AssistenteRespondeu r = await perguntar(pedido);
-        expect(
-          r.acao,
-          isNull,
-          reason: 'ofereceu abrir para "$pedido"',
-        );
+        expect(r.acao, isNull, reason: 'ofereceu abrir para "$pedido"');
       }
     });
 
@@ -81,34 +77,42 @@ void main() {
       expect(r.texto.toLowerCase(), contains('suporte'));
     });
 
-    test('mesmo dizendo que nao conseguiu, servico sensivel nao abre',
-        () async {
-      // O caminho da US3 — declarar dificuldade — abre aplicativo cotidiano.
-      // Aqui ele NAO pode abrir caminho para o banco: seria a FR-041 furada
-      // pela porta que a FR-014 deixou aberta.
-      final AssistenteRespondeu r =
-          await perguntar('nao consegui entrar no banco, me ajuda');
+    test(
+      'mesmo dizendo que nao conseguiu, servico sensivel nao abre',
+      () async {
+        // O caminho da US3 — declarar dificuldade — abre aplicativo cotidiano.
+        // Aqui ele NAO pode abrir caminho para o banco: seria a FR-041 furada
+        // pela porta que a FR-014 deixou aberta.
+        final AssistenteRespondeu r = await perguntar(
+          'nao consegui entrar no banco, me ajuda',
+        );
 
-      expect(r.acao, isNull);
-    });
+        expect(r.acao, isNull);
+      },
+    );
 
-    test('aplicativo cotidiano continua abrindo — o portao nao barra tudo',
-        () async {
-      final AssistenteRespondeu r = await perguntar('nao consegui achar');
+    test(
+      'aplicativo cotidiano continua abrindo — o portao nao barra tudo',
+      () async {
+        final AssistenteRespondeu r = await perguntar('nao consegui achar');
 
-      // Sem este caso, uma assistente que recusasse tudo passaria nos testes
-      // acima e a feature nao funcionaria.
-      expect(r.acao, isNotNull);
-    });
+        // Sem este caso, uma assistente que recusasse tudo passaria nos testes
+        // acima e a feature nao funcionaria.
+        expect(r.acao, isNotNull);
+      },
+    );
   });
 
   group('FR-045 — a pessoa sabe antes de tocar', () {
-    testWidgets('servico sensivel diz que a Memora so ensina',
-        (WidgetTester t) async {
+    testWidgets('servico sensivel diz que a Memora so ensina', (
+      WidgetTester t,
+    ) async {
       await montarCatalogo(t, CategoriaDoServico.sensivel);
 
-      expect(find.text(CategoriaDoServico.sensivel.oQueAMemoraFaz),
-          findsWidgets);
+      expect(
+        find.text(CategoriaDoServico.sensivel.oQueAMemoraFaz),
+        findsWidgets,
+      );
       // A explicacao do porque vem ANTES da lista, e nao depois de frustrar.
       expect(
         find.text(TextosAssistente.porqueNaoAbroServicoSensivel),
@@ -116,16 +120,20 @@ void main() {
       );
     });
 
-    testWidgets('aplicativo cotidiano diz que ela ensina e abre',
-        (WidgetTester t) async {
+    testWidgets('aplicativo cotidiano diz que ela ensina e abre', (
+      WidgetTester t,
+    ) async {
       await montarCatalogo(t, CategoriaDoServico.cotidiano);
 
-      expect(find.text(CategoriaDoServico.cotidiano.oQueAMemoraFaz),
-          findsWidgets);
+      expect(
+        find.text(CategoriaDoServico.cotidiano.oQueAMemoraFaz),
+        findsWidgets,
+      );
     });
 
-    testWidgets('a lista de sensiveis nao mistura cotidianos',
-        (WidgetTester t) async {
+    testWidgets('a lista de sensiveis nao mistura cotidianos', (
+      WidgetTester t,
+    ) async {
       await montarCatalogo(t, CategoriaDoServico.sensivel);
 
       expect(find.byKey(TelaCatalogo.chaveDoItem('Meu INSS')), findsOneWidget);

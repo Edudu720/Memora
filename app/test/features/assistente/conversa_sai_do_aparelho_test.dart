@@ -56,8 +56,11 @@ void main() {
     });
 
     test('a conversa guardada some', () async {
-      expect(await conversa.ler(), hasLength(1),
-          reason: 'o cenario pressupoe conversa guardada antes da saida');
+      expect(
+        await conversa.ler(),
+        hasLength(1),
+        reason: 'o cenario pressupoe conversa guardada antes da saida',
+      );
 
       await limpeza.executar();
 
@@ -71,8 +74,11 @@ void main() {
       await limpeza.executar();
 
       expect(await conversa.ler(), isEmpty);
-      expect(await ultimoAcesso.identificador(), 'ana@gmail.com',
-          reason: 'o identificador fica — e a conversa nao');
+      expect(
+        await ultimoAcesso.identificador(),
+        'ana@gmail.com',
+        reason: 'o identificador fica — e a conversa nao',
+      );
     });
 
     test('a credencial sai primeiro, e a conversa depois', () async {
@@ -83,29 +89,38 @@ void main() {
       expect(
         cofre.momentoDaLimpeza! < conversa.momentoDaLimpeza!,
         isTrue,
-        reason: 'se a limpeza falhar no meio, e melhor sobrar conversa sem '
+        reason:
+            'se a limpeza falhar no meio, e melhor sobrar conversa sem '
             'credencial do que credencial sem conversa',
       );
     });
 
-    test('falha ao apagar a conversa nao impede a limpeza de terminar',
-        () async {
-      final LimpezaDeSessao comFalha = LimpezaDeSessao(
-        cofre: cofre,
-        ultimoAcesso: ultimoAcesso,
-        dadosLocais: <DadoLocalDaPessoa>[_ConversaQueFalha(), conversa],
-      );
+    test(
+      'falha ao apagar a conversa nao impede a limpeza de terminar',
+      () async {
+        final LimpezaDeSessao comFalha = LimpezaDeSessao(
+          cofre: cofre,
+          ultimoAcesso: ultimoAcesso,
+          dadosLocais: <DadoLocalDaPessoa>[_ConversaQueFalha(), conversa],
+        );
 
-      // Sem isto, um arquivo travado pelo sistema deixaria a pessoa sem saber
-      // se saiu ou não. O que importa mais — a credencial — ja foi.
-      await comFalha.executar(esquecerTudo: true);
+        // Sem isto, um arquivo travado pelo sistema deixaria a pessoa sem saber
+        // se saiu ou não. O que importa mais — a credencial — ja foi.
+        await comFalha.executar(esquecerTudo: true);
 
-      expect(await cofre.tokenAcesso(), isNull);
-      expect(await conversa.ler(), isEmpty,
-          reason: 'o item depois do que falhou precisa ser apagado');
-      expect(await ultimoAcesso.identificador(), isNull,
-          reason: 'esquecerTudo roda depois dos dados locais');
-    });
+        expect(await cofre.tokenAcesso(), isNull);
+        expect(
+          await conversa.ler(),
+          isEmpty,
+          reason: 'o item depois do que falhou precisa ser apagado',
+        );
+        expect(
+          await ultimoAcesso.identificador(),
+          isNull,
+          reason: 'esquecerTudo roda depois dos dados locais',
+        );
+      },
+    );
   });
 }
 

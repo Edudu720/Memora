@@ -42,30 +42,31 @@ ControladorCadastro _preenchido(RepositorioAutenticacao repo) {
 void main() {
   group('Política de senha — comprimento sobre complexidade (FR-042)', () {
     test('senha curta é recusada', () {
-      final ControladorCadastro c =
-          ControladorCadastro(RepositorioAutenticacaoSimulado())
-            ..informarSenha('curta');
+      final ControladorCadastro c = ControladorCadastro(
+        RepositorioAutenticacaoSimulado(),
+      )..informarSenha('curta');
 
       expect(c.senhaValida, isFalse);
     });
 
     test('frase longa e simples é aceita', () {
-      final ControladorCadastro c =
-          ControladorCadastro(RepositorioAutenticacaoSimulado())
-            ..informarSenha('minha cachorra chama pipoca');
+      final ControladorCadastro c = ControladorCadastro(
+        RepositorioAutenticacaoSimulado(),
+      )..informarSenha('minha cachorra chama pipoca');
 
       expect(
         c.senhaValida,
         isTrue,
-        reason: 'Exigir maiúscula, número e símbolo leva pessoas idosas a '
+        reason:
+            'Exigir maiúscula, número e símbolo leva pessoas idosas a '
             'anotar a senha em papel, o que piora a segurança real.',
       );
     });
 
     test('senha notoriamente comum é recusada mesmo sendo longa', () {
-      final ControladorCadastro c =
-          ControladorCadastro(RepositorioAutenticacaoSimulado())
-            ..informarSenha('1234567890');
+      final ControladorCadastro c = ControladorCadastro(
+        RepositorioAutenticacaoSimulado(),
+      )..informarSenha('1234567890');
 
       expect(c.senhaValida, isFalse);
     });
@@ -73,28 +74,32 @@ void main() {
 
   group('Validação de canal (decisão D1)', () {
     test('e-mail sem arroba não habilita o envio', () {
-      final ControladorCadastro c = _preenchido(RepositorioAutenticacaoSimulado())
-        ..informarCanal('ana.email.com');
+      final ControladorCadastro c = _preenchido(
+        RepositorioAutenticacaoSimulado(),
+      )..informarCanal('ana.email.com');
 
       expect(c.podeEnviar, isFalse);
     });
 
     test('telefone com poucos dígitos não habilita o envio', () {
-      final ControladorCadastro c = _preenchido(RepositorioAutenticacaoSimulado())
-        ..escolherTipoCanal(TipoCanal.telefone)
-        ..informarCanal('9999');
+      final ControladorCadastro c =
+          _preenchido(RepositorioAutenticacaoSimulado())
+            ..escolherTipoCanal(TipoCanal.telefone)
+            ..informarCanal('9999');
 
       expect(c.podeEnviar, isFalse);
     });
 
     test('trocar o tipo de canal limpa o valor digitado', () {
-      final ControladorCadastro c = _preenchido(RepositorioAutenticacaoSimulado())
-        ..escolherTipoCanal(TipoCanal.telefone);
+      final ControladorCadastro c = _preenchido(
+        RepositorioAutenticacaoSimulado(),
+      )..escolherTipoCanal(TipoCanal.telefone);
 
       expect(
         c.canal,
         isEmpty,
-        reason: 'Manter o e-mail no campo de telefone confunde e gera um erro '
+        reason:
+            'Manter o e-mail no campo de telefone confunde e gera um erro '
             'que a pessoa não entende.',
       );
     });
@@ -102,14 +107,15 @@ void main() {
 
   group('Erros só aparecem depois da tentativa (FR-005)', () {
     test('não acusa erro enquanto a pessoa ainda está digitando', () {
-      final ControladorCadastro c =
-          ControladorCadastro(RepositorioAutenticacaoSimulado())
-            ..informarCanal('an');
+      final ControladorCadastro c = ControladorCadastro(
+        RepositorioAutenticacaoSimulado(),
+      )..informarCanal('an');
 
       expect(
         c.erroCanal,
         isNull,
-        reason: 'Acusar erro a cada tecla digitada faz a pessoa achar que '
+        reason:
+            'Acusar erro a cada tecla digitada faz a pessoa achar que '
             'está errando o tempo todo.',
       );
     });
@@ -136,7 +142,8 @@ void main() {
       expect(
         repo.chamadas,
         1,
-        reason: 'Mão trêmula gera toque duplo com facilidade. Duas contas '
+        reason:
+            'Mão trêmula gera toque duplo com facilidade. Duas contas '
             'para a mesma pessoa é um problema que ela não sabe resolver.',
       );
     });

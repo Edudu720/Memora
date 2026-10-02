@@ -18,9 +18,9 @@ void main() {
   });
 
   Future<RespostaDaAssistente> perguntar(String texto) => assistente.conversar(
-        mensagem: texto,
-        historico: const <MensagemDaConversa>[],
-      );
+    mensagem: texto,
+    historico: const <MensagemDaConversa>[],
+  );
 
   group('Serviço sensível — FR-041', () {
     test('nunca oferece abrir, mesmo com pedido direto', () async {
@@ -57,7 +57,11 @@ void main() {
         (ServicoDoCatalogo s) => s.categoria == CategoriaDoServico.sensivel,
       );
 
-      expect(sensiveis, isNotEmpty, reason: 'o catálogo precisa exercer o caso');
+      expect(
+        sensiveis,
+        isNotEmpty,
+        reason: 'o catálogo precisa exercer o caso',
+      );
       for (final ServicoDoCatalogo servico in sensiveis) {
         expect(servico.memoraPodeAbrir, isFalse);
       }
@@ -119,9 +123,9 @@ void main() {
     test('o limite diário traz a espera junto', () async {
       final RepositorioAssistenteSimulado limitado =
           RepositorioAssistenteSimulado(
-        demora: Duration.zero,
-        falhaForcada: FalhaDaAssistente.limiteDeConversas,
-      );
+            demora: Duration.zero,
+            falhaForcada: FalhaDaAssistente.limiteDeConversas,
+          );
 
       final RespostaDaAssistente resposta = await limitado.conversar(
         mensagem: 'oi',

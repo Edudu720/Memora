@@ -4,7 +4,9 @@ import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
+import '../../tokens/raio.dart';
 import '../texto/texto_memora.dart';
+import '../toque/superficie_tocavel.dart';
 
 /// Um destino da navegação inferior.
 @immutable
@@ -34,6 +36,9 @@ class NavegacaoInferior extends StatelessWidget {
 
   /// Acionada ao escolher um destino.
   final ValueChanged<int> aoSelecionar;
+
+  /// Chave do traço do destino ativo, para os testes.
+  static Key chaveDoTraco(int posicao) => Key('navegacao.traco.$posicao');
 
   /// Cria a navegação inferior.
   const NavegacaoInferior({
@@ -90,42 +95,62 @@ class _Item extends StatelessWidget {
     final MemoraCores cores = context.memora.cores;
     final Color cor = ativo ? cores.primaria : cores.texto;
 
-    return Semantics(
-      button: true,
-      selected: ativo,
-      label: item.rotulo,
-      hint: '$posicao de $total',
-      onTap: aoTocar,
-      child: ExcludeSemantics(
-        child: InkWell(
-          onTap: aoTocar,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: MemoraDimensoes.alvoDecisao,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: MemoraEspacamento.sm,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    item.icone,
-                    color: cor,
-                    size: MemoraDimensoes.iconeDestaque,
+    // O destino ativo é marcado por TRÊS sinais além da cor (FR-015 da 004):
+    // o traço em primária no topo, a pílula atrás do ícone e o rótulo em
+    // negrito. A pílula sozinha não bastaria — o `destaque` mede só 1,1 a
+    // 1,6:1 contra a barra —, e por isso o traço, que é par validado como
+    // gráfico (primária sobre superficieAlt), vem junto.
+    return SuperficieTocavel(
+      rotulo: item.rotulo,
+      dica: '$posicao de $total',
+      selecionada: ativo,
+      aoTocar: aoTocar,
+      fundo: Colors.transparent,
+      raio: BorderRadius.zero,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: MemoraDimensoes.alvoDecisao,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: MemoraEspacamento.sm),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                key: ativo ? NavegacaoInferior.chaveDoTraco(posicao) : null,
+                height: MemoraDimensoes.bordaSelecao,
+                width: MemoraDimensoes.larguraDaPilulaDeNavegacao,
+                decoration: BoxDecoration(
+                  color: ativo ? cores.primaria : Colors.transparent,
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(MemoraRaio.pilula),
                   ),
-                  const SizedBox(height: MemoraEspacamento.xs),
-                  // Rótulo escrito, sempre.
-                  TextoMemora(
-                    item.rotulo,
-                    estilo: ativo ? EstiloTexto.corpoForte : EstiloTexto.apoio,
-                    cor: cor,
-                    alinhamento: TextAlign.center,
-                  ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: MemoraEspacamento.xs),
+              Container(
+                width: MemoraDimensoes.larguraDaPilulaDeNavegacao,
+                height: MemoraDimensoes.alturaDaPilulaDeNavegacao,
+                decoration: BoxDecoration(
+                  color: ativo ? cores.destaque : Colors.transparent,
+                  borderRadius: BorderRadius.circular(MemoraRaio.pilula),
+                ),
+                alignment: Alignment.center,
+                child: Icon(
+                  item.icone,
+                  color: cor,
+                  size: MemoraDimensoes.iconeDestaque,
+                ),
+              ),
+              const SizedBox(height: MemoraEspacamento.xs),
+              // Rótulo escrito, sempre.
+              TextoMemora(
+                item.rotulo,
+                estilo: ativo ? EstiloTexto.corpoForte : EstiloTexto.apoio,
+                cor: cor,
+                alinhamento: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),

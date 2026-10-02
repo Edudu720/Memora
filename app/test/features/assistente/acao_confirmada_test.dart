@@ -54,7 +54,10 @@ void main() {
 
   Future<void> montar(WidgetTester t, ControladorConversa c) async {
     await t.pumpWidget(
-      MaterialApp(theme: TemasMemora.claro, home: TelaConversa(controlador: c)),
+      MaterialApp(
+        theme: TemasMemora.claro,
+        home: TelaConversa(controlador: c),
+      ),
     );
     await avancar(t);
   }
@@ -91,8 +94,9 @@ void main() {
   }
 
   group('H7 — nada acontece antes da confirmacao (FR-015)', () {
-    testWidgets('a oferta esta na tela e NADA foi aberto ainda',
-        (WidgetTester t) async {
+    testWidgets('a oferta esta na tela e NADA foi aberto ainda', (
+      WidgetTester t,
+    ) async {
       await chegarNaOferta(t);
 
       // O portao: a acao esta autorizada pelo servidor, e mesmo assim nenhum
@@ -101,8 +105,9 @@ void main() {
       expect(find.byKey(TelaConversa.chaveConfirmarAbrir), findsOneWidget);
     });
 
-    testWidgets('a pergunta diz exatamente o que vai acontecer',
-        (WidgetTester t) async {
+    testWidgets('a pergunta diz exatamente o que vai acontecer', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = await chegarNaOferta(t);
       final String nome = c.acaoOferecida!.nomeExibido;
 
@@ -112,8 +117,9 @@ void main() {
       );
     });
 
-    testWidgets('recusar nao abre nada, e a oferta some (FR-016)',
-        (WidgetTester t) async {
+    testWidgets('recusar nao abre nada, e a oferta some (FR-016)', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = await chegarNaOferta(t);
 
       c.recusarAcao();
@@ -135,11 +141,13 @@ void main() {
   });
 
   group('H8 — a pessoa e avisada antes de sair do Memora (FR-021)', () {
-    testWidgets('o pedido de confirmacao avisa que ela sai do aplicativo',
-        (WidgetTester t) async {
+    testWidgets('o pedido de confirmacao avisa que ela sai do aplicativo', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = await chegarNaOferta(t);
-      final String pergunta =
-          TextosAssistente.pedidoDeAbertura(c.acaoOferecida!.nomeExibido);
+      final String pergunta = TextosAssistente.pedidoDeAbertura(
+        c.acaoOferecida!.nomeExibido,
+      );
 
       // A FR-021 vive dentro da frase da FR-015. Quem reescrever o texto sem
       // saber disso derruba uma exigencia do Principio II sem perceber.
@@ -156,14 +164,12 @@ void main() {
       await confirmar(t, c);
 
       // Se a pessoa so vê o resultado, ela aprendeu que a Memora resolve.
-      expect(
-        c.mensagens.last.texto,
-        TextosAssistente.caminhoPercorrido(nome),
-      );
+      expect(c.mensagens.last.texto, TextosAssistente.caminhoPercorrido(nome));
     });
 
-    testWidgets('a acao executada e registrada (FR-020)',
-        (WidgetTester t) async {
+    testWidgets('a acao executada e registrada (FR-020)', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = await chegarNaOferta(t);
 
       await confirmar(t, c);
@@ -185,8 +191,9 @@ void main() {
       expect(c.mensagens.last.texto.toLowerCase(), isNot(contains('erro')));
     });
 
-    testWidgets('a acao que NAO aconteceu tambem nao e registrada',
-        (WidgetTester t) async {
+    testWidgets('a acao que NAO aconteceu tambem nao e registrada', (
+      WidgetTester t,
+    ) async {
       final ControladorConversa c = await chegarNaOferta(t);
       abridor.falharNaProxima = true;
 
