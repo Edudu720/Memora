@@ -498,8 +498,14 @@ assinatura ou pagamento, e não encontrar nenhuma.
   porta MUST ter acabamento de botão refinado — profundidade, contorno e
   estado pressionado visíveis —, e não a aparência de uma faixa chapada
   (revisão da T044).
-- **FR-017**: O Hub MUST caber sem rolagem em 100% e 150% de ampliação no menor
-  aparelho suportado.
+- **FR-017**: Em qualquer aparelho suportado e em qualquer ampliação, a porta
+  principal do Hub (conversar com a Memora) MUST aparecer sem rolar, e o Hub
+  MUST mostrar que há mais portas abaixo quando houver. O Hub inteiro MUST
+  caber sem rolagem no aparelho mais comum (360×800) em 100% e 150%.
+  (Antes: sem rolagem em 100% e 150% no **menor** aparelho, 320×568. Inviável a
+  150% junto com a FR-016 — a barra inferior sozinha toma 123 dos 568 px —, e
+  a 100% só cabia apertando as portas, o oposto do "junto demais" da revisão da
+  T044. Decisão do Henrique, 2026-10-02.)
 - **FR-018**: Uma parte que ainda não funciona MUST NOT ser mostrada no Hub, nas
   Configurações nem na Ajuda.
 - **FR-019**: Sair da conta MUST ficar em Configurações → Conta, e não no Hub nem
