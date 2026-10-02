@@ -34,7 +34,7 @@ class _Par {
   const _Par(this.nome, this.frente, this.fundo, {this.grafico = false});
 }
 
-/// Os mesmos 20 pares por tema verificados em
+/// Os mesmos 22 pares por tema verificados em
 /// `specs/002-design-system/ferramentas/validar_paleta.py`.
 const List<_Par> _pares = <_Par>[
   _Par('texto sobre fundo', _texto, _fundo),
@@ -62,6 +62,9 @@ const List<_Par> _pares = <_Par>[
   _Par('texto sobre destaque', _texto, _destaque),
   _Par('textoSuave sobre destaque', _textoSuave, _destaque),
   _Par('primaria sobre destaque', _primaria, _destaque),
+  // Revisao da #38: pares que a interface ja usava sem validacao.
+  _Par('primaria (texto) sobre superficieAlt', _primaria, _superficieAlt),
+  _Par('perigo sobre superficieAlt', _perigo, _superficieAlt, grafico: true),
 ];
 
 Color _fundo(MemoraCores c) => c.fundo;
@@ -103,8 +106,8 @@ void main() {
       });
     }
 
-    test('o validador cobre exatamente 60 pares', () {
-      expect(_pares.length * MemoraTheme.todos.length, 60);
+    test('o validador cobre exatamente 66 pares', () {
+      expect(_pares.length * MemoraTheme.todos.length, 66);
     });
   });
 

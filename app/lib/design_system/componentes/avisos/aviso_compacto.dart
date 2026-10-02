@@ -24,11 +24,11 @@ import '../texto/texto_memora.dart';
 ///   001 e FR-033 da 003 procuram. Fechado, ele está sempre à vista; aberto,
 ///   ele rola junto com o texto, porque fixo ele e o botão sozinhos já
 ///   passavam da metade da tela a 200% num 320×568.
-/// - **O [resumo] aparece fechado**, numa linha, para o aviso dizer alguma
-///   coisa mesmo sem ser aberto.
-/// - **Aberto, não passa de [MemoraDimensoes.tetoDoAvisoAberto] da altura da
-///   tela**; o resto rola por dentro. Fração, e não pixel — a lição do teto da
-///   conversa.
+/// - **O [resumo] aparece fechado**, inteiro, para o aviso dizer alguma coisa
+///   mesmo sem ser aberto. Nunca cortado: o resumo é o que a maioria lê.
+/// - **Aberto, não passa de [MemoraDimensoes.tetoDoAvisoAberto] da altura que
+///   sobra da tela**, descontado o teclado; o resto rola por dentro. Fração, e
+///   não pixel — a lição do teto da conversa.
 /// - **Começa fechado a cada montagem.** Quem abriu uma vez não deixa o aviso
 ///   aberto para sempre, virando paisagem.
 ///
@@ -114,8 +114,18 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    final double teto =
-        MediaQuery.sizeOf(context).height * MemoraDimensoes.tetoDoAvisoAberto;
+    // O que SOBRA da tela, e não a tela: a altura não diminui com o teclado,
+    // e num 360x640 com o teclado aberto metade da tela era quase toda a área
+    // útil (revisão da #38). O aviso vive dentro de lista que rola, onde a
+    // altura que o pai oferece é infinita — por isso a conta parte da tela.
+    //
+    // O teclado vem da janela (`View`), e não do `MediaQuery`: o `Scaffold`
+    // tira o teclado do `MediaQuery` que entrega ao corpo, e de dentro dele o
+    // aviso nunca o veria.
+    final double teclado =
+        MediaQueryData.fromView(View.of(context)).viewInsets.bottom;
+    final double sobra = MediaQuery.sizeOf(context).height - teclado;
+    final double teto = sobra * MemoraDimensoes.tetoDoAvisoAberto;
 
     return Container(
       width: double.infinity,
@@ -157,7 +167,7 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
           else ...<Widget>[
             _cabeca(cores),
             const SizedBox(height: MemoraEspacamento.xs),
-            TextoMemora(widget.resumo, maxLinhas: 2),
+            TextoMemora(widget.resumo),
           ],
           Align(
             alignment: Alignment.centerLeft,

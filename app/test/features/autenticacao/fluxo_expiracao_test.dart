@@ -28,7 +28,7 @@ class _RepoLento extends RepositorioAutenticacaoSimulado {
   }
 }
 
-Future<_RepoLento> montar(WidgetTester t) async {
+Future<_RepoLento> _montar(WidgetTester t) async {
   final UltimoAcessoEmMemoria ultimo = UltimoAcessoEmMemoria();
   final _RepoLento repo = _RepoLento()
     ..registrarConta(
@@ -83,7 +83,7 @@ Future<_RepoLento> montar(WidgetTester t) async {
 void main() {
   testWidgets('a pergunta "Fechar o Memora?" aberta na expiração não fica por '
       'cima do login', (WidgetTester t) async {
-    await montar(t);
+    await _montar(t);
     await t.binding.handlePopRoute();
     await FluxoDentroDaConta.avancar(t);
     expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsOneWidget,
@@ -103,7 +103,7 @@ void main() {
 
   testWidgets('tocar durante uma saída lenta não deixa o monitor vivo no login',
       (WidgetTester t) async {
-    final _RepoLento repo = await montar(t);
+    final _RepoLento repo = await _montar(t);
     repo.saida = Completer<void>();
 
     await t.pump(const Duration(seconds: 2)); // aviso

@@ -4,7 +4,7 @@ import 'package:flutter/painting.dart';
 /// Cores semânticas do Memora.
 ///
 /// Os valores desta classe são a **contraparte em código** de
-/// `specs/002-design-system/ferramentas/validar_paleta.py`, que valida os 60
+/// `specs/002-design-system/ferramentas/validar_paleta.py`, que valida os 66
 /// pares de contraste dos três temas segundo a WCAG 2.2.
 ///
 /// **Nunca altere um valor aqui sem rodar o validador.** O teste

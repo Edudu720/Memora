@@ -108,6 +108,11 @@ PARES = [
     ("texto",          "destaque",       "texto"),
     ("texto_suave",    "destaque",       "texto"),
     ("primaria",       "destaque",       "texto"),
+    # revisao da #38: pares que a interface ja usava sem validacao. O "Ler o
+    # aviso inteiro" escreve primaria como TEXTO sobre superficie_alt (antes so
+    # validada como grafico), e a borda e o escudo do aviso usam perigo sobre ela.
+    ("primaria",       "superficie_alt", "texto"),
+    ("perigo",         "superficie_alt", "grafico"),
 ]
 
 def main():

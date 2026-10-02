@@ -89,15 +89,32 @@ void main() {
   });
 
   group('Título', () {
-    testWidgets('cabe em duas linhas, e o leitor recebe o título inteiro', (
-      WidgetTester t,
-    ) async {
+    // A primeira versão cortava o título em duas linhas, e este teste exigia
+    // `maxLines == 2` — travava o defeito em vez de pegá-lo (revisão da #38).
+    for (final double escala in <double>[1.0, 1.5, 2.0]) {
+      testWidgets('nunca é cortado, a ${(escala * 100).round()}% no 320x568', (
+        WidgetTester t,
+      ) async {
+        vestir(t, const Size(320, 568));
+        await t.pumpWidget(
+          app(
+            const CabecalhoDeTela(
+              titulo: 'Como eu vejo o Memora',
+              memora: ExpressaoDaMemora.neutra,
+            ),
+            escala: escala,
+            tamanho: const Size(320, 568),
+          ),
+        );
+        final Text texto = t.widget<Text>(find.text('Como eu vejo o Memora'));
+        expect(texto.maxLines, isNull);
+        expect(texto.overflow, isNot(TextOverflow.ellipsis));
+      });
+    }
+
+    testWidgets('é cabeçalho para o leitor de tela', (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(app(const CabecalhoDeTela(titulo: tituloLongo)));
-
-      final Text texto = t.widget<Text>(find.text(tituloLongo));
-      expect(texto.maxLines, 2);
-      expect(find.bySemanticsLabel(tituloLongo), findsOneWidget);
       expect(
         t.getSemantics(find.bySemanticsLabel(tituloLongo)),
         isSemantics(isHeader: true),
@@ -158,11 +175,17 @@ void main() {
         await t.pumpWidget(
           naCombinacao(
             c,
+            // Numa lista, como nas telas de verdade: o título cresce com o
+            // texto ampliado, e quem rola é a tela, não o cabeçalho.
             Scaffold(
-              body: CabecalhoDeTela(
-                titulo: tituloLongo,
-                aoVoltar: () {},
-                memora: ExpressaoDaMemora.neutra,
+              body: ListView(
+                children: <Widget>[
+                  CabecalhoDeTela(
+                    titulo: tituloLongo,
+                    aoVoltar: () {},
+                    memora: ExpressaoDaMemora.neutra,
+                  ),
+                ],
               ),
             ),
           ),
