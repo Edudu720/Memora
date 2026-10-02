@@ -120,3 +120,20 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  # Atkinson Hyperlegible Next, desenhada para baixa visao (R3 da feature 004).
+  # Os tres pesos sao instancias estaticas da fonte variavel -- ver ORIGEM.md
+  # na mesma pasta. Um peso novo precisa ser gerado e declarado aqui.
+  #
+  # As pastas de `assets/guias/<chave>/` NAO estao declaradas acima: o Flutter
+  # nao le subpasta sozinho, e declarar pasta que ainda nao existe quebra o
+  # build. Cada guia acrescenta a propria linha quando nasce (fases 6 e 7).
+  fonts:
+    - family: AtkinsonHyperlegibleNext
+      fonts:
+        - asset: assets/fontes/atkinson_hyperlegible_next/AtkinsonHyperlegibleNext-Regular.ttf
+          weight: 400
+        - asset: assets/fontes/atkinson_hyperlegible_next/AtkinsonHyperlegibleNext-SemiBold.ttf
+          weight: 600
+        - asset: assets/fontes/atkinson_hyperlegible_next/AtkinsonHyperlegibleNext-Bold.ttf
+          weight: 700

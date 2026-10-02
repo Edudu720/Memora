@@ -18,7 +18,9 @@
 /// permite e o caso que ninguém tem na mesa para testar na mão.
 library;
 
-import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/design_system.dart';
 
 /// O aparelho em que o T070 foi medido, e o padrão de quem não pede outro.
 const Size referencia = Size(390, 844);
@@ -34,3 +36,61 @@ const List<Size> aparelhos = <Size>[
 /// Nome curto do aparelho, para o título do teste.
 String nomeDo(Size aparelho) =>
     '${aparelho.width.toInt()}x${aparelho.height.toInt()}';
+
+// -----------------------------------------------------------------------------
+// A matriz completa da feature 004: aparelho × escala × tema (FR-044).
+// -----------------------------------------------------------------------------
+
+/// As escalas de texto verificadas: 100%, 150% e o teto de 200%.
+const List<double> escalas = <double>[1.0, 1.5, 2.0];
+
+/// Uma combinação da matriz.
+typedef Combinacao = ({Size aparelho, double escala, MemoraTemaId tema});
+
+/// Toda combinação de [de] × [em] × [temas], na ordem do mais folgado ao mais
+/// apertado.
+///
+/// São 36 combinações com os padrões. Um teste de tela que rode todas custa
+/// segundos, e foi um aparelho só que escondeu o estouro do 360×640 em 100%.
+Iterable<Combinacao> matriz({
+  List<Size> de = aparelhos,
+  List<double> em = escalas,
+  List<MemoraTemaId> temas = MemoraTemaId.values,
+}) sync* {
+  for (final Size aparelho in de) {
+    for (final double escala in em) {
+      for (final MemoraTemaId tema in temas) {
+        yield (aparelho: aparelho, escala: escala, tema: tema);
+      }
+    }
+  }
+}
+
+/// Nome da combinação, para o título do teste e a mensagem de falha.
+String nomeDa(Combinacao c) =>
+    '${nomeDo(c.aparelho)} a ${(c.escala * 100).round()}% no tema ${c.tema.name}';
+
+/// Põe a janela do teste no tamanho do aparelho, e a devolve no fim.
+///
+/// `MediaQuery(size:)` sozinho **não** muda o layout — só o que
+/// `MediaQuery.of` lê. As restrições de verdade vêm da janela, que é 800×600
+/// por padrão: mais larga que qualquer telefone. Foi assim que os testes de
+/// acessibilidade antigos rodaram anos num tamanho que nenhum idoso tem.
+void vestir(WidgetTester t, Size aparelho) {
+  t.view.physicalSize = aparelho;
+  t.view.devicePixelRatio = 1.0;
+  addTearDown(t.view.resetPhysicalSize);
+  addTearDown(t.view.resetDevicePixelRatio);
+}
+
+/// Um aplicativo mínimo na combinação [c], com [filho] como tela.
+Widget naCombinacao(Combinacao c, Widget filho) => MaterialApp(
+  theme: TemasMemora.porId(c.tema),
+  home: MediaQuery(
+    data: MediaQueryData(
+      size: c.aparelho,
+      textScaler: TextScaler.linear(c.escala),
+    ),
+    child: filho,
+  ),
+);

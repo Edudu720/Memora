@@ -14,11 +14,72 @@ enum Ilustracao {
   pessoaComCelular('pessoa_com_celular'),
 
   /// A linha que atravessa a tela de boas-vindas. **Precisa de [cor]**.
-  linhaJornada('linha_jornada');
+  linhaJornada('linha_jornada', colorida: false),
 
-  const Ilustracao(this._arquivo);
+  // ---------------------------------------------------------------------------
+  // A Memora (feature 004, T010). Use pelo `MemoraPersonagem`, que escolhe a
+  // expressão; a ilustração direta existe para a galeria e para os testes.
+  // ---------------------------------------------------------------------------
+
+  /// A Memora em repouso.
+  memoraNeutra('memora_neutra'),
+
+  /// A Memora falando — apresentação, conversa, ajuda guiada.
+  memoraFalando('memora_falando'),
+
+  /// A Memora comemorando — fim do passo a passo, conta criada.
+  memoraComemorando('memora_comemorando'),
+
+  /// A Memora preocupada — ao lado dos avisos de segurança.
+  memoraPreocupada('memora_preocupada'),
+
+  // ---------------------------------------------------------------------------
+  // Portas do Hub (feature 004, T011)
+  // ---------------------------------------------------------------------------
+
+  /// "Conversar com a Memora": dois balões de fala.
+  portaConversa('porta_conversa'),
+
+  /// "Meus aplicativos": um celular com a grade.
+  portaAplicativos('porta_aplicativos'),
+
+  /// "Serviços sociais": prédio público e documento. **Sem logotipo** (R7).
+  portaServicos('porta_servicos'),
+
+  /// "Ajuda": a boia com o ponto de interrogação.
+  portaAjuda('porta_ajuda'),
+
+  /// "O que eu fiz por você": a prancheta marcada.
+  portaRegistro('porta_registro'),
+
+  // ---------------------------------------------------------------------------
+  // Estados (feature 004, FR-006)
+  // ---------------------------------------------------------------------------
+
+  /// Nada para mostrar ainda.
+  estadoVazio('estado_vazio'),
+
+  /// Não deu para carregar — é a conexão, não a pessoa.
+  estadoErro('estado_erro'),
+
+  /// Aplicativo cujo ícone o aparelho não forneceu (R7).
+  aplicativoGenerico('aplicativo_generico'),
+
+  // ---------------------------------------------------------------------------
+  // Ajustes (feature 004)
+  // ---------------------------------------------------------------------------
+
+  /// "Como eu vejo o Memora": a letra grande e a paleta.
+  ajusteAparencia('ajuste_aparencia');
+
+  const Ilustracao(this._arquivo, {this.colorida = true});
 
   final String _arquivo;
+
+  /// O desenho tem cores próprias, e por isso vai sobre o medalhão claro nos
+  /// temas escuros (R4 da feature 004). Só as de traço único, que recebem
+  /// `cor`, não são coloridas.
+  final bool colorida;
 
   /// Caminho do arquivo dentro de `assets/`.
   String get caminho => 'assets/ilustracoes/$_arquivo.svg';

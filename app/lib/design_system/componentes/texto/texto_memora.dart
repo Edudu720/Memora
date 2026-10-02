@@ -19,6 +19,9 @@ TextScaler escalaTextoLimitada(BuildContext context) {
 
 /// Papel semântico de um texto na interface.
 enum EstiloTexto {
+  /// O título grande da entrada e do Início.
+  destaque,
+
   /// Título principal da tela.
   tituloTela,
 
@@ -32,7 +35,20 @@ enum EstiloTexto {
   corpoForte,
 
   /// Texto auxiliar. Nunca menor que 16 sp.
-  apoio,
+  apoio;
+
+  /// O estilo de token correspondente.
+  ///
+  /// Num lugar só: `TextoMemora` e `TextoComDestaque` tinham, cada um, o seu
+  /// `switch` igual, e um estilo novo precisaria lembrar dos dois.
+  TextStyle get base => switch (this) {
+    EstiloTexto.destaque => MemoraTipografia.destaque,
+    EstiloTexto.tituloTela => MemoraTipografia.tituloTela,
+    EstiloTexto.tituloSecao => MemoraTipografia.tituloSecao,
+    EstiloTexto.corpo => MemoraTipografia.corpo,
+    EstiloTexto.corpoForte => MemoraTipografia.corpoForte,
+    EstiloTexto.apoio => MemoraTipografia.apoio,
+  };
 }
 
 /// Texto do Memora, com escala limitada e cor vinda do tema.
@@ -88,8 +104,8 @@ class TextoMemora extends StatelessWidget {
     this.alinhamento,
     this.maxLinhas,
     super.key,
-  })  : estilo = EstiloTexto.tituloTela,
-        cabecalho = true;
+  }) : estilo = EstiloTexto.tituloTela,
+       cabecalho = true;
 
   /// Atalho para [EstiloTexto.tituloSecao].
   const TextoMemora.tituloSecao(
@@ -98,8 +114,8 @@ class TextoMemora extends StatelessWidget {
     this.alinhamento,
     this.maxLinhas,
     super.key,
-  })  : estilo = EstiloTexto.tituloSecao,
-        cabecalho = true;
+  }) : estilo = EstiloTexto.tituloSecao,
+       cabecalho = true;
 
   /// Atalho para [EstiloTexto.apoio].
   const TextoMemora.apoio(
@@ -108,16 +124,10 @@ class TextoMemora extends StatelessWidget {
     this.alinhamento,
     this.maxLinhas,
     super.key,
-  })  : estilo = EstiloTexto.apoio,
-        cabecalho = false;
+  }) : estilo = EstiloTexto.apoio,
+       cabecalho = false;
 
-  TextStyle get _base => switch (estilo) {
-        EstiloTexto.tituloTela => MemoraTipografia.tituloTela,
-        EstiloTexto.tituloSecao => MemoraTipografia.tituloSecao,
-        EstiloTexto.corpo => MemoraTipografia.corpo,
-        EstiloTexto.corpoForte => MemoraTipografia.corpoForte,
-        EstiloTexto.apoio => MemoraTipografia.apoio,
-      };
+  TextStyle get _base => estilo.base;
 
   @override
   Widget build(BuildContext context) {

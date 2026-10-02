@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
+  <!--
+    Estado vazio: a caixa aberta, sem nada dentro ainda.
+
+    Desenho original da equipe (feature 004, T011), no estilo da Memora: formas
+    planas e arredondadas, sem contorno, cores da marca. Sem fundo: quem desenha
+    o medalhao e o IlustracaoMemora.
+  -->
+  <ellipse cx="60" cy="104" rx="40" ry="6" fill="#8FB4FF" opacity="0.5"/>
+  <path d="M22 50 L60 66 L98 50 V90 L60 106 L22 90 Z" fill="#1040F8"/>
+  <path d="M60 66 V106 L98 90 V50 Z" fill="#5B80FF"/>
+  <path d="M22 50 L60 34 L98 50 L60 66 Z" fill="#0B1B4D"/>
+  <path d="M22 50 L8 36 L46 20 L60 34 Z" fill="#8FB4FF"/>
+  <path d="M98 50 L112 36 L74 20 L60 34 Z" fill="#8FB4FF"/>
+  <circle cx="86" cy="16" r="5" fill="#FFC83D"/>
+  <circle cx="98" cy="26" r="3" fill="#FFC83D"/>
+</svg>

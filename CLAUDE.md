@@ -1493,6 +1493,26 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   de conta desativada entrou na #15 anunciada na descrição da PR, sem um único
   teste, e furada. `git grep <a constante que a guarda usa>` em
   `backend/src/test/` custa segundos e teria mostrado.
+- **O `flutter test` mede todo texto com uma fonte quadrada**, de 1 em por
+  caractere, seja qual for a família pedida (medido na feature 004):
+  "Esqueci minha senha" a 18 sp ocupa **342 px** na matriz e **168 px** com a
+  Atkinson carregada. Com a altura de linha fixada, as duas têm a mesma altura
+  por linha, e a quadrada quebra mais linhas. A matriz é **pessimista nas duas
+  direções**, de propósito — não carregue fonte nela. Os px de estouro que ela
+  aponta são de texto duas vezes mais largo que o real; continuam sendo
+  defeito, mas não são o que a pessoa vê.
+- **Teste de atividade pode virar decorativo por causa da geometria.** Na 004,
+  com a casca, o campo da conversa subiu, e o toque que o teste dava "no
+  campo" caía no botão "Continuar" do aviso de inatividade — que registra
+  atividade sozinho. Sem `Listener` nenhum, o teste passava. Só apareceu
+  quebrando o `Listener` de propósito. Em teste de inatividade, **exija que o
+  aviso não esteja na tela antes de cada toque**.
+- **`AvatarMemora` não é o rosto da Memora.** É o retrato do casal no cartão do
+  cadastro e do login — o nome é anterior ao personagem. O rosto dela é o
+  `MemoraPersonagem`, da feature 004.
+- **O portão do V9 é lexical.** Ele exige `MemoraMovimento.efetiva` **na mesma
+  linha** de cada `duration:`. Guardar a duração numa variável antes reprova,
+  mesmo estando certo. Escreva a chamada no lugar.
 
 ---
 

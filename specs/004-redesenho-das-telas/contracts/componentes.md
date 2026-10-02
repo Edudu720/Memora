@@ -34,8 +34,10 @@ Uma porta: do Hub, da Ajuda, de Configurações.
 | `aoAbrir` | sim | O cartão inteiro é o alvo de toque |
 | `principal` | não | Destaque de ação principal (FR-002). No máximo um por tela |
 
-**É ação**, então usa preenchimento (FR-012 da 002). Informação nunca usa este
-componente.
+**É ação**, então usa **pílula e preenchimento** (FR-012 da 002): forma de
+pílula, a principal em primária e as demais no `destaque`. **Não é um
+`Cartao`** — o `Cartao` não é clicável, e um cartão tocável seria uma terceira
+linguagem visual. Informação nunca usa este componente.
 
 ## `AvisoCompacto`
 
@@ -43,7 +45,7 @@ O aviso permanente que não ocupa a tela (R5).
 
 | Entrada | Obrigatória | Comportamento |
 |---|---|---|
-| `titulo` | sim | Sempre visível, sempre na árvore — é o que os portões procuram |
+| `titulo` | sim | Sempre na árvore — é o que os portões procuram. Fechado, sempre à vista; aberto, rola junto com o texto completo, e só o botão fica fixo (a 200% num 320×568, título e botão fixos já passavam da metade da tela) |
 | `resumo` | sim | Uma linha, visível fechado |
 | `textoCompleto` | sim | Visível só aberto. Aberto, o aviso não passa de 50% da altura disponível; o resto rola dentro dele |
 | `expressao` | não | Rosto da Memora "preocupada" ao lado |
@@ -86,7 +88,7 @@ barra sozinha seria informação só visual.
 
 ## `MemoraPersonagem`
 
-Substitui o `AvatarMemora`. Expressões: `neutra`, `falando`, `comemorando`,
+Componente **novo** — não confundir com o `AvatarMemora`, que é o retrato do casal no cartão do cadastro e do login e continua existindo. Expressões: `neutra`, `falando`, `comemorando`,
 `preocupada`. Decorativa por padrão; com `descricao`, anunciada. Nos temas escuro
 e de alto contraste, sobre medalhão claro (R4).
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
+  <!--
+    Porta "Ajuda": um balao com o ponto de interrogacao e a boia.
+
+    Desenho original da equipe (feature 004, T011), no estilo da Memora: formas
+    planas e arredondadas, sem contorno, cores da marca. Sem fundo: quem desenha
+    o medalhao e o IlustracaoMemora.
+  -->
+  <circle cx="60" cy="60" r="46" fill="#FFC83D"/>
+  <circle cx="60" cy="60" r="46" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-dasharray="24 24"/>
+  <circle cx="60" cy="60" r="28" fill="#1040F8"/>
+  <path d="M51 52 C51 45 56 41 61 41 C67 41 71 45 71 50 C71 56 64 57 62 62 V65" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <circle cx="62" cy="75" r="4" fill="#FFFFFF"/>
+</svg>

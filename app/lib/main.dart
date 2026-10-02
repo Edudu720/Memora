@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'demonstracao/casa_demonstracao.dart';
 import 'design_system/design_system.dart';
+import 'features/assistente/data/abridor_de_aplicativo.dart';
+import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
 import 'services/ambiente/ambiente.dart';
 import 'services/ambiente/composicao.dart';
@@ -41,9 +42,8 @@ Future<void> main() async {
 
 /// Raiz do aplicativo Memora.
 ///
-/// Nesta etapa o aplicativo apenas exercita o Design System. As telas reais
-/// chegam com a feature 001, que só é desbloqueada quando os componentes
-/// estiverem prontos e validados.
+/// A raiz leva direto ao fluxo de autenticação, que, com a pessoa dentro,
+/// monta a casca com a barra inferior (R1 da feature 004).
 class AplicativoMemora extends StatelessWidget {
   /// Controla o tema e a ampliação de texto escolhidos pela pessoa.
   final ControladorAparencia controlador;
@@ -82,9 +82,19 @@ class AplicativoMemora extends StatelessWidget {
               fatorDoAplicativo: atual.escalaTexto,
               child: child!,
             ),
-            home: CasaDemonstracao(
+            // O aplicativo de verdade, sem a casca de demonstração que existiu
+            // até a feature 004 (FR-007): quem abre o Memora não vê aba de
+            // desenvolvimento nenhuma. A galeria continua existindo só no
+            // modo de depuração, em Ajustes (R1).
+            //
+            // Quem escolheu entre servidor real e simulado foi a Composicao,
+            // na subida; o fluxo não sabe — e não deve saber — com qual fala.
+            home: FluxoAutenticacao(
+              repositorio: composicao.autenticacao,
               ultimoAcesso: ultimoAcesso,
-              composicao: composicao,
+              limpeza: composicao.limpeza,
+              assistente: composicao.assistente,
+              abridor: const AbridorDeAplicativoAndroid(),
             ),
           );
         },

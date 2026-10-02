@@ -22,11 +22,11 @@ cenários que são portão de saída da feature.
 
 ## ⚠️ A ordem desta lista tem um propósito
 
-1. **A fonte vem antes de qualquer tela.** A Atkinson Hyperlegible Next é mais
-   larga que a Roboto, e trocá-la pode estourar telas que hoje passam (R3).
-   A T009 roda a suíte inteira com a fonte nova e corrige o que quebrar
-   **antes** de existir tela nova — senão um estouro antigo parece defeito da
-   tela nova.
+1. **A fonte vem antes de qualquer tela.** A T009 roda a suíte inteira com a
+   família nova e confere que **nada mudou**: a matriz mede com a fonte
+   quadrada do `flutter test`, pessimista nas duas direções (R3, corrigida ao
+   implementar). Se algum resultado mudar, algum teste passou a carregar fonte,
+   e isso se investiga antes de existir tela nova.
 2. **A US2 vem antes da US1**, embora as duas sejam P1. O Início e o Hub são as
    telas mais vistas e fixam a linguagem que as outras copiam (R14). A fase da
    US2 **termina numa revisão de design da equipe** (T044): se ela reprovar,
@@ -68,12 +68,12 @@ cenários que são portão de saída da feature.
 
 **Purpose**: assets, declarações e estrutura que todas as fases usam.
 
-- [ ] T001 Baixar a família Atkinson Hyperlegible Next (pesos Regular, Medium e Bold) para `app/assets/fontes/atkinson_hyperlegible_next/`, junto com o `OFL.txt` que acompanha o pacote; **conferir a licença no próprio `OFL.txt`** antes de commitar (R3). Confirmar que `.ttf` já está no `.gitattributes` — está, desde a PR #29 — e que `git add` não avisa "LF will be replaced by CRLF"
-- [ ] T002 Declarar a família em `app/pubspec.yaml` (seção `fonts:`) e as pastas de assets novas. **O Flutter não declara subpastas recursivamente**: cada `assets/guias/<chave>/` precisa da própria linha, e a tarefa de cada guia (fases 6 e 7) acrescenta a sua
-- [ ] T003 [P] Criar `app/assets/ilustracoes/LICENCAS.md` com a tabela arquivo · origem · licença · alteração feita (R4), preenchendo as três ilustrações que já existem
-- [ ] T004 [P] Criar `app/assets/guias/CAPTURAS.md` com a tabela chave · data · versão do aplicativo · aparelho de referência, e as regras de captura de [contracts/guias.md](contracts/guias.md)
-- [ ] T005 [P] Criar os arquivos de texto `app/lib/l10n/textos_casca.dart`, `textos_apresentacao.dart`, `textos_guias.dart` e `textos_ajuda.dart`, seguindo o formato de `textos_autenticacao.dart`
-- [ ] T006 [P] Estender `app/test/suporte/aparelhos.dart` com um auxiliar que cruza a matriz de aparelhos × escalas com os três temas (`claro`, `escuro`, `altoContraste`), para os testes das fases seguintes não repetirem o laço
+- [X] T001 Baixar a família Atkinson Hyperlegible Next (pesos Regular, Medium e Bold) para `app/assets/fontes/atkinson_hyperlegible_next/`, junto com o `OFL.txt` que acompanha o pacote; **conferir a licença no próprio `OFL.txt`** antes de commitar (R3). Confirmar que `.ttf` já está no `.gitattributes` — está, desde a PR #29 — e que `git add` não avisa "LF will be replaced by CRLF"
+- [X] T002 Declarar a família em `app/pubspec.yaml` (seção `fonts:`) e as pastas de assets novas. **O Flutter não declara subpastas recursivamente**: cada `assets/guias/<chave>/` precisa da própria linha, e a tarefa de cada guia (fases 6 e 7) acrescenta a sua
+- [X] T003 [P] Criar `app/assets/ilustracoes/LICENCAS.md` com a tabela arquivo · origem · licença · alteração feita (R4), preenchendo as três ilustrações que já existem
+- [X] T004 [P] Criar `app/assets/guias/CAPTURAS.md` com a tabela chave · data · versão do aplicativo · aparelho de referência, e as regras de captura de [contracts/guias.md](contracts/guias.md)
+- [X] T005 [P] Criar os arquivos de texto `app/lib/l10n/textos_casca.dart`, `textos_apresentacao.dart`, `textos_guias.dart` e `textos_ajuda.dart`, seguindo o formato de `textos_autenticacao.dart`
+- [X] T006 [P] Estender `app/test/suporte/aparelhos.dart` com um auxiliar que cruza a matriz de aparelhos × escalas com os três temas (`claro`, `escuro`, `altoContraste`), para os testes das fases seguintes não repetirem o laço
 
 ---
 
@@ -84,37 +84,37 @@ cenários que são portão de saída da feature.
 
 ### A fonte e os tokens
 
-- [ ] T007 Aplicar a família em todos os estilos e criar `MemoraTipografia.destaque` (~36) em `app/lib/design_system/tokens/tipografia.dart`, e ligar a família ao `ThemeData` em `app/lib/design_system/temas/temas_memora.dart`. Carregar a fonte nos testes (`FontLoader`) num auxiliar em `app/test/suporte/fonte.dart`, para a matriz medir com a fonte real e não com a de teste
-- [ ] T008 [P] Acrescentar a `app/lib/design_system/tokens/dimensoes.dart` os tokens de [contracts/componentes.md](contracts/componentes.md): `ilustracaoCartao`, `ilustracaoCabecalho`, `ilustracaoHeroi`, `pisoDeIlustracao` e as frações `tetoDoAvisoAberto = 0.5` e `alturaMinimaDaTarefa = 0.5`
-- [ ] T009 Rodar `flutter test` inteiro com a fonte nova (depois de T007) e **corrigir cada estouro nas telas que já existem** em `app/lib/features/` e `app/lib/design_system/`, numa PR própria antes de qualquer tela nova. Registrar na PR quais telas quebraram e por quantos px — se nenhuma quebrar, conferir que a T007 de fato carregou a fonte nos testes
+- [X] T007 Aplicar a família em todos os estilos e criar `MemoraTipografia.destaque` (~36) em `app/lib/design_system/tokens/tipografia.dart`, e ligar a família ao `ThemeData` em `app/lib/design_system/temas/temas_memora.dart`. Criar em `app/test/suporte/fonte.dart` um auxiliar que carrega a Atkinson com `FontLoader` **só para o álbum de telas** (T043); a matriz continua com a fonte quadrada do `flutter test`, que é pessimista nas duas direções (R3)
+- [X] T008 [P] Acrescentar a `app/lib/design_system/tokens/dimensoes.dart` os tokens de [contracts/componentes.md](contracts/componentes.md): `ilustracaoCartao`, `ilustracaoCabecalho`, `ilustracaoHeroi`, `pisoDeIlustracao` e as frações `tetoDoAvisoAberto = 0.5` e `alturaMinimaDaTarefa = 0.5`
+- [X] T009 Rodar `flutter test` inteiro com a família nova (depois de T007) e **conferir que nenhum resultado mudou** em relação aos 481 de antes: a matriz não carrega fonte, então a troca de família não pode mexer nela (R3). Se algo mudar, investigar qual teste passou a carregar fonte antes de seguir
 
 ### Ilustrações e a Memora
 
-- [ ] T010 [P] Desenhar a Memora em SVG, a partir do robô do wireframe, com quatro expressões: `app/assets/ilustracoes/memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg` e `memora_preocupada.svg`; registrar em `LICENCAS.md`
+- [X] T010 [P] Desenhar a Memora em SVG, a partir do robô do wireframe, com quatro expressões: `app/assets/ilustracoes/memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg` e `memora_preocupada.svg`; registrar em `LICENCAS.md`
 - [ ] T011 [P] Selecionar e recolorir com a paleta as ilustrações de licença aberta (R4): pessoas; portas do Hub (conversa, aplicativos, serviços sociais, ajuda, registro); os 8 assuntos da Ajuda; os 3 grupos de Configurações; estados vazio e erro; aplicativo genérico; e os **pictogramas** dos 9 serviços sociais (prédio, documento, carteira, envelope…), **sem logotipo oficial** (R7). Tudo em `app/assets/ilustracoes/`, cada arquivo com linha em `LICENCAS.md`
-- [ ] T012 Acrescentar as ilustrações novas ao enum `Ilustracao` e o **medalhão** claro para os temas escuro e de alto contraste em `app/lib/design_system/componentes/ilustracao/ilustracao_memora.dart`; estender `app/test/design_system/ilustracao_e_destaque_test.dart` para conferir que toda ilustração do enum carrega e que, nos temas escuros, as coloridas estão sobre medalhão
-- [ ] T013 Criar `MemoraPersonagem` em `app/lib/design_system/componentes/ilustracao/memora_personagem.dart` (expressões, decorativa por padrão, anunciada com `descricao`), migrar todos os usos do `AvatarMemora` e apagar `avatar_memora.dart`
+- [X] T012 Acrescentar as ilustrações novas ao enum `Ilustracao` e o **medalhão** claro para os temas escuro e de alto contraste em `app/lib/design_system/componentes/ilustracao/ilustracao_memora.dart`; estender `app/test/design_system/ilustracao_e_destaque_test.dart` para conferir que toda ilustração do enum carrega e que, nos temas escuros, as coloridas estão sobre medalhão
+- [X] T013 Criar `MemoraPersonagem` em `app/lib/design_system/componentes/ilustracao/memora_personagem.dart` (expressões, decorativa por padrão, anunciada com `descricao`). **É componente novo**: o `AvatarMemora` que já existe é o retrato do casal no cartão do cadastro e do login, e não o rosto da Memora — ele continua (correção feita ao implementar)
 
 ### Componentes comuns
 
-- [ ] T014 [P] Teste de `CabecalhoDeTela` em `app/test/design_system/cabecalho_de_tela_test.dart`: título em no máximo duas linhas com o título inteiro no rótulo semântico; "Voltar" com ícone **e** texto, sempre no mesmo canto; sem `aoVoltar`, sem "Voltar"; ilustração some com pouca altura, texto nunca; "Voltar" com os estados normal, foco e pressionado, cada um distinguível por mais de um sinal além da cor (FR-043)
-- [ ] T015 [P] Implementar `CabecalhoDeTela` em `app/lib/design_system/componentes/navegacao/cabecalho_de_tela.dart`
-- [ ] T016 [P] Teste de `CartaoDePorta` em `app/test/design_system/cartao_de_porta_test.dart`: o cartão inteiro é alvo de toque; `explicacao` quebra em vez de estourar a 200%; ilustração encolhe antes do texto e some abaixo do piso; no máximo um `principal` por tela; estados normal, foco, pressionado e desabilitado, cada um distinguível por mais de um sinal além da cor (FR-043). Provar quebrando: tirar o estado de foco
-- [ ] T017 [P] Implementar `CartaoDePorta` em `app/lib/design_system/componentes/cartoes/cartao_de_porta.dart`
-- [ ] T018 [P] Teste de `AvisoCompacto` em `app/test/design_system/aviso_compacto_test.dart`: título sempre na árvore; texto completo só aberto; aberto **não passa de 50% da altura disponível** em toda a matriz, rolando por dentro; fechado de novo a cada montagem. O controle "Ler o aviso inteiro" com os estados normal, foco e pressionado (FR-043). **Provar quebrando**: tirar o teto e ver reprovar no 360×640 a 200%
-- [ ] T019 [P] Implementar `AvisoCompacto` em `app/lib/design_system/componentes/avisos/aviso_compacto.dart`, com teto por `LayoutBuilder` e fração (regra 3)
-- [ ] T020 [P] Teste de `BalaoDeFala` em `app/test/design_system/balao_de_fala_test.dart`: autor muda posição, rosto e nome (não só cor); leitor anuncia "Memora disse:" / "Você disse:"; opções com 56 dp e 16 dp de separação; as opções com os estados normal, foco, pressionado e desabilitado (depois de escolhida), e o balão da Memora com o estado "escrevendo" enquanto a resposta chega (FR-043)
-- [ ] T021 [P] Implementar `BalaoDeFala` em `app/lib/design_system/componentes/conversa/balao_de_fala.dart`
-- [ ] T022 Exportar os quatro componentes e o `MemoraPersonagem` em `app/lib/design_system/design_system.dart` e mostrá-los, em todos os estados, em `app/lib/design_system/galeria/galeria_memora.dart`; `app/test/design_system/galeria_completa_test.dart` precisa continuar passando
+- [X] T014 [P] Teste de `CabecalhoDeTela` em `app/test/design_system/cabecalho_de_tela_test.dart`: título em no máximo duas linhas com o título inteiro no rótulo semântico; "Voltar" com ícone **e** texto, sempre no mesmo canto; sem `aoVoltar`, sem "Voltar"; ilustração some com pouca altura, texto nunca; "Voltar" com os estados normal, foco e pressionado, cada um distinguível por mais de um sinal além da cor (FR-043)
+- [X] T015 [P] Implementar `CabecalhoDeTela` em `app/lib/design_system/componentes/navegacao/cabecalho_de_tela.dart`
+- [X] T016 [P] Teste de `CartaoDePorta` em `app/test/design_system/cartao_de_porta_test.dart`: o cartão inteiro é alvo de toque; `explicacao` quebra em vez de estourar a 200%; ilustração encolhe antes do texto e some abaixo do piso; no máximo um `principal` por tela; estados normal, foco, pressionado e desabilitado, cada um distinguível por mais de um sinal além da cor (FR-043). Provar quebrando: tirar o estado de foco
+- [X] T017 [P] Implementar `CartaoDePorta` em `app/lib/design_system/componentes/cartoes/cartao_de_porta.dart`
+- [X] T018 [P] Teste de `AvisoCompacto` em `app/test/design_system/aviso_compacto_test.dart`: título sempre na árvore; texto completo só aberto; aberto **não passa de 50% da altura disponível** em toda a matriz, rolando por dentro; fechado de novo a cada montagem. O controle "Ler o aviso inteiro" com os estados normal, foco e pressionado (FR-043). **Provar quebrando**: tirar o teto e ver reprovar no 360×640 a 200%
+- [X] T019 [P] Implementar `AvisoCompacto` em `app/lib/design_system/componentes/avisos/aviso_compacto.dart`, com teto por `LayoutBuilder` e fração (regra 3)
+- [X] T020 [P] Teste de `BalaoDeFala` em `app/test/design_system/balao_de_fala_test.dart`: autor muda posição, rosto e nome (não só cor); leitor anuncia "Memora disse:" / "Você disse:"; opções com 56 dp e 16 dp de separação; as opções com os estados normal, foco, pressionado e desabilitado (depois de escolhida), e o balão da Memora com o estado "escrevendo" enquanto a resposta chega (FR-043)
+- [X] T021 [P] Implementar `BalaoDeFala` em `app/lib/design_system/componentes/conversa/balao_de_fala.dart`
+- [X] T022 Exportar os quatro componentes e o `MemoraPersonagem` em `app/lib/design_system/design_system.dart` e mostrá-los, em todos os estados, em `app/lib/design_system/galeria/galeria_memora.dart`; `app/test/design_system/galeria_completa_test.dart` precisa continuar passando
 
 ### A casca interna
 
-- [ ] T023 Teste da casca em `app/test/features/casca/casca_interna_test.dart`: três destinos com ícone e nome; destino atual marcado por mais de um sinal além da cor; tocar no destino atual volta à raiz dele; "voltar" do sistema na raiz do Início pergunta antes de sair do Memora; destino inicial é o Início ([contracts/navegacao.md](contracts/navegacao.md))
-- [ ] T024 Implementar `CascaInterna` em `app/lib/features/casca/casca_interna.dart`, com uma pilha de navegação por destino e a `NavegacaoInferior` existente; textos em `textos_casca.dart`. A raiz de Configurações é **provisória** até a US7: a `TelaAparencia` de hoje, a linha da galeria (só quando `GaleriaMemora.paraDesenvolvimento()` não for `null`) e "Sair" com `SaidaComConfirmacao`
-- [ ] T025 Fazer o `FluxoAutenticacao` montar a `CascaInterna` quando a pessoa está dentro, em `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`: toda rota das três pilhas nasce por `_rota(...)` (com o `Listener` de atividade), e `_fecharRotasAbertas` fecha **as três** pilhas
-- [ ] T026 Estender `app/test/features/autenticacao/fluxo_dentro_da_conta.dart` e `fluxo_rotas_e_inatividade_test.dart` com rota aberta em **cada** um dos três destinos: a inatividade fecha todas, e toque em tela de qualquer destino conta como atividade. **Provar quebrando**: fechar só a pilha ativa
-- [ ] T027 Trocar `home:` de `AplicativoMemora` em `app/lib/main.dart` para o `FluxoAutenticacao` e apagar `app/lib/demonstracao/`
-- [ ] T028 Teste do V1 em `app/test/features/casca/sem_andaime_test.dart`: nenhuma aba "Componentes" ou "Aparência" na raiz; com `paraDesenvolvimento()` devolvendo `null`, nenhuma linha leva à galeria (FR-007)
+- [X] T023 Teste da casca em `app/test/features/casca/casca_interna_test.dart`: três destinos com ícone e nome; destino atual marcado por mais de um sinal além da cor; tocar no destino atual volta à raiz dele; "voltar" do sistema na raiz do Início pergunta antes de sair do Memora; destino inicial é o Início ([contracts/navegacao.md](contracts/navegacao.md))
+- [X] T024 Implementar `CascaInterna` em `app/lib/features/casca/casca_interna.dart`, com uma pilha de navegação por destino e a `NavegacaoInferior` existente; textos em `textos_casca.dart`. A raiz de Configurações é **provisória** até a US7: a `TelaAparencia` de hoje, a linha da galeria (só quando `GaleriaMemora.paraDesenvolvimento()` não for `null`) e "Sair" com `SaidaComConfirmacao`
+- [X] T025 Fazer o `FluxoAutenticacao` montar a `CascaInterna` quando a pessoa está dentro, em `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`: toda rota das três pilhas nasce por `_rota(...)` (com o `Listener` de atividade), e `_fecharRotasAbertas` fecha **as três** pilhas
+- [X] T026 Estender `app/test/features/autenticacao/fluxo_dentro_da_conta.dart` e `fluxo_rotas_e_inatividade_test.dart` com rota aberta em **cada** um dos três destinos: a inatividade fecha todas, e toque em tela de qualquer destino conta como atividade. **Provar quebrando**: fechar só a pilha ativa
+- [X] T027 Trocar `home:` de `AplicativoMemora` em `app/lib/main.dart` para o `FluxoAutenticacao` e apagar `app/lib/demonstracao/`
+- [X] T028 Teste do V1 em `app/test/features/casca/sem_andaime_test.dart`: nenhuma aba "Componentes" ou "Aparência" na raiz; com `paraDesenvolvimento()` devolvendo `null`, nenhuma linha leva à galeria (FR-007)
 
 ### A `chave` do catálogo
 
@@ -123,10 +123,30 @@ cenários que são portão de saída da feature.
 - [ ] T031 Teste `backend/src/test/java/br/fatec/memora/assistente/ChaveDoCatalogoTest.java` (sobre `TesteComBanco`): as 8 linhas semeadas têm `chave`; inserir sem `chave`, repetida ou com maiúscula é recusado pelo banco; o catálogo devolve `chave`. **Apagar só o que criar.** Provar quebrando: tirar o `UNIQUE` da migration de teste
 - [ ] T032 Acrescentar `chave` a `ServicoDoCatalogo` em `app/lib/features/assistente/domain/assistente.dart` e as mesmas 8 chaves ao catálogo de `app/lib/features/assistente/data/repositorio_assistente_simulado.dart`
 - [ ] T033 Teste de ligação em `app/test/features/aprendizado/catalogo_e_guias_test.dart`, que lê `backend/src/main/resources/db/migration/*.sql` e extrai as `chave`s: **reprova se o simulado e as migrations divergirem**, nomeando a chave. A comparação com os guias entra na T063, com uma lista explícita de itens anteriores à 004 ainda sem guia, que precisa chegar a zero na T076. Provar quebrando: tirar uma chave do simulado
-- [ ] T033a Criar `app/test/suporte/estados_de_tela.dart`: um auxiliar que monta uma tela em **carregando**, **vazio** e **erro** e reprova se alguma ficar sem desenho próprio ou sem frase (FR-006). Os testes de tela das fases seguintes o usam. Provar quebrando: uma tela de teste que mostra só um `SizedBox` enquanto carrega
+- [X] T033a Criar `app/test/suporte/estados_de_tela.dart`: um auxiliar que monta uma tela em **carregando**, **vazio** e **erro** e reprova se alguma ficar sem desenho próprio ou sem frase (FR-006). Os testes de tela das fases seguintes o usam. Provar quebrando: uma tela de teste que mostra só um `SizedBox` enquanto carrega
 
 **Checkpoint**: casca de pé, componentes na galeria, fonte medida, catálogo com
 `chave`. A partir daqui as histórias podem começar.
+
+> **Situação em 2026-10-01** (PR da fundação, só o aplicativo):
+>
+> - **T011 está parcial.** Entraram as ilustrações que a fundação e a US2 usam:
+>   as cinco portas do Hub, os estados vazio e erro, o aplicativo genérico e a
+>   de aparência. Os assuntos da Ajuda, os outros grupos de Ajustes e os
+>   pictogramas dos serviços sociais nascem nas fases que os usam (US5, US6,
+>   US7) — desenhar agora seria desenhar sem a tela que os mostra. Todas são
+>   **desenho original da equipe**, e não de banco de licença aberta, como a R4
+>   previa: a licença fica mais simples, e o `LICENCAS.md` registra cada uma.
+> - **T029-T033 ficaram para a próxima PR.** Três delas são do backend (a V8 e o
+>   contrato), e as duas do aplicativo dependem da V8 para ter `chave` a
+>   comparar. O pedido desta rodada foi o front-end.
+> - **Correções ao implementar**, todas registradas nos documentos:
+>   - a matriz mede com a fonte quadrada do `flutter test`, e não com a Roboto
+>     (R3 e T009 reescritas);
+>   - o `AvatarMemora` é o retrato do casal, e não o rosto da Memora (T013);
+>   - as portas são pílulas preenchidas, e não cartões: o `Cartao` não é
+>     clicável (R2, contrato);
+>   - o destino se chama "Ajustes", e não "Configurações" (ver `TextosCasca`).
 
 ---
 

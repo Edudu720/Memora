@@ -14,11 +14,36 @@ import 'package:flutter/painting.dart';
 /// A escala parte de 18 sp no corpo, acima do padrão de 14–16 sp de
 /// aplicativos comuns (research.md, R4).
 abstract final class MemoraTipografia {
+  /// Família de todo o aplicativo: Atkinson Hyperlegible Next, desenhada pelo
+  /// Braille Institute para baixa visão (R3 da feature 004).
+  ///
+  /// Ela diferencia `I`, `l` e `1`, e `0` de `O` — as confusões que mais
+  /// derrubam quem digita e-mail e código. E, embarcada, o texto é o mesmo em
+  /// todo aparelho, em vez de mudar de fabricante para fabricante.
+  ///
+  /// **Os testes não a usam**, e de propósito: o `flutter test` mede com uma
+  /// fonte quadrada, de 1 em por caractere, mais larga e com mais quebras que a
+  /// real. A matriz de estouro fica pessimista nas duas direções. Ver
+  /// `test/suporte/fonte.dart`, que a carrega só para o álbum de telas.
+  static const String familia = 'AtkinsonHyperlegibleNext';
+
   /// Menor tamanho permitido em qualquer texto do aplicativo.
   static const double tamanhoMinimo = 16.0;
 
+  /// O título grande da entrada e do Início (feature 004).
+  ///
+  /// O wireframe abre com um título de ~36: o [tituloTela], com 32, não dava a
+  /// hierarquia entre "onde estou" e "o que há aqui".
+  static const TextStyle destaque = TextStyle(
+    fontFamily: familia,
+    fontSize: 36,
+    fontWeight: FontWeight.bold,
+    height: 1.2,
+  );
+
   /// Título principal de uma tela.
   static const TextStyle tituloTela = TextStyle(
+    fontFamily: familia,
     fontSize: 32,
     fontWeight: FontWeight.bold,
     height: 1.25,
@@ -26,6 +51,7 @@ abstract final class MemoraTipografia {
 
   /// Título de seção ou agrupamento.
   static const TextStyle tituloSecao = TextStyle(
+    fontFamily: familia,
     fontSize: 24,
     fontWeight: FontWeight.bold,
     height: 1.3,
@@ -33,6 +59,7 @@ abstract final class MemoraTipografia {
 
   /// Texto padrão do aplicativo.
   static const TextStyle corpo = TextStyle(
+    fontFamily: familia,
     fontSize: 18,
     fontWeight: FontWeight.normal,
     height: 1.5,
@@ -40,6 +67,7 @@ abstract final class MemoraTipografia {
 
   /// Texto padrão com ênfase.
   static const TextStyle corpoForte = TextStyle(
+    fontFamily: familia,
     fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.5,
@@ -47,6 +75,7 @@ abstract final class MemoraTipografia {
 
   /// Texto auxiliar. **Nunca menor que [tamanhoMinimo].**
   static const TextStyle apoio = TextStyle(
+    fontFamily: familia,
     fontSize: 16,
     fontWeight: FontWeight.normal,
     height: 1.5,
@@ -54,6 +83,7 @@ abstract final class MemoraTipografia {
 
   /// Rótulo dentro de botão.
   static const TextStyle rotuloBotao = TextStyle(
+    fontFamily: familia,
     fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.2,
@@ -61,6 +91,7 @@ abstract final class MemoraTipografia {
 
   /// Todos os estilos, usados pelos testes que garantem o piso de 16 sp.
   static const List<TextStyle> todos = <TextStyle>[
+    destaque,
     tituloTela,
     tituloSecao,
     corpo,

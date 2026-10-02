@@ -22,6 +22,8 @@ import '../../assistente/presentation/telas/tela_catalogo.dart';
 import '../../assistente/presentation/telas/tela_conversa.dart';
 import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
+import '../../casca/casca_interna.dart';
+import '../../casca/raizes_provisorias.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
@@ -110,8 +112,9 @@ enum _Etapa {
 }
 
 class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
-  late final ControladorCadastro _cadastro =
-      ControladorCadastro(widget.repositorio);
+  late final ControladorCadastro _cadastro = ControladorCadastro(
+    widget.repositorio,
+  );
 
   late final MonitorDeSessao _monitor = MonitorDeSessao(
     inatividade: widget.inatividade,
@@ -131,6 +134,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   _Etapa _etapa = _Etapa.boasVindas;
   PessoaAutenticada? _pessoa;
+
+  /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
+  /// abre vai para a pilha do destino à vista, por [_empilhar].
+  final GlobalKey<CascaInternaState> _casca = GlobalKey<CascaInternaState>();
+
+  /// O canal do último acesso, lido uma vez ao entrar, para o perfil (R10).
+  Future<String?> _canal = Future<String?>.value();
   bool _avisoNaTela = false;
 
   /// Conta recém-criada em modo assistido, à espera da confirmação de canal.
@@ -237,6 +247,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   void _entrou(PessoaAutenticada pessoa) {
     setState(() {
       _pessoa = pessoa;
+      _canal = widget.ultimoAcesso.identificador();
       _etapa = _Etapa.dentro;
     });
     _monitor.iniciar();
@@ -251,29 +262,32 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _irParaLogin();
   }
 
-  /// Uma rota aberta de dentro do fluxo, com a atividade contada (FR-017).
+  /// Uma rota aberta de dentro do fluxo.
   ///
-  /// **Toda** rota que o fluxo empurra passa por aqui. O `Listener` do Hub nao
-  /// alcanca o que o Navigator poe por cima dele, e sem isto quem conversa por
-  /// 28 minutos seria avisado e expulso sem ter ficado parado um segundo.
-  /// Num lugar so, para que uma rota nova nao esqueca.
+  /// A atividade não é mais contada aqui: o `Listener` mora em volta da casca
+  /// inteira e enxerga o toque em qualquer tela de qualquer pilha (R1 da 004).
+  /// Antes, cada rota precisava lembrar de se envolver num — e quem conversava
+  /// por 28 minutos era expulso. Num lugar só continua valendo: toda tela que
+  /// o fluxo abre nasce aqui.
   Route<void> _rota({required WidgetBuilder builder}) {
-    return MaterialPageRoute<void>(
-      builder: (BuildContext contexto) => Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: (_) => _monitor.registrarAtividade(),
-        child: builder(contexto),
-      ),
-    );
+    return MaterialPageRoute<void>(builder: builder);
   }
 
-  /// Fecha tudo o que foi aberto por cima do fluxo (conversa, catalogo,
-  /// registro, aparencia).
+  /// Empilha [rota] no destino à vista da casca.
   ///
-  /// Trocar a etapa nao basta: essas telas sao rotas do Navigator e ficariam
-  /// por cima do login, com a conversa ainda na tela do celular esquecido na
-  /// mesa — a ameaca exata da FR-017. Volta-se a rota **deste fluxo**, e nao a
-  /// primeira: ele pode viver dentro de uma aba.
+  /// **Nunca** no `Navigator` de fora: a tela ficaria por cima da barra
+  /// inferior e fora da casca — onde sobreviveria à saída da conta.
+  void _empilhar(Route<void> rota) {
+    _casca.currentState?.empilhar<void>(rota);
+  }
+
+  /// Fecha o que ainda estiver por cima do fluxo no `Navigator` de fora.
+  ///
+  /// As telas da conta (conversa, catálogo, registro, aparência) não moram
+  /// mais aqui: vivem nas pilhas da casca, e saem da árvore junto com ela
+  /// quando a etapa troca (R1 da 004). O que pode sobrar no `Navigator` de
+  /// fora é diálogo — e é isso que se fecha antes do login aparecer. Volta-se
+  /// à rota **deste fluxo**, e não à primeira.
   void _fecharRotasAbertas() {
     final Route<dynamic>? rotaDoFluxo = ModalRoute.of(context);
     if (rotaDoFluxo == null) return;
@@ -349,10 +363,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           rotulo: TextosAssistente.portaAplicativos,
           descricao: TextosAssistente.descricaoAplicativos,
           icone: Icons.apps_outlined,
-          aoAbrir: () => _abrirCatalogo(
-            assistente,
-            CategoriaDoServico.cotidiano,
-          ),
+          aoAbrir: () =>
+              _abrirCatalogo(assistente, CategoriaDoServico.cotidiano),
         ),
 
       if (assistente != null)
@@ -360,10 +372,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           rotulo: TextosAssistente.portaServicos,
           descricao: TextosAssistente.descricaoServicos,
           icone: Icons.account_balance_outlined,
-          aoAbrir: () => _abrirCatalogo(
-            assistente,
-            CategoriaDoServico.sensivel,
-          ),
+          aoAbrir: () =>
+              _abrirCatalogo(assistente, CategoriaDoServico.sensivel),
         ),
 
       if (assistente != null)
@@ -371,7 +381,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           rotulo: TextosAssistente.portaRegistro,
           descricao: TextosAssistente.descricaoRegistro,
           icone: Icons.history_outlined,
-          aoAbrir: () => Navigator.of(context).push<void>(
+          aoAbrir: () => _empilhar(
             _rota(
               builder: (BuildContext contexto) => TelaRegistro(
                 repositorio: assistente,
@@ -388,11 +398,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         // Principal apenas quando nao ha assistente: duas acoes de mesmo peso
         // dividem a atencao de quem precisa de um caminho so.
         principal: assistente == null,
-        aoAbrir: () => Navigator.of(context).push<void>(
-          _rota(
-            builder: (BuildContext _) => const _PaginaDeAparencia(),
-          ),
-        ),
+        aoAbrir: _abrirAparencia,
       ),
     ];
   }
@@ -406,7 +412,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     RepositorioAssistente assistente,
     CategoriaDoServico categoria,
   ) {
-    Navigator.of(context).push<void>(
+    _empilhar(
       _rota(
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
@@ -430,7 +436,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     RepositorioAssistente assistente, {
     String rascunho = '',
   }) {
-    Navigator.of(context).push<void>(
+    _empilhar(
       _rota(
         // Quem cria é dono: o controlador nasce e morre com a rota, e não
         // sobra cronômetro nem resposta em voo depois de a pessoa sair da
@@ -448,59 +454,93 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     );
   }
 
+  void _abrirAparencia() {
+    _empilhar(_rota(builder: (BuildContext _) => const _PaginaDeAparencia()));
+  }
+
+  /// A galeria, só no modo de desenvolvimento (R9 da 002). Fora dele, nulo —
+  /// e a linha que levaria a ela não existe.
+  VoidCallback? get _abrirGaleria {
+    final Widget? galeria = GaleriaMemora.paraDesenvolvimento();
+    if (galeria == null) return null;
+    return () => _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => Scaffold(
+          appBar: BarraSuperior(
+            titulo: 'Galeria',
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+          body: galeria,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return switch (_etapa) {
       _Etapa.boasVindas => TelaBoasVindas(
-          aoComecar: () => setState(() => _etapa = _Etapa.cadastro),
-          aoJaTerConta: _irParaLogin,
-        ),
+        aoComecar: () => setState(() => _etapa = _Etapa.cadastro),
+        aoJaTerConta: _irParaLogin,
+      ),
       _Etapa.cadastro => TelaCadastro(
-          controlador: _cadastro,
-          aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
-          aoConcluir: _cadastrou,
-          aoEntregarAparelho: () =>
-              setState(() => _etapa = _Etapa.entregaDoAparelho),
-        ),
+        controlador: _cadastro,
+        aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
+        aoConcluir: _cadastrou,
+        aoEntregarAparelho: () =>
+            setState(() => _etapa = _Etapa.entregaDoAparelho),
+      ),
       _Etapa.entregaDoAparelho => TelaEntregaDoAparelho(
-          aoReceberOAparelho: () {
-            _cadastro.confirmarEntregaDoAparelho();
-            setState(() => _etapa = _Etapa.cadastro);
-          },
-          aoAdiar: () => setState(() => _etapa = _Etapa.cadastro),
-        ),
+        aoReceberOAparelho: () {
+          _cadastro.confirmarEntregaDoAparelho();
+          setState(() => _etapa = _Etapa.cadastro);
+        },
+        aoAdiar: () => setState(() => _etapa = _Etapa.cadastro),
+      ),
       _Etapa.confirmarCanal => TelaConfirmarCanal(
-          repositorio: widget.repositorio,
-          canalId: _aguardandoConfirmacao!.canalId!,
-          canalVisivel: _cadastro.canal.trim(),
-          aoConfirmar: _canalConfirmado,
-        ),
+        repositorio: widget.repositorio,
+        canalId: _aguardandoConfirmacao!.canalId!,
+        canalVisivel: _cadastro.canal.trim(),
+        aoConfirmar: _canalConfirmado,
+      ),
       _Etapa.primeiraEntrada => TelaPrimeiraEntrada(
-          nome: _aguardandoConfirmacao?.nomeTratamento ?? '',
-          aoEntrarSozinha: _entrarSozinha,
-        ),
+        nome: _aguardandoConfirmacao?.nomeTratamento ?? '',
+        aoEntrarSozinha: _entrarSozinha,
+      ),
       _Etapa.login => TelaLogin(
-          controlador: _login!,
-          aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
-          aoEntrar: _entrou,
-          aoRecuperar: _irParaRecuperacao,
-        ),
+        controlador: _login!,
+        aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
+        aoEntrar: _entrou,
+        aoRecuperar: _irParaRecuperacao,
+      ),
       _Etapa.recuperacao => TelaRecuperacao(
-          controlador: _recuperacao!,
-          aoVoltar: () => setState(() => _etapa = _Etapa.login),
-          aoConcluir: _recuperou,
-        ),
-      // Qualquer toque adia a expiração — inclusive rolar a tela, que é
-      // atividade de quem está lendo, não de quem foi embora.
-      _Etapa.dentro => Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: (_) => _monitor.registrarAtividade(),
-          child: TelaHub(
+        controlador: _recuperacao!,
+        aoVoltar: () => setState(() => _etapa = _Etapa.login),
+        aoConcluir: _recuperou,
+      ),
+      // A casca é quem conta a atividade: um `Listener` em volta dela inteira,
+      // inclusive das telas empilhadas (R1 da 004). Qualquer toque adia a
+      // expiração — inclusive rolar, que é de quem está lendo.
+      _Etapa.dentro => CascaInterna(
+        key: _casca,
+        aoRegistrarAtividade: _monitor.registrarAtividade,
+        raizes: <DestinoDaCasca, WidgetBuilder>{
+          DestinoDaCasca.ajustes: (BuildContext _) => AjustesProvisorios(
+            aoAbrirAparencia: _abrirAparencia,
+            aoAbrirGaleria: _abrirGaleria,
+            aoSair: _sair,
+          ),
+          DestinoDaCasca.inicio: (BuildContext _) => TelaHub(
             nome: _pessoa?.nomeTratamento ?? '',
             portas: _portasConstruidas(),
             aoSair: _sair,
           ),
-        ),
+          DestinoDaCasca.perfil: (BuildContext _) => PerfilProvisorio(
+            nome: _pessoa?.nomeTratamento ?? '',
+            canal: _canal,
+          ),
+        },
+      ),
     };
   }
 }
@@ -530,10 +570,7 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
 
   @override
   Widget build(BuildContext context) {
-    return TelaConversa(
-      controlador: _controlador,
-      aoVoltar: widget.aoVoltar,
-    );
+    return TelaConversa(controlador: _controlador, aoVoltar: widget.aoVoltar);
   }
 }
 

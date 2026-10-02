@@ -102,4 +102,57 @@ abstract final class MemoraDimensoes {
 
   /// 4 dp — espessura do giro grande.
   static const double espessuraIndicadorDeTela = 4;
+
+  // ---------------------------------------------------------------------------
+  // Ilustração (feature 004)
+  //
+  // Regra 7 da R2: **a ilustração cede espaço primeiro**. Os tamanhos abaixo
+  // são tetos, e quem desenha encolhe a ilustração quando a altura aperta e a
+  // tira de vez abaixo de [pisoDeIlustracao] — o texto e a ação, nunca.
+  // ---------------------------------------------------------------------------
+
+  /// 56 dp — a ilustração de um cartão de porta, ao lado do nome.
+  static const double ilustracaoCartao = 56;
+
+  /// 72 dp — a ilustração ou o rosto da Memora no cabeçalho de uma tela.
+  static const double ilustracaoCabecalho = 72;
+
+  /// 180 dp — o teto da ilustração principal das telas de entrada.
+  static const double ilustracaoHeroi = 180;
+
+  /// Fração da altura disponível que a ilustração principal pode ocupar.
+  ///
+  /// Fração, e não pixel: os 180 dp cabem num 390×844 e tomariam um terço de
+  /// um 320×568 — a lição do teto da conversa, na PR #28.
+  static const double fracaoDaIlustracaoHeroi = 0.28;
+
+  /// 40 dp — abaixo disto a ilustração some. Desenho pequeno demais vira
+  /// borrão para quem enxerga pouco, e ocupa o espaço de uma linha de texto.
+  static const double pisoDeIlustracao = 40;
+
+  // ---------------------------------------------------------------------------
+  // Tetos de layout em fração da altura (feature 004)
+  //
+  // Nunca em pixel. Ver o aviso no topo do CLAUDE.md: um teto de 420 px,
+  // medido num 390×844, estourava um 360×640 já em 100%.
+  // ---------------------------------------------------------------------------
+
+  /// O aviso compacto, aberto, não passa desta fração da altura disponível;
+  /// o resto do texto rola dentro dele (R5).
+  static const double tetoDoAvisoAberto = 0.5;
+
+  /// Fração mínima da altura que a tarefa da tela — a conversa e o campo de
+  /// escrever — precisa manter, em 100% e 150% (FR-022).
+  static const double alturaMinimaDaTarefa = 0.5;
+
+  // ---------------------------------------------------------------------------
+  // Navegação inferior (feature 004)
+  // ---------------------------------------------------------------------------
+
+  /// 64 × 32 dp — a pílula atrás do ícone do destino ativo. É reforço visual:
+  /// o sinal de estado é o traço e o negrito (ver `MemoraCores.destaque`).
+  static const double larguraDaPilulaDeNavegacao = 64;
+
+  /// Altura da pílula do destino ativo.
+  static const double alturaDaPilulaDeNavegacao = 32;
 }
