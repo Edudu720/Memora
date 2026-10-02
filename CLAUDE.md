@@ -4,7 +4,34 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-01 (noite) — **feature 004, o redesenho das
+**Última sessão**: 2026-10-02 (madrugada) — **feature 004, fases 2 e 3 e a
+revisão de design da T044**, pelo Henrique (Opus orquestrando, agentes Sonnet
+escrevendo código). Entraram: a #39 (correção da revisão das #36-#38), a #40
+(`chave` do catálogo, T029-T033, fecha a fase 2) e a #41 (Início, Hub novo e
+saída só em Ajustes, T034-T043, mais a T044). **Próximo: a Phase 3b**
+(T111-T124 do `tasks.md` da 004) — começar pela T113 (respiro do Hub e o
+`hub_cabe_sem_rolar_test.dart` reescrito para a FR-017 nova), T111 (ícone do
+app: o robô, nome "Memora") e T114 (`CaixaDeEtapa`). Depois a T116 pede uma
+**segunda rodada de revisão** com o Henrique, no celular.
+
+> 🎨 **A T044 reprovou o acabamento, não a direção.** Veredito em
+> `specs/004-redesenho-das-telas/revisao-de-design.md`: "junto demais",
+> "simples demais" para idosos. Mudaram FR-002a, 009/009a/009b, 015, 016, 017,
+> 022, 023, 028a, 038/039/039a e 042/042c; R2 e R5 revistas, R15 nova. Decisões
+> do Henrique: o aviso da conversa **encolhe e não some**; **plano fora**;
+> **idade opcional e só no aparelho**; **paletas prontas** de cor, nunca cor
+> livre; Carteira Digital é **o documento do gov.br**. As capturas dos guias,
+> ele vai mandar — até lá, a FR-028a mostra "captura pendente".
+>
+> 📱 **O aplicativo roda no celular do Henrique** (Galaxy S20 FE, SM-G781B, por
+> USB). Não atualiza sozinho: `flutter build apk --release` (com `TEMP` em
+> `C:\memora-tmp`) e `adb install -r app\build\app\outputs\flutter-apk\app-release.apk`.
+> Reverter `pubspec.lock` e `android/gradle.properties` depois do build.
+>
+> **Contagem em 2026-10-02**: **374** no backend e **933 + 1 pulado** no
+> aplicativo. O pulado é a FR-017 antiga, que a T113 reescreve.
+
+Sessão anterior: 2026-10-01 (noite) — **feature 004, o redesenho das
 telas**, pelo Eduardo: spec, plano e 114 tarefas (#36), e as **fases 1 e 2**
 (fundação) no aplicativo (#38), com a revisão de três agentes independentes e
 as correções numa PR própria (#39). Antes, no mesmo dia, a revisão das #31 a

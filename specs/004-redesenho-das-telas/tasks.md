@@ -192,7 +192,10 @@ um lugar só.
 150% no 320×568) é **inviável** junto com a FR-016 — a barra sozinha toma 123
 dos 568 px a 150%. O teste está escrito e pulado (`hub_cabe_sem_rolar_test.dart`),
 e o commit `d5a5031` apertou o cartão para caber a 100%, o oposto do "junto
-demais" da revisão. **Resolver na spec antes da T113.**
+demais" da revisão. ✅ **Resolvida em 2026-10-02 (Henrique)**: FR-017 reescrita —
+porta principal sempre sem rolar e indicação de que há mais, em qualquer
+aparelho; Hub inteiro sem rolar só no 360×800, a 100% e 150%. A T113 devolve o
+respiro e reescreve o `hub_cabe_sem_rolar_test.dart` para a regra nova.
 
 ### Já, antes da fase 4
 
