@@ -22,22 +22,22 @@ class TextosAssistente {
   static const String portaConversa = 'Conversar com a Memora';
 
   /// O que essa porta faz.
-  static const String descricaoConversa =
-      'Me pergunte qualquer coisa sobre o celular';
+  static const String descricaoConversa = 'Me pergunte o que quiser';
 
   /// Nome da porta dos serviços que a Memora só ensina.
-  static const String portaServicos = 'Serviços do dia a dia';
+  ///
+  /// "Serviços sociais", como no wireframe (FR-008 da feature 004): era
+  /// "Serviços do dia a dia", que não dizia de quais serviços se trata.
+  static const String portaServicos = 'Serviços sociais';
 
   /// O que essa porta faz.
-  static const String descricaoServicos =
-      'Banco, INSS e governo — eu te ensino o caminho';
+  static const String descricaoServicos = 'Eu só te ensino o caminho';
 
   /// Nome da porta dos aplicativos que a Memora pode abrir.
   static const String portaAplicativos = 'Meus aplicativos';
 
   /// O que essa porta faz.
-  static const String descricaoAplicativos =
-      'WhatsApp, fotos, vídeos — eu te ensino e posso abrir';
+  static const String descricaoAplicativos = 'Eu te ensino e posso abrir';
 
   /// Nome da porta de ajuda.
   static const String portaAjuda = 'Preciso de ajuda';
@@ -49,8 +49,7 @@ class TextosAssistente {
   static const String portaRegistro = 'O que eu fiz por você';
 
   /// O que essa porta faz.
-  static const String descricaoRegistro =
-      'Tudo que eu abri no seu lugar fica anotado aqui';
+  static const String descricaoRegistro = 'O que eu abri para você';
 
   // ---------------------------------------------------------------------------
   // Conversa — US2

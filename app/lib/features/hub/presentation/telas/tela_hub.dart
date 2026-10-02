@@ -1,164 +1,102 @@
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
-import '../../../../l10n/textos_assistente.dart';
-import '../../../../l10n/textos_autenticacao.dart';
-import '../../../autenticacao/presentation/widgets/saida_com_confirmacao.dart';
+import '../../../../l10n/textos_casca.dart';
 import '../../domain/hub.dart';
 
-/// O lugar para onde a pessoa sempre volta (T025, US1).
+/// Todas as partes do Memora, numa tela (T038, FR-016 da feature 004).
 ///
-/// ## A tela mais vista do produto
+/// ## A tela que o Início abre
 ///
-/// É a primeira coisa depois de entrar, e o destino do caminho de volta de
-/// todas as outras. Ela decide se a pessoa se sente perdida ou em casa — e por
-/// isso não tem menu escondido, gesto a descobrir, nem nada piscando pedindo
-/// atenção.
+/// O Hub não é mais a raiz de nada: o Início cumprimenta e leva ao que a
+/// pessoa mais faz, e este é o "ver tudo". Por isso ele tem **"Voltar"** — a
+/// raiz de um destino é que não tem —, no mesmo canto de todas as outras
+/// telas (FR-001). O "Sair" que morava aqui foi para Ajustes → Conta
+/// (FR-019): quem queria o Hub para escolher uma parte do aplicativo encontrava
+/// ao lado dela a porta de saída, e um toque errado custava a sessão.
 ///
 /// ## Ela mostra o que recebe, e só
 ///
-/// A FR-003 exige que porta sem destino não apareça. A tela não decide isso:
-/// ela exibe a lista que lhe passam, e [PortaDoHub] torna o destino
-/// obrigatório. Quem sabe o que existe é quem monta o fluxo.
+/// A FR-003 da 003 e a FR-018 desta feature exigem que porta sem destino não
+/// apareça. A tela não decide isso: ela exibe a lista que lhe passam, e
+/// [PortaDoHub] torna o destino obrigatório. Quem sabe o que existe é quem
+/// monta o fluxo.
 ///
-/// <b>A consequência prática é que o Hub cresce uma porta por entrega.</b> Hoje
-/// ele abre com o que de fato está construído; conversa, catálogos e registro
-/// entram quando existirem.
+/// ## Cabe sem rolar (FR-017)
 ///
-/// ## Por que botões, e não cartões
+/// Em 100% e 150% de ampliação, no menor aparelho suportado, nenhuma porta
+/// fica para baixo da dobra. Em 200% rolar é aceitável — a lista rola, e o
+/// começo dela já mostra que existe mais.
 ///
-/// Porta é ação, e ação no Memora usa pílula e preenchimento (FR-012 da feature
-/// 001). Cartão é a linguagem de informação, e o `Cartao` do Design System
-/// deliberadamente não aceita toque.
+/// ## Porta é ação
+///
+/// Cada porta é um `CartaoDePorta`: pílula preenchida com desenho, nome e uma
+/// linha do que há do outro lado. Cartão comum, o `Cartao`, é informação e
+/// deliberadamente não aceita toque (FR-012 da 002).
 class TelaHub extends StatelessWidget {
-  /// Chave da saudação, usada pelos testes.
-  static const Key chaveSaudacao = Key('hub.saudacao');
+  /// Chave da lista de portas, para os testes.
+  static const Key chaveLista = Key('hub.lista');
 
-  /// Chave do botão de sair.
-  static const Key chaveSair = Key('hub.sair');
-
-  /// Chave da confirmação que vem depois do toque em sair (FR-025).
-  static const Key chaveConfirmacaoSaida = Key('hub.confirmacao');
+  /// Chave do estado vazio, para os testes.
+  static const Key chaveVazio = Key('hub.vazio');
 
   /// Chave de uma porta, pelo rótulo.
   static Key chaveDaPorta(String rotulo) => Key('hub.porta.$rotulo');
 
-  /// Como a pessoa quer ser chamada.
-  final String nome;
-
   /// As portas construídas. Ver a nota sobre a FR-003.
   final List<PortaDoHub> portas;
 
-  /// Encerra a sessão, depois que a pessoa confirmou.
-  final Future<void> Function() aoSair;
+  /// Volta ao Início.
+  final VoidCallback aoVoltar;
 
   /// Cria o Hub.
-  const TelaHub({
-    required this.nome,
-    required this.portas,
-    required this.aoSair,
-    super.key,
-  });
+  const TelaHub({required this.portas, required this.aoVoltar, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-
     return Scaffold(
-      backgroundColor: cores.fundo,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(MemoraEspacamento.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              const SizedBox(height: MemoraEspacamento.md),
-
-              // O casal, e não um avatar de perfil: é a mesma ilustração das
-              // telas de entrada, e reconhecê-la aqui é o que faz o Hub
-              // parecer a continuação do lugar onde a pessoa acabou de entrar.
-              const Center(
-                child: IlustracaoMemora(Ilustracao.casalIdoso, altura: 96),
-              ),
-              const SizedBox(height: MemoraEspacamento.lg),
-
-              TextoMemora.tituloTela(
-                TextosAssistente.saudacao(nome),
-                key: TelaHub.chaveSaudacao,
-                alinhamento: TextAlign.center,
-              ),
-
-              const SizedBox(height: MemoraEspacamento.xxl),
-
-              for (final PortaDoHub porta in portas) ...<Widget>[
-                _Porta(porta: porta),
-                const SizedBox(height: MemoraEspacamento.lg),
-              ],
-
-              const SizedBox(height: MemoraEspacamento.xl),
-              // Sair pede confirmação (FR-025), a mesma da tela de perfil.
-              SaidaComConfirmacao(
-                chaveConfirmacao: TelaHub.chaveConfirmacaoSaida,
-                aoConfirmar: aoSair,
-                botao: (VoidCallback aoTocar) => BotaoTerciario(
-                  key: TelaHub.chaveSair,
-                  rotulo: TextosAutenticacao.botaoSair,
-                  aoTocar: aoTocar,
-                  larguraTotal: true,
+      backgroundColor: context.memora.cores.fundo,
+      body: SingleChildScrollView(
+        key: chaveLista,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            CabecalhoDeTela(titulo: TextosCasca.tituloHub, aoVoltar: aoVoltar),
+            if (portas.isEmpty)
+              const EstadoVazio(
+                key: chaveVazio,
+                titulo: TextosCasca.hubVazioTitulo,
+                explicacao: TextosCasca.hubVazioExplicacao,
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  MemoraEspacamento.lg,
+                  0,
+                  MemoraEspacamento.lg,
+                  MemoraEspacamento.lg,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    for (final PortaDoHub porta in portas) ...<Widget>[
+                      CartaoDePorta(
+                        key: chaveDaPorta(porta.rotulo),
+                        nome: porta.rotulo,
+                        explicacao: porta.descricao,
+                        ilustracao: porta.ilustracao,
+                        aoAbrir: porta.aoAbrir,
+                        principal: porta.principal,
+                      ),
+                      if (porta != portas.last)
+                        const SizedBox(height: MemoraEspacamento.md),
+                    ],
+                  ],
                 ),
               ),
-              const SizedBox(height: MemoraEspacamento.xxl),
-            ],
-          ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-/// Uma porta desenhada: o botão e, abaixo dele, o que há do outro lado.
-///
-/// A descrição fica **fora** do botão de propósito. Dentro, ela dobraria a
-/// altura do alvo de toque e faria o rótulo competir com o próprio texto de
-/// apoio; fora, o botão continua sendo um alvo limpo e a explicação continua
-/// disponível para quem lê antes de tocar.
-class _Porta extends StatelessWidget {
-  final PortaDoHub porta;
-
-  const _Porta({required this.porta});
-
-  @override
-  Widget build(BuildContext context) {
-    final Key chave = TelaHub.chaveDaPorta(porta.rotulo);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        if (porta.principal)
-          BotaoPrimario(
-            key: chave,
-            rotulo: porta.rotulo,
-            icone: porta.icone,
-            aoTocar: porta.aoAbrir,
-          )
-        else
-          BotaoSecundario(
-            key: chave,
-            rotulo: porta.rotulo,
-            icone: porta.icone,
-            aoTocar: porta.aoAbrir,
-          ),
-        const SizedBox(height: MemoraEspacamento.xs),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: MemoraEspacamento.md,
-          ),
-          child: TextoMemora.apoio(
-            porta.descricao,
-            alinhamento: TextAlign.center,
-          ),
-        ),
-      ],
     );
   }
 }

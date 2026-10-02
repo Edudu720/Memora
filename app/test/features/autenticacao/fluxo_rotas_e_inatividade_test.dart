@@ -5,8 +5,7 @@ import 'package:memora/features/casca/raizes_provisorias.dart';
 import 'package:memora/l10n/textos_casca.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
-import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
-import 'package:memora/l10n/textos_assistente.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 
 import 'fluxo_dentro_da_conta.dart';
@@ -24,10 +23,9 @@ void main() {
   setUp(() => fluxo = FluxoDentroDaConta());
 
   Future<void> abrirConversa(WidgetTester t) async {
-    await FluxoDentroDaConta.tocar(
-      t,
-      find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaConversa)),
-    );
+    // O atalho do Inicio, e nao o do Hub: um toque so, e a conversa e uma rota
+    // empilhada sobre a pilha do Inicio em qualquer dos dois caminhos.
+    await FluxoDentroDaConta.tocar(t, find.byKey(TelaInicio.chaveConversar));
     await FluxoDentroDaConta.avancar(t, 8);
     expect(
       find.byKey(TelaConversa.chaveCampo),

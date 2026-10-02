@@ -7,11 +7,14 @@ import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
-import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/features/casca/casca_interna.dart';
+import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
+import '../../suporte/aparelhos.dart';
 import 'dubles_autenticacao.dart';
 
 /// Monta o `FluxoAutenticacao` real, com assistente e limpeza, e entra na
@@ -40,12 +43,18 @@ class FluxoDentroDaConta {
     await avancar(t);
   }
 
-  /// Monta o fluxo e deixa a pessoa no Hub.
+  /// Monta o fluxo e deixa a pessoa no Início, a raiz do destino de mesmo nome.
+  ///
+  /// [em] põe a janela do teste no tamanho de um aparelho, com a ampliação e o
+  /// tema da combinação (FR-044): é como a matriz roda **pelo fluxo real**, com
+  /// a barra inferior e as pilhas da casca, e não só a tela isolada.
   Future<void> montar(
     WidgetTester t, {
     Duration inatividade = const Duration(minutes: 30),
     Duration aviso = const Duration(minutes: 2),
+    Combinacao? em,
   }) async {
+    if (em != null) vestir(t, em.aparelho);
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
     final RepositorioAutenticacaoSimulado repositorio =
         RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
@@ -61,7 +70,17 @@ class FluxoDentroDaConta {
       EscopoAparencia(
         controlador: ControladorAparencia(PreferenciaEmMemoria()),
         child: MaterialApp(
-          theme: TemasMemora.claro,
+          theme: TemasMemora.porId(em?.tema ?? MemoraTemaId.claro),
+          // `builder`, e não um `MediaQuery` em volta de `home`: a ampliação
+          // precisa valer também para os diálogos, que moram acima das rotas.
+          builder: em == null
+              ? null
+              : (BuildContext contexto, Widget? filho) => MediaQuery(
+                  data: MediaQuery.of(
+                    contexto,
+                  ).copyWith(textScaler: TextScaler.linear(em.escala)),
+                  child: filho!,
+                ),
           home: FluxoAutenticacao(
             repositorio: repositorio,
             assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
@@ -87,11 +106,44 @@ class FluxoDentroDaConta {
     await avancar(t, 6);
 
     expect(
-      find.byKey(TelaHub.chaveSaudacao),
+      find.byKey(TelaInicio.chaveSaudacao),
       findsOneWidget,
-      reason: 'o cenario pressupoe a pessoa dentro da conta',
+      reason: 'o cenario pressupoe a pessoa dentro da conta, no Inicio',
     );
     expect(dado.apagamentos, 0);
+  }
+
+  /// Toca no destino [destino] da barra inferior.
+  static Future<void> irPara(WidgetTester t, DestinoDaCasca destino) {
+    return tocar(
+      t,
+      find.descendant(
+        of: find.byKey(CascaInterna.chaveDaBarra),
+        matching: find.text(destino.rotulo),
+      ),
+    );
+  }
+
+  /// Espera a transicao de uma rota (300 ms) terminar, sem `pumpAndSettle`:
+  /// uma tela com `Carregando` anima sem parar e ele nunca voltaria.
+  ///
+  /// Enquanto a transicao corre, a tela de baixo ainda esta na arvore e a
+  /// busca por ela acha o que ja deveria estar coberto.
+  static Future<void> esperarATransicao(WidgetTester t) =>
+      t.pump(const Duration(milliseconds: 400));
+
+  /// Do Inicio ao Hub, tocando no atalho de verdade.
+  static Future<void> irAoHub(WidgetTester t) async {
+    await tocar(t, find.byKey(TelaInicio.chaveVerTudo));
+    await esperarATransicao(t);
+  }
+
+  /// Vai a Ajustes e toca em "Sair" — o toque que pergunta, e nao o que sai.
+  ///
+  /// E o unico caminho de saida (FR-019): nao ha "Sair" no Inicio nem no Hub.
+  static Future<void> tocarEmSair(WidgetTester t) async {
+    await irPara(t, DestinoDaCasca.ajustes);
+    await tocar(t, find.byKey(AjustesProvisorios.chaveSair));
   }
 }
 

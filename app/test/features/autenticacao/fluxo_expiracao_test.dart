@@ -8,7 +8,7 @@ import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simul
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/casca/casca_interna.dart';
-import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
@@ -70,7 +70,7 @@ Future<_RepoLento> _montar(WidgetTester t) async {
   }
   await FluxoDentroDaConta.tocar(t, find.byKey(TelaLogin.chaveEntrar));
   await FluxoDentroDaConta.avancar(t, 6);
-  expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget);
+  expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
   return repo;
 }
 

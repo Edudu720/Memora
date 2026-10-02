@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart' show immutable;
-import 'package:flutter/widgets.dart' show IconData, VoidCallback;
+import 'package:flutter/widgets.dart' show VoidCallback;
+
+import '../../../design_system/design_system.dart' show Ilustracao;
 
 /// Uma porta do Hub — um lugar do Memora que a pessoa pode abrir.
 ///
@@ -27,16 +29,17 @@ class PortaDoHub {
 
   /// O que há do outro lado, numa frase.
   ///
-  /// Existe porque o rótulo sozinho às vezes não basta: *"Serviços do dia a
-  /// dia"* não diz que a Memora só ensina e não abre, e essa diferença precisa
-  /// ser conhecida **antes** do toque (FR-045).
+  /// Existe porque o rótulo sozinho às vezes não basta: *"Serviços sociais"*
+  /// não diz que a Memora só ensina e não abre, e essa diferença precisa ser
+  /// conhecida **antes** do toque (FR-045 da 003).
   final String descricao;
 
-  /// Elemento visual da porta.
+  /// O desenho da porta (FR-016 da feature 004).
   ///
-  /// Nunca aparece sozinho: a FR-002 e o Princípio III exigem ícone
-  /// **acompanhado de texto**. Ícone isolado é adivinhação.
-  final IconData icone;
+  /// Nunca aparece sozinho: o `CartaoDePorta` sempre escreve o [rotulo] ao
+  /// lado, porque desenho isolado é adivinhação (Princípio III). Substitui o
+  /// ícone do Material que a porta carregava antes do redesenho.
+  final Ilustracao ilustracao;
 
   /// O que abrir. Obrigatório — ver a nota da classe.
   final VoidCallback aoAbrir;
@@ -45,14 +48,14 @@ class PortaDoHub {
   ///
   /// No máximo uma deve ser. O cenário 1 da User Story 1 da feature 001
   /// estabeleceu que o Memora não coloca duas ações de mesmo peso disputando a
-  /// atenção, e o Hub herda essa regra.
+  /// atenção, e o Hub herda essa regra (FR-002 da feature 004).
   final bool principal;
 
   /// Cria uma porta.
   const PortaDoHub({
     required this.rotulo,
     required this.descricao,
-    required this.icone,
+    required this.ilustracao,
     required this.aoAbrir,
     this.principal = false,
   });

@@ -10,6 +10,7 @@ import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simul
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
@@ -69,7 +70,7 @@ Future<void> _preencher(WidgetTester t, Key chave, String valor) async {
   await t.pump();
 }
 
-/// Monta o fluxo real e entra pelo cadastro, até o Hub.
+/// Monta o fluxo real e entra pelo cadastro, até o Hub (pelo Início).
 Future<void> _chegarAoHub(WidgetTester t) async {
   await t.pumpWidget(
     MaterialApp(
@@ -91,7 +92,12 @@ Future<void> _chegarAoHub(WidgetTester t) async {
   await _tocar(t, find.byKey(TelaCadastro.chaveEnviar));
   await _avancar(t, 6);
 
-  expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget);
+  expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
+
+  // O Hub fica um toque adiante do Inicio (T040): o atalho e real.
+  await _tocar(t, find.byKey(TelaInicio.chaveVerTudo));
+  await _avancar(t);
+  expect(find.byType(TelaHub), findsOneWidget);
 }
 
 String _textoDoCampo(WidgetTester t) {
