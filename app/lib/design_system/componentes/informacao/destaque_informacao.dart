@@ -59,11 +59,9 @@ class DestaqueInformacao extends StatelessWidget {
               Row(
                 children: <Widget>[
                   if (icone != null) ...<Widget>[
-                    Icon(
-                      icone,
-                      size: MemoraDimensoes.iconePequeno,
-                      color: cores.texto,
-                    ),
+                    Icon(icone,
+                        size: MemoraDimensoes.iconePequeno,
+                        color: cores.texto),
                     const SizedBox(width: MemoraEspacamento.sm),
                   ],
                   Flexible(

@@ -24,29 +24,35 @@ void main() {
   Widget hubCom(List<PortaDoHub> portas) {
     return MaterialApp(
       theme: TemasMemora.claro,
-      home: TelaHub(nome: 'Ana', portas: portas, aoSair: () async {}),
+      home: TelaHub(
+        nome: 'Ana',
+        portas: portas,
+        aoSair: () async {},
+      ),
     );
   }
 
   /// Uma porta que leva a algum lugar de verdade.
-  PortaDoHub portaQueAbre(BuildContext Function() contexto, String rotulo) {
+  PortaDoHub portaQueAbre(
+    BuildContext Function() contexto,
+    String rotulo,
+  ) {
     return PortaDoHub(
       rotulo: rotulo,
       descricao: 'descricao de $rotulo',
       icone: Icons.chat_bubble_outline,
       aoAbrir: () => Navigator.of(contexto()).push<void>(
         MaterialPageRoute<void>(
-          builder: (BuildContext _) =>
-              const Scaffold(body: Text('cheguei', key: destino)),
+          builder: (BuildContext _) => const Scaffold(
+            body: Text('cheguei', key: destino),
+          ),
         ),
       ),
     );
   }
 
   group('H1 — o Hub nao mostra porta que nao abre', () {
-    testWidgets('toda porta exibida leva a algum lugar', (
-      WidgetTester t,
-    ) async {
+    testWidgets('toda porta exibida leva a algum lugar', (WidgetTester t) async {
       late BuildContext contexto;
 
       await t.pumpWidget(
@@ -87,9 +93,8 @@ void main() {
       }
     });
 
-    testWidgets('cada porta tem nome escrito E elemento visual (FR-002)', (
-      WidgetTester t,
-    ) async {
+    testWidgets('cada porta tem nome escrito E elemento visual (FR-002)',
+        (WidgetTester t) async {
       await t.pumpWidget(
         hubCom(<PortaDoHub>[
           PortaDoHub(
@@ -106,9 +111,8 @@ void main() {
       expect(find.byIcon(Icons.chat_bubble_outline), findsOneWidget);
     });
 
-    testWidgets('a descricao aparece antes do toque (FR-045)', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a descricao aparece antes do toque (FR-045)',
+        (WidgetTester t) async {
       await t.pumpWidget(
         hubCom(<PortaDoHub>[
           PortaDoHub(
@@ -130,9 +134,8 @@ void main() {
   });
 
   group('O Hub e o lugar para onde se volta', () {
-    testWidgets('chama a pessoa pelo nome que ela escolheu', (
-      WidgetTester t,
-    ) async {
+    testWidgets('chama a pessoa pelo nome que ela escolheu',
+        (WidgetTester t) async {
       await t.pumpWidget(hubCom(const <PortaDoHub>[]));
 
       expect(find.textContaining('Ana'), findsWidgets);
@@ -165,9 +168,7 @@ void main() {
       expect(saiu, isTrue);
     });
 
-    testWidgets('no maximo uma porta e a acao principal', (
-      WidgetTester t,
-    ) async {
+    testWidgets('no maximo uma porta e a acao principal', (WidgetTester t) async {
       await t.pumpWidget(
         hubCom(<PortaDoHub>[
           PortaDoHub(
@@ -193,9 +194,8 @@ void main() {
   });
 
   group('Ampliacao — FR-027', () {
-    testWidgets('o Hub continua utilizavel com texto a 200%', (
-      WidgetTester t,
-    ) async {
+    testWidgets('o Hub continua utilizavel com texto a 200%',
+        (WidgetTester t) async {
       await t.pumpWidget(
         MaterialApp(
           theme: TemasMemora.claro,

@@ -81,11 +81,9 @@ class CampoInformacao extends StatelessWidget {
               Row(
                 children: <Widget>[
                   if (icone != null) ...<Widget>[
-                    Icon(
-                      icone,
-                      size: MemoraDimensoes.iconePequeno,
-                      color: cores.textoSuave,
-                    ),
+                    Icon(icone,
+                        size: MemoraDimensoes.iconePequeno,
+                        color: cores.textoSuave),
                     const SizedBox(width: MemoraEspacamento.sm),
                   ],
                   Flexible(

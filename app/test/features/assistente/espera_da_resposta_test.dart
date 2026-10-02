@@ -53,7 +53,8 @@ class _RepositorioControlado implements RepositorioAssistente {
   Future<void> registrarAcao({
     required String servicoId,
     required String pedidoResumido,
-  }) => throw UnimplementedError();
+  }) =>
+      throw UnimplementedError();
 
   @override
   Future<List<AcaoRegistrada>> registro() => throw UnimplementedError();
@@ -100,50 +101,36 @@ void main() {
     await controlador.iniciar();
   }
 
-  Iterable<MensagemDaConversa> falasDaPessoa() => controlador.mensagens.where(
-    (MensagemDaConversa m) => m.autor == AutorDaMensagem.pessoa,
-  );
+  Iterable<MensagemDaConversa> falasDaPessoa() => controlador.mensagens
+      .where((MensagemDaConversa m) => m.autor == AutorDaMensagem.pessoa);
 
-  testWidgets(
-    'sem nenhuma palavra em 30 s, a espera acaba e diz que é a conexão',
-    (WidgetTester t) async {
-      await preparar();
-      unawaited(controlador.enviar());
+  testWidgets('sem nenhuma palavra em 30 s, a espera acaba e diz que é a conexão',
+      (WidgetTester t) async {
+    await preparar();
+    unawaited(controlador.enviar());
 
-      await t.pump(const Duration(seconds: 29));
-      expect(
-        controlador.respondendo,
-        isTrue,
-        reason: 'Antes dos 30 s, ainda é espera.',
-      );
+    await t.pump(const Duration(seconds: 29));
+    expect(controlador.respondendo, isTrue,
+        reason: 'Antes dos 30 s, ainda é espera.');
 
-      await t.pump(const Duration(seconds: 1));
-      expect(controlador.estado, EstadoConversa.comErro);
-      expect(
-        controlador.mensagemDeErro,
-        TextosAssistente.semRespostaDaConversa,
-      );
+    await t.pump(const Duration(seconds: 1));
+    expect(controlador.estado, EstadoConversa.comErro);
+    expect(controlador.mensagemDeErro, TextosAssistente.semRespostaDaConversa);
 
-      repositorio.encerrar();
-      await t.pump();
-      controlador.dispose();
-    },
-  );
+    repositorio.encerrar();
+    await t.pump();
+    controlador.dispose();
+  });
 
-  testWidgets('a pergunta volta ao campo, e não fica uma fala sem resposta', (
-    WidgetTester t,
-  ) async {
+  testWidgets('a pergunta volta ao campo, e não fica uma fala sem resposta',
+      (WidgetTester t) async {
     await preparar();
     unawaited(controlador.enviar());
     await t.pump(ControladorConversa.esperaMaxima);
 
-    expect(
-      controlador.rascunho,
-      _pergunta,
-      reason:
-          'O texto de erro diz "o que você escreveu continua aqui". Era '
-          'mentira: o rascunho já tinha sido apagado no envio.',
-    );
+    expect(controlador.rascunho, _pergunta,
+        reason: 'O texto de erro diz "o que você escreveu continua aqui". Era '
+            'mentira: o rascunho já tinha sido apagado no envio.');
     expect(falasDaPessoa(), isEmpty);
 
     repositorio.encerrar();
@@ -151,9 +138,8 @@ void main() {
     controlador.dispose();
   });
 
-  testWidgets('tentar de novo reenvia sem a pessoa reescrever', (
-    WidgetTester t,
-  ) async {
+  testWidgets('tentar de novo reenvia sem a pessoa reescrever',
+      (WidgetTester t) async {
     await preparar();
     unawaited(controlador.enviar());
     await t.pump(ControladorConversa.esperaMaxima);
@@ -162,49 +148,41 @@ void main() {
     await t.pump();
 
     expect(repositorio.mensagens, <String>[_pergunta, _pergunta]);
-    repositorio.pendentes.last.complete(
-      const AssistenteRespondeu('Vou te mostrar o caminho.'),
-    );
+    repositorio.pendentes.last
+        .complete(const AssistenteRespondeu('Vou te mostrar o caminho.'));
     await t.pump();
 
     expect(controlador.estado, EstadoConversa.aguardando);
-    expect(
-      falasDaPessoa(),
-      hasLength(1),
-      reason: 'A pergunta aparece uma vez, e não uma por tentativa.',
-    );
+    expect(falasDaPessoa(), hasLength(1),
+        reason: 'A pergunta aparece uma vez, e não uma por tentativa.');
 
     repositorio.encerrar();
     await t.pump();
     controlador.dispose();
   });
 
-  testWidgets('a resposta que chega depois do corte é descartada', (
-    WidgetTester t,
-  ) async {
+  testWidgets('a resposta que chega depois do corte é descartada',
+      (WidgetTester t) async {
     await preparar();
     unawaited(controlador.enviar());
     await t.pump(ControladorConversa.esperaMaxima);
 
-    repositorio.pendentes.first.complete(
-      const AssistenteRespondeu('resposta atrasada'),
-    );
+    repositorio.pendentes.first
+        .complete(const AssistenteRespondeu('resposta atrasada'));
     await t.pump();
 
     expect(
       controlador.mensagens.map((MensagemDaConversa m) => m.texto),
       isNot(contains('resposta atrasada')),
-      reason:
-          'Senão a pessoa, que já tocou em tentar de novo, recebe duas '
+      reason: 'Senão a pessoa, que já tocou em tentar de novo, recebe duas '
           'respostas para uma pergunta.',
     );
     expect(controlador.estado, EstadoConversa.comErro);
     controlador.dispose();
   });
 
-  testWidgets('resposta que já começou a chegar não é cortada', (
-    WidgetTester t,
-  ) async {
+  testWidgets('resposta que já começou a chegar não é cortada',
+      (WidgetTester t) async {
     await preparar();
     unawaited(controlador.enviar());
 
@@ -212,30 +190,23 @@ void main() {
     repositorio.aoReceberTrecho!('Vou te ');
     await t.pump(const Duration(seconds: 60));
 
-    expect(
-      controlador.respondendo,
-      isTrue,
-      reason:
-          'A FR-052 fala da resposta que não COMEÇA. Uma resposta longa, '
-          'que está aparecendo, não pode ser interrompida no meio.',
-    );
+    expect(controlador.respondendo, isTrue,
+        reason: 'A FR-052 fala da resposta que não COMEÇA. Uma resposta longa, '
+            'que está aparecendo, não pode ser interrompida no meio.');
 
-    repositorio.pendentes.first.complete(
-      const AssistenteRespondeu('Vou te mostrar.'),
-    );
+    repositorio.pendentes.first
+        .complete(const AssistenteRespondeu('Vou te mostrar.'));
     await t.pump();
     expect(controlador.estado, EstadoConversa.aguardando);
     controlador.dispose();
   });
 
-  testWidgets('sem internet, a pergunta também volta ao campo', (
-    WidgetTester t,
-  ) async {
+  testWidgets('sem internet, a pergunta também volta ao campo',
+      (WidgetTester t) async {
     await preparar();
     unawaited(controlador.enviar());
-    repositorio.pendentes.first.complete(
-      const AssistenteFalhou(FalhaDaAssistente.semConexao),
-    );
+    repositorio.pendentes.first
+        .complete(const AssistenteFalhou(FalhaDaAssistente.semConexao));
     await t.pump();
 
     expect(controlador.rascunho, _pergunta);
@@ -243,18 +214,14 @@ void main() {
     controlador.dispose();
   });
 
-  testWidgets('resposta que chega depois do descarte não regrava a conversa', (
-    WidgetTester t,
-  ) async {
+  testWidgets('resposta que chega depois do descarte não regrava a conversa',
+      (WidgetTester t) async {
     // FR-048: depois de sair da tela (ou da conta, com a conversa já apagada
     // pela LimpezaDeSessao), uma resposta tardia não pode chamar `guardar`.
     final _RepositorioControlado repo = _RepositorioControlado();
     final _ConversaQueConta local = _ConversaQueConta();
-    final ControladorConversa c = ControladorConversa(
-      repo,
-      local,
-      rascunhoInicial: _pergunta,
-    );
+    final ControladorConversa c =
+        ControladorConversa(repo, local, rascunhoInicial: _pergunta);
     await c.iniciar();
 
     unawaited(c.enviar());
@@ -263,16 +230,14 @@ void main() {
     c.dispose();
     final int gravacoesAntes = local.gravacoes;
 
-    repo.pendentes.first.complete(const AssistenteRespondeu('resposta tardia'));
+    repo.pendentes.first
+        .complete(const AssistenteRespondeu('resposta tardia'));
     await t.pump();
     // O cronômetro de 30 s também não pode disparar depois do descarte.
     await t.pump(ControladorConversa.esperaMaxima);
 
-    expect(
-      local.gravacoes,
-      gravacoesAntes,
-      reason: 'resposta tardia regravaria a conversa que a saida apagou',
-    );
+    expect(local.gravacoes, gravacoesAntes,
+        reason: 'resposta tardia regravaria a conversa que a saida apagou');
     expect(t.takeException(), isNull);
   });
 
@@ -285,9 +250,7 @@ void main() {
   test('o aviso sem conexão das outras telas não promete o que não existe', () {
     // Catálogo e registro usam o aviso genérico, e nelas a pessoa não
     // escreveu nada: "o que você escreveu continua aqui" não cabe ali.
-    expect(
-      TextosAssistente.semConexao.toLowerCase(),
-      isNot(contains('você escreveu')),
-    );
+    expect(TextosAssistente.semConexao.toLowerCase(),
+        isNot(contains('você escreveu')));
   });
 }

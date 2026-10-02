@@ -19,9 +19,7 @@ void main() {
   Future<void> tocarSair(WidgetTester t) =>
       FluxoDentroDaConta.tocar(t, find.byKey(TelaHub.chaveSair));
 
-  testWidgets('tocar em sair pergunta, e ainda nao saiu', (
-    WidgetTester t,
-  ) async {
+  testWidgets('tocar em sair pergunta, e ainda nao saiu', (WidgetTester t) async {
     await fluxo.montar(t);
 
     await tocarSair(t);
@@ -29,26 +27,22 @@ void main() {
     expect(find.byKey(TelaHub.chaveConfirmacaoSaida), findsOneWidget);
     expect(find.text(TextosAutenticacao.perguntaSair), findsOneWidget);
     expect(find.text(TextosAutenticacao.avisoSair), findsOneWidget);
-    expect(
-      find.byKey(TelaHub.chaveSaudacao),
-      findsOneWidget,
-      reason: 'antes do segundo toque a pessoa continua dentro',
-    );
-    expect(
-      fluxo.dado.apagamentos,
-      0,
-      reason: 'nada pode ser apagado antes de a pessoa confirmar',
-    );
+    expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget,
+        reason: 'antes do segundo toque a pessoa continua dentro');
+    expect(fluxo.dado.apagamentos, 0,
+        reason: 'nada pode ser apagado antes de a pessoa confirmar');
     expect(fluxo.cofre.limpezas, 0);
   });
 
-  testWidgets('"ficar" mantem a pessoa dentro e devolve o botao', (
-    WidgetTester t,
-  ) async {
+  testWidgets('"ficar" mantem a pessoa dentro e devolve o botao',
+      (WidgetTester t) async {
     await fluxo.montar(t);
     await tocarSair(t);
 
-    await FluxoDentroDaConta.tocar(t, find.text(TextosAutenticacao.botaoFicar));
+    await FluxoDentroDaConta.tocar(
+      t,
+      find.text(TextosAutenticacao.botaoFicar),
+    );
 
     expect(find.byKey(TelaHub.chaveConfirmacaoSaida), findsNothing);
     expect(find.byKey(TelaHub.chaveSair), findsOneWidget);
@@ -57,9 +51,8 @@ void main() {
     expect(fluxo.cofre.limpezas, 0);
   });
 
-  testWidgets('confirmar sai: vai ao login e a limpeza roda', (
-    WidgetTester t,
-  ) async {
+  testWidgets('confirmar sai: vai ao login e a limpeza roda',
+      (WidgetTester t) async {
     await fluxo.montar(t);
     await tocarSair(t);
 

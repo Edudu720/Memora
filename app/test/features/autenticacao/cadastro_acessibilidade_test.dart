@@ -56,9 +56,8 @@ void main() {
   });
 
   group('Alvo de toque — FR-027', () {
-    testWidgets('boas-vindas atende à diretriz do Android', (
-      WidgetTester t,
-    ) async {
+    testWidgets('boas-vindas atende à diretriz do Android',
+        (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(
         _app(TelaBoasVindas(aoComecar: () {}, aoJaTerConta: () {})),
@@ -68,9 +67,8 @@ void main() {
       h.dispose();
     });
 
-    testWidgets('cadastro atende à diretriz do Android', (
-      WidgetTester t,
-    ) async {
+    testWidgets('cadastro atende à diretriz do Android',
+        (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(
         _app(TelaCadastro(controlador: _controlador(), aoConcluir: (_) {})),
@@ -85,37 +83,34 @@ void main() {
     for (final Size aparelho in aparelhos) {
       for (final double escala in <double>[1.0, 1.5, 2.0]) {
         testWidgets(
-          'boas-vindas nao quebra em ${nomeDo(aparelho)}, escala $escala',
-          (WidgetTester t) async {
-            t.view.physicalSize = aparelho;
-            await t.pumpWidget(
-              _app(TelaBoasVindas(aoComecar: () {}), escala: escala),
-            );
-            expect(t.takeException(), isNull);
-          },
-        );
+            'boas-vindas nao quebra em ${nomeDo(aparelho)}, escala $escala',
+            (WidgetTester t) async {
+          t.view.physicalSize = aparelho;
+          await t.pumpWidget(
+            _app(TelaBoasVindas(aoComecar: () {}), escala: escala),
+          );
+          expect(t.takeException(), isNull);
+        });
 
         testWidgets(
-          'cadastro nao quebra em ${nomeDo(aparelho)}, escala $escala',
-          (WidgetTester t) async {
-            t.view.physicalSize = aparelho;
-            await t.pumpWidget(
-              _app(
-                TelaCadastro(controlador: _controlador(), aoConcluir: (_) {}),
-                escala: escala,
-              ),
-            );
-            expect(t.takeException(), isNull);
-          },
-        );
+            'cadastro nao quebra em ${nomeDo(aparelho)}, escala $escala',
+            (WidgetTester t) async {
+          t.view.physicalSize = aparelho;
+          await t.pumpWidget(
+            _app(
+              TelaCadastro(controlador: _controlador(), aoConcluir: (_) {}),
+              escala: escala,
+            ),
+          );
+          expect(t.takeException(), isNull);
+        });
       }
     }
   });
 
   group('Leitor de tela — FR-031 e SC-005', () {
-    testWidgets('a ação principal anuncia rótulo, papel e ativação', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a ação principal anuncia rótulo, papel e ativação',
+        (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(_app(TelaBoasVindas(aoComecar: () {})));
 
@@ -131,9 +126,8 @@ void main() {
       h.dispose();
     });
 
-    testWidgets('cada campo anuncia rótulo e a explicação de uso', (
-      WidgetTester t,
-    ) async {
+    testWidgets('cada campo anuncia rótulo e a explicação de uso',
+        (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(
         _app(TelaCadastro(controlador: _controlador(), aoConcluir: (_) {})),
@@ -152,16 +146,14 @@ void main() {
       expect(
         campo.properties.hint,
         'É assim que eu vou falar com você',
-        reason:
-            'Sem a explicação no hint, quem usa leitor de tela não '
+        reason: 'Sem a explicação no hint, quem usa leitor de tela não '
             'descobre para que serve o dado (FR-004).',
       );
       h.dispose();
     });
 
-    testWidgets('o botão de enviar começa desabilitado e é anunciado assim', (
-      WidgetTester t,
-    ) async {
+    testWidgets('o botão de enviar começa desabilitado e é anunciado assim',
+        (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(
         _app(TelaCadastro(controlador: _controlador(), aoConcluir: (_) {})),
@@ -170,8 +162,7 @@ void main() {
       expect(
         t.getSemantics(find.byKey(TelaCadastro.chaveEnviar)),
         isSemantics(isButton: true, isEnabled: false, hasTapAction: false),
-        reason:
-            'Anunciar como ativo algo que não faz nada frustra quem não '
+        reason: 'Anunciar como ativo algo que não faz nada frustra quem não '
             'vê o estado visual.',
       );
       h.dispose();
@@ -180,9 +171,8 @@ void main() {
 
   group('Funciona nos três temas — FR-004 do Design System', () {
     for (final MemoraTemaId tema in MemoraTemaId.values) {
-      testWidgets('cadastro renderiza no tema ${tema.name}', (
-        WidgetTester t,
-      ) async {
+      testWidgets('cadastro renderiza no tema ${tema.name}',
+          (WidgetTester t) async {
         await t.pumpWidget(
           _app(
             TelaCadastro(controlador: _controlador(), aoConcluir: (_) {}),
@@ -195,25 +185,19 @@ void main() {
   });
 
   group('Nenhum gesto complexo — FR-034', () {
-    testWidgets('a tela não usa arrastar nem pressionar e segurar', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a tela não usa arrastar nem pressionar e segurar',
+        (WidgetTester t) async {
       await t.pumpWidget(
         _app(TelaCadastro(controlador: _controlador(), aoConcluir: (_) {})),
       );
 
-      final Iterable<GestureDetector> gestos = t.widgetList<GestureDetector>(
-        find.byType(GestureDetector),
-      );
+      final Iterable<GestureDetector> gestos =
+          t.widgetList<GestureDetector>(find.byType(GestureDetector));
 
       for (final GestureDetector g in gestos) {
-        expect(
-          g.onLongPress,
-          isNull,
-          reason:
-              'Pressionar e segurar exige precisão que não podemos '
-              'pressupor.',
-        );
+        expect(g.onLongPress, isNull,
+            reason: 'Pressionar e segurar exige precisão que não podemos '
+                'pressupor.');
         expect(g.onHorizontalDragStart, isNull);
         expect(g.onVerticalDragStart, isNull);
       }

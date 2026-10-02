@@ -19,11 +19,12 @@ const String _senhaNova = 'outra frase bem comprida';
 /// esperaria para sempre por um temporizador que só anda quando alguém bombeia
 /// quadros.
 RepositorioAutenticacaoSimulado _comContaDeAna() =>
-    RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
-      identificador: 'ana@email.com',
-      senha: _senhaAntiga,
-      nome: 'Ana',
-    );
+    RepositorioAutenticacaoSimulado(demora: Duration.zero)
+      ..registrarConta(
+        identificador: 'ana@email.com',
+        senha: _senhaAntiga,
+        nome: 'Ana',
+      );
 
 Future<ControladorRecuperacao> _montar(
   WidgetTester t, {
@@ -57,8 +58,10 @@ Future<ControladorRecuperacao> _montar(
 ///
 /// A chave fica no componente, que é uma coluna com rótulo, campo e texto de
 /// ajuda. `enterText` precisa do [TextField] lá dentro.
-Finder _entrada(Key chave) =>
-    find.descendant(of: find.byKey(chave), matching: find.byType(TextField));
+Finder _entrada(Key chave) => find.descendant(
+      of: find.byKey(chave),
+      matching: find.byType(TextField),
+    );
 
 /// Preenche o identificador e pede o código.
 Future<void> _pedirCodigoPara(WidgetTester t, String identificador) async {
@@ -102,38 +105,31 @@ Future<void> _concluirTroca(
 
 void main() {
   group('FR-019 — a resposta é idêntica exista a conta ou não', () {
-    testWidgets('conta existente e inexistente levam à mesma etapa', (
-      WidgetTester t,
-    ) async {
+    testWidgets('conta existente e inexistente levam à mesma etapa',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
 
       await _montar(t, repositorio: repo, chave: 'existe');
       await _pedirCodigoPara(t, 'ana@email.com');
-      final bool campoDeCodigoComConta = find
-          .byKey(TelaRecuperacao.chaveCodigo)
-          .evaluate()
-          .isNotEmpty;
+      final bool campoDeCodigoComConta =
+          find.byKey(TelaRecuperacao.chaveCodigo).evaluate().isNotEmpty;
 
       await _montar(t, repositorio: repo, chave: 'nao-existe');
       await _pedirCodigoPara(t, 'ninguem@email.com');
-      final bool campoDeCodigoSemConta = find
-          .byKey(TelaRecuperacao.chaveCodigo)
-          .evaluate()
-          .isNotEmpty;
+      final bool campoDeCodigoSemConta =
+          find.byKey(TelaRecuperacao.chaveCodigo).evaluate().isNotEmpty;
 
       expect(campoDeCodigoComConta, isTrue);
       expect(
         campoDeCodigoSemConta,
         isTrue,
-        reason:
-            'parar na primeira etapa quando a conta não existe diria que '
+        reason: 'parar na primeira etapa quando a conta não existe diria que '
             'ela não existe',
       );
     });
 
-    testWidgets('a confirmação repete apenas o que a pessoa digitou', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a confirmação repete apenas o que a pessoa digitou',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
 
       await _montar(t, repositorio: repo, chave: 'texto-com-conta');
@@ -161,9 +157,8 @@ void main() {
       );
     });
 
-    testWidgets('nenhum código é gerado para identificador sem conta', (
-      WidgetTester t,
-    ) async {
+    testWidgets('nenhum código é gerado para identificador sem conta',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
 
       await _montar(t, repositorio: repo);
@@ -176,11 +171,11 @@ void main() {
   });
 
   group('FR-023 — o aviso contra golpe é permanente', () {
-    testWidgets('está visível nas três etapas, sem rolar', (
-      WidgetTester t,
-    ) async {
+    testWidgets('está visível nas três etapas, sem rolar',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
-      final ControladorRecuperacao c = await _montar(t, repositorio: repo);
+      final ControladorRecuperacao c =
+          await _montar(t, repositorio: repo);
 
       expect(find.byType(AvisoAntigolpe), findsOneWidget);
 
@@ -196,9 +191,8 @@ void main() {
       expect(find.byType(AvisoAntigolpe), findsOneWidget);
     });
 
-    testWidgets('avisa sobre o número, não só sobre a senha', (
-      WidgetTester t,
-    ) async {
+    testWidgets('avisa sobre o número, não só sobre a senha',
+        (WidgetTester t) async {
       await _montar(t, repositorio: _comContaDeAna());
 
       // O golpe desta tela pede o código recebido, não a senha. Um aviso que
@@ -210,9 +204,8 @@ void main() {
   });
 
   group('código recusado', () {
-    testWidgets('mostra uma recusa só e oferece pedir outro', (
-      WidgetTester t,
-    ) async {
+    testWidgets('mostra uma recusa só e oferece pedir outro',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
       final ControladorRecuperacao c = await _montar(t, repositorio: repo);
 
@@ -228,9 +221,8 @@ void main() {
       expect(c.codigo, isEmpty);
     });
 
-    testWidgets('pedir outro número volta para conferir o identificador', (
-      WidgetTester t,
-    ) async {
+    testWidgets('pedir outro número volta para conferir o identificador',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
       final ControladorRecuperacao c = await _montar(t, repositorio: repo);
 
@@ -250,18 +242,14 @@ void main() {
   });
 
   group('senha nova', () {
-    testWidgets('o botão só libera com todas as regras atendidas', (
-      WidgetTester t,
-    ) async {
+    testWidgets('o botão só libera com todas as regras atendidas',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
       final ControladorRecuperacao c = await _montar(t, repositorio: repo);
 
       await _pedirCodigoPara(t, 'ana@email.com');
-      await _digitar(
-        t,
-        TelaRecuperacao.chaveCodigo,
-        RepositorioAutenticacaoSimulado.codigoDaDemonstracao,
-      );
+      await _digitar(t, TelaRecuperacao.chaveCodigo,
+          RepositorioAutenticacaoSimulado.codigoDaDemonstracao);
       await _digitar(t, TelaRecuperacao.chaveSenhaNova, 'curta');
 
       expect(c.senhaValida, isFalse);
@@ -271,9 +259,8 @@ void main() {
       expect(c.podeTrocarSenha, isTrue);
     });
 
-    testWidgets('FR-021 — conta que as outras sessões foram encerradas', (
-      WidgetTester t,
-    ) async {
+    testWidgets('FR-021 — conta que as outras sessões foram encerradas',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
       PessoaAutenticada? entrou;
 
@@ -293,8 +280,7 @@ void main() {
       expect(
         find.text(TextosAutenticacao.avisoSessoesEncerradas),
         findsOneWidget,
-        reason:
-            'entrar em silêncio desperdiça a única notícia que importa '
+        reason: 'entrar em silêncio desperdiça a única notícia que importa '
             'para quem está recuperando a conta porque alguém entrou nela',
       );
 
@@ -306,9 +292,8 @@ void main() {
       expect(entrou?.nomeTratamento, 'Ana');
     });
 
-    testWidgets('a senha nova passa a valer e a antiga não', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a senha nova passa a valer e a antiga não',
+        (WidgetTester t) async {
       final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
       await _montar(t, repositorio: repo);
 

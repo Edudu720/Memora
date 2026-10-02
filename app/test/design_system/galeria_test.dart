@@ -49,9 +49,9 @@ void main() {
 
   /// Os tipos de [_esperados] que existem na árvore neste instante.
   Set<Type> construidosAgora(WidgetTester t) => <Type>{
-    for (final MapEntry<Type, Finder> e in _esperados.entries)
-      if (t.any(e.value)) e.key,
-  };
+        for (final MapEntry<Type, Finder> e in _esperados.entries)
+          if (t.any(e.value)) e.key,
+      };
 
   /// A lista inteira da galeria, do topo ao fim, em passos de meia janela.
   ///
@@ -72,13 +72,9 @@ void main() {
     await t.pump();
 
     for (int passo = 0; passo < 400; passo++) {
-      expect(
-        t.takeException(),
-        isNull,
-        reason:
-            'estouro $onde, no passo $passo da rolagem '
-            '(posicao ${rolagem.position.pixels.toStringAsFixed(0)})',
-      );
+      expect(t.takeException(), isNull,
+          reason: 'estouro $onde, no passo $passo da rolagem '
+              '(posicao ${rolagem.position.pixels.toStringAsFixed(0)})');
       vistos.addAll(construidosAgora(t));
 
       final ScrollPosition p = rolagem.position;
@@ -95,24 +91,18 @@ void main() {
   }
 
   void todosConstruidos(Set<Type> vistos, String onde) {
-    final List<Type> ausentes = _esperados.keys
-        .where((Type k) => !vistos.contains(k))
-        .toList();
-    expect(
-      ausentes,
-      isEmpty,
-      reason:
-          'a rolagem $onde nao chegou a construir $ausentes — a '
-          'galeria nao foi medida inteira',
-    );
+    final List<Type> ausentes =
+        _esperados.keys.where((Type k) => !vistos.contains(k)).toList();
+    expect(ausentes, isEmpty,
+        reason: 'a rolagem $onde nao chegou a construir $ausentes — a '
+            'galeria nao foi medida inteira');
   }
 
   group('A galeria monta, inteira, em todo aparelho e toda ampliação', () {
     for (final Size aparelho in aparelhos) {
       for (final double escala in <double>[1.0, 1.5, 2.0]) {
-        testWidgets('${nomeDo(aparelho)}, escala $escala', (
-          WidgetTester t,
-        ) async {
+        testWidgets('${nomeDo(aparelho)}, escala $escala',
+            (WidgetTester t) async {
           await montar(t, aparelho: aparelho, escala: escala);
           final String onde = 'em ${nomeDo(aparelho)} a $escala';
 
@@ -123,9 +113,8 @@ void main() {
       }
     }
 
-    testWidgets('sem rolar, os componentes do fim da lista nao existem', (
-      WidgetTester t,
-    ) async {
+    testWidgets('sem rolar, os componentes do fim da lista nao existem',
+        (WidgetTester t) async {
       // Prova de que a rolagem acima é o que sustenta o teste: só com o topo
       // montado, os componentes do fim da lista não foram construídos — e um
       // teste que só olhasse o topo aprovaria sem ter medido nada deles.
@@ -144,12 +133,10 @@ void main() {
         TemasMemora.porId(id).extension<MemoraTheme>()!;
 
     Color fundoDaGaleria(WidgetTester t) => t
-        .widget<Scaffold>(
-          find.descendant(
-            of: find.byType(GaleriaMemora),
-            matching: find.byType(Scaffold),
-          ),
-        )
+        .widget<Scaffold>(find.descendant(
+          of: find.byType(GaleriaMemora),
+          matching: find.byType(Scaffold),
+        ))
         .backgroundColor!;
 
     Future<void> tocarPastilha(WidgetTester t, String rotulo) async {
@@ -165,65 +152,53 @@ void main() {
       MemoraTemaId.altoContraste: 'Alto contraste',
     };
 
-    test(
-      'os tres temas tem fundos distintos (senao o teste abaixo nao prova)',
-      () {
-        final Set<Color> fundos = <Color>{
-          for (final MemoraTemaId id in MemoraTemaId.values)
-            memoraDe(id).cores.fundo,
-        };
-        expect(fundos.length, MemoraTemaId.values.length);
-      },
-    );
+    test('os tres temas tem fundos distintos (senao o teste abaixo nao prova)',
+        () {
+      final Set<Color> fundos = <Color>{
+        for (final MemoraTemaId id in MemoraTemaId.values)
+          memoraDe(id).cores.fundo,
+      };
+      expect(fundos.length, MemoraTemaId.values.length);
+    });
 
     for (final MapEntry<MemoraTemaId, String> tema in rotulos.entries) {
-      testWidgets(
-        'trocar para "${tema.value}" muda o fundo e nao quebra nada',
-        (WidgetTester t) async {
-          // No aparelho mais estreito, na escala máxima: onde a troca de tema
-          // tem mais chance de revelar um componente que só cabia por sorte.
-          await montar(
-            t,
-            aparelho: aparelhos.last,
-            escala: MemoraDimensoes.escalaTextoMax,
-          );
+      testWidgets('trocar para "${tema.value}" muda o fundo e nao quebra nada',
+          (WidgetTester t) async {
+        // No aparelho mais estreito, na escala máxima: onde a troca de tema
+        // tem mais chance de revelar um componente que só cabia por sorte.
+        await montar(
+          t,
+          aparelho: aparelhos.last,
+          escala: MemoraDimensoes.escalaTextoMax,
+        );
 
-          // Passa antes por outro tema, para o caso "Claro" também provar uma
-          // mudança: a galeria nasce no claro, e tocar nele sem sair de lá
-          // passaria mesmo com a troca desligada.
-          final MemoraTemaId outro = tema.key == MemoraTemaId.escuro
-              ? MemoraTemaId.altoContraste
-              : MemoraTemaId.escuro;
-          await tocarPastilha(t, rotulos[outro]!);
-          expect(fundoDaGaleria(t), memoraDe(outro).cores.fundo);
+        // Passa antes por outro tema, para o caso "Claro" também provar uma
+        // mudança: a galeria nasce no claro, e tocar nele sem sair de lá
+        // passaria mesmo com a troca desligada.
+        final MemoraTemaId outro = tema.key == MemoraTemaId.escuro
+            ? MemoraTemaId.altoContraste
+            : MemoraTemaId.escuro;
+        await tocarPastilha(t, rotulos[outro]!);
+        expect(fundoDaGaleria(t), memoraDe(outro).cores.fundo);
 
-          await tocarPastilha(t, tema.value);
-          expect(
-            fundoDaGaleria(t),
-            memoraDe(tema.key).cores.fundo,
-            reason: 'tocar em "${tema.value}" nao trocou o tema da galeria',
-          );
+        await tocarPastilha(t, tema.value);
+        expect(fundoDaGaleria(t), memoraDe(tema.key).cores.fundo,
+            reason: 'tocar em "${tema.value}" nao trocou o tema da galeria');
 
-          final String onde = 'no tema "${tema.value}" a 200%';
-          todosConstruidos(await percorrer(t, onde: onde), onde);
-        },
-      );
+        final String onde = 'no tema "${tema.value}" a 200%';
+        todosConstruidos(await percorrer(t, onde: onde), onde);
+      });
     }
   });
 
-  testWidgets('a ampliação pode ser trocada de dentro da galeria', (
-    WidgetTester t,
-  ) async {
+  testWidgets('a ampliação pode ser trocada de dentro da galeria',
+      (WidgetTester t) async {
     await montar(t, aparelho: referencia);
 
-    double escalaVista() => MediaQuery.textScalerOf(
-      t.element(
-        find.descendant(
+    double escalaVista() => MediaQuery.textScalerOf(t.element(find.descendant(
           of: find.byType(GaleriaMemora),
           matching: find.byType(Scaffold),
-        ),
-      ),
-    ).scale(10);
+        ))).scale(10);
 
     expect(escalaVista(), 10.0, reason: 'a galeria nasce em 100%');
 
@@ -232,17 +207,13 @@ void main() {
     await t.tap(duzentos);
     await t.pump();
 
-    expect(
-      escalaVista(),
-      20.0,
-      reason: 'tocar em "200%" nao mudou a ampliacao dentro da galeria',
-    );
+    expect(escalaVista(), 20.0,
+        reason: 'tocar em "200%" nao mudou a ampliacao dentro da galeria');
     expect(t.takeException(), isNull);
   });
 
-  testWidgets('fora do modo de depuração a galeria não existe (R9)', (
-    WidgetTester t,
-  ) async {
+  testWidgets('fora do modo de depuração a galeria não existe (R9)',
+      (WidgetTester t) async {
     // `flutter test` roda em modo de depuração, então aqui ela existe. O que
     // este caso prende é o **contrato**: o ponto de entrada é anulável, e
     // quem chama precisa continuar tratando o `null`. Se alguém trocar o

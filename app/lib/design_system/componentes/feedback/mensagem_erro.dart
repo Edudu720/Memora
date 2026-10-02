@@ -51,9 +51,7 @@ class MensagemErro extends StatelessWidget {
             color: cores.superficie,
             borderRadius: BorderRadius.circular(MemoraRaio.padrao),
             border: Border.all(
-              color: cores.perigo,
-              width: MemoraDimensoes.bordaEnfase,
-            ),
+                color: cores.perigo, width: MemoraDimensoes.bordaEnfase),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,11 +61,9 @@ class MensagemErro extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   // Ícone E texto: cor sozinha não comunica.
-                  Icon(
-                    Icons.error_outline,
-                    color: cores.perigo,
-                    size: MemoraDimensoes.iconeDestaque,
-                  ),
+                  Icon(Icons.error_outline,
+                      color: cores.perigo,
+                      size: MemoraDimensoes.iconeDestaque),
                   const SizedBox(width: MemoraEspacamento.md),
                   Expanded(child: TextoMemora(mensagem)),
                 ],

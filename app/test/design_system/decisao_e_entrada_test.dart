@@ -39,9 +39,8 @@ void main() {
   });
 
   group('ConfirmacaoMemora — corrige os botões SIM/NÃO do protótipo', () {
-    testWidgets('empilha na vertical, não lado a lado', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('empilha na vertical, não lado a lado',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           ConfirmacaoMemora(
@@ -57,19 +56,14 @@ void main() {
       final Offset confirmar = tester.getCenter(find.byType(BotaoPrimario));
       final Offset recusar = tester.getCenter(find.byType(BotaoSecundario));
 
-      expect(
-        confirmar.dx,
-        recusar.dx,
-        reason:
-            'Mesma coluna: a escolha não pode depender de acertar o '
-            'lado certo, que é onde o toque acidental acontecia.',
-      );
+      expect(confirmar.dx, recusar.dx,
+          reason: 'Mesma coluna: a escolha não pode depender de acertar o '
+              'lado certo, que é onde o toque acidental acontecia.');
       expect(recusar.dy, greaterThan(confirmar.dy));
     });
 
-    testWidgets('cada opção tem ao menos 56 dp de altura', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('cada opção tem ao menos 56 dp de altura',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           ConfirmacaoMemora(
@@ -93,9 +87,8 @@ void main() {
       );
     });
 
-    testWidgets('confirmação comum executa no primeiro toque', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('confirmação comum executa no primeiro toque',
+        (WidgetTester tester) async {
       int confirmou = 0;
       await tester.pumpWidget(
         _comTema(
@@ -113,9 +106,8 @@ void main() {
       expect(confirmou, 1);
     });
 
-    testWidgets('ação irreversível exige DUAS confirmações', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('ação irreversível exige DUAS confirmações',
+        (WidgetTester tester) async {
       int apagou = 0;
       await tester.pumpWidget(
         _comTema(
@@ -138,9 +130,8 @@ void main() {
       expect(apagou, 1);
     });
 
-    testWidgets('é possível desistir entre as duas confirmações', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('é possível desistir entre as duas confirmações',
+        (WidgetTester tester) async {
       int apagou = 0;
       await tester.pumpWidget(
         _comTema(
@@ -162,9 +153,8 @@ void main() {
       expect(find.text('Quer apagar sua conta?'), findsOneWidget);
     });
 
-    testWidgets('na variante irreversível a recusa vem antes da ação', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('na variante irreversível a recusa vem antes da ação',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           ConfirmacaoMemora.irreversivel(
@@ -181,23 +171,16 @@ void main() {
       final double recusa = tester.getCenter(find.byType(BotaoSecundario)).dy;
       final double perigo = tester.getCenter(find.byType(BotaoPerigo)).dy;
 
-      expect(
-        recusa,
-        lessThan(perigo),
-        reason: 'O caminho seguro é lido primeiro e fica mais acessível.',
-      );
-      expect(
-        perigo - recusa,
-        greaterThanOrEqualTo(MemoraEspacamento.xxxl),
-        reason: 'Ação destrutiva precisa ficar isolada da comum (FR-013).',
-      );
+      expect(recusa, lessThan(perigo),
+          reason: 'O caminho seguro é lido primeiro e fica mais acessível.');
+      expect(perigo - recusa, greaterThanOrEqualTo(MemoraEspacamento.xxxl),
+          reason: 'Ação destrutiva precisa ficar isolada da comum (FR-013).');
     });
   });
 
   group('Campos de entrada', () {
-    testWidgets('CampoTexto mantém o rótulo visível ao digitar', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('CampoTexto mantém o rótulo visível ao digitar',
+        (WidgetTester tester) async {
       final TextEditingController c = TextEditingController();
       await tester.pumpWidget(
         _comTema(
@@ -212,22 +195,17 @@ void main() {
       await tester.enterText(find.byType(TextField), 'ana@email.com');
       await tester.pumpAndSettle();
 
-      expect(
-        find.text('Seu e-mail'),
-        findsOneWidget,
-        reason:
-            'Rótulo que some ao digitar obriga a pessoa a lembrar o que '
-            'estava preenchendo.',
-      );
+      expect(find.text('Seu e-mail'), findsOneWidget,
+          reason: 'Rótulo que some ao digitar obriga a pessoa a lembrar o que '
+              'estava preenchendo.');
       expect(
         find.text('Usamos para você entrar e recuperar a senha'),
         findsOneWidget,
       );
     });
 
-    testWidgets('erro é comunicado por ícone E texto', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('erro é comunicado por ícone E texto',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           const CampoTexto(
@@ -245,9 +223,8 @@ void main() {
       );
     });
 
-    testWidgets('CampoSenha revela com rótulo escrito, não só ícone', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('CampoSenha revela com rótulo escrito, não só ícone',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           const CampoSenha(
@@ -262,9 +239,8 @@ void main() {
       expect(find.text('Esconder senha'), findsOneWidget);
     });
 
-    testWidgets('no modo assistido a senha não pode ser revelada', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('no modo assistido a senha não pode ser revelada',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           const CampoSenha(
@@ -275,22 +251,17 @@ void main() {
         ),
       );
 
-      expect(
-        find.text('Mostrar senha'),
-        findsNothing,
-        reason:
-            'Com o acompanhante ao lado, revelar a senha entregaria a '
-            'ele o segredo que o modo assistido existe para proteger '
-            '(FR-060 da feature 001).',
-      );
+      expect(find.text('Mostrar senha'), findsNothing,
+          reason: 'Com o acompanhante ao lado, revelar a senha entregaria a '
+              'ele o segredo que o modo assistido existe para proteger '
+              '(FR-060 da feature 001).');
 
       final TextField campo = tester.widget<TextField>(find.byType(TextField));
       expect(campo.obscureText, isTrue);
     });
 
-    testWidgets('CampoCodigo aceita apenas dígitos, no máximo 6', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('CampoCodigo aceita apenas dígitos, no máximo 6',
+        (WidgetTester tester) async {
       final TextEditingController c = TextEditingController();
       await tester.pumpWidget(
         _comTema(CampoCodigo(rotulo: 'Código', controlador: c)),
@@ -307,9 +278,8 @@ void main() {
   });
 
   group('Navegação — ícone nunca sozinho (FR-016)', () {
-    testWidgets('todo item da navegação inferior tem rótulo escrito', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('todo item da navegação inferior tem rótulo escrito',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           NavegacaoInferior(
@@ -329,9 +299,8 @@ void main() {
       expect(find.text('Meu perfil'), findsOneWidget);
     });
 
-    testWidgets('barra superior escreve a palavra Voltar', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('barra superior escreve a palavra Voltar',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: TemasMemora.claro,
@@ -342,18 +311,14 @@ void main() {
         ),
       );
 
-      expect(
-        find.text('Voltar'),
-        findsOneWidget,
-        reason: 'Seta isolada é ambígua para quem tem pouca familiaridade.',
-      );
+      expect(find.text('Voltar'), findsOneWidget,
+          reason: 'Seta isolada é ambígua para quem tem pouca familiaridade.');
     });
   });
 
   group('Retorno ao usuário', () {
-    testWidgets('carregando sempre traz texto junto', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('carregando sempre traz texto junto',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(const Carregando(mensagem: 'Estou entrando na sua conta...')),
       );
@@ -362,9 +327,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('erro é anunciado como região viva ao leitor de tela', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('erro é anunciado como região viva ao leitor de tela',
+        (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comTema(
@@ -375,16 +339,14 @@ void main() {
       expect(
         tester.getSemantics(find.byType(MensagemErro)),
         isSemantics(isLiveRegion: true),
-        reason:
-            'Sem região viva, quem usa leitor de tela não fica sabendo que '
+        reason: 'Sem região viva, quem usa leitor de tela não fica sabendo que '
             'algo mudou na tela.',
       );
       handle.dispose();
     });
 
-    testWidgets('estado vazio explica e oferece caminho', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('estado vazio explica e oferece caminho',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         _comTema(
           EstadoVazio(
@@ -402,9 +364,8 @@ void main() {
   });
 
   group('Acessibilidade da fase', () {
-    testWidgets('confirmação atende à diretriz de alvo de toque', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('confirmação atende à diretriz de alvo de toque',
+        (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comTema(
@@ -422,9 +383,8 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('componentes da fase sobrevivem à ampliação máxima', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('componentes da fase sobrevivem à ampliação máxima',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: TemasMemora.claro,

@@ -62,13 +62,9 @@ void main() {
         reduzirMovimento: true,
       );
 
-      expect(
-        duracoesDe(t),
-        isNotEmpty,
-        reason:
-            'se o botao deixar de usar animacao implicita, este teste '
-            'passa a nao provar nada — e precisa ser reescrito, nao apagado',
-      );
+      expect(duracoesDe(t), isNotEmpty,
+          reason: 'se o botao deixar de usar animacao implicita, este teste '
+              'passa a nao provar nada — e precisa ser reescrito, nao apagado');
       expect(duracoesDe(t), everyElement(Duration.zero));
     });
 
@@ -131,9 +127,8 @@ void main() {
     // não.
     final List<String> fora = <String>[];
 
-    for (final FileSystemEntity arquivo in Directory(
-      'lib',
-    ).listSync(recursive: true)) {
+    for (final FileSystemEntity arquivo
+        in Directory('lib').listSync(recursive: true)) {
       if (arquivo is! File || !arquivo.path.endsWith('.dart')) continue;
       // O próprio token é quem define `efetiva` — ele não passa por si mesmo.
       if (arquivo.path.endsWith('movimento.dart')) continue;
@@ -156,17 +151,15 @@ void main() {
     expect(
       fora,
       isEmpty,
-      reason:
-          'animacao que nao passa por MemoraMovimento.efetiva ignora '
+      reason: 'animacao que nao passa por MemoraMovimento.efetiva ignora '
           '"reduzir movimento" do sistema (FR-027). Use '
           '`MemoraMovimento.efetiva(<token>, reduzirMovimento: '
           'MediaQuery.disableAnimationsOf(context))`.',
     );
   });
 
-  testWidgets('o que o giro comunica, o texto também comunica (FR-028)', (
-    WidgetTester t,
-  ) async {
+  testWidgets('o que o giro comunica, o texto também comunica (FR-028)',
+      (WidgetTester t) async {
     // A segunda metade do V9. O `CircularProgressIndicator` do Material gira
     // independentemente da preferência — não é nosso para desligar. O que
     // está ao nosso alcance é garantir que ele não seja o ÚNICO portador da

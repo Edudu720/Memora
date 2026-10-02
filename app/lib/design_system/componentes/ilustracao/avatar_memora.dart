@@ -49,9 +49,7 @@ class AvatarMemora extends StatelessWidget {
           // recorta o círculo do cartão quando ele fica por cima da borda,
           // como no protótipo.
           border: Border.all(
-            color: cores.fundo,
-            width: MemoraDimensoes.bordaAvatar,
-          ),
+              color: cores.fundo, width: MemoraDimensoes.bordaAvatar),
         ),
         clipBehavior: Clip.antiAlias,
         child: Align(

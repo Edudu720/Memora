@@ -67,17 +67,11 @@ void main() {
     addTearDown(c.dispose);
 
     await t.pumpWidget(
-      MaterialApp(
-        theme: TemasMemora.claro,
-        home: TelaConversa(controlador: c),
-      ),
+      MaterialApp(theme: TemasMemora.claro, home: TelaConversa(controlador: c)),
     );
     await avancar(t);
 
-    await t.enterText(
-      find.byKey(TelaConversa.chaveCampo),
-      'nao consegui achar',
-    );
+    await t.enterText(find.byKey(TelaConversa.chaveCampo), 'nao consegui achar');
     await avancar(t);
     await t.tap(find.byKey(TelaConversa.chaveEnviar));
     await avancar(t);
@@ -90,9 +84,8 @@ void main() {
   }
 
   group('H9 — o registro mostra o que foi feito', () {
-    testWidgets('a acao executada aparece, em linguagem comum', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a acao executada aparece, em linguagem comum',
+        (WidgetTester t) async {
       await executarUmaAcao(t);
       await montarRegistro(t);
 
@@ -110,9 +103,8 @@ void main() {
       );
     });
 
-    testWidgets('a tarefa so ENSINADA nao aparece (FR-025)', (
-      WidgetTester t,
-    ) async {
+    testWidgets('a tarefa so ENSINADA nao aparece (FR-025)',
+        (WidgetTester t) async {
       final ControladorConversa c = ControladorConversa(
         assistente,
         _ConversaEmMemoria(),
@@ -121,10 +113,7 @@ void main() {
       addTearDown(c.dispose);
 
       await t.pumpWidget(
-        MaterialApp(
-          theme: TemasMemora.claro,
-          home: TelaConversa(controlador: c),
-        ),
+        MaterialApp(theme: TemasMemora.claro, home: TelaConversa(controlador: c)),
       );
       await avancar(t);
 
@@ -145,18 +134,16 @@ void main() {
       expect(find.text(TextosAssistente.registroVazio), findsOneWidget);
     });
 
-    testWidgets('lista vazia e apresentada como boa noticia', (
-      WidgetTester t,
-    ) async {
+    testWidgets('lista vazia e apresentada como boa noticia',
+        (WidgetTester t) async {
       await montarRegistro(t);
 
       // "Nada encontrado" faria a pessoa achar que perdeu alguma coisa.
       expect(find.text('Você fez tudo sozinha até agora'), findsOneWidget);
     });
 
-    testWidgets('o registro nao e clicavel — e informacao, nao acao', (
-      WidgetTester t,
-    ) async {
+    testWidgets('o registro nao e clicavel — e informacao, nao acao',
+        (WidgetTester t) async {
       await executarUmaAcao(t);
       await montarRegistro(t);
 
@@ -174,9 +161,8 @@ void main() {
 
   group('A data e escrita do jeito que uma pessoa fala', () {
     test('mes por extenso, e nao dd/MM/yyyy', () {
-      final String texto = TextosAssistente.quandoAconteceu(
-        DateTime(2026, 8, 29, 14, 5),
-      );
+      final String texto =
+          TextosAssistente.quandoAconteceu(DateTime(2026, 8, 29, 14, 5));
 
       expect(texto, contains('agosto'));
       expect(texto, contains('14h05'));

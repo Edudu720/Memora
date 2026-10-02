@@ -48,21 +48,17 @@ void main() {
     /// A decisão de 2026-09-08: a FR-012 continua valendo depois da saída.
     /// Apagar o identificador tornaria o preenchimento prévio inútil
     /// justamente no caso mais comum — sair e voltar depois.
-    test(
-      'o identificador do último acesso fica, por decisão da equipe',
-      () async {
-        await limpeza.executar();
+    test('o identificador do último acesso fica, por decisão da equipe', () async {
+      await limpeza.executar();
 
-        expect(
-          await ultimoAcesso.identificador(),
-          'ana@gmail.com',
-          reason:
-              'FR-012 × FR-026: mantém-se o identificador porque toda '
-              'credencial já foi embora — quem pega o aparelho vê um e-mail e '
-              'nenhuma forma de entrar com ele',
-        );
-      },
-    );
+      expect(
+        await ultimoAcesso.identificador(),
+        'ana@gmail.com',
+        reason: 'FR-012 × FR-026: mantém-se o identificador porque toda '
+            'credencial já foi embora — quem pega o aparelho vê um e-mail e '
+            'nenhuma forma de entrar com ele',
+      );
+    });
 
     test('com esquecerTudo, o identificador também some', () async {
       await limpeza.executar(esquecerTudo: true);
@@ -73,9 +69,8 @@ void main() {
   });
 
   group('Sair leva dois toques, e o segundo é a confirmação', () {
-    testWidgets('o botão de sair está na tela, sem menu no caminho (FR-024)', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('o botão de sair está na tela, sem menu no caminho (FR-024)',
+        (WidgetTester tester) async {
       await tester.pumpWidget(_tela(aoSair: () async {}));
 
       expect(find.byKey(TelaPerfil.chaveSair), findsOneWidget);
@@ -83,9 +78,8 @@ void main() {
     });
 
     /// A FR-025 pede confirmação explícita. O primeiro toque não pode sair.
-    testWidgets('o primeiro toque abre a confirmação e não encerra nada', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('o primeiro toque abre a confirmação e não encerra nada',
+        (WidgetTester tester) async {
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
 
@@ -105,9 +99,7 @@ void main() {
       await tester.tap(find.byKey(TelaPerfil.chaveSair));
       await tester.pump();
 
-      await tester.ensureVisible(
-        find.text(TextosAutenticacao.botaoConfirmarSaida),
-      );
+      await tester.ensureVisible(find.text(TextosAutenticacao.botaoConfirmarSaida));
       await tester.tap(find.text(TextosAutenticacao.botaoConfirmarSaida));
       await tester.pump();
 
@@ -117,9 +109,8 @@ void main() {
     /// Dois toques, contados. Se um menu ou uma aba entrar no caminho, este
     /// teste continua passando — mas a contagem aqui é o registro do que a
     /// FR-024 exige, e quebrá-la exige mexer nesta linha de propósito.
-    testWidgets('são exatamente dois toques, do perfil até sair', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('são exatamente dois toques, do perfil até sair',
+        (WidgetTester tester) async {
       int toques = 0;
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
@@ -129,24 +120,16 @@ void main() {
       toques++;
       await tester.pump();
 
-      await tester.ensureVisible(
-        find.text(TextosAutenticacao.botaoConfirmarSaida),
-      );
+      await tester.ensureVisible(find.text(TextosAutenticacao.botaoConfirmarSaida));
       await tester.tap(find.text(TextosAutenticacao.botaoConfirmarSaida));
       toques++;
       await tester.pump();
 
       expect(saiu, isTrue);
-      expect(
-        toques,
-        lessThanOrEqualTo(2),
-        reason: 'FR-024: no máximo dois toques',
-      );
+      expect(toques, lessThanOrEqualTo(2), reason: 'FR-024: no máximo dois toques');
     });
 
-    testWidgets('desistir volta ao perfil sem encerrar', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('desistir volta ao perfil sem encerrar', (WidgetTester tester) async {
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
 
@@ -168,9 +151,7 @@ void main() {
     /// "Sim, quero sair" e "Não, quero ficar", nunca "SIM"/"NÃO" nem
     /// "OK"/"Cancelar". Palavra isolada exige que a pessoa lembre a pergunta,
     /// e "Cancelar" a obriga a decidir o que está sendo cancelado.
-    testWidgets('os dois botões são frases completas', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('os dois botões são frases completas', (WidgetTester tester) async {
       await tester.pumpWidget(_tela(aoSair: () async {}));
       await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
       await tester.tap(find.byKey(TelaPerfil.chaveSair));
@@ -183,9 +164,8 @@ void main() {
     });
 
     /// O aviso diz o que vem depois, e não o que se perde.
-    testWidgets('a confirmação avisa que a senha será necessária', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('a confirmação avisa que a senha será necessária',
+        (WidgetTester tester) async {
       await tester.pumpWidget(_tela(aoSair: () async {}));
       await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
       await tester.tap(find.byKey(TelaPerfil.chaveSair));

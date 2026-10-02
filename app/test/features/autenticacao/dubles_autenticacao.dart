@@ -47,9 +47,10 @@ abstract class RepositorioDeTeste implements RepositorioAutenticacao {
     required String identificador,
     required String codigo,
     required String novaSenha,
-  }) => throw UnimplementedError(
-    'confirmarRecuperacao não deveria ser chamado aqui',
-  );
+  }) =>
+      throw UnimplementedError(
+        'confirmarRecuperacao não deveria ser chamado aqui',
+      );
 }
 
 /// [UltimoAcesso] guardado em memória, para teste sem plataforma.

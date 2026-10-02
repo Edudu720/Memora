@@ -9,7 +9,9 @@ double _luminancia(Color cor) {
   double canal(double v) =>
       v <= 0.04045 ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4).toDouble();
 
-  return 0.2126 * canal(cor.r) + 0.7152 * canal(cor.g) + 0.0722 * canal(cor.b);
+  return 0.2126 * canal(cor.r) +
+      0.7152 * canal(cor.g) +
+      0.0722 * canal(cor.b);
 }
 
 /// Razão de contraste entre duas cores, de 1:1 a 21:1.
@@ -54,12 +56,7 @@ const List<_Par> _pares = <_Par>[
   _Par('sobrePerigo sobre perigo', _sobrePerigo, _perigo),
   _Par('borda sobre fundo', _borda, _fundo, grafico: true),
   _Par('borda sobre superficie', _borda, _superficie, grafico: true),
-  _Par(
-    'primaria sobre superficieAlt',
-    _primaria,
-    _superficieAlt,
-    grafico: true,
-  ),
+  _Par('primaria sobre superficieAlt', _primaria, _superficieAlt, grafico: true),
   // Feature 004: o tom suave da primaria. Nunca e o unico sinal de estado;
   // o que se verifica e o que se escreve por cima dele.
   _Par('texto sobre destaque', _texto, _destaque),
@@ -85,19 +82,17 @@ void main() {
     for (final MemoraTheme tema in MemoraTheme.todos) {
       group('tema ${tema.id.name}', () {
         for (final _Par par in _pares) {
-          final double exigido = par.grafico ? 3.0 : tema.contrasteMinimoTexto;
+          final double exigido =
+              par.grafico ? 3.0 : tema.contrasteMinimoTexto;
 
           test('${par.nome} >= $exigido:1', () {
-            final double razao = contraste(
-              par.frente(tema.cores),
-              par.fundo(tema.cores),
-            );
+            final double razao =
+                contraste(par.frente(tema.cores), par.fundo(tema.cores));
 
             expect(
               razao,
               greaterThanOrEqualTo(exigido),
-              reason:
-                  'Tema ${tema.id.name}: "${par.nome}" mede '
+              reason: 'Tema ${tema.id.name}: "${par.nome}" mede '
                   '${razao.toStringAsFixed(2)}:1, abaixo do mínimo de '
                   '$exigido:1. Rode '
                   'specs/002-design-system/ferramentas/validar_paleta.py '
@@ -119,8 +114,7 @@ void main() {
         expect(
           estilo.fontSize,
           greaterThanOrEqualTo(MemoraTipografia.tamanhoMinimo),
-          reason:
-              'Texto de ${estilo.fontSize} sp viola o piso de '
+          reason: 'Texto de ${estilo.fontSize} sp viola o piso de '
               '${MemoraTipografia.tamanhoMinimo} sp exigido pelo público-alvo.',
         );
       }
@@ -136,8 +130,7 @@ void main() {
       expect(
         MemoraDimensoes.alvoDecisao,
         greaterThan(MemoraDimensoes.alvoMinimo),
-        reason:
-            'Pontos de decisão exigem alvo maior que o mínimo — os botões '
+        reason: 'Pontos de decisão exigem alvo maior que o mínimo — os botões '
             'SIM/NÃO do protótipo mediam 24 px, metade do exigido.',
       );
     });

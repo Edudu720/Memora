@@ -69,9 +69,9 @@ class BotaoBase extends StatelessWidget {
     this.larguraTotal = true,
     super.key,
   }) : assert(
-         alturaMinima >= MemoraDimensoes.alvoMinimo,
-         'Nenhum botão pode ficar abaixo do alvo mínimo de toque.',
-       );
+          alturaMinima >= MemoraDimensoes.alvoMinimo,
+          'Nenhum botão pode ficar abaixo do alvo mínimo de toque.',
+        );
 
   bool get _habilitado => aoTocar != null && !carregando;
 
@@ -105,12 +105,12 @@ class BotaoBase extends StatelessWidget {
   }
 
   BoxBorder? _borda(MemoraCores c) => switch (estilo) {
-    EstiloBotao.secundario => Border.all(
-      color: _habilitado ? c.primaria : c.borda,
-      width: MemoraDimensoes.bordaEnfase,
-    ),
-    _ => null,
-  };
+        EstiloBotao.secundario =>
+          Border.all(
+              color: _habilitado ? c.primaria : c.borda,
+              width: MemoraDimensoes.bordaEnfase),
+        _ => null,
+      };
 
   @override
   Widget build(BuildContext context) {

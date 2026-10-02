@@ -48,11 +48,9 @@ class EstadoVazio extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Icon(
-            icone,
-            size: MemoraDimensoes.iconeEstadoVazio,
-            color: cores.textoSuave,
-          ),
+          Icon(icone,
+              size: MemoraDimensoes.iconeEstadoVazio,
+              color: cores.textoSuave),
           const SizedBox(height: MemoraEspacamento.lg),
           TextoMemora.tituloSecao(titulo, alinhamento: TextAlign.center),
           const SizedBox(height: MemoraEspacamento.sm),

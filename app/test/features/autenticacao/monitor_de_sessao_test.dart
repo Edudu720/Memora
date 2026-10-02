@@ -30,8 +30,7 @@ void main() {
       expect(
         eventos,
         <String>['aviso'],
-        reason:
-            'Sessão que cai sem avisar é indistinguível de defeito, e '
+        reason: 'Sessão que cai sem avisar é indistinguível de defeito, e '
             '"o aplicativo me expulsou" é motivo para desinstalar.',
       );
 
@@ -56,8 +55,7 @@ void main() {
       expect(
         segundosAnunciados,
         1,
-        reason:
-            'A tela precisa do número para escrever a frase. Um aviso que '
+        reason: 'A tela precisa do número para escrever a frase. Um aviso que '
             'só diz "vou te desconectar" deixa a pessoa sem saber se corre ou '
             'se termina de ler.',
       );
@@ -75,8 +73,7 @@ void main() {
       expect(
         monitor.aviso,
         const Duration(minutes: 2),
-        reason:
-            'Um minuto, o padrão de aplicativo bancário, expulsa '
+        reason: 'Um minuto, o padrão de aplicativo bancário, expulsa '
             'exatamente quem este produto atende.',
       );
 
@@ -102,8 +99,7 @@ void main() {
       expect(
         eventos,
         isEmpty,
-        reason:
-            'Quem está usando o Memora não pode ser interrompido. A FR-017 '
+        reason: 'Quem está usando o Memora não pode ser interrompido. A FR-017 '
             'conta inatividade, não tempo desde o login.',
       );
 
@@ -132,8 +128,7 @@ void main() {
       expect(
         eventos,
         <String>['aviso'],
-        reason:
-            'Expirar depois de a pessoa responder que está ali torna o '
+        reason: 'Expirar depois de a pessoa responder que está ali torna o '
             'botão do aviso uma mentira.',
       );
 
@@ -156,8 +151,7 @@ void main() {
       expect(
         eventos,
         isEmpty,
-        reason:
-            'Quem saiu por vontade própria não pode receber depois um '
+        reason: 'Quem saiu por vontade própria não pode receber depois um '
             'aviso de que a sessão vai cair.',
       );
 
@@ -173,8 +167,7 @@ void main() {
           aoExpirar: () {},
         ),
         throwsA(isA<AssertionError>()),
-        reason:
-            'Aviso simultâneo à expiração desconectaria a pessoa no mesmo '
+        reason: 'Aviso simultâneo à expiração desconectaria a pessoa no mesmo '
             'instante em que ela soubesse que isso ia acontecer.',
       );
     });
