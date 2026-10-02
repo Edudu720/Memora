@@ -71,6 +71,16 @@ void main() {
     // 5 s de conversa, com um toque a cada segundo: bem mais que o prazo de 3 s.
     for (int i = 0; i < 5; i++) {
       await t.pump(const Duration(seconds: 1));
+      // Antes de cada toque, o aviso NÃO pode estar na tela. Sem esta guarda o
+      // teste ficou decorativo na feature 004: com a casca, o campo subiu, e o
+      // toque "no campo" caía no botão "Continuar" do aviso — que registra
+      // atividade por conta própria. O teste passava sem nada contar o toque
+      // na conversa (achado ao quebrar o Listener de propósito).
+      expect(
+        find.text(TextosAutenticacao.tituloAvisoInatividade),
+        findsNothing,
+        reason: 'o aviso de inatividade apareceu no meio da atividade',
+      );
       await t.tap(find.byKey(TelaConversa.chaveCampo));
       await FluxoDentroDaConta.avancar(t);
     }
@@ -168,6 +178,16 @@ void main() {
 
       for (int i = 0; i < 5; i++) {
         await t.pump(const Duration(seconds: 1));
+        // Antes de cada toque, o aviso NÃO pode estar na tela. Sem esta guarda o
+        // teste ficou decorativo na feature 004: com a casca, o campo subiu, e o
+        // toque "no campo" caía no botão "Continuar" do aviso — que registra
+        // atividade por conta própria. O teste passava sem nada contar o toque
+        // na conversa (achado ao quebrar o Listener de propósito).
+        expect(
+          find.text(TextosAutenticacao.tituloAvisoInatividade),
+          findsNothing,
+          reason: 'o aviso de inatividade apareceu no meio da atividade',
+        );
         await t.tap(find.byType(TelaAparencia), warnIfMissed: false);
         await FluxoDentroDaConta.avancar(t);
       }
