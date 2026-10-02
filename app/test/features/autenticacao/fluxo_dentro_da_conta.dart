@@ -48,11 +48,16 @@ class FluxoDentroDaConta {
   /// [em] põe a janela do teste no tamanho de um aparelho, com a ampliação e o
   /// tema da combinação (FR-044): é como a matriz roda **pelo fluxo real**, com
   /// a barra inferior e as pilhas da casca, e não só a tela isolada.
+  ///
+  /// [capturavel] põe um `RepaintBoundary` com essa chave em volta do
+  /// aplicativo inteiro: é por onde o álbum de telas (T043) tira a foto da tela
+  /// que a pessoa de fato vê.
   Future<void> montar(
     WidgetTester t, {
     Duration inatividade = const Duration(minutes: 30),
     Duration aviso = const Duration(minutes: 2),
     Combinacao? em,
+    GlobalKey? capturavel,
   }) async {
     if (em != null) vestir(t, em.aparelho);
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
@@ -66,36 +71,39 @@ class FluxoDentroDaConta {
     // O `EscopoAparencia` em volta, como no `main.dart` de verdade: sem ele, a
     // tela de aparência — que a casca abre em Ajustes — não encontra quem a
     // controla. Um arnês que monta menos que o aplicativo testa menos que ele.
-    await t.pumpWidget(
-      EscopoAparencia(
-        controlador: ControladorAparencia(PreferenciaEmMemoria()),
-        child: MaterialApp(
-          theme: TemasMemora.porId(em?.tema ?? MemoraTemaId.claro),
-          // `builder`, e não um `MediaQuery` em volta de `home`: a ampliação
-          // precisa valer também para os diálogos, que moram acima das rotas.
-          builder: em == null
-              ? null
-              : (BuildContext contexto, Widget? filho) => MediaQuery(
-                  data: MediaQuery.of(
-                    contexto,
-                  ).copyWith(textScaler: TextScaler.linear(em.escala)),
-                  child: filho!,
-                ),
-          home: FluxoAutenticacao(
-            repositorio: repositorio,
-            assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
-            conversaLocal: _ConversaEmMemoria.new,
+    final Widget app = EscopoAparencia(
+      controlador: ControladorAparencia(PreferenciaEmMemoria()),
+      child: MaterialApp(
+        // A faixa "DEBUG" iria para dentro de toda imagem do álbum.
+        debugShowCheckedModeBanner: capturavel == null,
+        theme: TemasMemora.porId(em?.tema ?? MemoraTemaId.claro),
+        // `builder`, e não um `MediaQuery` em volta de `home`: a ampliação
+        // precisa valer também para os diálogos, que moram acima das rotas.
+        builder: em == null
+            ? null
+            : (BuildContext contexto, Widget? filho) => MediaQuery(
+                data: MediaQuery.of(
+                  contexto,
+                ).copyWith(textScaler: TextScaler.linear(em.escala)),
+                child: filho!,
+              ),
+        home: FluxoAutenticacao(
+          repositorio: repositorio,
+          assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+          conversaLocal: _ConversaEmMemoria.new,
+          ultimoAcesso: ultimoAcesso,
+          inatividade: inatividade,
+          avisoDeInatividade: aviso,
+          limpeza: LimpezaDeSessao(
+            cofre: cofre,
             ultimoAcesso: ultimoAcesso,
-            inatividade: inatividade,
-            avisoDeInatividade: aviso,
-            limpeza: LimpezaDeSessao(
-              cofre: cofre,
-              ultimoAcesso: ultimoAcesso,
-              dadosLocais: <DadoLocalDaPessoa>[dado],
-            ),
+            dadosLocais: <DadoLocalDaPessoa>[dado],
           ),
         ),
       ),
+    );
+    await t.pumpWidget(
+      capturavel == null ? app : RepaintBoundary(key: capturavel, child: app),
     );
     await avancar(t);
 
