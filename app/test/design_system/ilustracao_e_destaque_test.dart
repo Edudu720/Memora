@@ -6,13 +6,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 
-Widget _app(Widget filho, {ThemeData? tema, double escala = 1.0}) => MaterialApp(
-  theme: tema ?? TemasMemora.claro,
-  home: MediaQuery(
-    data: MediaQueryData(textScaler: TextScaler.linear(escala)),
-    child: Scaffold(body: filho),
-  ),
-);
+Widget _app(Widget filho, {ThemeData? tema, double escala = 1.0}) =>
+    MaterialApp(
+      theme: tema ?? TemasMemora.claro,
+      home: MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(escala)),
+        child: Scaffold(body: filho),
+      ),
+    );
 
 void main() {
   group('TextoComDestaque — a marcação', () {
@@ -28,17 +29,19 @@ void main() {
     });
 
     test('aceita mais de um destaque na mesma frase', () {
-      final List<(String, bool)> t =
-          TextoComDestaque.trechos('a *b* c *d* e');
-      expect(t.where(((String, bool) x) => x.$2).map(((String, bool) x) => x.$1),
-          <String>['b', 'd']);
+      final List<(String, bool)> t = TextoComDestaque.trechos('a *b* c *d* e');
+      expect(
+        t.where(((String, bool) x) => x.$2).map(((String, bool) x) => x.$1),
+        <String>['b', 'd'],
+      );
     });
 
     test('asterisco solto vira caractere comum, e não come a frase', () {
       // Perder a frase inteira por causa de um símbolo digitado a mais seria
       // pior do que exibir o símbolo.
-      final List<(String, bool)> t =
-          TextoComDestaque.trechos('promoção de 50* por cento');
+      final List<(String, bool)> t = TextoComDestaque.trechos(
+        'promoção de 50* por cento',
+      );
       expect(t.every(((String, bool) x) => !x.$2), isTrue);
       expect(
         t.map(((String, bool) x) => x.$1).join(),
@@ -46,8 +49,9 @@ void main() {
       );
     });
 
-    testWidgets('o leitor de tela recebe a frase sem os asteriscos',
-        (WidgetTester t) async {
+    testWidgets('o leitor de tela recebe a frase sem os asteriscos', (
+      WidgetTester t,
+    ) async {
       await t.pumpWidget(
         _app(const TextoComDestaque('Eu mostro e *você faz*.')),
       );
@@ -57,8 +61,9 @@ void main() {
       expect(find.bySemanticsLabel('Eu mostro e você faz.'), findsOneWidget);
     });
 
-    testWidgets('nenhuma palavra destacada responde ao toque',
-        (WidgetTester t) async {
+    testWidgets('nenhuma palavra destacada responde ao toque', (
+      WidgetTester t,
+    ) async {
       await t.pumpWidget(
         _app(const TextoComDestaque('Eu mostro e *você faz*.')),
       );
@@ -67,8 +72,7 @@ void main() {
       // palavra azul que aceita toque sem fazer nada é indistinguível de
       // aparelho quebrado para quem tem pouca familiaridade.
       final Text texto = t.widget<Text>(find.byType(Text));
-      final List<InlineSpan> filhos =
-          (texto.textSpan! as TextSpan).children!;
+      final List<InlineSpan> filhos = (texto.textSpan! as TextSpan).children!;
 
       expect(filhos, isNotEmpty);
       for (final InlineSpan span in filhos) {
@@ -80,11 +84,10 @@ void main() {
       }
     });
 
-    testWidgets('respeita o teto de ampliação do Memora',
-        (WidgetTester t) async {
-      await t.pumpWidget(
-        _app(const TextoComDestaque('a *b* c'), escala: 4.0),
-      );
+    testWidgets('respeita o teto de ampliação do Memora', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(_app(const TextoComDestaque('a *b* c'), escala: 4.0));
 
       final Text texto = t.widget<Text>(find.byType(Text));
       // O sistema pediu 4x; o teto do Memora é 2x. Sem o limite, a frase
@@ -97,8 +100,9 @@ void main() {
   });
 
   group('IlustracaoMemora', () {
-    testWidgets('é decorativa por padrão: fica fora do leitor de tela',
-        (WidgetTester t) async {
+    testWidgets('é decorativa por padrão: fica fora do leitor de tela', (
+      WidgetTester t,
+    ) async {
       await t.pumpWidget(
         _app(const IlustracaoMemora(Ilustracao.casalIdoso, altura: 80)),
       );
@@ -147,8 +151,9 @@ void main() {
       expect(find.byType(GestureDetector), findsNothing);
     });
 
-    testWidgets('o conteúdo do cartão começa abaixo do avatar',
-        (WidgetTester t) async {
+    testWidgets('o conteúdo do cartão começa abaixo do avatar', (
+      WidgetTester t,
+    ) async {
       const Key conteudo = Key('conteudo');
       await t.pumpWidget(
         _app(
@@ -159,8 +164,7 @@ void main() {
         ),
       );
 
-      final double baseDoAvatar =
-          t.getBottomLeft(find.byType(AvatarMemora)).dy;
+      final double baseDoAvatar = t.getBottomLeft(find.byType(AvatarMemora)).dy;
       final double topoDoConteudo = t.getTopLeft(find.byKey(conteudo)).dy;
 
       // Sem esse recuo, o primeiro campo do formulário ficaria por baixo do
@@ -189,12 +193,16 @@ void main() {
     test('toda ilustração tem a origem registrada em LICENCAS.md', () {
       // Ilustração sem origem conhecida não pode ser apresentada numa entrega
       // pública (R4). A regra estava só no texto do LICENCAS.md; agora reprova.
-      final String licencas =
-          File('assets/ilustracoes/LICENCAS.md').readAsStringSync();
+      final String licencas = File(
+        'assets/ilustracoes/LICENCAS.md',
+      ).readAsStringSync();
       for (final Ilustracao i in Ilustracao.values) {
         final String arquivo = i.caminho.split('/').last;
-        expect(licencas, contains('`$arquivo`'),
-            reason: '$arquivo não tem linha em assets/ilustracoes/LICENCAS.md');
+        expect(
+          licencas,
+          contains('`$arquivo`'),
+          reason: '$arquivo não tem linha em assets/ilustracoes/LICENCAS.md',
+        );
       }
     });
 
@@ -210,17 +218,24 @@ void main() {
       }
 
       for (final MemoraTheme tema in MemoraTheme.todos) {
-        expect(luminancia(tema.cores.medalhao), greaterThan(0.6),
-            reason: 'medalhão escuro demais no tema ${tema.id.name}');
+        expect(
+          luminancia(tema.cores.medalhao),
+          greaterThan(0.6),
+          reason: 'medalhão escuro demais no tema ${tema.id.name}',
+        );
       }
     });
 
     test('cada expressão da Memora usa um desenho da Memora', () {
       final Set<Ilustracao> usadas = <Ilustracao>{
-        for (final ExpressaoDaMemora e in ExpressaoDaMemora.values) e.ilustracao,
+        for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
+          e.ilustracao,
       };
-      expect(usadas.length, ExpressaoDaMemora.values.length,
-          reason: 'duas expressões com o mesmo desenho');
+      expect(
+        usadas.length,
+        ExpressaoDaMemora.values.length,
+        reason: 'duas expressões com o mesmo desenho',
+      );
       for (final Ilustracao i in usadas) {
         expect(i.name, startsWith('memora'));
       }
@@ -243,9 +258,11 @@ void main() {
 
         final Iterable<DecoratedBox> circulos = t
             .widgetList<DecoratedBox>(find.byType(DecoratedBox))
-            .where((DecoratedBox d) =>
-                d.decoration is BoxDecoration &&
-                (d.decoration as BoxDecoration).shape == BoxShape.circle);
+            .where(
+              (DecoratedBox d) =>
+                  d.decoration is BoxDecoration &&
+                  (d.decoration as BoxDecoration).shape == BoxShape.circle,
+            );
         expect(circulos.length, 2);
         for (final DecoratedBox d in circulos) {
           expect((d.decoration as BoxDecoration).color, tema.cores.medalhao);
@@ -253,8 +270,9 @@ void main() {
       });
     }
 
-    testWidgets('a Memora é decorativa por padrão e anunciada com descrição',
-        (WidgetTester t) async {
+    testWidgets('a Memora é decorativa por padrão e anunciada com descrição', (
+      WidgetTester t,
+    ) async {
       await t.pumpWidget(_app(const MemoraPersonagem()));
       expect(find.bySemanticsLabel(RegExp('.')), findsNothing);
 
@@ -269,8 +287,9 @@ void main() {
       expect(find.bySemanticsLabel('A Memora, preocupada'), findsOneWidget);
     });
 
-    testWidgets('nem a Memora nem o medalhão aceitam toque',
-        (WidgetTester t) async {
+    testWidgets('nem a Memora nem o medalhão aceitam toque', (
+      WidgetTester t,
+    ) async {
       // São retrato, não ação (FR-012 da 002).
       await t.pumpWidget(
         _app(

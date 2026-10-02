@@ -51,8 +51,9 @@ void main() {
 
   group('Componentes sobrevivem ao texto ampliado — FR-025 e SC-003', () {
     for (final double escala in _escalas) {
-      testWidgets('BotaoPrimario em escala $escala',
-          (WidgetTester tester) async {
+      testWidgets('BotaoPrimario em escala $escala', (
+        WidgetTester tester,
+      ) async {
         await tester.pumpWidget(
           _comEscala(
             BotaoPrimario(
@@ -79,8 +80,9 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('CampoInformacao em escala $escala',
-          (WidgetTester tester) async {
+      testWidgets('CampoInformacao em escala $escala', (
+        WidgetTester tester,
+      ) async {
         await tester.pumpWidget(
           _comEscala(
             const CampoInformacao(
@@ -93,8 +95,9 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('ListaInformacao em escala $escala',
-          (WidgetTester tester) async {
+      testWidgets('ListaInformacao em escala $escala', (
+        WidgetTester tester,
+      ) async {
         await tester.pumpWidget(
           _comEscala(
             const ListaInformacao(
@@ -123,8 +126,9 @@ void main() {
   });
 
   group('Teto de ampliação — FR-019 e R7', () {
-    testWidgets('escala acima do teto é limitada a 2.0',
-        (WidgetTester tester) async {
+    testWidgets('escala acima do teto é limitada a 2.0', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         _comEscala(const TextoMemora('Texto de teste'), 4.0),
       );
@@ -135,13 +139,15 @@ void main() {
       expect(
         efetivo,
         MemoraDimensoes.escalaTextoMax,
-        reason: 'Sem teto, o layout estoura e a pessoa fica sem saída — a '
+        reason:
+            'Sem teto, o layout estoura e a pessoa fica sem saída — a '
             'própria tela de configuração deixa de ser legível.',
       );
     });
 
-    testWidgets('escala dentro do limite é preservada',
-        (WidgetTester tester) async {
+    testWidgets('escala dentro do limite é preservada', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         _comEscala(const TextoMemora('Texto de teste'), 1.5),
       );
@@ -152,8 +158,9 @@ void main() {
   });
 
   group('Teto aplicado de forma consistente — T025', () {
-    testWidgets('todo componente limita a ampliação ao mesmo teto',
-        (WidgetTester tester) async {
+    testWidgets('todo componente limita a ampliação ao mesmo teto', (
+      WidgetTester tester,
+    ) async {
       // Escala de sistema muito acima do teto: nenhum componente pode
       // reagir de forma diferente dos demais.
       await tester.pumpWidget(
@@ -177,7 +184,8 @@ void main() {
         expect(
           t.textScaler?.scale(10) ?? 10 * 4.0,
           10 * MemoraDimensoes.escalaTextoMax,
-          reason: 'Um componente sem o teto se comporta diferente dos outros '
+          reason:
+              'Um componente sem o teto se comporta diferente dos outros '
               'em ampliação extrema, e o layout quebra de forma imprevisível.',
         );
       }
@@ -185,8 +193,9 @@ void main() {
   });
 
   group('Área de toque preservada com texto ampliado', () {
-    testWidgets('botão continua acima do alvo mínimo em escala 2.0',
-        (WidgetTester tester) async {
+    testWidgets('botão continua acima do alvo mínimo em escala 2.0', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comEscala(BotaoPrimario(rotulo: 'Continuar', aoTocar: () {}), 2.0),

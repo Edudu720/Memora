@@ -50,9 +50,15 @@ como adjetivo:
    texto (FR-002).
 2. **Cabeçalho único**: "Voltar" à esquerda, título em duas linhas no máximo,
    ilustração ou rosto da Memora à direita quando houver.
-3. **Cartões com ilustração** no lugar de listas de botões: cada porta do Hub,
-   cada assunto da Ajuda, cada grupo de Configurações é um cartão com desenho,
-   nome e uma linha de explicação.
+3. **Portas com ilustração** no lugar de listas de botões iguais: cada porta do
+   Hub, cada assunto da Ajuda, cada grupo de Configurações é uma **pílula
+   grande e preenchida**, com desenho, nome e uma linha de explicação.
+   ⚠️ *Corrigido ao implementar*: a primeira versão dizia "cartão", e o
+   `Cartao` do Design System **não é clicável** de propósito — "ação usa
+   pílula e preenchimento; informação nunca usa nenhum dos dois" (FR-012 da
+   002). Um cartão tocável seria a terceira linguagem que essa regra proíbe. A
+   pílula grande é a própria linguagem do wireframe (as pílulas azuis do Hub),
+   com desenho e explicação.
 4. **Fundo com profundidade**: superfície clara com cartões levemente elevados
    (sombra suave, raio de 24), em vez de pílula azul sobre cinza liso.
 5. **A Memora é personagem**: o robô do wireframe, redesenhado, em todo lugar

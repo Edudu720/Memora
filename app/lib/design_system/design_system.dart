@@ -5,6 +5,7 @@
 /// erosão que a FR-002 existe para evitar.
 library;
 
+export 'componentes/avisos/aviso_compacto.dart';
 export 'componentes/botoes/botao_perigo.dart';
 export 'componentes/botoes/botao_primario.dart';
 export 'componentes/botoes/botao_secundario.dart';
@@ -14,7 +15,9 @@ export 'componentes/campos/campo_senha.dart';
 export 'componentes/campos/campo_texto.dart';
 export 'componentes/cartoes/cartao.dart';
 export 'componentes/cartoes/cartao_com_avatar.dart';
+export 'componentes/cartoes/cartao_de_porta.dart';
 export 'componentes/confirmacao/confirmacao_memora.dart';
+export 'componentes/conversa/balao_de_fala.dart';
 export 'componentes/dialogos/dialogo.dart';
 export 'componentes/dialogos/folha_inferior.dart';
 export 'componentes/feedback/carregando.dart';
@@ -28,6 +31,7 @@ export 'componentes/informacao/campo_informacao.dart';
 export 'componentes/informacao/destaque_informacao.dart';
 export 'componentes/informacao/lista_informacao.dart';
 export 'componentes/navegacao/barra_superior.dart';
+export 'componentes/navegacao/cabecalho_de_tela.dart';
 export 'componentes/navegacao/navegacao_inferior.dart';
 export 'componentes/selecao/opcao_selecionavel.dart';
 export 'componentes/texto/texto_com_destaque.dart';

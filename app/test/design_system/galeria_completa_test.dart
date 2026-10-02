@@ -35,26 +35,30 @@ void main() {
     'preferencias/preferencia_aparencia.dart': 'e entidade, nao componente',
     'preferencias/tela_aparencia.dart':
         'e uma TELA inteira, com persistencia propria; montar uma tela dentro '
-            'da galeria misturaria os dois niveis',
+        'da galeria misturaria os dois niveis',
     'temas/memora_theme_extension.dart': 'e extensao de tema',
     'temas/temas_memora.dart': 'e o tema — a galeria troca entre os tres',
   };
 
   test('todo componente exportado aparece na galeria', () {
-    final List<String> exportados =
-        File('lib/design_system/design_system.dart')
-            .readAsLinesSync()
-            .where((String l) => l.startsWith("export '"))
-            .map((String l) => l.split("'")[1])
-            .where((String caminho) => !caminho.startsWith('tokens/'))
-            .toList();
+    final List<String> exportados = File('lib/design_system/design_system.dart')
+        .readAsLinesSync()
+        .where((String l) => l.startsWith("export '"))
+        .map((String l) => l.split("'")[1])
+        .where((String caminho) => !caminho.startsWith('tokens/'))
+        .toList();
 
-    expect(exportados, isNotEmpty,
-        reason: 'se o barril mudar de forma, este teste para de olhar para '
-            'qualquer coisa — e precisa ser reescrito, nao apagado');
+    expect(
+      exportados,
+      isNotEmpty,
+      reason:
+          'se o barril mudar de forma, este teste para de olhar para '
+          'qualquer coisa — e precisa ser reescrito, nao apagado',
+    );
 
-    final String galeria =
-        File('lib/design_system/galeria/galeria_memora.dart').readAsStringSync();
+    final String galeria = File(
+      'lib/design_system/galeria/galeria_memora.dart',
+    ).readAsStringSync();
 
     final List<String> ausentes = <String>[];
 
@@ -78,7 +82,8 @@ void main() {
     expect(
       ausentes,
       isEmpty,
-      reason: 'componente na biblioteca e ausente da galeria. Documentacao '
+      reason:
+          'componente na biblioteca e ausente da galeria. Documentacao '
           'incompleta e documentacao que ninguem confia — e o proximo a '
           'precisar dele vai escrever o segundo. Acrescente na galeria, ou '
           'declare em `foraDaGaleria` com a razao.',
@@ -96,9 +101,13 @@ void main() {
         .toSet();
 
     for (final String excecao in foraDaGaleria.keys) {
-      expect(exportados, contains(excecao),
-          reason: '`$excecao` esta na lista de excecoes e nao e mais '
-              'exportado pelo design_system.dart');
+      expect(
+        exportados,
+        contains(excecao),
+        reason:
+            '`$excecao` esta na lista de excecoes e nao e mais '
+            'exportado pelo design_system.dart',
+      );
     }
   });
 }

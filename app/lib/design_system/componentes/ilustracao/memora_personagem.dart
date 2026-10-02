@@ -72,7 +72,10 @@ class MemoraPersonagem extends StatelessWidget {
     return SizedBox.square(
       dimension: tamanho,
       child: DecoratedBox(
-        decoration: BoxDecoration(shape: BoxShape.circle, color: cores.medalhao),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: cores.medalhao,
+        ),
         child: ClipOval(
           child: Align(
             alignment: Alignment.bottomCenter,

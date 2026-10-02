@@ -17,8 +17,9 @@ Widget _comTema(Widget filho) {
 
 void main() {
   group('Componentes de informação não são botões — FR-012', () {
-    testWidgets('CampoInformacao não expõe semântica de botão',
-        (WidgetTester tester) async {
+    testWidgets('CampoInformacao não expõe semântica de botão', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comTema(const CampoInformacao(rotulo: 'Nome', valor: 'Ana')),
@@ -27,14 +28,16 @@ void main() {
       expect(
         tester.getSemantics(find.byType(CampoInformacao)),
         isSemantics(isButton: false, hasTapAction: false),
-        reason: 'Se o leitor de tela anunciar "botão", a pessoa vai tentar '
+        reason:
+            'Se o leitor de tela anunciar "botão", a pessoa vai tentar '
             'tocar num dado. É exatamente o erro do Perfil do protótipo.',
       );
       handle.dispose();
     });
 
-    testWidgets('DestaqueInformacao não expõe semântica de botão',
-        (WidgetTester tester) async {
+    testWidgets('DestaqueInformacao não expõe semântica de botão', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comTema(const DestaqueInformacao(rotulo: 'Plano', valor: 'Premium')),
@@ -47,8 +50,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('CampoInformacao não reage ao toque',
-        (WidgetTester tester) async {
+    testWidgets('CampoInformacao não reage ao toque', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         _comTema(const CampoInformacao(rotulo: 'E-mail', valor: 'a@b.com')),
       );
@@ -70,8 +74,9 @@ void main() {
       );
     });
 
-    testWidgets('botão expõe semântica de botão, ao contrário da informação',
-        (WidgetTester tester) async {
+    testWidgets('botão expõe semântica de botão, ao contrário da informação', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comTema(BotaoPrimario(rotulo: 'Continuar', aoTocar: () {})),
@@ -80,7 +85,8 @@ void main() {
       expect(
         tester.getSemantics(find.byType(BotaoPrimario)),
         isSemantics(isButton: true, isEnabled: true, hasTapAction: true),
-        reason: 'O contraste com o teste anterior é o ponto: leitor de tela '
+        reason:
+            'O contraste com o teste anterior é o ponto: leitor de tela '
             'precisa distinguir dado de ação tanto quanto a visão. E anunciar '
             '"botão" sem expor ação de toque é pior que não anunciar nada — a '
             'pessoa tenta ativar e nada acontece.',
@@ -88,8 +94,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('botão desabilitado não expõe ação de toque',
-        (WidgetTester tester) async {
+    testWidgets('botão desabilitado não expõe ação de toque', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _comTema(const BotaoPrimario(rotulo: 'Continuar')),
@@ -98,14 +105,16 @@ void main() {
       expect(
         tester.getSemantics(find.byType(BotaoPrimario)),
         isSemantics(isButton: true, isEnabled: false, hasTapAction: false),
-        reason: 'Desabilitado precisa ser anunciado como indisponível, e não '
+        reason:
+            'Desabilitado precisa ser anunciado como indisponível, e não '
             'oferecer uma ativação que não faz nada.',
       );
       handle.dispose();
     });
 
-    testWidgets('ListaInformacao aceita apenas campos de informação',
-        (WidgetTester tester) async {
+    testWidgets('ListaInformacao aceita apenas campos de informação', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         _comTema(
           const ListaInformacao(
@@ -133,8 +142,9 @@ void main() {
   });
 
   group('Informação cresce com o texto ampliado — FR-026', () {
-    testWidgets('CampoInformacao não estoura em escala 2.0',
-        (WidgetTester tester) async {
+    testWidgets('CampoInformacao não estoura em escala 2.0', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: TemasMemora.claro,

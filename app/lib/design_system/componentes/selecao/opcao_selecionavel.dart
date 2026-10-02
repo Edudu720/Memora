@@ -78,9 +78,7 @@ class OpcaoSelecionavel extends StatelessWidget {
                 child: Row(
                   children: <Widget>[
                     Icon(
-                      selecionada
-                          ? Icons.check_circle
-                          : Icons.circle_outlined,
+                      selecionada ? Icons.check_circle : Icons.circle_outlined,
                       color: selecionada ? cores.primaria : cores.borda,
                       size: MemoraDimensoes.iconeDestaque,
                     ),

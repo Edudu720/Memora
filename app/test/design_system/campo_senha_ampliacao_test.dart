@@ -61,29 +61,38 @@ void main() {
   group('O rótulo de revelar quebra linha em vez de estourar a tela', () {
     for (final Size aparelho in aparelhos) {
       for (final double escala in <double>[1.0, 1.5, 2.0]) {
-        testWidgets('${nomeDo(aparelho)}, escala $escala',
-            (WidgetTester t) async {
+        testWidgets('${nomeDo(aparelho)}, escala $escala', (
+          WidgetTester t,
+        ) async {
           await montar(t, aparelho: aparelho, escala: escala);
 
-          expect(t.takeException(), isNull,
-              reason: 'o controle de revelar nao pode estourar a largura de '
-                  '${nomeDo(aparelho)} em $escala — e a `Row` dele so nao '
-                  'estoura porque o rotulo e `Flexible`');
+          expect(
+            t.takeException(),
+            isNull,
+            reason:
+                'o controle de revelar nao pode estourar a largura de '
+                '${nomeDo(aparelho)} em $escala — e a `Row` dele so nao '
+                'estoura porque o rotulo e `Flexible`',
+          );
 
           // Estar dentro da tela não basta: o rótulo precisa continuar
           // legível. Truncar seria tão ruim quanto estourar, porque é o texto
           // que desfaz a ambiguidade do ícone.
           final Finder rotulo = find.text('Mostrar senha');
           expect(rotulo, findsOneWidget);
-          expect(t.getRect(rotulo).right, lessThanOrEqualTo(aparelho.width),
-              reason: 'o rotulo precisa caber na largura do aparelho');
+          expect(
+            t.getRect(rotulo).right,
+            lessThanOrEqualTo(aparelho.width),
+            reason: 'o rotulo precisa caber na largura do aparelho',
+          );
         });
       }
     }
   });
 
-  testWidgets('sem permitirRevelar nao ha controle nenhum — FR-060',
-      (WidgetTester t) async {
+  testWidgets('sem permitirRevelar nao ha controle nenhum — FR-060', (
+    WidgetTester t,
+  ) async {
     await montar(
       t,
       aparelho: referencia,
