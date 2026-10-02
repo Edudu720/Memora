@@ -160,19 +160,20 @@ o que cada parte do Hub faz (US2).
 
 ### Tests
 
-- [ ] T034 [P] [US2] Teste em `app/test/features/inicio/tela_inicio_test.dart`: cumprimenta pelo `nomeTratamento`; um atalho para conversar e um para o Hub; **nenhum "Sair"** (FR-019); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [X] T034 [P] [US2] Teste em `app/test/features/inicio/tela_inicio_test.dart`: cumprimenta pelo `nomeTratamento`; um atalho para conversar e um para o Hub; **nenhum "Sair"** (FR-019); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
 - [ ] T035 [P] [US2] Reescrever `app/test/features/hub/tela_hub_test.dart` e `app/test/acessibilidade/hub_acessibilidade_test.dart`: portas como `CartaoDePorta`; **sem rolagem em 100% e 150% no 320×568** (FR-017); sem "Sair"; porta sem destino não aparece (FR-018). Provar quebrando: devolver uma porta sem `aoAbrir`; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [ ] T036 [US2] Teste do SC-006 em `app/test/features/casca/profundidade_test.dart`: a partir do Início, cada parte do aplicativo é alcançada em até 3 toques, contando os toques de verdade
+  > **Parcial (2026-10-01)**: a reescrita, a matriz de 36 combinações, o portão da FR-018 pelo fluxo real e a quebra estão feitos. **A FR-017 só passa a 100%** no 320×568 (`test/acessibilidade/hub_cabe_sem_rolar_test.dart`, com a Atkinson carregada); **a 150% o teste está escrito e pulado**, porque o Hub não cabe com a FR-016 — o relatório da sessão traz os números. Fecha quando a equipe decidir qual das duas cede.
+- [X] T036 [US2] Teste do SC-006 em `app/test/features/casca/profundidade_test.dart`: a partir do Início, cada parte do aplicativo é alcançada em até 3 toques, contando os toques de verdade
 
 ### Implementation
 
-- [ ] T037 [US2] Criar `TelaInicio` em `app/lib/features/inicio/presentation/tela_inicio.dart`, com `MemoraTipografia.destaque`, `MemoraPersonagem` e os dois atalhos (o de conversar é o principal)
-- [ ] T038 [US2] Redesenhar `app/lib/features/hub/presentation/telas/tela_hub.dart` com `CabecalhoDeTela` e `CartaoDePorta`, tirando o "Sair"; `PortaDoHub` em `app/lib/features/hub/domain/hub.dart` ganha `ilustracao`
-- [ ] T039 [US2] Em `_portasConstruidas()` de `fluxo_autenticacao.dart`: tirar "Como eu vejo o Memora" (vai para Configurações); trocar o rótulo `portaServicos` de "Serviços do dia a dia" para **"Serviços sociais"**, como no wireframe, e ajustar a descrição em `app/lib/l10n/textos_assistente.dart` (FR-008); ligar as ilustrações
-- [ ] T040 [US2] Ligar o Início como raiz do destino Início em `app/lib/features/casca/casca_interna.dart`, com o Hub empilhado sobre ele
-- [ ] T041 [US2] Mover o portão da FR-025 da 001 de `app/test/features/autenticacao/fluxo_sair_confirma_test.dart` para a saída em Configurações (provisória, T024); a quebra (ligar o botão direto) precisa continuar reprovando
-- [ ] T042 [US2] Rodar a matriz completa em `tela_inicio_test.dart`, `tela_hub_test.dart`, `hub_acessibilidade_test.dart` e `app/test/features/autenticacao/fluxo_dentro_da_conta.dart`, e corrigir o que reprovar
-- [ ] T043 [US2] **Criar** `app/test/album/album_de_telas_test.dart` (renderiza cada tela, em cada tema, com a fonte embarcada, e salva em `app/build/album/` sem comparar nada — R13), por enquanto só com o Início e o Hub, e anexar as imagens à PR
+- [X] T037 [US2] Criar `TelaInicio` em `app/lib/features/inicio/presentation/tela_inicio.dart`, com `MemoraTipografia.destaque`, `MemoraPersonagem` e os dois atalhos (o de conversar é o principal)
+- [X] T038 [US2] Redesenhar `app/lib/features/hub/presentation/telas/tela_hub.dart` com `CabecalhoDeTela` e `CartaoDePorta`, tirando o "Sair"; `PortaDoHub` em `app/lib/features/hub/domain/hub.dart` ganha `ilustracao`
+- [X] T039 [US2] Em `_portasConstruidas()` de `fluxo_autenticacao.dart`: tirar "Como eu vejo o Memora" (vai para Configurações); trocar o rótulo `portaServicos` de "Serviços do dia a dia" para **"Serviços sociais"**, como no wireframe, e ajustar a descrição em `app/lib/l10n/textos_assistente.dart` (FR-008); ligar as ilustrações
+- [X] T040 [US2] Ligar o Início como raiz do destino Início em `app/lib/features/casca/casca_interna.dart`, com o Hub empilhado sobre ele
+- [X] T041 [US2] Mover o portão da FR-025 da 001 de `app/test/features/autenticacao/fluxo_sair_confirma_test.dart` para a saída em Configurações (provisória, T024); a quebra (ligar o botão direto) precisa continuar reprovando
+- [X] T042 [US2] Rodar a matriz completa em `tela_inicio_test.dart`, `tela_hub_test.dart`, `hub_acessibilidade_test.dart` e `app/test/features/autenticacao/fluxo_dentro_da_conta.dart`, e corrigir o que reprovar
+- [X] T043 [US2] **Criar** `app/test/album/album_de_telas_test.dart` (renderiza cada tela, em cada tema, com a fonte embarcada, e salva em `app/build/album/` sem comparar nada — R13), por enquanto só com o Início e o Hub, e anexar as imagens à PR
 - [ ] T044 [US2] **Revisão de design da equipe** sobre o Início e o Hub, comparando com o wireframe e com o de hoje (R2, R14). Registrar o veredito, com quem participou e o que mudar, em `specs/004-redesenho-das-telas/revisao-de-design.md` e na PR. **Se reprovar, parar e revisar a R2 antes da fase 4**
 
 **Checkpoint**: a linguagem visual está aprovada e as demais telas a copiam.
