@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
-import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_confirmar_canal.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_entrega_do_aparelho.dart';
@@ -179,7 +179,7 @@ void main() {
 
       expect(find.byType(TelaConfirmarCanal), findsOneWidget);
       expect(
-        find.byKey(TelaHub.chaveSaudacao),
+        find.byKey(TelaInicio.chaveSaudacao),
         findsNothing,
         reason: 'Entrar aqui concluiria o cadastro assistido sem posse '
             'confirmada, que é o que o cenário V4 proíbe.',
@@ -220,7 +220,7 @@ void main() {
       await _tocarNaChave(t, TelaPrimeiraEntrada.chaveEntrar);
 
       expect(find.byType(TelaLogin), findsOneWidget);
-      expect(find.byKey(TelaHub.chaveSaudacao), findsNothing);
+      expect(find.byKey(TelaInicio.chaveSaudacao), findsNothing);
     });
 
     /// A FR-012 remove a barreira de digitar o e-mail inteiro. Ela vale aqui
@@ -247,7 +247,7 @@ void main() {
       await _preencher(t, TelaLogin.chaveSenha, 'uma frase que so eu lembro');
       await _tocarNaChave(t, TelaLogin.chaveEntrar);
 
-      expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget);
+      expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
     });
   });
 }

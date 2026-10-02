@@ -3,12 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
-import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 
 import 'dubles_autenticacao.dart';
+import 'fluxo_dentro_da_conta.dart';
 
 /// Avança alguns quadros sem esperar quietude.
 ///
@@ -22,19 +23,6 @@ Future<void> _avancar(WidgetTester t, [int quadros = 4]) async {
 
 Future<void> _tocarNoTexto(WidgetTester t, String texto) async {
   final Finder alvo = find.text(texto);
-  await t.ensureVisible(alvo);
-  await t.pump();
-  await t.tap(alvo);
-  await _avancar(t);
-}
-
-/// Toca por chave, e nao por texto.
-///
-/// Mais estavel: o rotulo de um botao muda quando alguem melhora a frase, e um
-/// teste que quebra por isso vira ruido. Foi o que aconteceu quando o Hub
-/// substituiu a tela provisoria e "Sair da conta" virou "Sair da minha conta".
-Future<void> _tocarNaChave(WidgetTester t, Key chave) async {
-  final Finder alvo = find.byKey(chave);
   await t.ensureVisible(alvo);
   await t.pump();
   await t.tap(alvo);
@@ -94,7 +82,7 @@ void main() {
 
       await _cadastrar(t);
       expect(
-        find.byKey(TelaHub.chaveSaudacao),
+        find.byKey(TelaInicio.chaveSaudacao),
         findsOneWidget,
         reason: 'A FR-009 diz que a pessoa entra direto ao cadastrar, sem '
             'passar pelo login.',
@@ -108,7 +96,7 @@ void main() {
             'que é a barreira que a FR-012 existe para remover.',
       );
 
-      await _tocarNaChave(t, TelaHub.chaveSair);
+      await FluxoDentroDaConta.tocarEmSair(t);
       await _tocarNoTexto(t, TextosAutenticacao.botaoConfirmarSaida);
       await _avancar(t, 6);
 
@@ -126,7 +114,7 @@ void main() {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
 
       await _cadastrar(t);
-      await _tocarNaChave(t, TelaHub.chaveSair);
+      await FluxoDentroDaConta.tocarEmSair(t);
       await _tocarNoTexto(t, TextosAutenticacao.botaoConfirmarSaida);
       await _avancar(t, 6);
 
@@ -151,7 +139,7 @@ void main() {
       );
 
       await _cadastrar(t);
-      expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget);
+      expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
 
       // Dois segundos parada: chega a hora do aviso.
       await t.pump(const Duration(seconds: 2));
@@ -199,7 +187,7 @@ void main() {
       await _avancar(t);
 
       expect(
-        find.byKey(TelaHub.chaveSaudacao),
+        find.byKey(TelaInicio.chaveSaudacao),
         findsOneWidget,
         reason: 'Expirar depois de a pessoa dizer que está ali torna o botão '
             'do aviso uma mentira.',

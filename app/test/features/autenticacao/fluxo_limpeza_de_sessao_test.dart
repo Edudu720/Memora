@@ -4,12 +4,13 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
-import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
+import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import 'dubles_autenticacao.dart';
+import 'fluxo_dentro_da_conta.dart';
 
 /// A fiação da limpeza dentro do fluxo (FR-048, FR-026).
 ///
@@ -77,7 +78,7 @@ void main() {
     await t.tap(entrar);
     await avancar(t, 6);
 
-    expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget,
+    expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget,
         reason: 'o cenario pressupoe a pessoa dentro da conta');
     expect(dado.apagamentos, 0);
   }
@@ -86,11 +87,8 @@ void main() {
       (WidgetTester t) async {
     await montarDentro(t);
 
-    final Finder sair = find.byKey(TelaHub.chaveSair);
-    await t.ensureVisible(sair);
-    await t.pump();
-    await t.tap(sair);
-    await avancar(t);
+    // O unico "Sair" fica em Ajustes (FR-019 da feature 004).
+    await FluxoDentroDaConta.tocarEmSair(t);
 
     // Sair pede confirmacao (FR-025): o segundo toque e o que encerra.
     final Finder confirmar = find.text(TextosAutenticacao.botaoConfirmarSaida);

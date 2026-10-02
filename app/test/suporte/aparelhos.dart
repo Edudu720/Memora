@@ -94,3 +94,39 @@ Widget naCombinacao(Combinacao c, Widget filho) => MaterialApp(
     child: filho,
   ),
 );
+
+/// Reprova se [alvo] não ficar **alcançável** no aparelho [aparelho]: depois de
+/// rolar até ele, ele precisa estar inteiro dentro da janela.
+///
+/// "Não estourou" não é "continua utilizável" — a lição do portão da FR-027 da
+/// 003, que passava com a conversa reduzida a 4 px. A ação principal de uma
+/// tela precisa poder ser **tocada**, e tocar exige vê-la.
+///
+/// Quem chama toca em seguida e confere o efeito: isto prova que o alvo está à
+/// vista, não que ele responde.
+Future<void> exigirAlcancavel(
+  WidgetTester t,
+  Finder alvo, {
+  required Size aparelho,
+  required String contexto,
+}) async {
+  expect(alvo, findsOneWidget, reason: '$contexto: o alvo nem existe');
+  await t.ensureVisible(alvo);
+  await t.pump();
+  final Rect r = t.getRect(alvo);
+  expect(
+    r.top,
+    greaterThanOrEqualTo(0),
+    reason: '$contexto: o alvo ficou acima da janela ($r)',
+  );
+  expect(
+    r.bottom,
+    lessThanOrEqualTo(aparelho.height),
+    reason: '$contexto: o alvo ficou abaixo da janela ($r)',
+  );
+  expect(
+    r.left >= 0 && r.right <= aparelho.width,
+    isTrue,
+    reason: '$contexto: o alvo passou da largura da janela ($r)',
+  );
+}

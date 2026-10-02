@@ -73,4 +73,41 @@ abstract final class TextosCasca {
 
   /// Rótulo do canal.
   static const String rotuloCanal = 'E-mail ou telefone da conta';
+
+  // ---------------------------------------------------------------------------
+  // Início (FR-014) e o caminho para o Hub
+  //
+  // "Hub" é nome de trabalho do wireframe e não aparece para a pessoa
+  // (FR-008): o atalho diz o que ela encontra lá.
+  // ---------------------------------------------------------------------------
+
+  /// A saudação do Início, com o nome de tratamento.
+  static String inicioSaudacao(String nome) => 'Oi, $nome!';
+
+  /// A pergunta que acompanha a saudação.
+  static const String inicioConvite = 'O que vamos fazer hoje?';
+
+  /// O atalho para conversar com a Memora — a ação principal do Início.
+  static const String inicioConversar = 'Conversar com a Memora';
+
+  /// O atalho para ver todas as partes do aplicativo.
+  static const String inicioVerTudo = 'Ver tudo o que eu faço';
+
+  // ---------------------------------------------------------------------------
+  // Hub
+  // ---------------------------------------------------------------------------
+
+  /// Título da tela com todas as partes do aplicativo.
+  static const String tituloHub = 'Vamos começar?';
+
+  /// Título do estado vazio do Hub (FR-006).
+  ///
+  /// Não deveria aparecer: o Início só oferece o caminho quando há o que
+  /// mostrar (FR-018). Existe porque toda tela diz algo, em vez de ficar em
+  /// branco, quando não tem o que exibir.
+  static const String hubVazioTitulo = 'Ainda não há nada por aqui';
+
+  /// A explicação do estado vazio do Hub.
+  static const String hubVazioExplicacao =
+      'Quando houver algo para você abrir, vai aparecer nesta tela.';
 }

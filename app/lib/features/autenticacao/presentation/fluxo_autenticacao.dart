@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
+import '../../../l10n/textos_casca.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -25,6 +26,7 @@ import '../../hub/domain/hub.dart';
 import '../../casca/casca_interna.dart';
 import '../../casca/raizes_provisorias.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
+import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
@@ -366,73 +368,67 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _irParaLogin();
   }
 
-  /// As portas que **de fato existem** hoje (FR-003).
+  /// As portas que **de fato existem** hoje (FR-003 da 003, FR-018 da 004).
   ///
   /// Esta lista é curta de propósito, e vai crescer uma porta por entrega.
-  /// Acrescentar aqui *Conversar com a Memora* antes de a tela existir daria à
-  /// pessoa um botão que não abre nada — e porta que não abre é pior que porta
-  /// que não existe, porque quem toca conclui que quebrou o aparelho.
+  /// Acrescentar aqui *Ajuda* antes de a tela existir daria à pessoa um botão
+  /// que não abre nada — e porta que não abre é pior que porta que não existe,
+  /// porque quem toca conclui que quebrou o aparelho.
   ///
-  /// A `TelaAparencia` já existe desde a feature 002, e é a primeira porta
-  /// legítima do Hub: ela resolve um problema real de quem enxerga pouco.
+  /// "Como eu vejo o Memora" **não é mais porta do Hub** (T039): a aparência é
+  /// ajuste, e mora em Ajustes. Sem assistente, portanto, o Hub fica vazio — e
+  /// por isso o Início nem oferece o caminho até ele ([_abrirHub]).
   List<PortaDoHub> _portasConstruidas() {
     final RepositorioAssistente? assistente = widget.assistente;
+    if (assistente == null) return const <PortaDoHub>[];
 
     return <PortaDoHub>[
-      // A ação principal do Hub, quando a assistente existe: é ela a razão de
-      // o Memora existir.
-      if (assistente != null)
-        PortaDoHub(
-          rotulo: TextosAssistente.portaConversa,
-          descricao: TextosAssistente.descricaoConversa,
-          icone: Icons.chat_bubble_outline,
-          principal: true,
-          aoAbrir: () => _abrirConversa(assistente),
-        ),
-
-      if (assistente != null)
-        PortaDoHub(
-          rotulo: TextosAssistente.portaAplicativos,
-          descricao: TextosAssistente.descricaoAplicativos,
-          icone: Icons.apps_outlined,
-          aoAbrir: () =>
-              _abrirCatalogo(assistente, CategoriaDoServico.cotidiano),
-        ),
-
-      if (assistente != null)
-        PortaDoHub(
-          rotulo: TextosAssistente.portaServicos,
-          descricao: TextosAssistente.descricaoServicos,
-          icone: Icons.account_balance_outlined,
-          aoAbrir: () =>
-              _abrirCatalogo(assistente, CategoriaDoServico.sensivel),
-        ),
-
-      if (assistente != null)
-        PortaDoHub(
-          rotulo: TextosAssistente.portaRegistro,
-          descricao: TextosAssistente.descricaoRegistro,
-          icone: Icons.history_outlined,
-          aoAbrir: () => _empilhar(
-            _rota(
-              builder: (BuildContext contexto) => TelaRegistro(
-                repositorio: assistente,
-                aoVoltar: () => Navigator.of(contexto).pop(),
-              ),
+      // A ação principal do Hub: é a conversa a razão de o Memora existir.
+      PortaDoHub(
+        rotulo: TextosAssistente.portaConversa,
+        descricao: TextosAssistente.descricaoConversa,
+        ilustracao: Ilustracao.portaConversa,
+        principal: true,
+        aoAbrir: () => _abrirConversa(assistente),
+      ),
+      PortaDoHub(
+        rotulo: TextosAssistente.portaAplicativos,
+        descricao: TextosAssistente.descricaoAplicativos,
+        ilustracao: Ilustracao.portaAplicativos,
+        aoAbrir: () => _abrirCatalogo(assistente, CategoriaDoServico.cotidiano),
+      ),
+      PortaDoHub(
+        rotulo: TextosAssistente.portaServicos,
+        descricao: TextosAssistente.descricaoServicos,
+        ilustracao: Ilustracao.portaServicos,
+        aoAbrir: () => _abrirCatalogo(assistente, CategoriaDoServico.sensivel),
+      ),
+      PortaDoHub(
+        rotulo: TextosAssistente.portaRegistro,
+        descricao: TextosAssistente.descricaoRegistro,
+        ilustracao: Ilustracao.portaRegistro,
+        aoAbrir: () => _empilhar(
+          _rota(
+            builder: (BuildContext contexto) => TelaRegistro(
+              repositorio: assistente,
+              aoVoltar: () => Navigator.of(contexto).pop(),
             ),
           ),
         ),
-
-      PortaDoHub(
-        rotulo: 'Como eu vejo o Memora',
-        descricao: 'Deixar a letra maior, mudar as cores, enxergar melhor',
-        icone: Icons.palette_outlined,
-        // Principal apenas quando nao ha assistente: duas acoes de mesmo peso
-        // dividem a atencao de quem precisa de um caminho so.
-        principal: assistente == null,
-        aoAbrir: _abrirAparencia,
       ),
     ];
+  }
+
+  /// Abre o Hub por cima do Início (T040).
+  void _abrirHub() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaHub(
+          portas: _portasConstruidas(),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// Abre o catálogo de uma categoria.
@@ -562,10 +558,15 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             aoAbrirGaleria: _abrirGaleria,
             aoSair: _sair,
           ),
-          DestinoDaCasca.inicio: (BuildContext _) => TelaHub(
+          // O Início é a raiz, e o Hub se empilha sobre ele (T040). Cada
+          // atalho só existe se leva a algum lugar (FR-018): sem assistente
+          // não há conversa, e o Hub ficaria sem nenhuma porta.
+          DestinoDaCasca.inicio: (BuildContext _) => TelaInicio(
             nome: _pessoa?.nomeTratamento ?? '',
-            portas: _portasConstruidas(),
-            aoSair: _sair,
+            aoConversar: widget.assistente == null
+                ? null
+                : () => _abrirConversa(widget.assistente!),
+            aoVerTudo: _portasConstruidas().isEmpty ? null : _abrirHub,
           ),
           DestinoDaCasca.perfil: (BuildContext _) => PerfilProvisorio(
             nome: _pessoa?.nomeTratamento ?? '',
@@ -623,7 +624,7 @@ class _PaginaDeAparencia extends StatelessWidget {
     return Scaffold(
       backgroundColor: context.memora.cores.fundo,
       appBar: BarraSuperior(
-        titulo: 'Como eu vejo o Memora',
+        titulo: TextosCasca.portaAparencia,
         aoVoltar: () => Navigator.of(context).pop(),
       ),
       body: const TelaAparencia(),

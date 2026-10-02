@@ -81,6 +81,24 @@ dado × ação (FR-012 da 002).
 a primeira tela feita com essas regras. A US2 é a primeira a ser implementada
 justamente para isso aparecer cedo.
 
+⚠️ **Revista depois da T044 (2026-10-01).** A revisão do Henrique não reprovou
+a direção — fonte, paleta, personagem e barra inferior ficam —, mas achou o
+resultado **junto demais e simples demais** para quem usa. As sete regras
+continuam, e três mudam ou entram
+([revisao-de-design.md](revisao-de-design.md)):
+
+3. **Portas com ilustração** — continua pílula preenchida, mas com
+   **acabamento de botão**: profundidade (sombra que encolhe ao pressionar),
+   contorno, e a ilustração num medalhão que se destaca da pílula. "Simples"
+   continua sendo a meta; "chapado" não.
+8. **Uma caixa por etapa** (nova, FR-002a): cada grupo de campos, cada
+   explicação e cada escolha mora numa caixa própria, com uma frase de
+   instrução no topo dela ("Escreva aqui o seu e-mail"). Juntar tudo num
+   cartão só economiza espaço e cobra atenção, que é o que falta.
+9. **Tutorial no lugar de rótulo** (nova): a primeira vez que a pessoa chega a
+   uma tela, a Memora diz em uma frase o que se faz ali. Rótulo curto não
+   basta para quem não sabe o que esperar.
+
 ---
 
 ## R3 — Tipografia: Atkinson Hyperlegible Next, embarcada
@@ -184,6 +202,15 @@ disponível**.
 
 **Por quê**: o diagnóstico 3 da spec. O aviso continua permanente, que é o que a
 FR-023 da 001 e a FR-033 da 003 exigem: compacto não é escondido.
+
+⚠️ **Revista na T044 (2026-10-01): o aviso encolhe depois da primeira
+mensagem.** O Henrique pediu um aviso menor, que pudesse ser removido e sumisse
+ao mandar mensagem. Ficou o meio-termo, decidido por ele: **aberto até a
+primeira mensagem; depois, uma linha** com escudo e o núcleo ("senha" e
+"código"), que se toca para ler inteiro. Sumir — sozinho ou por gesto — foi
+recusado: o golpista pressiona a pessoa **durante** a conversa, e "feche esse
+aviso" é exatamente o que ele pediria. O portão continua conferindo o núcleo
+com o aviso fechado.
 
 **Alternativas descartadas**: mostrar o aviso só na primeira vez. Contraria a
 permanência exigida pelas duas features: a pessoa sendo enganada ao telefone
@@ -411,3 +438,30 @@ PR por fase, como nas features anteriores:
 **Por quê a US2 antes da US1**: a US1 é a primeira impressão, mas a US2 é a tela
 mais vista, e ela fixa a linguagem que as outras copiam. Errar a linguagem na
 US1 e descobrir na US2 custaria refazer as duas.
+
+---
+
+## R15 — Paletas prontas de cor de destaque
+
+Acrescentada na revisão da T044 (FR-039).
+
+**Decisão**: Aparência oferece **cinco ou seis paletas prontas** — azul (a do
+protótipo, padrão), verde, roxo, laranja-terra, rosa e grafite, a fechar na
+medição — combináveis com os três temas da 002. Uma paleta troca só a cor
+**primária** e os tons derivados dela (`destaque`, `medalhao`, o anel de foco);
+fundo, superfície, texto, erro e sucesso continuam sendo os do tema. No tema de
+alto contraste a paleta **não se aplica**: ele existe para o máximo contraste,
+e qualquer cor de destaque seria concessão.
+
+**Por quê**: o pedido foi personalização; a constituição exige WCAG 2.2 AA em
+toda combinação. Paleta pronta resolve os dois: cada combinação entra no
+`validar_paleta.py` **antes** de existir, e uma que não passa simplesmente não
+é oferecida.
+
+**Alternativas descartadas**: seletor de cor livre. Não há como validar
+contraste de uma cor que só existe no aparelho da pessoa, e o prejuízo de uma
+escolha ruim cai em quem enxerga pior. Mudar também fundo e texto por paleta
+multiplicaria as combinações a validar sem pedido nenhum por isso.
+
+**O que faria mudar de ideia**: alguma paleta reprovar no validador em mais de
+um tema — aí ela sai da lista, em vez de ganhar exceção.

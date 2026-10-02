@@ -6,105 +6,183 @@ import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 
 import '../suporte/aparelhos.dart';
 
-/// Acessibilidade do Hub — T070, FR-026 a FR-030.
+/// Acessibilidade do Hub — T070 da 003, FR-026 a FR-030, e T035 e T042 da 004
+/// (FR-044: a matriz completa de aparelho × escala × tema).
 ///
-/// A funcionalidade do Hub (FR-002, FR-003, FR-045) já tem teste próprio em
-/// `tela_hub_test.dart`. Este arquivo cobre só os cinco requisitos de
-/// acessibilidade da feature 003, no lugar que a tasks.md determina.
+/// A funcionalidade do Hub (FR-003, FR-016, FR-018) tem teste próprio em
+/// `tela_hub_test.dart`. Este arquivo cobre os requisitos de acessibilidade, e
+/// mede com a fonte **quadrada** do `flutter test`, que é pessimista nas duas
+/// direções (R3): o que passa aqui passa com a Atkinson.
+///
+/// ⚠️ O requisito de **não rolar** (FR-017) mora em
+/// `hub_cabe_sem_rolar_test.dart`, e de propósito em outro arquivo: ele mede
+/// com a Atkinson **carregada**, e uma fonte carregada vale para o arquivo
+/// inteiro — misturá-la aqui tiraria a margem da matriz.
 void main() {
-  List<PortaDoHub> portasDeExemplo() => <PortaDoHub>[
-        PortaDoHub(
-          rotulo: 'Conversar com a Memora',
-          descricao: 'Me pergunte qualquer coisa sobre o celular',
-          icone: Icons.chat_bubble_outline,
-          principal: true,
-          aoAbrir: () {},
-        ),
-        PortaDoHub(
-          rotulo: 'Serviços do dia a dia',
-          descricao: 'Banco, INSS e governo — eu te ensino o caminho',
-          icone: Icons.account_balance_outlined,
-          aoAbrir: () {},
-        ),
-        PortaDoHub(
-          rotulo: 'O que eu fiz por você',
-          descricao: 'Tudo que eu abri no seu lugar fica anotado aqui',
-          icone: Icons.history,
-          aoAbrir: () {},
-        ),
-      ];
+  /// As quatro portas que o Hub do aplicativo tem hoje, com o texto real.
+  List<PortaDoHub> portasDeExemplo({
+    VoidCallback? aoAbrirAPrincipal,
+    int quantas = 4,
+  }) => <PortaDoHub>[
+    PortaDoHub(
+      rotulo: 'Conversar com a Memora',
+      descricao: 'Me pergunte o que quiser',
+      ilustracao: Ilustracao.portaConversa,
+      principal: true,
+      aoAbrir: aoAbrirAPrincipal ?? () {},
+    ),
+    PortaDoHub(
+      rotulo: 'Meus aplicativos',
+      descricao: 'Eu te ensino e posso abrir',
+      ilustracao: Ilustracao.portaAplicativos,
+      aoAbrir: () {},
+    ),
+    PortaDoHub(
+      rotulo: 'Serviços sociais',
+      descricao: 'Eu só te ensino o caminho',
+      ilustracao: Ilustracao.portaServicos,
+      aoAbrir: () {},
+    ),
+    PortaDoHub(
+      rotulo: 'O que eu fiz por você',
+      descricao: 'O que eu abri para você',
+      ilustracao: Ilustracao.portaRegistro,
+      aoAbrir: () {},
+    ),
+    PortaDoHub(
+      rotulo: 'Preciso de ajuda',
+      descricao: 'Dúvidas sobre o próprio Memora',
+      ilustracao: Ilustracao.portaAjuda,
+      aoAbrir: () {},
+    ),
+  ].take(quantas).toList();
 
   /// Monta o Hub numa janela do tamanho de um aparelho real.
   ///
   /// `MediaQuery(data: MediaQueryData(size: ...))` sozinho **não** muda as
   /// restrições de verdade do layout — só o valor que widgets leem via
-  /// `MediaQuery.of`. Sem isto, o teste roda contra a janela padrão do
-  /// `flutter test`, bem maior que qualquer Android, e esconde overflow real
-  /// (foi assim que o de `tela_conversa.dart` passou despercebido até o T070).
+  /// `MediaQuery.of`. Sem `vestir`, o teste roda contra a janela padrão do
+  /// `flutter test`, bem maior que qualquer Android, e esconde overflow real.
   Future<void> montar(
-    WidgetTester t, {
-    double escala = 1.0,
-    Size aparelho = referencia,
+    WidgetTester t,
+    Combinacao c, {
+    VoidCallback? aoAbrirAPrincipal,
+    int quantas = 4,
   }) async {
-    t.view.physicalSize = aparelho;
-    t.view.devicePixelRatio = 1.0;
-    addTearDown(t.view.resetPhysicalSize);
-    addTearDown(t.view.resetDevicePixelRatio);
-
+    vestir(t, c.aparelho);
     await t.pumpWidget(
-      MaterialApp(
-        theme: TemasMemora.claro,
-        home: MediaQuery(
-          data: MediaQueryData(textScaler: TextScaler.linear(escala)),
-          child: TelaHub(
-            nome: 'Ana',
-            portas: portasDeExemplo(),
-            aoSair: () async {},
+      naCombinacao(
+        c,
+        TelaHub(
+          portas: portasDeExemplo(
+            aoAbrirAPrincipal: aoAbrirAPrincipal,
+            quantas: quantas,
           ),
+          aoVoltar: () {},
         ),
       ),
     );
   }
 
+  const Combinacao padrao = (
+    aparelho: referencia,
+    escala: 1.0,
+    tema: MemoraTemaId.claro,
+  );
+
   group('Alvo de toque — FR-026', () {
-    testWidgets('cada porta e o botao de sair atendem a diretriz de 48 dp',
-        (WidgetTester t) async {
+    testWidgets('cada porta e o "Voltar" atendem a diretriz de 48 dp', (
+      WidgetTester t,
+    ) async {
       final SemanticsHandle h = t.ensureSemantics();
-      await montar(t);
+      await montar(t, padrao);
 
       await expectLater(t, meetsGuideline(androidTapTargetGuideline));
+      await expectLater(t, meetsGuideline(labeledTapTargetGuideline));
       h.dispose();
+    });
+
+    testWidgets('as portas ficam afastadas por pelo menos 8 dp', (
+      WidgetTester t,
+    ) async {
+      await montar(t, padrao);
+
+      final List<Rect> caixas = <Rect>[
+        for (final Element e in find.byType(CartaoDePorta).evaluate())
+          t.getRect(find.byWidget(e.widget)),
+      ];
+      for (int i = 1; i < caixas.length; i++) {
+        expect(
+          caixas[i].top - caixas[i - 1].bottom,
+          greaterThanOrEqualTo(MemoraDimensoes.separacaoAlvo),
+          reason: 'portas ${i - 1} e $i coladas demais',
+        );
+      }
     });
   });
 
-  group('Texto ampliado — FR-027', () {
-    // A matriz de aparelhos entrou na revisao da PR #27: ate entao tudo rodava
-    // num 390x844, e foi assim que o overflow da tela de conversa passou.
-    for (final Size aparelho in aparelhos) {
-      for (final double escala in <double>[1.0, 1.5, 2.0]) {
-      testWidgets('o Hub com tres portas nao quebra em '
-          '${nomeDo(aparelho)}, escala $escala',
-          (WidgetTester t) async {
-        await montar(t, escala: escala, aparelho: aparelho);
+  group('Matriz — FR-027 e FR-044', () {
+    // A matriz de aparelhos entrou na revisão da PR #27: até então tudo
+    // rodava num 390x844, e foi assim que o overflow da conversa passou. Os
+    // três temas entraram com a feature 004.
+    for (final Combinacao c in matriz()) {
+      testWidgets('o Hub com 4 portas não estoura, e a principal é '
+          'alcançável e responde em ${nomeDa(c)}', (WidgetTester t) async {
+        int abriu = 0;
+        await montar(t, c, aoAbrirAPrincipal: () => abriu++);
 
-        expect(t.takeException(), isNull);
-        // Continua utilizavel: a saudacao e ao menos uma porta seguem visiveis
-        // e tocaveis, mesmo com o texto no maior tamanho previsto.
-        expect(find.byKey(TelaHub.chaveSaudacao), findsOneWidget);
-        final Finder primeiraPorta =
-            find.byKey(TelaHub.chaveDaPorta('Conversar com a Memora'));
-        await t.ensureVisible(primeiraPorta);
-        expect(primeiraPorta, findsOneWidget);
+        expect(t.takeException(), isNull, reason: nomeDa(c));
+
+        final Finder principal = find.byKey(
+          TelaHub.chaveDaPorta('Conversar com a Memora'),
+        );
+        await exigirAlcancavel(
+          t,
+          principal,
+          aparelho: c.aparelho,
+          contexto: nomeDa(c),
+        );
+        await t.tap(principal);
+        expect(
+          abriu,
+          1,
+          reason: '${nomeDa(c)}: a ação principal não respondeu ao toque',
+        );
       });
-      }
     }
+
+    for (final Combinacao c in matriz()) {
+      testWidgets('com a quinta porta (a Ajuda) o Hub continua sem estourar '
+          'em ${nomeDa(c)}', (WidgetTester t) async {
+        await montar(t, c, quantas: 5);
+        expect(t.takeException(), isNull, reason: nomeDa(c));
+      });
+    }
+
+    testWidgets('em 200% a lista rola, e a última porta é alcançável', (
+      WidgetTester t,
+    ) async {
+      const Combinacao c = (
+        aparelho: Size(320, 568),
+        escala: 2.0,
+        tema: MemoraTemaId.claro,
+      );
+      await montar(t, c);
+
+      await exigirAlcancavel(
+        t,
+        find.byKey(TelaHub.chaveDaPorta('O que eu fiz por você')),
+        aparelho: c.aparelho,
+        contexto: nomeDa(c),
+      );
+    });
   });
 
   group('Leitor de tela anuncia cada porta — FR-026', () {
-    testWidgets('a porta principal e anunciada como botao ativo',
-        (WidgetTester t) async {
+    testWidgets('a porta principal é anunciada como botão ativo, com a '
+        'explicação como dica', (WidgetTester t) async {
       final SemanticsHandle h = t.ensureSemantics();
-      await montar(t);
+      await montar(t, padrao);
 
       expect(
         t.getSemantics(
@@ -112,27 +190,48 @@ void main() {
         ),
         isSemantics(
           label: 'Conversar com a Memora',
+          hint: 'Me pergunte o que quiser',
           isButton: true,
           isEnabled: true,
+          hasEnabledState: true,
           hasTapAction: true,
         ),
       );
       h.dispose();
     });
+
+    testWidgets('o desenho da porta é decorativo: o leitor não o anuncia', (
+      WidgetTester t,
+    ) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      await montar(t, padrao);
+
+      // Imagem anunciada a cada porta acrescentaria uma parada à navegação
+      // sem informar nada (FR-045).
+      expect(find.bySemanticsLabel(RegExp('imagem|ilustra', caseSensitive: false)),
+          findsNothing);
+      h.dispose();
+    });
   });
 
   group('Nenhum gesto complexo — FR-030', () {
-    testWidgets('o Hub nao usa arrastar nem pressionar e segurar',
-        (WidgetTester t) async {
-      await montar(t);
+    testWidgets('o Hub não usa arrastar nem pressionar e segurar', (
+      WidgetTester t,
+    ) async {
+      await montar(t, padrao);
 
-      final Iterable<GestureDetector> gestos =
-          t.widgetList<GestureDetector>(find.byType(GestureDetector));
+      final Iterable<GestureDetector> gestos = t.widgetList<GestureDetector>(
+        find.byType(GestureDetector),
+      );
 
       for (final GestureDetector g in gestos) {
-        expect(g.onLongPress, isNull,
-            reason: 'Pressionar e segurar exige precisao que nao podemos '
-                'pressupor.');
+        expect(
+          g.onLongPress,
+          isNull,
+          reason:
+              'Pressionar e segurar exige precisão que não podemos '
+              'pressupor.',
+        );
         expect(g.onHorizontalDragStart, isNull);
         expect(g.onVerticalDragStart, isNull);
       }
