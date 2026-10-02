@@ -174,9 +174,45 @@ o que cada parte do Hub faz (US2).
 - [X] T041 [US2] Mover o portão da FR-025 da 001 de `app/test/features/autenticacao/fluxo_sair_confirma_test.dart` para a saída em Configurações (provisória, T024); a quebra (ligar o botão direto) precisa continuar reprovando
 - [X] T042 [US2] Rodar a matriz completa em `tela_inicio_test.dart`, `tela_hub_test.dart`, `hub_acessibilidade_test.dart` e `app/test/features/autenticacao/fluxo_dentro_da_conta.dart`, e corrigir o que reprovar
 - [X] T043 [US2] **Criar** `app/test/album/album_de_telas_test.dart` (renderiza cada tela, em cada tema, com a fonte embarcada, e salva em `app/build/album/` sem comparar nada — R13), por enquanto só com o Início e o Hub, e anexar as imagens à PR
-- [ ] T044 [US2] **Revisão de design da equipe** sobre o Início e o Hub, comparando com o wireframe e com o de hoje (R2, R14). Registrar o veredito, com quem participou e o que mudar, em `specs/004-redesenho-das-telas/revisao-de-design.md` e na PR. **Se reprovar, parar e revisar a R2 antes da fase 4**
+- [X] T044 [US2] **Revisão de design da equipe** sobre o Início e o Hub, comparando com o wireframe e com o de hoje (R2, R14). Registrar o veredito, com quem participou e o que mudar, em `specs/004-redesenho-das-telas/revisao-de-design.md` e na PR. **Se reprovar, parar e revisar a R2 antes da fase 4**
+  → **Feita em 2026-10-01 pelo Henrique**: direção aprovada, acabamento reprovado. Veredito em [revisao-de-design.md](revisao-de-design.md); as mudanças viraram a **Phase 3b**, abaixo. Falta a revisão dos dois Eduardos.
 
 **Checkpoint**: a linguagem visual está aprovada e as demais telas a copiam.
+
+---
+
+## Phase 3b: O que a revisão da T044 mudou (Priority: P1)
+
+**Goal**: aplicar o veredito da T044 ([revisao-de-design.md](revisao-de-design.md))
+**antes** de a fase 4 copiar a linguagem. As tarefas marcadas com outra
+história executam na fase daquela história, mas estão aqui para a revisão ter
+um lugar só.
+
+**Decisão pendente que esta fase herda da fase 3**: a FR-017 (Hub sem rolar a
+150% no 320×568) é **inviável** junto com a FR-016 — a barra sozinha toma 123
+dos 568 px a 150%. O teste está escrito e pulado (`hub_cabe_sem_rolar_test.dart`),
+e o commit `d5a5031` apertou o cartão para caber a 100%, o oposto do "junto
+demais" da revisão. **Resolver na spec antes da T113.**
+
+### Já, antes da fase 4
+
+- [ ] T111 [P] Ícone do aplicativo: a Memora (robô), a partir de `app/assets/ilustracoes/memora_*.svg`, em `app/android/app/src/main/res/mipmap-*` (ícone adaptativo: primeiro plano e fundo), e `android:label="Memora"` no `AndroidManifest.xml`, com maiúscula (FR-009b). Conferir no aparelho real
+- [ ] T112 [P] Ícones da barra inferior desenhados para ela (FR-015): reconhecíveis sem rótulo, mesmo peso visual entre os três, versão preenchida para o destino atual; contraste validado nos três temas. Teste em `casca_interna_test.dart` continua exigindo nome escrito ao lado
+- [ ] T113 Acabamento refinado do `CartaoDePorta` (FR-016, R2 regra 3): profundidade que encolhe ao pressionar, contorno, medalhão que se destaca da pílula também no tema claro (o aviso da #38); respiro que **cresce com a altura disponível**, em vez de fixo — revendo o `d5a5031` à luz da decisão da FR-017
+- [ ] T114 [P] Componente `CaixaDeEtapa` no Design System (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`), exportado e na galeria: uma caixa com a frase de instrução no topo e o conteúdo dentro (FR-002a, R2 regra 8). É informação, não ação: sem pílula nem preenchimento (FR-012 da 002). Teste em `app/test/design_system/caixa_de_etapa_test.dart`, com a matriz
+- [ ] T115 Rever o Início com a T113 e a T114: a Memora com uma frase de tutorial (R2 regra 9), os atalhos em caixas que dizem para que servem, e o espaço da tela usado — hoje sobra metade dela vazia em 390×844 (álbum da T043)
+- [ ] T116 Regerar o álbum (T043), reinstalar no aparelho, e **segunda rodada da revisão** do Início e do Hub — agora as telas novas — em `revisao-de-design.md`
+
+### Nas fases seguintes
+
+- [ ] T117 [US1] Boas-vindas na altura toda, só para quem nunca entrou no aparelho (FR-009); **tela de volta** com a Memora ou uma pessoa idosa de fundo, "Entrar" como ação principal (FR-009a); cadastro e login com `CaixaDeEtapa`, sem mudar campos nem regras (FR-010). Substitui o escopo da T051 e amplia o da T052
+- [ ] T118 [US3] O aviso da conversa **aberto até a primeira mensagem e, depois, uma linha** com escudo e o núcleo ("senha" e "código"), que se toca para ler (FR-022, R5 revista). Nunca some, nem por gesto. Portão: depois da primeira mensagem, o aviso fechado ainda contém "senha" e "código"; provar quebrando com o aviso removido. Amplia a T055
+- [ ] T119 [US4] "Meus aplicativos" em **lista**, ícone do aparelho à esquerda e nome ao lado (FR-023 revista). Ajusta a tarefa da tela de aplicativos da fase 6
+- [ ] T120 [US4] **Captura pendente** (FR-028a): passo sem captura mostra um aviso visível com a chave do guia e o número do passo; teste em `catalogo_e_guias_test.dart` lista as pendentes, e a lista precisa chegar a zero antes da T104
+- [ ] T121 [US7] Grupo **Acessibilidade** em Ajustes (FR-038, FR-039a): tamanho do texto, reduzir movimento e alto contraste, cada opção com uma frase de para quem serve, com pré-visualização
+- [ ] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador
+- [ ] T123 [US8] **Data de nascimento opcional** no Perfil (FR-042c, `data-model.md`): só no aparelho, por conta, em `shared_preferences`; não é `DadoLocalDaPessoa`; sai com `esquecerTudo`. A idade é calculada na exibição. Teste de unidade da gravação e da saída; teste de widget do convite e da exibição
+- [ ] T124 [US5] Carteira Digital é o documento do gov.br (T080, resolvida): a `chave` na V10 é `carteira-digital`, e o guia da T082 segue essa leitura
 
 ---
 
@@ -276,7 +312,8 @@ senha do gov.br e onde nunca se digita (US5).
 - [ ] T077 [US5] Redesenhar o catálogo sensível (Serviços sociais) em `tela_catalogo.dart`, com a frase de que ali se aprende a acessar os serviços, e pictogramas em vez de logotipos (R7)
 - [ ] T078 [US5] Guia do **Gov.br** (Figuras 29-36 do wireframe), com o que ter em mãos e o aviso de senha nas telas de entrada; capturas com o campo de senha **vazio**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [ ] T079 [P] [US5] Guia do **Meu INSS**, no mesmo formato, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
-- [ ] T080 [US5] **Confirmar com a equipe** qual "Carteira Digital" o wireframe quis dizer, e registrar a resposta na nota ¹ de `specs/004-redesenho-das-telas/data-model.md`, antes de capturar
+- [X] T080 [US5] **Confirmar com a equipe** qual "Carteira Digital" o wireframe quis dizer, e registrar a resposta na nota ¹ de `specs/004-redesenho-das-telas/data-model.md`, antes de capturar
+  → **Resolvida em 2026-10-01**: é o documento digital do gov.br (Henrique). Nota ¹ do `data-model.md` atualizada.
 - [ ] T081 [P] [US5] Guias de **e-Título**, **Serasa**, **FGTS** e **Poupatempo**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [ ] T082 [P] [US5] Guias de **Carteira Digital** (conforme T080), **Correios** e **Carteira de Trabalho Digital**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [ ] T083 [US5] Criar `backend/src/main/resources/db/migration/V10__servicos_sociais.sql` (todas `SENSIVEL`, `identificador_android` nulo) e as mesmas linhas no simulado; teste `backend/src/test/java/br/fatec/memora/assistente/ServicosSociaisTest.java`: inserir uma das novas com pacote é recusado por `ck_servico_sensivel_nao_abre`; apaga só o que criar

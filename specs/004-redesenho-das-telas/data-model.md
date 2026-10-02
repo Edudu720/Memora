@@ -81,6 +81,28 @@ não vista ──(fechou o aplicativo no meio)──▶ não vista   (recomeça 
 por inatividade (FR-042b).
 **Vai ao servidor?** Nunca (FR-042a).
 
+### Data de nascimento (estado, no aparelho)
+
+Acrescentada na revisão da T044 (FR-042c).
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| `idDaConta` | texto | — |
+| `dataDeNascimento` | data | Opcional. Não pode ser futura nem dar mais de 120 anos. A idade é calculada na exibição, nunca gravada |
+
+**Onde**: `shared_preferences`, por conta, como a apresentação vista. **Não é
+credencial** e não vai ao servidor — o servidor não ganha dado novo (R10).
+**Sai ao sair da conta?** Não na saída comum, para a pessoa não digitá-la de
+novo a cada entrada; **sim** com `esquecerTudo`. Por isso **não** é
+`DadoLocalDaPessoa`, que sai em toda saída.
+
+### Preferência de paleta (estado, no aparelho)
+
+Acrescentada na revisão da T044 (FR-039). Mais um campo das preferências de
+aparência que a 002 já guarda, ao lado do tema: o nome de uma paleta pronta
+(`azul`, o padrão, e as demais definidas na R15). Valor desconhecido — paleta
+retirada numa versão nova — volta ao padrão.
+
 ### Catálogo guardado (estado, no aparelho)
 
 | Campo | Tipo | Regra |
@@ -125,13 +147,14 @@ mundo. **Sai ao sair da conta?** Não: não é dado da pessoa (FR-024a).
 | `serasa` | Serasa |
 | `fgts` | FGTS |
 | `poupatempo` | Poupatempo |
-| `carteira-digital-de-transito` | Carteira Digital de Trânsito ¹ |
+| `carteira-digital` | Carteira Digital ¹ |
 | `correios` | Correios |
 | `carteira-de-trabalho` | Carteira de Trabalho Digital |
 
-¹ O wireframe diz só "Carteira Digital". A leitura aqui é a Carteira Digital de
-Trânsito, a mais usada com esse nome; se a equipe quis outra (a de identidade
-do gov.br, por exemplo), troca-se a linha antes da migration.
+¹ O wireframe diz só "Carteira Digital". **Confirmado pelo Henrique em
+2026-10-01 (T080): é o documento digital do gov.br, e não a Carteira Digital de
+Trânsito.** A primeira versão desta tabela supunha a de Trânsito, com a chave
+`carteira-digital-de-transito`; corrigida antes de existir migration.
 
 **Linhas novas da V9** — `COTIDIANO`, com pacote declarado em `<queries>`:
 

@@ -28,7 +28,7 @@ Três destinos fixos na barra inferior, cada um com pilha própria:
 
 | Destino | Raiz da pilha | O que se empilha sobre ela |
 |---|---|---|
-| **Configurações** | Lista de grupos | Aparência · Privacidade · Conta · (galeria, só em depuração) |
+| **Configurações** | Lista de grupos | Aparência · Acessibilidade · Privacidade · Conta · (galeria, só em depuração) |
 | **Início** | Início | Hub → Conversa · Meus aplicativos · Serviços sociais · Ajuda · O que eu fiz por você → passo a passo |
 | **Perfil** | Perfil | — |
 

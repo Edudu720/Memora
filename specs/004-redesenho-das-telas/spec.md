@@ -66,7 +66,7 @@ um aviso que ocupa a tela inteira deixa de ser lido na terceira vez.
 | 21-24 | Passo a passo de um aplicativo (TikTok) | **Não existe** — fora de escopo na 003 | Nova, mostrada dentro do Memora (US4) |
 | 25 | Configurações | Só a parte de aparência | Nova (US7) |
 | 26 | Configurações de acessibilidade | Existe como "Aparência" | Redesenhar (US7) |
-| 27 | Perfil | Existe, mas não é mostrada | Redesenhar, sem idade nem plano (US8) |
+| 27 | Perfil | Existe, mas não é mostrada | Redesenhar, com idade opcional e sem plano (US8, revisão da T044) |
 | 28 | Serviços sociais | Existe com Gov.br e Meu INSS | Redesenhar, com os serviços do wireframe (US5) |
 | 29-36 | Passo a passo do gov.br (4 telas e 4 explicações) | **Não existe** | Nova, mostrada dentro do Memora (US5) |
 
@@ -87,9 +87,21 @@ frase segue a voz da Memora já definida nas features 001 e 003.
 ### Session 2026-10-01
 
 - Q: O passo a passo de outro aplicativo aparece dentro do Memora ou por cima do aplicativo real, como no wireframe? → A: **Dentro do Memora**, com a imagem de exemplo de cada tela. Aparecer por cima exigiria a permissão de sobreposição, a mais usada por vírus bancários no Brasil, e treinaria na pessoa o gesto de concedê-la (FR-029).
-- Q: O que o Perfil mostra além de nome e canal? → A: **Só o que o Memora já sabe**: nome, desenho, canal de contato e o aplicativo mais aprendido, calculado no aparelho. A idade não é pedida, porque nenhuma tarefa depende dela (FR-042).
+- Q: O que o Perfil mostra além de nome e canal? → A: **Só o que o Memora já sabe**: nome, desenho, canal de contato e o aplicativo mais aprendido, calculado no aparelho. A idade não é pedida, porque nenhuma tarefa depende dela (FR-042). ⚠️ *Substituída na revisão da T044*: a idade passa a ser opcional, informada no Perfil e guardada só no aparelho (ver a sessão abaixo).
 - Q: Sem internet, como ficam "Meus aplicativos" e "Serviços sociais", que vêm do servidor? → A: **O aparelho guarda o último catálogo recebido**, e os guias, que já são locais, funcionam offline. Um item retirado do ar some na primeira atualização com conexão (FR-024a). Decisão tomada na análise de 2026-10-01.
 - Q: A tela de Planos entra nesta feature? → A: **Não.** Continua valendo a decisão da 003, que a marcou como Futuro: monetização nunca foi discutida, e uma tela de plano no Memora prepara a pessoa para o golpe "seu plano venceu" (US9).
+
+### Session 2026-10-01 — revisão de design da T044 (Henrique)
+
+A revisão do Início e do Hub pediu mudanças, e quatro delas esbarravam numa
+decisão já escrita. As respostas abaixo substituem o que estava antes; o
+veredito completo está em [revisao-de-design.md](revisao-de-design.md).
+
+- Q: O aviso "a Memora nunca pede senha ou código" pode ser removível e sumir depois que a pessoa manda uma mensagem? → A: **Encolhe, não some.** Fica aberto até a primeira mensagem da conversa; depois vira uma linha fina, com escudo e o núcleo do aviso, que a pessoa toca para ler inteiro. Sumir de vez deixaria a pessoa sem aviso justamente no meio da conversa, que é onde o golpista a pressiona (FR-022, R5).
+- Q: O Perfil mostra o plano? → A: **Não, por ora.** Mantém-se a resposta sobre Planos acima.
+- Q: O Perfil mostra a idade? → A: **Sim, se a pessoa quiser informar.** A data de nascimento é **opcional**, informada no próprio Perfil, nunca no cadastro, e **fica só no aparelho** — não vai para o servidor. Substitui a resposta anterior, que dizia que a idade não seria pedida (FR-042).
+- Q: Aparência deixa escolher cores? → A: **Sim, entre paletas prontas.** Cinco ou seis cores de destaque, combináveis com os três temas, cada combinação validada por contraste antes de existir. Cor livre está fora: não há como garantir contraste, e o prejuízo cairia em quem enxerga pior (FR-039).
+- Q: Qual "Carteira Digital" o wireframe quis dizer? → A: **O documento digital do gov.br**, e não a Carteira Digital de Trânsito (T080).
 
 ---
 
@@ -298,8 +310,10 @@ se proteger de um golpe por telefone.
 ### User Story 7 - Ajustar o Memora ao meu jeito (Priority: P2)
 
 Seu Antônio enxerga pouco à noite. Em Configurações ele vê os grupos com nome
-claro — Aparência, Privacidade e Conta — e, em Aparência, troca o tema e
-aumenta o texto, vendo o resultado antes de confirmar. Em Conta, ele sai do
+claro — Aparência, Acessibilidade, Privacidade e Conta. Em Acessibilidade,
+cada opção diz para quem ela serve; ele aumenta o texto e liga o alto
+contraste, vendo o resultado antes de confirmar. Em Aparência, escolhe uma das
+cores prontas. Em Conta, ele sai do
 aplicativo e entende o que acontece quando sai.
 
 **Why this priority**: ajuste de aparência já existe; o que falta é ele estar
@@ -344,9 +358,12 @@ e-mail ou telefone está ligado à conta.
 3. **Given** que ainda não aprendi nenhum, **When** abro o Perfil, **Then** essa
    linha diz, na voz da Memora, que ainda vamos aprender juntos, em vez de
    aparecer vazia.
-4. **Given** que estou no Perfil, **When** procuro idade ou plano, como no
-   wireframe, **Then** eles não aparecem: o Memora não pede idade e não tem
-   planos.
+4. **Given** que estou no Perfil, **When** procuro plano, como no wireframe,
+   **Then** ele não aparece: o Memora não tem planos.
+5. **Given** que estou no Perfil e nunca informei a idade, **When** a tela
+   aparece, **Then** vejo um convite opcional para informar a data de
+   nascimento, que fica só neste aparelho; informada, a idade aparece como
+   informação (FR-042c).
 
 ---
 
@@ -413,6 +430,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **FR-002**: Cada tela MUST ter **uma** ação principal visualmente destacada.
   As demais ações são visivelmente secundárias. Verificado na revisão de
   design; automaticamente, só no limite de um cartão principal por tela.
+- **FR-002a**: Tela que pede ação MUST separar cada etapa ou grupo numa
+  **caixa própria**, com uma frase dizendo o que fazer ali, em vez de juntar
+  campos, explicação e botões num bloco só. Quem usa é uma pessoa idosa: a
+  instrução vem escrita ao lado do que ela vai tocar (revisão da T044).
 - **FR-003**: A Memora MUST aparecer como personagem com rosto reconhecível nas
   telas em que fala com a pessoa: apresentação, conversa, ajuda e passo a passo.
 - **FR-004**: As telas de entrada, apresentação, Início, Hub, Ajuda e passo a
@@ -431,9 +452,17 @@ assinatura ou pagamento, e não encontrar nenhuma.
 
 ### Requisitos Funcionais — Primeiro contato
 
-- **FR-009**: A primeira tela, para quem não tem sessão, MUST mostrar
-  ilustração, uma frase dizendo para que o Memora serve e uma ação principal
-  para começar, mais o caminho para quem já tem conta.
+- **FR-009**: A primeira tela, para quem não tem sessão **e nunca entrou neste
+  aparelho**, MUST mostrar ilustração, uma frase dizendo para que o Memora serve
+  e uma ação principal para começar, mais o caminho para quem já tem conta. O
+  conteúdo MUST ocupar a altura da tela, sem um vazio embaixo (revisão da T044).
+- **FR-009a**: Quem já entrou neste aparelho antes (há identificador do último
+  acesso) MUST ver outra tela, de **volta**: ilustração de fundo (a Memora ou
+  uma pessoa idosa), uma frase de boas-vindas de volta, "Entrar" como ação
+  principal e o caminho para criar outra conta (revisão da T044).
+- **FR-009b**: O ícone do aplicativo no celular MUST ser a Memora (o robô), no
+  mesmo estilo das ilustrações de pessoas, e o nome sob o ícone MUST ser
+  **"Memora"**, com maiúscula (revisão da T044).
 - **FR-010**: Cadastro e login MUST ser redesenhados na nova linguagem sem mudar
   os campos e regras decididos na feature 001.
 - **FR-011**: Botões de entrar com Google ou Facebook MUST aparecer só quando
@@ -457,13 +486,18 @@ assinatura ou pagamento, e não encontrar nenhuma.
   num 320×568, "Configurações" quebrava em três a cinco linhas na barra, e é o
   nome do aplicativo de configurações do próprio Android. Nesta spec,
   "Configurações" continua sendo o nome do destino; o texto que a pessoa lê é
-  "Ajustes". O destino atual é marcado por mais de um sinal além da cor. A única
+  "Ajustes". Os ícones MUST ser desenhados para a barra — reconhecíveis sem o
+  rótulo e com peso visual igual entre os três (revisão da T044). O destino
+  atual é marcado por mais de um sinal além da cor. A única
   exceção é o teclado aberto: a barra se esconde e volta quando ele fecha, para
   o campo de escrever não ficar espremido.
 - **FR-016**: O Hub MUST mostrar as partes do wireframe — conversar com a
   Memora, serviços sociais, meus aplicativos e ajuda —, além de "O que eu fiz
   por você", que vem da 003. Planos não entra (US9). Cada parte tem
-  ilustração, nome e uma linha de explicação.
+  ilustração, nome e uma linha de explicação. O Hub continua simples, mas cada
+  porta MUST ter acabamento de botão refinado — profundidade, contorno e
+  estado pressionado visíveis —, e não a aparência de uma faixa chapada
+  (revisão da T044).
 - **FR-017**: O Hub MUST caber sem rolagem em 100% e 150% de ampliação no menor
   aparelho suportado.
 - **FR-018**: Uma parte que ainda não funciona MUST NOT ser mostrada no Hub, nas
@@ -481,12 +515,18 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **FR-022**: Os avisos de segurança da conversa MUST continuar presentes e
   legíveis, e a conversa com o campo de escrever MUST ocupar pelo menos metade
   da altura disponível em 100% e 150% de ampliação, no menor aparelho
-  suportado.
+  suportado. O aviso de que a Memora nunca pede senha nem código MUST ficar
+  aberto até a pessoa mandar a primeira mensagem da conversa e, a partir dela,
+  encolher para **uma linha** com escudo e o núcleo do aviso ("senha" e
+  "código"), que a pessoa toca para ler inteiro. Ele MUST NOT sumir, nem por
+  gesto da pessoa (revisão da T044).
 
 ### Requisitos Funcionais — Aplicativos e passo a passo
 
-- **FR-023**: "Meus aplicativos" MUST mostrar cada aplicativo com o ícone
-  reconhecível e o nome escrito, numa grade, com busca no topo.
+- **FR-023**: "Meus aplicativos" MUST mostrar cada aplicativo numa **lista**,
+  com o ícone reconhecível **à esquerda** e o nome escrito ao lado, com busca
+  no topo. (Antes: numa grade. Mudado na revisão da T044: o ícone à esquerda
+  com o nome na mesma linha é o que se lê de relance.)
 - **FR-024**: A busca MUST encontrar por parte do nome, sem diferenciar
   maiúsculas e acentos.
 - **FR-024a**: O aparelho MUST guardar o último catálogo recebido, para "Meus
@@ -517,6 +557,12 @@ assinatura ou pagamento, e não encontrar nenhuma.
   sairia de um arquivo local sem prazo de validade.)
 - **FR-028**: Toda imagem de tela de outro aplicativo, no passo a passo, MUST
   estar marcada visivelmente como exemplo e MUST NOT conter dado pessoal real.
+- **FR-028a**: Enquanto a captura de um passo não existir, o passo MUST mostrar
+  no lugar dela um aviso visível de **captura pendente**, com a chave do guia e
+  o número do passo, e o texto do passo continua funcionando. Um teste lista
+  as capturas pendentes; a lista MUST chegar a zero antes da T104. É o aviso ao
+  desenvolvimento que a revisão da T044 pediu, porque as capturas dependem da
+  equipe.
 - **FR-029**: O passo a passo MUST acontecer inteiro dentro do Memora. O Memora
   MUST NOT pedir permissão para aparecer por cima de outro aplicativo.
 
@@ -558,11 +604,20 @@ assinatura ou pagamento, e não encontrar nenhuma.
 
 ### Requisitos Funcionais — Configurações e Perfil
 
-- **FR-038**: Configurações MUST ter os grupos Aparência, Privacidade e Conta. Os
-  grupos "Tela" e "Acessibilidade" do wireframe se juntam em Aparência, porque
-  tratam da mesma coisa. "Notificações" e "Idiomas" só aparecem quando existirem.
-- **FR-039**: Aparência MUST permitir escolher entre os temas validados, mudar o
-  tamanho do texto e reduzir movimento, com pré-visualização antes de confirmar.
+- **FR-038**: Configurações MUST ter os grupos Aparência, **Acessibilidade**,
+  Privacidade e Conta. (Antes: "Tela" e "Acessibilidade" juntos em Aparência.
+  Separados na revisão da T044: acessibilidade é foco do produto, e escondê-la
+  dentro de "Aparência" a trata como gosto.) "Notificações" e "Idiomas" só
+  aparecem quando existirem.
+- **FR-039**: Aparência MUST permitir escolher entre os temas validados e entre
+  **paletas prontas de cor de destaque** — de cinco a seis —, com
+  pré-visualização antes de confirmar. Toda combinação de tema e paleta MUST
+  passar no validador de contraste antes de existir; cor livre MUST NOT ser
+  oferecida (revisão da T044).
+- **FR-039a**: Acessibilidade MUST reunir o tamanho do texto, reduzir movimento
+  e o tema de alto contraste, cada opção com uma frase dizendo **para quem ela
+  serve** ("Se as letras parecem pequenas…"), e com pré-visualização antes de
+  confirmar.
 - **FR-040**: Privacidade MUST dizer em linguagem comum o que fica guardado no
   aparelho e permitir apagar a conversa. Apagar é irreversível, e por isso MUST
   usar a confirmação irreversível da feature 002, em duas etapas e sem o botão
@@ -572,9 +627,14 @@ assinatura ou pagamento, e não encontrar nenhuma.
   destrutiva das duas e MUST NOT ficar adjacente à primeira (Princípio II):
   fica separada, abaixo, com uma frase dizendo para que serve — aparelho
   compartilhado ou que vai ser vendido.
-- **FR-042**: O Perfil MUST mostrar nome, desenho, canal de contato e o
-  aplicativo mais aprendido, como informação e nunca como botão. MUST NOT pedir
-  nem mostrar idade ou plano.
+- **FR-042**: O Perfil MUST mostrar nome, desenho, canal de contato, o
+  aplicativo mais aprendido e, se a pessoa a tiver informado, a **idade**, como
+  informação e nunca como botão. MUST NOT mostrar plano.
+- **FR-042c**: A data de nascimento MUST ser **opcional**, informada só no
+  Perfil (nunca no cadastro), e MUST ficar **só no aparelho**, por conta, sem ir
+  ao servidor. Sai com `esquecerTudo`, como o identificador do último acesso;
+  não sai na saída comum, para a pessoa não precisar digitá-la de novo a cada
+  entrada (revisão da T044).
 - **FR-042a**: O aplicativo mais aprendido MUST ser calculado no aparelho, a
   partir dos passo a passo concluídos, e MUST NOT ser enviado ao servidor.
 - **FR-042b**: O progresso de aprendizado MUST ser apagado do aparelho quando a
