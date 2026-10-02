@@ -143,6 +143,17 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   Future<String?> _canal = Future<String?>.value();
   bool _avisoNaTela = false;
 
+  /// Verdadeiro do instante em que a sessão expira até a pessoa entrar de novo.
+  ///
+  /// A expiração espera `encerrarSessao`, que no servidor real é uma chamada de
+  /// rede — e, durante essa espera, a casca continua na tela e aceitando toque.
+  /// Sem esta trava, um toque (ou o "Estou aqui" do aviso) reiniciava o
+  /// monitor no meio da expiração, e ele seguia correndo depois do login: o
+  /// aviso de inatividade aparecia **por cima do login**, e uma segunda
+  /// expiração apagava o que a pessoa estava digitando (achado da revisão da
+  /// PR #38, provado por `fluxo_expiracao_test.dart`).
+  bool _expirando = false;
+
   /// Conta recém-criada em modo assistido, à espera da confirmação de canal.
   ///
   /// Guardada separada de [_pessoa] de propósito: ela **não** está dentro do
@@ -245,6 +256,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   }
 
   void _entrou(PessoaAutenticada pessoa) {
+    _expirando = false;
     setState(() {
       _pessoa = pessoa;
       _canal = widget.ultimoAcesso.identificador();
@@ -306,7 +318,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         rotuloConfirmar: TextosAutenticacao.botaoContinuar,
         aoConfirmar: () {
           Navigator.of(context).pop();
-          _monitor.registrarAtividade();
+          _registrarAtividade();
         },
       ),
     );
@@ -314,7 +326,16 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _avisoNaTela = false;
   }
 
+  /// Conta atividade — salvo quando a sessão já está expirando.
+  void _registrarAtividade() {
+    if (_expirando) return;
+    _monitor.registrarAtividade();
+  }
+
   Future<void> _expirarPorInatividade() async {
+    // Antes de qualquer espera: daqui em diante, nada reinicia a contagem.
+    _expirando = true;
+    _monitor.parar();
     await widget.repositorio.encerrarSessao();
 
     // A conversa sai aqui tambem, e nao so na saida deliberada. A FR-017
@@ -523,7 +544,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       // expiração — inclusive rolar, que é de quem está lendo.
       _Etapa.dentro => CascaInterna(
         key: _casca,
-        aoRegistrarAtividade: _monitor.registrarAtividade,
+        aoRegistrarAtividade: _registrarAtividade,
         raizes: <DestinoDaCasca, WidgetBuilder>{
           DestinoDaCasca.ajustes: (BuildContext _) => AjustesProvisorios(
             aoAbrirAparencia: _abrirAparencia,
