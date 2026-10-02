@@ -14,7 +14,7 @@ enum Ilustracao {
   pessoaComCelular('pessoa_com_celular'),
 
   /// A linha que atravessa a tela de boas-vindas. **Precisa de [cor]**.
-  linhaJornada('linha_jornada', colorida: false),
+  linhaJornada('linha_jornada'),
 
   // ---------------------------------------------------------------------------
   // A Memora (feature 004, T010). Use pelo `MemoraPersonagem`, que escolhe a
@@ -72,14 +72,9 @@ enum Ilustracao {
   /// "Como eu vejo o Memora": a letra grande e a paleta.
   ajusteAparencia('ajuste_aparencia');
 
-  const Ilustracao(this._arquivo, {this.colorida = true});
+  const Ilustracao(this._arquivo);
 
   final String _arquivo;
-
-  /// O desenho tem cores próprias, e por isso vai sobre o medalhão claro nos
-  /// temas escuros (R4 da feature 004). Só as de traço único, que recebem
-  /// `cor`, não são coloridas.
-  final bool colorida;
 
   /// Caminho do arquivo dentro de `assets/`.
   String get caminho => 'assets/ilustracoes/$_arquivo.svg';

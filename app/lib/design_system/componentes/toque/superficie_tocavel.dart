@@ -19,12 +19,19 @@ import '../../tokens/movimento.dart';
 ///
 /// | Estado | Sinal além da cor |
 /// |---|---|
-/// | foco | anel de [MemoraDimensoes.bordaSelecao] em primária, por fora |
-/// | pressionado | a superfície encolhe para [MemoraMovimento.escalaPressionado] e perde a sombra |
+/// | foco | anel de [MemoraDimensoes.bordaSelecao] em primária, **por fora** da superfície |
+/// | pressionado | a superfície encolhe para [MemoraMovimento.escalaPressionado] e perde a sombra; se for transparente, ganha o preenchimento `destaque` |
 /// | desabilitado | anunciado como tal ao leitor de tela; quem chama troca o conteúdo |
 ///
-/// O anel vai em `foregroundDecoration`: por cima, sem mudar o tamanho, para a
-/// tela não "pular" quando o foco chega.
+/// O anel vai em `foregroundDecoration`, desenhado **por fora**
+/// (`strokeAlignOutside`): por cima, sem mudar o tamanho, para a tela não
+/// "pular" quando o foco chega. Por dentro — a primeira versão — o anel
+/// primária caía sobre o preenchimento primária da porta principal, e foco e
+/// repouso ficavam iguais (achado da revisão da #38).
+///
+/// Superfície transparente (a barra inferior, o "Voltar") não tem sombra a
+/// perder, e encolher uma caixa sem fundo em 3% não se vê. Por isso ela ganha
+/// o preenchimento `destaque` enquanto pressionada.
 ///
 /// ## Por que não é exportada
 ///
@@ -49,6 +56,9 @@ class SuperficieTocavel extends StatefulWidget {
   /// Com sombra de cartão quando em repouso.
   final bool sombra;
 
+  /// Contorno de [MemoraDimensoes.bordaEnfase] nesta cor. Nulo, sem contorno.
+  final Color? borda;
+
   /// Para o leitor de tela: é o item escolhido de um grupo (o destino ativo
   /// da barra inferior). Nulo, a superfície não faz parte de grupo nenhum.
   final bool? selecionada;
@@ -65,6 +75,7 @@ class SuperficieTocavel extends StatefulWidget {
     this.aoTocar,
     this.dica,
     this.sombra = false,
+    this.borda,
     this.selecionada,
     super.key,
   });
@@ -105,8 +116,16 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
               reduzirMovimento: reduzir,
             ),
             decoration: BoxDecoration(
-              color: widget.fundo,
+              color: _pressionada && widget.fundo.a == 0
+                  ? cores.destaque
+                  : widget.fundo,
               borderRadius: widget.raio,
+              border: widget.borda == null
+                  ? null
+                  : Border.all(
+                      color: widget.borda!,
+                      width: MemoraDimensoes.bordaEnfase,
+                    ),
               boxShadow: widget.sombra && !_pressionada
                   ? <BoxShadow>[
                       BoxShadow(
@@ -123,6 +142,7 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
                     border: Border.all(
                       color: cores.primaria,
                       width: MemoraDimensoes.bordaSelecao,
+                      strokeAlign: BorderSide.strokeAlignOutside,
                     ),
                   )
                 : null,

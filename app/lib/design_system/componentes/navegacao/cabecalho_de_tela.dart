@@ -18,9 +18,11 @@ import '../toque/superficie_tocavel.dart';
 /// - **"Voltar" no mesmo canto, com seta e palavra** (US2, cenário 5). Seta
 ///   sozinha é ambígua para quem tem pouca familiaridade — mesma regra da
 ///   `BarraSuperior` da 002.
-/// - **Título em no máximo duas linhas.** Acima disso, reticências; o leitor
-///   de tela recebe o título inteiro, porque o `Text` anuncia o texto todo, e
-///   não o que coube.
+/// - **O título nunca é cortado.** A primeira versão o limitava a duas linhas,
+///   com reticências: "Como eu vejo o Memora" saía cortado a 150% nos
+///   aparelhos estreitos, e quem amplia o texto perdia justamente o que pediu
+///   para ver maior (WCAG 1.4.4, revisão da #38). O leitor de tela recebia o
+///   título inteiro — a pessoa que enxerga pouco, não.
 ///
 /// ## A figura cede espaço primeiro
 ///
@@ -107,7 +109,7 @@ class CabecalhoDeTela extends StatelessWidget {
             ],
             Row(
               children: <Widget>[
-                Expanded(child: TextoMemora.tituloTela(titulo, maxLinhas: 2)),
+                Expanded(child: TextoMemora.tituloTela(titulo)),
                 if (figura != null) ...<Widget>[
                   const SizedBox(width: MemoraEspacamento.md),
                   KeyedSubtree(

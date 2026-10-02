@@ -151,6 +151,55 @@ void main() {
     });
   });
 
+  group('Achados da revisão da #38', () {
+    testWidgets('o anel de foco fica POR FORA, e aparece também na principal',
+        (WidgetTester t) async {
+      // Por dentro, o anel primária caía sobre o preenchimento primária da
+      // porta principal: focada e sem foco ficavam iguais, salvo a camada do
+      // InkWell — o "só cor" que a FR-043 recusa.
+      await t.pumpWidget(app(porta(aoAbrir: () {}, principal: true)));
+      await t.sendKeyEvent(LogicalKeyboardKey.tab);
+      await t.pump();
+      final BoxDecoration anel =
+          superficie(t).foregroundDecoration! as BoxDecoration;
+      final BorderSide lado = (anel.border! as Border).top;
+      expect(lado.strokeAlign, BorderSide.strokeAlignOutside);
+      expect(lado.width, greaterThanOrEqualTo(3));
+    });
+
+    testWidgets('superfície transparente ganha preenchimento ao ser pressionada',
+        (WidgetTester t) async {
+      // A barra inferior e o "Voltar" são transparentes e sem sombra: encolher
+      // uma caixa sem fundo em 3% não se vê. O segundo sinal precisa existir.
+      await t.pumpWidget(
+        app(
+          NavegacaoInferior(
+            indiceAtivo: 0,
+            aoSelecionar: (_) {},
+            itens: const <ItemNavegacao>[
+              ItemNavegacao(icone: Icons.settings, rotulo: 'Ajustes'),
+              ItemNavegacao(icone: Icons.home, rotulo: 'Início'),
+            ],
+          ),
+        ),
+      );
+      final Finder item = find.ancestor(
+        of: find.text('Início'),
+        matching: find.byType(AnimatedContainer),
+      ).first;
+      Color? fundo() =>
+          (t.widget<AnimatedContainer>(item).decoration! as BoxDecoration).color;
+      expect(fundo(), Colors.transparent);
+
+      final TestGesture dedo = await t.startGesture(t.getCenter(item));
+      await t.pump(kPressTimeout);
+      expect(fundo(), MemoraCores.claro.destaque);
+      await dedo.up();
+      await t.pump();
+      expect(fundo(), Colors.transparent);
+    });
+  });
+
   group('A ilustração cede primeiro — regra 7 da R2', () {
     testWidgets('com o texto a 175% ou mais, o desenho sai', (
       WidgetTester t,
@@ -162,6 +211,57 @@ void main() {
       expect(find.byType(MedalhaoDeIlustracao), findsNothing);
       expect(find.text('Conversar com a Memora'), findsOneWidget);
     });
+  });
+
+  group('O texto fica dentro da forma — achado da revisão da #38', () {
+    // O Flutter reduz o raio de um RRect à metade do menor lado. Com o raio de
+    // pílula (999), a porta que fica alta com o texto ampliado virava quase um
+    // círculo, e os cantos do nome e da explicação saíam do preenchimento —
+    // na principal, texto branco sobre o fundo claro, invisível. `takeException`
+    // não pega isso: não é estouro, é texto fora da forma.
+    for (final Combinacao c in matriz(em: const <double>[1.5, 2.0])) {
+      testWidgets('em ${nomeDa(c)}', (WidgetTester t) async {
+        vestir(t, c.aparelho);
+        await t.pumpWidget(
+          naCombinacao(
+            c,
+            Scaffold(
+              body: ListView(
+                padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                children: <Widget>[porta(aoAbrir: () {}, principal: true)],
+              ),
+            ),
+          ),
+        );
+        final Finder caixa = find.descendant(
+          of: find.byType(CartaoDePorta),
+          matching: find.byType(AnimatedContainer),
+        );
+        final BorderRadius raio =
+            (t.widget<AnimatedContainer>(caixa).decoration! as BoxDecoration)
+                .borderRadius! as BorderRadius;
+        final RRect forma = raio.toRRect(t.getRect(caixa)).scaleRadii();
+
+        for (final Element texto in find
+            .descendant(of: find.byType(CartaoDePorta), matching: find.byType(Text))
+            .evaluate()) {
+          final Rect r = t.getRect(find.byWidget(texto.widget));
+          for (final Offset canto in <Offset>[
+            r.topLeft,
+            r.topRight,
+            r.bottomLeft,
+            r.bottomRight,
+          ]) {
+            expect(
+              forma.contains(canto),
+              isTrue,
+              reason: '${nomeDa(c)}: o canto $canto do texto '
+                  '"${(texto.widget as Text).data}" fica fora da porta',
+            );
+          }
+        }
+      });
+    }
   });
 
   group('Matriz — FR-044', () {

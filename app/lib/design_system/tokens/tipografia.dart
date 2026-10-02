@@ -23,8 +23,8 @@ abstract final class MemoraTipografia {
   ///
   /// **Os testes não a usam**, e de propósito: o `flutter test` mede com uma
   /// fonte quadrada, de 1 em por caractere, mais larga e com mais quebras que a
-  /// real. A matriz de estouro fica pessimista nas duas direções. Ver
-  /// `test/suporte/fonte.dart`, que a carrega só para o álbum de telas.
+  /// real. A matriz de estouro fica pessimista nas duas direções. Só o álbum
+  /// de telas (T043) vai carregá-la, porque ele existe para olhar.
   static const String familia = 'AtkinsonHyperlegibleNext';
 
   /// Menor tamanho permitido em qualquer texto do aplicativo.

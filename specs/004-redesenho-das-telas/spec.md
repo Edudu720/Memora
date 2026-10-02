@@ -224,8 +224,9 @@ sozinha, sem o Memora.
    posso voltar sem perder o lugar.
 5. **Given** que terminei o passo a passo, **When** a última tela aparece,
    **Then** a Memora me parabeniza e oferece voltar ao Hub e, se for um
-   aplicativo que ela pode abrir, abri-lo agora, avisando que vou sair do
-   Memora.
+   aplicativo que ela pode abrir e houver conexão, oferece pedir a ela que o
+   abra — pela conversa, com a confirmação e o aviso de saída de sempre
+   (FR-027).
 6. **Given** que o passo a passo ensina telas de outro aplicativo, **When**
    ele começa, **Then** a explicação inteira acontece dentro do Memora, com a
    imagem de exemplo da tela do outro aplicativo, e o Memora nunca pede
@@ -451,7 +452,12 @@ assinatura ou pagamento, e não encontrar nenhuma.
   para ver todas as partes do aplicativo.
 - **FR-015**: Todas as telas internas MUST ter uma barra inferior fixa com três
   destinos — Configurações, Início e Perfil —, cada um com desenho e nome
-  escrito. O destino atual é marcado por mais de um sinal além da cor. A única
+  escrito. **O rótulo visível do destino de configurações é "Ajustes"**
+  (decisão de implementação de 2026-10-01, a confirmar pela equipe): a 200%
+  num 320×568, "Configurações" quebrava em três a cinco linhas na barra, e é o
+  nome do aplicativo de configurações do próprio Android. Nesta spec,
+  "Configurações" continua sendo o nome do destino; o texto que a pessoa lê é
+  "Ajustes". O destino atual é marcado por mais de um sinal além da cor. A única
   exceção é o teclado aberto: a barra se esconde e volta quando ele fecha, para
   o campo de escrever não ficar espremido.
 - **FR-016**: O Hub MUST mostrar as partes do wireframe — conversar com a
@@ -493,12 +499,22 @@ assinatura ou pagamento, e não encontrar nenhuma.
   encontrar, o ponto a tocar destacado, uma frase curta e a indicação "passo N
   de M".
 - **FR-026**: Todo passo MUST permitir voltar ao anterior, sair do passo a passo
-  e dizer "a minha tela está diferente", que leva à conversa com a Memora. Essa
-  conversa MUST começar dizendo que uma tela diferente que peça senha ou código
-  sem a pessoa esperar pode ser golpe, e que nesse caso é para parar.
+  e dizer "a minha tela está diferente". Esse caminho MUST mostrar **primeiro,
+  no próprio guia e sem depender de internet**, que uma tela diferente que
+  peça senha ou código sem a pessoa esperar pode ser golpe, e que nesse caso é
+  para parar; **depois**, oferece a conversa com a Memora. (Revisão da #36: o
+  aviso morava só na conversa, que precisa de internet e de um provedor que
+  ainda não foi escolhido — offline, a pessoa nunca o via.)
 - **FR-027**: O último passo MUST parabenizar a pessoa e oferecer voltar ao Hub.
   Para aplicativo que a Memora pode abrir (regra D1 da 003), oferece também
-  abri-lo, com o aviso de que a pessoa vai sair do Memora.
+  pedir à Memora que o abra — **pelo mesmo caminho de qualquer abertura**: a
+  conversa leva o pedido ao servidor, o `AutorizadorDeAcao` decide, e só então
+  vêm a confirmação, o registro e o aviso de saída da 003. O passo a passo
+  **não abre nada sozinho**. Sem conexão, ou com o catálogo vindo do que o
+  aparelho guardou, essa oferta não aparece — o guia continua ensinando.
+  (Revisão da #36: a versão anterior criava uma segunda forma de abrir
+  aplicativo, sem passar pelo autorizador, e com o catálogo guardado a decisão
+  sairia de um arquivo local sem prazo de validade.)
 - **FR-028**: Toda imagem de tela de outro aplicativo, no passo a passo, MUST
   estar marcada visivelmente como exemplo e MUST NOT conter dado pessoal real.
 - **FR-029**: O passo a passo MUST acontecer inteiro dentro do Memora. O Memora
@@ -529,9 +545,13 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **FR-036**: O assunto "Como baixar um aplicativo" MUST ensinar a usar só a loja
   oficial do aparelho, e dizer por quê.
 - **FR-036a**: A apresentação inicial, o assunto "Segurança" da Ajuda e a tela
-  de Conta MUST dizer, em linguagem comum, o que o Memora **nunca** faz: pedir
-  senha ou código, ligar para a pessoa, pedir para instalar outro aplicativo ou
-  cobrar qualquer valor.
+  de Conta MUST dizer, em linguagem comum, o que **ninguém do Memora** faz:
+  pedir senha ou código **por telefone, mensagem ou e-mail**, ligar para a
+  pessoa, pedir para instalar aplicativo **fora da loja oficial** ou "para o
+  Memora funcionar", ou cobrar qualquer valor. (Revisão da #36: a versão
+  anterior dizia que o Memora "nunca pede senha nem código" — e ele pede, no
+  login, na recuperação e na confirmação do canal. Literal é o que o Princípio
+  II exige; a ressalva do canal é a mesma da FR-023 da 001.)
 - **FR-037**: Link para fora do Memora MUST levar só a endereço oficial, ser
   anunciado antes de abrir e dizer para onde leva. Nesta feature, o único é o
   endereço de download do "Compartilhar"; um link novo exige voltar a esta spec.
@@ -548,7 +568,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
   usar a confirmação irreversível da feature 002, em duas etapas e sem o botão
   de apagar ao lado do de cancelar (Princípio II).
 - **FR-041**: Conta MUST mostrar o canal de contato da conta e oferecer sair, e
-  sair esquecendo também o identificador lembrado.
+  sair esquecendo também o identificador lembrado. A segunda é a mais
+  destrutiva das duas e MUST NOT ficar adjacente à primeira (Princípio II):
+  fica separada, abaixo, com uma frase dizendo para que serve — aparelho
+  compartilhado ou que vai ser vendido.
 - **FR-042**: O Perfil MUST mostrar nome, desenho, canal de contato e o
   aplicativo mais aprendido, como informação e nunca como botão. MUST NOT pedir
   nem mostrar idade ou plano.
@@ -580,7 +603,13 @@ assinatura ou pagamento, e não encontrar nenhuma.
   bancário. O passo a passo ensina onde digitá-los; ele não os recebe.
 - **FR-049**: Os avisos de segurança MUST continuar existindo onde as features
   anteriores os exigem, no tamanho necessário para serem lidos e não maior: o
-  aviso compacto pode se expandir quando a pessoa toca nele.
+  aviso compacto pode se expandir quando a pessoa toca nele. **O aviso
+  compacto é só da conversa**, onde a falta de espaço foi medida. Na
+  recuperação de acesso o aviso continua inteiro: o golpe daquela tela pede o
+  número de 6 dígitos, e esconder o "número" atrás de um toque enfraqueceria a
+  FR-023 da 001 sem resolver problema nenhum (revisão da #36). O resumo
+  sempre visível de qualquer aviso compacto MUST conter o núcleo do aviso — na
+  conversa, "senha" e "código".
 - **FR-050**: Os dados mostrados no Perfil e em Conta MUST ser só os da própria
   conta, e MUST sumir da tela quando a sessão expira.
 
@@ -656,8 +685,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
   IA, que ainda não foi escolhido.
 - **O menor aparelho suportado é o de 320×568**, como na matriz de aparelhos que
   as features anteriores já usam.
-- **Voz e uso offline continuam fora de escopo**, conforme as contradições 1 e 2
-  de `requisitos-atualizados.md`.
+- **Voz continua fora de escopo** (contradição 1 de `requisitos-atualizados.md`).
+  **Uso offline é parcial, e só isto:** os guias e o último catálogo recebido
+  funcionam sem internet (FR-024a); a conversa continua exigindo conexão
+  (contradição 2). Não é suporte offline do produto inteiro.
 
 ---
 
@@ -720,8 +751,8 @@ própria.
 | Hub | Porta falsa inserida por fora | As portas são fixas no aplicativo, como já são hoje: o servidor não acrescenta porta |
 | Meus aplicativos (busca) | Aplicativo falso instalado com o mesmo nome do verdadeiro | O item é ligado ao **pacote**, não ao nome, e o aparelho só enxerga os pacotes declarados (R7 do plano). A cópia não aparece na grade e não pode ser aberta pelo Memora |
 | Serviços sociais | Tela que imita o Memora com um "Entrar no gov.br" | Nenhum item abre nada (FR-031), e não há logotipo oficial na tela para imitar |
-| Fim do passo a passo → "Abrir agora" | Fazer o Memora abrir o aplicativo errado | Só para cotidiano, pelo pacote do catálogo, com a confirmação, o registro e o aviso de saída da 003 (FR-027) |
-| Passo → "A minha tela está diferente" | A tela "diferente" é um site falso pedindo senha | FR-026: a conversa começa dizendo que tela diferente pedindo senha ou código pode ser golpe |
+| Fim do passo a passo → "Peça à Memora para abrir" | Fazer o Memora abrir o aplicativo errado, ou um que saiu do catálogo | FR-027: o guia não abre nada; o pedido vai pela conversa, e quem decide é o `AutorizadorDeAcao` no servidor. Offline, a oferta não aparece |
+| Passo → "A minha tela está diferente" | A tela "diferente" é um site falso pedindo senha | FR-026: o próprio guia, antes da conversa e sem internet, diz que tela diferente pedindo senha ou código pode ser golpe |
 | Configurações → Aparência | — | Não guarda dado da pessoa nem leva para fora do Memora: nenhuma exploração identificada |
 | Configurações → Privacidade | "Apague a conversa para liberar espaço" | FR-040: confirmação irreversível em duas etapas |
 | Ajuda → a conversa guiada | O exemplo vira roteiro ("a Memora disse para me passar…") | O exemplo nunca contém pedido de dado, e vem marcado como exemplo, como as capturas (FR-028) |

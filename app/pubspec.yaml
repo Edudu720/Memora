@@ -94,6 +94,8 @@ flutter:
 
   assets:
     - assets/ilustracoes/
+    # A licença da fonte vai junto, e aparece em "Licenças" do aplicativo.
+    - assets/fontes/atkinson_hyperlegible_next/OFL.txt
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -57,7 +57,9 @@ Uma tela do passo a passo.
 | `vistaEm` | instante | Gravado ao chegar ao fim **ou** ao pular (FR-013) |
 
 **Onde**: `shared_preferences`, como conjunto de contas que já viram.
-**Sai ao sair da conta?** Não (R11).
+**Sai ao sair da conta?** Não na saída comum; **sim** com
+`LimpezaDeSessao.executar(esquecerTudo: true)`, para aparelho que vai ser
+vendido (R11).
 
 **Transições**:
 

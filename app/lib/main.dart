@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'design_system/design_system.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
@@ -11,6 +13,7 @@ import 'services/seguranca/cofre_de_credenciais.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registrarLicencasEmbarcadas();
   final RepositorioPreferenciaAparenciaLocal repositorio =
       await RepositorioPreferenciaAparenciaLocal.abrir();
   final ControladorAparencia controlador = ControladorAparencia(repositorio);
@@ -101,4 +104,20 @@ class AplicativoMemora extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Põe a licença da fonte embarcada na lista de licenças do aplicativo.
+///
+/// A OFL permite embarcar a Atkinson Hyperlegible Next, desde que a licença
+/// viaje junto. Só o resumo que vai dentro do próprio `.ttf` já bastaria;
+/// registrar o texto inteiro deixa isso sem dúvida (revisão da #38).
+void registrarLicencasEmbarcadas() {
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(
+      <String>['Atkinson Hyperlegible Next'],
+      await rootBundle.loadString(
+        'assets/fontes/atkinson_hyperlegible_next/OFL.txt',
+      ),
+    );
+  });
 }

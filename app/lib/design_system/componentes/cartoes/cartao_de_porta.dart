@@ -20,7 +20,9 @@ import '../toque/superficie_tocavel.dart';
 /// proíbe. Esta é a pílula azul do Hub do wireframe, crescida para caber um
 /// desenho e uma linha de explicação.
 ///
-/// A porta [principal] vai em primária; as outras no `destaque`. No máximo uma
+/// A porta [principal] vai em primária; as outras no `destaque`, **com a borda
+/// em primária** do `BotaoSecundario`: só o `destaque` mede 1,13:1 contra o
+/// fundo claro, e a porta quase sumia (revisão da #38). No máximo uma
 /// principal por tela (FR-002) — duas ações de mesmo peso dividem a atenção de
 /// quem precisa de um caminho só.
 ///
@@ -81,7 +83,8 @@ class CartaoDePorta extends StatelessWidget {
       aoTocar: aoAbrir,
       fundo: fundo,
       sombra: habilitada,
-      raio: BorderRadius.circular(MemoraRaio.pilula),
+      raio: BorderRadius.circular(MemoraRaio.porta),
+      borda: habilitada && !principal ? cores.primaria : null,
       child: ConstrainedBox(
         constraints: const BoxConstraints(
           minHeight: MemoraDimensoes.alvoDecisao,

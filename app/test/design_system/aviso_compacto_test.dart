@@ -84,6 +84,31 @@ void main() {
     );
   });
 
+  testWidgets('com o teclado aberto, o teto é metade do que SOBRA da tela',
+      (WidgetTester t) async {
+    // A altura da tela não diminui com o teclado: num 360x640 com 300 px de
+    // teclado, metade da tela (320) é quase toda a área que sobra (340) — a
+    // lição da PR #28 de novo (revisão da #38).
+    // O teclado na JANELA, como no aparelho: um `MediaQuery` por fora seria
+    // apagado pelo `Scaffold`, e o teste não provaria nada.
+    vestir(t, const Size(360, 640));
+    t.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(t.view.resetViewInsets);
+    await t.pumpWidget(
+      MaterialApp(
+        theme: TemasMemora.claro,
+        home: Scaffold(body: SingleChildScrollView(child: aviso())),
+      ),
+    );
+    await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
+    await t.pump();
+    expect(find.text(AvisoCompacto.rotuloFechar), findsOneWidget);
+    expect(
+      t.getSize(find.byType(AvisoCompacto)).height,
+      lessThanOrEqualTo((640 - 300) * 0.5),
+    );
+  });
+
   group('Aberto, não passa de metade da tela — R5', () {
     for (final Combinacao c in matriz()) {
       testWidgets('em ${nomeDa(c)}', (WidgetTester t) async {
@@ -94,16 +119,22 @@ void main() {
             Scaffold(body: SingleChildScrollView(child: aviso())),
           ),
         );
+        // Role antes de tocar: com o resumo inteiro, a 200% o botão fica
+        // abaixo da dobra no 320x568, e o toque fora da tela não abre nada.
+        await t.ensureVisible(find.byKey(AvisoCompacto.chaveAlternar));
+        await t.pump();
         await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
         await t.pump();
+        expect(find.text(AvisoCompacto.rotuloFechar), findsOneWidget,
+            reason: '${nomeDa(c)}: o aviso precisa estar aberto para medir');
 
         expect(t.takeException(), isNull, reason: nomeDa(c));
         final double altura = t.getSize(find.byType(AvisoCompacto)).height;
         expect(
           altura,
-          lessThanOrEqualTo(
-            c.aparelho.height * MemoraDimensoes.tetoDoAvisoAberto,
-          ),
+          // 0,5 escrito aqui, e não o token: comparar com o token passaria
+          // mesmo com `tetoDoAvisoAberto = 0.9` (revisão da #38).
+          lessThanOrEqualTo(c.aparelho.height * 0.5),
           reason:
               '${nomeDa(c)}: o aviso aberto mede ${altura.round()} px, '
               'mais que metade dos ${c.aparelho.height.round()} da tela',

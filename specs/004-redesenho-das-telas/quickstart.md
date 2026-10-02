@@ -65,8 +65,11 @@ reprovar.
 Em "Meus aplicativos", buscar "tik" e "TIK". **Espera-se**: o TikTok aparece nas
 duas. Tocar: passo a passo com "Passo 1 de N", selo "Exemplo" na captura,
 destaque no ponto a tocar, "Voltar" e "A minha tela está diferente" em todo
-passo. Último passo: parabéns, "Voltar ao Hub" e "Abrir o TikTok agora", que
-avisa a saída do Memora antes de abrir. Com o TikTok **não instalado**: o guia
+passo; "A minha tela está diferente" mostra o aviso de golpe **antes** da
+conversa, mesmo sem internet. Último passo: parabéns, "Voltar ao Hub" e, com
+conexão, "Peça à Memora para abrir o TikTok", que vai pela conversa, com a
+confirmação e o aviso de saída de sempre. Sem conexão, essa oferta não
+aparece. Com o TikTok **não instalado**: o guia
 começa pela loja oficial. Em nenhum momento o Android pede permissão de
 sobreposição.
 Com o modo avião ligado depois de uma abertura com internet, "Meus aplicativos"
@@ -127,9 +130,11 @@ $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"; cd backend; .\mvnw clean test
 ```
 
 **Espera-se**: a V8 sobe, as 8 linhas antigas têm `chave`, as novas sensíveis
-estão sem pacote. **Provar quebrando**: acrescentar numa migration de teste uma
-`chave` sem guia e ver o teste de ligação do aplicativo reprovar com o nome da
-chave.
+estão sem pacote. **Provar quebrando**: acrescentar uma `chave` ao
+`RepositorioAssistenteSimulado` sem a migration correspondente (ou o
+contrário) e ver o teste de ligação do aplicativo reprovar com o nome da chave.
+O teste lê só `backend/src/main/resources/db/migration/` — não existe
+"migration de teste".
 
 ### V13 — A revisão de design (SC-005)
 

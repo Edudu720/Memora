@@ -4,17 +4,32 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-01 — **revisão das PRs #31 a #34** e a PR de
-correção que saiu dela, pelo Henrique. Ver "A revisão de 2026-10-01", logo
-abaixo, antes de mexer em sessão, galeria ou no teto diário.
-**Estado**: **361 testes** no backend e **481** no aplicativo, todos com
-execução limpa. A feature 001 está completa, só a fase 8 (login social) fora,
-com bloqueio externo. A feature 003 tem Hub, conversa que ensina, catálogos,
+**Última sessão**: 2026-10-01 (noite) — **feature 004, o redesenho das
+telas**, pelo Eduardo: spec, plano e 114 tarefas (#36), e as **fases 1 e 2**
+(fundação) no aplicativo (#38), com a revisão de três agentes independentes e
+as correções numa PR própria (#39). Antes, no mesmo dia, a revisão das #31 a
+#34 pelo Henrique — ver "A revisão de 2026-10-01", logo abaixo.
+
+> 📋 **O que falta está num documento só:
+> [docs/relatorios/o-que-falta.md](docs/relatorios/o-que-falta.md)** — por
+> feature, com as tarefas, as decisões pendentes e o que depende de gente.
+>
+> ⚠️ **As #36 a #39 entraram na `master` sem revisão humana**, por decisão do
+> Eduardo, para destravar a próxima fase. **A equipe precisa revisar o que
+> entrou** antes da fase 3 da 004.
+
+**Estado**: **361 testes** no backend e **768** no aplicativo, todos com
+execução limpa. A feature 001 tem US1 a US4 completas e a US5 sem o envio real
+(T065a) e a conta abandonada (T065b); faltam a fase 8 (login social, com
+bloqueio externo) e a fase 9 (validação). A feature 003 tem Hub, conversa que ensina, catálogos,
 execução com confirmação e registro — tudo contra simulado, **sem provedor de
 IA escolhido** —, as fases 9 (T069, T070) e as T075-T078 da fase 10 feitas.
-**Próximo: a fase 8 da 003** (T061-T068), que espera a escolha do provedor, ou
-a **fase 10** (T079-T099, quase toda sem dependência externa) ou o resto da **fase 9** (T071-T074 — T071 exige as 5 pessoas de 65+). Ver
-seção 4-B.
+A 004 tem a fundação pronta: fonte Atkinson, a Memora como personagem, os
+componentes novos, a casca com barra inferior e o fim da casca de demonstração.
+**Próximo: a fase 3 da 004** (US2, Início e Hub), que termina numa **revisão de
+design da equipe** (T044); ou a `chave` do catálogo (T029-T033, backend). Na
+003, a fase 8 espera o provedor e a fase 10 (T079-T099) não depende de nada
+externo. Ver seção 4-B e o `o-que-falta.md`.
 
 > 🔴 **A revisão de 2026-10-01 achou a sessão furada em três lugares, e nenhum
 > estava na lista do que revisar.** Os quatro agentes de revisão olharam as PRs;
@@ -28,8 +43,13 @@ seção 4-B.
 >   catálogo e registro são rotas do `Navigator`; trocar a etapa do fluxo
 >   deixava a conversa na tela do celular esquecido. Hoje `_fecharRotasAbertas`.
 > - **Tocar dentro dessas telas não contava como atividade** — o `Listener`
->   envolvia só o Hub. Quem conversasse 28 minutos era expulso. Hoje toda rota
->   do fluxo nasce em `_rota(...)`, que já traz o `Listener`.
+>   envolvia só o Hub. Quem conversasse 28 minutos era expulso. *Na 004 isto
+>   mudou de lugar*: as telas vivem nas pilhas da `CascaInterna`, e **um
+>   `Listener` só, em volta da casca**, conta o toque em qualquer uma; o
+>   `_rota(...)` não traz mais `Listener`. As pilhas saem da árvore com a casca
+>   na expiração, e o `popUntil` de `_fecharRotasAbertas` fica para os
+>   diálogos do `Navigator` de fora. ⚠️ O leitor de tela e o teclado **ainda
+>   não** contam como atividade (T109 da 004).
 >
 > **Testar o componente não prova a tela que o aplicativo mostra.** Os três
 > portões novos montam o `FluxoAutenticacao` de verdade
@@ -168,12 +188,9 @@ seção 4-B.
 > $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"; cd backend; .\mvnw clean test
 > ```
 
-> ⚠️ **A casca de demonstração continua no `RepositorioAutenticacaoSimulado`** —
-> agora para cadastro **e login**. A troca é de uma linha em
-> `lib/demonstracao/casa_demonstracao.dart`, mas exige decidir de onde vem a URL
-> base do servidor — não há configuração de ambiente no aplicativo, e `MemoraApi`
-> hoje aponta para produção por padrão. **Isso não está na spec**; decidir antes
-> de trocar.
+> ✅ **A casca de demonstração não existe mais** (feature 004, #38): o
+> `main.dart` abre direto no `FluxoAutenticacao`. Simulado ou servidor real é
+> escolhido na `Composicao`, por `--dart-define` — ver a seção 5.1.
 >
 > O simulado **reproduz a escada de bloqueio real** (5 falhas, depois 1 min) e
 > guarda as contas criadas na própria execução, para que cadastrar e depois
@@ -266,7 +283,7 @@ execute as instruções manualmente. O resultado é idêntico.
 
 | Feature | Spec | Plano | Tarefas | Código |
 |---|---|---|---|---|
-| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1 a US5 completas, nos dois lados; falta a fase 8 (login social), com bloqueio externo |
+| **001 — Autenticação Acessível** | ✅ | ✅ | ✅ | 🟡 US1 a US4 completas; US5 sem T065a (envio real) e T065b (conta abandonada); faltam T027a, a fase 8 (login social, bloqueio externo) e a fase 9 (validação) |
 | **002 — Design System** | ✅ | ✅ | ✅ | 🟡 **T001-T049 e T052 feitas** — faltam T050/T051 (5 pessoas) e T053 (revisões) |
 | **003 — Hub e a assistente** | ✅ | ✅ | ✅ | 🟡 **66 de 99 tarefas** (2026-10-01); faltam a fatia do provedor de IA, o resto da validação e a fase 10 (T079-T099) |
 
@@ -566,7 +583,7 @@ entrega o que o corpo escondeu — medido, não suposto.
 | Sair encerra **de verdade** (FR-026) | `SairEncerraSessaoTest` | Pus `if (false)` na revogação: **3 testes** reprovaram, o principal com `expected:<401> but was:<200>` — o refresh de 60 dias continuou renovando depois do `204` |
 | Sair encerra **só este aparelho** (FR-024) | `SairEncerraSessaoTest` | Troquei por `revogarSessoesDaPessoa`: **2 testes** reprovaram com `expected:<200> but was:<401>` — o tablet caiu junto com o celular |
 | Sair exige confirmação (FR-025) | `saida_limpa_armazenamento_test.dart` e, **pelo Hub de verdade**, `fluxo_sair_confirma_test.dart` | Liguei o botão direto no `_sair`: **4 testes** reprovaram com `Found 0 widgets with key [<'perfil.confirmacao'>]`. ⚠️ Até 2026-10-01 só a `TelaPerfil` era testada — e ela não aparecia no aplicativo; o Hub saía com um toque. No Hub, a mesma quebra reprova **5 testes** |
-| A inatividade fecha o que está aberto (FR-017) | `fluxo_rotas_e_inatividade_test.dart` | Comentei o `popUntil`: reprovou com `Found 1 widget with key [<'conversa.campo'>]` — a conversa ficou por cima do login |
+| A inatividade fecha o que está aberto (FR-017) | `fluxo_rotas_e_inatividade_test.dart` e, desde a 004, `fluxo_expiracao_test.dart` | Comentei o `popUntil`: reprovou com `Found 1 widget with key [<'conversa.campo'>]` — a conversa ficou por cima do login. ⚠️ **Na 004 isso deixou de ser verdade**: as telas vivem nas pilhas da casca e morrem com ela, e comentar o `popUntil` não reprovava mais nada. Ele continua necessário para os **diálogos** do `Navigator` de fora — o `fluxo_expiracao_test.dart` abre "Fechar o Memora?" e deixa expirar, e reprova sem ele |
 | Tocar na conversa conta como atividade (FR-017) | `fluxo_rotas_e_inatividade_test.dart` | Troquei o `onPointerDown` por `(_) {}`: a pessoa foi expulsa no meio da conversa |
 | Sair apaga a conversa, pelo fluxo real (FR-048) | `fluxo_limpeza_de_sessao_test.dart` | Comentei cada `limpeza?.executar()`: reprovou só o caso correspondente, `Expected: <1> Actual: <0>` |
 | Teto diário resiste a rajada (R7) | `LimiteDeConversasTest` | Voltei ao ler-decidir-gravar sem trava: 40 turnos simultâneos deram `duplicate key ... pk_uso_da_assistente` |
@@ -1017,8 +1034,9 @@ a oposta, e a medição desmentiu.
 ### A galeria e o portão dos tokens (T045-T048, 2026-09-15)
 
 `app/lib/design_system/galeria/galeria_memora.dart` monta **todo** componente
-em **todo** estado, com troca de tema e de ampliação por dentro. Ela vive na
-aba "Componentes" da casca de demonstração e **substituiu** a vitrine antiga
+em **todo** estado, com troca de tema e de ampliação por dentro. Desde a 004
+ela é aberta por uma linha em **Ajustes**, que só existe no modo de depuração.
+Ela **substituiu** a vitrine antiga
 (`demonstracao/tela_componentes.dart`, apagada): duas listas dos mesmos
 componentes é como elas começam a divergir.
 
@@ -1163,23 +1181,17 @@ e o que mais estiver aberto. Não há folga para os três mais um jogo.
 
 ### O que existe para ver
 
-A tela inicial é uma **casca de demonstração** (`lib/demonstracao/`), provisória,
-com três abas:
-
-| Aba | Conteúdo |
-|---|---|
-| **Entrar** | Fluxo real das US1 e US2: boas-vindas → cadastro → dentro → sair → login |
-| **Componentes** | Vitrine do Design System |
-| **Aparência** | Tela real de preferências, com pré-visualização |
-
-A casca sai quando o Hub existir.
+O aplicativo abre nas **boas-vindas** — a casca de demonstração saiu na 004.
+Dentro da conta há a **barra inferior** com Ajustes, Início e Meu perfil. Em
+Ajustes estão a aparência, a saída e, **só em depuração**, a galeria do Design
+System com todos os componentes em todos os estados.
 
 **Como ver o estado bloqueado no aparelho**: crie a conta pelo cadastro, saia,
 e erre a senha **5 vezes**. A quinta já responde bloqueio, com contagem
 regressiva de 1 minuto que libera o botão sozinha.
 
 **Como ver o aviso de inatividade sem esperar meia hora**: em
-`casa_demonstracao.dart`, passe prazos curtos ao `FluxoAutenticacao` —
+`main.dart`, passe prazos curtos ao `FluxoAutenticacao` —
 `inatividade: Duration(seconds: 30), avisoDeInatividade: Duration(seconds: 10)`.
 São os valores reais por padrão; o parâmetro existe justamente para não precisar
 mentir sobre eles no código.
@@ -1510,9 +1522,21 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 - **`AvatarMemora` não é o rosto da Memora.** É o retrato do casal no cartão do
   cadastro e do login — o nome é anterior ao personagem. O rosto dela é o
   `MemoraPersonagem`, da feature 004.
-- **O portão do V9 é lexical.** Ele exige `MemoraMovimento.efetiva` **na mesma
-  linha** de cada `duration:`. Guardar a duração numa variável antes reprova,
-  mesmo estando certo. Escreva a chamada no lugar.
+- **O portão do V9 é lexical.** Ele procura `MemoraMovimento.efetiva` na linha
+  de cada `duration:` (ou na seguinte). Guardar a duração numa variável antes
+  reprova, mesmo estando certo. Escreva a chamada no lugar.
+- **`dart format` em pasta inteira reescreve arquivos que você não tocou.** Na
+  004 ele reformatou dezenas de arquivos da 001, 002 e 003 sem mudar lógica, e
+  foi preciso reverter um por um. Formate **só os arquivos que você editou**.
+- **Com um `Navigator` por destino, diálogo e `pop()` precisam concordar.** O
+  `DialogoMemora.mostrar` abre no `Navigator` que o contexto de quem chama
+  encontra (`useRootNavigator: false`); com o padrão, "Entendi" fechava a tela
+  de trás. E o `Scaffold` tira o teclado do `MediaQuery` do corpo: quem precisa
+  saber do teclado lê da `View`.
+- **Raio de pílula em caixa que cresce corta o texto.** O Flutter reduz o raio
+  à metade do menor lado; uma porta alta com raio 999 vira quase círculo, e os
+  cantos do texto saem do preenchimento. `takeException` não pega — o portão
+  confere os cantos do texto dentro do `RRect`.
 
 ---
 
@@ -1593,9 +1617,21 @@ receberá nada, e a deixaria presa esperando uma mensagem que não vem.
 | **Confirmar a `TelaConfirmarCanal`** como consequência, não escopo novo | Eduardo | Não — já implementada; sem ela a conta assistida não teria saída |
 | Teste com 5 pessoas de 65+ anos | Equipe | **Sim** — portão de saída das features 001 e 002 |
 
-### Onde a fila parou em 2026-10-01
+### Onde a fila parou em 2026-10-01 (noite)
 
-**A fila está vazia.** A #31 até a #35 entraram na `master`, nesta ordem, e a
+**A fila está vazia de novo** — mas as #36 a #39 entraram **sem revisão
+humana**, por decisão do Eduardo. Revisar o que entrou é a primeira tarefa.
+
+| # | O quê | Situação |
+|---|---|---|
+| **#36** | Spec, plano e tarefas da 004 | ✅ na `master` |
+| **#37** | Passagem de contexto depois da #35 | ✅ na `master` |
+| **#38** | Fundação da 004 — fonte, Memora, componentes, casca | ✅ na `master` |
+| **#39** | Correções da revisão das #36 a #38 (três agentes independentes) | ✅ na `master` |
+
+### Onde a fila parou em 2026-10-01 (tarde)
+
+A #31 até a #35 entraram na `master`, nesta ordem, e a
 #35 é a PR de correção da revisão das quatro anteriores, empilhada sobre a #34.
 
 | # | O quê | Situação |

@@ -170,8 +170,13 @@ equipe não quer).
 **Decisão**: novo componente `AvisoCompacto`, que mostra **o título do aviso e
 uma linha**, com "Ler o aviso inteiro" para expandir. Expandido, ele empurra o
 conteúdo, mas nunca passa de 50% da altura disponível; acima disso o texto
-rola dentro dele. A conversa (FR-022) e a recuperação de acesso (FR-023 da 001)
-passam a usá-lo.
+rola dentro dele. **Só a conversa (FR-022) passa a usá-lo.**
+
+⚠️ *Corrigido na revisão da #36*: a primeira versão levava o aviso compacto
+também à recuperação de acesso. Lá o título fixo é "Eu nunca peço sua senha", e
+o "número de 6 dígitos" — o dado que o golpe daquela tela pede — ficaria só no
+texto expandido. A recuperação nem tinha o problema de espaço da conversa.
+Ela mantém o aviso inteiro (FR-049).
 
 O portão da FR-022 é uma extensão do da FR-027 da 003: na matriz de aparelhos,
 em 100% e 150%, **lista de mensagens + campo de escrever ≥ 50% da altura
@@ -184,10 +189,10 @@ FR-023 da 001 e a FR-033 da 003 exigem: compacto não é escondido.
 permanência exigida pelas duas features: a pessoa sendo enganada ao telefone
 pode estar na décima conversa.
 
-⚠️ **Os portões da FR-023 da 001** procuram o texto do aviso na árvore. Com o
-aviso compacto, o texto inteiro só existe expandido; os testes precisam
-procurar o **título** (sempre presente) e expandir para ler o resto. Mudar o
-teste, não o portão: o que ele protege é a presença do aviso, e ela continua.
+⚠️ **Os portões da FR-023 da 001 não mudam**: a recuperação mantém o aviso
+inteiro. Na conversa, o resumo sempre visível precisa conter o núcleo do aviso
+("senha" e "código"), e o teste confere isso **com o aviso fechado** — que é o
+que a maioria vê.
 
 ---
 
@@ -315,8 +320,14 @@ por erro de digitação.
 
 **Decisão**: o nome vem da sessão (`PessoaAutenticada.nomeTratamento`); o canal
 vem do **identificador do último acesso**, que o aparelho já guarda (FR-012 da
-001) e que é, por construção, um canal da conta — foi com ele que a pessoa
-entrou ou se cadastrou.
+001) — foi com ele que a pessoa entrou ou se cadastrou.
+
+⚠️ **Não é, sempre, um canal da conta** (correção da revisão da #36). Na
+sessão-chamariz, quem tentou cadastrar um canal que já pertence a alguém
+recebe uma sessão para um sujeito que não existe, e o fluxo grava o canal
+**digitado** (`fluxo_autenticacao.dart`, `_cadastrou`). Não vaza nada além do
+que a própria pessoa digitou — mas o Perfil mostraria um canal que não é de
+conta nenhuma. É o mesmo comportamento que o login já tem desde a FR-012.
 
 **Por quê**: um endpoint autenticado novo traria a obrigação da sessão-chamariz
 e mais superfície, para mostrar um dado que o aparelho já tem. Não há dado
@@ -331,7 +342,7 @@ a US4 da 001 um dia permitir trocar o canal, isso precisa ser revisto.
 
 | Dado | Onde | Sai ao sair da conta? |
 |---|---|---|
-| Apresentação vista | `shared_preferences`, por conta | **Não** — sair e voltar não deve repetir a apresentação |
+| Apresentação vista | `shared_preferences`, por conta | **Não** na saída comum — sair e voltar não deve repetir a apresentação. **Sim** com `esquecerTudo`: aparelho que vai ser vendido não deve guardar os identificadores das contas que passaram por ele (revisão da #36) |
 | Progresso de aprendizado | arquivo local, por conta | **Sim** — entra como `DadoLocalDaPessoa` na `LimpezaDeSessao` (FR-042b) |
 | Catálogo guardado | arquivo local, único | **Não** — é o mesmo para todo mundo e não diz nada sobre a pessoa (FR-024a, decisão da análise de 2026-10-01) |
 

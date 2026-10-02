@@ -84,6 +84,15 @@ void main() {
       // Início é o segundo destino.
       expect(find.byKey(NavegacaoInferior.chaveDoTraco(2)), findsOneWidget);
       expect(find.byKey(NavegacaoInferior.chaveDoTraco(1)), findsNothing);
+      // A chave sozinha não prova nada: ela é aplicada pelo mesmo `ativo ?` que
+      // pinta o traço, e um traço transparente passaria (revisão da #38).
+      final Container traco = t.widget<Container>(
+        find.byKey(NavegacaoInferior.chaveDoTraco(2)),
+      );
+      expect(
+        (traco.decoration! as BoxDecoration).color,
+        MemoraCores.claro.primaria,
+      );
       expect(
         t.getSemantics(destino(DestinoDaCasca.inicio)),
         isSemantics(label: TextosCasca.destinoInicio, isSelected: true),

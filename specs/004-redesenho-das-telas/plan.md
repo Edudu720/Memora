@@ -71,7 +71,7 @@ no servidor; nenhuma permissão nova do Android, em especial a de sobreposição
 **Scale/Scope**: **20 telas novas ou redesenhadas** de forma visível
 (contando as variações de passo como uma tela), mais as 6 telas da 001 e da
 003 fora do wireframe que entram no redesenho. ~16 guias de passo a passo, de 3
-a 5 passos cada. Backend: 3 migrations.
+a 7 passos cada. Backend: 3 migrations.
 
 ## Constitution Check
 
@@ -84,7 +84,7 @@ a 5 passos cada. Backend: 3 migrations.
 | **III — Acessibilidade** | ✅ | Toda tela nova entra na matriz de aparelho × escala × tema (FR-044). A fonte escolhida é a de baixa visão. A ilustração cede espaço antes do texto (regra 7 da R2) |
 | **IV — Spec antes de código** | ✅ | Spec com as três clarificações respondidas. Duas interpretações deste plano estão **registradas como tal** para a equipe poder reabrir: o pictograma no lugar do logotipo (R7) e as capturas reais (R6) |
 | **V — Arquitetura limpa, feature-first** | ✅ | Features novas em `features/` (ver estrutura). Componentes que servem a mais de uma tela vão para o Design System, nunca para dentro de uma feature |
-| **VI — A IA nunca age sozinha** | ✅ | Nenhuma ação nova. Abrir aplicativo a partir do passo a passo passa pela mesma confirmação e registro da 003 |
+| **VI — A IA nunca age sozinha** | ✅ | Nenhuma ação nova. O fim do passo a passo **não abre nada**: oferece pedir à Memora, e o pedido vai pela conversa ao `AutorizadorDeAcao`, com a confirmação e o registro da 003 (FR-027). Offline ou com catálogo do aparelho, a oferta não aparece (revisão da #36) |
 | **VII — Ensinar, não substituir** | ✅ | É o centro da feature: o passo a passo é ensino puro, e "abrir agora" só aparece **depois** do último passo, para aplicativo cotidiano |
 
 **Nenhuma violação a justificar.** A seção *Complexity Tracking* fica vazia.
@@ -94,8 +94,8 @@ a 5 passos cada. Backend: 3 migrations.
 Mantida. O desenho da Phase 1 acrescentou um ponto que vale registrar ao lado do
 Princípio I: o **canal de plataforma** `memora/aplicativos` é código nativo novo,
 mas só **lê** — instalado ou não, e o ícone — e só para pacotes declarados em
-`<queries>`. Ele não abre nada (abrir continua com o `AbridorDeAplicativo`) e
-enxerga pacote fora de `<queries>` — o Android não deixa —, e o lado Kotlin
+`<queries>`. Ele não abre nada (abrir continua com o `AbridorDeAplicativo`),
+não enxerga pacote fora de `<queries>` — o Android não deixa —, e o lado Kotlin
 recusa argumento que não tenha forma de pacote antes de consultar o sistema
 ([contracts/canal-aplicativos.md](contracts/canal-aplicativos.md)).
 
