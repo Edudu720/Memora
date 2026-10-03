@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/services/preferencias/repositorio_preferencia_aparencia_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Repositório em memória, para testar sem tocar no armazenamento do aparelho.
 class _RepositorioFalso implements RepositorioPreferenciaAparencia {
@@ -41,6 +43,161 @@ void main() {
     test('padrão é seguir o sistema, sem ampliação extra', () {
       expect(PreferenciaAparencia.padrao.tema, EscolhaDeTema.seguirSistema);
       expect(PreferenciaAparencia.padrao.ehPadrao, isTrue);
+    });
+  });
+
+  group('Reduzir movimento e paleta — FR-039, FR-039a', () {
+    test('o padrão não reduz movimento: só a configuração do sistema vale', () {
+      expect(PreferenciaAparencia.padrao.reduzirMovimento, isFalse);
+      expect(
+        PreferenciaAparencia.padrao.paleta,
+        PreferenciaAparencia.paletaPadrao,
+      );
+    });
+
+    test(
+      'reduzir movimento tira a preferência do padrão, e voltar o repõe',
+      () {
+        const PreferenciaAparencia p = PreferenciaAparencia();
+        expect(p.copyWith(reduzirMovimento: true).ehPadrao, isFalse);
+        expect(p.copyWith(reduzirMovimento: true).reduzirMovimento, isTrue);
+        expect(
+          p.copyWith(reduzirMovimento: true).copyWith(reduzirMovimento: false),
+          PreferenciaAparencia.padrao,
+        );
+      },
+    );
+
+    test('a igualdade enxerga os dois campos novos', () {
+      expect(
+        const PreferenciaAparencia(reduzirMovimento: true),
+        isNot(PreferenciaAparencia.padrao),
+      );
+      expect(
+        const PreferenciaAparencia(reduzirMovimento: true).hashCode,
+        isNot(PreferenciaAparencia.padrao.hashCode),
+      );
+    });
+
+    test('paleta que não existe volta ao padrão', () {
+      const PreferenciaAparencia p = PreferenciaAparencia();
+      expect(
+        p.copyWith(paleta: 'verde-que-nao-existe').paleta,
+        PreferenciaAparencia.paletaPadrao,
+      );
+      expect(
+        PreferenciaAparencia.paletaValida(null),
+        PreferenciaAparencia.paletaPadrao,
+      );
+      expect(
+        PreferenciaAparencia.paletaValida(''),
+        PreferenciaAparencia.paletaPadrao,
+      );
+      expect(
+        PreferenciaAparencia.paletaValida(PreferenciaAparencia.paletaPadrao),
+        PreferenciaAparencia.paletaPadrao,
+      );
+    });
+
+    test('pré-visualizar reduzir movimento aplica na hora e não grava', () {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+
+      c.preVisualizarReducaoDeMovimento(reduzir: true);
+
+      expect(c.atual.reduzirMovimento, isTrue);
+      expect(c.confirmada.reduzirMovimento, isFalse);
+      expect(repo.gravacoes, 0);
+
+      c.descartar();
+      expect(c.atual.reduzirMovimento, isFalse, reason: 'desfazer volta');
+    });
+
+    test(
+      'confirmar persiste reduzir movimento; voltar ao padrão o desfaz',
+      () async {
+        final _RepositorioFalso repo = _RepositorioFalso();
+        final ControladorAparencia c = ControladorAparencia(repo);
+
+        c.preVisualizarReducaoDeMovimento(reduzir: true);
+        await c.confirmar();
+        expect(repo.salva?.reduzirMovimento, isTrue);
+
+        await c.voltarAoPadrao();
+        expect(repo.salva?.reduzirMovimento, isFalse);
+      },
+    );
+  });
+
+  group('Persistência no aparelho — o repositório de verdade', () {
+    Future<RepositorioPreferenciaAparenciaLocal> abrir(
+      Map<String, Object> inicial,
+    ) async {
+      SharedPreferences.setMockInitialValues(inicial);
+      return RepositorioPreferenciaAparenciaLocal.abrir();
+    }
+
+    test('sem nada guardado, devolve o padrão', () async {
+      final RepositorioPreferenciaAparenciaLocal repo = await abrir(
+        <String, Object>{},
+      );
+      expect(await repo.carregar(), PreferenciaAparencia.padrao);
+    });
+
+    test('guarda e lê tema, ampliação, movimento e paleta', () async {
+      final RepositorioPreferenciaAparenciaLocal repo = await abrir(
+        <String, Object>{},
+      );
+      const PreferenciaAparencia p = PreferenciaAparencia(
+        tema: EscolhaDeTema.altoContraste,
+        escalaTexto: 1.4,
+        reduzirMovimento: true,
+      );
+
+      await repo.salvar(p);
+
+      expect(await repo.carregar(), p);
+    });
+
+    test('reduzir movimento sobrevive a fechar e abrir o aplicativo', () async {
+      final RepositorioPreferenciaAparenciaLocal repo = await abrir(
+        <String, Object>{},
+      );
+      await repo.salvar(const PreferenciaAparencia(reduzirMovimento: true));
+
+      // Outra instância sobre o mesmo armazenamento: é o aplicativo reaberto.
+      final RepositorioPreferenciaAparenciaLocal reaberto =
+          await RepositorioPreferenciaAparenciaLocal.abrir();
+
+      expect((await reaberto.carregar()).reduzirMovimento, isTrue);
+    });
+
+    test(
+      'paleta desconhecida volta ao padrão, sem derrubar a leitura',
+      () async {
+        final RepositorioPreferenciaAparenciaLocal repo =
+            await abrir(<String, Object>{
+              'aparencia.paleta': 'cor-de-uma-versao-futura',
+              'aparencia.tema': 'escuro',
+            });
+
+        final PreferenciaAparencia lida = await repo.carregar();
+
+        expect(lida.paleta, PreferenciaAparencia.paletaPadrao);
+        expect(
+          lida.tema,
+          EscolhaDeTema.escuro,
+          reason: 'o resto é lido normalmente',
+        );
+      },
+    );
+
+    test('tema desconhecido volta ao padrão', () async {
+      final RepositorioPreferenciaAparenciaLocal repo = await abrir(
+        <String, Object>{'aparencia.tema': 'tema-que-nao-existe'},
+      );
+
+      expect((await repo.carregar()).tema, PreferenciaAparencia.padrao.tema);
     });
   });
 

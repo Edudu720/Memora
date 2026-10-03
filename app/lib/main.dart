@@ -91,6 +91,7 @@ class AplicativoMemora extends StatelessWidget {
             themeMode: aparencia.modo,
             builder: (BuildContext context, Widget? child) => AmpliacaoDeTexto(
               fatorDoAplicativo: atual.escalaTexto,
+              reduzirMovimento: atual.reduzirMovimento,
               child: child!,
             ),
             // O aplicativo de verdade, sem a casca de demonstração que existiu

@@ -66,6 +66,10 @@ class ControladorAparencia extends ChangeNotifier {
   void preVisualizarEscalaTexto(double escala) =>
       preVisualizar(atual.copyWith(escalaTexto: escala));
 
+  /// Atalho para pré-visualizar apenas "reduzir movimento".
+  void preVisualizarReducaoDeMovimento({required bool reduzir}) =>
+      preVisualizar(atual.copyWith(reduzirMovimento: reduzir));
+
   /// Persiste a pré-visualização. Sem pré-visualização, não faz nada.
   Future<void> confirmar() async {
     final PreferenciaAparencia? pendente = _emPreVisualizacao;

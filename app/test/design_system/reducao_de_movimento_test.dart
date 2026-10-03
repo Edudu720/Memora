@@ -3,6 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
+import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
+import 'package:memora/features/autenticacao/presentation/telas/tela_boas_vindas.dart';
+import 'package:memora/main.dart';
+import 'package:memora/services/ambiente/ambiente.dart';
+import 'package:memora/services/ambiente/composicao.dart';
+import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
+
+import '../features/autenticacao/dubles_autenticacao.dart';
+import '../features/autenticacao/fluxo_dentro_da_conta.dart';
 
 /// V9 — redução de movimento (FR-027, FR-028).
 ///
@@ -178,5 +188,128 @@ void main() {
       isSemantics(label: 'Estou pensando...'),
     );
     h.dispose();
+  });
+
+  group('A preferência "reduzir movimento" do aplicativo — FR-039a, T093', () {
+    // O que o aplicativo faz com a escolha da pessoa: ela chega ao MediaQuery
+    // que todo componente nosso consulta (`disableAnimationsOf`), e soma-se à
+    // do sistema — nunca a desfaz.
+    Future<bool> reduzSob(
+      WidgetTester t, {
+      required bool sistema,
+      required bool aplicativo,
+    }) async {
+      late bool reduz;
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: MediaQuery(
+            data: MediaQueryData(disableAnimations: sistema),
+            child: AmpliacaoDeTexto(
+              fatorDoAplicativo: 1,
+              reduzirMovimento: aplicativo,
+              child: Builder(
+                builder: (BuildContext context) {
+                  reduz = MediaQuery.disableAnimationsOf(context);
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      return reduz;
+    }
+
+    testWidgets('ligada no aplicativo, o MediaQuery manda reduzir', (
+      WidgetTester t,
+    ) async {
+      expect(await reduzSob(t, sistema: false, aplicativo: true), isTrue);
+    });
+
+    testWidgets('desligada, só a configuração do sistema vale', (
+      WidgetTester t,
+    ) async {
+      expect(await reduzSob(t, sistema: false, aplicativo: false), isFalse);
+      expect(
+        await reduzSob(t, sistema: true, aplicativo: false),
+        isTrue,
+        reason: 'quem pediu menos movimento ao celular não o perde por ter '
+            'deixado a opção do Memora desligada',
+      );
+    });
+
+    testWidgets('ligada nos dois, continua reduzindo', (WidgetTester t) async {
+      expect(await reduzSob(t, sistema: true, aplicativo: true), isTrue);
+    });
+
+    testWidgets('um componente nosso para de animar quando a pessoa liga a '
+        'opção, sem o sistema pedir', (WidgetTester t) async {
+      Future<List<Duration>> duracoes({required bool reduzir}) async {
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: AmpliacaoDeTexto(
+              fatorDoAplicativo: 1,
+              reduzirMovimento: reduzir,
+              child: Scaffold(
+                body: BotaoPrimario(rotulo: 'Continuar', aoTocar: () {}),
+              ),
+            ),
+          ),
+        );
+        return duracoesDe(t);
+      }
+
+      expect(await duracoes(reduzir: false), contains(MemoraMovimento.rapido));
+      final List<Duration> reduzido = await duracoes(reduzir: true);
+      expect(reduzido, isNotEmpty);
+      expect(reduzido, everyElement(Duration.zero));
+    });
+
+    testWidgets('no aplicativo de verdade (main.dart), a preferência chega '
+        'a todas as telas — e a pré-visualização vale na hora', (
+      WidgetTester t,
+    ) async {
+      final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
+      final ControladorAparencia aparencia = ControladorAparencia(
+        PreferenciaEmMemoria(),
+      );
+      await t.pumpWidget(
+        AplicativoMemora(
+          controlador: aparencia,
+          ultimoAcesso: ultimoAcesso,
+          composicao: Composicao(
+            ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
+            autenticacao: RepositorioAutenticacaoSimulado(
+              demora: Duration.zero,
+            ),
+            assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+            limpeza: LimpezaDeSessao(
+              cofre: CofreQueRegistra(),
+              ultimoAcesso: ultimoAcesso,
+            ),
+          ),
+        ),
+      );
+      await t.pump();
+
+      bool reduz() => MediaQuery.disableAnimationsOf(
+        t.element(find.byType(TelaBoasVindas)),
+      );
+      expect(reduz(), isFalse);
+
+      aparencia.preVisualizarReducaoDeMovimento(reduzir: true);
+      await t.pump();
+      expect(
+        reduz(),
+        isTrue,
+        reason: 'o builder do MaterialApp não aplica a preferência',
+      );
+
+      aparencia.descartar();
+      await t.pump();
+      expect(reduz(), isFalse);
+    });
   });
 }
