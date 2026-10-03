@@ -219,7 +219,7 @@ void main() {
           t,
           find.descendant(
             of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-            matching: find.byType(BotaoPerigo),
+            matching: find.text(TextosConfiguracoes.botaoApagarConversa),
           ),
         );
 
@@ -248,7 +248,7 @@ void main() {
           t,
           find.descendant(
             of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-            matching: find.byType(BotaoPerigo),
+            matching: find.text(TextosConfiguracoes.botaoApagarConversa),
           ),
         );
 
@@ -294,7 +294,7 @@ void main() {
           t,
           find.descendant(
             of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-            matching: find.byType(BotaoPerigo),
+            matching: find.text(TextosConfiguracoes.botaoApagarConversa),
           ),
         );
         await exigirLonge('segunda etapa');
@@ -338,7 +338,7 @@ void main() {
           t,
           find.descendant(
             of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-            matching: find.byType(BotaoPerigo),
+            matching: find.text(TextosConfiguracoes.botaoApagarConversa),
           ),
         );
 
@@ -368,7 +368,7 @@ void main() {
           t,
           find.descendant(
             of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-            matching: find.byType(BotaoPerigo),
+            matching: find.text(TextosConfiguracoes.botaoApagarConversa),
           ),
         );
         await tocar(t, simPodeApagar);
@@ -676,7 +676,7 @@ void main() {
 
         final Finder perigo = find.descendant(
           of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-          matching: find.byType(BotaoPerigo),
+          matching: find.text(TextosConfiguracoes.botaoApagarConversa),
         );
         await exigirAlcancavel(
           t,
@@ -973,7 +973,7 @@ void main() {
         t,
         find.descendant(
           of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-          matching: find.byType(BotaoPerigo),
+          matching: find.text(TextosConfiguracoes.botaoApagarConversa),
         ),
       );
       expect(fluxo.conversa.guardadas, isNotEmpty, reason: '2 toques');
@@ -1009,7 +1009,7 @@ void main() {
         t,
         find.descendant(
           of: find.byKey(TelaPrivacidade.chaveConfirmacao),
-          matching: find.byType(BotaoPerigo),
+          matching: find.text(TextosConfiguracoes.botaoApagarConversa),
         ),
       );
       await FluxoDentroDaConta.tocar(t, simPodeApagar);
