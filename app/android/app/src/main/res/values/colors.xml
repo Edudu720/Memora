@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fundo do icone adaptativo: o medalhao claro das ilustracoes
+         (MemoraCores.claro.medalhao, 0xFFE3EAFF), onde o robo azul se destaca. -->
+    <color name="ic_launcher_background">#E3EAFF</color>
+</resources>
