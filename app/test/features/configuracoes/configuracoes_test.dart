@@ -485,6 +485,16 @@ void main() {
         greaterThanOrEqualTo(MemoraEspacamento.xxxl),
         reason: 'FR-041: a mais destrutiva não fica adjacente à comum',
       );
+      // O que separa os dois é espaço de verdade, e não só o título e a frase
+      // que ficam no meio: o título da segunda parte começa longe do "Sair".
+      final Rect titulo = t.getRect(
+        find.text(TextosConfiguracoes.tituloEsquecer),
+      );
+      expect(
+        titulo.top - sair.bottom,
+        greaterThanOrEqualTo(MemoraEspacamento.xxxl),
+        reason: 'FR-041: a segunda parte começa colada ao "Sair"',
+      );
       expect(frase.top, greaterThan(sair.bottom));
       expect(
         frase.bottom,
