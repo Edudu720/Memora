@@ -501,11 +501,19 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **FR-017**: Em qualquer aparelho suportado e em qualquer ampliação, a porta
   principal do Hub (conversar com a Memora) MUST aparecer sem rolar, e o Hub
   MUST mostrar que há mais portas abaixo quando houver. O Hub inteiro MUST
-  caber sem rolagem no aparelho mais comum (360×800) em 100% e 150%.
+  caber sem rolagem no aparelho mais comum (360×800) em 100%. **Uma exceção
+  medida**: no menor aparelho (320×568) a 200%, basta a porta principal
+  começar à vista com o alvo de toque dela inteiro acima da barra — o
+  cabeçalho sozinho toma 326 dos 421 px disponíveis, e a porta tem 220.
   (Antes: sem rolagem em 100% e 150% no **menor** aparelho, 320×568. Inviável a
   150% junto com a FR-016 — a barra inferior sozinha toma 123 dos 568 px —, e
   a 100% só cabia apertando as portas, o oposto do "junto demais" da revisão da
-  T044. Decisão do Henrique, 2026-10-02.)
+  T044. Decisão do Henrique, 2026-10-02. **Revista no mesmo dia**, depois de
+  a T113 medir: o 360×800 a 150% também não cabia — o cabeçalho toma 200 px,
+  cada explicação quebra em duas ou três linhas e a última porta termina ~170
+  px abaixo da barra, 138 mesmo com o respiro no piso. O que sobra é a
+  explicação que a FR-016 exige. O Hub inteiro ficou só a 100%; a 150%, a
+  faixa "há mais" e a principal à vista cumprem a regra geral.)
 - **FR-018**: Uma parte que ainda não funciona MUST NOT ser mostrada no Hub, nas
   Configurações nem na Ajuda.
 - **FR-019**: Sair da conta MUST ficar em Configurações → Conta, e não no Hub nem

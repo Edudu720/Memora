@@ -196,13 +196,18 @@ demais" da revisão. ✅ **Resolvida em 2026-10-02 (Henrique)**: FR-017 reescrit
 porta principal sempre sem rolar e indicação de que há mais, em qualquer
 aparelho; Hub inteiro sem rolar só no 360×800, a 100% e 150%. A T113 devolve o
 respiro e reescreve o `hub_cabe_sem_rolar_test.dart` para a regra nova.
+⚠️ **Revista no mesmo dia**: a T113 mediu o 360×800 a 150% inviável também
+(faltam ~170 px de explicação que a FR-016 exige), e a principal não cabe
+inteira no 320×568 a 200%. Henrique: Hub inteiro **só a 100%**, e a exceção
+do 320×568 a 200% (basta o alvo de toque da principal à vista) entra na
+FR-017. Nenhum teste pulado.
 
 ### Já, antes da fase 4
 
-- [ ] T111 [P] Ícone do aplicativo: a Memora (robô), a partir de `app/assets/ilustracoes/memora_*.svg`, em `app/android/app/src/main/res/mipmap-*` (ícone adaptativo: primeiro plano e fundo), e `android:label="Memora"` no `AndroidManifest.xml`, com maiúscula (FR-009b). Conferir no aparelho real
-- [ ] T112 [P] Ícones da barra inferior desenhados para ela (FR-015): reconhecíveis sem rótulo, mesmo peso visual entre os três, versão preenchida para o destino atual; contraste validado nos três temas. Teste em `casca_interna_test.dart` continua exigindo nome escrito ao lado
-- [ ] T113 Acabamento refinado do `CartaoDePorta` (FR-016, R2 regra 3): profundidade que encolhe ao pressionar, contorno, medalhão que se destaca da pílula também no tema claro (o aviso da #38); respiro que **cresce com a altura disponível**, em vez de fixo — revendo o `d5a5031` à luz da decisão da FR-017
-- [ ] T114 [P] Componente `CaixaDeEtapa` no Design System (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`), exportado e na galeria: uma caixa com a frase de instrução no topo e o conteúdo dentro (FR-002a, R2 regra 8). É informação, não ação: sem pílula nem preenchimento (FR-012 da 002). Teste em `app/test/design_system/caixa_de_etapa_test.dart`, com a matriz
+- [X] T111 [P] Ícone do aplicativo: a Memora (robô), a partir de `app/assets/ilustracoes/memora_*.svg`, em `app/android/app/src/main/res/mipmap-*` (ícone adaptativo: primeiro plano e fundo), e `android:label="Memora"` no `AndroidManifest.xml`, com maiúscula (FR-009b). Conferir no aparelho real
+- [X] T112 [P] Ícones da barra inferior desenhados para ela (FR-015): reconhecíveis sem rótulo, mesmo peso visual entre os três, versão preenchida para o destino atual; contraste validado nos três temas. Teste em `casca_interna_test.dart` continua exigindo nome escrito ao lado
+- [X] T113 Acabamento refinado do `CartaoDePorta` (FR-016, R2 regra 3): profundidade que encolhe ao pressionar, contorno, medalhão que se destaca da pílula também no tema claro (o aviso da #38); respiro que **cresce com a altura disponível**, em vez de fixo — revendo o `d5a5031` à luz da decisão da FR-017
+- [X] T114 [P] Componente `CaixaDeEtapa` no Design System (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`), exportado e na galeria: uma caixa com a frase de instrução no topo e o conteúdo dentro (FR-002a, R2 regra 8). É informação, não ação: sem pílula nem preenchimento (FR-012 da 002). Teste em `app/test/design_system/caixa_de_etapa_test.dart`, com a matriz
 - [ ] T115 Rever o Início com a T113 e a T114: a Memora com uma frase de tutorial (R2 regra 9), os atalhos em caixas que dizem para que servem, e o espaço da tela usado — hoje sobra metade dela vazia em 390×844 (álbum da T043)
 - [ ] T116 Regerar o álbum (T043), reinstalar no aparelho, e **segunda rodada da revisão** do Início e do Hub — agora as telas novas — em `revisao-de-design.md`
 

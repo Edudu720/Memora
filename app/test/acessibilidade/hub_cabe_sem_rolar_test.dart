@@ -14,13 +14,18 @@ import '../suporte/fonte.dart';
 /// > Em qualquer aparelho suportado e em qualquer ampliação, a porta
 /// > principal do Hub MUST aparecer sem rolar, e o Hub MUST mostrar que há
 /// > mais portas abaixo quando houver. O Hub inteiro MUST caber sem rolagem no
-/// > aparelho mais comum (360×800) em 100% e 150%.
+/// > aparelho mais comum (360×800) em 100%.
 ///
-/// (Reescrita em 2026-10-02. A FR-017 antiga pedia o Hub inteiro sem rolar no
-/// **menor** aparelho, 320×568, a 100% e 150% — inviável com a FR-016: a barra
-/// inferior sozinha toma 123 dos 568 px a 150%, e a 100% só cabia apertando as
-/// portas, o "junto demais" que a revisão da T044 reprovou. O teste de 150%
-/// ficava pulado, com os números.)
+/// (Reescrita em 2026-10-02, duas vezes. A FR-017 antiga pedia o Hub inteiro
+/// sem rolar no **menor** aparelho, 320×568, a 100% e 150% — inviável com a
+/// FR-016: a barra inferior sozinha toma 123 dos 568 px a 150%, e a 100% só
+/// cabia apertando as portas, o "junto demais" que a revisão da T044 reprovou.
+/// A primeira reescrita pedia o 360×800 a 100% **e 150%**, e a T113 mediu o
+/// 150% inviável também: o cabeçalho toma 200 px, a explicação de cada porta
+/// quebra em duas ou três linhas, e a última porta termina ~170 px abaixo da
+/// barra — 138 mesmo com o respiro no piso. O que sobra é conteúdo que a
+/// FR-016 exige. Decisão do Henrique: o Hub inteiro só a 100%; a 150% vale a
+/// regra geral, a principal à vista e a faixa avisando que há mais.)
 ///
 /// ## Os três portões
 ///
@@ -30,7 +35,7 @@ import '../suporte/fonte.dart';
 /// 2. **O aviso de que há mais**, em toda combinação em que a lista rola: a
 ///    faixa existe, está à vista, é lida pelo leitor de tela com o gesto, e
 ///    some quando a pessoa chega ao fim. Onde nada rola, ela não existe;
-/// 3. **O 360×800 inteiro**, a 100% e 150%, nos três temas: nenhuma rolagem.
+/// 3. **O 360×800 inteiro**, a 100%, nos três temas: nenhuma rolagem.
 ///
 /// ## Por que este arquivo mede com a Atkinson, e a matriz não
 ///
@@ -101,9 +106,9 @@ void main() {
         // sobram acima da barra, e a principal, que tem 220 de altura, não
         // cabe inteira **por nenhum desenho de porta**. Ali o piso é que ela
         // comece à vista e dê ao menos o alvo de decisão para tocar sem rolar;
-        // inteira, só a partir do 360×640. Fechar isto pede mexer no
-        // cabeçalho (Voltar e título na mesma linha, por exemplo), que é
-        // decisão de design — ver o relatório da T113.
+        // inteira, só a partir do 360×640. Aceita pelo Henrique em
+        // 2026-10-02 e escrita na FR-017: fechá-la pediria mexer no
+        // `CabecalhoDeTela`, que é de todas as telas.
         if (c.aparelho == const Size(320, 568) && c.escala == 2.0) {
           expect(
             porta.top + MemoraDimensoes.alvoDecisao,
@@ -234,26 +239,5 @@ void main() {
       final Combinacao c = (aparelho: maisComum, escala: 1.0, tema: tema);
       testWidgets('em ${nomeDa(c)}', (WidgetTester t) => exigirTudoCabe(t, c));
     }
-
-    // PULADO de propósito, e com os números — o mesmo destino que o 150% do
-    // 320×568 teve na T035. Medido com a Atkinson no 360×800 a 150%: a barra
-    // inferior começa em 708; o cabeçalho (Voltar e o título em duas linhas)
-    // toma 200; as quatro portas, com nome e explicação ampliados, passam de
-    // 679 e a última termina em ~879. Faltam ~170 px, e **nem o respiro no piso
-    // (8 e 12 dp) os devolve**: com ele a última porta ainda termina em 846, 138
-    // abaixo da barra. O que sobra é conteúdo — a explicação de cada porta
-    // quebra em duas ou três linhas a 150% —, e a FR-016 manda ter explicação
-    // em toda porta. Decisão da equipe: encurtar as explicações para uma linha,
-    // compactar o cabeçalho do Hub, ou o requisito cair para 100%. Tire o
-    // `skip` quando decidir.
-    testWidgets(
-      '150%: o Hub inteiro cabe em 360x800 (PULADO: faltam ~170 px, ver nota)',
-      (WidgetTester t) => exigirTudoCabe(t, (
-        aparelho: maisComum,
-        escala: 1.5,
-        tema: MemoraTemaId.claro,
-      )),
-      skip: true,
-    );
   });
 }
