@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../ilustracao/ilustracao_memora.dart';
@@ -26,16 +29,40 @@ import '../toque/superficie_tocavel.dart';
 /// principal por tela (FR-002) — duas ações de mesmo peso dividem a atenção de
 /// quem precisa de um caminho só.
 ///
-/// ## Enxuta de propósito, e sem a seta
+/// ## Acabamento de botão, e não de faixa chapada (T113, FR-016, R2 regra 3)
 ///
-/// A porta não tem a seta ("›") que a primeira versão trazia: o cartão inteiro
-/// é a pílula preenchida, e a pílula já diz "toque aqui". A seta custava 44 dp
-/// de largura, e com ela o nome e a explicação não cabiam em uma linha no
-/// 320×568 — quatro portas empilhavam além da tela, e o Hub tinha de rolar já
-/// em 100% (FR-017). O respiro vertical caiu de 12 para 8 e o desenho, de 56
-/// para 48 dp, pelo mesmo motivo. **Se a revisão de design pedir a seta ou mais
-/// respiro de volta, a conta da FR-017 volta com eles** — ver
-/// `test/acessibilidade/hub_cabe_sem_rolar_test.dart`.
+/// A revisão de design da T044 achou o Hub "simples demais". O que a porta
+/// ganhou, cada coisa **além** da cor:
+///
+/// - **profundidade**: sombra de [MemoraElevacao.porta] em repouso, que
+///   *encolhe* a [MemoraElevacao.portaPressionada] enquanto o dedo está nela,
+///   junto com o encolher da própria superfície. É reforço, nunca o sinal
+///   (R5): quem não vê sombra tem a pílula e o contorno;
+/// - **contorno**: a porta secundária traz a borda em primária; a principal,
+///   por ser da cor da própria borda, vale-se da profundidade;
+/// - **medalhão que se destaca**: no tema claro o `medalhao` e o `destaque`
+///   são o mesmo azul-claro, e o desenho sumia dentro da porta secundária
+///   (aviso da #38). O medalhão ganha contorno em primária lá, onde a cor não
+///   o separa.
+///
+/// ## O respiro cresce com a altura, e a seta continua de fora
+///
+/// A primeira versão do emagrecimento (`d5a5031`) fixou o respiro vertical em
+/// 8 dp e tirou a seta, para o Hub caber a 100% no 320×568 (FR-017 antiga). A
+/// FR-017 foi reescrita em 2026-10-02: a porta principal precisa aparecer sem
+/// rolar em qualquer aparelho, o Hub avisa quando há mais, e o Hub **inteiro**
+/// só precisa caber no 360×800 a 100% e 150%. Apertar tudo para o menor
+/// aparelho era justamente o "junto demais" da revisão.
+///
+/// Hoje o respiro é uma **fração da altura da tela**, dividida pela ampliação
+/// do texto — ver [respiroVertical] e [afastamentoEntrePortas]. Num aparelho
+/// alto ele sobe até o teto; num baixo, ou com texto ampliado, desce até o
+/// piso antigo de 8 dp. Teto fixo em pixel só cabe no aparelho em que foi
+/// medido (a lição da conversa, PR #28).
+///
+/// A **seta** ("›") continua fora: custava 44 dp de largura, e o cartão
+/// inteiro, sendo pílula preenchida, já diz "toque aqui". O recuo da direita é
+/// **geométrico**, e não de gosto — ver o comentário no `build`.
 ///
 /// ## A ilustração cede primeiro
 ///
@@ -45,6 +72,46 @@ import '../toque/superficie_tocavel.dart';
 class CartaoDePorta extends StatelessWidget {
   /// A partir desta ampliação de texto o desenho sai.
   static const double ampliacaoQueTiraAIlustracao = 1.75;
+
+  /// O respiro vertical **de dentro** de uma porta, no aparelho e na
+  /// ampliação de [context]: entre [MemoraEspacamento.sm] e
+  /// [MemoraEspacamento.lg], proporcional à altura da tela.
+  static double respiroVertical(BuildContext context) => _crescendo(
+    context,
+    MemoraDimensoes.fracaoDeRespiroDaPorta,
+    MemoraEspacamento.sm,
+    MemoraEspacamento.lg,
+  );
+
+  /// O afastamento **entre** duas portas empilhadas: entre
+  /// [MemoraEspacamento.md] e [MemoraEspacamento.xl], proporcional à altura
+  /// da tela.
+  static double afastamentoEntrePortas(BuildContext context) => _crescendo(
+    context,
+    MemoraDimensoes.fracaoDeAfastamentoEntrePortas,
+    MemoraEspacamento.md,
+    MemoraEspacamento.xl,
+  );
+
+  /// Fração da altura da tela, dividida pela ampliação, limitada ao intervalo.
+  ///
+  /// Divide pela ampliação porque texto maior toma mais altura do mesmo
+  /// aparelho: o espaço "livre" em linhas de texto é o que encolhe. A altura é
+  /// a da **janela** (`sizeOf`), que não muda com o teclado, e por isso o
+  /// respiro não pula quando ele abre.
+  static double _crescendo(
+    BuildContext context,
+    double fracao,
+    double piso,
+    double teto,
+  ) {
+    final double altura = MediaQuery.sizeOf(context).height;
+    final double ampliacao = math.max(
+      1,
+      MediaQuery.textScalerOf(context).scale(1),
+    );
+    return (altura / ampliacao * fracao).clamp(piso, teto);
+  }
 
   /// Nome da porta.
   final String nome;
@@ -84,6 +151,7 @@ class CartaoDePorta extends StatelessWidget {
         : (principal ? cores.sobrePrimaria : cores.texto);
     final bool comDesenho =
         MediaQuery.textScalerOf(context).scale(1) < ampliacaoQueTiraAIlustracao;
+    final double respiro = respiroVertical(context);
 
     return SuperficieTocavel(
       rotulo: nome,
@@ -91,6 +159,9 @@ class CartaoDePorta extends StatelessWidget {
       aoTocar: aoAbrir,
       fundo: fundo,
       sombra: habilitada,
+      elevacao: MemoraElevacao.porta,
+      elevacaoPressionada: MemoraElevacao.portaPressionada,
+      corDaSombra: MemoraElevacao.sombraDaPorta,
       raio: BorderRadius.circular(MemoraRaio.porta),
       borda: habilitada && !principal ? cores.primaria : null,
       child: ConstrainedBox(
@@ -102,12 +173,13 @@ class CartaoDePorta extends StatelessWidget {
           // 40 da forma, um texto a 8 dp do topo precisa estar a 16 dp da
           // borda direita para a primeira linha não sair da curva (o teste
           // "O texto fica dentro da forma" prova). Sem a seta, a coluna de
-          // texto vai até a borda, e é este recuo que a mantém dentro.
-          padding: const EdgeInsets.fromLTRB(
+          // texto vai até a borda, e é este recuo que a mantém dentro. Com o
+          // respiro vertical maior a curva cede mais, e 16 sobra.
+          padding: EdgeInsets.fromLTRB(
             MemoraEspacamento.sm,
-            MemoraEspacamento.sm,
+            respiro,
             MemoraEspacamento.lg,
-            MemoraEspacamento.sm,
+            respiro,
           ),
           child: Row(
             children: <Widget>[
@@ -115,6 +187,10 @@ class CartaoDePorta extends StatelessWidget {
                 MedalhaoDeIlustracao(
                   ilustracao,
                   tamanho: MemoraDimensoes.ilustracaoCartao,
+                  // Só onde a cor não separa o medalhão da porta: na
+                  // secundária (mesmo azul-claro no tema claro). Na principal
+                  // ele já se destaca do preenchimento em primária.
+                  contorno: habilitada && !principal ? cores.primaria : null,
                 ),
                 const SizedBox(width: MemoraEspacamento.md),
               ] else
