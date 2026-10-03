@@ -8,6 +8,8 @@ import '../../features/autenticacao/domain/autenticacao.dart';
 import '../seguranca/cofre_de_credenciais.dart';
 import 'ambiente.dart';
 import '../../features/assistente/data/conversa_local.dart';
+import '../../features/assistente/data/catalogo_guardado.dart';
+import '../../features/aprendizado/data/progresso_de_aprendizado.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../../features/perfil/data/data_de_nascimento_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
@@ -55,6 +57,11 @@ class Composicao {
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
+  /// O que a pessoa já aprendeu a fazer, só no aparelho (T062, FR-042a/b).
+  ///
+  /// É a mesma instância que a [limpeza] apaga em **toda** saída.
+  final ProgressoDeAprendizado? progresso;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
@@ -62,6 +69,7 @@ class Composicao {
     required this.assistente,
     required this.limpeza,
     this.dataDeNascimento,
+    this.progresso,
   });
 
   /// Resolve as dependências a partir do ambiente.
@@ -74,9 +82,13 @@ class Composicao {
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
     DataDeNascimentoDoAparelho? dataDeNascimento,
+    ProgressoDeAprendizado? progresso,
+    bool guardarCatalogo = false,
   }) {
     final DataDeNascimentoDoAparelho datas =
         dataDeNascimento ?? DataDeNascimentoEmMemoria();
+    final ProgressoDeAprendizado aprendizado =
+        progresso ?? ProgressoDeAprendizado();
     ambiente.exigirTlsForaDeDepuracao();
 
     final RepositorioAutenticacao autenticacao = ambiente.usaServidorReal
@@ -89,8 +101,14 @@ class Composicao {
     return Composicao(
       ambiente: ambiente,
       autenticacao: autenticacao,
-      assistente: RepositorioAssistenteSimulado(),
+      // O catálogo guardado (FR-024a) envolve a consulta do catálogo e escreve
+      // em disco, que teste de widget não alcança: fica desligado por padrão e
+      // o `main.dart` o liga. Ele NÃO entra em `dadosLocais` — não é da pessoa.
+      assistente: guardarCatalogo
+          ? CatalogoGuardado(RepositorioAssistenteSimulado())
+          : RepositorioAssistenteSimulado(),
       dataDeNascimento: datas,
+      progresso: aprendizado,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa
@@ -104,7 +122,9 @@ class Composicao {
       limpeza: LimpezaDeSessao(
         cofre: cofre,
         ultimoAcesso: ultimoAcesso,
-        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal()],
+        // O progresso de aprendizado sai em TODA saída (FR-042b), como a
+        // conversa: revela o que a pessoa ainda não sabe fazer.
+        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal(), aprendizado],
         dadosDoAparelho: <DadoLocalDoAparelho>[datas],
       ),
     );
