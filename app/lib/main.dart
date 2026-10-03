@@ -31,6 +31,7 @@ Future<void> main() async {
     cofre: CofreSeguroDoSistema(),
     ultimoAcesso: ultimoAcesso,
     dataDeNascimento: dataDeNascimento,
+    guardarCatalogo: true,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
