@@ -4,6 +4,8 @@ import '../../design_system/design_system.dart';
 import '../../l10n/textos_autenticacao.dart';
 import '../../l10n/textos_casca.dart';
 import '../autenticacao/presentation/widgets/saida_com_confirmacao.dart';
+import '../perfil/data/data_de_nascimento_local.dart';
+import '../perfil/presentation/secao_idade.dart';
 
 /// A raiz do destino Ajustes, **provisória até a US7** (T092).
 ///
@@ -99,6 +101,9 @@ class AjustesProvisorios extends StatelessWidget {
 /// Mostra o que o Memora já sabe — nome e canal —, como **informação**, e
 /// nunca como botão (FR-012 da 002). O canal vem do identificador do último
 /// acesso, que o aparelho já guarda (R10): nenhuma chamada nova ao servidor.
+///
+/// Embute a [SecaoIdade] (T123): a idade, se a pessoa quis informar, ou o
+/// convite para informar. A tela definitiva (T097) reaproveita o mesmo widget.
 class PerfilProvisorio extends StatelessWidget {
   /// Como a pessoa quer ser chamada.
   final String nome;
@@ -107,7 +112,21 @@ class PerfilProvisorio extends StatelessWidget {
   final Future<String?> canal;
 
   /// Cria a raiz provisória.
-  const PerfilProvisorio({required this.nome, required this.canal, super.key});
+  /// Onde a data de nascimento fica guardada, por conta (FR-042c).
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
+  /// A conta de quem é o Perfil. Sem ela não há de quem guardar a idade, e a
+  /// seção não aparece.
+  final String? idDaConta;
+
+  /// Cria a raiz provisória.
+  const PerfilProvisorio({
+    required this.nome,
+    required this.canal,
+    this.dataDeNascimento,
+    this.idDaConta,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +160,14 @@ class PerfilProvisorio extends StatelessWidget {
                   ),
             ),
           ),
+          if (dataDeNascimento != null && idDaConta != null)
+            Padding(
+              padding: const EdgeInsets.all(MemoraEspacamento.lg),
+              child: SecaoIdade(
+                armazenamento: dataDeNascimento!,
+                idDaConta: idDaConta!,
+              ),
+            ),
         ],
       ),
     );

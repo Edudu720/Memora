@@ -9,6 +9,7 @@ import '../seguranca/cofre_de_credenciais.dart';
 import 'ambiente.dart';
 import '../../features/assistente/data/conversa_local.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
+import '../../features/perfil/data/data_de_nascimento_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 
 /// Monta as dependências do aplicativo, uma vez, na subida.
@@ -49,12 +50,18 @@ class Composicao {
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   final LimpezaDeSessao limpeza;
 
+  /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
+  ///
+  /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
     required this.limpeza,
+    this.dataDeNascimento,
   });
 
   /// Resolve as dependências a partir do ambiente.
@@ -66,7 +73,10 @@ class Composicao {
     required Ambiente ambiente,
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
+    DataDeNascimentoDoAparelho? dataDeNascimento,
   }) {
+    final DataDeNascimentoDoAparelho datas =
+        dataDeNascimento ?? DataDeNascimentoEmMemoria();
     ambiente.exigirTlsForaDeDepuracao();
 
     final RepositorioAutenticacao autenticacao = ambiente.usaServidorReal
@@ -80,15 +90,22 @@ class Composicao {
       ambiente: ambiente,
       autenticacao: autenticacao,
       assistente: RepositorioAssistenteSimulado(),
+      dataDeNascimento: datas,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa
       // nada e mantem esta lista sendo a resposta completa para "o que a
       // saida leva" — que e o valor de existir um lugar so.
+      //
+      // A saida leva em TODA saida: a conversa. Leva so no `esquecerTudo`: o
+      // identificador do ultimo acesso e a data de nascimento do Perfil
+      // (todas as contas do aparelho). Esta ultima NAO e `DadoLocalDaPessoa`:
+      // a pessoa nao digita de novo a cada entrada.
       limpeza: LimpezaDeSessao(
         cofre: cofre,
         ultimoAcesso: ultimoAcesso,
         dadosLocais: <DadoLocalDaPessoa>[ConversaLocal()],
+        dadosDoAparelho: <DadoLocalDoAparelho>[datas],
       ),
     );
   }
