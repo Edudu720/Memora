@@ -4,7 +4,31 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-02 (tarde) — **feature 004, Phase 3b, T111-T115**,
+**Última sessão**: 2026-10-03 — **fase 8 da 003: a assistente pensa de
+verdade**, pelo Henrique. **Provedor escolhido: Google Gemini, nível
+gratuito, `gemini-3.8-flash`** (T061, decisão dele: a equipe não pode pagar).
+Adaptador REST em `assistente/infra/ClienteDaAssistenteGemini.java` (sem o SDK,
+que é Jackson 2), ADR em `docs/architecture/adr-002-provedor-de-ia.md`. Ligar:
+`$env:MEMORA_ASSISTENTE_PROVEDOR = "gemini"` e `GEMINI_API_KEY` — a chave está
+gravada como variável **de usuário** do Windows na máquina do Henrique;
+**nunca** leia nem imprima o valor, só verifique se existe. Sem configuração,
+continua o simulado. `ClienteDaAssistenteGeminiRealTest` passou contra o
+Google (~5 s). **413 testes** no backend.
+
+> 🔴 **O nível gratuito viola a FR-051**: o Google usa o conteúdo para treinar
+> e revisores humanos podem lê-lo. Está na ADR-002, e a T086 continua aberta.
+> **O teste com as 5 pessoas de 65+ (T071) não pode usar a chave gratuita.**
+> **Próximo: `/speckit-clarify` da 003**, que o Henrique vai rodar, para rever
+> a FR-051, o teto de turnos (a R3 diz "encerra com elegância"; o código faz
+> janela deslizante de 20) e a voz (hoje fora de escopo; transcrição e fala).
+> Pendentes: o portão "chave nunca na URL" (`chaveNoCabecalho`) **não foi
+> provado quebrando** — o classificador de permissões bloqueou a quebra; a T068
+> (custo e latência); e o app no celular ainda fala com o simulado.
+
+Sessão anterior: 2026-10-02 (tarde) — feature 004, Phase 3b, T111-T115, na
+`master` sem PR; a T116 (segunda revisão no celular) segue pendente.
+
+Detalhe da sessão de 2026-10-02 (tarde) — **feature 004, Phase 3b, T111-T115**,
 pelo Henrique (Opus orquestrando, agentes Sonnet em worktrees paralelos).
 Entraram **direto na `master`, sem PR**, a pedido dele: ícone do app (a
 Memora) e o nome "Memora" (T111), ícones SVG próprios na barra inferior

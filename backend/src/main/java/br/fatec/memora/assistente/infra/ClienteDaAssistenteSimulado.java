@@ -2,6 +2,7 @@ package br.fatec.memora.assistente.infra;
 
 import java.util.Optional;
 import java.util.function.Consumer;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +30,17 @@ import org.springframework.stereotype.Component;
  * aplicação <b>não sobe</b> — de propósito (R8). Subir sem provedor faria a
  * assistente responder erro a cada pergunta, e a falha apareceria para a pessoa
  * idosa em vez de para quem implanta.
+ *
+ * <h2>E só existe quando é o provedor escolhido</h2>
+ *
+ * {@code @Conditional(ProvedorEscolhido.EhSimulado)}: com
+ * {@code memora.assistente.provedor=gemini} este bean sai de cena e o adaptador
+ * real entra no lugar (T064). Sem nada configurado — o caso de quem clona o
+ * repositório e de todos os testes — continua sendo este.
  */
 @Component
 @Profile("!producao")
+@Conditional(ProvedorEscolhido.EhSimulado.class)
 public class ClienteDaAssistenteSimulado implements ClienteDaAssistente {
 
     /** Resposta padrão, quando nada foi combinado para o teste. */
@@ -41,6 +50,8 @@ public class ClienteDaAssistenteSimulado implements ClienteDaAssistente {
 
     private String proximoTexto = RESPOSTA_PADRAO;
     private Sugestao proximaSugestao;
+    private Pedido ultimoPedido;
+    private AssistenteIndisponivel.Motivo proximaFalha;
 
     /**
      * Combina o texto da próxima resposta.
@@ -65,15 +76,45 @@ public class ClienteDaAssistenteSimulado implements ClienteDaAssistente {
         return this;
     }
 
+    /**
+     * Faz a assistente falhar como o provedor falharia (cota, 5xx, rede...).
+     *
+     * <p>Para provar o caminho de erro de ponta a ponta — o que a pessoa lê
+     * quando o provedor cai — sem derrubar provedor nenhum.
+     */
+    public ClienteDaAssistenteSimulado falharCom(AssistenteIndisponivel.Motivo motivo) {
+        this.proximaFalha = motivo;
+        return this;
+    }
+
     /** Volta ao roteiro padrão, sem sugestão. */
     public ClienteDaAssistenteSimulado limpar() {
         this.proximoTexto = RESPOSTA_PADRAO;
         this.proximaSugestao = null;
+        this.ultimoPedido = null;
+        this.proximaFalha = null;
         return this;
+    }
+
+    /**
+     * O último pedido recebido, como o provedor o receberia.
+     *
+     * <p>Existe para o teste poder olhar o que viajaria ao modelo — o teto de
+     * turnos e a ordem persona, catálogo, histórico (T065) — sem precisar de
+     * rede.
+     */
+    public Pedido ultimoPedido() {
+        return ultimoPedido;
     }
 
     @Override
     public Resposta conversar(Pedido pedido, Consumer<String> aoReceberTrecho) {
+        this.ultimoPedido = pedido;
+        if (proximaFalha != null) {
+            // O texto que o provedor real traria nao existe aqui, e e de proposito:
+            // a falha carrega so o motivo.
+            throw new AssistenteIndisponivel(proximaFalha, null);
+        }
         // Entrega em pedaços, como um provedor real entregaria: o controlador
         // e a tela precisam ser exercitados no modo em que vão funcionar, e não
         // num caminho especial que só existe no teste.

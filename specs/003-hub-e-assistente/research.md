@@ -72,6 +72,18 @@ antes de ensinar (FR-014)?
 tocar no que não pretendia, e o prejuízo recai sobre quem tem menos condição de
 perceber o erro — o custo por token é a parte barata da conta.
 
+### Atualização de 2026-10-02 — a escolha foi feita, e ela viola a FR-051
+
+O Henrique escolheu o **Gemini API, nível gratuito, modelo `gemini-3.8-flash`**,
+por falta de verba; a comparação com conversas reais deste "Como decidir" **não
+foi feita**. O nível gratuito deixa o Google usar o conteúdo para melhorar os
+produtos dele e permite revisão humana, o que **desfaz a FR-051** (e o último item
+da tabela acima). Registro completo, com os seis critérios, as alternativas e o que
+faria mudar de ideia, em [ADR-002](../../docs/architecture/adr-002-provedor-de-ia.md).
+**Pendência**: a FR-051 será revista em `/speckit-clarify`; até lá a T086 continua
+aberta e nenhuma conversa real (nem a T071, com as cinco pessoas de 65+) pode passar
+por esta chave.
+
 ---
 
 ## R3 — A conversa não é persistida no servidor
