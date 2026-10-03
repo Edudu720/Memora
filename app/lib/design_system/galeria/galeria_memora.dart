@@ -467,9 +467,9 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const SizedBox(height: MemoraEspacamento.lg),
       NavegacaoInferior(
         itens: const <ItemNavegacao>[
-          ItemNavegacao(icone: Icons.home_outlined, rotulo: 'Início'),
-          ItemNavegacao(icone: Icons.chat_bubble_outline, rotulo: 'Conversar'),
-          ItemNavegacao(icone: Icons.person_outline, rotulo: 'Meu perfil'),
+          ItemNavegacao(icone: IconeDeNavegacao.ajustes, rotulo: 'Ajustes'),
+          ItemNavegacao(icone: IconeDeNavegacao.inicio, rotulo: 'Início'),
+          ItemNavegacao(icone: IconeDeNavegacao.perfil, rotulo: 'Meu perfil'),
         ],
         indiceAtivo: _abaAtiva,
         aoSelecionar: (int i) => setState(() => _abaAtiva = i),
