@@ -116,7 +116,7 @@ void main() {
   });
 
   group('Falhas', () {
-    test('o limite diário traz a espera junto', () async {
+    test('o limite diário não traz espera: diz que volta amanhã (T106)', () async {
       final RepositorioAssistenteSimulado limitado =
           RepositorioAssistenteSimulado(
         demora: Duration.zero,
@@ -130,8 +130,8 @@ void main() {
 
       expect(resposta, isA<AssistenteFalhou>());
       expect(
-        (resposta as AssistenteFalhou).tentarNovamenteEmSegundos,
-        isNotNull,
+        (resposta as AssistenteFalhou).falha,
+        FalhaDaAssistente.limiteDeConversas,
       );
     });
   });

@@ -1,5 +1,6 @@
 import 'package:memora_api/memora_api.dart' as api;
 
+import '../../features/assistente/data/aceite_do_aviso.dart';
 import '../../features/assistente/data/repositorio_assistente_simulado.dart';
 import '../../features/assistente/domain/assistente.dart';
 import '../../features/autenticacao/data/repositorio_autenticacao_api.dart';
@@ -46,6 +47,12 @@ class Composicao {
   /// A assistente. **Sempre simulada por ora** — ver o cabeçalho.
   final RepositorioAssistente assistente;
 
+  /// Se a pessoa já aceitou o aviso de privacidade da conversa (FR-051).
+  ///
+  /// É o **mesmo objeto** que a [limpeza] apaga na saída: criar um aqui e outro
+  /// lá seria o aceite sobreviver à saída da conta sem ninguém perceber.
+  final AceiteDoAviso aceiteDoAviso;
+
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   final LimpezaDeSessao limpeza;
 
@@ -54,6 +61,7 @@ class Composicao {
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
+    required this.aceiteDoAviso,
     required this.limpeza,
   });
 
@@ -66,6 +74,7 @@ class Composicao {
     required Ambiente ambiente,
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
+    required AceiteDoAviso aceiteDoAviso,
   }) {
     ambiente.exigirTlsForaDeDepuracao();
 
@@ -80,6 +89,7 @@ class Composicao {
       ambiente: ambiente,
       autenticacao: autenticacao,
       assistente: RepositorioAssistenteSimulado(),
+      aceiteDoAviso: aceiteDoAviso,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa
@@ -88,7 +98,7 @@ class Composicao {
       limpeza: LimpezaDeSessao(
         cofre: cofre,
         ultimoAcesso: ultimoAcesso,
-        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal()],
+        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal(), aceiteDoAviso],
       ),
     );
   }

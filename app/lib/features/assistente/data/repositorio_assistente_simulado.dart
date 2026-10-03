@@ -136,12 +136,11 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
   }) async {
     await _esperar();
 
+    // Qualquer uma das cinco falhas, sob comando — inclusive
+    // `assistenteIndisponivel` (FR-057), que o servidor real entrega como
+    // evento `erro` com `ASSISTENTE_INDISPONIVEL`.
     if (falhaForcada != null) {
-      return AssistenteFalhou(
-        falhaForcada!,
-        tentarNovamenteEmSegundos:
-            falhaForcada == FalhaDaAssistente.limiteDeConversas ? 3600 : null,
-      );
+      return AssistenteFalhou(falhaForcada!);
     }
 
     final String pedido = mensagem.toLowerCase();

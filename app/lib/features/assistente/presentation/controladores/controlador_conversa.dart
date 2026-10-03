@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../../l10n/textos_assistente.dart';
 import '../../data/abridor_de_aplicativo.dart';
+import '../../data/aceite_do_aviso.dart';
 import '../../data/conversa_local.dart';
 import '../../domain/assistente.dart';
 
@@ -40,12 +41,24 @@ enum EstadoConversa {
 /// A FR-016 diz que a recusa encerra o assunto, e que a Memora não insiste na
 /// mesma conversa. Aqui isso é literal: [recusarAcao] limpa a oferta, e nada a
 /// traz de volta a não ser uma nova resposta do servidor.
+///
+/// ## Nada sai do aparelho antes do aceite (FR-051)
+///
+/// O serviço que gera as respostas é de fora do Memora, e pode usar e deixar
+/// pessoas lerem o que recebe. Por isso [podeEnviar] é falso, e [enviar] não faz
+/// nada, até a pessoa dizer que entendeu ([aceitar]). A guarda mora **aqui**, e
+/// não só na tela: esconder o botão não impede um envio por outro caminho.
 class ControladorConversa extends ChangeNotifier {
   final RepositorioAssistente _repositorio;
   final ConversaLocal _local;
+  final AceiteDoAviso _aceite;
   final AbridorDeAplicativo? _abridor;
 
   /// Cria o controlador.
+  ///
+  /// [aceite] é obrigatório, de propósito: um controlador sem ele não teria
+  /// como saber se já pode falar com o serviço de fora, e o padrão seguro é
+  /// **não** poder.
   ///
   /// [abridor] é opcional: sem ele a Memora conversa e ensina, mas não abre
   /// nada. É o mesmo raciocínio da porta do Hub — funcionalidade que não existe
@@ -57,10 +70,22 @@ class ControladorConversa extends ChangeNotifier {
   ControladorConversa(
     this._repositorio,
     this._local, {
+    required AceiteDoAviso aceite,
     AbridorDeAplicativo? abridor,
     String rascunhoInicial = '',
-  })  : _abridor = abridor,
+  })  : _aceite = aceite,
+        _abridor = abridor,
         _rascunho = rascunhoInicial;
+
+  /// Quantas mensagens viajam ao serviço a cada turno (FR-056).
+  ///
+  /// São **20 turnos** — uma troca é a pergunta da pessoa e a resposta da
+  /// Memora —, ou seja, 40 mensagens, o `maxItems` do contrato. O servidor
+  /// recusa mais que isso com `400` e corta de novo nas mesmas 40, por defesa
+  /// (`data-model.md`, "Turno — a unidade de conta"). A conversa nunca é
+  /// encerrada por ficar longa: o aparelho guarda e mostra tudo, e só o que
+  /// viaja é limitado.
+  static const int mensagensQueViajam = 40;
 
   /// Quanto tempo esperar pela **primeira** palavra da resposta (FR-052).
   ///
@@ -77,6 +102,9 @@ class ControladorConversa extends ChangeNotifier {
   int _envio = 0;
   Timer? _cronometro;
   bool _descartado = false;
+
+  /// A pessoa já aceitou o aviso de privacidade (FR-051)? Falso até lido.
+  bool _aceitou = false;
 
   EstadoConversa _estado = EstadoConversa.abrindo;
   FalhaDaAssistente? _falha;
@@ -114,25 +142,68 @@ class ControladorConversa extends ChangeNotifier {
   String get ultimoPedido => _ultimoPedido;
 
   /// Pode enviar o que está escrito.
-  bool get podeEnviar => _rascunho.trim().isNotEmpty && !respondendo;
+  ///
+  /// Exige o aceite do aviso de privacidade (FR-051): sem ele, nada vai ao
+  /// serviço de fora.
+  bool get podeEnviar =>
+      _aceitou && _rascunho.trim().isNotEmpty && !respondendo;
+
+  /// A pessoa já aceitou o aviso de privacidade?
+  bool get aceitou => _aceitou;
+
+  /// A tela deve mostrar a explicação, no lugar de deixar escrever?
+  ///
+  /// Falso enquanto a leitura inicial não terminou: piscar a explicação para
+  /// quem já aceitou seria pedir de novo o que ela já deu.
+  bool get precisaDoAceite => _estado != EstadoConversa.abrindo && !_aceitou;
+
+  /// Oferecer "tentar de novo" para a falha atual? (FR-052, FR-057)
+  ///
+  /// Só as falhas passageiras — ver [FalhaDaAssistente.passageira].
+  bool get podeTentarDeNovo => _falha?.passageira ?? false;
 
   /// Texto do erro atual, na voz da Memora.
   String? get mensagemDeErro => switch (_falha) {
         null => null,
         FalhaDaAssistente.semConexao => TextosAssistente.semRespostaDaConversa,
         FalhaDaAssistente.limiteDeConversas => TextosAssistente.limiteDeConversas,
+        FalhaDaAssistente.assistenteIndisponivel =>
+          TextosAssistente.assistenteIndisponivel,
         FalhaDaAssistente.sessaoExpirada => TextosAssistente.sessaoExpirada,
         FalhaDaAssistente.inesperada => TextosAssistente.inesperada,
       };
 
-  /// Lê a conversa guardada e prepara a tela (FR-049).
+  /// Lê a conversa guardada e o aceite, e prepara a tela (FR-049).
   Future<void> iniciar() async {
     final List<MensagemDaConversa> guardadas = await _local.ler();
+    bool jaAceitou = false;
+    try {
+      jaAceitou = await _aceite.aceitou();
+    } on Exception {
+      // Sem conseguir ler, vale "não aceitou": pedir de novo é o lado seguro.
+    }
     if (_descartado) return;
     _mensagens
       ..clear()
       ..addAll(guardadas);
+    _aceitou = jaAceitou;
     _estado = EstadoConversa.aguardando;
+    notifyListeners();
+  }
+
+  /// A pessoa leu o aviso e disse que entendeu (FR-051).
+  ///
+  /// Só depois disto o envio é liberado. Se guardar o aceite falhar, a pessoa
+  /// segue na conversa — ela tocou no botão — e será perguntada de novo na
+  /// próxima vez: errar para o lado de avisar demais, nunca de menos.
+  Future<void> aceitar() async {
+    try {
+      await _aceite.registrar();
+    } on Exception {
+      // Ver acima.
+    }
+    if (_descartado) return;
+    _aceitou = true;
     notifyListeners();
   }
 
@@ -176,8 +247,9 @@ class ControladorConversa extends ChangeNotifier {
 
     final RespostaDaAssistente resposta = await _repositorio.conversar(
       mensagem: pergunta,
-      // O histórico viaja porque o servidor não o guarda (FR-047).
-      historico: List<MensagemDaConversa>.unmodifiable(_mensagens),
+      // O histórico viaja porque o servidor não o guarda (FR-047), mas só as
+      // mais recentes: o resto fica no aparelho (FR-056).
+      historico: List<MensagemDaConversa>.unmodifiable(_maisRecentes()),
       aoReceberTrecho: (String trecho) {
         if (esteEnvio != _envio) return;
         // A primeira palavra chegou: a espera da FR-052 acabou bem.
@@ -212,6 +284,12 @@ class ControladorConversa extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  /// As [mensagensQueViajam] mais recentes, na ordem em que foram ditas.
+  List<MensagemDaConversa> _maisRecentes() => _mensagens.length <=
+          mensagensQueViajam
+      ? _mensagens
+      : _mensagens.sublist(_mensagens.length - mensagensQueViajam);
 
   /// Tira da conversa a fala que ficou sem resposta, e a devolve ao campo.
   ///
@@ -286,14 +364,17 @@ class ControladorConversa extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Depois de um erro: sem internet, **reenvia** a pergunta (FR-052).
+  /// Depois de uma falha passageira, **reenvia** a pergunta (FR-052, FR-057).
   ///
-  /// A pessoa não precisa reescrever — ela já está no campo. Nas demais falhas
-  /// (o limite do dia, a sessão que caiu), reenviar não resolveria nada, e o
-  /// botão só devolve a tela à espera.
+  /// A pessoa não precisa reescrever — ela já está no campo. São passageiras a
+  /// conexão, o serviço de fora fora do ar e a falha inesperada
+  /// ([FalhaDaAssistente.passageira]). Nas demais (o limite do dia, a sessão que
+  /// caiu), reenviar não resolveria nada, e a tela nem oferece o botão
+  /// ([podeTentarDeNovo]); se alguém o chamar mesmo assim, só devolve a tela à
+  /// espera.
   void tentarNovamente() {
     final bool reenviar =
-        _falha == FalhaDaAssistente.semConexao && _rascunho.trim().isNotEmpty;
+        podeTentarDeNovo && _rascunho.trim().isNotEmpty;
     _falha = null;
     _estado = EstadoConversa.aguardando;
     notifyListeners();

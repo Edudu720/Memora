@@ -16,6 +16,7 @@ import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
+import '../../assistente/data/aceite_do_aviso.dart';
 import '../../assistente/data/conversa_local.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
@@ -79,6 +80,13 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Trocável no teste de widget, onde I/O de arquivo real nunca completa.
   final ConversaLocal Function() conversaLocal;
 
+  /// Onde fica guardado que a pessoa aceitou o aviso de privacidade (FR-051).
+  ///
+  /// Opcional, e o padrão é o lado seguro: sem ele, o aceite vive só nesta
+  /// execução e a conversa pergunta de novo na seguinte. Em produção quem o dá
+  /// é a `Composicao`, que é também quem o põe na lista da `LimpezaDeSessao`.
+  final AceiteDoAviso? aceiteDoAviso;
+
   /// Quanto tempo parado até a sessão cair (FR-017).
   final Duration inatividade;
 
@@ -91,6 +99,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.assistente,
     this.abridor,
     this.conversaLocal = ConversaLocal.new,
+    this.aceiteDoAviso,
     required this.ultimoAcesso,
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
@@ -124,6 +133,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     aoAvisar: _avisarDeInatividade,
     aoExpirar: _expirarPorInatividade,
   );
+
+  /// O aceite de quando ninguém deu um: só nesta execução, nunca em disco.
+  final AceiteDoAviso _aceiteNestaExecucao = _AceiteSoNaMemoria();
 
   /// Recriado a cada visita ao login: o controlador tenta renovar a sessão no
   /// `initState` da tela, e reaproveitar um que já concluiu deixaria estado
@@ -473,6 +485,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           criar: () => ControladorConversa(
             assistente,
             widget.conversaLocal(),
+            aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
             abridor: widget.abridor,
             rascunhoInicial: rascunho,
           ),
@@ -576,6 +589,23 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       ),
     };
   }
+}
+
+/// O aceite de reserva: vale enquanto o aplicativo estiver aberto e nada mais.
+///
+/// Existe para que o controlador da conversa sempre tenha um [AceiteDoAviso] —
+/// e para que a falta de um nunca resulte em "aceito sem ninguém ter aceito".
+class _AceiteSoNaMemoria implements AceiteDoAviso {
+  bool _aceito = false;
+
+  @override
+  Future<bool> aceitou() async => _aceito;
+
+  @override
+  Future<void> registrar() async => _aceito = true;
+
+  @override
+  Future<void> apagar() async => _aceito = false;
 }
 
 /// Cria o [ControladorConversa] e o descarta quando a rota sai.

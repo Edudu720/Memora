@@ -13,6 +13,7 @@ import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../../suporte/aparelhos.dart';
 import 'dubles_autenticacao.dart';
@@ -91,6 +92,7 @@ class FluxoDentroDaConta {
           repositorio: repositorio,
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
           conversaLocal: _ConversaEmMemoria.new,
+        aceiteDoAviso: AceiteEmMemoria(),
           ultimoAcesso: ultimoAcesso,
           inatividade: inatividade,
           avisoDeInatividade: aviso,

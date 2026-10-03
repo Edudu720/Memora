@@ -4,6 +4,7 @@ import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simul
 import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
+import '../suporte/aceite_em_memoria.dart';
 
 import '../features/autenticacao/dubles_autenticacao.dart';
 
@@ -88,6 +89,7 @@ void main() {
         ),
         cofre: _CofreDeMentira(),
       ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoSimulado>());
@@ -101,6 +103,7 @@ void main() {
         ),
         cofre: _CofreDeMentira(),
       ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoApi>());
@@ -116,6 +119,7 @@ void main() {
         ),
         cofre: _CofreDeMentira(),
       ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
       expect(real.avisoDeIntegracaoParcial, isNotNull);
@@ -130,6 +134,7 @@ void main() {
         ),
         cofre: _CofreDeMentira(),
       ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
       expect(simulada.avisoDeIntegracaoParcial, isNull);

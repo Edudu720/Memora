@@ -9,6 +9,7 @@ import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/controladores/controlador_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// Cenario H2 do quickstart — a assistente ensina antes de oferecer fazer.
 ///
@@ -53,6 +54,7 @@ void main() {
     return ControladorConversa(
       RepositorioAssistenteSimulado(demora: Duration.zero, falhaForcada: falha),
       local,
+      aceite: AceiteEmMemoria(),
     );
   }
 

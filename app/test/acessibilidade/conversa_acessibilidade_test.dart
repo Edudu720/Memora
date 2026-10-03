@@ -9,6 +9,7 @@ import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/controladores/controlador_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../suporte/aceite_em_memoria.dart';
 
 import '../suporte/aparelhos.dart';
 
@@ -46,10 +47,14 @@ void main() {
     local = _ConversaEmMemoria();
   });
 
-  ControladorConversa controladorCom({Duration demora = Duration.zero}) {
+  ControladorConversa controladorCom({
+    Duration demora = Duration.zero,
+    bool aceito = true,
+  }) {
     return ControladorConversa(
       RepositorioAssistenteSimulado(demora: demora),
       local,
+      aceite: AceiteEmMemoria(aceito: aceito),
     );
   }
 
@@ -147,6 +152,67 @@ void main() {
           expect(botao.bottom, lessThanOrEqualTo(aparelho.height),
               reason: 'o botao de enviar precisa caber na tela depois de '
                   'rolada a faixa que o contem');
+        });
+      }
+    }
+  });
+
+  group('A explicacao do aceite — FR-051 com FR-026 e FR-027', () {
+    testWidgets('os dois botoes atendem a diretriz de 48 dp',
+        (WidgetTester t) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      final ControladorConversa c = controladorCom(aceito: false);
+      addTearDown(c.dispose);
+      await montar(t, c);
+
+      expect(find.byKey(TelaConversa.chaveAceite), findsOneWidget);
+      await expectLater(t, meetsGuideline(androidTapTargetGuideline));
+      h.dispose();
+    });
+
+    for (final Size aparelho in aparelhos) {
+      final String nome = nomeDo(aparelho);
+
+      for (final double escala in <double>[1.0, 1.5, 2.0]) {
+        testWidgets('segue utilizavel em $nome, escala $escala',
+            (WidgetTester t) async {
+          final ControladorConversa c = controladorCom(aceito: false);
+          addTearDown(c.dispose);
+          await montar(t, c, escala: escala, aparelho: aparelho);
+
+          expect(t.takeException(), isNull,
+              reason: 'nada pode estourar a tela em $nome a $escala');
+
+          final double alturaDaLista =
+              t.getSize(find.byType(ListView).first).height;
+          expect(alturaDaLista, greaterThanOrEqualTo(48),
+              reason: 'a explicacao precisa de espaco para ser lida; em '
+                  '$nome a $escala sobraram '
+                  '${alturaDaLista.toStringAsFixed(0)} px');
+
+          // A explicacao e lida do comeco: o titulo esta a vista, sem a
+          // pessoa precisar rolar. A lista nao desce ao fim sozinha, como faz
+          // com as mensagens — levaria direto aos botoes, sem o texto.
+          final Finder titulo = find.text(TextosAssistente.tituloAceite);
+          expect(titulo, findsOneWidget);
+          expect(t.getRect(titulo).top, greaterThanOrEqualTo(0));
+          expect(t.getRect(titulo).bottom, lessThanOrEqualTo(aparelho.height));
+
+          // Os dois botoes alcancaveis: sem isso a pessoa nao consegue nem
+          // aceitar nem recusar, e fica presa na explicacao.
+          for (final Key chave in <Key>[
+            TelaConversa.chaveAceitar,
+            TelaConversa.chaveRecusarAceite,
+          ]) {
+            final Finder botao = find.byKey(chave);
+            await t.ensureVisible(botao);
+            await t.pump();
+            final Rect r = t.getRect(botao);
+            expect(r.top, greaterThanOrEqualTo(0));
+            expect(r.bottom, lessThanOrEqualTo(aparelho.height),
+                reason: 'o botao $chave ficou fora da tela em $nome a '
+                    '$escala');
+          }
         });
       }
     }

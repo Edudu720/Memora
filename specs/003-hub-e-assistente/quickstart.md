@@ -208,6 +208,38 @@ tentativa; **3 de 5 conseguem repetir a tarefa sozinhas**.
 
 ---
 
+## H13 — Aviso e consentimento da FR-051
+
+**Cobre**: FR-051 · Emenda 1 ao Princípio I · enquanto o serviço que gera as
+respostas for o do nível gratuito (ADR-002)
+
+1. Abrir a conversa numa conta que nunca aceitou o aviso (conta nova, ou depois
+   de sair).
+2. **Esperado**: no lugar do campo de escrever aparece a explicação "Antes de
+   conversarmos", dizendo que o texto vai a um serviço do Google, fora do
+   Memora, que pode usá-lo para melhorar os programas dele e que pessoas de lá
+   podem lê-lo; e pedindo que a pessoa não escreva senha, documento, endereço,
+   nem dado de saúde ou de dinheiro. **Não há campo nem botão de enviar.**
+3. **Esperado**: nada chega ao serviço enquanto a pessoa não tocar em "Entendi,
+   vamos conversar" — nem pelo controlador, mesmo com uma pergunta já escrita.
+4. Tocar em "Agora não". **Esperado**: volta para trás, nada foi enviado nem
+   aceito, e o resto do Memora (Hub, catálogos, registro) continua funcionando.
+5. Voltar à conversa e aceitar. **Esperado**: o campo aparece e a pergunta
+   segue; a explicação não volta a ser pedida nesta conta.
+6. **Esperado**: em toda conversa, antes e depois do aceite, o aviso "Não
+   escreva dados pessoais aqui" está na mesma caixa do aviso antigolpe (FR-033),
+   com o texto completo — os quatro tipos de dado — e alcançável por rolagem em
+   200%.
+7. Sair da conta e entrar de novo. **Esperado**: a explicação volta a ser
+   pedida (o aceite é da pessoa, e sai junto com a conta — FR-048).
+
+> O que este cenário **não** prova é o que mais importa: que a pessoa leu. Isso
+> é o que o H12 observa, com gente de verdade. O aviso e o consentimento
+> reduzem o dano; não o eliminam — ninguém impede quem conversa de escrever o
+> nome de um neto.
+
+---
+
 ## Onde cada cenário roda (T069, 2026-09-15)
 
 "Executar de forma automatizada" só é verificável se dá para apontar **qual
@@ -229,6 +261,7 @@ no repositório leva ao lugar certo.
 | **H10** | `backend/.../assistente/LimiteDeConversasTest.java` | servidor |
 | **H11** | `app/test/acessibilidade/` (T070) | aplicativo |
 | **H12** | ❌ **não automatizável** — são cinco pessoas | — |
+| **H13** | `app/test/features/assistente/aviso_de_privacidade_test.dart` (passo 6, na matriz de aparelhos × escalas) + `app/test/features/assistente/consentimento_test.dart` (passos 2 a 5 e 7: nada é enviado antes do aceite; o aceite sai com a conta) + `app/test/acessibilidade/conversa_acessibilidade_test.dart` (a explicação cabe e os botões se alcançam) | aplicativo |
 
 Rodar todos:
 

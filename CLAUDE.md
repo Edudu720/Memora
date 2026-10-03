@@ -15,15 +15,24 @@ gravada como variável **de usuário** do Windows na máquina do Henrique;
 continua o simulado. `ClienteDaAssistenteGeminiRealTest` passou contra o
 Google (~5 s). **413 testes** no backend.
 
-> 🔴 **O nível gratuito viola a FR-051**: o Google usa o conteúdo para treinar
-> e revisores humanos podem lê-lo. Está na ADR-002, e a T086 continua aberta.
-> **O teste com as 5 pessoas de 65+ (T071) não pode usar a chave gratuita.**
-> **Próximo: `/speckit-clarify` da 003**, que o Henrique vai rodar, para rever
-> a FR-051, o teto de turnos (a R3 diz "encerra com elegância"; o código faz
-> janela deslizante de 20) e a voz (hoje fora de escopo; transcrição e fala).
-> Pendentes: o portão "chave nunca na URL" (`chaveNoCabecalho`) **não foi
-> provado quebrando** — o classificador de permissões bloqueou a quebra; a T068
-> (custo e latência); e o app no celular ainda fala com o simulado.
+> ✅ **Atualizado no mesmo dia (2026-10-03, à noite): o nível gratuito virou
+> risco aceito.** O `/speckit-clarify` reescreveu a FR-051, e a equipe aprovou
+> **por unanimidade** a **Emenda 1 ao Princípio I** (constituição **v1.1.0**).
+> Quatro condições: aviso permanente na conversa, consentimento antes da
+> primeira mensagem, nenhum dado da pessoa enviado e troca de serviço quando
+> houver verba. As duas primeiras foram feitas na **fase 11 da 003**
+> (T100-T106, branch `feature/003-fase11-convergencia`), e a T086 fechou. A
+> T071 pode usar a chave gratuita **desde que o APK tenha o aviso e o
+> consentimento**. Também: FR-056 (janela de **20 turnos = 40 mensagens**; turno
+> é uma troca), FR-057 (provedor fora do ar ≠ limite diário, campo `codigo` no
+> evento `erro` do SSE) e a **voz vai para uma feature 005**, processada no
+> aparelho. **1130** testes no app, **413** no backend.
+>
+> Pendentes: a `ConversaLocal` guarda só 40 mensagens em disco (contra a
+> FR-056; resolver com a T082); a T036 (o app ainda fala com o simulado da
+> assistente, mesmo com servidor real); o portão "chave nunca na URL"
+> (`chaveNoCabecalho`) **não foi provado quebrando**; a T068 (custo e
+> latência).
 
 Sessão anterior: 2026-10-02 (tarde) — feature 004, Phase 3b, T111-T115, na
 `master` sem PR; a T116 (segunda revisão no celular) segue pendente.

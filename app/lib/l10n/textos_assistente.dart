@@ -88,6 +88,46 @@ class TextosAssistente {
       'senha ou um número de confirmação — nem por telefone, nem por mensagem, '
       'nem por e-mail. Se alguém pedir, é golpe: pode desligar sem responder.';
 
+  /// Título do aviso de privacidade (FR-051), junto ao antigolpe.
+  static const String tituloAvisoPrivacidade = 'Não escreva dados pessoais aqui';
+
+  /// O aviso de privacidade.
+  ///
+  /// Diz **para onde** o texto vai e **o que não escrever**: os quatro tipos
+  /// (senha, documento, endereço, saúde e dinheiro) são o que a FR-051 lista, e
+  /// há teste que reprova se algum sumir. Ele não promete sigilo — o serviço de
+  /// fora é do nível gratuito, e a ADR-002 registra por quê.
+  static const String avisoPrivacidade =
+      'Para eu te responder, o que você escreve vai para um serviço de fora do '
+      'Memora, e pessoas de lá podem ler. Não escreva senha, documento, '
+      'endereço, nem nada sobre sua saúde ou seu dinheiro.';
+
+  // ---------------------------------------------------------------------------
+  // O consentimento antes da primeira mensagem — FR-051
+  // ---------------------------------------------------------------------------
+
+  /// Título da explicação que antecede a primeira mensagem.
+  static const String tituloAceite = 'Antes de conversarmos';
+
+  /// A explicação, em linguagem comum.
+  ///
+  /// Diz as quatro coisas que a FR-051 exige que a pessoa saiba antes de
+  /// escrever: o texto sai do Memora, vai para o Google, pode ser usado para
+  /// melhorar os programas dele e pode ser lido por gente. E o que não
+  /// escrever.
+  static const String corpoDoAceite =
+      'Para eu conseguir te responder, o que você escrever aqui é enviado a um '
+      'serviço do Google, fora do Memora. Esse serviço pode usar a conversa '
+      'para melhorar os programas dele, e pessoas de lá podem lê-la. Por isso, '
+      'nunca escreva senha, documento, endereço, nem nada sobre sua saúde ou '
+      'seu dinheiro.';
+
+  /// Aceita. Diz o que acontece, e não "OK".
+  static const String botaoAceitar = 'Entendi, vamos conversar';
+
+  /// Recusa. Quem recusa segue com o resto do Memora, só sem a conversa.
+  static const String botaoRecusarAceite = 'Agora não';
+
   // ---------------------------------------------------------------------------
   // A oferta de executar — US3
   // ---------------------------------------------------------------------------
@@ -174,6 +214,16 @@ class TextosAssistente {
   /// Não sugere que a pessoa fez algo errado — ela só conversou bastante.
   static const String limiteDeConversas =
       'Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui.';
+
+  /// O serviço que gera as respostas está fora do ar, sem cota ou não
+  /// respondeu no prazo (FR-057).
+  ///
+  /// Mesma frase que o servidor usa. A dificuldade é **da Memora**, e o texto
+  /// diz isso; e promete só "daqui a pouco", que é verdade para falha passageira
+  /// — o limite do dia, que volta amanhã, tem texto próprio.
+  static const String assistenteIndisponivel =
+      'Estou com um pouquinho de dificuldade para pensar agora — não foi nada '
+      'que você fez. Vamos tentar de novo daqui a pouco? 😊';
 
   /// A sessão caiu.
   static const String sessaoExpirada =

@@ -11,6 +11,7 @@ import 'package:memora/main.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
 import '../autenticacao/fluxo_dentro_da_conta.dart';
@@ -50,6 +51,7 @@ void main() {
           ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
           autenticacao: RepositorioAutenticacaoSimulado(demora: Duration.zero),
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+          aceiteDoAviso: AceiteEmMemoria(),
           limpeza: LimpezaDeSessao(
             cofre: CofreQueRegistra(),
             ultimoAcesso: ultimoAcesso,

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'design_system/design_system.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
+import 'features/assistente/data/aceite_do_aviso.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
 import 'services/ambiente/ambiente.dart';
@@ -20,6 +21,7 @@ Future<void> main() async {
   await controlador.carregar();
 
   final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
+  final AceiteDoAvisoLocal aceiteDoAviso = await AceiteDoAvisoLocal.abrir();
 
   // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
   // lugar. Ver `services/ambiente/composicao.dart`.
@@ -27,6 +29,7 @@ Future<void> main() async {
     ambiente: Ambiente.doAmbiente(),
     cofre: CofreSeguroDoSistema(),
     ultimoAcesso: ultimoAcesso,
+    aceiteDoAviso: aceiteDoAviso,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
@@ -97,6 +100,7 @@ class AplicativoMemora extends StatelessWidget {
               ultimoAcesso: ultimoAcesso,
               limpeza: composicao.limpeza,
               assistente: composicao.assistente,
+              aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoAndroid(),
             ),
           );
