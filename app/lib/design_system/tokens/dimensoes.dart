@@ -145,6 +145,13 @@ abstract final class MemoraDimensoes {
   /// um 320×568 — a lição do teto da conversa, na PR #28.
   static const double fracaoDaIlustracaoHeroi = 0.28;
 
+  /// Fração da altura disponível que a Memora do **Início** pode ocupar (T115).
+  ///
+  /// Menor que [fracaoDaIlustracaoHeroi] porque o Início tem mais a dizer: a
+  /// frase da Memora e uma caixa por atalho (FR-002a) precisam caber num
+  /// 390x844 sem rolar, e a figura é o que cede primeiro (regra 7 da R2).
+  static const double fracaoDaFiguraDoInicio = 0.14;
+
   /// 40 dp — abaixo disto a ilustração some. Desenho pequeno demais vira
   /// borrão para quem enxerga pouco, e ocupa o espaço de uma linha de texto.
   static const double pisoDeIlustracao = 40;

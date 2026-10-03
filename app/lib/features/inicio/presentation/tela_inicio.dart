@@ -3,14 +3,33 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_casca.dart';
 
-/// O Início: a raiz do destino de mesmo nome (T037, FR-014 da feature 004).
+/// O Início: a raiz do destino de mesmo nome (T037 e T115, FR-014 da feature
+/// 004).
 ///
 /// ## A tela que a pessoa mais verá
 ///
 /// É para onde ela chega ao entrar e para onde o "me tira daqui" da barra
-/// inferior a devolve. A Memora a cumprimenta pelo nome de tratamento e mostra
-/// o caminho para o que ela mais faz — conversar —, mais um para ver tudo o
-/// que o aplicativo tem.
+/// inferior a devolve. A Memora a cumprimenta pelo nome de tratamento, **diz em
+/// uma frase o que se faz ali** e mostra o caminho para o que ela mais faz —
+/// conversar —, mais um para ver tudo o que o aplicativo tem.
+///
+/// ## A Memora ensina a tela (R2, regra 9)
+///
+/// A revisão da T044 achou o Início "simples demais": uma saudação e dois
+/// botões, e quem nunca usou o aplicativo sem saber o que esperar. A frase de
+/// tutorial fica num balão da Memora, logo abaixo da saudação.
+///
+/// **Ela aparece sempre**, e não só na primeira vez: o Início é a tela-casa, a
+/// frase é curta, e ainda não há onde guardar "já vi" por pessoa. Quando
+/// houver, é aqui que a decisão de esconder a frase passa a existir — e
+/// esconder só pode valer para quem de fato já a leu.
+///
+/// ## Cada atalho numa caixa que diz para que serve (FR-002a)
+///
+/// "Conversar com a Memora" sozinho diz o que o botão faz, não **quando**
+/// tocá-lo. Cada atalho mora numa `CaixaDeEtapa` cuja frase responde a isso
+/// ("Tem uma dúvida sobre o celular? Converse comigo."), escrita ao lado do
+/// botão e não num parágrafo lá em cima.
 ///
 /// ## Dois atalhos, uma ação principal
 ///
@@ -23,18 +42,28 @@ import '../../../l10n/textos_casca.dart';
 ///
 /// Cada atalho é opcional: quem monta o fluxo só entrega o que leva a algum
 /// lugar. Um botão sem destino seria a porta pintada na parede que a FR-003 da
-/// 003 proíbe.
+/// 003 proíbe — e a **caixa dele** some junto, porque uma instrução sem o que
+/// tocar é a mesma porta pintada. Sem atalho nenhum, some também a frase de
+/// tutorial: ela apontaria para o nada.
 ///
 /// ## Não há "Sair" aqui (FR-019)
 ///
 /// Sair fica em Ajustes → Conta. Era o botão do lado das portas do Hub, e um
 /// toque errado custava a sessão inteira.
 ///
+/// ## O espaço da tela, repartido
+///
+/// Na primeira versão o conteúdo era empilhado no topo e, num 390×844, metade
+/// da tela ficava vazia (T044: "vazio embaixo"). Agora o conteúdo tem **no
+/// mínimo** a altura da área útil, e o que sobra vira respiro igual em cima, no
+/// meio e embaixo — conta em fração, refeita por aparelho, nunca em pixel.
+///
 /// ## A Memora cede espaço, o texto e a ação não
 ///
 /// O desenho ocupa uma fração da altura disponível e some abaixo do piso (regra
-/// 7 da R2). A tela rola, de modo que a ação principal continua alcançável em
-/// qualquer ampliação.
+/// 7 da R2). Sem sobra de altura — pouca tela, ampliação alta — o respiro vai a
+/// zero, a tela rola e a ação principal continua alcançável em qualquer
+/// ampliação.
 ///
 /// ## Estados da FR-006
 ///
@@ -53,6 +82,15 @@ class TelaInicio extends StatelessWidget {
 
   /// Chave da Memora.
   static const Key chaveMemora = Key('inicio.memora');
+
+  /// Chave do balão com a frase de tutorial.
+  static const Key chaveTutorial = Key('inicio.tutorial');
+
+  /// Chave da caixa do atalho para a conversa.
+  static const Key chaveCaixaConversar = Key('inicio.caixaConversar');
+
+  /// Chave da caixa do atalho para ver tudo.
+  static const Key chaveCaixaVerTudo = Key('inicio.caixaVerTudo');
 
   /// Como a pessoa quer ser chamada.
   final String nome;
@@ -75,6 +113,8 @@ class TelaInicio extends StatelessWidget {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final bool conversarEPrincipal = aoConversar != null;
+    final int atalhos =
+        (aoConversar != null ? 1 : 0) + (aoVerTudo != null ? 1 : 0);
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -85,64 +125,109 @@ class TelaInicio extends StatelessWidget {
             // A figura cede primeiro, e a conta é refeita por aparelho
             // (regra 3): fração da altura, nunca pixel.
             final double cabe =
-                caixa.maxHeight * MemoraDimensoes.fracaoDaIlustracaoHeroi;
+                caixa.maxHeight * MemoraDimensoes.fracaoDaFiguraDoInicio;
             final double figura = cabe < MemoraDimensoes.ilustracaoHeroi
                 ? cabe
                 : MemoraDimensoes.ilustracaoHeroi;
 
+            // A altura que o conteúdo ocupa **no mínimo**: a da área útil,
+            // menos o respiro de cima e de baixo da rolagem. Sobrando espaço,
+            // o `Column` abaixo o reparte entre os blocos; faltando, a tela
+            // rola.
+            final double alturaMinima =
+                (caixa.maxHeight - 2 * MemoraEspacamento.lg).clamp(
+                  0.0,
+                  double.infinity,
+                );
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(MemoraEspacamento.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (figura >= MemoraDimensoes.pisoDeIlustracao) ...<Widget>[
-                    Center(
-                      child: MemoraPersonagem(
-                        key: chaveMemora,
-                        tamanho: figura,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: alturaMinima),
+                child: Column(
+                  // `spaceEvenly` com dois blocos: o espaço que sobra vira três
+                  // respiros iguais (em cima, no meio e embaixo). Sem sobra
+                  // ele é zero, e o que separa os blocos é o afastamento fixo
+                  // do primeiro.
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        bottom: MemoraEspacamento.xl,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          if (figura >=
+                              MemoraDimensoes.pisoDeIlustracao) ...<Widget>[
+                            Center(
+                              child: MemoraPersonagem(
+                                key: chaveMemora,
+                                tamanho: figura,
+                              ),
+                            ),
+                            const SizedBox(height: MemoraEspacamento.lg),
+                          ],
+                          TextoMemora(
+                            TextosCasca.inicioSaudacao(nome),
+                            key: chaveSaudacao,
+                            estilo: EstiloTexto.destaque,
+                            cabecalho: true,
+                            alinhamento: TextAlign.center,
+                          ),
+                          if (atalhos > 0) ...<Widget>[
+                            const SizedBox(height: MemoraEspacamento.lg),
+                            BalaoDeFala(
+                              key: chaveTutorial,
+                              autor: AutorDoBalao.memora,
+                              texto: TextosCasca.inicioTutorial(atalhos),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-                    const SizedBox(height: MemoraEspacamento.xl),
-                  ],
-                  TextoMemora(
-                    TextosCasca.inicioSaudacao(nome),
-                    key: chaveSaudacao,
-                    estilo: EstiloTexto.destaque,
-                    cabecalho: true,
-                    alinhamento: TextAlign.center,
-                  ),
-                  const SizedBox(height: MemoraEspacamento.sm),
-                  const TextoMemora(
-                    TextosCasca.inicioConvite,
-                    alinhamento: TextAlign.center,
-                  ),
-                  if (aoConversar != null || aoVerTudo != null) ...<Widget>[
-                    const SizedBox(height: MemoraEspacamento.xxl),
-                    if (aoConversar != null)
-                      BotaoPrimario(
-                        key: chaveConversar,
-                        rotulo: TextosCasca.inicioConversar,
-                        icone: Icons.chat_bubble_outline,
-                        aoTocar: aoConversar,
-                      ),
-                    if (aoConversar != null && aoVerTudo != null)
-                      const SizedBox(height: MemoraEspacamento.md),
-                    if (aoVerTudo != null)
-                      conversarEPrincipal
-                          ? BotaoSecundario(
-                              key: chaveVerTudo,
-                              rotulo: TextosCasca.inicioVerTudo,
-                              icone: Icons.apps_outlined,
-                              aoTocar: aoVerTudo,
-                            )
-                          : BotaoPrimario(
-                              key: chaveVerTudo,
-                              rotulo: TextosCasca.inicioVerTudo,
-                              icone: Icons.apps_outlined,
-                              aoTocar: aoVerTudo,
+                    if (atalhos > 0)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          if (aoConversar != null)
+                            CaixaDeEtapa(
+                              key: chaveCaixaConversar,
+                              instrucao: TextosCasca.inicioInstrucaoConversar,
+                              child: BotaoPrimario(
+                                key: chaveConversar,
+                                rotulo: TextosCasca.inicioConversar,
+                                icone: Icons.chat_bubble_outline,
+                                aoTocar: aoConversar,
+                              ),
                             ),
+                          if (aoConversar != null && aoVerTudo != null)
+                            const SizedBox(height: MemoraEspacamento.lg),
+                          if (aoVerTudo != null)
+                            CaixaDeEtapa(
+                              key: chaveCaixaVerTudo,
+                              instrucao: TextosCasca.inicioInstrucaoVerTudo,
+                              child: conversarEPrincipal
+                                  ? BotaoSecundario(
+                                      key: chaveVerTudo,
+                                      rotulo: TextosCasca.inicioVerTudo,
+                                      icone: Icons.apps_outlined,
+                                      aoTocar: aoVerTudo,
+                                    )
+                                  : BotaoPrimario(
+                                      key: chaveVerTudo,
+                                      rotulo: TextosCasca.inicioVerTudo,
+                                      icone: Icons.apps_outlined,
+                                      aoTocar: aoVerTudo,
+                                    ),
+                            ),
+                        ],
+                      ),
                   ],
-                ],
+                ),
               ),
             );
           },

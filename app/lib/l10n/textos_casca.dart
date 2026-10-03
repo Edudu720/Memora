@@ -84,8 +84,20 @@ abstract final class TextosCasca {
   /// A saudação do Início, com o nome de tratamento.
   static String inicioSaudacao(String nome) => 'Oi, $nome!';
 
-  /// A pergunta que acompanha a saudação.
-  static const String inicioConvite = 'O que vamos fazer hoje?';
+  /// A frase de tutorial da Memora no Início (R2, regra 9): diz o que se faz
+  /// nesta tela. [atalhos] é quantas caixas há para tocar — a frase concorda
+  /// com o que está na tela, e com nenhuma não há o que dizer (FR-018).
+  static String inicioTutorial(int atalhos) => atalhos == 1
+      ? 'Aqui você escolhe o que quer fazer. Toque na caixa abaixo.'
+      : 'Aqui você escolhe o que quer fazer. Toque numa das caixas abaixo.';
+
+  /// A instrução da caixa de conversar (FR-002a): para que ela serve.
+  static const String inicioInstrucaoConversar =
+      'Tem uma dúvida sobre o celular? Converse comigo.';
+
+  /// A instrução da caixa de ver tudo (FR-002a): para que ela serve.
+  static const String inicioInstrucaoVerTudo =
+      'Quer ver tudo o que o Memora tem? Toque aqui.';
 
   /// O atalho para conversar com a Memora — a ação principal do Início.
   static const String inicioConversar = 'Conversar com a Memora';
