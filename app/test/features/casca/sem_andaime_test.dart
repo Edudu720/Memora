@@ -6,7 +6,7 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_boas_vindas.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/main.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
@@ -84,11 +84,16 @@ void main() {
     await t.pumpWidget(
       MaterialApp(
         theme: TemasMemora.claro,
-        home: AjustesProvisorios(aoAbrirAparencia: () {}, aoSair: () async {}),
+        home: TelaConfiguracoes(
+          aoAbrirAparencia: () {},
+          aoAbrirAcessibilidade: () {},
+          aoAbrirPrivacidade: () {},
+          aoAbrirConta: () {},
+        ),
       ),
     );
-    expect(find.byKey(AjustesProvisorios.chaveGaleria), findsNothing);
-    expect(find.byKey(AjustesProvisorios.chaveAparencia), findsOneWidget);
+    expect(find.byKey(TelaConfiguracoes.chaveGaleria), findsNothing);
+    expect(find.byKey(TelaConfiguracoes.chaveAparencia), findsOneWidget);
   });
 
   testWidgets(

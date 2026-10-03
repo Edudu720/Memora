@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
-import '../../../l10n/textos_casca.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -28,6 +27,9 @@ import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
 import '../../casca/casca_interna.dart';
 import '../../casca/raizes_provisorias.dart';
+import '../../configuracoes/presentation/tela_configuracoes.dart';
+import '../../configuracoes/presentation/tela_conta.dart';
+import '../../configuracoes/presentation/tela_privacidade.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
 import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
@@ -316,10 +318,16 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     setState(() => _etapa = jaViu ? _Etapa.dentro : _Etapa.apresentacao);
   }
 
-  Future<void> _sair() async {
+  /// Sai da conta.
+  ///
+  /// [esquecerTudo] é o "Sair e esquecer este aparelho" de Ajustes → Conta
+  /// (FR-041): além do que a saída comum leva, apaga o que só a leitura
+  /// literal da FR-026 leva — o identificador do último acesso, a data de
+  /// nascimento e a apresentação vista. A saída comum **não** o faz.
+  Future<void> _sair({bool esquecerTudo = false}) async {
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
-    await widget.limpeza?.executar();
+    await widget.limpeza?.executar(esquecerTudo: esquecerTudo);
     if (!mounted) return;
     _fecharRotasAbertas();
     _irParaLogin();
@@ -529,6 +537,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         // sobra cronômetro nem resposta em voo depois de a pessoa sair da
         // tela — ou da conta (FR-048).
         builder: (BuildContext contexto) => _DonaDaConversa(
+          aoAbrir: _conversasAbertas.add,
+          aoFechar: _conversasAbertas.remove,
           criar: () => ControladorConversa(
             assistente,
             widget.conversaLocal(),
@@ -541,8 +551,57 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     );
   }
 
-  void _abrirAparencia() {
-    _empilhar(_rota(builder: (BuildContext _) => const _PaginaDeAparencia()));
+  /// As conversas abertas agora, em qualquer pilha da casca.
+  ///
+  /// Quem apaga a conversa em Privacidade precisa apagá-la também **da tela**:
+  /// uma conversa aberta no Início guarda as mensagens na memória, e a
+  /// próxima pergunta as regravaria no aparelho — desfazendo o apagar.
+  final List<ControladorConversa> _conversasAbertas = <ControladorConversa>[];
+
+  /// Apaga a conversa do aparelho e das telas que a estejam mostrando (T094).
+  Future<void> _apagarConversa() async {
+    await widget.conversaLocal().apagar();
+    for (final ControladorConversa c in List<ControladorConversa>.of(
+      _conversasAbertas,
+    )) {
+      await c.apagarConversa();
+    }
+  }
+
+  /// A tela de aparência, e a de acessibilidade, que dividem a mesma tela.
+  void _abrirAjusteVisual(GrupoDeAjusteVisual grupo) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaAparencia(
+          grupo: grupo,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  void _abrirPrivacidade() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaPrivacidade(
+          aoApagarConversa: _apagarConversa,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  void _abrirConta() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaConta(
+          canal: _canal,
+          aoSair: _sair,
+          aoSairEEsquecer: () => _sair(esquecerTudo: true),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// A galeria, só no modo de desenvolvimento (R9 da 002). Fora dele, nulo —
@@ -623,10 +682,14 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         key: _casca,
         aoRegistrarAtividade: _registrarAtividade,
         raizes: <DestinoDaCasca, WidgetBuilder>{
-          DestinoDaCasca.ajustes: (BuildContext _) => AjustesProvisorios(
-            aoAbrirAparencia: _abrirAparencia,
+          DestinoDaCasca.ajustes: (BuildContext _) => TelaConfiguracoes(
+            aoAbrirAparencia: () =>
+                _abrirAjusteVisual(GrupoDeAjusteVisual.aparencia),
+            aoAbrirAcessibilidade: () =>
+                _abrirAjusteVisual(GrupoDeAjusteVisual.acessibilidade),
+            aoAbrirPrivacidade: _abrirPrivacidade,
+            aoAbrirConta: _abrirConta,
             aoAbrirGaleria: _abrirGaleria,
-            aoSair: _sair,
           ),
           // O Início é a raiz, e o Hub se empilha sobre ele (T040). Cada
           // atalho só existe se leva a algum lugar (FR-018): sem assistente
@@ -658,7 +721,16 @@ class _DonaDaConversa extends StatefulWidget {
   final ControladorConversa Function() criar;
   final VoidCallback aoVoltar;
 
-  const _DonaDaConversa({required this.criar, required this.aoVoltar});
+  /// Avisam o fluxo de que há uma conversa aberta, e de quando ela fecha.
+  final void Function(ControladorConversa) aoAbrir;
+  final void Function(ControladorConversa) aoFechar;
+
+  const _DonaDaConversa({
+    required this.criar,
+    required this.aoVoltar,
+    required this.aoAbrir,
+    required this.aoFechar,
+  });
 
   @override
   State<_DonaDaConversa> createState() => _DonaDaConversaState();
@@ -668,7 +740,14 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
   late final ControladorConversa _controlador = widget.criar();
 
   @override
+  void initState() {
+    super.initState();
+    widget.aoAbrir(_controlador);
+  }
+
+  @override
   void dispose() {
+    widget.aoFechar(_controlador);
     _controlador.dispose();
     super.dispose();
   }
@@ -676,30 +755,5 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
   @override
   Widget build(BuildContext context) {
     return TelaConversa(controlador: _controlador, aoVoltar: widget.aoVoltar);
-  }
-}
-
-/// A tela de aparência com barra superior, para o caminho de volta ao Hub.
-///
-/// A `TelaAparencia` nasceu na feature 002 sem barra: ela era uma aba da casca
-/// de demonstração, e aba não precisa de "voltar". Dentro do Hub ela precisa —
-/// a FR-005 exige que o caminho de volta esteja **sempre na mesma posição**, em
-/// todas as telas.
-///
-/// Envolver aqui, em vez de mexer na tela do Design System, mantém o componente
-/// utilizável nos dois contextos.
-class _PaginaDeAparencia extends StatelessWidget {
-  const _PaginaDeAparencia();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.memora.cores.fundo,
-      appBar: BarraSuperior(
-        titulo: TextosCasca.portaAparencia,
-        aoVoltar: () => Navigator.of(context).pop(),
-      ),
-      body: const TelaAparencia(),
-    );
   }
 }
