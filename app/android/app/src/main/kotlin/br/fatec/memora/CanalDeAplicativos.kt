@@ -43,7 +43,7 @@ class CanalDeAplicativos(private val packageManager: PackageManager) :
 
         /** A mesma forma que o lado Dart confere. Mantenha as duas iguais. */
         private val FORMA_DE_PACOTE =
-            Regex("^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$")
+            Regex("""^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$""")
 
         /** Registra o canal no motor do Flutter. */
         fun registrar(executor: DartExecutor, packageManager: PackageManager) {
