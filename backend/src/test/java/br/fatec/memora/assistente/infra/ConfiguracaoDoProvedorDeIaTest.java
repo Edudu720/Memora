@@ -85,7 +85,8 @@ class ConfiguracaoDoProvedorDeIaTest {
                         c -> {
                             assertThat(c).hasFailed();
                             assertThat(rootCause(c.getStartupFailure()).getMessage())
-                                    .contains("GEMINI_API_KEY");
+                                    .contains("GEMINI_API_KEY")
+                                    .contains("nao configurada");
                         });
     }
 
@@ -97,7 +98,8 @@ class ConfiguracaoDoProvedorDeIaTest {
                         c -> {
                             assertThat(c).hasFailed();
                             assertThat(rootCause(c.getStartupFailure()).getMessage())
-                                    .contains("GEMINI_API_KEY");
+                                    .contains("GEMINI_API_KEY")
+                                    .contains("nao configurada");
                         });
     }
 
