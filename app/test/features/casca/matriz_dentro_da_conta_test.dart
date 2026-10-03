@@ -43,7 +43,9 @@ void main() {
         .dy;
     expect(
       r.top,
-      greaterThanOrEqualTo(0),
+      // Folga de ruído de ponto flutuante: `ensureVisible` alinha o alvo ao
+      // topo e o topo sai como -1e-13 (visto no "ver tudo" do Início, T115).
+      greaterThanOrEqualTo(-0.01),
       reason: '${nomeDa(c)}: o alvo ficou acima da janela ($r)',
     );
     if (r.height <= topoDaBarra) {
