@@ -15,6 +15,8 @@ import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../apresentacao/data/apresentacao_vista.dart';
+import '../../apresentacao/presentation/fluxo_apresentacao.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/conversa_local.dart';
 import '../../assistente/domain/assistente.dart';
@@ -76,6 +78,13 @@ class FluxoAutenticacao extends StatefulWidget {
   /// aplicativo — o que basta para o teste de widget.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
+  /// Quais contas já viram a apresentação inicial (FR-013, T050).
+  ///
+  /// **Opcional de propósito**: sem ele a pessoa entra direto, como antes da
+  /// 004 — é o que o teste de widget que só quer chegar ao Início espera.
+  /// O aplicativo de verdade sempre o recebe da `Composicao`.
+  final ApresentacaoVista? apresentacaoVista;
+
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
@@ -104,6 +113,7 @@ class FluxoAutenticacao extends StatefulWidget {
     super.key,
     this.limpeza,
     this.dataDeNascimento,
+    this.apresentacaoVista,
   });
 
   @override
@@ -118,6 +128,10 @@ enum _Etapa {
   primeiraEntrada,
   login,
   recuperacao,
+
+  /// Entrou, e o aplicativo confere se a conta já viu a apresentação.
+  conferindoApresentacao,
+  apresentacao,
   dentro,
 }
 
@@ -268,14 +282,38 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _irParaLogin();
   }
 
+  /// A pessoa está autenticada. Antes da casca, passa pela apresentação — mas
+  /// **só** se esta conta ainda não a viu (FR-013).
+  ///
+  /// A sessão e o monitor de inatividade valem desde já: a apresentação é
+  /// tempo de sessão como qualquer outro, e celular esquecido nela expira.
   void _entrou(PessoaAutenticada pessoa) {
     _expirando = false;
+    final ApresentacaoVista? vistas = widget.apresentacaoVista;
     setState(() {
       _pessoa = pessoa;
       _canal = widget.ultimoAcesso.identificador();
-      _etapa = _Etapa.dentro;
+      _etapa = vistas == null ? _Etapa.dentro : _Etapa.conferindoApresentacao;
     });
     _monitor.iniciar();
+    if (vistas != null) _conferirApresentacao(vistas, pessoa);
+  }
+
+  Future<void> _conferirApresentacao(
+    ApresentacaoVista vistas,
+    PessoaAutenticada pessoa,
+  ) async {
+    bool jaViu;
+    try {
+      jaViu = await vistas.jaViu(pessoa.id);
+    } catch (_) {
+      // Sem conseguir ler, mostrar de novo custa uma tela pulável; não mostrar
+      // seria decidir pela pessoa sem saber.
+      jaViu = false;
+    }
+    // Ela pode ter saído, ou a sessão expirado, enquanto se lia.
+    if (!mounted || _etapa != _Etapa.conferindoApresentacao) return;
+    setState(() => _etapa = jaViu ? _Etapa.dentro : _Etapa.apresentacao);
   }
 
   Future<void> _sair() async {
@@ -285,6 +323,16 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     if (!mounted) return;
     _fecharRotasAbertas();
     _irParaLogin();
+  }
+
+  /// Conta o toque como atividade numa tela de dentro da conta que **não** é
+  /// a casca: a apresentação. Sem isto, quem a lê devagar seria expulso.
+  Widget _contandoAtividade(Widget tela) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _registrarAtividade(),
+      child: tela,
+    );
   }
 
   /// Uma rota aberta de dentro do fluxo.
@@ -556,6 +604,17 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         controlador: _recuperacao!,
         aoVoltar: () => setState(() => _etapa = _Etapa.login),
         aoConcluir: _recuperou,
+      ),
+      _Etapa.conferindoApresentacao => _contandoAtividade(
+        const TelaPreparandoApresentacao(),
+      ),
+      _Etapa.apresentacao => _contandoAtividade(
+        FluxoApresentacao(
+          nome: _pessoa?.nomeTratamento ?? '',
+          idDaConta: _pessoa!.id,
+          vista: widget.apresentacaoVista!,
+          aoConcluir: () => setState(() => _etapa = _Etapa.dentro),
+        ),
       ),
       // A casca é quem conta a atividade: um `Listener` em volta dela inteira,
       // inclusive das telas empilhadas (R1 da 004). Qualquer toque adia a

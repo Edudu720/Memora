@@ -228,15 +228,15 @@ apresentando.
 
 ### Tests
 
-- [ ] T045 [P] [US1] Teste em `app/test/features/apresentacao/fluxo_apresentacao_test.dart`: três telas com "Continuar" e "Pular"; aparece depois do cadastro e da primeira entrada; **não** aparece de novo depois de sair e entrar; interrompida no meio, recomeça; a primeira tela diz o que a Memora nunca faz (FR-036a); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [ ] T046 [P] [US1] Teste de unidade (`test` puro) em `app/test/features/apresentacao/apresentacao_vista_test.dart`: grava ao fim ou ao pular, por conta; outra conta no mesmo aparelho ainda não viu
+- [X] T045 [P] [US1] Teste em `app/test/features/apresentacao/fluxo_apresentacao_test.dart`: três telas com "Continuar" e "Pular"; aparece depois do cadastro e da primeira entrada; **não** aparece de novo depois de sair e entrar; interrompida no meio, recomeça; a primeira tela diz o que a Memora nunca faz (FR-036a); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [X] T046 [P] [US1] Teste de unidade (`test` puro) em `app/test/features/apresentacao/apresentacao_vista_test.dart`: grava ao fim ou ao pular, por conta; outra conta no mesmo aparelho ainda não viu
 - [ ] T047 [P] [US1] Estender `app/test/features/autenticacao/tela_login_test.dart`: sem botões de Google e Facebook (FR-011); "Esqueci minha senha" e "Primeiro acesso" visíveis sem rolar em 100% no 320×568
 
 ### Implementation
 
-- [ ] T048 [US1] Criar `ApresentacaoVista` em `app/lib/features/apresentacao/data/apresentacao_vista.dart`, sobre `shared_preferences`; **não** é `DadoLocalDaPessoa` (R11). Sai com `LimpezaDeSessao.executar(esquecerTudo: true)` — aparelho que vai ser vendido não guarda as contas que passaram por ele (R11, revisão da #36)
-- [ ] T049 [US1] Criar as três telas (Olá, Apresentação, Exemplo) em `app/lib/features/apresentacao/presentation/fluxo_apresentacao.dart`, com `BalaoDeFala` e `MemoraPersonagem`; textos em `textos_apresentacao.dart`
-- [ ] T050 [US1] Inserir a apresentação em `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`, entre a autenticação e a casca, só para conta que não a viu
+- [X] T048 [US1] Criar `ApresentacaoVista` em `app/lib/features/apresentacao/data/apresentacao_vista.dart`, sobre `shared_preferences`; **não** é `DadoLocalDaPessoa` (R11). Sai com `LimpezaDeSessao.executar(esquecerTudo: true)` — aparelho que vai ser vendido não guarda as contas que passaram por ele (R11, revisão da #36)
+- [X] T049 [US1] Criar as três telas (Olá, Apresentação, Exemplo) em `app/lib/features/apresentacao/presentation/fluxo_apresentacao.dart`, com `BalaoDeFala` e `MemoraPersonagem`; textos em `textos_apresentacao.dart`
+- [X] T050 [US1] Inserir a apresentação em `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`, entre a autenticação e a casca, só para conta que não a viu
 - [ ] T051 [P] [US1] Redesenhar `app/lib/features/autenticacao/presentation/telas/tela_boas_vindas.dart`: ilustração herói, a frase do que o Memora faz, uma ação principal e "Já tenho conta" (FR-009)
 - [ ] T052 [P] [US1] Redesenhar `tela_cadastro.dart` e `tela_login.dart` na mesma pasta, sem mudar campos nem regras (FR-010); `cadastro_acessibilidade_test.dart` e `campo_senha_ampliacao_test.dart` continuam passando
 
