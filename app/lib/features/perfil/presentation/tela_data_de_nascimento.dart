@@ -50,6 +50,9 @@ class TelaDataDeNascimento extends StatefulWidget {
   /// Chave do botão de guardar.
   static const Key chaveGuardar = Key('perfil.data.guardar');
 
+  /// Chave do aviso de que não foi possível guardar.
+  static const Key chaveErroAoGuardar = Key('perfil.data.erro_ao_guardar');
+
   /// Chave do botão de cancelar.
   static const Key chaveCancelar = Key('perfil.data.cancelar');
 
@@ -70,6 +73,7 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
 
   ProblemaDaData? _problema;
   bool _guardando = false;
+  bool _falhou = false;
 
   @override
   void dispose() {
@@ -93,9 +97,20 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
     }
     setState(() {
       _problema = null;
+      _falhou = false;
       _guardando = true;
     });
-    await widget.armazenamento.guardar(widget.idDaConta, data);
+    try {
+      await widget.armazenamento.guardar(widget.idDaConta, data);
+    } catch (_) {
+      // Sem isto os dois botões ficariam desabilitados para sempre.
+      if (!mounted) return;
+      setState(() {
+        _guardando = false;
+        _falhou = true;
+      });
+      return;
+    }
     if (!mounted) return;
     Navigator.of(context).pop(true);
   }
@@ -188,6 +203,14 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
             tamanho: 4,
             erro: _erroAno(),
           ),
+          if (_falhou) ...<Widget>[
+            const SizedBox(height: MemoraEspacamento.lg),
+            const TextoMemora(
+              TextosPerfil.erroAoGuardar,
+              key: TelaDataDeNascimento.chaveErroAoGuardar,
+              estilo: EstiloTexto.corpoForte,
+            ),
+          ],
           const SizedBox(height: MemoraEspacamento.xxl),
           BotaoPrimario(
             key: TelaDataDeNascimento.chaveGuardar,

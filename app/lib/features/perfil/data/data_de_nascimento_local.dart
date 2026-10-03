@@ -43,19 +43,33 @@ class DataDeNascimentoLocal implements DataDeNascimentoDoAparelho {
   static Future<DataDeNascimentoLocal> abrir() async =>
       DataDeNascimentoLocal(await SharedPreferences.getInstance());
 
+  /// Id vazio ou só de espaços não identifica ninguém: todas as contas sem id
+  /// cairiam na mesma chave, e uma veria a data da outra.
+  static bool _semConta(String idDaConta) => idDaConta.trim().isEmpty;
+
   @override
-  Future<DataDeNascimento?> ler(String idDaConta) async =>
-      DataDeNascimento.deArmazenado(
-        _preferencias.getString('$prefixo$idDaConta'),
-      );
+  Future<DataDeNascimento?> ler(String idDaConta) async {
+    if (_semConta(idDaConta)) return null;
+    return DataDeNascimento.deArmazenado(
+      _preferencias.getString('$prefixo$idDaConta'),
+    );
+  }
 
   @override
   Future<void> guardar(String idDaConta, DataDeNascimento data) async {
+    if (_semConta(idDaConta)) {
+      throw ArgumentError.value(
+        idDaConta,
+        'idDaConta',
+        'sem id da conta a data não tem de quem ser',
+      );
+    }
     await _preferencias.setString('$prefixo$idDaConta', data.paraArmazenar());
   }
 
   @override
   Future<void> apagar(String idDaConta) async {
+    if (_semConta(idDaConta)) return;
     await _preferencias.remove('$prefixo$idDaConta');
   }
 

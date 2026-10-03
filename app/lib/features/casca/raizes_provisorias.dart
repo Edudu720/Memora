@@ -111,12 +111,12 @@ class PerfilProvisorio extends StatelessWidget {
   /// O canal da conta, quando o aparelho o tem.
   final Future<String?> canal;
 
-  /// Cria a raiz provisória.
   /// Onde a data de nascimento fica guardada, por conta (FR-042c).
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
-  /// A conta de quem é o Perfil. Sem ela não há de quem guardar a idade, e a
-  /// seção não aparece.
+  /// A conta de quem é o Perfil. Sem ela — ausente, vazia ou só espaços — não
+  /// há de quem guardar a idade, e a seção não aparece: com id vazio, todas as
+  /// contas cairiam na mesma chave e uma veria a idade da outra.
   final String? idDaConta;
 
   /// Cria a raiz provisória.
@@ -160,7 +160,9 @@ class PerfilProvisorio extends StatelessWidget {
                   ),
             ),
           ),
-          if (dataDeNascimento != null && idDaConta != null)
+          if (dataDeNascimento != null &&
+              idDaConta != null &&
+              idDaConta!.trim().isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(MemoraEspacamento.lg),
               child: SecaoIdade(

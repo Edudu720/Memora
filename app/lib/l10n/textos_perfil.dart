@@ -84,6 +84,10 @@ abstract final class TextosPerfil {
   static const String erroAnoCurto =
       'Escreva o ano com quatro números, como 1952.';
 
+  /// Não foi possível guardar (falha do aparelho).
+  static const String erroAoGuardar =
+      'Não consegui guardar agora. Tente de novo.';
+
   /// Data que não existe.
   static const String erroImpossivel =
       'Essa data não existe no calendário. Confira o dia e o mês.';

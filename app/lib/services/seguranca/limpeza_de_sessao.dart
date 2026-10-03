@@ -69,8 +69,8 @@ class LimpezaDeSessao {
   /// Remove do aparelho o que a saída leva.
   ///
   /// [esquecerTudo] apaga também o identificador do último acesso e os
-  /// [DadoLocalDoAparelho] — é a leitura literal da FR-026, e o que faz sentido num aparelho compartilhado ou que
-  /// vai ser vendido. Não é o padrão pelo motivo no cabeçalho.
+  /// [DadoLocalDoAparelho] — é a leitura literal da FR-026, e o que faz sentido
+  /// num aparelho compartilhado ou que vai ser vendido. Não é o padrão pelo motivo no cabeçalho.
   Future<void> executar({bool esquecerTudo = false}) async {
     // Primeiro e sempre: o que abre a conta.
     await _cofre.limpar();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/componentes/botoes/botao_base.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/casca/raizes_provisorias.dart';
@@ -302,6 +303,49 @@ void main() {
       });
     }
 
+    testWidgets('se guardar falhar, avisa e destrava os botões', (t) async {
+      final _QueFalhaAoGuardar datas = _QueFalhaAoGuardar();
+      await montar(t, datas);
+      await tocar(t, find.byKey(SecaoIdade.chaveInformar));
+
+      await preencherData(t, '15', '3', '1952');
+      await tocar(t, find.byKey(TelaDataDeNascimento.chaveGuardar));
+
+      expect(
+        find.byKey(TelaDataDeNascimento.chaveErroAoGuardar),
+        findsOneWidget,
+      );
+      expect(find.text(TextosPerfil.erroAoGuardar), findsOneWidget);
+      expect(
+        find.byKey(TelaDataDeNascimento.chaveDia),
+        findsOneWidget,
+        reason: 'continua na tela de entrada',
+      );
+      for (final Key chave in <Key>[
+        TelaDataDeNascimento.chaveGuardar,
+        TelaDataDeNascimento.chaveCancelar,
+      ]) {
+        await t.ensureVisible(find.byKey(chave));
+        expect(
+          t
+              .widget<BotaoBase>(
+                find.descendant(
+                  of: find.byKey(chave),
+                  matching: find.byType(BotaoBase),
+                ),
+              )
+              .aoTocar,
+          isNotNull,
+          reason: 'botão travado depois da falha',
+        );
+      }
+
+      // E dá para tentar de novo.
+      datas.falha = false;
+      await tocar(t, find.byKey(TelaDataDeNascimento.chaveGuardar));
+      expect(find.byKey(SecaoIdade.chaveIdade), findsOneWidget);
+    });
+
     testWidgets('corrigir depois do erro funciona', (t) async {
       final DataDeNascimentoEmMemoria datas = await abrir(t);
 
@@ -318,9 +362,16 @@ void main() {
   });
 
   group('Matriz de aparelhos (FR-044)', () {
-    final List<Combinacao> combinacoes = matriz(
-      temas: <MemoraTemaId>[MemoraTemaId.claro],
-    ).toList();
+    // A matriz completa no tema claro; os três temas só no aparelho mais
+    // estreito, a 200% — o padrão da galeria.
+    final List<Combinacao> combinacoes = <Combinacao>[
+      ...matriz(temas: <MemoraTemaId>[MemoraTemaId.claro]),
+      ...matriz(
+        de: <Size>[aparelhos.last],
+        em: <double>[2.0],
+        temas: <MemoraTemaId>[MemoraTemaId.escuro, MemoraTemaId.altoContraste],
+      ),
+    ];
 
     for (final Combinacao c in combinacoes) {
       testWidgets('o convite cabe em ${nomeDa(c)}', (t) async {
@@ -389,6 +440,45 @@ void main() {
     }
   });
 
+  group('O Perfil sem id de conta não mostra a idade', () {
+    Future<void> perfil(
+      WidgetTester t,
+      DataDeNascimentoEmMemoria datas,
+      String? id,
+    ) async {
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: PerfilProvisorio(
+            nome: 'Ana',
+            canal: Future<String?>.value('ana@email.com'),
+            dataDeNascimento: datas,
+            idDaConta: id,
+          ),
+        ),
+      );
+      await avancar(t);
+    }
+
+    for (final String? id in <String?>[null, '', '   ']) {
+      testWidgets('id ${id == null ? 'ausente' : "'$id'"}', (t) async {
+        final DataDeNascimentoEmMemoria datas = DataDeNascimentoEmMemoria();
+        await datas.guardar('', nascida);
+        await datas.guardar('   ', nascida);
+        await perfil(t, datas, id);
+
+        expect(find.byType(SecaoIdade), findsNothing);
+        expect(find.byKey(SecaoIdade.chaveIdade), findsNothing);
+        expect(find.byKey(SecaoIdade.chaveConvite), findsNothing);
+      });
+    }
+
+    testWidgets('com id de verdade, a seção aparece', (t) async {
+      await perfil(t, DataDeNascimentoEmMemoria(), conta);
+      expect(find.byType(SecaoIdade), findsOneWidget);
+    });
+  });
+
   group('Pelo fluxo de verdade', () {
     testWidgets('o Perfil convida, guarda e mostra a idade da conta', (
       t,
@@ -407,4 +497,15 @@ void main() {
       expect(find.byType(PerfilProvisorio), findsOneWidget);
     });
   });
+}
+
+/// Armazenamento cujo `guardar` falha enquanto [falha] for verdadeiro.
+class _QueFalhaAoGuardar extends DataDeNascimentoEmMemoria {
+  bool falha = true;
+
+  @override
+  Future<void> guardar(String idDaConta, DataDeNascimento data) async {
+    if (falha) throw StateError('disco cheio');
+    await super.guardar(idDaConta, data);
+  }
 }

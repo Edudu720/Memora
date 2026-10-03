@@ -165,6 +165,20 @@ void main() {
       },
     );
 
+    for (final String vazio in <String>['', '   ']) {
+      test("id vazio ('$vazio') não guarda e não lê", () async {
+        expect(() => armazenamento.guardar(vazio, ana), throwsArgumentError);
+        expect(preferencias.getKeys(), isEmpty);
+
+        // Mesmo que algo tenha caído na chave sem id, ninguém o lê.
+        await preferencias.setString(
+          '${DataDeNascimentoLocal.prefixo}$vazio',
+          '1952-03-15',
+        );
+        expect(await armazenamento.ler(vazio), isNull);
+      });
+    }
+
     test('esquecer o aparelho apaga a de todas as contas, e só ela', () async {
       await preferencias.setString('memora.ultimo_identificador', 'x@y.com');
       await armazenamento.guardar('conta-a', ana);
