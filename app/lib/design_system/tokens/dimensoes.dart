@@ -114,9 +114,24 @@ abstract final class MemoraDimensoes {
   /// 48 dp — a ilustração de um cartão de porta, ao lado do nome.
   ///
   /// Eram 56. Com 56, a porta tinha 80 dp de altura só por causa do desenho, e
-  /// quatro portas mais o cabeçalho não cabiam sem rolar no 320×568, que é o
-  /// que a FR-017 exige do Hub. 48 continua acima do [pisoDeIlustracao].
+  /// o Hub não cabia no aparelho mais comum (a FR-017 pede o Hub inteiro sem
+  /// rolar no 360×800, a 100% e 150%). 48 continua acima do
+  /// [pisoDeIlustracao].
   static const double ilustracaoCartao = 48;
+
+  /// Fração da altura da tela, já descontada a ampliação do texto, que vira o
+  /// respiro **vertical de dentro** da porta (T113). O resultado é limitado
+  /// entre `MemoraEspacamento.sm` e `.lg` — ver `CartaoDePorta.respiroVertical`.
+  ///
+  /// Fração, e não pixel: o respiro fixo de 8 dp que o commit `d5a5031` impôs
+  /// apertava o 390×844 para caber no 320×568, e a revisão da T044 chamou o
+  /// resultado de "junto demais". A conta é refeita em cada aparelho.
+  static const double fracaoDeRespiroDaPorta = 0.02;
+
+  /// Fração da altura da tela, já descontada a ampliação do texto, que vira o
+  /// afastamento **entre** portas. Limitado entre `MemoraEspacamento.md` e
+  /// `.xl`. Mesma razão de [fracaoDeRespiroDaPorta].
+  static const double fracaoDeAfastamentoEntrePortas = 0.03;
 
   /// 72 dp — a ilustração ou o rosto da Memora no cabeçalho de uma tela.
   static const double ilustracaoCabecalho = 72;

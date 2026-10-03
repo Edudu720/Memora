@@ -110,4 +110,17 @@ abstract final class TextosCasca {
   /// A explicação do estado vazio do Hub.
   static const String hubVazioExplicacao =
       'Quando houver algo para você abrir, vai aparecer nesta tela.';
+
+  /// A faixa no pé do Hub quando há mais portas abaixo da dobra (FR-017).
+  ///
+  /// Curta de propósito: a 200% de ampliação ela já ocupa duas linhas, e a
+  /// faixa fica sobre o pé da lista. A frase completa, com o gesto, é a do
+  /// leitor de tela ([hubHaMaisLeitor]).
+  static const String hubHaMais = 'Há mais abaixo';
+
+  /// O que o leitor de tela diz no lugar de [hubHaMais]: a frase completa, com
+  /// o gesto. Quem usa TalkBack rola por deslizar, e é o único jeito de saber
+  /// que há mais portas depois da última lida.
+  static const String hubHaMaisLeitor =
+      'Há mais portas abaixo. Deslize para baixo para ver.';
 }
