@@ -214,7 +214,7 @@ respiro e reescreve o `hub_cabe_sem_rolar_test.dart` para a regra nova.
 - [ ] T120 [US4] **Captura pendente** (FR-028a): passo sem captura mostra um aviso visível com a chave do guia e o número do passo; teste em `catalogo_e_guias_test.dart` lista as pendentes, e a lista precisa chegar a zero antes da T104
 - [ ] T121 [US7] Grupo **Acessibilidade** em Ajustes (FR-038, FR-039a): tamanho do texto, reduzir movimento e alto contraste, cada opção com uma frase de para quem serve, com pré-visualização
 - [ ] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador
-- [ ] T123 [US8] **Data de nascimento opcional** no Perfil (FR-042c, `data-model.md`): só no aparelho, por conta, em `shared_preferences`; não é `DadoLocalDaPessoa`; sai com `esquecerTudo`. A idade é calculada na exibição. Teste de unidade da gravação e da saída; teste de widget do convite e da exibição
+- [X] T123 [US8] **Data de nascimento opcional** no Perfil (FR-042c, `data-model.md`): só no aparelho, por conta, em `shared_preferences`; não é `DadoLocalDaPessoa`; sai com `esquecerTudo`. A idade é calculada na exibição. Teste de unidade da gravação e da saída; teste de widget do convite e da exibição
 - [ ] T124 [US5] Carteira Digital é o documento do gov.br (T080, resolvida): a `chave` na V10 é `carteira-digital`, e o guia da T082 segue essa leitura
 
 ---
@@ -359,7 +359,7 @@ senha do gov.br e onde nunca se digita (US5).
 
 **Independent Test**: dizer, olhando o Perfil, qual canal está ligado à conta (US8).
 
-- [ ] T096 [P] [US8] Teste em `app/test/features/perfil/tela_perfil_test.dart`: nome, desenho, canal e o mais aprendido como **informação** (o mesmo critério de `informacao_nao_e_acao_test.dart`); a frase de "vamos aprender juntos" quando vazio; nenhum campo de idade ou plano; **nenhuma chamada ao repositório** ao abrir (dublê espião); some quando a sessão expira (FR-050); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [ ] T096 [P] [US8] Teste em `app/test/features/perfil/tela_perfil_test.dart`: nome, desenho, canal e o mais aprendido como **informação** (o mesmo critério de `informacao_nao_e_acao_test.dart`); a frase de "vamos aprender juntos" quando vazio; nenhum campo de plano, e a idade só como informação e só se a pessoa a informou, pela `SecaoIdade` da T123 (FR-042, FR-042c); **nenhuma chamada ao repositório** ao abrir (dublê espião); some quando a sessão expira (FR-050); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
 - [ ] T097 [US8] Criar `TelaPerfil` em `app/lib/features/perfil/presentation/tela_perfil.dart`, ligar como raiz do destino Perfil e **apagar** `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart` (pendência da #35)
 
 ---
