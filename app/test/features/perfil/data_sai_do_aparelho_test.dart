@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/autenticacao/data/ultimo_acesso_local.dart';
 import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 import 'package:memora/features/perfil/domain/data_de_nascimento.dart';
+import 'package:memora/services/ambiente/ambiente.dart';
+import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -75,6 +77,28 @@ void main() {
       isNull,
       reason: 'o esquecer() do último acesso roda mesmo assim',
     );
+  });
+
+  test('a Composicao liga a mesma guarda ao Perfil e ao esquecerTudo', () async {
+    // O que a pessoa vê no Perfil e o que a saída esquece precisam ser a mesma
+    // instância: lista errada na composição deixaria a data no aparelho.
+    final Composicao composicao = Composicao.resolver(
+      ambiente: const Ambiente(
+        urlBase: 'http://10.0.2.2:8080/v1',
+        usaServidorReal: false,
+      ),
+      cofre: cofre,
+      ultimoAcesso: ultimoAcesso,
+      dataDeNascimento: datas,
+    );
+    expect(composicao.dataDeNascimento, same(datas));
+
+    await composicao.limpeza.executar();
+    expect(await datas.ler('conta-a'), ana, reason: 'saída comum mantém');
+
+    await composicao.limpeza.executar(esquecerTudo: true);
+    expect(await datas.ler('conta-a'), isNull);
+    expect(await datas.ler('conta-b'), isNull);
   });
 
   test('sem esquecerTudo, os itens do aparelho nem são chamados', () async {
