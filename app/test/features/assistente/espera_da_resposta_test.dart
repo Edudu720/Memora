@@ -253,4 +253,39 @@ void main() {
     expect(TextosAssistente.semConexao.toLowerCase(),
         isNot(contains('você escreveu')));
   });
+
+  testWidgets('apagar a conversa com uma resposta em voo: o que chega depois '
+      'não volta nem regrava (FR-040)', (WidgetTester t) async {
+    repositorio = _RepositorioControlado();
+    final _ConversaQueConta local = _ConversaQueConta();
+    controlador = ControladorConversa(
+      repositorio,
+      local,
+      rascunhoInicial: _pergunta,
+    );
+    await controlador.iniciar();
+
+    unawaited(controlador.enviar());
+    await t.pump();
+    repositorio.aoReceberTrecho!('Primeiro, abra ');
+    expect(controlador.respondendo, isTrue);
+
+    await controlador.apagarConversa();
+    final int gravacoesAoApagar = local.gravacoes;
+
+    // A resposta e um trecho soltos DEPOIS de apagar.
+    repositorio.aoReceberTrecho!('o aplicativo da galeria');
+    repositorio.pendentes.first.complete(
+      const AssistenteRespondeu('Abra a galeria.'),
+    );
+    await t.pump();
+    await t.pump(ControladorConversa.esperaMaxima);
+
+    expect(controlador.mensagens, isEmpty);
+    expect(await local.ler(), isEmpty, reason: 'regravou no aparelho');
+    expect(local.gravacoes, gravacoesAoApagar);
+    expect(controlador.trechoEmCurso, isEmpty);
+    expect(controlador.respondendo, isFalse);
+    expect(controlador.estado, EstadoConversa.aguardando);
+  });
 }
