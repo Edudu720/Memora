@@ -15,6 +15,7 @@ export 'componentes/campos/campo_senha.dart';
 export 'componentes/campos/campo_texto.dart';
 export 'componentes/cartoes/cartao.dart';
 export 'componentes/cartoes/cartao_com_avatar.dart';
+export 'componentes/cartoes/caixa_de_etapa.dart';
 export 'componentes/cartoes/cartao_de_porta.dart';
 export 'componentes/confirmacao/confirmacao_memora.dart';
 export 'componentes/conversa/balao_de_fala.dart';

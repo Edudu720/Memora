@@ -307,7 +307,24 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
       ),
 
-      const _Secao('A Memora e as ilustrações', 'O rosto dela, em quatro '
+      const _Secao('Caixa de etapa', 'Uma por etapa: a frase do que fazer no '
+          'topo, e embaixo o que se toca. É informação — a caixa não responde '
+          'ao toque, só o que está dentro dela.'),
+      const CaixaDeEtapa(
+        instrucao: 'Escreva aqui o seu e-mail',
+        child: CampoTexto(
+          rotulo: 'Seu e-mail',
+          textoAjuda: 'Usamos para você entrar',
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const CaixaDeEtapa(
+        instrucao: 'Leia com calma, e só depois siga em frente',
+        child: TextoMemora('Uma caixa também guarda uma explicação, sem '
+            'nenhum campo dentro dela.'),
+      ),
+
+      const _Secao('A Memora e as ilustrações','O rosto dela, em quatro '
           'expressões, e as ilustrações coloridas sempre sobre o medalhão '
           'claro — nos três temas.'),
       Wrap(
