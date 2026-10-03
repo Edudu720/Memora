@@ -169,7 +169,10 @@ reprovar.
 **Cobre**: R7 do research
 
 1. Abrir conversas até o teto diário.
-2. **Esperado**: `429` com espera, e texto acolhedor — não "cota excedida".
+2. **Esperado**: o stream (HTTP `200`) traz um evento `erro` com
+   `codigo: LIMITE_DE_CONVERSAS` e texto acolhedor que diz "amanhã" — não
+   "cota excedida". Não há `429` nem campo de espera (clarificação de
+   2026-10-03).
 3. **Esperado**: `LIMITE_ATINGIDO` na trilha.
 
 ---
@@ -257,5 +260,6 @@ dois foram escritos aqui.
 A conversa é **SSE**: quando a cota acaba, o stream já respondeu `200`, então o
 limite viaja como evento `erro` com o código `LIMITE_DE_CONVERSAS`. E não há
 campo de espera no corpo — a espera é "amanhã", que a frase já diz. Nenhuma das
-duas é defeito; as duas divergem do texto acima. **Decidir se corrige o cenário
-ou o transporte.**
+duas é defeito; as duas divergem do texto acima. ✅ **Resolvido em 2026-10-03
+(`/speckit-clarify`): corrige-se o cenário**, não o transporte — o H10 acima já
+descreve o evento `erro`, e o `openapi.yaml` documenta o campo `codigo`.

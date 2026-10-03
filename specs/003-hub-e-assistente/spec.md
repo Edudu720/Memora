@@ -54,6 +54,16 @@ um aplicativo que a pessoa não sabe usar, operado por alguém que ela não vê.
 - Q: Por quanto tempo a conversa fica guardada no aparelho? → A: Mensagens com mais de 30 dias são apagadas sozinhas, sem ação da pessoa (FR-054).
 - Q: Por quanto tempo o servidor guarda o registro de ações da assistente? → A: 12 meses para o registro; o resumo do pedido é apagado antes, aos 90 dias, e o fato de a ação ter acontecido permanece (FR-055).
 
+### Session 2026-10-03
+
+Com o Henrique, depois da ADR-002 (Gemini, nível gratuito).
+
+- Q: Com o nível gratuito do provedor (treina com o conteúdo, revisores humanos podem lê-lo), em que conversas a chave gratuita pode ser usada? → A: **Em todas**, inclusive no teste com as 5 pessoas de 65+ (T071). A FR-051 deixa de proibir treino e passa a exigir transparência: aviso permanente na conversa, consentimento antes da primeira mensagem e nenhum dado da conta enviado ao provedor. A saída é migrar para um serviço que não treine quando houver verba, **sem data**. A T086 fecha com a ADR-002 registrando o risco aceito. ⚠️ Contraria o Princípio I como está escrito (segurança acima de custo) — ver a nota na FR-051.
+- Q: Quando a conversa fica longa, ela é encerrada (R3, "encerra com elegância") ou segue com janela deslizante (o código)? → A: **Janela deslizante.** A conversa nunca é encerrada por tamanho; o serviço externo recebe só os 20 turnos mais recentes, e o aparelho guarda e mostra todos. Os 30 turnos da FR-053 valem só para a contagem do limite diário (FR-056).
+- Q: A voz (falar e ouvir a Memora) entra nesta feature ou numa nova? → A: **Numa nova, a 005.** A 003 continua só escrita (Assumptions).
+- Q: Onde o áudio é processado? → A: **No próprio aparelho.** O áudio nunca sai do celular nem é guardado; só o texto transcrito segue o caminho da conversa escrita. Registrado em Assumptions para a 005 nascer com isso.
+- Q: Os erros da conversa (limite diário, provedor fora do ar ou sem cota, falha inesperada) entram no contrato? → A: **Sim, dentro do stream.** O evento `erro` documenta o campo `codigo` (`LIMITE_DE_CONVERSAS`, `ASSISTENTE_INDISPONIVEL`, `ERRO_INESPERADO`), e o contrato diz que esses erros viajam com HTTP 200, nunca como 429/503. O H10 é corrigido. Na spec, a FR-057 separa provedor indisponível de limite diário.
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -215,6 +225,10 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **A internet cai durante a conversa.** A assistente precisa de conexão; a
   pessoa precisa entender que o problema é a internet, e não ela. O mesmo vale
   para a resposta que não chega: depois de 30 segundos, a espera acaba (FR-052).
+- **O serviço que gera as respostas está fora do ar ou sem cota.** A cota do
+  nível gratuito é uma só para todas as contas; quando acaba, a assistente fica
+  indisponível para todo mundo. A pessoa precisa saber que não foi nada que ela
+  fez, e que não é o limite dela do dia (FR-057).
 - **A assistente não sabe a resposta.** Dizer *"não sei"* com clareza é melhor do
   que inventar um caminho que não existe — um passo a passo errado faz a pessoa
   tocar em coisas que ela não pretendia.
@@ -272,6 +286,17 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   turnos; passado qualquer um dos dois, a mensagem seguinte abre uma conversa
   nova. Uma conversa já em curso quando o limite é atingido MUST poder
   continuar até terminar: a pessoa não é interrompida no meio de um passo.
+- **FR-056**: A conversa MUST NOT ser encerrada por ter ficado longa. O serviço
+  externo que gera as respostas MUST receber apenas os **20 turnos mais
+  recentes**; os mais antigos continuam guardados e visíveis no aparelho
+  (FR-047, FR-054), mas não viajam. Os 30 turnos da FR-053 servem só para
+  contar conversas no limite diário e não interrompem nada.
+- **FR-057**: Quando o serviço externo que gera as respostas estiver fora do ar
+  ou sem cota, a Memora MUST dizer, em linguagem comum, que a dificuldade é
+  dela e não da pessoa, e MUST oferecer tentar de novo mais tarde. Essa
+  situação MUST ser distinguível do limite diário (FR-053) e da conexão da
+  pessoa (FR-052): só as falhas passageiras oferecem tentar de novo; o limite
+  diário diz que a conversa volta no dia seguinte.
 
 ### Requisitos Funcionais — A assistente executa
 
@@ -386,12 +411,35 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   nem sobre a conta da pessoa (Princípio VI).
 - **FR-036**: O registro de ações MUST NOT conter senha, código, token nem
   conteúdo de mensagem privada.
-- **FR-051**: O serviço externo que gera as respostas da assistente MUST NOT
-  usar o conteúdo das conversas para treinar modelos. Ele MAY retê-lo apenas
-  para monitoramento de abuso, por **no máximo 30 dias**, e essas duas
-  garantias MUST estar documentadas no contrato ou nos termos publicados do
-  serviço **antes** de ele receber a primeira conversa real. Sem isso, a FR-047
-  seria cumprida no nosso servidor e desfeita no dele.
+- **FR-051**: O serviço externo que gera as respostas da assistente MAY usar o
+  conteúdo das conversas para melhorar os próprios produtos e MAY permitir que
+  revisores humanos o leiam — é o nível gratuito escolhido na ADR-002, aceito
+  por falta de verba (decisão de 2026-10-03). Enquanto o serviço for desse
+  tipo:
+  - a conversa MUST exibir, junto ao aviso da FR-033 e com a mesma
+    permanência, que o que for escrito ali é lido por um serviço de fora do
+    Memora, e pedir que a pessoa não escreva senha, documento, endereço nem
+    dado de saúde ou de dinheiro;
+  - antes da primeira mensagem no aparelho, a Memora MUST explicar isso em
+    linguagem comum e MUST NOT enviar nada ao serviço até a pessoa dizer que
+    entendeu. Quem não aceitar continua com o restante do Memora — Hub,
+    catálogos e registro —, só sem a conversa;
+  - nada que identifique a pessoa — nome, canal de contato, identificador da
+    conta — MUST viajar ao serviço: só a persona, o catálogo, o histórico e a
+    mensagem;
+  - **condição de saída**: assim que houver verba, o serviço MUST ser trocado
+    por um que não treine com o conteúdo e retenha no máximo 30 dias, só para
+    monitoramento de abuso, documentado no contrato ou nos termos publicados.
+    Não há data. Na troca, o aviso e o consentimento acima deixam de ser
+    exigidos.
+
+  > ⚠️ Esta versão **aceita um risco que a anterior proibia**: a FR-047 é
+  > cumprida no nosso servidor e desfeita no do provedor. Como o Princípio I
+  > põe segurança acima de custo, ela só vale pela **Emenda 1 da constituição**
+  > (v1.1.0, aprovação unânime em 2026-10-03), cujas quatro condições são as
+  > deste requisito. O aviso e o consentimento reduzem o dano; não o eliminam,
+  > porque ninguém impede quem conversa de escrever o nome de um neto. O risco
+  > aceito está na ADR-002.
 
 ### Requisitos Contra Engenharia Social *(obrigatórios — Princípio II)*
 
@@ -462,8 +510,12 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **A conversa exige conexão.** Uso offline está fora de escopo, conforme a
   contradição 2 já registrada em
   [requisitos-atualizados.md](../../docs/referencia/requisitos-atualizados.md).
-- **A conversa é escrita.** Comandos por voz estão fora de escopo (contradição 1
-  do mesmo documento).
+- **A conversa é escrita nesta feature.** Falar com a Memora (transcrição) e
+  ouvi-la (fala) ficam para uma **feature própria, a 005**, que resolve a
+  contradição 1 do mesmo documento. Uma decisão já vale para ela (2026-10-03):
+  **o áudio é processado no próprio aparelho e nunca sai dele nem é guardado**,
+  porque voz é a matéria-prima do golpe de clonagem de voz; só o texto
+  transcrito segue o caminho da conversa escrita, sob a FR-051.
 - **A tela de Planos fica para depois.** O Arquivo X prevê planos Básico e
   Premium; monetização nunca foi discutida pela equipe, e a decisão desta
   sessão é marcá-la como **Futuro**, fora do escopo desta feature.
@@ -510,7 +562,7 @@ conversa — o vínculo que a FR-064 daquela feature nega continua negado aqui.
 | A Memora abre o aplicativo do banco e treina o gesto de deixar outro entrar | Tomada de conta bancária por terceiro | FR-041: recusa estrutural, mesmo com pedido e confirmação |
 | Conversa guardada no servidor vira acervo sobre pessoa idosa | Perfil detalhado de alvo preferencial de golpe | FR-047: conteúdo só no aparelho |
 | Conta comprometida dispara conversas sem parar | Custo em reais e assistente fora do ar para todas as pessoas | FR-053: limite diário por conta |
-| O serviço externo que gera as respostas guarda ou treina com as conversas | O mesmo acervo, fora do nosso controle e sem aparecer no nosso código | FR-051: treino proibido; retenção de no máximo 30 dias, só para abuso, documentada antes da primeira conversa real |
+| O serviço externo que gera as respostas guarda ou treina com as conversas | O mesmo acervo, fora do nosso controle e sem aparecer no nosso código | **Risco aceito** enquanto não houver verba (FR-051, ADR-002): aviso permanente, consentimento antes da primeira mensagem e nenhum dado da conta enviado. A mitigação de verdade é a condição de saída da FR-051 |
 
 ### Monitoramento e registro
 

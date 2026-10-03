@@ -214,8 +214,23 @@ components:
           properties:
             tipo: { type: string, enum: [fim] }
         - type: object
+          description: |
+            Falha da conversa. Viaja **dentro** do stream: quando acontece, a
+            resposta HTTP já é `200`, então limite diário e provedor
+            indisponível **nunca** chegam como `429` ou `503` (clarificação de
+            2026-10-03). Encerra o stream.
           properties:
             tipo: { type: string, enum: [erro] }
+            codigo:
+              type: string
+              enum: [LIMITE_DE_CONVERSAS, ASSISTENTE_INDISPONIVEL, ERRO_INESPERADO]
+              description: |
+                `LIMITE_DE_CONVERSAS` — teto diário da conta (FR-053); volta no
+                dia seguinte, não se oferece tentar de novo.
+                `ASSISTENTE_INDISPONIVEL` — o provedor está fora do ar, sem
+                cota ou não respondeu no prazo (FR-057); oferece tentar de novo
+                mais tarde.
+                `ERRO_INESPERADO` — defeito nosso; o detalhe fica no log.
             mensagem:
               type: string
               description: Texto já pronto para a pessoa, na voz da Memora.
