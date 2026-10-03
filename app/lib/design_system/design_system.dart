@@ -33,6 +33,7 @@ export 'componentes/informacao/destaque_informacao.dart';
 export 'componentes/informacao/lista_informacao.dart';
 export 'componentes/navegacao/barra_superior.dart';
 export 'componentes/navegacao/cabecalho_de_tela.dart';
+export 'componentes/navegacao/icone_de_navegacao.dart';
 export 'componentes/navegacao/navegacao_inferior.dart';
 export 'componentes/selecao/opcao_selecionavel.dart';
 export 'componentes/texto/texto_com_destaque.dart';

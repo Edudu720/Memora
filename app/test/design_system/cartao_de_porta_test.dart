@@ -177,8 +177,8 @@ void main() {
             indiceAtivo: 0,
             aoSelecionar: (_) {},
             itens: const <ItemNavegacao>[
-              ItemNavegacao(icone: Icons.settings, rotulo: 'Ajustes'),
-              ItemNavegacao(icone: Icons.home, rotulo: 'Início'),
+              ItemNavegacao(icone: IconeDeNavegacao.ajustes, rotulo: 'Ajustes'),
+              ItemNavegacao(icone: IconeDeNavegacao.inicio, rotulo: 'Início'),
             ],
           ),
         ),
