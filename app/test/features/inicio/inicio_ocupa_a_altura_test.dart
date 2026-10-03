@@ -26,9 +26,10 @@ import '../../suporte/fonte.dart';
 void main() {
   setUpAll(carregarAtkinson);
 
-  /// A parte da altura da área útil que pode sobrar abaixo da última caixa.
+  /// A parte da altura da tela que pode sobrar abaixo da última caixa. Medido:
+  /// repartido sobra 6% a 9%; empilhado no topo, 14% a 24% — 11% separa os dois.
   /// Acima disso, a tela está com um vazio que o redesenho existe para tirar.
-  const double sobraMaxima = 0.15;
+  const double sobraMaxima = 0.11;
 
   const List<Size> aparelhosAltos = <Size>[
     referencia,
@@ -50,7 +51,11 @@ void main() {
       );
       expect(t.takeException(), isNull);
 
-      final Rect area = t.getRect(find.byType(SingleChildScrollView));
+      // A área é a do `Scaffold`, e não a do `SingleChildScrollView`: o
+      // `Scaffold` dá ao corpo restrição solta, e a rolagem **encolhe até o
+      // conteúdo** — medida por ela, a sobra seria sempre zero, com ou sem o
+      // defeito (achado ao provar este portão quebrando).
+      final Rect area = t.getRect(find.byType(Scaffold));
       final Rect ultima = t.getRect(find.byKey(TelaInicio.chaveCaixaVerTudo));
       final double sobra = area.bottom - ultima.bottom;
 
