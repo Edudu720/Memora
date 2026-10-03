@@ -9,6 +9,7 @@ import '../seguranca/cofre_de_credenciais.dart';
 import 'ambiente.dart';
 import '../../features/assistente/data/conversa_local.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
+import '../../features/apresentacao/data/apresentacao_vista.dart';
 import '../../features/perfil/data/data_de_nascimento_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 
@@ -55,6 +56,11 @@ class Composicao {
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
+  /// Quais contas já viram a apresentação inicial (FR-013, T048).
+  ///
+  /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
+  final ApresentacaoVista? apresentacaoVista;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
@@ -62,6 +68,7 @@ class Composicao {
     required this.assistente,
     required this.limpeza,
     this.dataDeNascimento,
+    this.apresentacaoVista,
   });
 
   /// Resolve as dependências a partir do ambiente.
@@ -74,9 +81,12 @@ class Composicao {
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
     DataDeNascimentoDoAparelho? dataDeNascimento,
+    ApresentacaoVistaDoAparelho? apresentacaoVista,
   }) {
     final DataDeNascimentoDoAparelho datas =
         dataDeNascimento ?? DataDeNascimentoEmMemoria();
+    final ApresentacaoVistaDoAparelho vistas =
+        apresentacaoVista ?? ApresentacaoVistaEmMemoria();
     ambiente.exigirTlsForaDeDepuracao();
 
     final RepositorioAutenticacao autenticacao = ambiente.usaServidorReal
@@ -91,6 +101,7 @@ class Composicao {
       autenticacao: autenticacao,
       assistente: RepositorioAssistenteSimulado(),
       dataDeNascimento: datas,
+      apresentacaoVista: vistas,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa
@@ -99,13 +110,14 @@ class Composicao {
       //
       // A saida leva em TODA saida: a conversa. Leva so no `esquecerTudo`: o
       // identificador do ultimo acesso e a data de nascimento do Perfil
-      // (todas as contas do aparelho). Esta ultima NAO e `DadoLocalDaPessoa`:
-      // a pessoa nao digita de novo a cada entrada.
+      // (todas as contas do aparelho) e a apresentacao vista (idem). Estes
+      // dois NAO sao `DadoLocalDaPessoa`: a pessoa nao digita nem ve de novo a
+      // cada entrada.
       limpeza: LimpezaDeSessao(
         cofre: cofre,
         ultimoAcesso: ultimoAcesso,
         dadosLocais: <DadoLocalDaPessoa>[ConversaLocal()],
-        dadosDoAparelho: <DadoLocalDoAparelho>[datas],
+        dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas],
       ),
     );
   }
