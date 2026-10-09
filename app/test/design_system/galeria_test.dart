@@ -241,6 +241,7 @@ final Map<Type, Finder> _esperados = <Type, Finder>{
   MensagemErro: find.byType(MensagemErro),
   EstadoVazio: find.byType(EstadoVazio),
   CartaoComAvatar: find.byType(CartaoComAvatar),
+  CaixaDeEtapa: find.byType(CaixaDeEtapa),
   MemoraPersonagem: find.byType(MemoraPersonagem),
   MedalhaoDeIlustracao: find.byType(MedalhaoDeIlustracao),
   CartaoDePorta: find.byType(CartaoDePorta),

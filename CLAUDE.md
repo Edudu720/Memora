@@ -4,15 +4,50 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-02 (madrugada) — **feature 004, fases 2 e 3 e a
-revisão de design da T044**, pelo Henrique (Opus orquestrando, agentes Sonnet
-escrevendo código). Entraram: a #39 (correção da revisão das #36-#38), a #40
-(`chave` do catálogo, T029-T033, fecha a fase 2) e a #41 (Início, Hub novo e
-saída só em Ajustes, T034-T043, mais a T044). **Próximo: a Phase 3b**
-(T111-T124 do `tasks.md` da 004) — começar pela T113 (respiro do Hub e o
-`hub_cabe_sem_rolar_test.dart` reescrito para a FR-017 nova), T111 (ícone do
-app: o robô, nome "Memora") e T114 (`CaixaDeEtapa`). Depois a T116 pede uma
-**segunda rodada de revisão** com o Henrique, no celular.
+**Última sessão**: 2026-10-03 — **fase 8 da 003: a assistente pensa de
+verdade**, pelo Henrique. **Provedor escolhido: Google Gemini, nível
+gratuito, `gemini-3.8-flash`** (T061, decisão dele: a equipe não pode pagar).
+Adaptador REST em `assistente/infra/ClienteDaAssistenteGemini.java` (sem o SDK,
+que é Jackson 2), ADR em `docs/architecture/adr-002-provedor-de-ia.md`. Ligar:
+`$env:MEMORA_ASSISTENTE_PROVEDOR = "gemini"` e `GEMINI_API_KEY` — a chave está
+gravada como variável **de usuário** do Windows na máquina do Henrique;
+**nunca** leia nem imprima o valor, só verifique se existe. Sem configuração,
+continua o simulado. `ClienteDaAssistenteGeminiRealTest` passou contra o
+Google (~5 s). **413 testes** no backend.
+
+> 🔴 **O nível gratuito viola a FR-051**: o Google usa o conteúdo para treinar
+> e revisores humanos podem lê-lo. Está na ADR-002, e a T086 continua aberta.
+> **O teste com as 5 pessoas de 65+ (T071) não pode usar a chave gratuita.**
+> **Próximo: `/speckit-clarify` da 003**, que o Henrique vai rodar, para rever
+> a FR-051, o teto de turnos (a R3 diz "encerra com elegância"; o código faz
+> janela deslizante de 20) e a voz (hoje fora de escopo; transcrição e fala).
+> Pendentes: o portão "chave nunca na URL" (`chaveNoCabecalho`) **não foi
+> provado quebrando** — o classificador de permissões bloqueou a quebra; a T068
+> (custo e latência); e o app no celular ainda fala com o simulado.
+
+Sessão anterior: 2026-10-02 (tarde) — feature 004, Phase 3b, T111-T115, na
+`master` sem PR; a T116 (segunda revisão no celular) segue pendente.
+
+Detalhe da sessão de 2026-10-02 (tarde) — **feature 004, Phase 3b, T111-T115**,
+pelo Henrique (Opus orquestrando, agentes Sonnet em worktrees paralelos).
+Entraram **direto na `master`, sem PR**, a pedido dele: ícone do app (a
+Memora) e o nome "Memora" (T111), ícones SVG próprios na barra inferior
+(T112), acabamento das portas do Hub e a faixa "Há mais abaixo" (T113), o
+componente `CaixaDeEtapa` (T114) e o Início com balão de tutorial e atalhos em
+caixas (T115). **A FR-017 foi revista de novo**: a T113 mediu o 360×800 a 150%
+inviável — Hub inteiro sem rolar só a 100%, e no 320×568 a 200% basta o alvo
+de toque da principal à vista. **Próximo: a T116** — a segunda rodada de
+revisão do Henrique, no celular (APK já instalado), registrada em
+`revisao-de-design.md`. Pontos levantados para ela: sobra vazio embaixo do Hub
+em 390×844 (o respiro tem teto de 16 dp), a Memora aparece duas vezes no Início
+(figura e rosto do balão), e a voz mistura "Converse comigo" com "o que o
+Memora tem". Depois, a fase 4 (US1).
+
+> **Contagem em 2026-10-02 (tarde)**: **1061** no aplicativo, **nenhum
+> pulado**; backend sem mudança (374).
+
+Sessão anterior: 2026-10-02 (madrugada) — fases 2 e 3 da 004 e a revisão de
+design da T044 (#39, #40, #41).
 
 > 🎨 **A T044 reprovou o acabamento, não a direção.** Veredito em
 > `specs/004-redesenho-das-telas/revisao-de-design.md`: "junto demais",

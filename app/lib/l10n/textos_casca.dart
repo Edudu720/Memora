@@ -67,8 +67,20 @@ abstract final class TextosCasca {
   /// A saudação do Início, com o nome de tratamento.
   static String inicioSaudacao(String nome) => 'Oi, $nome!';
 
-  /// A pergunta que acompanha a saudação.
-  static const String inicioConvite = 'O que vamos fazer hoje?';
+  /// A frase de tutorial da Memora no Início (R2, regra 9): diz o que se faz
+  /// nesta tela. [atalhos] é quantas caixas há para tocar — a frase concorda
+  /// com o que está na tela, e com nenhuma não há o que dizer (FR-018).
+  static String inicioTutorial(int atalhos) => atalhos == 1
+      ? 'Aqui você escolhe o que quer fazer. Toque na caixa abaixo.'
+      : 'Aqui você escolhe o que quer fazer. Toque numa das caixas abaixo.';
+
+  /// A instrução da caixa de conversar (FR-002a): para que ela serve.
+  static const String inicioInstrucaoConversar =
+      'Tem uma dúvida sobre o celular? Converse comigo.';
+
+  /// A instrução da caixa de ver tudo (FR-002a): para que ela serve.
+  static const String inicioInstrucaoVerTudo =
+      'Quer ver tudo o que o Memora tem? Toque aqui.';
 
   /// O atalho para conversar com a Memora — a ação principal do Início.
   static const String inicioConversar = 'Conversar com a Memora';
@@ -93,4 +105,17 @@ abstract final class TextosCasca {
   /// A explicação do estado vazio do Hub.
   static const String hubVazioExplicacao =
       'Quando houver algo para você abrir, vai aparecer nesta tela.';
+
+  /// A faixa no pé do Hub quando há mais portas abaixo da dobra (FR-017).
+  ///
+  /// Curta de propósito: a 200% de ampliação ela já ocupa duas linhas, e a
+  /// faixa fica sobre o pé da lista. A frase completa, com o gesto, é a do
+  /// leitor de tela ([hubHaMaisLeitor]).
+  static const String hubHaMais = 'Há mais abaixo';
+
+  /// O que o leitor de tela diz no lugar de [hubHaMais]: a frase completa, com
+  /// o gesto. Quem usa TalkBack rola por deslizar, e é o único jeito de saber
+  /// que há mais portas depois da última lida.
+  static const String hubHaMaisLeitor =
+      'Há mais portas abaixo. Deslize para baixo para ver.';
 }

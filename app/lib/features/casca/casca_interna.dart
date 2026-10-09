@@ -7,13 +7,13 @@ import '../../l10n/textos_casca.dart';
 /// Os três destinos fixos da barra inferior (FR-015 da feature 004).
 enum DestinoDaCasca {
   /// Ajustes: aparência, privacidade, conta.
-  ajustes(TextosCasca.destinoConfiguracoes, Icons.settings_outlined),
+  ajustes(TextosCasca.destinoConfiguracoes, IconeDeNavegacao.ajustes),
 
   /// Início: a raiz de onde se chega a todo o resto.
-  inicio(TextosCasca.destinoInicio, Icons.home_outlined),
+  inicio(TextosCasca.destinoInicio, IconeDeNavegacao.inicio),
 
   /// Meu perfil.
-  perfil(TextosCasca.destinoPerfil, Icons.person_outline);
+  perfil(TextosCasca.destinoPerfil, IconeDeNavegacao.perfil);
 
   const DestinoDaCasca(this.rotulo, this.icone);
 
@@ -21,7 +21,7 @@ enum DestinoDaCasca {
   final String rotulo;
 
   /// Desenho do destino. Nunca sozinho: a barra sempre escreve o [rotulo].
-  final IconData icone;
+  final IconeDeNavegacao icone;
 }
 
 /// A casca de quem está dentro da conta: a barra inferior e uma pilha de
@@ -91,9 +91,9 @@ class CascaInternaState extends State<CascaInterna> {
 
   final Map<DestinoDaCasca, GlobalKey<NavigatorState>> _navegadores =
       <DestinoDaCasca, GlobalKey<NavigatorState>>{
-    for (final DestinoDaCasca d in DestinoDaCasca.values)
-      d: GlobalKey<NavigatorState>(debugLabel: 'casca.${d.name}'),
-  };
+        for (final DestinoDaCasca d in DestinoDaCasca.values)
+          d: GlobalKey<NavigatorState>(debugLabel: 'casca.${d.name}'),
+      };
 
   /// O destino à vista.
   DestinoDaCasca get destinoAtual => _atual;
@@ -168,9 +168,8 @@ class CascaInternaState extends State<CascaInterna> {
               for (final DestinoDaCasca d in DestinoDaCasca.values)
                 Navigator(
                   key: _navegadores[d],
-                  onGenerateRoute: (RouteSettings _) => MaterialPageRoute<void>(
-                    builder: widget.raizes[d]!,
-                  ),
+                  onGenerateRoute: (RouteSettings _) =>
+                      MaterialPageRoute<void>(builder: widget.raizes[d]!),
                 ),
             ],
           ),

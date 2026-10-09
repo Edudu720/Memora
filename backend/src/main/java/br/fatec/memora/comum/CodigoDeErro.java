@@ -95,6 +95,19 @@ public enum CodigoDeErro {
             "Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui."),
 
     /**
+     * O serviço que gera as respostas da assistente não respondeu (T063).
+     *
+     * <p>Cobre a cota do provedor acabada, falha do lado dele e rede caída: para
+     * a pessoa é tudo a mesma coisa, e a frase não pode sugerir que ela fez algo
+     * errado nem expor de quem é a culpa. O motivo verdadeiro vai para o log.
+     * Também não consta do contrato — ver a segunda divergência desta classe.
+     */
+    ASSISTENTE_INDISPONIVEL(
+            HttpStatus.SERVICE_UNAVAILABLE,
+            "Estou com um pouquinho de dificuldade para pensar agora — não foi nada que "
+                    + "você fez. Vamos tentar de novo daqui a pouco? 😊"),
+
+    /**
      * Falha não prevista. Ver a segunda divergência anotada nesta classe.
      *
      * <p>O texto não pede para "tentar mais tarde" nem menciona erro de sistema:
