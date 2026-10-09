@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
@@ -52,6 +53,17 @@ void main() {
     matching: find.text(d.rotulo),
   );
 
+  /// O arquivo SVG que o destino da [posicao] (de 1 a 3) está desenhando.
+  String desenhoDe(WidgetTester t, int posicao) {
+    final SvgPicture figura = t.widget<SvgPicture>(
+      find.descendant(
+        of: find.byKey(NavegacaoInferior.chaveDoIcone(posicao)),
+        matching: find.byType(SvgPicture),
+      ),
+    );
+    return (figura.bytesLoader as SvgAssetLoader).assetName;
+  }
+
   group('A barra — FR-015', () {
     testWidgets('três destinos, cada um com desenho e nome escrito', (
       WidgetTester t,
@@ -59,14 +71,47 @@ void main() {
       await t.pumpWidget(app());
       for (final DestinoDaCasca d in DestinoDaCasca.values) {
         expect(destino(d), findsOneWidget, reason: d.rotulo);
+        // O desenho é o do próprio destino, e não o de outro: o arquivo leva o
+        // nome dele.
         expect(
-          find.descendant(
-            of: find.byKey(CascaInterna.chaveDaBarra),
-            matching: find.byIcon(d.icone),
-          ),
-          findsOneWidget,
+          desenhoDe(t, d.index + 1),
+          anyOf(d.icone.caminhoContornado, d.icone.caminhoPreenchido),
           reason: 'ícone de ${d.rotulo}',
         );
+      }
+    });
+
+    testWidgets(
+      'o destino atual tem o ícone preenchido; os outros, só o contorno',
+      (WidgetTester t) async {
+        await t.pumpWidget(app());
+        // Início é o segundo destino.
+        expect(desenhoDe(t, 2), DestinoDaCasca.inicio.icone.caminhoPreenchido);
+        expect(desenhoDe(t, 1), DestinoDaCasca.ajustes.icone.caminhoContornado);
+        expect(desenhoDe(t, 3), DestinoDaCasca.perfil.icone.caminhoContornado);
+
+        await t.tap(destino(DestinoDaCasca.perfil));
+        await t.pumpAndSettle();
+        expect(desenhoDe(t, 3), DestinoDaCasca.perfil.icone.caminhoPreenchido);
+        expect(desenhoDe(t, 2), DestinoDaCasca.inicio.icone.caminhoContornado);
+        expect(desenhoDe(t, 1), DestinoDaCasca.ajustes.icone.caminhoContornado);
+      },
+    );
+
+    testWidgets('os três ícones ocupam a mesma caixa, atual ou não', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      for (final DestinoDaCasca atual in DestinoDaCasca.values) {
+        await t.tap(destino(atual));
+        await t.pumpAndSettle();
+        for (int i = 1; i <= DestinoDaCasca.values.length; i++) {
+          expect(
+            t.getSize(find.byKey(NavegacaoInferior.chaveDoIcone(i))),
+            const Size.square(MemoraDimensoes.iconeDestaque),
+            reason: 'ícone $i com ${atual.rotulo} à vista',
+          );
+        }
       }
     });
 

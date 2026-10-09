@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Primeiro plano do icone do aplicativo: a Memora, neutra (FR-009b, T111).
+
+    E o mesmo desenho de app/assets/ilustracoes/memora_neutra.svg, convertido
+    para caminhos de VectorDrawable (sem rasterizar). Se o desenho da Memora
+    mudar la, este arquivo muda junto.
+
+    O icone adaptativo e um quadro de 108 dp do qual o Android recorta uma
+    mascara (circulo, quadrado arredondado...). So os 66 dp centrais estao
+    garantidos: por isso o robo e reduzido a 46% e centralizado de modo que a
+    antena e a cabeca caiam inteiras nessa zona. O corpo desce alem dela e e
+    cortado pela mascara, como nas ilustracoes.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.46"
+        android:scaleY="0.46"
+        android:translateX="8"
+        android:translateY="17.4">
+        <!-- corpo -->
+        <path android:fillColor="#FF3D63FF" android:pathData="M46,200C46,172 66,156 100,156C134,156 154,172 154,200Z"/>
+        <!-- peito -->
+        <path android:fillColor="#FFFFC83D" android:pathData="M88,170H112A8,8 0 0 1 120,178V184A8,8 0 0 1 112,192H88A8,8 0 0 1 80,184V178A8,8 0 0 1 88,170Z"/>
+        <!-- botao azul -->
+        <path android:fillColor="#FF1040F8" android:pathData="M88,181a4,4 0 1,0 8,0a4,4 0 1,0 -8,0Z"/>
+        <!-- botao rosa -->
+        <path android:fillColor="#FFFF7A93" android:pathData="M104,181a4,4 0 1,0 8,0a4,4 0 1,0 -8,0Z"/>
+        <!-- pescoco -->
+        <path android:fillColor="#FF0B2BA8" android:pathData="M94,140H106A6,6 0 0 1 112,146V154A6,6 0 0 1 106,160H94A6,6 0 0 1 88,154V146A6,6 0 0 1 94,140Z"/>
+        <!-- haste da antena -->
+        <path android:fillColor="#FF0B2BA8" android:pathData="M100,22H100A3,3 0 0 1 103,25V41A3,3 0 0 1 100,44H100A3,3 0 0 1 97,41V25A3,3 0 0 1 100,22Z"/>
+        <!-- bola da antena -->
+        <path android:fillColor="#FFFFC83D" android:pathData="M90,20a10,10 0 1,0 20,0a10,10 0 1,0 -20,0Z"/>
+        <!-- brilho da bola -->
+        <path android:fillColor="#FFFFE7A3" android:pathData="M93.5,16.5a3,3 0 1,0 6,0a3,3 0 1,0 -6,0Z"/>
+        <!-- orelha esquerda -->
+        <path android:fillColor="#FF0B2BA8" android:pathData="M37,78H37A9,9 0 0 1 46,87V109A9,9 0 0 1 37,118H37A9,9 0 0 1 28,109V87A9,9 0 0 1 37,78Z"/>
+        <!-- orelha direita -->
+        <path android:fillColor="#FF0B2BA8" android:pathData="M163,78H163A9,9 0 0 1 172,87V109A9,9 0 0 1 163,118H163A9,9 0 0 1 154,109V87A9,9 0 0 1 163,78Z"/>
+        <!-- cabeca -->
+        <path android:fillColor="#FF1040F8" android:pathData="M78,40H122A40,40 0 0 1 162,80V108A40,40 0 0 1 122,148H78A40,40 0 0 1 38,108V80A40,40 0 0 1 78,40Z"/>
+        <!-- brilho da cabeca -->
+        <path android:pathData="M60,52C70,46 84,44 96,44" android:strokeColor="#FF5B80FF" android:strokeWidth="6" android:strokeLineCap="round"/>
+        <!-- tela -->
+        <path android:fillColor="#FFF4F7FF" android:pathData="M82,58H118A28,28 0 0 1 146,86V104A28,28 0 0 1 118,132H82A28,28 0 0 1 54,104V86A28,28 0 0 1 82,58Z"/>
+        <!-- olho esquerdo -->
+        <path android:fillColor="#FF0B1B4D" android:pathData="M72,90a8,8 0 1,0 16,0a8,8 0 1,0 -16,0Z"/>
+        <!-- olho direito -->
+        <path android:fillColor="#FF0B1B4D" android:pathData="M112,90a8,8 0 1,0 16,0a8,8 0 1,0 -16,0Z"/>
+        <!-- reflexo esquerdo -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M80,87.5a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0Z"/>
+        <!-- reflexo direito -->
+        <path android:fillColor="#FFFFFFFF" android:pathData="M120,87.5a2.5,2.5 0 1,0 5,0a2.5,2.5 0 1,0 -5,0Z"/>
+        <!-- bochecha esquerda -->
+        <path android:fillColor="#FFFF9FB2" android:pathData="M59,110a9,6 0 1,0 18,0a9,6 0 1,0 -18,0Z"/>
+        <!-- bochecha direita -->
+        <path android:fillColor="#FFFF9FB2" android:pathData="M123,110a9,6 0 1,0 18,0a9,6 0 1,0 -18,0Z"/>
+        <!-- sorriso -->
+        <path android:pathData="M88,110Q100,120 112,110" android:strokeColor="#FF0B1B4D" android:strokeWidth="5" android:strokeLineCap="round"/>
+    </group>
+</vector>

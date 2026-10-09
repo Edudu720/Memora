@@ -1,0 +1,75 @@
+package br.fatec.memora.assistente.infra;
+
+import java.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Liga o adaptador do Gemini quando ele é o provedor escolhido (T064).
+ *
+ * <h2>A chave não tem padrão, e a ausência dela derruba a subida</h2>
+ *
+ * Mesma família do {@code EnviadorDeCodigo}, e com a razão da R8: subir sem
+ * chave faria a assistente responder erro a cada pergunta, e a falha apareceria
+ * para a pessoa idosa em vez de para quem implanta. Por isso a diferença para
+ * {@code ConfiguracaoDeToken}, que sorteia um valor e segue com WARN: lá o
+ * prejuízo é interno e reversível; aqui não existe valor sorteado que faça uma
+ * chamada ao Google funcionar.
+ *
+ * <p>Nenhum valor de chave existe no repositório — nem de exemplo.
+ *
+ * <h2>Prazos explícitos</h2>
+ *
+ * Conexão e leitura têm número escrito (padrões abaixo, em segundos), e não o
+ * "sem limite" do cliente HTTP. A leitura é o tempo <b>sem receber nada</b>,
+ * não o da resposta inteira: um modelo que "pensa" demora a começar, e uma
+ * resposta longa pode levar minutos transmitindo sem estar travada. O teto de
+ * 120 s do {@code ControladorConversa} continua valendo por cima.
+ */
+@Configuration
+public class ConfiguracaoDoProvedorDeIa {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ConfiguracaoDoProvedorDeIa.class);
+
+    /**
+     * O adaptador do Gemini.
+     *
+     * <p>O {@code AutoCloseable} do adaptador é o método de destruição: o Spring
+     * o chama no fim do contexto e o vigia de leitura não vaza.
+     */
+    @Bean
+    @Conditional(ProvedorEscolhido.EhGemini.class)
+    ClienteDaAssistenteGemini clienteDaAssistenteGemini(
+            @Value("${memora.assistente.gemini.chave:}") String chave,
+            @Value("${memora.assistente.gemini.modelo:gemini-3.8-flash}") String modelo,
+            @Value("${memora.assistente.gemini.url-base:" + ClienteDaAssistenteGemini.URL_BASE_PADRAO + "}")
+                    String urlBase,
+            @Value("${memora.assistente.gemini.timeout-conexao-segundos:10}") long conexao,
+            @Value("${memora.assistente.gemini.timeout-leitura-segundos:60}") long leitura) {
+
+        ClienteDaAssistenteGemini cliente =
+                new ClienteDaAssistenteGemini(
+                        chave,
+                        modelo,
+                        urlBase,
+                        Duration.ofSeconds(conexao),
+                        Duration.ofSeconds(leitura));
+
+        LOG.info("Provedor de IA: gemini, modelo {}.", modelo);
+        // O nivel gratuito do Gemini deixa o Google usar o conteudo para melhorar
+        // os produtos dele, e isso desfaz a FR-051. Nao ha como saber daqui se a
+        // chave e gratuita ou paga, entao o aviso e condicional e fica visivel a
+        // cada subida: e a pendencia que a ADR-002 registra.
+        LOG.warn(
+                "Se a chave GEMINI_API_KEY for do nivel GRATUITO, o Google pode usar o conteudo "
+                        + "das conversas para melhorar os produtos dele e revisores humanos "
+                        + "podem le-lo: a FR-051 (treino proibido, retencao ate 30 dias) NAO esta "
+                        + "cumprida. Nao use conversas reais de pessoas assim. Ver "
+                        + "docs/architecture/adr-002-provedor-de-ia.md e a T086.");
+        return cliente;
+    }
+}

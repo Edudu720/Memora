@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import 'ilustracao_memora.dart';
 
 /// Uma ilustração colorida sobre o círculo claro do Memora (R4 da feature 004).
@@ -33,11 +34,21 @@ class MedalhaoDeIlustracao extends StatelessWidget {
   /// O que a figura comunica. Nulo é decorativa, e o leitor de tela a ignora.
   final String? descricao;
 
+  /// Contorno de [MemoraDimensoes.bordaEnfase] nesta cor. Nulo, sem contorno.
+  ///
+  /// Existe para o medalhão sobre uma superfície da **mesma cor**: no tema
+  /// claro o `medalhao` e o `destaque` são o mesmo azul-claro, e o círculo
+  /// sobre a porta secundária sumia (aviso da #38). O contorno desenha a forma
+  /// sem mexer na paleta, e sem trocar o medalhão por outra cor que o
+  /// cabeçalho e a Memora, que o usam sobre o fundo, teriam de acompanhar.
+  final Color? contorno;
+
   /// Cria o medalhão.
   const MedalhaoDeIlustracao(
     this.ilustracao, {
     required this.tamanho,
     this.descricao,
+    this.contorno,
     super.key,
   });
 
@@ -50,6 +61,12 @@ class MedalhaoDeIlustracao extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: cores.medalhao,
+          border: contorno == null
+              ? null
+              : Border.all(
+                  color: contorno!,
+                  width: MemoraDimensoes.bordaEnfase,
+                ),
         ),
         child: Center(
           child: IlustracaoMemora(

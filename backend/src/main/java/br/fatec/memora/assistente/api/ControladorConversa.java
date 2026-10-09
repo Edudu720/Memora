@@ -2,6 +2,7 @@ package br.fatec.memora.assistente.api;
 
 import br.fatec.memora.assistente.aplicacao.AutorizadorDeAcao;
 import br.fatec.memora.assistente.aplicacao.ServicoDeConversa;
+import br.fatec.memora.assistente.infra.AssistenteIndisponivel;
 import br.fatec.memora.assistente.infra.ClienteDaAssistente;
 import br.fatec.memora.autenticacao.seguranca.PessoaAutenticada;
 import br.fatec.memora.comum.CodigoDeErro;
@@ -160,6 +161,20 @@ public class ControladorConversa {
                     new ErroResposta(
                             CodigoDeErro.LIMITE_DE_CONVERSAS.name(),
                             CodigoDeErro.LIMITE_DE_CONVERSAS.mensagemPadrao()));
+            emissor.complete();
+
+        } catch (AssistenteIndisponivel indisponivel) {
+            // Falha PREVISTA do provedor: cota do plano gratuito, 5xx, rede, prazo.
+            // E esperada no dia a dia, entao vai como WARN sem rastro de pilha. O
+            // motivo (so o enum e o status) fica no log; o corpo de erro do
+            // Google nem foi lido, e a pessoa recebe a frase da Memora.
+            LOG.warn("{}", indisponivel.getMessage());
+            enviar(
+                    emissor,
+                    "erro",
+                    new ErroResposta(
+                            CodigoDeErro.ASSISTENTE_INDISPONIVEL.name(),
+                            CodigoDeErro.ASSISTENTE_INDISPONIVEL.mensagemPadrao()));
             emissor.complete();
 
         } catch (RuntimeException falha) {

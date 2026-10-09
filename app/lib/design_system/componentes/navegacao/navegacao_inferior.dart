@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
@@ -7,12 +8,13 @@ import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../texto/texto_memora.dart';
 import '../toque/superficie_tocavel.dart';
+import 'icone_de_navegacao.dart';
 
 /// Um destino da navegação inferior.
 @immutable
 class ItemNavegacao {
-  /// Ícone do destino.
-  final IconData icone;
+  /// Desenho do destino: contornado quando não é o atual, preenchido quando é.
+  final IconeDeNavegacao icone;
 
   /// Rótulo escrito. **Obrigatório** (FR-016).
   final String rotulo;
@@ -39,6 +41,9 @@ class NavegacaoInferior extends StatelessWidget {
 
   /// Chave do traço do destino ativo, para os testes.
   static Key chaveDoTraco(int posicao) => Key('navegacao.traco.$posicao');
+
+  /// Chave da caixa que reserva o ícone de cada destino, para os testes.
+  static Key chaveDoIcone(int posicao) => Key('navegacao.icone.$posicao');
 
   /// Cria a navegação inferior.
   const NavegacaoInferior({
@@ -95,9 +100,10 @@ class _Item extends StatelessWidget {
     final MemoraCores cores = context.memora.cores;
     final Color cor = ativo ? cores.primaria : cores.texto;
 
-    // O destino ativo é marcado por TRÊS sinais além da cor (FR-015 da 004):
-    // o traço em primária no topo, a pílula atrás do ícone e o rótulo em
-    // negrito. A pílula sozinha não bastaria — o `destaque` mede só 1,1 a
+    // O destino ativo é marcado por QUATRO sinais além da cor (FR-015 da 004):
+    // o traço em primária no topo, a pílula atrás do ícone, o ícone
+    // preenchido (os outros são só contorno) e o rótulo em negrito. A pílula
+    // sozinha não bastaria — o `destaque` mede só 1,1 a
     // 1,6:1 contra a barra —, e por isso o traço, que é par validado como
     // gráfico (primária sobre superficieAlt), vem junto.
     return SuperficieTocavel(
@@ -136,10 +142,21 @@ class _Item extends StatelessWidget {
                   borderRadius: BorderRadius.circular(MemoraRaio.pilula),
                 ),
                 alignment: Alignment.center,
-                child: Icon(
-                  item.icone,
-                  color: cor,
-                  size: MemoraDimensoes.iconeDestaque,
+                // Os três desenhos ocupam a mesma caixa, e a caixa é a mesma nas
+                // duas versões: trocar de contorno para cheio não mexe em nada.
+                // A cor vem do tema por filtro — o arquivo não tem cor própria.
+                child: SizedBox(
+                  key: NavegacaoInferior.chaveDoIcone(posicao),
+                  width: MemoraDimensoes.iconeDestaque,
+                  height: MemoraDimensoes.iconeDestaque,
+                  child: SvgPicture.asset(
+                    item.icone.caminho(preenchido: ativo),
+                    width: MemoraDimensoes.iconeDestaque,
+                    height: MemoraDimensoes.iconeDestaque,
+                    colorFilter: ColorFilter.mode(cor, BlendMode.srcIn),
+                    // Decoração: o destino é anunciado pelo rótulo escrito.
+                    excludeFromSemantics: true,
+                  ),
                 ),
               ),
               const SizedBox(height: MemoraEspacamento.xs),
