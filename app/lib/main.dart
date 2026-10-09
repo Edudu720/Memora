@@ -32,11 +32,6 @@ Future<void> main() async {
     aceiteDoAviso: aceiteDoAviso,
   );
 
-  final String? aviso = composicao.avisoDeIntegracaoParcial;
-  if (aviso != null) {
-    debugPrint('[Memora] $aviso');
-  }
-
   runApp(
     AplicativoMemora(
       controlador: controlador,

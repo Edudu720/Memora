@@ -1,6 +1,8 @@
 import 'package:memora_api/memora_api.dart' as api;
 
 import '../../features/assistente/data/aceite_do_aviso.dart';
+import '../../features/assistente/data/chamada_com_renovacao.dart';
+import '../../features/assistente/data/repositorio_assistente_api.dart';
 import '../../features/assistente/data/repositorio_assistente_simulado.dart';
 import '../../features/assistente/domain/assistente.dart';
 import '../../features/autenticacao/data/repositorio_autenticacao_api.dart';
@@ -26,17 +28,17 @@ import '../seguranca/limpeza_de_sessao.dart';
 /// exatamente por isso que os testes de widget continuam podendo passar um
 /// simulado sem tocar em nada.
 ///
-/// ## O que ainda não tem lado real
+/// ## Um aplicativo, uma escolha
 ///
-/// A **assistente** continua simulada mesmo com `MEMORA_SERVIDOR_REAL=true`.
-/// Não é descuido: o `repositorio_assistente_api.dart` é a tarefa T036 da
-/// feature 003, adiada porque o contrato da assistente ainda não foi fundido
-/// com o da 001 — e, acima disso, porque **não há provedor de IA escolhido**
-/// (R2). Um cliente HTTP apontando para um endpoint que nenhum modelo atende
-/// não seria integração, seria fachada.
+/// Com servidor real, a **assistente também é real**: não existe aplicativo
+/// com conta de verdade e assistente de mentira (spec 003, clarificação de
+/// 2026-10-09). Quem decide entre a resposta simulada e o provedor de IA é só
+/// o servidor (`MEMORA_ASSISTENTE_PROVEDOR`), nunca o aparelho.
 ///
-/// [avisoDeIntegracaoParcial] existe para que isso apareça no log de quem
-/// rodar contra o servidor, em vez de virar uma surpresa na demonstração.
+/// O `MemoraApi` é **uma instância só**, dividida entre a autenticação e a
+/// assistente: é nele que o token de acesso vai para o cabeçalho, e a
+/// renovação em silêncio da assistente precisa renovar o token que a própria
+/// autenticação usa.
 class Composicao {
   /// De onde o aplicativo fala com o servidor.
   final Ambiente ambiente;
@@ -44,7 +46,7 @@ class Composicao {
   /// Autenticação: real quando há servidor, simulada quando não.
   final RepositorioAutenticacao autenticacao;
 
-  /// A assistente. **Sempre simulada por ora** — ver o cabeçalho.
+  /// A assistente: real quando há servidor, simulada quando não.
   final RepositorioAssistente assistente;
 
   /// Se a pessoa já aceitou o aviso de privacidade da conversa (FR-051).
@@ -78,17 +80,33 @@ class Composicao {
   }) {
     ambiente.exigirTlsForaDeDepuracao();
 
-    final RepositorioAutenticacao autenticacao = ambiente.usaServidorReal
-        ? RepositorioAutenticacaoApi(
-            cliente: api.MemoraApi(basePathOverride: ambiente.urlBase),
-            cofre: cofre,
-          )
-        : RepositorioAutenticacaoSimulado();
+    final RepositorioAutenticacao autenticacao;
+    final RepositorioAssistente assistente;
+
+    if (ambiente.usaServidorReal) {
+      final api.MemoraApi cliente = api.MemoraApi(
+        basePathOverride: ambiente.urlBase,
+      );
+      final RepositorioAutenticacaoApi autenticacaoReal =
+          RepositorioAutenticacaoApi(cliente: cliente, cofre: cofre);
+      autenticacao = autenticacaoReal;
+      assistente = RepositorioAssistenteApi(
+        cliente: cliente,
+        chamadas: ChamadaComRenovacao(
+          cliente: cliente,
+          cofre: cofre,
+          renovar: autenticacaoReal.renovarSessao,
+        ),
+      );
+    } else {
+      autenticacao = RepositorioAutenticacaoSimulado();
+      assistente = RepositorioAssistenteSimulado();
+    }
 
     return Composicao(
       ambiente: ambiente,
       autenticacao: autenticacao,
-      assistente: RepositorioAssistenteSimulado(),
+      assistente: assistente,
       aceiteDoAviso: aceiteDoAviso,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
@@ -101,16 +119,5 @@ class Composicao {
         dadosLocais: <DadoLocalDaPessoa>[ConversaLocal(), aceiteDoAviso],
       ),
     );
-  }
-
-  /// O que dizer a quem rodou contra o servidor e vai encontrar simulado no meio.
-  ///
-  /// `null` quando não há ressalva a fazer.
-  String? get avisoDeIntegracaoParcial {
-    if (!ambiente.usaServidorReal) {
-      return null;
-    }
-    return 'Servidor real em ${ambiente.urlBase}. A ASSISTENTE continua '
-        'simulada: a T036 espera o provedor de IA (R2). Autenticação é real.';
   }
 }

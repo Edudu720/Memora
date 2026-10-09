@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_api.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_api.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
@@ -109,35 +111,41 @@ void main() {
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoApi>());
     });
 
-    /// A ressalva precisa aparecer para quem rodar contra o servidor. Sem ela,
-    /// a assistente simulada vira surpresa no meio de uma demonstração.
-    test('avisa que a assistente continua simulada quando o servidor é real', () {
-      final Composicao real = Composicao.resolver(
+    /// Não existe aplicativo com conta de verdade e assistente de mentira
+    /// (spec 003, clarificação de 2026-10-09): a escolha é uma só.
+    test('com servidor real, a assistente fala com a API — não com o simulado',
+        () {
+      final Composicao composicao = Composicao.resolver(
         ambiente: const Ambiente(
           urlBase: 'https://api.memora.app/v1',
           usaServidorReal: true,
         ),
         cofre: _CofreDeMentira(),
-      ultimoAcesso: UltimoAcessoEmMemoria(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
         aceiteDoAviso: AceiteEmMemoria(),
       );
 
-      expect(real.avisoDeIntegracaoParcial, isNotNull);
-      expect(real.avisoDeIntegracaoParcial, contains('ASSISTENTE'));
+      expect(composicao.assistente, isA<RepositorioAssistenteApi>());
+      expect(
+        composicao.assistente,
+        isNot(isA<RepositorioAssistenteSimulado>()),
+        reason: 'servidor real com assistente simulada é o aplicativo que '
+            'promete uma conversa que ninguém atende',
+      );
     });
 
-    test('não avisa nada quando tudo é simulado', () {
-      final Composicao simulada = Composicao.resolver(
+    test('sem servidor real, a assistente é simulada', () {
+      final Composicao composicao = Composicao.resolver(
         ambiente: const Ambiente(
           urlBase: 'http://10.0.2.2:8080/v1',
           usaServidorReal: false,
         ),
         cofre: _CofreDeMentira(),
-      ultimoAcesso: UltimoAcessoEmMemoria(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
         aceiteDoAviso: AceiteEmMemoria(),
       );
 
-      expect(simulada.avisoDeIntegracaoParcial, isNull);
+      expect(composicao.assistente, isA<RepositorioAssistenteSimulado>());
     });
   });
 }
