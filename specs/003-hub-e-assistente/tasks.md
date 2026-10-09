@@ -190,11 +190,11 @@ confirma antes, executa, e depois mostra o caminho percorrido.
 > **A única fase que depende da escolha da equipe** (R2). Tudo acima já funciona
 > e é testável sem ela.
 
-- [ ] T061 Escolher o provedor e o modelo contra os critérios da **R2** do [research.md](research.md), rodando as mesmas conversas reais nos candidatos. **Decisão da equipe**
-- [ ] T062 Registrar a escolha em `docs/architecture/adr-002-provedor-de-ia.md`, com as alternativas avaliadas e o que faria mudar de ideia
-- [ ] T063 Criar o adaptador em `infra/`, implementando `ClienteDaAssistente` — a **única** classe que importa o SDK do provedor
-- [ ] T064 Configurar a chave por variável de ambiente, **sem padrão no repositório**, e fazer o perfil `producao` não subir sem ela (R8)
-- [ ] T065 Aplicar cache do bloco estável — persona e catálogo antes do histórico — e o teto de turnos por conversa (R3)
+- [X] T061 Escolher o provedor e o modelo contra os critérios da **R2** do [research.md](research.md), rodando as mesmas conversas reais nos candidatos. **Decisão da equipe** — **Gemini gratuito (`gemini-3.8-flash`), decisão do Henrique em 2026-10-02, ver ADR-002**; a comparação com conversas reais não foi feita, e a escolha viola a FR-051 (a T086 segue aberta)
+- [X] T062 Registrar a escolha em `docs/architecture/adr-002-provedor-de-ia.md`, com as alternativas avaliadas e o que faria mudar de ideia
+- [X] T063 Criar o adaptador em `infra/`, implementando `ClienteDaAssistente` — a **única** classe que importa o SDK do provedor — feito por REST direto, sem SDK (Jackson 2 do SDK x Jackson 3 do Spring Boot 4; ver ADR-002)
+- [X] T064 Configurar a chave por variável de ambiente, **sem padrão no repositório**, e fazer o perfil `producao` não subir sem ela (R8)
+- [X] T065 Aplicar cache do bloco estável — persona e catálogo antes do histórico — e o teto de turnos por conversa (R3)
 - [X] T066 Escrever o cenário **H5** em `backend/src/test/java/br/fatec/memora/assistente/InjecaoNaoViraAcaoTest.java`, com texto de golpe colado no chat
 - [X] T067 Escrever o cenário **H10**, do limite diário, em `backend/src/test/java/br/fatec/memora/assistente/LimiteDeConversasTest.java`
 - [ ] T068 Medir custo e latência reais de uma conversa típica e registrar no [research.md](research.md)
@@ -298,7 +298,7 @@ contrato OpenAPI é a fonte da verdade e o cliente é gerado a partir dele.
 - [ ] T083 Impedir de forma determinística que a oferta de executar volte depois de recusada na mesma conversa — marca no `ControladorConversa` e a recusa entrando no histórico enviado ao servidor —, e testar que um segundo "não consegui" não produz oferta per FR-016, US3/AC2 (partial)
 - [ ] T084 Fazer a Memora dizer que é um programa, uma vez por conversa e sem repetir: instrução na `PersonaDaMemora` e texto no convite inicial da `TelaConversa` per FR-013 (missing)
 - [ ] T085 Acrescentar à `TelaConversa` um controle visível para apagar a conversa e recomeçar, ligado a `apagarConversa()`, com confirmação — hoje o método só é chamado por teste per FR-050, FR-049 (missing)
-- [ ] T086 Exigir na ADR-002 (T062) a evidência da FR-051 — link para o contrato ou os termos do provedor que proíbem treino e limitam a retenção a 30 dias — e fazer da ausência dela um bloqueio para a primeira conversa real per FR-051 (missing)
+- [ ] T086 Exigir na ADR-002 (T062) a evidência da FR-051 — link para o contrato ou os termos do provedor que proíbem treino e limitam a retenção a 30 dias — e fazer da ausência dela um bloqueio para a primeira conversa real per FR-051 (missing) — **segue aberta**: a ADR-002 existe e registra que o nível gratuito do Gemini não tem essa evidência; a primeira conversa real continua bloqueada
 - [ ] T087 Acrescentar à `PersonaDaMemora` a recusa explicada de pedido financeiro ou irreversível ("transfere R$ 500 para o Carlos"), sem contorno; criar o roteiro no simulado e um teste per FR-018, FR-031, FR-037, US3/AC4 (partial)
 - [ ] T088 Decidir se `ACAO_RECUSADA` pode guardar o texto cru do chat em `pedido_resumido`: hoje guarda (`ServicoDeConversa.java:125`), o que põe no servidor conteúdo de conversa — inclusive texto de golpe colado — fora do caso que a FR-023 justifica. Justificar na spec ou deixar de gravar, e ajustar `ConversaNaoPersisteTest` per FR-047 (contradicts)
 - [ ] T089 Verificar se o aplicativo está instalado **antes** de marcá-lo como "ensina e abre" no catálogo e antes de oferecer abri-lo; hoje isso só é descoberto depois da confirmação per FR-046 (partial)

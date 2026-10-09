@@ -286,9 +286,9 @@ void main() {
             indiceAtivo: 1,
             aoSelecionar: (_) {},
             itens: const <ItemNavegacao>[
-              ItemNavegacao(icone: Icons.settings, rotulo: 'Ajustes'),
-              ItemNavegacao(icone: Icons.home, rotulo: 'Início'),
-              ItemNavegacao(icone: Icons.person, rotulo: 'Meu perfil'),
+              ItemNavegacao(icone: IconeDeNavegacao.ajustes, rotulo: 'Ajustes'),
+              ItemNavegacao(icone: IconeDeNavegacao.inicio, rotulo: 'Início'),
+              ItemNavegacao(icone: IconeDeNavegacao.perfil, rotulo: 'Meu perfil'),
             ],
           ),
         ),

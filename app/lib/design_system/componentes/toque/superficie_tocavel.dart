@@ -20,7 +20,7 @@ import '../../tokens/movimento.dart';
 /// | Estado | Sinal além da cor |
 /// |---|---|
 /// | foco | anel de [MemoraDimensoes.bordaSelecao] em primária, **por fora** da superfície |
-/// | pressionado | a superfície encolhe para [MemoraMovimento.escalaPressionado] e perde a sombra; se for transparente, ganha o preenchimento `destaque` |
+/// | pressionado | a superfície encolhe para [MemoraMovimento.escalaPressionado] e a sombra encolhe junto, para [elevacaoPressionada] (por padrão, some); se for transparente, ganha o preenchimento `destaque` |
 /// | desabilitado | anunciado como tal ao leitor de tela; quem chama troca o conteúdo |
 ///
 /// O anel vai em `foregroundDecoration`, desenhado **por fora**
@@ -53,8 +53,18 @@ class SuperficieTocavel extends StatefulWidget {
   /// Arredondamento.
   final BorderRadius raio;
 
-  /// Com sombra de cartão quando em repouso.
+  /// Com sombra quando em repouso.
   final bool sombra;
+
+  /// Quanto a sombra "levanta" a superfície em repouso. Só vale com [sombra].
+  final double elevacao;
+
+  /// A elevação enquanto pressionada. Zero, a sombra some; maior que zero, ela
+  /// só encolhe — a superfície "desce" sem desaparecer.
+  final double elevacaoPressionada;
+
+  /// Cor da sombra.
+  final Color corDaSombra;
 
   /// Contorno de [MemoraDimensoes.bordaEnfase] nesta cor. Nulo, sem contorno.
   final Color? borda;
@@ -75,6 +85,9 @@ class SuperficieTocavel extends StatefulWidget {
     this.aoTocar,
     this.dica,
     this.sombra = false,
+    this.elevacao = MemoraElevacao.cartao,
+    this.elevacaoPressionada = MemoraElevacao.plana,
+    this.corDaSombra = MemoraElevacao.sombra,
     this.borda,
     this.selecionada,
     super.key,
@@ -93,6 +106,9 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
     final MemoraCores cores = context.memora.cores;
     final bool habilitada = widget.aoTocar != null;
     final bool reduzir = MediaQuery.disableAnimationsOf(context);
+    final double elevacaoAgora = _pressionada
+        ? widget.elevacaoPressionada
+        : widget.elevacao;
 
     return Semantics(
       button: true,
@@ -126,12 +142,15 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
                       color: widget.borda!,
                       width: MemoraDimensoes.bordaEnfase,
                     ),
-              boxShadow: widget.sombra && !_pressionada
+              // Com `elevacaoPressionada` > 0 a lista continua com um item e o
+              // `AnimatedContainer` interpola desfoque e deslocamento: a
+              // sombra *encolhe*, em vez de sumir de uma vez.
+              boxShadow: widget.sombra && elevacaoAgora > MemoraElevacao.plana
                   ? <BoxShadow>[
                       BoxShadow(
-                        color: MemoraElevacao.sombra,
-                        blurRadius: MemoraElevacao.cartao * 4,
-                        offset: const Offset(0, MemoraElevacao.cartao),
+                        color: widget.corDaSombra,
+                        blurRadius: elevacaoAgora * 4,
+                        offset: Offset(0, elevacaoAgora),
                       ),
                     ]
                   : null,

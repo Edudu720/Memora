@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Versao monocromatica do icone (Android 13+, icones tematicos): a silhueta da
+    Memora com a tela vazada, os olhos e o sorriso. O sistema pinta com a cor do
+    tema; so a transparencia importa aqui.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.46"
+        android:scaleY="0.46"
+        android:translateX="8"
+        android:translateY="17.4">
+        <!-- cabeca com a tela vazada -->
+        <path android:fillColor="#FF000000" android:fillType="evenOdd" android:pathData="M78,40H122A40,40 0 0 1 162,80V108A40,40 0 0 1 122,148H78A40,40 0 0 1 38,108V80A40,40 0 0 1 78,40ZM82,58H118A28,28 0 0 1 146,86V104A28,28 0 0 1 118,132H82A28,28 0 0 1 54,104V86A28,28 0 0 1 82,58Z"/>
+        <!-- orelhas, antena e pescoco -->
+        <path android:fillColor="#FF000000" android:pathData="M37,78H37A9,9 0 0 1 46,87V109A9,9 0 0 1 37,118H37A9,9 0 0 1 28,109V87A9,9 0 0 1 37,78ZM163,78H163A9,9 0 0 1 172,87V109A9,9 0 0 1 163,118H163A9,9 0 0 1 154,109V87A9,9 0 0 1 163,78ZM100,22H100A3,3 0 0 1 103,25V41A3,3 0 0 1 100,44H100A3,3 0 0 1 97,41V25A3,3 0 0 1 100,22ZM90,20a10,10 0 1,0 20,0a10,10 0 1,0 -20,0ZM94,140H106A6,6 0 0 1 112,146V154A6,6 0 0 1 106,160H94A6,6 0 0 1 88,154V146A6,6 0 0 1 94,140Z"/>
+        <!-- olhos -->
+        <path android:fillColor="#FF000000" android:pathData="M72,90a8,8 0 1,0 16,0a8,8 0 1,0 -16,0ZM112,90a8,8 0 1,0 16,0a8,8 0 1,0 -16,0Z"/>
+        <!-- sorriso -->
+        <path android:pathData="M88,110Q100,120 112,110" android:strokeColor="#FF000000" android:strokeWidth="5" android:strokeLineCap="round"/>
+    </group>
+</vector>
