@@ -71,21 +71,39 @@ void main() {
       expect(lidos.single.dados, 'oi');
     });
 
-    test('só UM espaço depois dos dois-pontos é removido', () async {
-      // Um trecho que começa com espaço perderia o espaço entre as palavras.
+    test('o dado vai inteiro: o espaço depois de "data:" é do texto', () async {
+      // Trecho copiado do fio real, contra o Gemini, em 2026-10-09. O Spring
+      // escreve `data:` sem espaço, e o pedaço seguinte começa com o espaço
+      // entre "ajuda" e "bastante". O SSE padrão o removeria.
       final List<EventoSse> lidos = await eventos(
         deTextos(<String>[
-          'event:texto\ndata:  duas palavras\n\n',
-          'event:texto\ndata: uma\n\n',
-          'event:texto\ndata:nenhum\n\n',
+          'event:texto\n'
+              'data:Vamos fazer isso juntos! Deixar a letra maior ajuda\n\n',
+          'event:texto\n'
+              'data: bastante a enxergar tudo.\n'
+              'data:\n'
+              'data:Vamos fazer com calma, um passo de\n\n',
+          'event:texto\ndata: cada vez.\n\n',
+          'event:fim\ndata:\n\n',
         ]),
       );
 
-      expect(lidos.map((EventoSse e) => e.dados), <String>[
-        ' duas palavras',
-        'uma',
-        'nenhum',
-      ]);
+      expect(
+        lidos
+            .where((EventoSse e) => e.nome == 'texto')
+            .map((EventoSse e) => e.dados)
+            .join(),
+        'Vamos fazer isso juntos! Deixar a letra maior ajuda bastante a '
+        'enxergar tudo.\n\nVamos fazer com calma, um passo de cada vez.',
+      );
+    });
+
+    test('o nome do evento tolera o espaço do padrão', () async {
+      final List<EventoSse> lidos = await eventos(
+        deTextos(<String>['event: texto\ndata:Olá\n\n']),
+      );
+
+      expect(lidos.single.nome, 'texto');
     });
 
     test('caractere multibyte cortado entre dois pedaços sobrevive', () async {

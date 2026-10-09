@@ -423,7 +423,11 @@ paths:
             - `texto` — `data:` é o trecho em **texto puro**, não JSON. Chega em
               pedaços. Se o trecho tiver quebra de linha, o servidor o emite em
               várias linhas `data:`, que o leitor junta com `\n` (regra padrão do
-              SSE).
+              SSE). O servidor escreve `data:` **sem espaço** depois dos
+              dois-pontos, e o valor é **tudo** o que vem depois deles. Isso
+              contraria o SSE padrão, que manda remover um espaço: o trecho
+              seguinte costuma começar com o espaço entre duas palavras
+              (`data: bastante`), e removê-lo as grudaria.
             - `acao` — `data:` é JSON no formato do esquema `AcaoAutorizada`, o
               objeto direto, sem envelope. Chega no máximo uma vez e **só quando
               autorizada** pelo catálogo.

@@ -43,9 +43,14 @@ class EventoSse {
 /// - O evento só é despachado na **linha em branco**. Um evento cortado no meio
 ///   pela queda da conexão **não** é entregue: texto pela metade, tratado como
 ///   resposta, seria pior que falha.
-/// - `data:` aceita **um** espaço opcional depois dos dois-pontos, e só um: o
-///   resto pertence ao dado (um trecho de resposta que comece com espaço
-///   perderia o espaço entre as palavras).
+/// - O valor de `data:` é **tudo** o que vem depois dos dois-pontos, sem tirar
+///   espaço nenhum. Aqui o leitor se afasta do SSE padrão, que manda remover um
+///   espaço, e de propósito: o Spring escreve `data:` sem espaço e emenda o
+///   trecho logo depois. O modelo corta a resposta no meio da frase, e o
+///   pedaço seguinte começa justamente com o espaço entre as duas palavras
+///   (`data: bastante a enxergar`). Seguir o padrão grudaria as palavras em
+///   toda emenda. Isso foi visto no fio, contra o Gemini, em 2026-10-09, e
+///   nenhum teste com servidor falso o mostrava.
 Stream<EventoSse> lerEventosSse(Stream<List<int>> bytes) async* {
   String nome = '';
   final List<String> dados = <String>[];
@@ -78,7 +83,9 @@ Stream<EventoSse> lerEventosSse(Stream<List<int>> bytes) async* {
         ? linha
         : linha.substring(0, doisPontos);
     String valor = doisPontos < 0 ? '' : linha.substring(doisPontos + 1);
-    if (valor.startsWith(' ')) valor = valor.substring(1);
+    // Só o nome do evento tolera o espaço do padrão; o dado vai inteiro (ver o
+    // cabeçalho).
+    if (campo != 'data' && valor.startsWith(' ')) valor = valor.substring(1);
 
     switch (campo) {
       case 'event':
