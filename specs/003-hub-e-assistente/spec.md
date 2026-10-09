@@ -72,6 +72,7 @@ Com o Henrique, para destravar a T036 (o aplicativo falar com a assistente real)
 - Q: O cliente gerado não lê eventos transmitidos aos poucos, e o aplicativo hoje espera a resposta inteira. Como a conversa é consumida? → A: **A resposta aparece na tela à medida que chega** (FR-052). Catálogo, registro e ação vêm do cliente gerado; só a conversa é lida à mão, fora do pacote gerado e com teste contra o formato do contrato (Dependências).
 - Q: O token de acesso vale 15 minutos. O que acontece quando ele vence no meio da conversa? → A: **Renovar em silêncio e reenviar o pedido uma vez**, na conversa, nos catálogos, no registro e na ação. Só se a renovação falhar a pessoa volta ao login. Sessão encerrada por falta de uso continua sendo só a inatividade da FR-017 (Edge Cases).
 - Q: Um aplicativo que fala com o servidor de verdade fala também com a assistente de verdade? → A: **Sim, pela mesma escolha.** Não existe aplicativo com conta real e assistente simulada. Quem decide entre o simulado e o provedor de IA é só o servidor (Dependências).
+- Q: A pessoa confirmou e o aplicativo abriu, mas o registro da ação não chegou ao servidor (rede). O que acontece? → A: **O aplicativo continua aberto e a Memora conta a verdade.** O registro é tentado mais uma vez; se falhar de novo, ela diz na conversa que abriu o aplicativo mas não conseguiu anotar no Registro, sem erro técnico (Edge Cases).
 
 ---
 
@@ -251,6 +252,12 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   catálogos, o registro e a ação. Só quando a renovação também falha a pessoa
   volta à entrada. Quem encerra a sessão por falta de uso é a inatividade da
   feature 001 (FR-017), nunca o vencimento da credencial (2026-10-09).
+- **O aplicativo abriu, mas o registro não foi anotado.** A rede pode cair
+  entre a confirmação e o registro da ação (FR-020). O gesto da pessoa não
+  depende da rede: o aplicativo abre. O registro MUST ser tentado mais uma vez,
+  e, se falhar, a Memora MUST dizer na conversa, em linguagem comum, que abriu
+  o aplicativo mas não conseguiu anotar isso no Registro (FR-023). Nunca falha
+  em silêncio (2026-10-09).
 
 ---
 
