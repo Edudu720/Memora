@@ -31,6 +31,7 @@ import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
+import '../../../services/seguranca/sessao_perdida.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -70,6 +71,15 @@ class FluxoAutenticacao extends StatefulWidget {
   /// automática por inatividade.
   final LimpezaDeSessao? limpeza;
 
+  /// Avisa que a sessão caiu **no meio do uso**, fora do que o monitor vê (T111).
+  ///
+  /// A camada de dados da assistente renova a sessão em silêncio; quando a
+  /// renovação é recusada, quem sabe é ela, e quem leva a pessoa à entrada é este
+  /// fluxo — pelo **mesmo** caminho da inatividade (`_expirarSessao`), com a
+  /// mesma limpeza. Opcional porque a maioria dos testes de tela não tem o que
+  /// avisar.
+  final SessaoPerdida? sessaoPerdida;
+
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
@@ -100,6 +110,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.abridor,
     this.conversaLocal = ConversaLocal.new,
     this.aceiteDoAviso,
+    this.sessaoPerdida,
     required this.ultimoAcesso,
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
@@ -131,7 +142,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     inatividade: widget.inatividade,
     aviso: widget.avisoDeInatividade,
     aoAvisar: _avisarDeInatividade,
-    aoExpirar: _expirarPorInatividade,
+    aoExpirar: _expirarSessao,
   );
 
   /// O aceite de quando ninguém deu um: só nesta execução, nunca em disco.
@@ -176,7 +187,14 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   PessoaAutenticada? _aguardandoConfirmacao;
 
   @override
+  void initState() {
+    super.initState();
+    widget.sessaoPerdida?.addListener(_aoPerderASessao);
+  }
+
+  @override
   void dispose() {
+    widget.sessaoPerdida?.removeListener(_aoPerderASessao);
     _cadastro.dispose();
     _login?.dispose();
     _recuperacao?.dispose();
@@ -357,7 +375,29 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _monitor.registrarAtividade();
   }
 
-  Future<void> _expirarPorInatividade() async {
+  /// A sessão caiu no meio do uso — a renovação em silêncio foi recusada (T111).
+  ///
+  /// Só vale com a pessoa **dentro**: fora dela não há o que encerrar, e uma
+  /// resposta tardia de uma conversa que já saiu da tela não pode arrastar quem
+  /// está no login para um segundo login. Duas chamadas em voo levam o mesmo
+  /// `401` e avisam duas vezes; o `_expirando` deixa passar só a primeira.
+  void _aoPerderASessao() {
+    if (_etapa != _Etapa.dentro || _expirando) return;
+    _expirarSessao();
+  }
+
+  /// Leva a pessoa de volta à entrada porque a sessão acabou.
+  ///
+  /// É o caminho **único** de saída automática: o monitor o chama por
+  /// inatividade (FR-017) e a assistente o chama por sessão perdida (T111). A
+  /// limpeza, o fechamento do que está aberto e a trava `_expirando` são os
+  /// mesmos nos dois — duas saídas automáticas com limpezas diferentes seriam
+  /// duas chances de uma esquecer o que a outra apaga.
+  ///
+  /// A entrada não mostra frase nenhuma, tal como na inatividade: lá o aviso
+  /// veio **antes**, no diálogo dos últimos segundos; aqui a conversa já disse,
+  /// na própria tela, que precisa que a pessoa entre de novo.
+  Future<void> _expirarSessao() async {
     // Antes de qualquer espera: daqui em diante, nada reinicia a contagem.
     _expirando = true;
     _monitor.parar();

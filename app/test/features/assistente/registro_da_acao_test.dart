@@ -37,7 +37,7 @@ class _ConversaEmMemoria implements ConversaLocal {
 class _RepositorioQueFalhaNoRegistro implements RepositorioAssistente {
   /// O que cada tentativa de registro faz: lançar o que está na lista, na
   /// ordem; passada a lista, dá certo.
-  final List<Object> falhas;
+  final List<Exception> falhas;
 
   /// Se não nulo, cada registro espera por ele antes de agir.
   final Completer<void>? portao;
@@ -108,7 +108,7 @@ void main() {
 
   test('registro que dá certo: uma chamada, e nada a explicar', () async {
     final _RepositorioQueFalhaNoRegistro repo = _RepositorioQueFalhaNoRegistro(
-      <Object>[],
+      <Exception>[],
     );
     final ControladorConversa c = await comOferta(repo);
 
@@ -126,7 +126,7 @@ void main() {
     'falha uma vez e dá certo na repetição: a pessoa não fica sabendo',
     () async {
       final _RepositorioQueFalhaNoRegistro repo =
-          _RepositorioQueFalhaNoRegistro(<Object>[Exception('rede caiu')]);
+          _RepositorioQueFalhaNoRegistro(<Exception>[Exception('rede caiu')]);
       final ControladorConversa c = await comOferta(repo);
 
       await c.confirmarAcao();
@@ -143,7 +143,7 @@ void main() {
     'falha duas vezes: o aplicativo continua aberto e a Memora conta',
     () async {
       final _RepositorioQueFalhaNoRegistro repo =
-          _RepositorioQueFalhaNoRegistro(<Object>[
+          _RepositorioQueFalhaNoRegistro(<Exception>[
             Exception('rede caiu'),
             Exception('ainda sem rede'),
           ]);
@@ -187,7 +187,7 @@ void main() {
     'sessão perdida: não repete, e não fala por cima da volta à entrada',
     () async {
       final _RepositorioQueFalhaNoRegistro repo =
-          _RepositorioQueFalhaNoRegistro(<Object>[
+          _RepositorioQueFalhaNoRegistro(<Exception>[
             const FalhaDeChamadaDaAssistente(FalhaDaAssistente.sessaoExpirada),
           ]);
       final ControladorConversa c = await comOferta(repo);
@@ -208,7 +208,7 @@ void main() {
     () async {
       final Completer<void> portao = Completer<void>();
       final _RepositorioQueFalhaNoRegistro repo =
-          _RepositorioQueFalhaNoRegistro(<Object>[
+          _RepositorioQueFalhaNoRegistro(<Exception>[
             Exception('rede caiu'),
             Exception('ainda sem rede'),
           ], portao: portao);

@@ -94,6 +94,7 @@ class AplicativoMemora extends StatelessWidget {
               repositorio: composicao.autenticacao,
               ultimoAcesso: ultimoAcesso,
               limpeza: composicao.limpeza,
+              sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
               aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoAndroid(),

@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:memora_api/memora_api.dart' as api;
 
 import '../../features/assistente/data/aceite_do_aviso.dart';
@@ -13,6 +15,7 @@ import 'ambiente.dart';
 import '../../features/assistente/data/conversa_local.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
+import '../seguranca/sessao_perdida.dart';
 
 /// Monta as dependências do aplicativo, uma vez, na subida.
 ///
@@ -58,6 +61,12 @@ class Composicao {
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   final LimpezaDeSessao limpeza;
 
+  /// Avisa que a sessão caiu no meio do uso (T111).
+  ///
+  /// É o **mesmo objeto** que a assistente aciona e que o fluxo escuta:
+  /// criar um para cada lado seria a sessão perdida sem ninguém ouvir.
+  final SessaoPerdida sessaoPerdida;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
@@ -65,6 +74,7 @@ class Composicao {
     required this.assistente,
     required this.aceiteDoAviso,
     required this.limpeza,
+    required this.sessaoPerdida,
   });
 
   /// Resolve as dependências a partir do ambiente.
@@ -77,14 +87,19 @@ class Composicao {
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
     required AceiteDoAviso aceiteDoAviso,
+    @visibleForTesting Dio? dioDeTeste,
   }) {
     ambiente.exigirTlsForaDeDepuracao();
 
+    final SessaoPerdida sessaoPerdida = SessaoPerdida();
     final RepositorioAutenticacao autenticacao;
     final RepositorioAssistente assistente;
 
     if (ambiente.usaServidorReal) {
+      // [dioDeTeste] existe para o teste trocar o transporte e provar a
+      // ligação inteira (assistente → renovação → aviso) sem rede.
       final api.MemoraApi cliente = api.MemoraApi(
+        dio: dioDeTeste,
         basePathOverride: ambiente.urlBase,
       );
       final RepositorioAutenticacaoApi autenticacaoReal =
@@ -96,6 +111,7 @@ class Composicao {
           cliente: cliente,
           cofre: cofre,
           renovar: autenticacaoReal.renovarSessao,
+          sessaoPerdida: sessaoPerdida,
         ),
       );
     } else {
@@ -108,6 +124,7 @@ class Composicao {
       autenticacao: autenticacao,
       assistente: assistente,
       aceiteDoAviso: aceiteDoAviso,
+      sessaoPerdida: sessaoPerdida,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa

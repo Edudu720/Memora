@@ -225,9 +225,13 @@ class TextosAssistente {
       'Estou com um pouquinho de dificuldade para pensar agora — não foi nada '
       'que você fez. Vamos tentar de novo daqui a pouco? 😊';
 
-  /// A sessão caiu.
+  /// A sessão caiu — a renovação em silêncio foi recusada (T108, T111).
+  ///
+  /// Quem chega aqui estava **usando** o Memora, então a frase de antes ("faz
+  /// um tempinho que você não usa") era errada. E ela é breve de propósito: o
+  /// fluxo já está levando a pessoa à entrada.
   static const String sessaoExpirada =
-      'Faz um tempinho que você não usa o Memora. Vamos entrar de novo?';
+      'Por segurança, preciso que você entre de novo 😊';
 
   /// Qualquer outra falha.
   static const String inesperada =

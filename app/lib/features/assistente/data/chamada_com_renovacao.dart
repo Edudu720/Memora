@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
 import '../../../services/seguranca/cofre_de_credenciais.dart';
+import '../../../services/seguranca/sessao_perdida.dart';
 import '../../autenticacao/domain/autenticacao.dart';
 import '../domain/assistente.dart';
 
@@ -51,14 +52,17 @@ void soltarCorpoDaResposta(DioException excecao) {
 ///
 /// ## O que a renovação recusada vira
 ///
-/// [FalhaDaAssistente.sessaoExpirada], e só ela. Falta de conexão **durante a
-/// renovação** é [FalhaDaAssistente.semConexao]: a rede caiu, a sessão não, e
+/// [FalhaDaAssistente.sessaoExpirada], e só ela — e é só nesse caso que o
+/// [SessaoPerdida] é acionado, para o fluxo levar a pessoa à entrada (T111).
+/// Falta de conexão **durante a renovação** é [FalhaDaAssistente.semConexao]: a
+/// rede caiu, a sessão não, e
 /// mandar a pessoa à entrada por causa disso seria fazê-la digitar a senha por
 /// um problema que não é dela.
 class ChamadaComRenovacao {
   final api.MemoraApi _api;
   final CofreDeCredenciais _cofre;
   final Future<ResultadoAutenticacao> Function() _renovar;
+  final SessaoPerdida? _sessaoPerdida;
 
   Future<void>? _renovacaoEmCurso;
 
@@ -73,9 +77,11 @@ class ChamadaComRenovacao {
     required api.MemoraApi cliente,
     required CofreDeCredenciais cofre,
     required Future<ResultadoAutenticacao> Function() renovar,
+    SessaoPerdida? sessaoPerdida,
   }) : _api = cliente,
        _cofre = cofre,
-       _renovar = renovar;
+       _renovar = renovar,
+       _sessaoPerdida = sessaoPerdida;
 
   /// Executa [chamada] com o token do cofre, renovando e reenviando se preciso.
   ///
@@ -100,9 +106,7 @@ class ChamadaComRenovacao {
     } on DioException catch (excecao) {
       if (_foiRecusadoPorSessao(excecao)) {
         soltarCorpoDaResposta(excecao);
-        throw const FalhaDeChamadaDaAssistente(
-          FalhaDaAssistente.sessaoExpirada,
-        );
+        throw _sessaoPerdidaDeVerdade();
       }
       rethrow;
     }
@@ -142,6 +146,16 @@ class ChamadaComRenovacao {
     return nova;
   }
 
+  /// A sessão caiu de verdade: avisa quem leva a pessoa à entrada (T111) e
+  /// devolve a falha que a chamada lança.
+  ///
+  /// É o **único** lugar que aciona o aviso — e só para a sessão recusada. Rede
+  /// que cai e falha inesperada seguem sem ele.
+  FalhaDeChamadaDaAssistente _sessaoPerdidaDeVerdade() {
+    _sessaoPerdida?.avisar();
+    return const FalhaDeChamadaDaAssistente(FalhaDaAssistente.sessaoExpirada);
+  }
+
   Future<void> _renovarDeVerdade(String? tokenUsado) async {
     // Alguém já renovou depois de esta chamada sair com o token antigo.
     final String? atual = await _cofre.tokenAcesso();
@@ -152,16 +166,19 @@ class ChamadaComRenovacao {
       case AutenticacaoConcluida():
         return;
       case AutenticacaoFalhou(:final FalhaAutenticacao falha):
-        throw FalhaDeChamadaDaAssistente(switch (falha) {
-          FalhaAutenticacao.semConexao => FalhaDaAssistente.semConexao,
-          FalhaAutenticacao.credenciaisInvalidas =>
-            FalhaDaAssistente.sessaoExpirada,
-          // Refresh recusado por qualquer outro motivo de sessão, ou falha que
-          // a assistente não sabe nomear: não finja saber se a sessão caiu.
+        throw switch (falha) {
+          FalhaAutenticacao.credenciaisInvalidas => _sessaoPerdidaDeVerdade(),
+          FalhaAutenticacao.semConexao => const FalhaDeChamadaDaAssistente(
+            FalhaDaAssistente.semConexao,
+          ),
+          // Falha que a assistente não sabe nomear: não finja saber se a
+          // sessão caiu.
           FalhaAutenticacao.dadosInvalidos ||
           FalhaAutenticacao.muitasTentativas ||
-          FalhaAutenticacao.inesperada => FalhaDaAssistente.inesperada,
-        });
+          FalhaAutenticacao.inesperada => const FalhaDeChamadaDaAssistente(
+            FalhaDaAssistente.inesperada,
+          ),
+        };
     }
   }
 }

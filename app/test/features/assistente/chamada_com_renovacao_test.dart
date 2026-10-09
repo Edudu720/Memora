@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/assistente/data/chamada_com_renovacao.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
+import 'package:memora/services/seguranca/sessao_perdida.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
 import 'suporte_da_api_falsa.dart';
@@ -23,6 +24,7 @@ void main() {
   late RenovadorFalso renovador;
   late AdaptadorFalso servidor;
   late ChamadaComRenovacao chamadas;
+  late SessaoPerdida sessaoPerdida;
   late Future<_Resposta> Function() chamada;
 
   /// Monta tudo. [aceita] diz qual token o servidor aceita.
@@ -32,6 +34,7 @@ void main() {
     Future<ResponseBody> Function(RequestOptions, int)? resposta,
   }) {
     cofre = CofreEmMemoria();
+    sessaoPerdida = SessaoPerdida();
     renovador = (renovadorDoTeste ?? RenovadorFalso.new)(cofre);
     servidor = AdaptadorFalso(
       resposta ??
@@ -51,6 +54,7 @@ void main() {
       cliente: cliente,
       cofre: cofre,
       renovar: renovador.renovar,
+      sessaoPerdida: sessaoPerdida,
     );
     chamada = () => cliente.getCatalogoApi().assistenteCatalogoGet();
   }
@@ -239,4 +243,74 @@ void main() {
       expect(servidor.pedidos.last.headers['Authorization'], 'Bearer acesso-2');
     },
   );
+  group('o aviso de sessão perdida (T111)', () {
+    test('renovação recusada aciona o aviso, uma vez', () async {
+      montar(
+        aceita: 'acesso-2',
+        renovadorDoTeste: (CofreEmMemoria c) =>
+            RenovadorFalso(c, recusar: true),
+      );
+
+      await falhaDaChamada();
+
+      expect(sessaoPerdida.avisos, 1);
+    });
+
+    test('o segundo 401, depois de renovar, também aciona o aviso', () async {
+      montar(aceita: 'nenhum');
+
+      await falhaDaChamada();
+
+      expect(sessaoPerdida.avisos, 1);
+    });
+
+    test(
+      'duas chamadas em voo com a renovação recusada avisam UMA vez',
+      () async {
+        // A renovação é uma só (a segunda chamada espera a mesma), e é nela que o
+        // aviso nasce: duas saídas automáticas seriam duas limpezas.
+        final Completer<void> portao = Completer<void>();
+        montar(
+          aceita: 'acesso-2',
+          renovadorDoTeste: (CofreEmMemoria c) =>
+              RenovadorFalso(c, portao: portao, recusar: true),
+        );
+
+        final Future<Object?> a = falhaDaChamada();
+        final Future<Object?> b = falhaDaChamada();
+        await pumpEventQueue();
+        portao.complete();
+        await Future.wait(<Future<Object?>>[a, b]);
+
+        expect(renovador.chamadas, 1);
+        expect(sessaoPerdida.avisos, 1);
+      },
+    );
+
+    test('falta de rede na renovação NÃO aciona o aviso', () async {
+      montar(
+        aceita: 'acesso-2',
+        renovadorDoTeste: (CofreEmMemoria c) =>
+            RenovadorFalso(c, semRede: true),
+      );
+
+      await falhaDaChamada();
+
+      expect(sessaoPerdida.avisos, 0);
+    });
+
+    test('falha que não é 401 e sucesso não acionam o aviso', () async {
+      montar(
+        aceita: 'acesso-1',
+        resposta: (RequestOptions o, int n) async =>
+            respostaJson(500, <String, Object>{'codigo': 'ERRO_INESPERADO'}),
+      );
+      await falhaDaChamada();
+
+      montar(aceita: 'acesso-2');
+      await chamadas.executar(chamada);
+
+      expect(sessaoPerdida.avisos, 0);
+    });
+  });
 }
