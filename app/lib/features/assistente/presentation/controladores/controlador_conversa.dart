@@ -344,10 +344,50 @@ class ControladorConversa extends ChangeNotifier {
 
     _dizer(TextosAssistente.caminhoPercorrido(acao.nomeExibido));
 
-    await _repositorio.registrarAcao(
-      servicoId: acao.servicoId,
-      pedidoResumido: _ultimoPedido,
-    );
+    await _registrar(acao);
+  }
+
+  /// Anota a ação no Registro, e **nunca** deixa a falha subir (T112).
+  ///
+  /// ## O gesto da pessoa não depende da rede
+  ///
+  /// O aplicativo já abriu — e continua aberto. A rede pode ter caído entre a
+  /// confirmação e o registro, e desfazer ou esconder o que a pessoa fez seria
+  /// pior que a falha. O registro é tentado **mais uma vez** (além do reenvio
+  /// por `401` que a camada de dados já faz), porque uma queda de rede costuma
+  /// durar menos que uma frase.
+  ///
+  /// ## Falhar de novo: a Memora conta a verdade
+  ///
+  /// Sem o registro, a trilha da FR-020 fica com um buraco, e a FR-023 diz que
+  /// a pessoa vê o que a Memora fez. Calar deixaria o Registro dizer que nada
+  /// aconteceu num dia em que o aplicativo abriu. Por isso ela diz, na conversa
+  /// e em linguagem comum, que abriu mas não conseguiu anotar — sem erro
+  /// técnico e sem culpar a pessoa.
+  ///
+  /// ## Sessão perdida não se repete nem se explica aqui
+  ///
+  /// Se a falha é [FalhaDaAssistente.sessaoExpirada], a renovação já foi
+  /// recusada: tentar de novo é inútil, e a camada de dados já avisou que a
+  /// sessão caiu (T111) — quem leva a pessoa à entrada é o fluxo, e a conversa
+  /// sai da tela junto.
+  Future<void> _registrar(AcaoAutorizada acao) async {
+    for (int tentativa = 1; tentativa <= 2; tentativa++) {
+      try {
+        // Mesmo com o controlador já descartado o registro segue: é trilha de
+        // auditoria, e a pessoa ter saído da tela não desfaz o que aconteceu.
+        await _repositorio.registrarAcao(
+          servicoId: acao.servicoId,
+          pedidoResumido: _ultimoPedido,
+        );
+        return;
+      } on FalhaDeChamadaDaAssistente catch (falha) {
+        if (falha.falha == FalhaDaAssistente.sessaoExpirada) return;
+      } on Exception {
+        // Rede, tempo esgotado, resposta fora do contrato: tenta de novo.
+      }
+    }
+    _dizer(TextosAssistente.naoAnoteiNoRegistro(acao.nomeExibido));
   }
 
   /// Acrescenta uma fala da Memora à conversa, e guarda.

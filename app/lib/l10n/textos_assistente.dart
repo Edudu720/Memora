@@ -252,6 +252,14 @@ class TextosAssistente {
       'Não encontrei o $aplicativo no seu celular. Pode ser que ele não esteja '
       'instalado ainda — quer que eu te mostre como procurar na loja?';
 
+  /// O aplicativo abriu, mas o registro da ação não chegou ao servidor (T112).
+  ///
+  /// Conta a verdade sem culpar a pessoa e sem palavra técnica: o que ela fez
+  /// funcionou, e o que não funcionou foi a anotação da Memora.
+  static String naoAnoteiNoRegistro(String aplicativo) =>
+      'Abri o $aplicativo, mas não consegui anotar isso no seu Registro. '
+      'Não foi nada que você fez — pode usar o aplicativo com calma 😊';
+
   // ---------------------------------------------------------------------------
   // Registro — US4
   // ---------------------------------------------------------------------------

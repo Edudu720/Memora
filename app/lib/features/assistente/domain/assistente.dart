@@ -182,6 +182,23 @@ enum FalhaDaAssistente {
       };
 }
 
+/// Uma chamada da assistente que não pôde ser feita, e por quê.
+///
+/// É o que as chamadas **sem** tipo de resposta próprio (catálogo, registro,
+/// ação) lançam: as telas já tratam qualquer `Exception` como "não consegui
+/// carregar", e quem precisar distinguir a sessão perdida da rede tem o
+/// [falha] para isso. A conversa a converte em `AssistenteFalhou`.
+class FalhaDeChamadaDaAssistente implements Exception {
+  /// O que aconteceu.
+  final FalhaDaAssistente falha;
+
+  /// Cria a falha.
+  const FalhaDeChamadaDaAssistente(this.falha);
+
+  @override
+  String toString() => 'FalhaDeChamadaDaAssistente($falha)';
+}
+
 /// O que a Memora respondeu a um turno da conversa.
 @immutable
 sealed class RespostaDaAssistente {
