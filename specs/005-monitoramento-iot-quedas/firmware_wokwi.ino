@@ -236,11 +236,17 @@ void callbackMqtt(char* topic, byte* payload, unsigned int length) {
 }
 
 void reconectarMqtt() {
-  if (!client.connected()) {
+  static unsigned long ultimaTentativa = 0;
+  if (!client.connected() && (millis() - ultimaTentativa >= 5000)) {
+    ultimaTentativa = millis();
     String clientId = "ESP32-Memora-" + String(random(0xffff), HEX);
+    Serial.print("Conectando ao MQTT HiveMQ...");
     if (client.connect(clientId.c_str())) {
-      Serial.println("Conectado ao Broker MQTT HiveMQ!");
+      Serial.println(" Conectado!");
       client.subscribe(TOPICO_COMANDO);
+    } else {
+      Serial.print(" Falha, rc=");
+      Serial.println(client.state());
     }
   }
 }
@@ -362,7 +368,7 @@ void loop() {
         float movimentoMedio = somaMovimento / max(1, quantidadeAmostras);
         if (movimentoMedio < POST_IMPACT_MOVEMENT) {
           Serial.println(">>> ALERTA DE QUEDA CONFIRMADA! <<<");
-          tone(BUZZER_PIN, 2000, 1000);
+          tone(BUZZER_PIN, 2000); // Toca continuamente até o Memora enviar CESSAR_ALARME
           publicarAlertaQueda();
         }
         estadoAtual = INERTE;
@@ -374,3 +380,4 @@ void loop() {
   publicarTelemetriaMqtt();
   delay(10);
 }
+
