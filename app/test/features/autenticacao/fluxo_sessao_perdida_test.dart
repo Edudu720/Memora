@@ -1,14 +1,21 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/assistente/data/chamada_com_renovacao.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_api.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
+import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 import 'package:memora/services/seguranca/sessao_perdida.dart';
+import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
+import 'package:memora/features/autenticacao/presentation/telas/tela_boas_vindas.dart';
+import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
 import '../assistente/suporte_da_api_falsa.dart';
+import 'dubles_autenticacao.dart';
 import 'fluxo_dentro_da_conta.dart';
 
 /// A sessão que cai no meio do uso leva à entrada (T111, Edge Cases de
@@ -148,5 +155,41 @@ void main() {
     );
     expect(find.byKey(TelaConversa.chaveErro), findsOneWidget);
     expect(fluxo.dado.apagamentos, 0);
+  });
+  testWidgets('fora da conta, o aviso não arrasta ninguém a lugar nenhum', (
+    WidgetTester t,
+  ) async {
+    // Uma resposta tardia de uma conversa que já saiu da tela, ou um aviso
+    // quando a pessoa ainda nem entrou: não há sessão para encerrar, e rodar a
+    // saída automática apagaria o que a pessoa acabou de digitar.
+    final DadoLocalQueRegistra dado = DadoLocalQueRegistra();
+    final UltimoAcessoEmMemoria ultimo = UltimoAcessoEmMemoria();
+    await t.pumpWidget(
+      EscopoAparencia(
+        controlador: ControladorAparencia(PreferenciaEmMemoria()),
+        child: MaterialApp(
+          theme: TemasMemora.claro,
+          home: FluxoAutenticacao(
+            repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
+            ultimoAcesso: ultimo,
+            sessaoPerdida: sessaoPerdida,
+            limpeza: LimpezaDeSessao(
+              cofre: CofreQueRegistra(),
+              ultimoAcesso: ultimo,
+              dadosLocais: <DadoLocalDaPessoa>[dado],
+            ),
+          ),
+        ),
+      ),
+    );
+    await FluxoDentroDaConta.avancar(t);
+    expect(find.byKey(TelaBoasVindas.chaveComecar), findsOneWidget);
+
+    sessaoPerdida.avisar();
+    await FluxoDentroDaConta.avancar(t, 6);
+
+    expect(dado.apagamentos, 0, reason: 'não há sessão para encerrar');
+    expect(find.byKey(TelaBoasVindas.chaveComecar), findsOneWidget);
+    expect(find.byKey(TelaLogin.chaveEntrar), findsNothing);
   });
 }
