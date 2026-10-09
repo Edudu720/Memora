@@ -33,3 +33,4 @@ IMPORTANTE: O Memora NUNCA solicita dinheiro, transferências bancárias ou senh
 1. O texto sempre inclui o aviso explícito de que o Memora nunca solicita dinheiro.
 2. Nenhuma chave PIX ou link de pagamento pode constar no alerta.
 3. O nome do idoso e a hora exata da ocorrência são fornecidos para facilitar a validação rápida pelo familiar.
+

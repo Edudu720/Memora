@@ -116,3 +116,4 @@ Criar o arquivo complementar com as rotinas de conectividade para o Wokwi:
 - Publicação no tópico `memora/iot/<id>/alerta` no evento de queda confirmada:
   `{"tipo": "QUEDA", "bpm": 85, "horario": 123456}`
 - Assinatura do tópico `memora/iot/<id>/comando` para desligar o alarme quando o app responder `{"comando": "CESSAR_ALARME"}`.
+

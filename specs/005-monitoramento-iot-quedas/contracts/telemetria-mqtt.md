@@ -82,3 +82,4 @@ Onde `{dispositivoId}` é uma identificação de sessão única (ex.: `demonstra
 1. Desliga o alarme sonoro no buzzer (`noTone(BUZZER_PIN)`).
 2. Apaga o LED vermelho e retorna ao LED verde (modo normal).
 3. Reseta o estado interno para `INERTE`.
+

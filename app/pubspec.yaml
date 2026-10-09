@@ -70,6 +70,10 @@ dependencies:
   # transporte.
   dio: ^5.7.0
 
+  # Cliente MQTT para recepção de telemetria e alertas em tempo real do
+  # Dispositivo de Cuidado (ESP32 / Wokwi) (FR-013).
+  mqtt_client: ^10.3.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

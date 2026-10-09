@@ -96,3 +96,4 @@ Parâmetros de conexão e comportamento do dispositivo no aplicativo.
 
 - `ContatoEmergencia` é persistido no armazenamento local seguro do aplicativo (`shared_preferences` / `flutter_secure_storage`).
 - Histórico de `EventoQueda` é armazenado localmente em arquivo de log de segurança/auditoria para conferência da família.
+

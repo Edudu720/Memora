@@ -73,3 +73,4 @@ Ter o emulador Android ou celular conectado (Galaxy S20 FE do Henrique ou Pixel 
 3. No app Memora, selecionar o modo MQTT e conectar no tópico de demonstração.
 4. **Espera-se**:
    - Telemetria do Wokwi refletida em tempo real no app Memora.
+
