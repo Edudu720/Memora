@@ -23,7 +23,7 @@ class SessoApi {
   const SessoApi(this._dio);
 
   /// Entrar com identificador e senha
-  /// Aceita **qualquer canal verificado** da pessoa — e-mail ou telefone (FR-051).  O erro é sempre genérico: não distingue identificador inexistente de senha incorreta (FR-013). O servidor executa o hash mesmo quando a conta não existe, para que o tempo de resposta não denuncie a existência (R3). 
+  /// Aceita **qualquer canal cadastrado** da pessoa — e-mail ou telefone (FR-051), verificado ou não. Quem autentica é a senha; o canal apenas localiza a conta. A verificação de posse é exigida na **recuperação de acesso** (FR-052), que é onde ela impede o golpe da FR-062.  Não há campo &#x60;tipo&#x60;: a pessoa digita o que lembrar, e o servidor distingue e-mail de telefone. Pedir o tipo devolveria a ela a pergunta \&quot;com qual dos dois você se cadastrou?\&quot;, que é justamente o que a FR-051 evita.  O erro é sempre genérico: não distingue identificador inexistente de senha incorreta (FR-013). O servidor executa o hash mesmo quando a conta não existe, para que o tempo de resposta não denuncie a existência (R3). 
   ///
   /// Parameters:
   /// * [entrarRequisicao] 

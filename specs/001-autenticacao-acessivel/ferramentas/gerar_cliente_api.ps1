@@ -63,6 +63,46 @@ if (-not (Test-Path $Jar)) {
 Write-Output "Contrato : $Contrato"
 Write-Output "Destino  : $Destino"
 
+# --- Limpeza do que a geração anterior escreveu ----------------------------
+#
+# O gerador só acrescenta e sobrescreve: nunca apaga. Quando um esquema sai do
+# contrato, o modelo dele (e a documentação e o teste) continua no pacote como
+# órfão, e o `.g.dart` do `json_serializable` também. Pior: o órfão ainda
+# compila, então ninguém percebe que o pacote descreve uma API que não existe
+# mais.
+#
+# A R8 proíbe editar o cliente à mão — e é justamente por isso que a limpeza mora
+# aqui: faz parte da geração, roda igual para todo mundo. O gerador registra o que
+# escreveu em `.openapi-generator\FILES`; apagamos exatamente essa lista, e mais
+# nada. O `.openapi-generator-ignore` e qualquer arquivo fora da lista ficam.
+# Os `.g.dart` não constam da lista (quem os escreve é o `build_runner`), então
+# saem junto com o `.dart` de `lib\src\model\` a que pertencem.
+
+$ListaDoGerador = Join-Path $Destino '.openapi-generator\FILES'
+if (Test-Path $ListaDoGerador) {
+    $DestinoCompleto = [System.IO.Path]::GetFullPath($Destino).TrimEnd('\') + '\'
+    $removidos = 0
+    foreach ($linha in (Get-Content $ListaDoGerador)) {
+        $relativo = $linha.Trim()
+        # Linha vazia, caminho absoluto ou com `..` não é nosso para apagar.
+        if (-not $relativo -or [System.IO.Path]::IsPathRooted($relativo) -or $relativo -match '\.\.') {
+            continue
+        }
+        $alvos = @($relativo)
+        if ($relativo -match '^lib/src/model/.+\.dart$') {
+            $alvos += ($relativo -replace '\.dart$', '.g.dart')
+        }
+        foreach ($alvo in $alvos) {
+            $caminho = [System.IO.Path]::GetFullPath((Join-Path $Destino $alvo))
+            if ($caminho.StartsWith($DestinoCompleto) -and (Test-Path -LiteralPath $caminho -PathType Leaf)) {
+                Remove-Item -LiteralPath $caminho -Force
+                $removidos++
+            }
+        }
+    }
+    Write-Output "Geração anterior limpa: $removidos arquivo(s) removido(s)."
+}
+
 # Espaço no caminho do repositório derrubava a geração, e não há forma de passar
 # o caminho absoluto que agrade os dois estágios do gerador: ele valida a entrada
 # como URI (onde espaço é ilegal) e depois a abre como caminho de arquivo (onde
@@ -146,7 +186,41 @@ if ($Opcoes -notmatch '(?m)^\s*unused_import:') {
     Write-Output 'Aviso unused_import silenciado no analysis_options.yaml gerado.'
 }
 
+# --- Dependências e código derivado (build_runner) --------------------------
+#
+# Os modelos gerados usam `json_serializable`: cada `x.dart` declara
+# `part 'x.g.dart'`, e o `.g.dart` só existe depois do `build_runner`. O gerador
+# não o roda, e os `.g.dart` são versionados junto com o pacote. Sem este passo,
+# um modelo novo no contrato deixaria o pacote sem compilar, e um modelo que saiu
+# deixaria o `.g.dart` dele para trás — a limpeza lá em cima já o apagou.
+#
+# Faz parte da geração pelo mesmo motivo do piso do SDK: a R8 proíbe editar o
+# gerado à mão, e é aqui que o resultado fica reproduzível. O `dart` vem junto
+# com o Flutter; se não estiver no PATH (acontece nas duas máquinas do projeto),
+# cai no caminho padrão do Henrique.
+
+$Dart = $null
+$comandoDart = Get-Command dart -ErrorAction SilentlyContinue
+if ($null -ne $comandoDart) {
+    $Dart = $comandoDart.Source
+} elseif (Test-Path 'C:\flutter\bin\dart.bat') {
+    $Dart = 'C:\flutter\bin\dart.bat'
+} else {
+    throw 'Dart não encontrado. Ponha o Flutter no PATH (o dart vem junto com ele).'
+}
+
+Push-Location $Destino
+try {
+    & $Dart pub get
+    if ($LASTEXITCODE -ne 0) { throw "dart pub get falhou com código $LASTEXITCODE" }
+
+    & $Dart run build_runner build --delete-conflicting-outputs
+    if ($LASTEXITCODE -ne 0) { throw "build_runner falhou com código $LASTEXITCODE" }
+} finally {
+    Pop-Location
+}
+
 Write-Output ''
-Write-Output 'Cliente gerado. Próximos passos (T027):'
-Write-Output '  cd app; flutter pub get'
-Write-Output '  cd app/pacotes/memora_api; dart pub get; dart analyze; dart test'
+Write-Output 'Cliente gerado, com dart pub get e build_runner já rodados. Próximos passos:'
+Write-Output '  cd app/pacotes/memora_api; dart analyze; dart test'
+Write-Output '  cd app; flutter pub get; flutter analyze; flutter test'
