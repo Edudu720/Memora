@@ -64,6 +64,15 @@ Com o Henrique, depois da ADR-002 (Gemini, nível gratuito).
 - Q: Onde o áudio é processado? → A: **No próprio aparelho.** O áudio nunca sai do celular nem é guardado; só o texto transcrito segue o caminho da conversa escrita. Registrado em Assumptions para a 005 nascer com isso.
 - Q: Os erros da conversa (limite diário, provedor fora do ar ou sem cota, falha inesperada) entram no contrato? → A: **Sim, dentro do stream.** O evento `erro` documenta o campo `codigo` (`LIMITE_DE_CONVERSAS`, `ASSISTENTE_INDISPONIVEL`, `ERRO_INESPERADO`), e o contrato diz que esses erros viajam com HTTP 200, nunca como 429/503. O H10 é corrigido. Na spec, a FR-057 separa provedor indisponível de limite diário.
 
+### Session 2026-10-09
+
+Com o Henrique, para destravar a T036 (o aplicativo falar com a assistente real).
+
+- Q: Onde fica o contrato que gera o cliente do aplicativo? → A: **Fundido no contrato da 001.** Os caminhos da assistente entram no `openapi.yaml` da 001, que passa a ser o único contrato do aplicativo e gera um pacote só; o arquivo desta feature vira ponteiro para ele (Dependências).
+- Q: O cliente gerado não lê eventos transmitidos aos poucos, e o aplicativo hoje espera a resposta inteira. Como a conversa é consumida? → A: **A resposta aparece na tela à medida que chega** (FR-052). Catálogo, registro e ação vêm do cliente gerado; só a conversa é lida à mão, fora do pacote gerado e com teste contra o formato do contrato (Dependências).
+- Q: O token de acesso vale 15 minutos. O que acontece quando ele vence no meio da conversa? → A: **Renovar em silêncio e reenviar o pedido uma vez**, na conversa, nos catálogos, no registro e na ação. Só se a renovação falhar a pessoa volta ao login. Sessão encerrada por falta de uso continua sendo só a inatividade da FR-017 (Edge Cases).
+- Q: Um aplicativo que fala com o servidor de verdade fala também com a assistente de verdade? → A: **Sim, pela mesma escolha.** Não existe aplicativo com conta real e assistente simulada. Quem decide entre o simulado e o provedor de IA é só o servidor (Dependências).
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -236,6 +245,12 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
   está mais lá. A pessoa precisa de uma saída que não a faça pensar que errou.
 - **A pessoa acha que está falando com uma pessoa de verdade.** Precisa ficar
   claro, sem repetição cansativa, que a Memora é um programa.
+- **O acesso vence no meio da conversa.** A credencial curta da conta vence
+  enquanto a pessoa ainda está usando. O aplicativo MUST renová-la sem a pessoa
+  perceber e refazer o pedido **uma vez**. Isso vale para a conversa, os
+  catálogos, o registro e a ação. Só quando a renovação também falha a pessoa
+  volta à entrada. Quem encerra a sessão por falta de uso é a inatividade da
+  feature 001 (FR-017), nunca o vencimento da credencial (2026-10-09).
 
 ---
 
@@ -275,7 +290,9 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **FR-052**: Se a resposta não começar a aparecer em **30 segundos**, a espera
   MUST ser encerrada: a Memora MUST dizer, em linguagem comum, que o problema é
   a conexão e não a pessoa, e MUST oferecer tentar de novo sem que a pessoa
-  precise reescrever o pedido.
+  precise reescrever o pedido. A resposta MUST aparecer na tela **à medida que
+  chega**, e não só quando termina: é isso que deixa ver as primeiras palavras
+  da SC-007 em até 5 segundos.
 - **FR-053**: Cada conta MUST ter um limite de **20 conversas por dia**. O
   número MUST ser ajustável na configuração do servidor, sem nova versão do
   aplicativo, e MUST ser revisto depois do teste com as 5 pessoas de 65+. Ao
@@ -631,3 +648,16 @@ cenário V8 da feature 001 já garante que nada sobra depois de sair da conta.
 - **Feature 002 — Design System**: todos os componentes visuais vêm de lá.
 - A tela provisória `_TelaDentro`, hoje em `fluxo_autenticacao.dart`, é
   substituída pelo Hub desta feature.
+- **O contrato é um só, o da 001** (2026-10-09). Os endpoints da assistente
+  vivem no `openapi.yaml` da feature 001, e o aplicativo usa um único cliente
+  gerado a partir dele. O `contracts/openapi.yaml` desta pasta deixa de ser
+  fonte da verdade: vira ponteiro, para não haver dois contratos divergindo.
+- **A conversa é o único trecho do cliente escrito à mão** (2026-10-09). O
+  gerador não lê eventos transmitidos aos poucos, e a FR-052 exige mostrá-los
+  assim. Catálogo, registro e ação vêm do cliente gerado; a leitura da conversa
+  fica fora do pacote gerado, aproveita o token e o endereço dele e tem teste
+  que confere cada evento contra o formato do contrato.
+- **Conta e assistente usam o mesmo servidor** (2026-10-09). Se o aplicativo
+  usa o servidor de verdade para a conta, usa para a assistente também. A
+  escolha entre a assistente simulada e o provedor de IA é feita **só no
+  servidor**.
