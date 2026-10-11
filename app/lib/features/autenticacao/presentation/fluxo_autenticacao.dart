@@ -437,7 +437,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             repositorioContato: RepositorioContatoEmergenciaLocal(),
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
-          nomePessoaIdosa: _sessao?.nome ?? 'Usuário',
+          nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
         ),
       ),
     );
