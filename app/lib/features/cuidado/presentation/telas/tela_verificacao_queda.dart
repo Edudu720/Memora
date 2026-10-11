@@ -90,31 +90,10 @@ class TelaVerificacaoQueda extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
-                              SizedBox(
-                                height: MemoraDimensoes.alvoDecisao,
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: cores.sucesso,
-                                    foregroundColor: cores.sobrePrimaria,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                                    ),
-                                    elevation: MemoraElevacao.cartao,
-                                  ),
-                                  onPressed: controlador.responderEstouBem,
-                                  icon: const Icon(
-                                    Icons.check_circle_outline_rounded,
-                                    size: MemoraDimensoes.iconeDestaque,
-                                  ),
-                                  label: Text(
-                                    'Estou bem',
-                                    style: MemoraTipografia.rotuloBotao.copyWith(
-                                      color: cores.sobrePrimaria,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textScaler: escalaTextoLimitada(context),
-                                  ),
-                                ),
+                              BotaoPrimario(
+                                rotulo: 'Estou bem',
+                                icone: Icons.check_circle_outline_rounded,
+                                aoTocar: controlador.responderEstouBem,
                               ),
                               const SizedBox(height: MemoraEspacamento.md),
                               BotaoPerigo(

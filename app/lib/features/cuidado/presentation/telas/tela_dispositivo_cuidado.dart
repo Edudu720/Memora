@@ -158,22 +158,24 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                     ),
                                   ),
                                   const SizedBox(width: MemoraEspacamento.sm),
-                                  Text(
-                                    _textoDoStatus(statusConexao),
-                                    style: MemoraTipografia.corpoForte.copyWith(
-                                      color: cores.texto,
+                                  Expanded(
+                                    child: Text(
+                                      _textoDoStatus(statusConexao),
+                                      style: MemoraTipografia.corpoForte.copyWith(
+                                        color: cores.texto,
+                                      ),
+                                      textScaler: escalaTextoLimitada(context),
                                     ),
-                                    textScaler: escalaTextoLimitada(context),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    modoMqtt ? 'Wokwi / MQTT' : 'Simulador',
-                                    style: MemoraTipografia.apoio.copyWith(
-                                      color: cores.textoSuave,
-                                    ),
-                                    textScaler: escalaTextoLimitada(context),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: MemoraEspacamento.xs),
+                              Text(
+                                modoMqtt ? 'Wokwi / MQTT' : 'Simulador',
+                                style: MemoraTipografia.apoio.copyWith(
+                                  color: cores.textoSuave,
+                                ),
+                                textScaler: escalaTextoLimitada(context),
                               ),
                               const SizedBox(height: MemoraEspacamento.sm),
                               Text(
@@ -238,12 +240,14 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                     size: MemoraDimensoes.iconePadrao,
                                   ),
                                   const SizedBox(width: MemoraEspacamento.sm),
-                                  Text(
-                                    'Contato de Emergência',
-                                    style: MemoraTipografia.corpoForte.copyWith(
-                                      color: cores.texto,
+                                  Expanded(
+                                    child: Text(
+                                      'Contato de Emergência',
+                                      style: MemoraTipografia.corpoForte.copyWith(
+                                        color: cores.texto,
+                                      ),
+                                      textScaler: escalaTextoLimitada(context),
                                     ),
-                                    textScaler: escalaTextoLimitada(context),
                                   ),
                                 ],
                               ),
@@ -314,14 +318,16 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                       size: MemoraDimensoes.iconePadrao,
                                     ),
                                     const SizedBox(width: MemoraEspacamento.sm),
-                                    Text(
-                                      'Integração Wokwi & Testes',
-                                      style: MemoraTipografia.corpoForte.copyWith(
-                                        color: cores.texto,
+                                    Expanded(
+                                      child: Text(
+                                        'Integração Wokwi & Testes',
+                                        style: MemoraTipografia.corpoForte.copyWith(
+                                          color: cores.texto,
+                                        ),
+                                        textScaler: escalaTextoLimitada(context),
                                       ),
-                                      textScaler: escalaTextoLimitada(context),
                                     ),
-                                    const Spacer(),
+                                    const SizedBox(width: MemoraEspacamento.sm),
                                     Icon(
                                       _painelWokwiAberto
                                           ? Icons.expand_less_rounded

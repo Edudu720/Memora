@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
 import 'package:memora/features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
 import 'package:memora/features/cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
@@ -47,7 +48,7 @@ void main() {
     });
 
     testWidgets('zero estouro de layout na matriz completa de aparelhos', (WidgetTester tester) async {
-      for (final Combinacao c in matrizCompleta()) {
+      for (final Combinacao c in matriz()) {
         final RepositorioContatoEmergenciaLocal repo = RepositorioContatoEmergenciaLocal();
         final ProvedorDeTelemetriaSimulado provedor = ProvedorDeTelemetriaSimulado();
         final ControladorDispositivoCuidado ctrl = ControladorDispositivoCuidado(

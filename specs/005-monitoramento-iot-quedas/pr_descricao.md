@@ -168,3 +168,4 @@ Código C++ completo desenvolvido para execução no simulador Wokwi:
 - [x] Suporte ao simulador Wokwi via broker público HiveMQ.
 - [x] Suporte a números nacionais e com prefixo `+55`.
 - [x] Branches publicadas no GitHub: `spec/005-monitoramento-iot-quedas` e `feature/005-fase1-2-fundacao-iot`.
+

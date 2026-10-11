@@ -31,15 +31,16 @@ class CronometroRegressivoQueda extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: MemoraEspacamento.sm,
             children: <Widget>[
               Icon(
                 Icons.timer_outlined,
                 color: cores.perigo,
                 size: MemoraDimensoes.iconeDestaque,
               ),
-              const SizedBox(width: MemoraEspacamento.sm),
               Text(
                 '$segundosRestantes segundos',
                 style: MemoraTipografia.tituloSecao.copyWith(

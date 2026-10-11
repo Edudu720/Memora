@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
 import 'package:memora/features/cuidado/domain/casos_de_uso/disparar_socorro_emergencia.dart';
 import 'package:memora/features/cuidado/domain/entidades/contato_emergencia.dart';
@@ -90,7 +91,7 @@ void main() {
     });
 
     testWidgets('zero estouro de layout na matriz de aparelhos (320x568 até 390x844)', (WidgetTester tester) async {
-      for (final Combinacao c in matrizCompleta()) {
+      for (final Combinacao c in matriz()) {
         final ProvedorDeTelemetriaSimulado provedor = ProvedorDeTelemetriaSimulado();
         final ControladorVerificacaoQueda ctrl = ControladorVerificacaoQueda(
           evento: EventoQueda.novo(bpm: 88, aceleracao: 2.7),
