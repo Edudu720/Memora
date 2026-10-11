@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import '../../domain/entidades/enums_cuidado.dart';
@@ -49,10 +50,25 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
     if (_statusAtual == StatusConexaoIot.conectado) return;
 
     _statusAtual = StatusConexaoIot.conectando;
-    _controladorStatus.add(_statusAtual);
+    if (!_controladorStatus.isClosed) {
+      _controladorStatus.add(_statusAtual);
+    }
+
+    String hostFinal = broker;
+    try {
+      final List<InternetAddress> addresses = await InternetAddress.lookup(
+        broker,
+        type: InternetAddressType.IPv4,
+      );
+      if (addresses.isNotEmpty) {
+        hostFinal = addresses.first.address;
+      }
+    } catch (_) {
+      // Mantém o broker original caso a resolução falhe
+    }
 
     final String clientId = 'MemoraApp_${DateTime.now().millisecondsSinceEpoch}';
-    final MqttServerClient cliente = MqttServerClient(broker, clientId)
+    final MqttServerClient cliente = MqttServerClient(hostFinal, clientId)
       ..port = porta
       ..keepAlivePeriod = 30
       ..logging(on: false)
@@ -80,7 +96,9 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
 
   void _aoConectar() {
     _statusAtual = StatusConexaoIot.conectado;
-    _controladorStatus.add(_statusAtual);
+    if (!_controladorStatus.isClosed) {
+      _controladorStatus.add(_statusAtual);
+    }
 
     _cliente?.subscribe(_topicoTelemetria, MqttQos.atMostOnce);
     _cliente?.subscribe(_topicoAlerta, MqttQos.atLeastOnce);
@@ -91,7 +109,9 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
 
   void _aoDesconectar() {
     _statusAtual = StatusConexaoIot.desconectado;
-    _controladorStatus.add(_statusAtual);
+    if (!_controladorStatus.isClosed) {
+      _controladorStatus.add(_statusAtual);
+    }
   }
 
   void _processarMensagensMqtt(List<MqttReceivedMessage<MqttMessage>> mensagens) {
@@ -146,10 +166,12 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
 
   @override
   void descartar() {
+    _cliente?.onDisconnected = null;
+    _cliente?.onConnected = null;
     desconectar();
-    _controladorTelemetria.close();
-    _controladorQueda.close();
-    _controladorStatus.close();
+    if (!_controladorTelemetria.isClosed) _controladorTelemetria.close();
+    if (!_controladorQueda.isClosed) _controladorQueda.close();
+    if (!_controladorStatus.isClosed) _controladorStatus.close();
   }
 }
 
