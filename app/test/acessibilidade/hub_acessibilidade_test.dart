@@ -19,10 +19,11 @@ import '../suporte/aparelhos.dart';
 /// com a Atkinson **carregada**, e uma fonte carregada vale para o arquivo
 /// inteiro — misturá-la aqui tiraria a margem da matriz.
 void main() {
-  /// As quatro portas que o Hub do aplicativo tem hoje, com o texto real.
+  /// As cinco portas que o Hub do aplicativo tem hoje, com o texto real —
+  /// a quinta, a Ajuda, entrou na T090.
   List<PortaDoHub> portasDeExemplo({
     VoidCallback? aoAbrirAPrincipal,
-    int quantas = 4,
+    int quantas = 5,
   }) => <PortaDoHub>[
     PortaDoHub(
       rotulo: 'Conversar com a Memora',
@@ -67,7 +68,7 @@ void main() {
     WidgetTester t,
     Combinacao c, {
     VoidCallback? aoAbrirAPrincipal,
-    int quantas = 4,
+    int quantas = 5,
   }) async {
     vestir(t, c.aparelho);
     await t.pumpWidget(
@@ -126,7 +127,7 @@ void main() {
     // rodava num 390x844, e foi assim que o overflow da conversa passou. Os
     // três temas entraram com a feature 004.
     for (final Combinacao c in matriz()) {
-      testWidgets('o Hub com 4 portas não estoura, e a principal é '
+      testWidgets('o Hub com 5 portas não estoura, e a principal é '
           'alcançável e responde em ${nomeDa(c)}', (WidgetTester t) async {
         int abriu = 0;
         await montar(t, c, aoAbrirAPrincipal: () => abriu++);
@@ -151,14 +152,6 @@ void main() {
       });
     }
 
-    for (final Combinacao c in matriz()) {
-      testWidgets('com a quinta porta (a Ajuda) o Hub continua sem estourar '
-          'em ${nomeDa(c)}', (WidgetTester t) async {
-        await montar(t, c, quantas: 5);
-        expect(t.takeException(), isNull, reason: nomeDa(c));
-      });
-    }
-
     testWidgets('em 200% a lista rola, e a última porta é alcançável', (
       WidgetTester t,
     ) async {
@@ -171,7 +164,7 @@ void main() {
 
       await exigirAlcancavel(
         t,
-        find.byKey(TelaHub.chaveDaPorta('O que eu fiz por você')),
+        find.byKey(TelaHub.chaveDaPorta('Preciso de ajuda')),
         aparelho: c.aparelho,
         contexto: nomeDa(c),
       );
