@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/componentes/botoes/botao_base.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
+import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/casca/raizes_provisorias.dart';
 import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 import 'package:memora/features/perfil/domain/data_de_nascimento.dart';
@@ -495,6 +496,55 @@ void main() {
 
       expect(find.byKey(SecaoIdade.chaveIdade), findsOneWidget);
       expect(find.byType(PerfilProvisorio), findsOneWidget);
+    });
+
+    testWidgets('uma conta não vê a idade de outra no mesmo aparelho', (
+      t,
+    ) async {
+      // As mesmas instâncias entre as entradas: é o mesmo aparelho.
+      final DataDeNascimentoEmMemoria datas = DataDeNascimentoEmMemoria();
+      final FluxoDentroDaConta fluxo = FluxoDentroDaConta();
+      await fluxo.montar(t, datas: datas);
+      fluxo.repositorio.registrarConta(
+        identificador: 'bia@email.com',
+        senha: 'outra frase que so a bia sabe',
+        nome: 'Bia',
+      );
+
+      // A conta A informa a data.
+      await FluxoDentroDaConta.irPara(t, DestinoDaCasca.perfil);
+      await tocar(t, find.byKey(SecaoIdade.chaveInformar));
+      await preencherData(t, '15', '3', '1952');
+      await tocar(t, find.byKey(TelaDataDeNascimento.chaveGuardar));
+      expect(find.byKey(SecaoIdade.chaveIdade), findsOneWidget);
+
+      // A conta B entra no mesmo aparelho: vê o convite, nunca a idade de A.
+      await FluxoDentroDaConta.sairConfirmando(t);
+      expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
+      await FluxoDentroDaConta.entrarComConta(
+        t,
+        'bia@email.com',
+        'outra frase que so a bia sabe',
+      );
+      await FluxoDentroDaConta.irPara(t, DestinoDaCasca.perfil);
+      expect(find.byKey(SecaoIdade.chaveConvite), findsOneWidget);
+      expect(
+        find.byKey(SecaoIdade.chaveIdade),
+        findsNothing,
+        reason: 'a idade de Ana não pode aparecer na conta da Bia',
+      );
+
+      // A volta de A: a saída comum manteve a data (FR-042c).
+      await FluxoDentroDaConta.sairConfirmando(t);
+      await FluxoDentroDaConta.entrarComConta(
+        t,
+        'ana@email.com',
+        'uma frase que so eu lembro',
+      );
+      await FluxoDentroDaConta.irPara(t, DestinoDaCasca.perfil);
+      expect(find.byKey(SecaoIdade.chaveIdade), findsOneWidget);
+      expect(find.text('74 anos'), findsOneWidget);
+      expect(find.byKey(SecaoIdade.chaveConvite), findsNothing);
     });
   });
 }
