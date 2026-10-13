@@ -7,6 +7,9 @@ import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
+import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
+import 'package:memora/features/configuracoes/presentation/tela_privacidade.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
@@ -149,25 +152,79 @@ void main() {
     (
       parte: 'ajustes',
       toques: <Finder>[naBarra(DestinoDaCasca.ajustes)],
-      chegada: find.byType(AjustesProvisorios),
+      chegada: find.byType(TelaConfiguracoes),
       via: DestinoDaCasca.ajustes,
     ),
     (
-      parte: 'como eu vejo o Memora (aparência)',
+      parte: 'como o Memora fica (aparência)',
       toques: <Finder>[
         naBarra(DestinoDaCasca.ajustes),
-        find.byKey(AjustesProvisorios.chaveAparencia),
+        find.byKey(TelaConfiguracoes.chaveAparencia),
       ],
-      chegada: find.byType(TelaAparencia),
+      chegada: find.byWidgetPredicate(
+        (Widget w) =>
+            w is TelaAparencia && w.grupo == GrupoDeAjusteVisual.aparencia,
+      ),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'enxergar e usar melhor (acessibilidade)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chaveAcessibilidade),
+      ],
+      chegada: find.byWidgetPredicate(
+        (Widget w) =>
+            w is TelaAparencia && w.grupo == GrupoDeAjusteVisual.acessibilidade,
+      ),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'o que fica guardado (privacidade)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chavePrivacidade),
+      ],
+      chegada: find.byType(TelaPrivacidade),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'apagar a conversa (a pergunta)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chavePrivacidade),
+        find.byKey(TelaPrivacidade.chaveApagar),
+      ],
+      chegada: find.byKey(TelaPrivacidade.chaveConfirmacao),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'minha conta',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chaveConta),
+      ],
+      chegada: find.byType(TelaConta),
       via: DestinoDaCasca.ajustes,
     ),
     (
       parte: 'a saída da conta',
       toques: <Finder>[
         naBarra(DestinoDaCasca.ajustes),
-        find.byKey(AjustesProvisorios.chaveSair),
+        find.byKey(TelaConfiguracoes.chaveConta),
+        find.byKey(TelaConta.chaveSair),
       ],
-      chegada: find.byKey(AjustesProvisorios.chaveConfirmacao),
+      chegada: find.byKey(TelaConta.chaveConfirmacao),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'sair e esquecer este aparelho (a pergunta)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chaveConta),
+        find.byKey(TelaConta.chaveEsquecer),
+      ],
+      chegada: find.byKey(TelaConta.chaveConfirmacaoEsquecer),
       via: DestinoDaCasca.ajustes,
     ),
     (
@@ -182,7 +239,7 @@ void main() {
         parte: 'a galeria (só em desenvolvimento)',
         toques: <Finder>[
           naBarra(DestinoDaCasca.ajustes),
-          find.byKey(AjustesProvisorios.chaveGaleria),
+          find.byKey(TelaConfiguracoes.chaveGaleria),
         ],
         chegada: find.byType(GaleriaMemora),
         via: DestinoDaCasca.ajustes,
