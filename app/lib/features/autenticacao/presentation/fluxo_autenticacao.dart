@@ -72,11 +72,10 @@ class FluxoAutenticacao extends StatefulWidget {
 
   /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
   ///
-  /// Obrigatório: uma guarda criada em silêncio aqui seria uma que nenhuma
-  /// limpeza conhece, e a data ficaria no aparelho depois do `esquecerTudo`.
-  /// Quem monta o fluxo entrega a mesma instância que a `LimpezaDeSessao`
-  /// esquece (a `Composicao` faz isso).
-  final ArmazenamentoDaDataDeNascimento dataDeNascimento;
+  /// Opcional: sem ele o fluxo usa uma guarda em memória, que existe para os
+  /// testes. Em produção a `Composicao` exige a guarda real e o `main.dart` a
+  /// repassa aqui.
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
@@ -105,7 +104,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
     super.key,
     this.limpeza,
-    required this.dataDeNascimento,
+    this.dataDeNascimento,
   });
 
   @override
@@ -147,7 +146,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   _Etapa _etapa = _Etapa.boasVindas;
   PessoaAutenticada? _pessoa;
 
-  late final ArmazenamentoDaDataDeNascimento _datas = widget.dataDeNascimento;
+  late final ArmazenamentoDaDataDeNascimento _datas =
+      widget.dataDeNascimento ?? DataDeNascimentoEmMemoria();
 
   /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
   /// abre vai para a pilha do destino à vista, por [_empilhar].

@@ -10,7 +10,6 @@ import 'package:memora/l10n/textos_autenticacao.dart';
 
 import 'dubles_autenticacao.dart';
 import 'fluxo_dentro_da_conta.dart';
-import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// Avança alguns quadros sem esperar quietude.
 ///
@@ -50,7 +49,6 @@ Future<void> _montarFluxo(
     MaterialApp(
       theme: TemasMemora.claro,
       home: FluxoAutenticacao(
-        dataDeNascimento: DataDeNascimentoEmMemoria(),
         repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
         ultimoAcesso: ultimoAcesso,
         inatividade: inatividade,
@@ -77,9 +75,8 @@ Future<void> _cadastrar(WidgetTester t) async {
 
 void main() {
   group('Do cadastro ao login — US1 e US2 juntas', () {
-    testWidgets('cadastrar já conta como acesso, e o login vem preenchido', (
-      WidgetTester t,
-    ) async {
+    testWidgets('cadastrar já conta como acesso, e o login vem preenchido',
+        (WidgetTester t) async {
       final UltimoAcessoEmMemoria memoria = UltimoAcessoEmMemoria();
       await _montarFluxo(t, ultimoAcesso: memoria);
 
@@ -87,16 +84,14 @@ void main() {
       expect(
         find.byKey(TelaInicio.chaveSaudacao),
         findsOneWidget,
-        reason:
-            'A FR-009 diz que a pessoa entra direto ao cadastrar, sem '
+        reason: 'A FR-009 diz que a pessoa entra direto ao cadastrar, sem '
             'passar pelo login.',
       );
 
       expect(
         memoria.valor,
         'ana@email.com',
-        reason:
-            'Cadastrar É um acesso bem-sucedido. Não lembrar o canal aqui '
+        reason: 'Cadastrar É um acesso bem-sucedido. Não lembrar o canal aqui '
             'obrigaria a pessoa a digitar o e-mail inteiro no primeiro login, '
             'que é a barreira que a FR-012 existe para remover.',
       );
@@ -109,38 +104,33 @@ void main() {
       expect(
         find.text(TextosAutenticacao.identificadorLembrado),
         findsOneWidget,
-        reason:
-            'Sair e voltar precisa deixar só a senha faltando — é o '
+        reason: 'Sair e voltar precisa deixar só a senha faltando — é o '
             'cenário 2 da US2.',
       );
     });
 
-    testWidgets(
-      'sair encerra a sessão, e a renovação automática não a ressuscita',
-      (WidgetTester t) async {
-        await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
+    testWidgets('sair encerra a sessão, e a renovação automática não a ressuscita',
+        (WidgetTester t) async {
+      await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
 
-        await _cadastrar(t);
-        await FluxoDentroDaConta.tocarEmSair(t);
-        await _tocarNoTexto(t, TextosAutenticacao.botaoConfirmarSaida);
-        await _avancar(t, 6);
+      await _cadastrar(t);
+      await FluxoDentroDaConta.tocarEmSair(t);
+      await _tocarNoTexto(t, TextosAutenticacao.botaoConfirmarSaida);
+      await _avancar(t, 6);
 
-        expect(
-          find.byKey(TelaLogin.chaveEntrar),
-          findsOneWidget,
-          reason:
-              'Sem apagar a credencial local, a renovação automática do '
-              'ControladorLogin colocaria a pessoa de volta dentro no mesmo '
-              'instante — e o botão de sair seria enfeite.',
-        );
-      },
-    );
+      expect(
+        find.byKey(TelaLogin.chaveEntrar),
+        findsOneWidget,
+        reason: 'Sem apagar a credencial local, a renovação automática do '
+            'ControladorLogin colocaria a pessoa de volta dentro no mesmo '
+            'instante — e o botão de sair seria enfeite.',
+      );
+    });
   });
 
   group('Expiração por inatividade — FR-017', () {
-    testWidgets('avisa antes e depois devolve a pessoa ao login', (
-      WidgetTester t,
-    ) async {
+    testWidgets('avisa antes e depois devolve a pessoa ao login',
+        (WidgetTester t) async {
       await _montarFluxo(
         t,
         ultimoAcesso: UltimoAcessoEmMemoria(),
@@ -168,16 +158,14 @@ void main() {
       expect(
         find.text(TextosAutenticacao.tituloAvisoInatividade),
         findsNothing,
-        reason:
-            'Deixar o aviso aberto por cima do login ofereceria um "pode '
+        reason: 'Deixar o aviso aberto por cima do login ofereceria um "pode '
             'continuar" que já não continua nada.',
       );
       expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
     });
 
-    testWidgets('responder ao aviso mantém a pessoa dentro', (
-      WidgetTester t,
-    ) async {
+    testWidgets('responder ao aviso mantém a pessoa dentro',
+        (WidgetTester t) async {
       await _montarFluxo(
         t,
         ultimoAcesso: UltimoAcessoEmMemoria(),
@@ -188,10 +176,8 @@ void main() {
       await _cadastrar(t);
       await t.pump(const Duration(seconds: 2));
       await _avancar(t);
-      expect(
-        find.text(TextosAutenticacao.tituloAvisoInatividade),
-        findsOneWidget,
-      );
+      expect(find.text(TextosAutenticacao.tituloAvisoInatividade),
+          findsOneWidget);
 
       await _tocarNoTexto(t, TextosAutenticacao.botaoContinuar);
       await _avancar(t, 6);
@@ -203,8 +189,7 @@ void main() {
       expect(
         find.byKey(TelaInicio.chaveSaudacao),
         findsOneWidget,
-        reason:
-            'Expirar depois de a pessoa dizer que está ali torna o botão '
+        reason: 'Expirar depois de a pessoa dizer que está ali torna o botão '
             'do aviso uma mentira.',
       );
     });

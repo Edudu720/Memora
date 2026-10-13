@@ -99,7 +99,7 @@ class FluxoDentroDaConta {
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
           conversaLocal: _ConversaEmMemoria.new,
           ultimoAcesso: ultimoAcesso,
-          dataDeNascimento: datas ?? DataDeNascimentoEmMemoria(),
+          dataDeNascimento: datas,
           inatividade: inatividade,
           avisoDeInatividade: aviso,
           limpeza: LimpezaDeSessao(
