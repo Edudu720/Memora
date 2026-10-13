@@ -339,7 +339,7 @@ senha do gov.br e onde nunca se digita (US5).
 - [X] T086 [US6] Criar `AssuntoDeAjuda` em `app/lib/features/ajuda/domain/assunto_de_ajuda.dart` e o conteúdo em `textos_ajuda.dart`, incluindo "Como baixar um aplicativo" com a conferência do desenvolvedor na loja oficial (FR-036)
 - [ ] T087 [US6] Criar `TelaAjuda` e `TelaAssunto` em `app/lib/features/ajuda/presentation/`
 - [ ] T088 [US6] Criar a ajuda guiada da conversa (Figuras 15-19) em `app/lib/features/ajuda/presentation/ajuda_guiada_da_conversa.dart`, com `BalaoDeFala` e saída direta para a conversa real (FR-034)
-- [ ] T089 [US6] Acrescentar `urlDownload` a `app/lib/services/ambiente/ambiente.dart` (de `--dart-define=MEMORA_URL_DOWNLOAD`) e o envio por `ACTION_SEND` do `android_intent_plus` em `app/lib/features/ajuda/data/compartilhar.dart`; caso em `app/test/services/ambiente_test.dart`
+- [X] T089 [US6] Acrescentar `urlDownload` a `app/lib/services/ambiente/ambiente.dart` (de `--dart-define=MEMORA_URL_DOWNLOAD`) e o envio por `ACTION_SEND` do `android_intent_plus` em `app/lib/features/ajuda/data/compartilhar.dart`; caso em `app/test/services/ambiente_test.dart`
 - [ ] T090 [US6] Pôr a porta "Ajuda" no Hub, em `_portasConstruidas()`, usando `portaAjuda` e `descricaoAjuda` de `textos_assistente.dart`  — fecha a primeira metade da T095 da 003. Com a quinta porta, rodar de novo `app/test/acessibilidade/hub_acessibilidade_test.dart`: a FR-017 (sem rolar em 100% e 150% no 320×568) precisa continuar passando com as 5 portas
 
 ---

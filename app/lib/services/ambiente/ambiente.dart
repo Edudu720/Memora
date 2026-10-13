@@ -42,8 +42,44 @@ class Ambiente {
   /// exercitar as telas sem backend, sem provedor de IA e sem banco.
   final bool usaServidorReal;
 
+  /// O endereço oficial de download do Memora, ou nulo quando não há (T089).
+  ///
+  /// Vem de `--dart-define=MEMORA_URL_DOWNLOAD`, **no build** — nada que a
+  /// pessoa digite chega aqui, e é por isso que o "Compartilhar" da Ajuda
+  /// pode mandá-lo para fora do aplicativo (FR-035, FR-037). Hoje o aplicativo
+  /// não está publicado e não há endereço: nulo, e o assunto "Compartilhar"
+  /// não existe (R12).
+  ///
+  /// Só entra aqui um endereço que passou por [enderecoOficial]; o construtor
+  /// não o confere, porque quem constrói à mão é teste.
+  final String? urlDownload;
+
   /// Cria uma configuração de ambiente.
-  const Ambiente({required this.urlBase, required this.usaServidorReal});
+  const Ambiente({
+    required this.urlBase,
+    required this.usaServidorReal,
+    this.urlDownload,
+  });
+
+  /// Confere o endereço de download informado no build.
+  ///
+  /// Devolve o endereço limpo, ou nulo quando não serve — e nulo é "o
+  /// Compartilhar não existe", nunca "o Compartilhar manda qualquer coisa".
+  /// Serve só `https://`, com nome de servidor, **sem usuário e senha** na
+  /// frente (`https://loja.com@golpe.com` parece um e-mail da loja e leva ao
+  /// golpe), sem espaço nem quebra de linha. Endereço sem cifra levaria a
+  /// pessoa a baixar o aplicativo por um caminho que qualquer rede adultera.
+  static String? enderecoOficial(String? bruto) {
+    final String? texto = bruto?.trim();
+    if (texto == null || texto.isEmpty) return null;
+    if (texto.contains(RegExp(r'\s'))) return null;
+    final Uri? uri = Uri.tryParse(texto);
+    if (uri == null) return null;
+    if (uri.scheme != 'https') return null;
+    if (uri.host.isEmpty) return null;
+    if (uri.userInfo.isNotEmpty) return null;
+    return texto;
+  }
 
   /// Padrão de desenvolvimento: o hospedeiro do emulador Android.
   static const String urlBasePadrao = 'http://10.0.2.2:8080/v1';
@@ -65,7 +101,13 @@ class Ambiente {
     );
     const bool real = bool.fromEnvironment('MEMORA_SERVIDOR_REAL');
 
-    return Ambiente(urlBase: url, usaServidorReal: real);
+    const String download = String.fromEnvironment('MEMORA_URL_DOWNLOAD');
+
+    return Ambiente(
+      urlBase: url,
+      usaServidorReal: real,
+      urlDownload: enderecoOficial(download),
+    );
   }
 
   /// O endereço trafega cifrado?
