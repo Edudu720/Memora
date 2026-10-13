@@ -56,7 +56,7 @@ class Composicao {
   /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
   ///
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
-  final ArmazenamentoDaDataDeNascimento dataDeNascimento;
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
   /// Quais contas já viram a apresentação inicial (FR-013, T048).
   ///
@@ -74,7 +74,7 @@ class Composicao {
     required this.autenticacao,
     required this.assistente,
     required this.limpeza,
-    required this.dataDeNascimento,
+    this.dataDeNascimento,
     this.apresentacaoVista,
     this.progresso,
   });
