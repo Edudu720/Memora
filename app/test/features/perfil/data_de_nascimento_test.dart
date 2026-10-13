@@ -195,4 +195,19 @@ void main() {
       );
     });
   });
+
+  group('A guarda em memória se comporta como a local', () {
+    final DataDeNascimento ana = DataDeNascimento.deArmazenado('1952-03-15')!;
+
+    for (final String vazio in <String>['', '   ']) {
+      test("id vazio ('$vazio') recusa, não guarda e não lê", () async {
+        final DataDeNascimentoEmMemoria memoria = DataDeNascimentoEmMemoria();
+        await expectLater(memoria.guardar(vazio, ana), throwsArgumentError);
+        expect(await memoria.ler(vazio), isNull);
+        await memoria.apagar(vazio);
+        // E nada vazou para uma conta de verdade.
+        expect(await memoria.ler('conta-a'), isNull);
+      });
+    }
+  });
 }
