@@ -336,7 +336,7 @@ senha do gov.br e onde nunca se digita (US5).
 **Independent Test**: achar, pela Ajuda, como se proteger de um golpe por telefone (US6).
 
 - [ ] T085 [P] [US6] Teste em `app/test/features/ajuda/tela_ajuda_test.dart`: assuntos com desenho e nome; "Segurança" mostra uma dica por vez, incluindo o que o Memora nunca faz (FR-036a); "Ver a apresentação de novo" funciona; **sem `MEMORA_URL_DOWNLOAD`, "Compartilhar" não existe**; com ele, avisa antes e envia só o endereço oficial; matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [ ] T086 [US6] Criar `AssuntoDeAjuda` em `app/lib/features/ajuda/domain/assunto_de_ajuda.dart` e o conteúdo em `textos_ajuda.dart`, incluindo "Como baixar um aplicativo" com a conferência do desenvolvedor na loja oficial (FR-036)
+- [X] T086 [US6] Criar `AssuntoDeAjuda` em `app/lib/features/ajuda/domain/assunto_de_ajuda.dart` e o conteúdo em `textos_ajuda.dart`, incluindo "Como baixar um aplicativo" com a conferência do desenvolvedor na loja oficial (FR-036)
 - [ ] T087 [US6] Criar `TelaAjuda` e `TelaAssunto` em `app/lib/features/ajuda/presentation/`
 - [ ] T088 [US6] Criar a ajuda guiada da conversa (Figuras 15-19) em `app/lib/features/ajuda/presentation/ajuda_guiada_da_conversa.dart`, com `BalaoDeFala` e saída direta para a conversa real (FR-034)
 - [ ] T089 [US6] Acrescentar `urlDownload` a `app/lib/services/ambiente/ambiente.dart` (de `--dart-define=MEMORA_URL_DOWNLOAD`) e o envio por `ACTION_SEND` do `android_intent_plus` em `app/lib/features/ajuda/data/compartilhar.dart`; caso em `app/test/services/ambiente_test.dart`
