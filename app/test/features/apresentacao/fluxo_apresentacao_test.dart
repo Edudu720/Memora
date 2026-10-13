@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/apresentacao/data/apresentacao_vista.dart';
@@ -217,6 +218,44 @@ void main() {
       expect(fechou, 1);
       expect(concluiu, 0);
       expect(await vistas.jaViu(contaAna), isFalse);
+    });
+
+    testWidgets('trocar de tela anuncia o título da nova ao leitor de tela', (
+      t,
+    ) async {
+      final List<String> anuncios = <String>[];
+      t.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility,
+        (dynamic mensagem) async {
+          final Map<dynamic, dynamic> m = mensagem as Map<dynamic, dynamic>;
+          if (m['type'] == 'announce') {
+            anuncios.add(
+              (m['data'] as Map<dynamic, dynamic>)['message'] as String,
+            );
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => t.binding.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility,
+              null,
+            ),
+      );
+
+      await montar(t);
+      expect(anuncios, isEmpty, reason: 'a primeira tela não é uma troca');
+
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      expect(anuncios, <String>[TextosApresentacao.tituloConversa]);
+
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      expect(anuncios.last, TextosApresentacao.tituloExemplo);
+
+      await t.binding.handlePopRoute();
+      await avancar(t);
+      expect(anuncios.last, TextosApresentacao.tituloConversa);
     });
 
     testWidgets('dois toques seguidos em Pular concluem uma vez só', (t) async {

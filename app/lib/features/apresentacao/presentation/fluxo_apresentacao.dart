@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_apresentacao.dart';
@@ -90,7 +91,29 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
       _concluir();
       return;
     }
-    setState(() => _indice++);
+    _irParaTela(_indice + 1);
+  }
+
+  /// Os títulos das telas, na ordem — o que o leitor de tela anuncia.
+  static const List<String> _titulos = <String>[
+    TextosApresentacao.tituloOla,
+    TextosApresentacao.tituloConversa,
+    TextosApresentacao.tituloExemplo,
+  ];
+
+  /// Troca de tela e **anuncia** a nova.
+  ///
+  /// Trocar a `key` recria a subárvore, e o leitor de tela não percebe que a
+  /// tela mudou: quem não enxerga ficaria ouvindo o silêncio depois do toque em
+  /// "Continuar". O título é lido; a posição ("passo 2 de 3") já está no
+  /// começo da tela.
+  void _irParaTela(int indice) {
+    setState(() => _indice = indice);
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      _titulos[indice],
+      Directionality.of(context),
+    );
   }
 
   Future<void> _concluir() async {
@@ -109,7 +132,7 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
 
   Future<void> _voltarDoAparelho() async {
     if (_indice > 0) {
-      setState(() => _indice--);
+      _irParaTela(_indice - 1);
       return;
     }
     bool fechar = false;
