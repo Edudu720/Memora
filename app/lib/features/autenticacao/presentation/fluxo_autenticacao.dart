@@ -182,6 +182,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// PR #38, provado por `fluxo_expiracao_test.dart`).
   bool _expirando = false;
 
+  /// Quantas vezes alguém entrou neste fluxo. A conferência da apresentação é
+  /// uma leitura assíncrona: se a sessão expirar e **outra** pessoa (ou a mesma)
+  /// entrar antes de a leitura antiga voltar, só a resposta da entrada atual
+  /// decide o que se mostra — olhar a etapa não basta, porque ela volta a ser
+  /// `conferindoApresentacao` com a entrada nova.
+  int _geracaoDaEntrada = 0;
+
   /// Conta recém-criada em modo assistido, à espera da confirmação de canal.
   ///
   /// Guardada separada de [_pessoa] de propósito: ela **não** está dentro do
@@ -290,6 +297,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// tempo de sessão como qualquer outro, e celular esquecido nela expira.
   void _entrou(PessoaAutenticada pessoa) {
     _expirando = false;
+    final int geracao = ++_geracaoDaEntrada;
     final ApresentacaoVista? vistas = widget.apresentacaoVista;
     setState(() {
       _pessoa = pessoa;
@@ -297,12 +305,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _etapa = vistas == null ? _Etapa.dentro : _Etapa.conferindoApresentacao;
     });
     _monitor.iniciar();
-    if (vistas != null) _conferirApresentacao(vistas, pessoa);
+    if (vistas != null) _conferirApresentacao(vistas, pessoa, geracao);
   }
 
   Future<void> _conferirApresentacao(
     ApresentacaoVista vistas,
     PessoaAutenticada pessoa,
+    int geracao,
   ) async {
     bool jaViu;
     try {
@@ -312,8 +321,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       // seria decidir pela pessoa sem saber.
       jaViu = false;
     }
-    // Ela pode ter saído, ou a sessão expirado, enquanto se lia.
-    if (!mounted || _etapa != _Etapa.conferindoApresentacao) return;
+    // Ela pode ter saído, ou a sessão expirado, enquanto se lia — e outra
+    // entrada pode ter começado outra conferência.
+    if (!mounted ||
+        geracao != _geracaoDaEntrada ||
+        _etapa != _Etapa.conferindoApresentacao) {
+      return;
+    }
     setState(() => _etapa = jaViu ? _Etapa.dentro : _Etapa.apresentacao);
   }
 
