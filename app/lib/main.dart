@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'design_system/design_system.dart';
+import 'features/apresentacao/data/apresentacao_vista.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
@@ -23,6 +24,8 @@ Future<void> main() async {
   final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
   final DataDeNascimentoLocal dataDeNascimento =
       await DataDeNascimentoLocal.abrir();
+  final ApresentacaoVistaLocal apresentacaoVista =
+      await ApresentacaoVistaLocal.abrir();
 
   // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
   // lugar. Ver `services/ambiente/composicao.dart`.
@@ -31,6 +34,7 @@ Future<void> main() async {
     cofre: CofreSeguroDoSistema(),
     ultimoAcesso: ultimoAcesso,
     dataDeNascimento: dataDeNascimento,
+    apresentacaoVista: apresentacaoVista,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
@@ -101,6 +105,7 @@ class AplicativoMemora extends StatelessWidget {
               ultimoAcesso: ultimoAcesso,
               limpeza: composicao.limpeza,
               dataDeNascimento: composicao.dataDeNascimento,
+              apresentacaoVista: composicao.apresentacaoVista,
               assistente: composicao.assistente,
               abridor: const AbridorDeAplicativoAndroid(),
             ),
