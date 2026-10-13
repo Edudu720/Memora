@@ -39,7 +39,11 @@ Widget _app(
             reduzirMovimento: controlador.atual.reduzirMovimento,
             child: child!,
           ),
-          home: TelaAparencia(grupo: grupo, aoVoltar: aoVoltar),
+          home: TelaAparencia(
+            titulo: 'Título',
+            grupo: grupo,
+            aoVoltar: aoVoltar,
+          ),
         );
       },
     ),
@@ -59,16 +63,18 @@ Future<void> _tocar(WidgetTester tester, Finder alvo) async {
 
 void main() {
   group('Tela de aparência — fluxo de pré-visualização', () {
-    testWidgets('não oferece salvar enquanto nada foi mudado',
-        (WidgetTester tester) async {
+    testWidgets('não oferece salvar enquanto nada foi mudado', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(_app(ControladorAparencia(_RepositorioFalso())));
 
       expect(find.text('Salvar deste jeito'), findsNothing);
       expect(find.text('Deixar como estava'), findsNothing);
     });
 
-    testWidgets('escolher um tema pré-visualiza e oferece salvar ou desfazer',
-        (WidgetTester tester) async {
+    testWidgets('escolher um tema pré-visualiza e oferece salvar ou desfazer', (
+      WidgetTester tester,
+    ) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(_app(c));
@@ -81,8 +87,9 @@ void main() {
       expect(find.text('Deixar como estava'), findsOneWidget);
     });
 
-    testWidgets('salvar persiste e some com os botões de decisão',
-        (WidgetTester tester) async {
+    testWidgets('salvar persiste e some com os botões de decisão', (
+      WidgetTester tester,
+    ) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(_app(c));
@@ -94,8 +101,9 @@ void main() {
       expect(find.text('Salvar deste jeito'), findsNothing);
     });
 
-    testWidgets('desfazer volta ao estado anterior',
-        (WidgetTester tester) async {
+    testWidgets('desfazer volta ao estado anterior', (
+      WidgetTester tester,
+    ) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(_app(c));
@@ -107,8 +115,9 @@ void main() {
       expect(repo.gravacoes, 0);
     });
 
-    testWidgets('voltar ao padrão aparece só quando há personalização',
-        (WidgetTester tester) async {
+    testWidgets('voltar ao padrão aparece só quando há personalização', (
+      WidgetTester tester,
+    ) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(
@@ -122,8 +131,9 @@ void main() {
       expect(find.text('Voltar ao jeito original'), findsOneWidget);
     });
 
-    testWidgets('voltar ao padrão restaura em um único toque',
-        (WidgetTester tester) async {
+    testWidgets('voltar ao padrão restaura em um único toque', (
+      WidgetTester tester,
+    ) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(
@@ -139,8 +149,9 @@ void main() {
   });
 
   group('Tela de aparência — acessibilidade', () {
-    testWidgets('opções atendem à diretriz de alvo de toque',
-        (WidgetTester tester) async {
+    testWidgets('opções atendem à diretriz de alvo de toque', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_app(ControladorAparencia(_RepositorioFalso())));
 
@@ -148,8 +159,9 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('opção selecionada é anunciada como escolha exclusiva',
-        (WidgetTester tester) async {
+    testWidgets('opção selecionada é anunciada como escolha exclusiva', (
+      WidgetTester tester,
+    ) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_app(ControladorAparencia(_RepositorioFalso())));
 
@@ -160,14 +172,16 @@ void main() {
           hasCheckedState: true,
           isChecked: true,
         ),
-        reason: 'Sem isso o leitor de tela não informa qual opção está ativa '
+        reason:
+            'Sem isso o leitor de tela não informa qual opção está ativa '
             'nem que se trata de escolha única.',
       );
       handle.dispose();
     });
 
-    testWidgets('tela continua utilizável na ampliação máxima',
-        (WidgetTester tester) async {
+    testWidgets('tela continua utilizável na ampliação máxima', (
+      WidgetTester tester,
+    ) async {
       final ControladorAparencia c = ControladorAparencia(_RepositorioFalso());
       c.preVisualizarEscalaTexto(MemoraDimensoes.escalaTextoMax);
       await tester.pumpWidget(_app(c));
@@ -200,7 +214,10 @@ void main() {
       await c.carregar();
       await tester.pumpWidget(_app(c));
 
-      expect(find.textContaining('Enxergar e usar melhor'), findsOneWidget);
+      expect(
+        find.textContaining('Se escolher Claro ou Escuro'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -346,7 +363,7 @@ void main() {
               controlador: controlador,
               child: naCombinacao(
                 c,
-                TelaAparencia(grupo: grupo, aoVoltar: () {}),
+                TelaAparencia(titulo: 'Título', grupo: grupo, aoVoltar: () {}),
               ),
             ),
           );

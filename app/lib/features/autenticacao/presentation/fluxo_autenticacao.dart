@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
+import '../../../l10n/textos_configuracoes.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -577,6 +578,11 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _empilhar(
       _rota(
         builder: (BuildContext contexto) => TelaAparencia(
+          titulo: switch (grupo) {
+            GrupoDeAjusteVisual.aparencia => TextosConfiguracoes.portaAparencia,
+            GrupoDeAjusteVisual.acessibilidade =>
+              TextosConfiguracoes.portaAcessibilidade,
+          },
           grupo: grupo,
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
