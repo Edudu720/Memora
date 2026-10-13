@@ -6,6 +6,7 @@ import 'design_system/design_system.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
+import 'features/perfil/data/data_de_nascimento_local.dart';
 import 'services/ambiente/ambiente.dart';
 import 'services/ambiente/composicao.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
@@ -20,6 +21,8 @@ Future<void> main() async {
   await controlador.carregar();
 
   final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
+  final DataDeNascimentoLocal dataDeNascimento =
+      await DataDeNascimentoLocal.abrir();
 
   // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
   // lugar. Ver `services/ambiente/composicao.dart`.
@@ -27,6 +30,7 @@ Future<void> main() async {
     ambiente: Ambiente.doAmbiente(),
     cofre: CofreSeguroDoSistema(),
     ultimoAcesso: ultimoAcesso,
+    dataDeNascimento: dataDeNascimento,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
@@ -96,6 +100,7 @@ class AplicativoMemora extends StatelessWidget {
               repositorio: composicao.autenticacao,
               ultimoAcesso: ultimoAcesso,
               limpeza: composicao.limpeza,
+              dataDeNascimento: composicao.dataDeNascimento,
               assistente: composicao.assistente,
               abridor: const AbridorDeAplicativoAndroid(),
             ),
