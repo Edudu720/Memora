@@ -183,6 +183,16 @@ void main() {
       expect(await memoria.jaViu('conta-a'), isFalse);
       expect(await memoria.jaViu('conta-b'), isFalse);
     });
+
+    test('id vazio ou só de espaços também não é de ninguém', () async {
+      final ApresentacaoVistaEmMemoria memoria = ApresentacaoVistaEmMemoria();
+
+      expect(await memoria.jaViu(''), isFalse);
+      expect(await memoria.jaViu('   '), isFalse);
+      expect(() => memoria.marcarComoVista(''), throwsArgumentError);
+      expect(() => memoria.marcarComoVista('  '), throwsArgumentError);
+      expect(await memoria.jaViu(''), isFalse, reason: 'nada foi gravado');
+    });
   });
 }
 

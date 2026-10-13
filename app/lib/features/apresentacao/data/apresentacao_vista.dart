@@ -93,10 +93,20 @@ class ApresentacaoVistaEmMemoria implements ApresentacaoVistaDoAparelho {
   final Set<String> _contas = <String>{};
 
   @override
-  Future<bool> jaViu(String idDaConta) async => _contas.contains(idDaConta);
+  Future<bool> jaViu(String idDaConta) async =>
+      !ApresentacaoVistaLocal._semConta(idDaConta) &&
+      _contas.contains(idDaConta);
 
   @override
   Future<void> marcarComoVista(String idDaConta) async {
+    // Mesmo contrato da versão real: o dublê não pode aceitar o que ela recusa.
+    if (ApresentacaoVistaLocal._semConta(idDaConta)) {
+      throw ArgumentError.value(
+        idDaConta,
+        'idDaConta',
+        'sem id da conta a apresentação não tem de quem ser',
+      );
+    }
     _contas.add(idDaConta);
   }
 
