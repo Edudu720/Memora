@@ -460,7 +460,9 @@ void main() {
     test('o que viaja na intenção do Android é o endereço, e MAIS NADA', () {
       final intencao = intencaoDeCompartilhamento(enderecoOficial);
 
-      expect(intencao.action, 'action_send');
+      // O plugin repassa ao Android o texto como esta, fora de 'action_view' e
+      // poucos outros: so a constante inteira chega como ACTION_SEND.
+      expect(intencao.action, 'android.intent.action.SEND');
       expect(intencao.type, 'text/plain');
       expect(intencao.arguments, <String, dynamic>{
         'android.intent.extra.TEXT': enderecoOficial,

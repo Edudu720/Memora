@@ -44,6 +44,9 @@ abstract interface class Compartilhador {
   }
 }
 
+/// `Intent.ACTION_SEND`, escrita por inteiro (ver [intencaoDeCompartilhamento]).
+const String acaoDeEnviar = 'android.intent.action.SEND';
+
 /// A intenção que o Android recebe: um `ACTION_SEND` de texto, com o endereço e
 /// mais nada.
 ///
@@ -52,7 +55,11 @@ abstract interface class Compartilhador {
 /// saindo do aplicativo.
 AndroidIntent intencaoDeCompartilhamento(String endereco) {
   return AndroidIntent(
-    action: 'action_send',
+    // A constante inteira, e nao o apelido 'action_send': o android_intent_plus
+    // so traduz 'action_view' e alguns de configuracoes, e repassa o resto ao
+    // Android como esta. Nenhum aplicativo atende 'action_send', e a folha
+    // abriria vazia.
+    action: acaoDeEnviar,
     type: 'text/plain',
     arguments: <String, dynamic>{'android.intent.extra.TEXT': endereco},
   );
