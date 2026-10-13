@@ -45,7 +45,9 @@ class ControladorAparencia extends ChangeNotifier {
   Future<void> carregar() async {
     try {
       _confirmada = await _repositorio.carregar();
-    } on Exception {
+    } on Object {
+      // `Object` e não `Exception`: dado de tipo errado lança `TypeError`,
+      // que é um `Error`, e o `main` espera este método antes do `runApp`.
       _confirmada = PreferenciaAparencia.padrao;
     }
     _emPreVisualizacao = null;
