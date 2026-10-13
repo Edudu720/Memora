@@ -8,10 +8,12 @@ import 'package:memora/features/apresentacao/presentation/fluxo_apresentacao.dar
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.dart';
+import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_apresentacao.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
+import 'package:memora/l10n/textos_casca.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import '../../suporte/aparelhos.dart';
@@ -46,10 +48,12 @@ void main() {
   group('As três telas', () {
     late ApresentacaoVistaEmMemoria vistas;
     late int concluiu;
+    late int fechou;
 
     setUp(() {
       vistas = ApresentacaoVistaEmMemoria();
       concluiu = 0;
+      fechou = 0;
     });
 
     Widget app({ApresentacaoVista? vista, String nome = 'Ana'}) {
@@ -60,6 +64,7 @@ void main() {
           idDaConta: contaAna,
           vista: vista ?? vistas,
           aoConcluir: () => concluiu++,
+          aoFecharOMemora: () async => fechou++,
         ),
       );
     }
@@ -163,6 +168,55 @@ void main() {
       await montar(t);
       expect(tela(0), findsOneWidget);
       expect(tela(1), findsNothing);
+    });
+
+    testWidgets('"voltar" do aparelho na tela 3 e na 2 volta uma tela, sem '
+        'gravar nada (FR-013)', (t) async {
+      await montar(t);
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      expect(tela(2), findsOneWidget);
+
+      expect(await t.binding.handlePopRoute(), isTrue);
+      await avancar(t);
+      expect(tela(1), findsOneWidget);
+
+      expect(await t.binding.handlePopRoute(), isTrue);
+      await avancar(t);
+      expect(tela(0), findsOneWidget);
+
+      expect(fechou, 0, reason: 'voltar de tela não fecha o aplicativo');
+      expect(concluiu, 0);
+      expect(
+        await vistas.jaViu(contaAna),
+        isFalse,
+        reason: 'só o fim ou o pulo gravam a apresentação como vista',
+      );
+    });
+
+    testWidgets('"voltar" do aparelho na tela 1 pergunta antes de fechar', (
+      t,
+    ) async {
+      await montar(t);
+
+      await t.binding.handlePopRoute();
+      await t.pumpAndSettle();
+      expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsOneWidget);
+      expect(fechou, 0, reason: 'fechar em silêncio é o Memora sumir');
+
+      await t.tap(find.text(TextosCasca.botaoFicar));
+      await t.pumpAndSettle();
+      expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsNothing);
+      expect(tela(0), findsOneWidget, reason: 'ficou onde estava');
+      expect(fechou, 0);
+
+      await t.binding.handlePopRoute();
+      await t.pumpAndSettle();
+      await t.tap(find.text(TextosCasca.botaoFecharMemora));
+      await t.pumpAndSettle();
+      expect(fechou, 1);
+      expect(concluiu, 0);
+      expect(await vistas.jaViu(contaAna), isFalse);
     });
 
     testWidgets('dois toques seguidos em Pular concluem uma vez só', (t) async {
