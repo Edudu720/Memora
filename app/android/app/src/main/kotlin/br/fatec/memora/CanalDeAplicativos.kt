@@ -45,6 +45,13 @@ class CanalDeAplicativos(private val packageManager: PackageManager) :
         private val FORMA_DE_PACOTE =
             Regex("""^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$""")
 
+        // Renderizar icone nao deve segurar a thread principal: a grade pede
+        // varios de uma vez. O resultado volta para a principal, que e onde o
+        // MethodChannel exige responder. Uma thread so, compartilhada pelo
+        // processo: configureFlutterEngine pode rodar varias vezes (a Activity
+        // recria) e criar uma por chamada deixaria threads orfas.
+        private val trabalho: ExecutorService = Executors.newSingleThreadExecutor()
+
         /** Registra o canal no motor do Flutter. */
         fun registrar(executor: DartExecutor, packageManager: PackageManager) {
             MethodChannel(executor.binaryMessenger, NOME)
@@ -58,10 +65,6 @@ class CanalDeAplicativos(private val packageManager: PackageManager) :
         }
     }
 
-    // Renderizar icone nao deve segurar a thread principal: a grade pede
-    // varios de uma vez. O resultado volta para a principal, que e onde o
-    // MethodChannel exige responder.
-    private val trabalho: ExecutorService = Executors.newSingleThreadExecutor()
     private val principal = Handler(Looper.getMainLooper())
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
