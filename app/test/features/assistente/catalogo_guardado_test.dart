@@ -218,6 +218,37 @@ void main() {
     );
   });
 
+  group('a origem do catálogo (T066)', () {
+    test('resposta boa do servidor: origem servidor', () async {
+      servidor.resposta = <ServicoDoCatalogo>[_item('whatsapp')];
+
+      final CatalogoComOrigem c = await catalogo.catalogoComOrigem();
+
+      expect(c.origem, OrigemDoCatalogo.servidor);
+    });
+
+    test('servidor fora do ar com algo guardado: origem guardado', () async {
+      servidor.resposta = <ServicoDoCatalogo>[_item('whatsapp')];
+      await catalogo.catalogo();
+      servidor.falha = const _SemConexao();
+
+      final CatalogoComOrigem c = await catalogo.catalogoComOrigem();
+
+      expect(c.origem, OrigemDoCatalogo.guardado);
+      expect(chaves(c.servicos), <String>['whatsapp']);
+    });
+
+    test('resposta malformada com algo guardado: origem guardado', () async {
+      servidor.resposta = <ServicoDoCatalogo>[_item('whatsapp')];
+      await catalogo.catalogo();
+      servidor.resposta = <ServicoDoCatalogo>[];
+
+      final CatalogoComOrigem c = await catalogo.catalogoComOrigem();
+
+      expect(c.origem, OrigemDoCatalogo.guardado);
+    });
+  });
+
   group('arquivo estragado', () {
     test('conteúdo ilegível vale como nada guardado, e o próximo recebido o '
         'conserta', () async {
@@ -233,6 +264,20 @@ void main() {
       expect(chaves((await catalogo.lerGuardado())!.servicos), <String>[
         'whatsapp',
       ]);
+    });
+
+    test('arquivo adulterado com serviço sensível abrível é recusado na '
+        'leitura (FR-041)', () async {
+      arquivo().writeAsStringSync(
+        '{"recebidoEm":"2026-10-02T00:00:00Z","servicos":['
+        '{"id":"a","chave":"banco","nomeExibido":"Banco","descricaoCurta":"",'
+        '"categoria":"sensivel","memoraPodeAbrir":true}]}',
+      );
+
+      expect(await catalogo.lerGuardado(), isNull);
+
+      servidor.falha = const _SemConexao();
+      await expectLater(catalogo.catalogo(), throwsA(isA<_SemConexao>()));
     });
 
     test(

@@ -191,6 +191,15 @@ void main() {
       expect(await progresso.concluidos('bia'), isEmpty);
     });
 
+    test('apagar leva também o temporário deixado por uma queda', () async {
+      final File tmp = File('${arquivo().path}.tmp');
+      tmp.writeAsStringSync('{"contas":{}}');
+
+      await progresso.apagar();
+
+      expect(tmp.existsSync(), isFalse);
+    });
+
     test('apagar sem nada guardado não falha', () async {
       await progresso.apagar();
       await progresso.apagar();

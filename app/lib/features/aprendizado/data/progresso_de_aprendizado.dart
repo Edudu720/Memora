@@ -140,10 +140,14 @@ class ProgressoDeAprendizado implements DadoLocalDaPessoa {
   @override
   Future<void> apagar() => _naFila(() async {
     final File arquivo = await _arquivo();
-    try {
-      await arquivo.delete();
-    } on PathNotFoundException {
-      // Já não existe: é o resultado que se queria.
+    // O temporário também: se o processo morreu entre gravar e renomear, ele
+    // guarda o progresso de todas as contas e sobreviveria à saída.
+    for (final File f in <File>[arquivo, File('${arquivo.path}.tmp')]) {
+      try {
+        await f.delete();
+      } on PathNotFoundException {
+        // Já não existe: é o resultado que se queria.
+      }
     }
   });
 
