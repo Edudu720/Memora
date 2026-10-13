@@ -809,6 +809,52 @@ void main() {
       expect(find.byKey(FluxoApresentacao.chaveContinuar), findsNothing);
     });
 
+    testWidgets(
+      'a resposta velha da conferência não decide pela entrada nova',
+      (t) async {
+        final _VistaLentaPorLeitura lenta = _VistaLentaPorLeitura();
+        await montar(
+          t,
+          vista: lenta,
+          inatividade: const Duration(seconds: 3),
+          aviso: const Duration(seconds: 1),
+        );
+        await entrarPeloLogin(t, 'ana');
+        expect(lenta.leituras, 1);
+
+        // A sessão da Ana expira com a leitura dela ainda no ar.
+        await t.pump(const Duration(seconds: 2));
+        await avancar(t);
+        await t.pump(const Duration(seconds: 1));
+        await t.pump(const Duration(milliseconds: 50));
+        await t.pump(const Duration(seconds: 1));
+        expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
+
+        // A Bia entra, e a leitura dela também fica no ar.
+        await preencherLogin(t, 'bia');
+        expect(lenta.leituras, 2);
+        expect(find.byType(Carregando), findsOneWidget);
+
+        // A leitura velha (a da Ana: "já viu") chega agora.
+        lenta.responder(0, jaViu: true);
+        await avancar(t);
+        expect(
+          find.byType(Carregando),
+          findsOneWidget,
+          reason: 'a resposta da Ana não decide pela entrada da Bia',
+        );
+        expect(find.byKey(TelaInicio.chaveSaudacao), findsNothing);
+
+        // A leitura da Bia ("nunca viu") é a que vale.
+        lenta.responder(1, jaViu: false);
+        await avancar(t);
+        exigirApresentacao('a Bia nunca a viu');
+        expect(find.textContaining('Olá, Bia!'), findsOneWidget);
+
+        await fechar(t);
+      },
+    );
+
     testWidgets('a inatividade vale também durante a apresentação', (t) async {
       await montar(
         t,
@@ -898,6 +944,27 @@ class _VistaLenta implements ApresentacaoVista {
 
   @override
   Future<bool> jaViu(String idDaConta) => _resposta.future;
+
+  @override
+  Future<void> marcarComoVista(String idDaConta) async {}
+}
+
+/// Cada leitura de `jaViu` fica no ar até o teste responder àquela, pela
+/// ordem em que foram feitas.
+class _VistaLentaPorLeitura implements ApresentacaoVista {
+  final List<Completer<bool>> _respostas = <Completer<bool>>[];
+
+  int get leituras => _respostas.length;
+
+  void responder(int leitura, {required bool jaViu}) =>
+      _respostas[leitura].complete(jaViu);
+
+  @override
+  Future<bool> jaViu(String idDaConta) {
+    final Completer<bool> c = Completer<bool>();
+    _respostas.add(c);
+    return c.future;
+  }
 
   @override
   Future<void> marcarComoVista(String idDaConta) async {}
