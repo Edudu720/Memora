@@ -53,7 +53,7 @@ class Composicao {
   /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
   ///
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
-  final ArmazenamentoDaDataDeNascimento dataDeNascimento;
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
   /// Cria a composição já resolvida.
   const Composicao({
@@ -61,7 +61,7 @@ class Composicao {
     required this.autenticacao,
     required this.assistente,
     required this.limpeza,
-    required this.dataDeNascimento,
+    this.dataDeNascimento,
   });
 
   /// Resolve as dependências a partir do ambiente.
