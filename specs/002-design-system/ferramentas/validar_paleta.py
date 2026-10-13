@@ -183,10 +183,16 @@ def rodar(paletas):
     return resultado
 
 
+# Os temas em que a paleta TEM de valer, escritos aqui de novo e de proposito:
+# a conta do autoteste nao pode depender da constante que ele fiscaliza, senao
+# encolher `TEMAS_COM_PALETA` encolheria junto o que se espera.
+TEMAS_ONDE_A_PALETA_VALE = ("claro", "escuro")
+
+
 def combinacoes_esperadas(paletas):
     """Quantas combinacoes `combinacoes()` deve gerar, contada de outro jeito."""
-    return (len(TEMAS_COM_PALETA) * len(paletas)
-            + len([t for t in TEMAS if t not in TEMAS_COM_PALETA]))
+    return (len(TEMAS_ONDE_A_PALETA_VALE) * len(paletas)
+            + len([t for t in TEMAS if t not in TEMAS_ONDE_A_PALETA_VALE]))
 
 
 def main():
@@ -227,6 +233,11 @@ def autoteste():
     erros = []
     if len(resultado) != esperado:
         erros.append(f"{len(resultado)} combinacoes rodaram, esperadas {esperado}")
+
+    for tema, rotulo in (("claro", "paleta ruim_claro"),
+                         ("escuro", "paleta ruim_escuro")):
+        if (tema, rotulo) not in resultado:
+            erros.append(f"{rotulo} nem chegou a ser validada no tema {tema}")
 
     for (tema, rotulo), falhas in resultado.items():
         deve_falhar = ((tema == "claro" and rotulo == "paleta ruim_claro")
