@@ -27,7 +27,7 @@ a novembro com centenas de testes verdes e sem fazer o que promete.
 | **Ratificar a spec da 004**, aprovada pelo Eduardo em 2026-10-13 | Henrique e Du3101, aprovando a #58 | Formalmente, o Princípio IV | `Status` da `spec.md` da 004 |
 | **T116: segunda rodada da revisão de design, no celular** | Henrique | **O merge de toda tela nova** (decisão de 2026-10-13: portão do merge, não do código) | T116 da 004 |
 | **Teste com 5 pessoas de 65+** | Equipe | Portão de saída das features 001, 002, 003 e 004 | T085 (001), T050/T051 (002), T071 (003), T105 (004) |
-| **A chave gratuita do Gemini no teste com as 5 pessoas** | Equipe | A T071 | ⚠️ **Contradição**: a clarificação de 2026-10-03, na branch `feature/003-fase11-convergencia`, diz que a chave gratuita vale **inclusive na T071**, com aviso e consentimento; o `CLAUDE.md` da `master`, do mesmo dia, diz que a T071 **não pode** usá-la. Decidir e corrigir um dos dois |
+| **Mesclar a `feature/003-fase11-convergencia`** (abrir a PR) | Henrique | **A T071**: a chave gratuita do Gemini pode ser usada no teste com as 5 pessoas (decidido em 2026-10-13, seguindo a emenda à ADR-002), mas **só com o aviso e o consentimento da FR-051 no aplicativo**, e eles só existem nessa branch | Emenda à ADR-002 na `003-fase11`; T101-T104 da 003 |
 | **Provedor de envio de e-mail/SMS** | Equipe | Código de verificação e de recuperação chegarem a alguém; o perfil `producao` não sobe sem ele | T065a da 001 |
 | **Registrar o app no Google e no Facebook** | Equipe | Login social; aprovação do Facebook não é rápida | Fase 8 da 001 (T079-T083) |
 | **Verba para um provedor de IA que não treine com a conversa** | Equipe | Cumprir a FR-051 original; hoje é risco aceito, sem data (ADR-002) | ADR-002; FR-051 da 003 |
@@ -106,8 +106,8 @@ dos conflitos do caminho.
   106**: a clarificação de 2026-10-03 (FR-051 como transparência, janela
   deslizante de 20 turnos, voz para a 005, erros no stream) e as T101-T104 e
   T106. **Não tem PR.**
-- **Fase 9, validação** (T071-T074), com as 5 pessoas — ver a contradição da
-  chave gratuita na seção 1.
+- **Fase 9, validação** (T071-T074), com as 5 pessoas. A T071 **pode** usar a
+  chave gratuita, mas só depois que a `003-fase11` entrar (seção 1).
 - **Fase 10, convergência** (T079-T099): quase toda sem dependência externa.
 - **T021 e T036**: gerar o cliente Dart da 003 — adiadas até o contrato da 003
   ser fundido com o da 001.

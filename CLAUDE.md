@@ -59,10 +59,16 @@ não some) e a **#56** (fase 8, US6: a Ajuda e a quinta porta), as duas sobre a
 > também foi corrigido na #58, e o aviso do passo **precisa** estar na
 > `master` antes da T065.
 
-> ⚠️ **Contradição a resolver**: a clarificação de 2026-10-03 na
-> `feature/003-fase11-convergencia` diz que a chave gratuita do Gemini vale
-> **inclusive** no teste com as 5 pessoas (T071); o aviso deste arquivo, logo
-> abaixo, diz que a T071 **não pode** usá-la. Os dois são do mesmo dia.
+> ✅ **A T071 pode usar a chave gratuita do Gemini** — decisão do Eduardo em
+> 2026-10-13, seguindo a do Henrique. Vale a **emenda à ADR-002** da
+> `feature/003-fase11-convergencia`: pode, **desde que o aviso permanente e o
+> consentimento antes da primeira mensagem estejam no aplicativo** que as
+> pessoas usarem; sem eles, a emenda não vale. Esses dois só existem naquela
+> branch (T101-T104), que **ainda não tem PR** — então a T071 só acontece
+> depois que ela entrar. O aviso "a T071 não pode usar a chave gratuita", na
+> sessão de 2026-10-03 logo abaixo, está **superado**. A ADR diz ainda que US$ 5
+> de pré-pagamento já tiram o treino com o conteúdo — o caminho mais barato
+> para voltar a cumprir a FR-051 original.
 
 **Contagem em 2026-10-13**: **1600 + 1 pulado** na integração das #44 à #54;
 **1681 + 1 pulado** na #56; backend sem mudança. **Próximo**: a revisão humana
