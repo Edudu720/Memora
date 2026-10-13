@@ -4,7 +4,59 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-03 — **fase 8 da 003: a assistente pensa de
+**Última sessão**: 2026-10-13 — **revisão das #44 a #48 e as fases 5 e 8
+da 004**, pelo Eduardo (Opus orquestrando e revisando, agentes Sonnet
+escrevendo; um revisor independente por PR). As cinco PRs saíram "com
+correções", nenhuma com problema crítico. O veredito de cada uma está num
+comentário na própria PR, e as correções estão em PRs empilhadas sobre a
+revisada: **#50** (T123), **#51** (fase 4), **#52** (fase 9), **#53** (fase 6)
+e **#54** (relatório de pentest). Mais a **#49**, que sai da `master`. Depois
+vieram a **#55** (fase 5, US3: a conversa com balões e o aviso que encolhe e
+não some) e a **#56** (fase 8, US6: a Ajuda e a quinta porta), as duas sobre a
+#52. **Nada disso tem revisão humana ainda.**
+
+> 🔴 **Ordem de merge:** #49 → #44 → #50 → #45 → #51 → #46 → #52 → #55 e #56 →
+> #47 → #53 → #48 → #54. Depois de cada merge, `gh pr edit N --base master`
+> na de cima. A branch **`integracao/revisao-44-a-48`** (sem PR) tem da #44 à
+> #54 mescladas nessa ordem: **1600 testes, 1 pulado** (o da T117, que agora
+> tem dono), os quatro validadores ok e `flutter build apk --debug` ok. Os
+> conflitos do caminho (`composicao.dart`, `main.dart`,
+> `fluxo_dentro_da_conta.dart`, `tasks.md`) são todos de soma, e as resoluções
+> estão nos commits de merge dela.
+
+> 🔴 **O Android copiava os dados do aparelho para o Google Drive** (#49).
+> Sem `allowBackup`/`dataExtractionRules` no manifesto, o Auto Backup levava
+> `shared_prefs/` e `app_flutter/` — conversa, data de nascimento, progresso,
+> o cofre — para o backup e para a transferência entre aparelhos. Isso
+> desmentia a D3 da 003 e a FR-042c da 004, e três revisores acharam, cada um
+> por um caminho. No Android 12+ `allowBackup="false"` **sozinho não basta**
+> para a transferência entre aparelhos: precisa de `<device-transfer>` no
+> `dataExtractionRules`. O portão é `sem_backup_test.dart`, e o manifesto
+> fundido do APK foi conferido.
+
+> ⚠️ **Testar cada PR sozinha não prova a pilha.** Tornar `dataDeNascimento`
+> `required` numa PR de correção passava em todos os testes da branch e
+> quebrava a compilação das PRs empilhadas que constroem o mesmo objeto. Só a
+> integração de tudo, na ordem de merge, pegou isso, e a mudança foi desfeita.
+> Antes de publicar uma pilha, mescle tudo numa branch temporária e rode a
+> suíte e o build.
+
+**Contagem em 2026-10-13**: **1600 + 1 pulado** na integração das #44 à #54;
+**1681 + 1 pulado** na #56; backend sem mudança. **Próximo**: a revisão humana
+e os merges na ordem acima; depois a **T116** no celular, que agora também
+precisa ver o teclado na conversa em aparelho baixo (360×640), o anúncio do
+TalkBack entre as telas da apresentação, e a folha do Compartilhar. Pendentes
+da equipe:
+- a frase de Privacidade "o Memora não guarda cópia", diante do Gemini gratuito
+  (FR-051);
+- a contagem "15 reprovaram (4+7+4)" do relatório de pentest;
+- a branch `feature/003-fase11-convergencia` do Henrique, que tem o clarify da
+  003 de 2026-10-03 e ainda não tem PR;
+- a 005 (Du3101), que compila mas reprova o `flutter analyze` (104 avisos) e
+  acrescentou `usesCleartextTraffic="true"` no app inteiro, o que piora a
+  **#43**.
+
+Sessão anterior: 2026-10-03 — **fase 8 da 003: a assistente pensa de
 verdade**, pelo Henrique. **Provedor escolhido: Google Gemini, nível
 gratuito, `gemini-3.8-flash`** (T061, decisão dele: a equipe não pode pagar).
 Adaptador REST em `assistente/infra/ClienteDaAssistenteGemini.java` (sem o SDK,
@@ -1599,6 +1651,25 @@ falha. Faça o mesmo ao criar qualquer novo portão.
   à metade do menor lado; uma porta alta com raio 999 vira quase círculo, e os
   cantos do texto saem do preenchimento. `takeException` não pega — o portão
   confere os cantos do texto dentro do `RRect`.
+- **`MediaQueryData(...)` criado do zero num teste tem `size: Size.zero`.** O
+  componente que mede pela altura da tela (`AvisoCompacto`, `CartaoDePorta`,
+  `CabecalhoDeTela`, que leem `MediaQuery.sizeOf`) passa a medir **0**, e o
+  portão passa sem medir nada. Na fase 5 o aviso da conversa media 0 px e
+  todos os portões passavam; só apareceu quando um teste tentou tocar nele. Use
+  `MediaQuery.of(ctx).copyWith(textScaler: ...)` e exija uma altura mínima
+  como sanidade. O `cartao_de_porta_test.dart` ainda tem o padrão (otimista,
+  não grave: o Hub é medido pela matriz).
+- **O `android_intent_plus` só traduz `action_view` e algumas ações de
+  configurações.** Qualquer outro apelido, como `action_send`, chega ao Android
+  como está, nenhum aplicativo o atende, e a folha abre vazia — com o teste do
+  objeto Dart passando. Use a constante inteira (`android.intent.action.SEND`).
+  Teste de intent que confere só o objeto Dart não prova o que o Android
+  recebe.
+- **`TypeError` não é `Exception`.** `getBool`/`getString` do
+  `SharedPreferences` lançam `TypeError` quando o valor gravado tem outro tipo,
+  e um `on Exception` deixa passar. Antes da #52, uma preferência corrompida
+  impedia o aplicativo de **abrir**, porque o `carregar()` roda antes do
+  `runApp`. Leia com `get(chave)` e `is`, com o padrão por chave.
 
 ---
 
