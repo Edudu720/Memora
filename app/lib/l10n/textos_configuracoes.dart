@@ -48,15 +48,16 @@ abstract final class TextosConfiguracoes {
 
   /// Abre a tela dizendo para onde vai o que ela vai listar.
   static const String privacidadeIntro =
-      'Estas coisas ficam guardadas só neste celular, e não em outro lugar.';
+      'Estas coisas ficam guardadas neste celular.';
 
   /// Rótulo da conversa.
   static const String guardadoConversa = 'A conversa com a Memora';
 
   /// O que é a conversa guardada, e quando sai.
   static const String guardadoConversaValor =
-      'O que você me escreveu e o que eu respondi. Sai do celular quando '
-      'você sai da conta.';
+      'O que você me escreveu e o que eu respondi. Fica guardada só aqui. '
+      'Para eu responder, ela viaja a cada pergunta, mas o Memora não '
+      'guarda cópia. Sai do celular quando você sai da conta.';
 
   /// Rótulo da data de nascimento.
   static const String guardadoIdade = 'Sua data de nascimento';
@@ -79,8 +80,9 @@ abstract final class TextosConfiguracoes {
 
   /// Quando o identificador sai.
   static const String guardadoContatoValor =
-      'Para você não digitar tudo de novo na próxima vez que entrar. Sai '
-      'com "Sair e esquecer este aparelho".';
+      'Para você não digitar tudo de novo na próxima vez que entrar. O '
+      'Memora também o conhece, porque é o contato da sua conta. Sai deste '
+      'celular com "Sair e esquecer este aparelho".';
 
   /// O que **nunca** fica depois de sair.
   static const String guardadoNuncaFica =
@@ -152,8 +154,9 @@ abstract final class TextosConfiguracoes {
   /// Para que serve "Sair e esquecer" (FR-041).
   static const String paraQueServeEsquecer =
       'Use se o celular é de mais gente, ou se vai ser vendido ou dado. Além '
-      'de sair, eu apago tudo o que guardei aqui: a conversa, a sua idade, a '
-      'apresentação e o seu e-mail ou telefone.';
+      'de sair, eu apago o que guardei aqui sobre você: a conversa, a sua '
+      'idade, a apresentação e o seu e-mail ou telefone. Os ajustes de '
+      'aparência ficam.';
 
   /// O botão que abre a pergunta.
   static const String botaoEsquecer = 'Sair e esquecer este aparelho';

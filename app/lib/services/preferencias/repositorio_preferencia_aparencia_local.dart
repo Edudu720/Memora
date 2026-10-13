@@ -33,21 +33,36 @@ class RepositorioPreferenciaAparenciaLocal
 
   @override
   Future<PreferenciaAparencia> carregar() async {
-    final String? nomeTema = _preferencias.getString(_chaveTema);
-    final double? escala = _preferencias.getDouble(_chaveEscalaTexto);
+    // Cada chave é lida com segurança, com o padrão **dela**: valor de outro
+    // tipo (dado corrompido, versão antiga) faria `getBool` e companhia
+    // lançarem `TypeError`, e uma chave ruim não pode derrubar o aplicativo
+    // nem zerar as outras — quem está em 200% continua em 200%.
+    final Object? tema = _ler(_chaveTema);
+    final Object? escala = _ler(_chaveEscalaTexto);
+    final Object? reduzir = _ler(_chaveReduzirMovimento);
+    final Object? paleta = _ler(_chavePaleta);
 
     return PreferenciaAparencia(
-      tema: _temaPorNome(nomeTema),
+      tema: _temaPorNome(tema is String ? tema : null),
       // copyWith limita a faixa; aqui garantimos o padrão quando ausente.
-      escalaTexto: escala ?? PreferenciaAparencia.padrao.escalaTexto,
-      reduzirMovimento:
-          _preferencias.getBool(_chaveReduzirMovimento) ??
-          PreferenciaAparencia.padrao.reduzirMovimento,
+      escalaTexto: escala is num
+          ? escala.toDouble()
+          : PreferenciaAparencia.padrao.escalaTexto,
+      reduzirMovimento: reduzir is bool
+          ? reduzir
+          : PreferenciaAparencia.padrao.reduzirMovimento,
       // Nome de paleta que não existe (retirada numa versão nova, ou dado
       // corrompido) volta ao padrão: o `copyWith` confere.
-      paleta: _preferencias.getString(_chavePaleta) ??
-          PreferenciaAparencia.paletaPadrao,
+      paleta: paleta is String ? paleta : PreferenciaAparencia.paletaPadrao,
     ).copyWith();
+  }
+
+  Object? _ler(String chave) {
+    try {
+      return _preferencias.get(chave);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override

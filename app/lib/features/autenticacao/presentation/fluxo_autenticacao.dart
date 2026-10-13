@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
+import '../../../l10n/textos_configuracoes.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -575,12 +576,16 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   /// Apaga a conversa do aparelho e das telas que a estejam mostrando (T094).
   Future<void> _apagarConversa() async {
-    await widget.conversaLocal().apagar();
+    // Primeiro as telas: o `_envio++` de cada controlador é síncrono e
+    // invalida o que está em voo. Se o arquivo fosse apagado antes, uma
+    // gravação em andamento poderia recriá-lo com a conversa antiga.
     for (final ControladorConversa c in List<ControladorConversa>.of(
       _conversasAbertas,
     )) {
       await c.apagarConversa();
     }
+    // Por último o arquivo, e uma falha aqui SOBE para a tela de Privacidade.
+    await widget.conversaLocal().apagar();
   }
 
   /// A tela de aparência, e a de acessibilidade, que dividem a mesma tela.
@@ -588,6 +593,11 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _empilhar(
       _rota(
         builder: (BuildContext contexto) => TelaAparencia(
+          titulo: switch (grupo) {
+            GrupoDeAjusteVisual.aparencia => TextosConfiguracoes.portaAparencia,
+            GrupoDeAjusteVisual.acessibilidade =>
+              TextosConfiguracoes.portaAcessibilidade,
+          },
           grupo: grupo,
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
