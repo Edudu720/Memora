@@ -13,10 +13,12 @@ revisada: **#50** (T123), **#51** (fase 4), **#52** (fase 9), **#53** (fase 6)
 e **#54** (relatório de pentest). Mais a **#49**, que sai da `master`. Depois
 vieram a **#55** (fase 5, US3: a conversa com balões e o aviso que encolhe e
 não some) e a **#56** (fase 8, US6: a Ajuda e a quinta porta), as duas sobre a
-#52. **Nada disso tem revisão humana ainda.**
+#52. Por fim, o **`/speckit-analyze` e o `/speckit-clarify` da 004**, na
+**#58**, e esta passagem, na **#57**. **Nada disso tem revisão humana ainda.**
 
 > 🔴 **Ordem de merge:** #49 → #44 → #50 → #45 → #51 → #46 → #52 → #55 e #56 →
-> #47 → #53 → #48 → #54. Depois de cada merge, `gh pr edit N --base master`
+> #47 → #53 → #48 → #54 → **#58 por último** (o `tasks.md` dela conflita com a
+> pilha: fique com a marca da pilha **e** com o texto dela). Depois de cada merge, `gh pr edit N --base master`
 > na de cima. A branch **`integracao/revisao-44-a-48`** (sem PR) tem da #44 à
 > #54 mescladas nessa ordem: **1600 testes, 1 pulado** (o da T117, que agora
 > tem dono), os quatro validadores ok e `flutter build apk --debug` ok. Os
@@ -41,12 +43,34 @@ não some) e a **#56** (fase 8, US6: a Ajuda e a quinta porta), as duas sobre a
 > Antes de publicar uma pilha, mescle tudo numa branch temporária e rode a
 > suíte e o build.
 
+> ✅ **O analyze da 004 achou 35 problemas, e os dois críticos foram resolvidos
+> no clarify** (#58, `spec.md`, sessão de 2026-10-13):
+> - a data de nascimento é **Confidencial, sem cifra** — a constituição só
+>   exige cifra para Sensível —, e fora da tela de informar só a idade aparece;
+> - a spec saiu de `Draft`: **aprovada pelo Eduardo**, e Henrique e Du3101
+>   ratificam aprovando a #58.
+>
+> Também ficou decidido que "Sair e esquecer" usa a confirmação irreversível,
+> que a paleta não vale no alto contraste e — **o que muda o fluxo** — que a
+> **T116 é portão do merge, não do código**: tela nova pode ser implementada,
+> mas não entra na `master` antes da revisão do Henrique no celular. As PRs de
+> tela abertas até hoje ficam de fora. Texto obsoleto (a FR-017 antiga em seis
+> lugares, "grade" em vez de lista, o aviso de senha do passo como compacto)
+> também foi corrigido na #58, e o aviso do passo **precisa** estar na
+> `master` antes da T065.
+
+> ⚠️ **Contradição a resolver**: a clarificação de 2026-10-03 na
+> `feature/003-fase11-convergencia` diz que a chave gratuita do Gemini vale
+> **inclusive** no teste com as 5 pessoas (T071); o aviso deste arquivo, logo
+> abaixo, diz que a T071 **não pode** usá-la. Os dois são do mesmo dia.
+
 **Contagem em 2026-10-13**: **1600 + 1 pulado** na integração das #44 à #54;
 **1681 + 1 pulado** na #56; backend sem mudança. **Próximo**: a revisão humana
 e os merges na ordem acima; depois a **T116** no celular, que agora também
 precisa ver o teclado na conversa em aparelho baixo (360×640), o anúncio do
-TalkBack entre as telas da apresentação, e a folha do Compartilhar. Pendentes
-da equipe:
+TalkBack entre as telas da apresentação, e a folha do Compartilhar. O retrato
+completo do que falta está em `docs/relatorios/o-que-falta.md`, atualizado
+hoje. Pendentes da equipe:
 - a frase de Privacidade "o Memora não guarda cópia", diante do Gemini gratuito
   (FR-051);
 - a contagem "15 reprovaram (4+7+4)" do relatório de pentest;
