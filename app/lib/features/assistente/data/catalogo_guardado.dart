@@ -56,25 +56,37 @@ class CatalogoGuardado implements RepositorioAssistente {
        _agora = agora ?? DateTime.now;
 
   @override
-  Future<List<ServicoDoCatalogo>> catalogo() async {
+  Future<List<ServicoDoCatalogo>> catalogo() async =>
+      (await catalogoComOrigem()).servicos;
+
+  /// Como [catalogo], mas dizendo **de onde** o catálogo veio.
+  ///
+  /// A oferta "Peça à Memora para abrir" só pode aparecer com catálogo do
+  /// [OrigemDoCatalogo.servidor] (T066): o guardado pode estar velho, e
+  /// oferecer abrir algo que o servidor já tirou do ar desfaria a R6.
+  Future<CatalogoComOrigem> catalogoComOrigem() async {
     final List<ServicoDoCatalogo> recebido;
     try {
       recebido = await _interno.catalogo();
     } on Exception {
       final CatalogoRecebido? guardado = await lerGuardado();
-      if (guardado != null) return guardado.servicos;
+      if (guardado != null) {
+        return CatalogoComOrigem(guardado.servicos, OrigemDoCatalogo.guardado);
+      }
       rethrow;
     }
 
     final String? defeito = _defeitoDe(recebido);
     if (defeito != null) {
       final CatalogoRecebido? guardado = await lerGuardado();
-      if (guardado != null) return guardado.servicos;
+      if (guardado != null) {
+        return CatalogoComOrigem(guardado.servicos, OrigemDoCatalogo.guardado);
+      }
       throw FormatException('Catálogo malformado e nada guardado: $defeito');
     }
 
     await _naFila(() => _gravar(recebido));
-    return recebido;
+    return CatalogoComOrigem(recebido, OrigemDoCatalogo.servidor);
   }
 
   /// O que está guardado, ou `null` quando não há nada (ou o arquivo está
@@ -240,4 +252,25 @@ class CatalogoRecebido {
 
   /// Cria o registro.
   const CatalogoRecebido({required this.servicos, required this.recebidoEm});
+}
+
+/// De onde veio o catálogo que a tela está mostrando.
+enum OrigemDoCatalogo {
+  /// Resposta boa do servidor, agora.
+  servidor,
+
+  /// O último catálogo guardado no aparelho (sem conexão ou resposta ruim).
+  guardado,
+}
+
+/// Um catálogo e a sua [origem].
+class CatalogoComOrigem {
+  /// Os serviços.
+  final List<ServicoDoCatalogo> servicos;
+
+  /// De onde vieram.
+  final OrigemDoCatalogo origem;
+
+  /// Cria o par.
+  const CatalogoComOrigem(this.servicos, this.origem);
 }
