@@ -49,14 +49,17 @@ Fechar o aplicativo no meio da apresentação de uma conta nova: ela recomeça.
 
 **Espera-se**: o Início cumprimenta pelo nome. A barra inferior aparece em toda
 tela interna, com desenho e nome nos três destinos. O Hub mostra as cinco portas
-sem rolar, em 100% e 150%, no 320×568. Nenhuma tela está a mais de 3 toques do
+sem rolar **só a 100% no 360×800** (FR-017 atual); em qualquer aparelho e
+ampliação a porta principal aparece sem rolar, com a faixa "há mais abaixo", e
+no 320×568 a 200% basta o alvo de toque dela à vista. Nenhuma tela está a mais de 3 toques do
 Início. "Sair" não aparece no Hub nem no Início.
 
 ### V4 — A conversa recupera espaço (US3, FR-020 a FR-022, R5)
 
 Na matriz de aparelhos, em 100% e 150%. **Espera-se**: lista de mensagens +
-campo de escrever ≥ 50% da altura disponível; o título do aviso sempre
-presente; "Ler o aviso inteiro" expande e o aviso aberto não passa de 50%.
+campo de escrever ≥ 50% da altura disponível; o aviso aberto até a primeira
+mensagem e, depois dela, uma linha com o núcleo ("senha" e "código") que nunca
+some; "Ler o aviso inteiro" expande e o aviso aberto não passa de 50%.
 **Provar quebrando**: devolver o aviso antigo (expandido sempre) e ver o portão
 reprovar.
 
@@ -92,10 +95,14 @@ compartilhamento, que leva só o endereço oficial.
 
 ### V8 — Configurações (US7, FR-038 a FR-041)
 
-**Espera-se**: Aparência, Privacidade e Conta, e nada de "Notificações" nem
-"Idiomas". Aparência pré-visualiza antes de confirmar. Privacidade apaga a
+**Espera-se**: Aparência, **Acessibilidade** (FR-038, FR-039a), Privacidade e
+Conta, e nada de "Notificações" nem "Idiomas". Aparência pré-visualiza antes de
+confirmar e oferece **paletas prontas** de cor (FR-039; ainda pela metade na
+T122), nunca cor livre. Privacidade apaga a
 conversa **só depois das duas etapas** da confirmação irreversível — um toque
-não apaga nada. Conta mostra o canal, e "Sair" pergunta antes.
+não apaga nada. Conta mostra o canal, e "Sair" pergunta antes; "Sair e esquecer
+este aparelho" fica **separado**, abaixo, com a frase de para que serve
+(FR-041).
 
 ### V9 — Perfil sem dado novo (US8, FR-042 a FR-042b)
 
@@ -117,8 +124,9 @@ animação nova roda.
 
 ### V11 — Os portões antigos continuam de pé (FR-047, SC-008)
 
-A verificação completa, acima. **Espera-se**: os 481 testes do aplicativo e os
-361 do backend que existiam em 2026-10-01 continuam passando — os que mudaram
+A verificação completa, acima. **Espera-se**: todos os testes que existiam
+antes da feature continuam passando, contra a contagem da execução limpa mais
+recente — os que mudaram
 de forma (procurar o título do aviso em vez do texto inteiro, R5; testar a
 saída na tela de Conta em vez da `TelaPerfil`) estão listados no PR, com o
 motivo.

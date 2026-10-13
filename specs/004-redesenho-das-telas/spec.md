@@ -393,8 +393,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
 
 - **Texto ampliado a 200% no aparelho menor.** Toda tela nova cabe e continua
   utilizável no menor aparelho suportado: nada estoura, e a ação principal fica
-  alcançável. Vale também para o Hub, onde a regra "sem rolar" vale em 100% e
-  150%; em 200%, rolar é aceitável se o início da lista mostrar que existe mais.
+  alcançável. Vale também para o Hub, onde vale a regra da FR-017: a porta
+  principal sempre à vista e a indicação de que há mais abaixo; o Hub inteiro
+  sem rolar só no 360×800 em 100%; e, no 320×568 a 200%, basta o alvo de
+  toque da principal à vista.
 - **Tema escuro e alto contraste.** As ilustrações continuam legíveis e com
   contraste nos três temas; nenhuma informação depende só da ilustração.
 - **"Reduzir movimento" ligado.** As transições e animações novas respeitam a
@@ -574,7 +576,7 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **FR-028a**: Enquanto a captura de um passo não existir, o passo MUST mostrar
   no lugar dela um aviso visível de **captura pendente**, com a chave do guia e
   o número do passo, e o texto do passo continua funcionando. Um teste lista
-  as capturas pendentes; a lista MUST chegar a zero antes da T104. É o aviso ao
+  as capturas pendentes; a lista MUST chegar a zero antes da revisão de design final. É o aviso ao
   desenvolvimento que a revisão da T044 pediu, porque as capturas dependem da
   equipe.
 - **FR-029**: O passo a passo MUST acontecer inteiro dentro do Memora. O Memora
@@ -747,8 +749,9 @@ assinatura ou pagamento, e não encontrar nenhuma.
   não na cor base.
 - **"Início" e "Hub" continuam duas telas**, como no wireframe. O Início
   cumprimenta e leva ao que a pessoa mais faz; o Hub mostra tudo.
-- **"Tela" e "Acessibilidade" viram "Aparência"**, porque no wireframe as duas
-  tratam de cor, tema e fonte.
+- **"Tela" e "Acessibilidade" ficaram juntas em "Aparência" no wireframe**, que
+  as trata como cor, tema e fonte. A revisão da T044 as separou: Acessibilidade
+  é grupo próprio (FR-038).
 - **"Idiomas" e "Notificações" ficam fora** enquanto não houver segundo idioma
   nem notificação, pela regra de não mostrar porta que não abre (D3 da 002 e
   US1 da 003).
@@ -823,7 +826,7 @@ própria.
 | Boas-vindas, cadastro e login | As explorações já analisadas na 001 | O redesenho muda a aparência, não o comportamento (FR-010); a análise da 001 continua valendo |
 | Início | Ligação: "abra o Memora e toque em tal lugar" | O Início só leva a partes do próprio Memora; nenhum atalho abre outro aplicativo nem link |
 | Hub | Porta falsa inserida por fora | As portas são fixas no aplicativo, como já são hoje: o servidor não acrescenta porta |
-| Meus aplicativos (busca) | Aplicativo falso instalado com o mesmo nome do verdadeiro | O item é ligado ao **pacote**, não ao nome, e o aparelho só enxerga os pacotes declarados (R7 do plano). A cópia não aparece na grade e não pode ser aberta pelo Memora |
+| Meus aplicativos (busca) | Aplicativo falso instalado com o mesmo nome do verdadeiro | O item é ligado ao **pacote**, não ao nome, e o aparelho só enxerga os pacotes declarados (R7 do plano). A cópia não aparece na lista e não pode ser aberta pelo Memora |
 | Serviços sociais | Tela que imita o Memora com um "Entrar no gov.br" | Nenhum item abre nada (FR-031), e não há logotipo oficial na tela para imitar |
 | Fim do passo a passo → "Peça à Memora para abrir" | Fazer o Memora abrir o aplicativo errado, ou um que saiu do catálogo | FR-027: o guia não abre nada; o pedido vai pela conversa, e quem decide é o `AutorizadorDeAcao` no servidor. Offline, a oferta não aparece |
 | Passo → "A minha tela está diferente" | A tela "diferente" é um site falso pedindo senha | FR-026: o próprio guia, antes da conversa e sem internet, diz que tela diferente pedindo senha ou código pode ser golpe |

@@ -34,7 +34,7 @@ Uma tela do passo a passo.
 
 | Campo | Tipo | Regra |
 |---|---|---|
-| `captura` | enum de imagem | Arquivo em `assets/guias/<chave>/`. **Imagem inexistente não compila** (R6) |
+| `captura` | enum de imagem | Arquivo em `assets/guias/<chave>/`. Imagem ainda inexistente mostra o aviso de **captura pendente** (FR-028a, R6) |
 | `destaque` | região relativa (`x`, `y`, `largura`, `altura`, de 0 a 1) | Onde tocar. Desenhada pelo aplicativo, por cima da captura |
 | `texto` | texto | Uma ou duas frases, no imperativo gentil da voz da Memora |
 | `temCampoDeSenha` | sim/não | Quando sim, o passo mostra o aviso "a senha só se digita no aplicativo oficial" (FR-032) |
@@ -117,7 +117,7 @@ mundo. **Sai ao sair da conta?** Não: não é dado da pessoa (FR-024a).
 - Com conexão, a resposta nova **substitui** a guardada inteira. Nunca se mescla:
   mesclar manteria vivo um item que o servidor tirou do ar.
 - Sem conexão e sem catálogo guardado (primeira abertura offline), a tela diz
-  que precisa de internet uma vez, em vez de mostrar grade vazia.
+  que precisa de internet uma vez, em vez de mostrar lista vazia.
 - Resposta malformada não substitui a guardada.
 
 ### Dados que já existem e passam a ser exibidos

@@ -91,7 +91,7 @@ cenários que são portão de saída da feature.
 ### Ilustrações e a Memora
 
 - [X] T010 [P] Desenhar a Memora em SVG, a partir do robô do wireframe, com quatro expressões: `app/assets/ilustracoes/memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg` e `memora_preocupada.svg`; registrar em `LICENCAS.md`
-- [ ] T011 [P] Selecionar e recolorir com a paleta as ilustrações de licença aberta (R4): pessoas; portas do Hub (conversa, aplicativos, serviços sociais, ajuda, registro); os 8 assuntos da Ajuda; os 3 grupos de Configurações; estados vazio e erro; aplicativo genérico; e os **pictogramas** dos 9 serviços sociais (prédio, documento, carteira, envelope…), **sem logotipo oficial** (R7). Tudo em `app/assets/ilustracoes/`, cada arquivo com linha em `LICENCAS.md`
+- [ ] T011 [P] Selecionar e recolorir com a paleta as ilustrações de licença aberta (R4): pessoas; portas do Hub (conversa, aplicativos, serviços sociais, ajuda, registro); os 3 grupos de Configurações; estados vazio e erro; aplicativo genérico; e os **pictogramas** dos 9 serviços sociais (prédio, documento, carteira, envelope…), **sem logotipo oficial** (R7). Tudo em `app/assets/ilustracoes/`, cada arquivo com linha em `LICENCAS.md`
 - [X] T012 Acrescentar as ilustrações novas ao enum `Ilustracao` e o **medalhão** claro para os temas escuro e de alto contraste em `app/lib/design_system/componentes/ilustracao/ilustracao_memora.dart`; estender `app/test/design_system/ilustracao_e_destaque_test.dart` para conferir que toda ilustração do enum carrega e que, nos temas escuros, as coloridas estão sobre medalhão
 - [X] T013 Criar `MemoraPersonagem` em `app/lib/design_system/componentes/ilustracao/memora_personagem.dart` (expressões, decorativa por padrão, anunciada com `descricao`). **É componente novo**: o `AvatarMemora` que já existe é o retrato do casal no cartão do cadastro e do login, e não o rosto da Memora — ele continua (correção feita ao implementar)
 
@@ -132,9 +132,11 @@ cenários que são portão de saída da feature.
 >
 > - **T011 está parcial.** Entraram as ilustrações que a fundação e a US2 usam:
 >   as cinco portas do Hub, os estados vazio e erro, o aplicativo genérico e a
->   de aparência. Os assuntos da Ajuda, os outros grupos de Ajustes e os
->   pictogramas dos serviços sociais nascem nas fases que os usam (US5, US6,
->   US7) — desenhar agora seria desenhar sem a tela que os mostra. Todas são
+>   de aparência. Os pictogramas dos serviços sociais e as ilustrações dos
+>   outros grupos de Ajustes nascem nas fases que os usam (US5, US7) —
+>   desenhar agora seria desenhar sem a tela que os mostra. A Ajuda (fase 8)
+>   reaproveitou ilustrações já existentes: os desenhos próprios dos assuntos
+>   da Ajuda são só uma troca opcional (análise de 2026-10-13). Todas são
 >   **desenho original da equipe**, e não de banco de licença aberta, como a R4
 >   previa: a licença fica mais simples, e o `LICENCAS.md` registra cada uma.
 > - **T029-T033 ficaram para a próxima PR.** Três delas são do backend (a V8 e o
@@ -161,8 +163,8 @@ o que cada parte do Hub faz (US2).
 ### Tests
 
 - [X] T034 [P] [US2] Teste em `app/test/features/inicio/tela_inicio_test.dart`: cumprimenta pelo `nomeTratamento`; um atalho para conversar e um para o Hub; **nenhum "Sair"** (FR-019); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [ ] T035 [P] [US2] Reescrever `app/test/features/hub/tela_hub_test.dart` e `app/test/acessibilidade/hub_acessibilidade_test.dart`: portas como `CartaoDePorta`; **sem rolagem em 100% e 150% no 320×568** (FR-017); sem "Sair"; porta sem destino não aparece (FR-018). Provar quebrando: devolver uma porta sem `aoAbrir`; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-  > **Parcial (2026-10-01)**: a reescrita, a matriz de 36 combinações, o portão da FR-018 pelo fluxo real e a quebra estão feitos. **A FR-017 só passa a 100%** no 320×568 (`test/acessibilidade/hub_cabe_sem_rolar_test.dart`, com a Atkinson carregada); **a 150% o teste está escrito e pulado**, porque o Hub não cabe com a FR-016 — o relatório da sessão traz os números. Fecha quando a equipe decidir qual das duas cede.
+- [ ] T035 [P] [US2] Reescrever `app/test/features/hub/tela_hub_test.dart` e `app/test/acessibilidade/hub_acessibilidade_test.dart`: portas como `CartaoDePorta`; **a regra da FR-017 atual** (porta principal sempre à vista e faixa "há mais"; Hub inteiro sem rolar só no 360×800 a 100%; exceção do 320×568 a 200%) — a T113 e o `hub_cabe_sem_rolar_test.dart` já cobrem a regra nova (análise de 2026-10-13); sem "Sair"; porta sem destino não aparece (FR-018). Provar quebrando: devolver uma porta sem `aoAbrir`; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+  > **Parcial (2026-10-01)**: a reescrita, a matriz de 36 combinações, o portão da FR-018 pelo fluxo real e a quebra estão feitos. **A FR-017 só passa a 100%** no 320×568 (`test/acessibilidade/hub_cabe_sem_rolar_test.dart`, com a Atkinson carregada); **a 150% o teste está escrito e pulado**, porque o Hub não cabe com a FR-016 — o relatório da sessão traz os números. Fecha quando a equipe decidir qual das duas cede. **(Superada pela decisão de 2026-10-02: a FR-017 foi reescrita, e a T113 reescreveu o `hub_cabe_sem_rolar_test.dart` para a regra atual; ver a FR-017.)**
 - [X] T036 [US2] Teste do SC-006 em `app/test/features/casca/profundidade_test.dart`: a partir do Início, cada parte do aplicativo é alcançada em até 3 toques, contando os toques de verdade
 
 ### Implementation
@@ -194,7 +196,8 @@ dos 568 px a 150%. O teste está escrito e pulado (`hub_cabe_sem_rolar_test.dart
 e o commit `d5a5031` apertou o cartão para caber a 100%, o oposto do "junto
 demais" da revisão. ✅ **Resolvida em 2026-10-02 (Henrique)**: FR-017 reescrita —
 porta principal sempre sem rolar e indicação de que há mais, em qualquer
-aparelho; Hub inteiro sem rolar só no 360×800, a 100% e 150%. A T113 devolve o
+aparelho; Hub inteiro sem rolar só no 360×800, a 100% e 150% (**superada pela
+revisão do mesmo dia, logo abaixo: vale a FR-017 atual, só a 100%**). A T113 devolve o
 respiro e reescreve o `hub_cabe_sem_rolar_test.dart` para a regra nova.
 ⚠️ **Revista no mesmo dia**: a T113 mediu o 360×800 a 150% inviável também
 (faltam ~170 px de explicação que a FR-016 exige), e a principal não cabe
@@ -208,7 +211,7 @@ FR-017. Nenhum teste pulado.
 - [X] T112 [P] Ícones da barra inferior desenhados para ela (FR-015): reconhecíveis sem rótulo, mesmo peso visual entre os três, versão preenchida para o destino atual; contraste validado nos três temas. Teste em `casca_interna_test.dart` continua exigindo nome escrito ao lado
 - [X] T113 Acabamento refinado do `CartaoDePorta` (FR-016, R2 regra 3): profundidade que encolhe ao pressionar, contorno, medalhão que se destaca da pílula também no tema claro (o aviso da #38); respiro que **cresce com a altura disponível**, em vez de fixo — revendo o `d5a5031` à luz da decisão da FR-017
 - [X] T114 [P] Componente `CaixaDeEtapa` no Design System (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`), exportado e na galeria: uma caixa com a frase de instrução no topo e o conteúdo dentro (FR-002a, R2 regra 8). É informação, não ação: sem pílula nem preenchimento (FR-012 da 002). Teste em `app/test/design_system/caixa_de_etapa_test.dart`, com a matriz
-- [ ] T115 Rever o Início com a T113 e a T114: a Memora com uma frase de tutorial (R2 regra 9), os atalhos em caixas que dizem para que servem, e o espaço da tela usado — hoje sobra metade dela vazia em 390×844 (álbum da T043)
+- [X] T115 Rever o Início com a T113 e a T114: a Memora com uma frase de tutorial (R2 regra 9), os atalhos em caixas que dizem para que servem, e o espaço da tela usado — hoje sobra metade dela vazia em 390×844 (álbum da T043)
 - [ ] T116 Regerar o álbum (T043), reinstalar no aparelho, e **segunda rodada da revisão** do Início e do Hub — agora as telas novas — em `revisao-de-design.md`
 
 ### Nas fases seguintes
@@ -242,8 +245,9 @@ apresentando.
 - [ ] T048 [US1] Criar `ApresentacaoVista` em `app/lib/features/apresentacao/data/apresentacao_vista.dart`, sobre `shared_preferences`; **não** é `DadoLocalDaPessoa` (R11). Sai com `LimpezaDeSessao.executar(esquecerTudo: true)` — aparelho que vai ser vendido não guarda as contas que passaram por ele (R11, revisão da #36)
 - [ ] T049 [US1] Criar as três telas (Olá, Apresentação, Exemplo) em `app/lib/features/apresentacao/presentation/fluxo_apresentacao.dart`, com `BalaoDeFala` e `MemoraPersonagem`; textos em `textos_apresentacao.dart`
 - [ ] T050 [US1] Inserir a apresentação em `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`, entre a autenticação e a casca, só para conta que não a viu
-- [ ] T051 [P] [US1] Redesenhar `app/lib/features/autenticacao/presentation/telas/tela_boas_vindas.dart`: ilustração herói, a frase do que o Memora faz, uma ação principal e "Já tenho conta" (FR-009)
+- [X] T051 [P] [US1] **Substituída pela T117 (análise de 2026-10-13); não se faz.** Redesenhar `app/lib/features/autenticacao/presentation/telas/tela_boas_vindas.dart`: ilustração herói, a frase do que o Memora faz, uma ação principal e "Já tenho conta" (FR-009)
 - [ ] T052 [P] [US1] Redesenhar `tela_cadastro.dart` e `tela_login.dart` na mesma pasta, sem mudar campos nem regras (FR-010); `cadastro_acessibilidade_test.dart` e `campo_senha_ampliacao_test.dart` continuam passando
+- [ ] T127 [US1] Teste das duas boas-vindas, decidido pelo identificador do último acesso: a boas-vindas completa **só para quem nunca entrou no aparelho** (FR-009) e a **tela de volta** para quem já entrou (FR-009a); cada uma com a matriz de aparelhos × escalas. Antes da T117 (análise de 2026-10-13)
 
 **Checkpoint**: US1 e US2 juntas são o MVP visível — entrar, ser apresentada e chegar ao Hub.
 
@@ -270,7 +274,7 @@ apresentando.
 
 ## Phase 6: User Story 4 — Aprender um aplicativo, passo a passo (Priority: P1)
 
-**Goal**: "Meus aplicativos" em grade, com busca, e o passo a passo dentro do Memora.
+**Goal**: "Meus aplicativos" em lista (FR-023), com busca, e o passo a passo dentro do Memora.
 
 **Independent Test**: aprender pelo Memora a achar um vídeo num aplicativo
 desconhecido, e repetir sozinha sem ele (US4).
@@ -287,14 +291,14 @@ desconhecido, e repetir sozinha sem ele (US4).
 - [ ] T062 [US4] Criar `ProgressoDeAprendizado` em `app/lib/features/aprendizado/data/progresso_de_aprendizado.dart` como `DadoLocalDaPessoa`, e incluí-lo em `dadosLocais` de `app/lib/services/ambiente/composicao.dart`
 - [ ] T063 [US4] Ativar no `catalogo_e_guias_test.dart` (T033) as validações de [contracts/guias.md](contracts/guias.md): chave sem guia, guia sem chave, 3 a 7 passos, captura sem descrição, guia sem linha em `CAPTURAS.md` — com a lista explícita de itens anteriores à 004 ainda sem guia
 - [ ] T064 [P] [US4] Teste de unidade (`test` puro, disco real) em `app/test/features/aprendizado/progresso_de_aprendizado_test.dart`: conta só no último passo; mais aprendido com empate para o mais recente; ausente quando vazio. Estender `app/test/features/autenticacao/fluxo_limpeza_de_sessao_test.dart`: o progresso sai em toda saída, inclusive por inatividade, **mesmo quando outro dado local falha** (FR-042b). E concluir um guia **não faz nenhuma chamada** a repositório nem ao servidor, provado com dublê espião (FR-042a)
-- [ ] T065 [P] [US4] Criar `PassoIlustrado` e `IndicadorDePasso` em `app/lib/design_system/componentes/guia/`, exportá-los e pô-los na galeria; teste em `app/test/design_system/passo_ilustrado_test.dart`: selo "Exemplo" sempre presente; contraste do selo e do anel de destaque medido nos três temas; "Passo N de M" em texto; o aviso da FR-032 quando `temCampoDeSenha`; captura ainda carregando e captura que falhou ao carregar, cada uma com desenho próprio (FR-006, FR-043)
+- [ ] T065 [P] [US4] Criar `PassoIlustrado` e `IndicadorDePasso` em `app/lib/design_system/componentes/guia/`, exportá-los e pô-los na galeria; teste em `app/test/design_system/passo_ilustrado_test.dart`: selo "Exemplo" sempre presente; contraste do selo e do anel de destaque medido nos três temas; "Passo N de M" em texto; o aviso da FR-032 quando `temCampoDeSenha`, **inteiro, nunca como `AvisoCompacto`** (FR-049); captura ainda carregando e captura que falhou ao carregar, cada uma com desenho próprio (FR-006, FR-043)
 - [ ] T066 [US4] Criar `TelaPassoAPasso` em `app/lib/features/aprendizado/presentation/tela_passo_a_passo.dart`: a Memora (`MemoraPersonagem`) junto do texto de cada passo (FR-003); "Voltar", "Sair do passo a passo" e "A minha tela está diferente" em todo passo (FR-026), esta última mostrando **primeiro, no próprio guia e sem internet**, o aviso de que tela diferente pedindo senha ou código pode ser golpe, e só depois oferecendo a conversa; último passo com parabéns, "Voltar ao Hub" e, só para cotidiano **e com conexão e catálogo vindo do servidor**, "Peça à Memora para abrir", que leva à conversa com o pedido — o guia **não abre nada**; quem decide é o `AutorizadorDeAcao` (FR-027, revisão da #36); aplicativo não instalado começa por um passo de "baixar na loja oficial"
 - [ ] T067 [US4] Teste em `app/test/features/aprendizado/tela_passo_a_passo_test.dart` cobrindo os cenários 3 a 6 da US4, a matriz completa, e um caso que lê `app/android/app/src/main/AndroidManifest.xml` e **reprova se existir `SYSTEM_ALERT_WINDOW`** (FR-029); os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
 
 ### "Meus aplicativos"
 
 - [ ] T068 [P] [US4] Criar a busca em `app/lib/features/aprendizado/domain/busca.dart` (trecho, sem acento, sem diferenciar maiúscula) e o teste `app/test/features/aprendizado/busca_test.dart` com "tik", "TIK", "video" × "Vídeo"
-- [ ] T069 [US4] Redesenhar o catálogo cotidiano de `app/lib/features/assistente/presentation/telas/tela_catalogo.dart` como grade com busca no topo: ícone do aparelho quando instalado, ilustração genérica quando não; tocar abre o guia, ou a conversa quando o item não tem guia ([contracts/catalogo.md](contracts/catalogo.md)); `app/test/acessibilidade/catalogo_acessibilidade_test.dart` e `catalogo_leva_a_conversa_test.dart` atualizados; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [ ] T069 [US4] Redesenhar o catálogo cotidiano de `app/lib/features/assistente/presentation/telas/tela_catalogo.dart` como **lista** com busca no topo, ícone à esquerda e nome ao lado (FR-023, revista; a T119 ajusta a tarefa): ícone do aparelho quando instalado, ilustração genérica quando não; tocar abre o guia, ou a conversa quando o item não tem guia ([contracts/catalogo.md](contracts/catalogo.md)); `app/test/acessibilidade/catalogo_acessibilidade_test.dart` e `catalogo_leva_a_conversa_test.dart` atualizados; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
 - [ ] T069a [US4] Criar o catálogo guardado em `app/lib/features/assistente/data/catalogo_guardado.dart`, envolvendo a consulta de catálogo do `RepositorioAssistente`: guarda em arquivo local a última resposta completa, **substitui** a guardada a cada resposta nova (nunca mescla), ignora resposta malformada e, sem conexão, devolve a guardada. **Não** é `DadoLocalDaPessoa` (FR-024a, [data-model.md](data-model.md#catálogo-guardado-estado-no-aparelho))
 - [ ] T069b [P] [US4] Teste de unidade (`test` puro, disco real) em `app/test/features/assistente/catalogo_guardado_test.dart`: sem conexão devolve o último recebido; item retirado do servidor some na primeira resposta nova; resposta malformada não apaga o guardado; primeira abertura sem conexão e sem nada guardado diz que precisa de internet; sair da conta **não** apaga o catálogo. Provar quebrando: mesclar em vez de substituir, e ver o item retirado sobreviver
 
@@ -316,7 +320,7 @@ desconhecido, e repetir sozinha sem ele (US4).
 **Independent Test**: depois do passo a passo, a pessoa diz onde se digita a
 senha do gov.br e onde nunca se digita (US5).
 
-- [ ] T076 [P] [US5] Estender `app/test/features/assistente/servico_sensivel_test.dart`: cada serviço com pictograma e nome; nenhum botão "Abrir"; todo guia sensível com `precisaTerEmMaos`; passo com `temCampoDeSenha` mostra o aviso da FR-032. Fechar a T063: a lista de itens sem guia chega a **zero** e é apagada do teste; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [ ] T076 [P] [US5] Estender `app/test/features/assistente/servico_sensivel_test.dart`: cada serviço com pictograma e nome; nenhum botão "Abrir"; todo guia sensível com `precisaTerEmMaos`; passo com `temCampoDeSenha` mostra o aviso da FR-032 **inteiro, nunca como `AvisoCompacto`** (FR-049). Fechar a T063: a lista de itens sem guia chega a **zero** e é apagada do teste; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
 - [ ] T077 [US5] Redesenhar o catálogo sensível (Serviços sociais) em `tela_catalogo.dart`, com a frase de que ali se aprende a acessar os serviços, e pictogramas em vez de logotipos (R7)
 - [ ] T078 [US5] Guia do **Gov.br** (Figuras 29-36 do wireframe), com o que ter em mãos e o aviso de senha nas telas de entrada; capturas com o campo de senha **vazio**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [ ] T079 [P] [US5] Guia do **Meu INSS**, no mesmo formato, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
@@ -340,7 +344,7 @@ senha do gov.br e onde nunca se digita (US5).
 - [ ] T087 [US6] Criar `TelaAjuda` e `TelaAssunto` em `app/lib/features/ajuda/presentation/`
 - [ ] T088 [US6] Criar a ajuda guiada da conversa (Figuras 15-19) em `app/lib/features/ajuda/presentation/ajuda_guiada_da_conversa.dart`, com `BalaoDeFala` e saída direta para a conversa real (FR-034)
 - [ ] T089 [US6] Acrescentar `urlDownload` a `app/lib/services/ambiente/ambiente.dart` (de `--dart-define=MEMORA_URL_DOWNLOAD`) e o envio por `ACTION_SEND` do `android_intent_plus` em `app/lib/features/ajuda/data/compartilhar.dart`; caso em `app/test/services/ambiente_test.dart`
-- [ ] T090 [US6] Pôr a porta "Ajuda" no Hub, em `_portasConstruidas()`, usando `portaAjuda` e `descricaoAjuda` de `textos_assistente.dart`  — fecha a primeira metade da T095 da 003. Com a quinta porta, rodar de novo `app/test/acessibilidade/hub_acessibilidade_test.dart`: a FR-017 (sem rolar em 100% e 150% no 320×568) precisa continuar passando com as 5 portas
+- [ ] T090 [US6] Pôr a porta "Ajuda" no Hub, em `_portasConstruidas()`, usando `portaAjuda` e `descricaoAjuda` de `textos_assistente.dart`  — fecha a primeira metade da T095 da 003. Com a quinta porta, rodar de novo `app/test/acessibilidade/hub_acessibilidade_test.dart`: a FR-017 atual (porta principal sempre à vista e faixa "há mais"; Hub inteiro sem rolar só no 360×800 a 100%) precisa continuar passando com as 5 portas
 
 ---
 
@@ -355,6 +359,7 @@ senha do gov.br e onde nunca se digita (US5).
 - [ ] T093 [US7] Acrescentar "reduzir movimento" a `PreferenciaAparencia` (`app/lib/design_system/preferencias/preferencia_aparencia.dart`), persistida pelo repositório de `app/lib/services/preferencias/` e aplicada sobre o `MediaQuery` no `builder` de `MaterialApp` em `main.dart` (sem ela, só a configuração do sistema vale); redesenhar `tela_aparencia.dart` com pré-visualização e desfazer (FR-039); `app/test/design_system/reducao_de_movimento_test.dart` e `preferencias/tela_aparencia_test.dart` estendidos
 - [ ] T094 [US7] Criar `TelaPrivacidade` em `app/lib/features/configuracoes/presentation/tela_privacidade.dart`: o que fica no aparelho, em linguagem comum, e apagar a conversa pela `ConfirmacaoMemora.irreversivel`, em duas etapas (FR-040; fecha a T085 da 003)
 - [ ] T095 [US7] Criar `TelaConta` em `app/lib/features/configuracoes/presentation/tela_conta.dart`, com o canal vindo de `UltimoAcesso` (R10); apontar `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart` para ela, mantendo as quatro quebras que o portão já provou. "Sair e esquecer este aparelho" **não fica ao lado** do "Sair": separado, abaixo, com a frase de para que serve (FR-041, Princípio II)
+- [ ] T126 [US7] Teste de que a tela **Conta** some quando a sessão expira (FR-050), como a T096 faz para o Perfil: abrir a Conta, deixar a inatividade vencer e exigir o login no lugar dela (análise de 2026-10-13)
 
 ---
 
@@ -385,16 +390,17 @@ senha do gov.br e onde nunca se digita (US5).
 - [ ] T110 Toque **dentro de um diálogo** conta como atividade: hoje os diálogos abertos no `Navigator` de fora ficam fora do `Listener` da casca (o aviso de inatividade se salva porque registra atividade sozinho). Teste em `app/test/features/casca/atividade_acessivel_test.dart`
 
 - [ ] T098a Teste em `app/test/features/casca/sem_campo_de_segredo_test.dart`: varre `app/lib/features/` e reprova qualquer uso de `CampoSenha` ou `CampoCodigo` fora de `features/autenticacao/` (FR-048). Provar quebrando: pôr um `CampoSenha` na `TelaPerfil`
-- [ ] T099 [P] Redesenhar as telas fora do wireframe na mesma linguagem: `tela_confirmar_canal.dart`, `tela_entrega_do_aparelho.dart`, `tela_primeira_entrada.dart` (em `autenticacao/presentation/telas/`), `tela_registro.dart` (em `assistente/presentation/telas/`) e a `ConfirmacaoMemora`; `fluxo_assistido_test.dart`, `tela_registro_test.dart` e `registro_acessibilidade_test.dart` passando na matriz completa
+- [ ] T099 [P] Redesenhar as telas fora do wireframe na mesma linguagem: `tela_confirmar_canal.dart`, `tela_entrega_do_aparelho.dart`, `tela_primeira_entrada.dart` (em `autenticacao/presentation/telas/`), `tela_recuperacao.dart` (em `autenticacao/presentation/telas/`; a spec a lista entre as telas fora do wireframe a redesenhar, e a T057 só cuida do aviso), `tela_registro.dart` (em `assistente/presentation/telas/`) e a `ConfirmacaoMemora`; `fluxo_assistido_test.dart`, `tela_registro_test.dart` e `registro_acessibilidade_test.dart` passando na matriz completa
 - [ ] T100 [P] Cruzar `app/test/design_system/galeria_test.dart` com os três temas e confirmar que todo componente novo aparece
 - [ ] T101 **Estender** `app/test/album/album_de_telas_test.dart`, criado na T043, a todas as telas da feature e às de fora do wireframe redesenhadas na T099
 - [ ] T102 Preencher a tabela "Onde cada cenário roda" do [quickstart.md](quickstart.md) e conferir a tabela de inventário da [spec.md](spec.md): cada uma das 35 telas do wireframe existe no álbum, ou tem a decisão de não existir registrada (SC-001)
 - [ ] T103 Verificação completa: `flutter analyze`, `flutter test`, `validar_paleta.py`, `validar_tokens.py` e `--autoteste`, `mvnw clean test`. Registrar as contagens (contando `<testcase` no backend — ver a armadilha do `tests=` no `CLAUDE.md`) e listar, com motivo, todo teste antigo que mudou de forma (V11)
-- [ ] T104 **Revisão de design** dos três integrantes sobre o álbum completo (`app/build/album/`), tela a tela contra o wireframe e contra o de hoje (SC-005, V13), com o veredito em `specs/004-redesenho-das-telas/revisao-de-design.md`. A revisão confere também, guia por guia, que nenhuma captura tem dado pessoal real (FR-028) e que cada tela tem uma só ação principal (FR-002)
+- [ ] T104 **Revisão de design** dos três integrantes sobre o álbum completo (`app/build/album/`), tela a tela contra o wireframe e contra o de hoje (SC-005, V13), com o veredito em `specs/004-redesenho-das-telas/revisao-de-design.md`. A revisão confere também, guia por guia, que nenhuma captura tem dado pessoal real (FR-028) que cada tela tem uma só ação principal (FR-002), a FR-005 e a FR-045
 - [ ] T105 **Teste com 5 pessoas de 65+** (V14, SC-002 a SC-004), com os resultados por tarefa e as notas em `specs/004-redesenho-das-telas/teste-com-pessoas.md` — mesma rodada que a T071 da 003 e a T050 da 002 esperam
 - [ ] T106 Revisões obrigatórias conforme `.specify/memory/constitution.md`: código, UX, acessibilidade e segurança
-- [ ] T107 Registrar em `docs/referencia/requisitos-atualizados.md` e `docs/design/divergencias-do-prototipo.md` cada divergência do wireframe desta feature, com o motivo: Planos fora, idade fora do Perfil, "Tela" e "Acessibilidade" viraram "Aparência", sem "Idiomas" e "Notificações", pictograma em vez de logotipo, sem o site de ajuda externo, passo a passo dentro do Memora. Atualizar também `specs/003-hub-e-assistente/spec.md` (US1, FR-043 e a tabela das duas categorias): a porta passa a se chamar "Serviços sociais", e banco e saúde continuam na mesma categoria SENSIVEL quando entrarem no catálogo
+- [ ] T107 Registrar em `docs/referencia/requisitos-atualizados.md` e `docs/design/divergencias-do-prototipo.md` cada divergência do wireframe desta feature, com o motivo: Planos fora, idade opcional e só no aparelho (FR-042c), Acessibilidade como grupo próprio (FR-038), paletas prontas de cor (FR-039), sem "Idiomas" e "Notificações", pictograma em vez de logotipo, sem o site de ajuda externo, passo a passo dentro do Memora. Atualizar também `specs/003-hub-e-assistente/spec.md` (US1, FR-043 e a tabela das duas categorias): a porta passa a se chamar "Serviços sociais", e banco e saúde continuam na mesma categoria SENSIVEL quando entrarem no catálogo
 - [ ] T108 Atualizar o `CLAUDE.md` com a passagem de contexto da feature
+- [ ] T125 Aplicar a `CaixaDeEtapa` (FR-002a) às telas que pedem ação e ainda não a têm — Ajustes, Conta e Privacidade, a tela de data de nascimento, o passo a passo, a Ajuda e as telas da T099 —, cada uma com o portão de layout da matriz (análise de 2026-10-13)
 
 ---
 

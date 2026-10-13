@@ -47,6 +47,10 @@ Um teste do aplicativo reprova quando:
 - um guia de serviço sensível não tem `precisaTerEmMaos`;
 - um passo `temCampoDeSenha` não mostra o aviso da FR-032;
 - uma captura não tem `descricaoDaCaptura`;
+- **Captura pendente (FR-028a)**: a captura que ainda não existe **não reprova a
+  construção**: o passo mostra um aviso visível de captura pendente, com a chave
+  do guia e o número do passo, e o texto continua funcionando. O teste lista as
+  pendentes, e a lista precisa chegar a zero antes da revisão de design final;
 - `CAPTURAS.md` não tem linha para um guia.
 
 ## Ordem de produção
