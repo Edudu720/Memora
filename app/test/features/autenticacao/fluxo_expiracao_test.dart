@@ -14,6 +14,7 @@ import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import 'dubles_autenticacao.dart';
 import 'fluxo_dentro_da_conta.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// Repositório cuja saída só termina quando o teste manda — como a chamada de
 /// rede de `encerrarSessao` no servidor real.
@@ -42,6 +43,7 @@ Future<_RepoLento> _montar(WidgetTester t) async {
       child: MaterialApp(
         theme: TemasMemora.claro,
         home: FluxoAutenticacao(
+          dataDeNascimento: DataDeNascimentoEmMemoria(),
           repositorio: repo,
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
           ultimoAcesso: ultimo,
@@ -57,13 +59,17 @@ Future<_RepoLento> _montar(WidgetTester t) async {
   );
   await FluxoDentroDaConta.avancar(t);
   await FluxoDentroDaConta.tocar(
-      t, find.text(TextosAutenticacao.botaoJaTenhoConta));
+    t,
+    find.text(TextosAutenticacao.botaoJaTenhoConta),
+  );
   for (final (Key k, String v) in <(Key, String)>[
     (TelaLogin.chaveIdentificador, 'ana@email.com'),
     (TelaLogin.chaveSenha, 'uma frase que so eu lembro'),
   ]) {
-    final Finder e =
-        find.descendant(of: find.byKey(k), matching: find.byType(TextField));
+    final Finder e = find.descendant(
+      of: find.byKey(k),
+      matching: find.byType(TextField),
+    );
     await t.ensureVisible(e);
     await t.enterText(e, v);
     await t.pump();
@@ -86,8 +92,11 @@ void main() {
     await _montar(t);
     await t.binding.handlePopRoute();
     await FluxoDentroDaConta.avancar(t);
-    expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsOneWidget,
-        reason: 'o cenário pressupõe a pergunta aberta');
+    expect(
+      find.byKey(CascaInterna.chavePerguntaDeFechar),
+      findsOneWidget,
+      reason: 'o cenário pressupõe a pergunta aberta',
+    );
 
     await t.pump(const Duration(seconds: 2));
     await FluxoDentroDaConta.avancar(t);
@@ -96,40 +105,52 @@ void main() {
     await t.pump(const Duration(seconds: 1));
 
     expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
-    expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsNothing,
-        reason: 'diálogo é rota do Navigator de fora, e não morre com a '
-            'casca: é o popUntil de _fecharRotasAbertas que o tira');
+    expect(
+      find.byKey(CascaInterna.chavePerguntaDeFechar),
+      findsNothing,
+      reason:
+          'diálogo é rota do Navigator de fora, e não morre com a '
+          'casca: é o popUntil de _fecharRotasAbertas que o tira',
+    );
   });
 
-  testWidgets('tocar durante uma saída lenta não deixa o monitor vivo no login',
-      (WidgetTester t) async {
-    final _RepoLento repo = await _montar(t);
-    repo.saida = Completer<void>();
+  testWidgets(
+    'tocar durante uma saída lenta não deixa o monitor vivo no login',
+    (WidgetTester t) async {
+      final _RepoLento repo = await _montar(t);
+      repo.saida = Completer<void>();
 
-    await t.pump(const Duration(seconds: 2)); // aviso
-    await FluxoDentroDaConta.avancar(t);
-    expect(find.text(TextosAutenticacao.tituloAvisoInatividade), findsOneWidget);
-    await t.pump(const Duration(seconds: 1)); // expira; a saída fica pendente
-    await FluxoDentroDaConta.avancar(t);
-
-    // A pessoa volta no último segundo e toca "Estou aqui". A expiração já
-    // começou: esse toque não pode reiniciar a contagem.
-    if (t.any(find.text(TextosAutenticacao.botaoContinuar))) {
-      await t.tap(find.text(TextosAutenticacao.botaoContinuar));
+      await t.pump(const Duration(seconds: 2)); // aviso
       await FluxoDentroDaConta.avancar(t);
-    }
-
-    repo.saida!.complete();
-    repo.saida = null;
-    await FluxoDentroDaConta.avancar(t, 6);
-    expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
-
-    // Parada no login: não há sessão, e não pode haver monitor.
-    for (int i = 0; i < 3; i++) {
-      await t.pump(const Duration(seconds: 2));
+      expect(
+        find.text(TextosAutenticacao.tituloAvisoInatividade),
+        findsOneWidget,
+      );
+      await t.pump(const Duration(seconds: 1)); // expira; a saída fica pendente
       await FluxoDentroDaConta.avancar(t);
-      expect(find.text(TextosAutenticacao.tituloAvisoInatividade), findsNothing,
-          reason: 'aviso de inatividade por cima do LOGIN');
-    }
-  });
+
+      // A pessoa volta no último segundo e toca "Estou aqui". A expiração já
+      // começou: esse toque não pode reiniciar a contagem.
+      if (t.any(find.text(TextosAutenticacao.botaoContinuar))) {
+        await t.tap(find.text(TextosAutenticacao.botaoContinuar));
+        await FluxoDentroDaConta.avancar(t);
+      }
+
+      repo.saida!.complete();
+      repo.saida = null;
+      await FluxoDentroDaConta.avancar(t, 6);
+      expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
+
+      // Parada no login: não há sessão, e não pode haver monitor.
+      for (int i = 0; i < 3; i++) {
+        await t.pump(const Duration(seconds: 2));
+        await FluxoDentroDaConta.avancar(t);
+        expect(
+          find.text(TextosAutenticacao.tituloAvisoInatividade),
+          findsNothing,
+          reason: 'aviso de inatividade por cima do LOGIN',
+        );
+      }
+    },
+  );
 }

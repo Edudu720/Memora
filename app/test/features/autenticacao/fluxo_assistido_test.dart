@@ -11,6 +11,7 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_primeira_en
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 
 import 'dubles_autenticacao.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// O modo assistido de ponta a ponta (T061-T064, FR-058 a FR-064).
 ///
@@ -67,6 +68,7 @@ Future<void> _montarFluxo(
     MaterialApp(
       theme: TemasMemora.claro,
       home: FluxoAutenticacao(
+        dataDeNascimento: DataDeNascimentoEmMemoria(),
         repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
         ultimoAcesso: ultimoAcesso,
       ),
@@ -87,8 +89,9 @@ Future<void> _preencherComAcompanhante(WidgetTester t) async {
 
 void main() {
   group('A senha não é alcançada pelo acompanhante — FR-059 e FR-060', () {
-    testWidgets('com acompanhante, o campo de senha não existe na tela',
-        (WidgetTester t) async {
+    testWidgets('com acompanhante, o campo de senha não existe na tela', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
 
       await _preencherComAcompanhante(t);
@@ -96,14 +99,16 @@ void main() {
       expect(
         find.byKey(TelaCadastro.chaveSenha),
         findsNothing,
-        reason: 'A FR-059 manda interromper o fluxo AO CHEGAR na senha. Um '
+        reason:
+            'A FR-059 manda interromper o fluxo AO CHEGAR na senha. Um '
             'campo presente, ainda que rolado para baixo, já teria sido '
             'preenchido pelo acompanhante.',
       );
     });
 
-    testWidgets('sem acompanhante, o campo de senha está lá desde o começo',
-        (WidgetTester t) async {
+    testWidgets('sem acompanhante, o campo de senha está lá desde o começo', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
 
       await _tocarNoTexto(t, 'Começar minha jornada');
@@ -112,8 +117,9 @@ void main() {
       expect(find.byKey(TelaCadastro.chaveSenha), findsOneWidget);
     });
 
-    testWidgets('o pedido de devolver o aparelho aparece e explica o motivo',
-        (WidgetTester t) async {
+    testWidgets('o pedido de devolver o aparelho aparece e explica o motivo', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _preencherComAcompanhante(t);
 
@@ -129,8 +135,9 @@ void main() {
 
     /// A FR-059 interrompe um gesto de cuidado. Sem agradecer, a interrupção
     /// soa como acusação — e quem se sente acusado contorna a regra.
-    testWidgets('o texto agradece quem ajudou em vez de acusar',
-        (WidgetTester t) async {
+    testWidgets('o texto agradece quem ajudou em vez de acusar', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _preencherComAcompanhante(t);
       await _tocarNaChave(t, TelaCadastro.chavePedirAparelho);
@@ -165,15 +172,17 @@ void main() {
       expect(
         olhinho,
         findsNothing,
-        reason: 'Revelar a senha entregaria ao acompanhante, que ainda está '
+        reason:
+            'Revelar a senha entregaria ao acompanhante, que ainda está '
             'ao lado, exatamente o segredo que este modo protege (FR-060).',
       );
     });
   });
 
   group('Confirmar a posse e entrar sozinha — FR-062 e FR-063', () {
-    testWidgets('o cadastro assistido leva à confirmação, não para dentro',
-        (WidgetTester t) async {
+    testWidgets('o cadastro assistido leva à confirmação, não para dentro', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _cadastrarComAcompanhante(t);
 
@@ -181,13 +190,15 @@ void main() {
       expect(
         find.byKey(TelaInicio.chaveSaudacao),
         findsNothing,
-        reason: 'Entrar aqui concluiria o cadastro assistido sem posse '
+        reason:
+            'Entrar aqui concluiria o cadastro assistido sem posse '
             'confirmada, que é o que o cenário V4 proíbe.',
       );
     });
 
-    testWidgets('código errado não passa, e o texto não culpa a pessoa',
-        (WidgetTester t) async {
+    testWidgets('código errado não passa, e o texto não culpa a pessoa', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _cadastrarComAcompanhante(t);
 
@@ -198,8 +209,9 @@ void main() {
       expect(find.textContaining('não conferiu'), findsOneWidget);
     });
 
-    testWidgets('com o código certo, vem a primeira entrada sozinha',
-        (WidgetTester t) async {
+    testWidgets('com o código certo, vem a primeira entrada sozinha', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _cadastrarComAcompanhante(t);
 
@@ -211,8 +223,9 @@ void main() {
     /// O coração da FR-063: a pessoa precisa **entrar**, não ser levada para
     /// dentro. Se esta tela virasse um "continuar" que já autentica, a
     /// confirmação de autonomia deixaria de existir.
-    testWidgets('a primeira entrada leva ao login, e não direto para dentro',
-        (WidgetTester t) async {
+    testWidgets('a primeira entrada leva ao login, e não direto para dentro', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _cadastrarComAcompanhante(t);
       await _confirmarCanal(t);
@@ -225,8 +238,9 @@ void main() {
 
     /// A FR-012 remove a barreira de digitar o e-mail inteiro. Ela vale aqui
     /// também: a pessoa que nunca entrou é justamente quem mais precisa.
-    testWidgets('o login da primeira entrada já vem com o identificador',
-        (WidgetTester t) async {
+    testWidgets('o login da primeira entrada já vem com o identificador', (
+      WidgetTester t,
+    ) async {
       final UltimoAcessoEmMemoria memoria = UltimoAcessoEmMemoria();
       await _montarFluxo(t, ultimoAcesso: memoria);
       await _cadastrarComAcompanhante(t);
@@ -236,8 +250,9 @@ void main() {
       expect(memoria.valor, 'ana@email.com');
     });
 
-    testWidgets('e aí ela entra sozinha, com a própria senha',
-        (WidgetTester t) async {
+    testWidgets('e aí ela entra sozinha, com a própria senha', (
+      WidgetTester t,
+    ) async {
       await _montarFluxo(t, ultimoAcesso: UltimoAcessoEmMemoria());
       await _cadastrarComAcompanhante(t);
       await _confirmarCanal(t);

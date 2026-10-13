@@ -14,6 +14,7 @@ import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// Tocar num serviço do catálogo leva à conversa que ensina (T077).
 ///
@@ -76,6 +77,7 @@ Future<void> _chegarAoHub(WidgetTester t) async {
     MaterialApp(
       theme: TemasMemora.claro,
       home: FluxoAutenticacao(
+        dataDeNascimento: DataDeNascimentoEmMemoria(),
         repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
         assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
         conversaLocal: _ConversaEmMemoria.new,
@@ -115,8 +117,9 @@ void main() {
     (TextosAssistente.portaAplicativos, 'WhatsApp'),
     (TextosAssistente.portaServicos, 'Gov.br'),
   ]) {
-    testWidgets('em "$porta", tocar em $servico abre a conversa já perguntando',
-        (WidgetTester t) async {
+    testWidgets('em "$porta", tocar em $servico abre a conversa já perguntando', (
+      WidgetTester t,
+    ) async {
       await _chegarAoHub(t);
 
       await _tocar(t, find.byKey(TelaHub.chaveDaPorta(porta)));
@@ -125,14 +128,16 @@ void main() {
       expect(
         find.byType(TelaConversa),
         findsOneWidget,
-        reason: 'O item do catálogo precisa levar a algum lugar. Botão que não '
+        reason:
+            'O item do catálogo precisa levar a algum lugar. Botão que não '
             'abre nada faz quem toca concluir que quebrou o aparelho (FR-003).',
       );
       expect(_textoDoCampo(t), TextosAssistente.perguntaSobre(servico));
       expect(
         find.text(TextosAssistente.perguntaSobre(servico)),
         findsOneWidget,
-        reason: 'A pergunta fica no campo, e não vira mensagem: quem envia é a '
+        reason:
+            'A pergunta fica no campo, e não vira mensagem: quem envia é a '
             'pessoa.',
       );
     });
@@ -141,9 +146,13 @@ void main() {
   test('o estado vazio do catálogo não promete "em breve" (H1)', () {
     // O H1 do quickstart: nenhuma porta leva a tela vazia ou a "em breve".
     // Promessa sem data, para este público, é o mesmo que porta que não abre.
-    expect(TextosAssistente.catalogoVazioTitulo.toLowerCase(),
-        isNot(contains('breve')));
-    expect(TextosAssistente.catalogoVazioExplicacao.toLowerCase(),
-        isNot(contains('breve')));
+    expect(
+      TextosAssistente.catalogoVazioTitulo.toLowerCase(),
+      isNot(contains('breve')),
+    );
+    expect(
+      TextosAssistente.catalogoVazioExplicacao.toLowerCase(),
+      isNot(contains('breve')),
+    );
   });
 }

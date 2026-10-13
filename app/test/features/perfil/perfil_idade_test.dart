@@ -304,6 +304,43 @@ void main() {
       });
     }
 
+    testWidgets('mês fora do calendário: o erro aparece no campo Mês', (
+      t,
+    ) async {
+      await abrir(t);
+
+      await preencherData(t, '15', '13', '1952');
+      await tocar(t, find.byKey(TelaDataDeNascimento.chaveGuardar));
+
+      final Finder erro = find.text(TextosPerfil.erroImpossivel);
+      expect(erro, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(TelaDataDeNascimento.chaveMes),
+          matching: erro,
+        ),
+        findsOneWidget,
+        reason: 'o campo a corrigir é o mês',
+      );
+    });
+
+    testWidgets('dia que não existe no mês: o erro continua no campo Dia', (
+      t,
+    ) async {
+      await abrir(t);
+
+      await preencherData(t, '31', '2', '1952');
+      await tocar(t, find.byKey(TelaDataDeNascimento.chaveGuardar));
+
+      expect(
+        find.descendant(
+          of: find.byKey(TelaDataDeNascimento.chaveDia),
+          matching: find.text(TextosPerfil.erroImpossivel),
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('se guardar falhar, avisa e destrava os botões', (t) async {
       final _QueFalhaAoGuardar datas = _QueFalhaAoGuardar();
       await montar(t, datas);
@@ -444,7 +481,7 @@ void main() {
   group('O Perfil sem id de conta não mostra a idade', () {
     Future<void> perfil(
       WidgetTester t,
-      DataDeNascimentoEmMemoria datas,
+      ArmazenamentoDaDataDeNascimento datas,
       String? id,
     ) async {
       await t.pumpWidget(
@@ -463,10 +500,9 @@ void main() {
 
     for (final String? id in <String?>[null, '', '   ']) {
       testWidgets('id ${id == null ? 'ausente' : "'$id'"}', (t) async {
-        final DataDeNascimentoEmMemoria datas = DataDeNascimentoEmMemoria();
-        await datas.guardar('', nascida);
-        await datas.guardar('   ', nascida);
-        await perfil(t, datas, id);
+        // Uma guarda que daria a data a qualquer id, até o vazio: a tela é que
+        // não pode perguntar.
+        await perfil(t, _QueDaAData(nascida), id);
 
         expect(find.byType(SecaoIdade), findsNothing);
         expect(find.byKey(SecaoIdade.chaveIdade), findsNothing);
@@ -558,4 +594,20 @@ class _QueFalhaAoGuardar extends DataDeNascimentoEmMemoria {
     if (falha) throw StateError('disco cheio');
     await super.guardar(idDaConta, data);
   }
+}
+
+/// Guarda que devolve [data] para qualquer id, inclusive o vazio.
+class _QueDaAData implements ArmazenamentoDaDataDeNascimento {
+  final DataDeNascimento data;
+
+  _QueDaAData(this.data);
+
+  @override
+  Future<DataDeNascimento?> ler(String idDaConta) async => data;
+
+  @override
+  Future<void> guardar(String idDaConta, DataDeNascimento data) async {}
+
+  @override
+  Future<void> apagar(String idDaConta) async {}
 }
