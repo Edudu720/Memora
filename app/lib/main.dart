@@ -35,6 +35,7 @@ Future<void> main() async {
     ultimoAcesso: ultimoAcesso,
     dataDeNascimento: dataDeNascimento,
     apresentacaoVista: apresentacaoVista,
+    guardarCatalogo: true,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
