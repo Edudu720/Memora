@@ -117,6 +117,12 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
 
   bool _vazio(TextEditingController c) => int.tryParse(c.text.trim()) == null;
 
+  /// O mês digitado não existe (0, 13...): o erro é do Mês, e não do Dia.
+  bool _mesForaDoCalendario() {
+    final int? mes = int.tryParse(_mes.text.trim());
+    return mes != null && (mes < 1 || mes > 12);
+  }
+
   /// O erro do campo, se for dele.
   ///
   /// Cada problema aponta para o campo que a pessoa precisa olhar: o que não
@@ -124,13 +130,16 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
   /// longe demais é o ano; o que falta é o primeiro campo vazio.
   String? _erroDia() => switch (_problema) {
     ProblemaDaData.incompleta when _vazio(_dia) => TextosPerfil.erroIncompleta,
-    ProblemaDaData.impossivel => TextosPerfil.erroImpossivel,
+    ProblemaDaData.impossivel when !_mesForaDoCalendario() =>
+      TextosPerfil.erroImpossivel,
     _ => null,
   };
 
   String? _erroMes() => switch (_problema) {
     ProblemaDaData.incompleta when !_vazio(_dia) && _vazio(_mes) =>
       TextosPerfil.erroIncompleta,
+    ProblemaDaData.impossivel when _mesForaDoCalendario() =>
+      TextosPerfil.erroImpossivel,
     _ => null,
   };
 
