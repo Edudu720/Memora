@@ -1035,5 +1035,45 @@ void main() {
       );
       expect(fluxo.conversa.guardadas, isEmpty);
     });
+
+    testWidgets('se o aparelho não deixa apagar, Privacidade diz que NÃO '
+        'apagou, e a conversa aberta no Início não cai', (
+      WidgetTester t,
+    ) async {
+      await entrar(t);
+      await fluxo.conversa.guardar(<MensagemDaConversa>[
+        MensagemDaConversa(
+          autor: AutorDaMensagem.pessoa,
+          texto: 'Como eu mando uma foto?',
+          momento: DateTime(2026, 10),
+        ),
+      ]);
+      fluxo.conversa.falharAoApagar = true;
+      await FluxoDentroDaConta.tocar(t, find.byKey(TelaInicio.chaveConversar));
+      await FluxoDentroDaConta.esperarATransicao(t);
+
+      await FluxoDentroDaConta.irAPrivacidade(t);
+      await FluxoDentroDaConta.tocar(
+        t,
+        find.byKey(TelaPrivacidade.chaveApagar),
+      );
+      await FluxoDentroDaConta.tocar(
+        t,
+        find.descendant(
+          of: find.byKey(TelaPrivacidade.chaveConfirmacao),
+          matching: find.text(TextosConfiguracoes.botaoApagarConversa),
+        ),
+      );
+      await FluxoDentroDaConta.tocar(t, simPodeApagar);
+
+      expect(find.byKey(TelaPrivacidade.chaveFalha), findsOneWidget);
+      expect(find.byKey(TelaPrivacidade.chaveApagada), findsNothing);
+      expect(t.takeException(), isNull);
+      expect(
+        fluxo.conversa.guardadas,
+        isNotEmpty,
+        reason: 'a conversa continua no aparelho, e a tela disse isso',
+      );
+    });
   });
 }

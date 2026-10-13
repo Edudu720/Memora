@@ -44,7 +44,7 @@ class ConversaLocal implements DadoLocalDaPessoa {
 
   /// Cria o armazenamento da conversa.
   ConversaLocal({Future<Directory> Function()? diretorio})
-      : _diretorio = diretorio ?? getApplicationDocumentsDirectory;
+    : _diretorio = diretorio ?? getApplicationDocumentsDirectory;
 
   /// Lê a conversa guardada. Lista vazia quando não há nenhuma.
   Future<List<MensagemDaConversa>> ler() async {
@@ -52,7 +52,9 @@ class ConversaLocal implements DadoLocalDaPessoa {
       // Le direto e trata a ausencia como conversa vazia, em vez de
       // perguntar antes se existe: sao duas idas ao disco para responder o
       // que a leitura ja responde.
-      final dynamic conteudo = jsonDecode(await (await _arquivo()).readAsString());
+      final dynamic conteudo = jsonDecode(
+        await (await _arquivo()).readAsString(),
+      );
       if (conteudo is! List) return const <MensagemDaConversa>[];
 
       return conteudo
@@ -70,7 +72,8 @@ class ConversaLocal implements DadoLocalDaPessoa {
 
   /// Grava a conversa, mantendo apenas os turnos mais recentes.
   Future<void> guardar(List<MensagemDaConversa> mensagens) async {
-    final List<MensagemDaConversa> recentes = mensagens.length <= turnosGuardados
+    final List<MensagemDaConversa> recentes =
+        mensagens.length <= turnosGuardados
         ? mensagens
         : mensagens.sublist(mensagens.length - turnosGuardados);
 
@@ -90,20 +93,23 @@ class ConversaLocal implements DadoLocalDaPessoa {
   Future<void> apagar() async {
     try {
       await (await _arquivo()).delete();
-    } on Exception {
-      // Nada a fazer. A limpeza de sessão continua, porque o que importa mais
-      // — a credencial — é apagado por outro caminho.
+    } on PathNotFoundException {
+      // Não há conversa guardada: o resultado que se queria já é verdade.
     }
+    // Qualquer outra falha (permissão, disco) SOBE: quem apaga a pedido da
+    // pessoa, em Privacidade, precisa saber que a conversa continua lá, em
+    // vez de ouvir "pronto" de graça. A `LimpezaDeSessao` protege cada item,
+    // então sair continua nunca falhando para a pessoa (FR-026).
   }
 
   Future<File> _arquivo() async =>
       File('${(await _diretorio()).path}/$nomeDoArquivo');
 
   Map<String, dynamic> _mapaDe(MensagemDaConversa m) => <String, dynamic>{
-        'autor': m.autor.name,
-        'texto': m.texto,
-        'momento': m.momento.toIso8601String(),
-      };
+    'autor': m.autor.name,
+    'texto': m.texto,
+    'momento': m.momento.toIso8601String(),
+  };
 
   MensagemDaConversa? _mensagemDe(Map<String, dynamic> mapa) {
     final String? texto = mapa['texto'] as String?;
