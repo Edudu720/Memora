@@ -201,8 +201,10 @@ void main() {
 
       // Imagem anunciada a cada porta acrescentaria uma parada à navegação
       // sem informar nada (FR-045).
-      expect(find.bySemanticsLabel(RegExp('imagem|ilustra', caseSensitive: false)),
-          findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp('imagem|ilustra', caseSensitive: false)),
+        findsNothing,
+      );
       h.dispose();
     });
   });
