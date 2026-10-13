@@ -4,7 +4,8 @@
 
 **Created**: 2026-10-01
 
-**Status**: Draft
+**Status**: Aprovada por Eduardo Juncker em 2026-10-13, com as clarificações
+desta data; ratificação de Henrique Sandrini e Du3101 na revisão da #58
 
 **Input**: User description: "O front deve ser com um design prático, intuitivo, profissional e moderno. Não estamos satisfeito com a maneira que foi realizada. Deve conter todas as telas do wireframe e melhorar drasticamente na parte de design e acessibilidade para o idoso. Foi focado muito na segurança do projeto e não em sua aparencia e funcionalidades."
 
@@ -100,8 +101,16 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 - Q: O aviso "a Memora nunca pede senha ou código" pode ser removível e sumir depois que a pessoa manda uma mensagem? → A: **Encolhe, não some.** Fica aberto até a primeira mensagem da conversa; depois vira uma linha fina, com escudo e o núcleo do aviso, que a pessoa toca para ler inteiro. Sumir de vez deixaria a pessoa sem aviso justamente no meio da conversa, que é onde o golpista a pressiona (FR-022, R5).
 - Q: O Perfil mostra o plano? → A: **Não, por ora.** Mantém-se a resposta sobre Planos acima.
 - Q: O Perfil mostra a idade? → A: **Sim, se a pessoa quiser informar.** A data de nascimento é **opcional**, informada no próprio Perfil, nunca no cadastro, e **fica só no aparelho** — não vai para o servidor. Substitui a resposta anterior, que dizia que a idade não seria pedida (FR-042).
-- Q: Aparência deixa escolher cores? → A: **Sim, entre paletas prontas.** Cinco ou seis cores de destaque, combináveis com os três temas, cada combinação validada por contraste antes de existir. Cor livre está fora: não há como garantir contraste, e o prejuízo cairia em quem enxerga pior (FR-039).
+- Q: Aparência deixa escolher cores? → A: **Sim, entre paletas prontas.** Cinco ou seis cores de destaque, combináveis com os temas claro e escuro (não com o alto contraste; ver a sessão de 2026-10-13), cada combinação validada por contraste antes de existir. Cor livre está fora: não há como garantir contraste, e o prejuízo cairia em quem enxerga pior (FR-039).
 - Q: Qual "Carteira Digital" o wireframe quis dizer? → A: **O documento digital do gov.br**, e não a Carteira Digital de Trânsito (T080).
+
+### Session 2026-10-13 — bloqueios do `/speckit-analyze` (Eduardo)
+
+- Q: Como classificar e guardar a data de nascimento no aparelho? → A: **Confidencial, sem cifra**, como o canal de contato. A constituição só exige cifra em repouso para dado Sensível. Fora da tela em que é informada, nenhuma tela mostra a data, só a idade (FR-042c, Threat Model, Análise de Engenharia Social).
+- Q: Como registrar a aprovação desta spec, que estava em `Draft` com a implementação já avançada (Princípio IV)? → A: **Aprovada agora pelo Eduardo, com estas clarificações; Henrique e Du3101 ratificam na revisão da #58** (Status). A implementação nova segue a partir desta aprovação.
+- Q: Que confirmação "Sair e esquecer este aparelho" exige? → A: **A irreversível, em duas etapas**, a mesma de apagar a conversa (FR-040). Ela apaga sem volta o que o aparelho guarda de todas as contas (FR-041).
+- Q: As paletas prontas valem no tema de alto contraste? → A: **Não.** A paleta vale no claro e no escuro; o alto contraste existe para o máximo contraste, e qualquer cor de destaque seria concessão (FR-039, R15).
+- Q: A segunda rodada da revisão de design no celular (T116) é portão para as próximas telas? → A: **É portão do merge, não do código.** As telas novas podem ser implementadas, mas nenhuma PR de tela nova entra na `master` antes da T116. Vale para o que for implementado a partir de agora (fase 7, Perfil, T099, T117, T125); as PRs de tela já abertas em 2026-10-13 (#45, #46, #47, #55, #56) seguem a ordem de merge, porque a própria T116 precisa delas no aparelho (Assumptions).
 
 ---
 
@@ -627,9 +636,11 @@ assinatura ou pagamento, e não encontrar nenhuma.
   aparecem quando existirem.
 - **FR-039**: Aparência MUST permitir escolher entre os temas validados e entre
   **paletas prontas de cor de destaque** — de cinco a seis —, com
-  pré-visualização antes de confirmar. Toda combinação de tema e paleta MUST
-  passar no validador de contraste antes de existir; cor livre MUST NOT ser
-  oferecida (revisão da T044).
+  pré-visualização antes de confirmar. A paleta vale nos temas claro e escuro;
+  no **alto contraste ela não se aplica**, porque ele existe para o máximo
+  contraste. Toda combinação de tema claro ou escuro com paleta MUST passar no
+  validador de contraste antes de existir; cor livre MUST NOT ser oferecida
+  (revisão da T044).
 - **FR-039a**: Acessibilidade MUST reunir o tamanho do texto, reduzir movimento
   e o tema de alto contraste, cada opção com uma frase dizendo **para quem ela
   serve** ("Se as letras parecem pequenas…"), e com pré-visualização antes de
@@ -642,7 +653,9 @@ assinatura ou pagamento, e não encontrar nenhuma.
   sair esquecendo também o identificador lembrado. A segunda é a mais
   destrutiva das duas e MUST NOT ficar adjacente à primeira (Princípio II):
   fica separada, abaixo, com uma frase dizendo para que serve — aparelho
-  compartilhado ou que vai ser vendido.
+  compartilhado ou que vai ser vendido. Como apaga sem volta o que o aparelho
+  guarda de todas as contas, MUST usar a confirmação irreversível da FR-040, em
+  duas etapas e sem o botão de esquecer ao lado do de cancelar.
 - **FR-042**: O Perfil MUST mostrar nome, desenho, canal de contato, o
   aplicativo mais aprendido e, se a pessoa a tiver informado, a **idade**, como
   informação e nunca como botão. MUST NOT mostrar plano.
@@ -650,7 +663,9 @@ assinatura ou pagamento, e não encontrar nenhuma.
   Perfil (nunca no cadastro), e MUST ficar **só no aparelho**, por conta, sem ir
   ao servidor. Sai com `esquecerTudo`, como o identificador do último acesso;
   não sai na saída comum, para a pessoa não precisar digitá-la de novo a cada
-  entrada (revisão da T044).
+  entrada (revisão da T044). É dado **Confidencial** e fica no aparelho sem
+  cifra, como o canal de contato. Fora da tela em que é informada, nenhuma
+  tela MUST mostrar a data: o Perfil mostra só a idade.
 - **FR-042a**: O aplicativo mais aprendido MUST ser calculado no aparelho, a
   partir dos passo a passo concluídos, e MUST NOT ser enviado ao servidor.
 - **FR-042b**: O progresso de aprendizado MUST ser apagado do aparelho quando a
@@ -706,6 +721,8 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **Catálogo guardado**: a última lista de aplicativos e serviços recebida do
   servidor. Fica no aparelho para o uso sem internet (FR-024a); não é dado da
   pessoa.
+- **Data de nascimento**: opcional, por conta, só no aparelho. Confidencial.
+  Sai só com `esquecerTudo` (FR-042c).
 - **Perfil exibido**: os dados que o Perfil mostra. Não cria dado novo no
   servidor.
 
@@ -739,6 +756,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
 
 ## Assumptions
 
+- **A revisão de design no aparelho é portão do merge.** Depois da reprovação
+  do acabamento na T044, nenhuma tela nova entra na `master` antes da segunda
+  rodada (T116). Implementar antes é permitido; mesclar, não. As PRs de tela
+  abertas até 2026-10-13 ficam de fora, porque a T116 as revisa no aparelho.
 - **"Profissional e moderno" é verificado por gente, não por máquina.** O SC-004
   e o SC-005 são as medidas; não existe teste automatizado de beleza.
 - **A linguagem visual nova nasce do Design System, e não ao lado dele.** Se o
@@ -779,6 +800,7 @@ assinatura ou pagamento, e não encontrar nenhuma.
 | Canal de contato (e-mail ou telefone) | Confidencial | Perfil, Conta |
 | Marca de apresentação vista | Público | Só no aparelho |
 | Progresso de aprendizado | Interno | Perfil; só no aparelho |
+| Data de nascimento | Confidencial | Perfil, só como idade; a data, só na tela de informar; só no aparelho |
 | Imagens de exemplo de outros aplicativos | Público | Passo a passo; não podem conter dado real |
 
 ### Quem pode acessar
@@ -786,8 +808,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - A pessoa dona da conta, com sessão válida, vê os próprios dados.
 - Quem pega o aparelho desbloqueado com sessão aberta vê o mesmo, até a
   inatividade encerrar a sessão (FR-017 da 001).
-- Nenhuma tela desta feature envia dado novo ao servidor. O único dado novo, o
-  progresso de aprendizado, fica no aparelho e sai junto com a conta.
+- Nenhuma tela desta feature envia dado novo ao servidor. Os dois dados novos
+  ficam no aparelho e nunca vão para a cópia de segurança fora dele: o
+  progresso de aprendizado sai junto com a conta, e a data de nascimento sai só
+  com `esquecerTudo` (FR-042c).
 
 ### Ataques previstos e mitigação
 
@@ -821,6 +845,7 @@ própria.
 | Ajuda → Compartilhar | Mensagem "do Memora" com link trocado | FR-035 |
 | Ajuda → Baixar aplicativo | "Baixe este aplicativo para o Memora funcionar" | FR-036 e FR-036a: o Memora nunca pede para instalar outro aplicativo |
 | Perfil / Conta | Ligação "do suporte do Memora" pede para ler o e-mail da tela | FR-036a: a Conta diz que o Memora não liga para ninguém |
+| Perfil → informar a data de nascimento | Ligação "do INSS" ou "do banco" pede a data "para confirmar o cadastro", ou alguém lê a data na tela do aparelho | FR-042c: a data só aparece na tela em que é informada, e o Perfil mostra só a idade. Ela nunca é pedida fora do Perfil nem no cadastro, e a FR-036a diz que o Memora não liga para ninguém |
 | Planos (ausente) | "Seu plano do Memora venceu, pague por este link" | US9: o Memora não tem plano; FR-036a: o Memora diz que nunca cobra |
 | Conversa redesenhada | Aviso compacto deixa de ser notado | FR-049: compacto, mas sempre visível, e expansível |
 | Boas-vindas, cadastro e login | As explorações já analisadas na 001 | O redesenho muda a aparência, não o comportamento (FR-010); a análise da 001 continua valendo |

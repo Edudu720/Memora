@@ -212,7 +212,7 @@ FR-017. Nenhum teste pulado.
 - [X] T113 Acabamento refinado do `CartaoDePorta` (FR-016, R2 regra 3): profundidade que encolhe ao pressionar, contorno, medalhão que se destaca da pílula também no tema claro (o aviso da #38); respiro que **cresce com a altura disponível**, em vez de fixo — revendo o `d5a5031` à luz da decisão da FR-017
 - [X] T114 [P] Componente `CaixaDeEtapa` no Design System (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`), exportado e na galeria: uma caixa com a frase de instrução no topo e o conteúdo dentro (FR-002a, R2 regra 8). É informação, não ação: sem pílula nem preenchimento (FR-012 da 002). Teste em `app/test/design_system/caixa_de_etapa_test.dart`, com a matriz
 - [X] T115 Rever o Início com a T113 e a T114: a Memora com uma frase de tutorial (R2 regra 9), os atalhos em caixas que dizem para que servem, e o espaço da tela usado — hoje sobra metade dela vazia em 390×844 (álbum da T043)
-- [ ] T116 Regerar o álbum (T043), reinstalar no aparelho, e **segunda rodada da revisão** do Início e do Hub — agora as telas novas — em `revisao-de-design.md`
+- [ ] T116 Regerar o álbum (T043), reinstalar no aparelho, e **segunda rodada da revisão** do Início e do Hub — agora as telas novas — em `revisao-de-design.md`. **Portão do merge** (clarificação de 2026-10-13): nenhuma PR de tela nova entra na `master` antes desta tarefa. Implementar antes é permitido. As PRs de tela abertas em 2026-10-13 (#45, #46, #47, #55, #56) ficam de fora e são revisadas aqui, no aparelho
 
 ### Nas fases seguintes
 

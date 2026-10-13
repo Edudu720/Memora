@@ -83,7 +83,9 @@ por inatividade (FR-042b).
 
 ### Data de nascimento (estado, no aparelho)
 
-Acrescentada na revisão da T044 (FR-042c).
+Acrescentada na revisão da T044 (FR-042c). Classificação: **Confidencial**, sem cifra, como o
+canal de contato (clarificação de 2026-10-13). Nenhuma tela além da de
+informar mostra a data; o Perfil mostra só a idade.
 
 | Campo | Tipo | Regra |
 |---|---|---|
