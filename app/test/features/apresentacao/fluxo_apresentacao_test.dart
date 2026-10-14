@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/apresentacao/data/apresentacao_vista.dart';
@@ -8,10 +9,12 @@ import 'package:memora/features/apresentacao/presentation/fluxo_apresentacao.dar
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.dart';
+import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_apresentacao.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
+import 'package:memora/l10n/textos_casca.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import '../../suporte/aparelhos.dart';
@@ -46,10 +49,12 @@ void main() {
   group('As três telas', () {
     late ApresentacaoVistaEmMemoria vistas;
     late int concluiu;
+    late int fechou;
 
     setUp(() {
       vistas = ApresentacaoVistaEmMemoria();
       concluiu = 0;
+      fechou = 0;
     });
 
     Widget app({ApresentacaoVista? vista, String nome = 'Ana'}) {
@@ -60,6 +65,7 @@ void main() {
           idDaConta: contaAna,
           vista: vista ?? vistas,
           aoConcluir: () => concluiu++,
+          aoFecharOMemora: () async => fechou++,
         ),
       );
     }
@@ -163,6 +169,93 @@ void main() {
       await montar(t);
       expect(tela(0), findsOneWidget);
       expect(tela(1), findsNothing);
+    });
+
+    testWidgets('"voltar" do aparelho na tela 3 e na 2 volta uma tela, sem '
+        'gravar nada (FR-013)', (t) async {
+      await montar(t);
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      expect(tela(2), findsOneWidget);
+
+      expect(await t.binding.handlePopRoute(), isTrue);
+      await avancar(t);
+      expect(tela(1), findsOneWidget);
+
+      expect(await t.binding.handlePopRoute(), isTrue);
+      await avancar(t);
+      expect(tela(0), findsOneWidget);
+
+      expect(fechou, 0, reason: 'voltar de tela não fecha o aplicativo');
+      expect(concluiu, 0);
+      expect(
+        await vistas.jaViu(contaAna),
+        isFalse,
+        reason: 'só o fim ou o pulo gravam a apresentação como vista',
+      );
+    });
+
+    testWidgets('"voltar" do aparelho na tela 1 pergunta antes de fechar', (
+      t,
+    ) async {
+      await montar(t);
+
+      await t.binding.handlePopRoute();
+      await t.pumpAndSettle();
+      expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsOneWidget);
+      expect(fechou, 0, reason: 'fechar em silêncio é o Memora sumir');
+
+      await t.tap(find.text(TextosCasca.botaoFicar));
+      await t.pumpAndSettle();
+      expect(find.byKey(CascaInterna.chavePerguntaDeFechar), findsNothing);
+      expect(tela(0), findsOneWidget, reason: 'ficou onde estava');
+      expect(fechou, 0);
+
+      await t.binding.handlePopRoute();
+      await t.pumpAndSettle();
+      await t.tap(find.text(TextosCasca.botaoFecharMemora));
+      await t.pumpAndSettle();
+      expect(fechou, 1);
+      expect(concluiu, 0);
+      expect(await vistas.jaViu(contaAna), isFalse);
+    });
+
+    testWidgets('trocar de tela anuncia o título da nova ao leitor de tela', (
+      t,
+    ) async {
+      final List<String> anuncios = <String>[];
+      t.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+        SystemChannels.accessibility,
+        (dynamic mensagem) async {
+          final Map<dynamic, dynamic> m = mensagem as Map<dynamic, dynamic>;
+          if (m['type'] == 'announce') {
+            anuncios.add(
+              (m['data'] as Map<dynamic, dynamic>)['message'] as String,
+            );
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => t.binding.defaultBinaryMessenger
+            .setMockDecodedMessageHandler<dynamic>(
+              SystemChannels.accessibility,
+              null,
+            ),
+      );
+
+      await montar(t);
+      expect(anuncios, isEmpty, reason: 'a primeira tela não é uma troca');
+
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      expect(anuncios, <String>[TextosApresentacao.tituloConversa]);
+
+      await tocar(t, find.byKey(FluxoApresentacao.chaveContinuar));
+      expect(anuncios.last, TextosApresentacao.tituloExemplo);
+
+      await t.binding.handlePopRoute();
+      await avancar(t);
+      expect(anuncios.last, TextosApresentacao.tituloConversa);
     });
 
     testWidgets('dois toques seguidos em Pular concluem uma vez só', (t) async {
@@ -755,6 +848,52 @@ void main() {
       expect(find.byKey(FluxoApresentacao.chaveContinuar), findsNothing);
     });
 
+    testWidgets(
+      'a resposta velha da conferência não decide pela entrada nova',
+      (t) async {
+        final _VistaLentaPorLeitura lenta = _VistaLentaPorLeitura();
+        await montar(
+          t,
+          vista: lenta,
+          inatividade: const Duration(seconds: 3),
+          aviso: const Duration(seconds: 1),
+        );
+        await entrarPeloLogin(t, 'ana');
+        expect(lenta.leituras, 1);
+
+        // A sessão da Ana expira com a leitura dela ainda no ar.
+        await t.pump(const Duration(seconds: 2));
+        await avancar(t);
+        await t.pump(const Duration(seconds: 1));
+        await t.pump(const Duration(milliseconds: 50));
+        await t.pump(const Duration(seconds: 1));
+        expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
+
+        // A Bia entra, e a leitura dela também fica no ar.
+        await preencherLogin(t, 'bia');
+        expect(lenta.leituras, 2);
+        expect(find.byType(Carregando), findsOneWidget);
+
+        // A leitura velha (a da Ana: "já viu") chega agora.
+        lenta.responder(0, jaViu: true);
+        await avancar(t);
+        expect(
+          find.byType(Carregando),
+          findsOneWidget,
+          reason: 'a resposta da Ana não decide pela entrada da Bia',
+        );
+        expect(find.byKey(TelaInicio.chaveSaudacao), findsNothing);
+
+        // A leitura da Bia ("nunca viu") é a que vale.
+        lenta.responder(1, jaViu: false);
+        await avancar(t);
+        exigirApresentacao('a Bia nunca a viu');
+        expect(find.textContaining('Olá, Bia!'), findsOneWidget);
+
+        await fechar(t);
+      },
+    );
+
     testWidgets('a inatividade vale também durante a apresentação', (t) async {
       await montar(
         t,
@@ -844,6 +983,27 @@ class _VistaLenta implements ApresentacaoVista {
 
   @override
   Future<bool> jaViu(String idDaConta) => _resposta.future;
+
+  @override
+  Future<void> marcarComoVista(String idDaConta) async {}
+}
+
+/// Cada leitura de `jaViu` fica no ar até o teste responder àquela, pela
+/// ordem em que foram feitas.
+class _VistaLentaPorLeitura implements ApresentacaoVista {
+  final List<Completer<bool>> _respostas = <Completer<bool>>[];
+
+  int get leituras => _respostas.length;
+
+  void responder(int leitura, {required bool jaViu}) =>
+      _respostas[leitura].complete(jaViu);
+
+  @override
+  Future<bool> jaViu(String idDaConta) {
+    final Completer<bool> c = Completer<bool>();
+    _respostas.add(c);
+    return c.future;
+  }
 
   @override
   Future<void> marcarComoVista(String idDaConta) async {}
