@@ -39,15 +39,23 @@ const Map<String, String> _semAcento = <String, String>{
   'ÿ': 'y',
 };
 
-/// Põe [texto] na forma de comparação: minúsculas, sem acento e com os espaços
-/// do começo, do fim e do meio reduzidos a um.
+/// Põe [texto] na forma de comparação: minúsculas, sem acento (inclusive o
+/// acento "solto", como caractere combinante), com a pontuação virando espaço
+/// e os espaços do começo, do fim e do meio reduzidos a um.
 String normalizarParaBusca(String texto) {
   final StringBuffer saida = StringBuffer();
   for (final int runa in texto.toLowerCase().runes) {
+    // U+0300 a U+036F: marcas combinantes (o acento digitado separado da letra).
+    if (runa >= 0x0300 && runa <= 0x036F) continue;
     final String c = String.fromCharCode(runa);
     saida.write(_semAcento[c] ?? c);
   }
-  return saida.toString().trim().split(RegExp(r'\s+')).join(' ');
+  return saida
+      .toString()
+      .replaceAll(RegExp(r'[^\p{L}\p{N}\s]', unicode: true), ' ')
+      .trim()
+      .split(RegExp(r'\s+'))
+      .join(' ');
 }
 
 /// Os itens de [servicos] que respondem a [consulta], na ordem em que vieram.
@@ -65,10 +73,13 @@ List<ServicoDoCatalogo> buscarServicos(
   if (normalizada.isEmpty) return List<ServicoDoCatalogo>.of(servicos);
 
   final List<String> palavras = normalizada.split(' ');
+  // A versão sem espaços ("govbr" acha "Gov.br"; "gov br" acha "Gov.br").
+  final String colada = normalizada.replaceAll(' ', '');
   return servicos.where((ServicoDoCatalogo s) {
     final String alvo = normalizarParaBusca(
       '${s.nomeExibido} ${s.descricaoCurta}',
     );
-    return palavras.every(alvo.contains);
+    return palavras.every(alvo.contains) ||
+        alvo.replaceAll(' ', '').contains(colada);
   }).toList();
 }

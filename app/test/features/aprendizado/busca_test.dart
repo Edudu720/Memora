@@ -140,6 +140,23 @@ void main() {
       expect(nomes('google youtube'), isEmpty);
     });
 
+    test('"govbr", "gov br" e "gov.br" acham o Gov.br', () {
+      expect(nomes('govbr'), contains('Gov.br'));
+      expect(nomes('gov br'), contains('Gov.br'));
+      expect(nomes('gov.br'), contains('Gov.br'));
+    });
+
+    test('acento digitado como caractere combinante também é ignorado', () {
+      final List<ServicoDoCatalogo> lista = <ServicoDoCatalogo>[
+        item('TikTok', 'Ver vídeos curtos'),
+      ];
+      expect(
+        buscarServicos(lista, 'vídeo').map((s) => s.nomeExibido),
+        <String>['TikTok'],
+      );
+      expect(normalizarParaBusca('Vídeo'), 'video');
+    });
+
     test('sem resultado devolve lista vazia, não erro', () {
       expect(nomes('xyzzy'), isEmpty);
     });
