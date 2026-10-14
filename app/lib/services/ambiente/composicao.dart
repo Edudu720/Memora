@@ -8,7 +8,11 @@ import '../../features/autenticacao/domain/autenticacao.dart';
 import '../seguranca/cofre_de_credenciais.dart';
 import 'ambiente.dart';
 import '../../features/assistente/data/conversa_local.dart';
+import '../../features/assistente/data/catalogo_guardado.dart';
+import '../../features/aprendizado/data/progresso_de_aprendizado.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
+import '../../features/apresentacao/data/apresentacao_vista.dart';
+import '../../features/perfil/data/data_de_nascimento_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 
 /// Monta as dependências do aplicativo, uma vez, na subida.
@@ -49,12 +53,30 @@ class Composicao {
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   final LimpezaDeSessao limpeza;
 
+  /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
+  ///
+  /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
+  /// Quais contas já viram a apresentação inicial (FR-013, T048).
+  ///
+  /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
+  final ApresentacaoVista? apresentacaoVista;
+
+  /// O que a pessoa já aprendeu a fazer, só no aparelho (T062, FR-042a/b).
+  ///
+  /// É a mesma instância que a [limpeza] apaga em **toda** saída.
+  final ProgressoDeAprendizado? progresso;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
     required this.limpeza,
+    this.dataDeNascimento,
+    this.apresentacaoVista,
+    this.progresso,
   });
 
   /// Resolve as dependências a partir do ambiente.
@@ -66,7 +88,17 @@ class Composicao {
     required Ambiente ambiente,
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
+    DataDeNascimentoDoAparelho? dataDeNascimento,
+    ApresentacaoVistaDoAparelho? apresentacaoVista,
+    ProgressoDeAprendizado? progresso,
+    bool guardarCatalogo = false,
   }) {
+    final DataDeNascimentoDoAparelho datas =
+        dataDeNascimento ?? DataDeNascimentoEmMemoria();
+    final ApresentacaoVistaDoAparelho vistas =
+        apresentacaoVista ?? ApresentacaoVistaEmMemoria();
+    final ProgressoDeAprendizado aprendizado =
+        progresso ?? ProgressoDeAprendizado();
     ambiente.exigirTlsForaDeDepuracao();
 
     final RepositorioAutenticacao autenticacao = ambiente.usaServidorReal
@@ -79,16 +111,33 @@ class Composicao {
     return Composicao(
       ambiente: ambiente,
       autenticacao: autenticacao,
-      assistente: RepositorioAssistenteSimulado(),
+      // O catálogo guardado (FR-024a) envolve a consulta do catálogo e escreve
+      // em disco, que teste de widget não alcança: fica desligado por padrão e
+      // o `main.dart` o liga. Ele NÃO entra em `dadosLocais` — não é da pessoa.
+      assistente: guardarCatalogo
+          ? CatalogoGuardado(RepositorioAssistenteSimulado())
+          : RepositorioAssistenteSimulado(),
+      dataDeNascimento: datas,
+      apresentacaoVista: vistas,
+      progresso: aprendizado,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa
       // nada e mantem esta lista sendo a resposta completa para "o que a
       // saida leva" — que e o valor de existir um lugar so.
+      //
+      // A saida leva em TODA saida: a conversa. Leva so no `esquecerTudo`: o
+      // identificador do ultimo acesso e a data de nascimento do Perfil
+      // (todas as contas do aparelho) e a apresentacao vista (idem). Estes
+      // dois NAO sao `DadoLocalDaPessoa`: a pessoa nao digita nem ve de novo a
+      // cada entrada.
       limpeza: LimpezaDeSessao(
         cofre: cofre,
         ultimoAcesso: ultimoAcesso,
-        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal()],
+        // O progresso de aprendizado sai em TODA saída (FR-042b), como a
+        // conversa: revela o que a pessoa ainda não sabe fazer.
+        dadosLocais: <DadoLocalDaPessoa>[ConversaLocal(), aprendizado],
+        dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas],
       ),
     );
   }

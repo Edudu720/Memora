@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
@@ -78,9 +79,17 @@ void main() {
     await t.pumpWidget(
       MaterialApp(
         theme: TemasMemora.claro,
-        home: MediaQuery(
-          data: MediaQueryData(textScaler: TextScaler.linear(escala)),
-          child: TelaConversa(controlador: c),
+        // `copyWith` sobre o `MediaQuery` real, e nao um `MediaQueryData` novo:
+        // este nasce com `size: Size.zero`, e o `AvisoCompacto` calcula o teto
+        // dele a partir do tamanho da tela — o aviso aberto media 0 px e os
+        // portoes abaixo passavam sem medir nada.
+        home: Builder(
+          builder: (BuildContext contexto) => MediaQuery(
+            data: MediaQuery.of(contexto).copyWith(
+              textScaler: TextScaler.linear(escala),
+            ),
+            child: TelaConversa(controlador: c),
+          ),
         ),
       ),
     );
@@ -150,6 +159,146 @@ void main() {
         });
       }
     }
+  });
+
+  group('O aviso compacto — FR-022 e FR-049', () {
+    // "Altura disponivel" = a que sobra abaixo da barra superior, que e o que
+    // a tela de conversa reparte entre aviso, lista e campo.
+    double disponivel(WidgetTester t, Size aparelho) =>
+        aparelho.height - t.getSize(find.byType(BarraSuperior)).height;
+
+    String textoDoAviso(WidgetTester t) => t
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byKey(TelaConversa.chaveAviso),
+            matching: find.byType(Text),
+          ),
+        )
+        .map((Text x) => x.data ?? x.textSpan?.toPlainText() ?? '')
+        .join(' ')
+        .toLowerCase();
+
+    // ⚠️ Os tres portoes abaixo existem porque a FR-022 nao e a FR-027: nao
+    // estourar e a lista ter 48 px nao significa que a conversa ocupa metade
+    // da tela. Aviso sempre expandido passa na FR-027 e reprova aqui.
+    for (final Size aparelho in aparelhos) {
+      for (final double escala in <double>[1.0, 1.5]) {
+        final String nome = '${nomeDo(aparelho)}, escala $escala';
+
+        testWidgets('antes da primeira mensagem o aviso esta aberto e cabe '
+            'em metade da tela, em $nome', (WidgetTester t) async {
+          final ControladorConversa c = controladorCom();
+          addTearDown(c.dispose);
+          await montar(t, c, escala: escala, aparelho: aparelho);
+          expect(t.takeException(), isNull);
+
+          final double total = disponivel(t, aparelho);
+          final Rect aviso = t.getRect(find.byKey(TelaConversa.chaveAviso));
+
+          expect(find.text(TextosAssistente.tituloAvisoAntigolpe),
+              findsOneWidget,
+              reason: 'o titulo do aviso esta sempre presente');
+          expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsOneWidget,
+              reason: 'ate a primeira mensagem o aviso fica aberto');
+          expect(aviso.height, greaterThan(MemoraDimensoes.alvoMinimo),
+              reason: 'sanidade: um aviso de altura zero passaria em tudo');
+          expect(aviso.height, lessThanOrEqualTo(total * 0.5),
+              reason: 'aberto, o aviso ocupa no maximo metade da altura '
+                  'disponivel ($nome)');
+          expect(aparelho.height - aviso.bottom,
+              greaterThanOrEqualTo(total * 0.5),
+              reason: 'lista + campo de escrever precisam de pelo menos '
+                  'metade da altura disponivel ($nome)');
+        });
+
+        testWidgets('depois da primeira mensagem o aviso vira uma linha que '
+            'ainda diz "senha" e "codigo", em $nome', (WidgetTester t) async {
+          final ControladorConversa c = controladorCom();
+          addTearDown(c.dispose);
+          await montar(t, c, escala: escala, aparelho: aparelho);
+          await perguntar(t, 'como vejo as fotos do meu neto');
+          expect(t.takeException(), isNull);
+
+          expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
+          expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing,
+              reason: 'depois da primeira mensagem o aviso encolhe');
+
+          final String lido = textoDoAviso(t);
+          expect(lido, contains('senha'), reason: 'o resumo fechado (FR-049)');
+          expect(lido, contains('código'), reason: 'o resumo fechado (FR-049)');
+          expect(lido, contains(TextosAssistente.tituloAvisoAntigolpe
+              .toLowerCase()),
+              reason: 'o titulo continua presente com o aviso fechado');
+
+          final double total = disponivel(t, aparelho);
+          final Rect aviso = t.getRect(find.byKey(TelaConversa.chaveAviso));
+          expect(aparelho.height - aviso.bottom,
+              greaterThanOrEqualTo(total * 0.5),
+              reason: 'lista + campo de escrever com pelo menos metade da '
+                  'altura disponivel ($nome)');
+        });
+      }
+    }
+
+    // O resumo fechado e o que a maioria le: precisa valer tambem em 200%.
+    for (final Size aparelho in aparelhos) {
+      testWidgets('fechado, o aviso nao estoura nem espreme a lista em '
+          '${nomeDo(aparelho)}, escala 2.0', (WidgetTester t) async {
+        final ControladorConversa c = controladorCom();
+        addTearDown(c.dispose);
+        await montar(t, c, escala: 2.0, aparelho: aparelho);
+        await perguntar(t, 'como vejo as fotos do meu neto');
+
+        expect(t.takeException(), isNull);
+        expect(textoDoAviso(t), contains('código'));
+        expect(t.getSize(find.byType(ListView).first).height,
+            greaterThanOrEqualTo(48));
+      });
+    }
+
+    testWidgets('nunca some: nem depois de varias mensagens, nem por gesto', (
+      WidgetTester t,
+    ) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+      await perguntar(t, 'como vejo as fotos do meu neto');
+      await perguntar(t, 'nao consegui achar');
+      await perguntar(t, 'como mando mensagem');
+
+      expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
+      expect(find.byType(Dismissible), findsNothing,
+          reason: 'ninguem manda o aviso embora arrastando');
+
+      // Tocar abre; tocar de novo encolhe. Em nenhum momento o aviso sai.
+      await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
+      await avancar(t);
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsOneWidget);
+      expect(find.text(TextosAssistente.avisoAntigolpe), findsOneWidget);
+      await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
+      await avancar(t);
+      expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
+    });
+
+    testWidgets('o aviso fechado e um botao de verdade para o leitor de tela',
+        (WidgetTester t) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+      await perguntar(t, 'como vejo as fotos do meu neto');
+
+      final SemanticsData dados =
+          t.getSemantics(find.byKey(AvisoCompacto.chaveAlternar))
+              .getSemanticsData();
+      expect(dados.flagsCollection.isButton, isTrue);
+      expect(dados.hasAction(SemanticsAction.tap), isTrue,
+          reason: 'sem onTap o TalkBack anuncia o botao e nao ativa nada');
+      expect(dados.label, contains('código'));
+      await expectLater(t, meetsGuideline(androidTapTargetGuideline));
+      h.dispose();
+    });
   });
 
   group('Mensagens alcancaveis na ordem — FR-028', () {

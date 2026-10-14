@@ -40,25 +40,38 @@ import 'cofre_de_credenciais.dart';
 ///
 /// Por isso [dadosLocais] é uma lista, e não um campo de conversa: o que a
 /// saída leva vai crescer, e o lugar de listar é aqui — um só.
+///
+/// ## O que só sai com [esquecerTudo] (T123 da feature 004)
+///
+/// Há dado que a pessoa **não** quer digitar de novo a cada entrada e que, como
+/// o identificador do último acesso, só vai embora na leitura literal da
+/// FR-026: a data de nascimento do Perfil (FR-042c). Ele **não** pode ser um
+/// [DadoLocalDaPessoa], que sai em toda saída. Por isso há uma segunda
+/// interface, [DadoLocalDoAparelho], com lista própria: o tipo diferente impede
+/// que alguém ponha o dado na lista errada, já na compilação.
 class LimpezaDeSessao {
   final CofreDeCredenciais _cofre;
   final UltimoAcesso _ultimoAcesso;
   final List<DadoLocalDaPessoa> _dadosLocais;
+  final List<DadoLocalDoAparelho> _dadosDoAparelho;
 
   /// Cria a limpeza sobre o cofre, o último acesso e os dados locais.
   const LimpezaDeSessao({
     required CofreDeCredenciais cofre,
     required UltimoAcesso ultimoAcesso,
     List<DadoLocalDaPessoa> dadosLocais = const <DadoLocalDaPessoa>[],
-  })  : _cofre = cofre,
-        _ultimoAcesso = ultimoAcesso,
-        _dadosLocais = dadosLocais;
+    List<DadoLocalDoAparelho> dadosDoAparelho = const <DadoLocalDoAparelho>[],
+  }) : _cofre = cofre,
+       _ultimoAcesso = ultimoAcesso,
+       _dadosLocais = dadosLocais,
+       _dadosDoAparelho = dadosDoAparelho;
 
   /// Remove do aparelho o que a saída leva.
   ///
-  /// [esquecerTudo] apaga também o identificador do último acesso — é a leitura
-  /// literal da FR-026, e o que faz sentido num aparelho compartilhado ou que
-  /// vai ser vendido. Não é o padrão pelo motivo no cabeçalho.
+  /// [esquecerTudo] apaga também o identificador do último acesso e os
+  /// [DadoLocalDoAparelho] — é a leitura literal da FR-026, e o que faz sentido
+  /// num aparelho compartilhado ou que vai ser vendido. Não é o padrão pelo
+  /// motivo no cabeçalho.
   Future<void> executar({bool esquecerTudo = false}) async {
     // Primeiro e sempre: o que abre a conta.
     await _cofre.limpar();
@@ -83,6 +96,17 @@ class LimpezaDeSessao {
     }
 
     if (esquecerTudo) {
+      // Cada item com a própria proteção, como no laço acima: uma falha não
+      // pode deixar o identificador do último acesso sem esquecer.
+      for (final DadoLocalDoAparelho dado in _dadosDoAparelho) {
+        try {
+          await dado.esquecerDoAparelho();
+        } catch (erro) {
+          debugPrint(
+            'Limpeza de sessao: um dado do aparelho nao foi esquecido ($erro).',
+          );
+        }
+      }
       await _ultimoAcesso.esquecer();
     }
   }
@@ -96,4 +120,16 @@ class LimpezaDeSessao {
 abstract interface class DadoLocalDaPessoa {
   /// Remove o dado do aparelho.
   Future<void> apagar();
+}
+
+/// Algo guardado no aparelho que **só** o `esquecerTudo` leva (FR-042c).
+///
+/// Distinto de [DadoLocalDaPessoa] de propósito: aquele sai em toda saída, e
+/// este fica quando a pessoa sai da conta e volta — para ela não digitar de
+/// novo, a cada entrada, o que o aparelho já sabe. Como o dado é guardado por
+/// conta, esquecer o **aparelho** apaga o de **todas** as contas, e não só o da
+/// que acabou de sair.
+abstract interface class DadoLocalDoAparelho {
+  /// Remove o dado de todas as contas deste aparelho.
+  Future<void> esquecerDoAparelho();
 }
