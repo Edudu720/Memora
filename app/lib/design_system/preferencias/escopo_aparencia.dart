@@ -84,10 +84,19 @@ class AparenciaResolvida {
 /// O resultado combinado é limitado a [MemoraDimensoes.escalaTextoMax]: sem
 /// teto, somar as duas ampliações estoura o layout e a pessoa fica sem saída.
 ///
+/// Aplica também "reduzir movimento" (FR-039a): ligado, o aplicativo inteiro
+/// passa a ver `disableAnimations` verdadeiro, e todo componente que consulta
+/// `MediaQuery.disableAnimationsOf` — o que o portão do V9 exige de todos —
+/// deixa de animar. Desligado, **só a configuração do sistema vale**: esta
+/// preferência soma à do aparelho, e nunca a desfaz.
+///
 /// Use no `builder` do [MaterialApp].
 class AmpliacaoDeTexto extends StatelessWidget {
   /// Fator escolhido pela pessoa dentro do aplicativo.
   final double fatorDoAplicativo;
+
+  /// Reduzir o movimento por escolha da pessoa, além do que o sistema pedir.
+  final bool reduzirMovimento;
 
   /// Conteúdo do aplicativo.
   final Widget child;
@@ -96,6 +105,7 @@ class AmpliacaoDeTexto extends StatelessWidget {
   const AmpliacaoDeTexto({
     required this.fatorDoAplicativo,
     required this.child,
+    this.reduzirMovimento = false,
     super.key,
   });
 
@@ -109,7 +119,10 @@ class AmpliacaoDeTexto extends StatelessWidget {
     );
 
     return MediaQuery(
-      data: dados.copyWith(textScaler: TextScaler.linear(combinado)),
+      data: dados.copyWith(
+        textScaler: TextScaler.linear(combinado),
+        disableAnimations: dados.disableAnimations || reduzirMovimento,
+      ),
       child: child,
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/l10n/textos_casca.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
@@ -130,7 +131,7 @@ void main() {
       await irPara(t, TextosCasca.destinoConfiguracoes);
       await FluxoDentroDaConta.tocar(
         t,
-        find.byKey(AjustesProvisorios.chaveAparencia),
+        find.byKey(TelaConfiguracoes.chaveAparencia),
       );
       await FluxoDentroDaConta.avancar(t, 8);
       expect(
@@ -170,7 +171,7 @@ void main() {
       await irPara(t, TextosCasca.destinoConfiguracoes);
       await FluxoDentroDaConta.tocar(
         t,
-        find.byKey(AjustesProvisorios.chaveAparencia),
+        find.byKey(TelaConfiguracoes.chaveAparencia),
       );
       await FluxoDentroDaConta.avancar(t, 8);
 

@@ -203,6 +203,60 @@ void main() {
     });
   });
 
+  group('FR-049 — na recuperação o aviso fica inteiro (T057)', () {
+    testWidgets('o texto inteiro está na tela, sem tocar em nada', (
+      WidgetTester t,
+    ) async {
+      await _montar(t, repositorio: _comContaDeAna());
+
+      expect(find.text(TextosAutenticacao.avisoAntigolpe), findsOneWidget);
+      expect(find.text(TextosAutenticacao.tituloAvisoAntigolpe), findsOneWidget);
+    });
+
+    testWidgets('não usa o aviso compacto, em nenhuma etapa', (
+      WidgetTester t,
+    ) async {
+      final RepositorioAutenticacaoSimulado repo = _comContaDeAna();
+      await _montar(t, repositorio: repo);
+      expect(find.byType(AvisoCompacto), findsNothing);
+
+      await _pedirCodigoPara(t, 'ana@email.com');
+      expect(find.byType(AvisoCompacto), findsNothing);
+      expect(find.text(TextosAutenticacao.avisoAntigolpe), findsOneWidget);
+    });
+
+    testWidgets('o visual novo: borda de perigo e o rosto preocupado da Memora',
+        (WidgetTester t) async {
+      await _montar(t, repositorio: _comContaDeAna());
+
+      final Finder rosto = find.descendant(
+        of: find.byType(AvisoAntigolpe),
+        matching: find.byType(MemoraPersonagem),
+      );
+      expect(rosto, findsOneWidget);
+      expect(
+        t.widget<MemoraPersonagem>(rosto).expressao,
+        ExpressaoDaMemora.preocupada,
+        reason: 'preocupada, nao brava: aviso dado com raiva assusta',
+      );
+
+      final BoxDecoration caixa = t
+          .widgetList<Container>(
+            find.descendant(
+              of: find.byType(AvisoAntigolpe),
+              matching: find.byType(Container),
+            ),
+          )
+          .map((Container c) => c.decoration)
+          .whereType<BoxDecoration>()
+          .firstWhere((BoxDecoration d) => d.border != null);
+      expect(
+        (caixa.border! as Border).top.color,
+        TemasMemora.claro.extension<MemoraTheme>()!.cores.perigo,
+      );
+    });
+  });
+
   group('código recusado', () {
     testWidgets('mostra uma recusa só e oferece pedir outro',
         (WidgetTester t) async {

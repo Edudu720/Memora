@@ -59,8 +59,8 @@ class ControladorConversa extends ChangeNotifier {
     this._local, {
     AbridorDeAplicativo? abridor,
     String rascunhoInicial = '',
-  })  : _abridor = abridor,
-        _rascunho = rascunhoInicial;
+  }) : _abridor = abridor,
+       _rascunho = rascunhoInicial;
 
   /// Quanto tempo esperar pela **primeira** palavra da resposta (FR-052).
   ///
@@ -118,12 +118,12 @@ class ControladorConversa extends ChangeNotifier {
 
   /// Texto do erro atual, na voz da Memora.
   String? get mensagemDeErro => switch (_falha) {
-        null => null,
-        FalhaDaAssistente.semConexao => TextosAssistente.semRespostaDaConversa,
-        FalhaDaAssistente.limiteDeConversas => TextosAssistente.limiteDeConversas,
-        FalhaDaAssistente.sessaoExpirada => TextosAssistente.sessaoExpirada,
-        FalhaDaAssistente.inesperada => TextosAssistente.inesperada,
-      };
+    null => null,
+    FalhaDaAssistente.semConexao => TextosAssistente.semRespostaDaConversa,
+    FalhaDaAssistente.limiteDeConversas => TextosAssistente.limiteDeConversas,
+    FalhaDaAssistente.sessaoExpirada => TextosAssistente.sessaoExpirada,
+    FalhaDaAssistente.inesperada => TextosAssistente.inesperada,
+  };
 
   /// Lê a conversa guardada e prepara a tela (FR-049).
   Future<void> iniciar() async {
@@ -192,7 +192,10 @@ class ControladorConversa extends ChangeNotifier {
     _trechoEmCurso = '';
 
     switch (resposta) {
-      case AssistenteRespondeu(:final String texto, :final AcaoAutorizada? acao):
+      case AssistenteRespondeu(
+        :final String texto,
+        :final AcaoAutorizada? acao,
+      ):
         _mensagens.add(
           MensagemDaConversa(
             autor: AutorDaMensagem.memora,
@@ -314,11 +317,24 @@ class ControladorConversa extends ChangeNotifier {
 
   /// Apaga a conversa (FR-050).
   Future<void> apagarConversa() async {
+    // Invalida o que está em voo, como o `dispose`: quem apaga quer que a
+    // conversa SUMA, e uma resposta que chegasse depois a regravaria no
+    // aparelho (FR-040, FR-048).
+    _envio++;
+    _cronometro?.cancel();
+    _trechoEmCurso = '';
     _mensagens.clear();
     _acaoOferecida = null;
     _falha = null;
     _estado = EstadoConversa.aguardando;
-    await _local.apagar();
-    notifyListeners();
+    try {
+      await _local.apagar();
+    } catch (_) {
+      // A conversa da TELA já foi esvaziada acima. Quem pediu o apagar (a
+      // tela de Privacidade) apaga o arquivo por conta própria e é ela quem
+      // conta a falha à pessoa; aqui a falha não pode derrubar a conversa.
+    } finally {
+      notifyListeners();
+    }
   }
 }

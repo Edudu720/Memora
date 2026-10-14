@@ -104,13 +104,20 @@ não apaga nada. Conta mostra o canal, e "Sair" pergunta antes; "Sair e esquecer
 este aparelho" fica **separado**, abaixo, com a frase de para que serve
 (FR-041).
 
-### V9 — Perfil sem dado novo (US8, FR-042 a FR-042b)
+### V9 — Perfil sem dado novo no servidor (US8, FR-042 a FR-042c)
 
 Conta nova: a linha do aplicativo mais aprendido diz que ainda vão aprender
 juntos. Concluir o guia do TikTok duas vezes e o do WhatsApp uma: aparece o
 TikTok. **Sair e entrar de novo**: a linha volta a dizer que ainda vão aprender
-— o progresso saiu com a conta. Nenhum campo de idade ou plano. Nenhuma
-requisição nova ao servidor ao abrir o Perfil.
+— o progresso saiu com a conta. Nenhum campo de plano. Nenhuma requisição nova
+ao servidor ao abrir o Perfil.
+
+**A idade** (FR-042c, revisão da T044): sem data, o Perfil convida a contar,
+sem exigir. Informar 12/03/1952 mostra a idade como informação, nunca como
+botão. **Sair e entrar de novo**: a idade continua lá — a saída comum não a
+leva. Entrar com **outra conta** no mesmo aparelho: o convite, e não a idade
+da primeira. Só "esquecer este aparelho" (`esquecerTudo`) apaga a data, de
+todas as contas. Nenhuma requisição leva a data ao servidor.
 
 ### V10 — Nada estoura, em nenhum lugar (FR-043 a FR-046, SC-007)
 

@@ -114,14 +114,19 @@ Future<void> exigirAlcancavel(
   await t.ensureVisible(alvo);
   await t.pump();
   final Rect r = t.getRect(alvo);
+  // Folga de ruído de ponto flutuante: `ensureVisible` alinha o alvo à borda,
+  // e ela sai como -3e-14 (visto em Ajustes, 360x800 a 150%, depois da 3b). É
+  // a mesma folga do `matriz_dentro_da_conta_test.dart`; um centésimo de px
+  // não esconde estouro nenhum.
+  const double folga = 0.01;
   expect(
     r.top,
-    greaterThanOrEqualTo(0),
+    greaterThanOrEqualTo(-folga),
     reason: '$contexto: o alvo ficou acima da janela ($r)',
   );
   expect(
     r.bottom,
-    lessThanOrEqualTo(aparelho.height),
+    lessThanOrEqualTo(aparelho.height + folga),
     reason: '$contexto: o alvo ficou abaixo da janela ($r)',
   );
   expect(
