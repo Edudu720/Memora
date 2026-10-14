@@ -142,7 +142,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
 /// Um serviço na lista.
 ///
 /// Usa [BotaoSecundario] porque é ação — abre a conversa sobre aquele serviço.
-/// A linha de baixo, fora do botão, diz o que a Memora faz com ele.
+/// Um serviço na lista, apresentado em cartão com ícone reconhecível do aplicativo (R7).
 class _ItemDoCatalogo extends StatelessWidget {
   final ServicoDoCatalogo servico;
   final void Function(ServicoDoCatalogo servico)? aoEscolher;
@@ -152,50 +152,90 @@ class _ItemDoCatalogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
+    final bool habilitado = aoEscolher != null;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        BotaoSecundario(
-          key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
-          rotulo: servico.nomeExibido,
-          icone: servico.memoraPodeAbrir
-              ? Icons.open_in_new
-              : Icons.menu_book_outlined,
-          aoTocar:
-              aoEscolher == null ? null : () => aoEscolher!.call(servico),
-        ),
-        const SizedBox(height: MemoraEspacamento.xs),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MemoraEspacamento.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextoMemora.apoio(servico.descricaoCurta),
-              const SizedBox(height: MemoraEspacamento.xs),
-              // A FR-045, literal. Nunca só por ícone: cor e forma não podem
-              // ser os únicos portadores de significado (Princípio III).
-              Row(
-                children: <Widget>[
-                  Icon(
-                    servico.memoraPodeAbrir
-                        ? Icons.check_circle_outline
-                        : Icons.school_outlined,
-                    size: MemoraDimensoes.iconePequeno,
-                    color: cores.textoSuave,
-                  ),
-                  const SizedBox(width: MemoraEspacamento.xs),
-                  Expanded(
-                    child: TextoMemora.apoio(
-                      servico.categoria.oQueAMemoraFaz,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    return Semantics(
+      button: true,
+      enabled: habilitado,
+      label: '${servico.nomeExibido}. ${servico.descricaoCurta}. ${servico.categoria.oQueAMemoraFaz}',
+      child: Material(
+        key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
+        color: cores.superficie,
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha: 0.06),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+          side: BorderSide(
+            color: cores.borda.withValues(alpha: 0.35),
+            width: 1.2,
           ),
         ),
-      ],
+        child: InkWell(
+          borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+          onTap: habilitado ? () => aoEscolher!.call(servico) : null,
+          child: Padding(
+            padding: const EdgeInsets.all(MemoraEspacamento.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                // Ícone reconhecível do aplicativo (WhatsApp, Facebook, etc.)
+                IconeDoAplicativo(
+                  chave: servico.chave,
+                  nome: servico.nomeExibido,
+                ),
+                const SizedBox(width: MemoraEspacamento.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: TextoMemora(
+                              servico.nomeExibido,
+                              estilo: EstiloTexto.destaque,
+                            ),
+                          ),
+                          Icon(
+                            servico.memoraPodeAbrir
+                                ? Icons.open_in_new_rounded
+                                : Icons.arrow_forward_ios_rounded,
+                            size: MemoraDimensoes.iconePequeno,
+                            color: cores.primaria,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: MemoraEspacamento.xs),
+                      TextoMemora.apoio(servico.descricaoCurta),
+                      const SizedBox(height: MemoraEspacamento.sm),
+                      // Rótulo de permissão e aprendizado (FR-045)
+                      Row(
+                        children: <Widget>[
+                          Icon(
+                            servico.memoraPodeAbrir
+                                ? Icons.check_circle_outline
+                                : Icons.school_outlined,
+                            size: MemoraDimensoes.iconePequeno,
+                            color: servico.memoraPodeAbrir
+                                ? cores.sucesso
+                                : cores.textoSuave,
+                          ),
+                          const SizedBox(width: MemoraEspacamento.xs),
+                          Expanded(
+                            child: TextoMemora.apoio(
+                              servico.categoria.oQueAMemoraFaz,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

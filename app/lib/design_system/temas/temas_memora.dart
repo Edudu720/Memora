@@ -10,13 +10,13 @@ import 'memora_theme_extension.dart';
 /// Nenhum valor visual literal aparece aqui: tudo vem de `tokens/` (FR-002).
 abstract final class TemasMemora {
   /// Tema claro, padrão do aplicativo.
-  static ThemeData get claro => _construir(MemoraTheme.claro, Brightness.light);
+  static final ThemeData claro = _construir(MemoraTheme.claro, Brightness.light);
 
   /// Tema escuro.
-  static ThemeData get escuro => _construir(MemoraTheme.escuro, Brightness.dark);
+  static final ThemeData escuro = _construir(MemoraTheme.escuro, Brightness.dark);
 
   /// Tema de alto contraste, para baixa visão severa.
-  static ThemeData get altoContraste =>
+  static final ThemeData altoContraste =
       _construir(MemoraTheme.altoContraste, Brightness.dark);
 
   /// Retorna o tema correspondente ao identificador.

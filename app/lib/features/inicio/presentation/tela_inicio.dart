@@ -145,40 +145,40 @@ class TelaInicio extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: alturaMinima),
                 child: Column(
-                  // `spaceEvenly` com dois blocos: o espaço que sobra vira três
-                  // respiros iguais (em cima, no meio e embaixo). Sem sobra
-                  // ele é zero, e o que separa os blocos é o afastamento fixo
-                  // do primeiro.
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
+                    // Topo alinhado com o design: Saudação à esquerda, Memora à direita
                     Padding(
                       padding: const EdgeInsets.only(
-                        bottom: MemoraEspacamento.xl,
+                        bottom: MemoraEspacamento.lg,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          if (figura >=
-                              MemoraDimensoes.pisoDeIlustracao) ...<Widget>[
-                            Center(
-                              child: MemoraPersonagem(
-                                key: chaveMemora,
-                                tamanho: figura,
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: TextoMemora(
+                                  TextosCasca.inicioSaudacao(nome),
+                                  key: chaveSaudacao,
+                                  estilo: EstiloTexto.destaque,
+                                  cabecalho: true,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: MemoraEspacamento.lg),
-                          ],
-                          TextoMemora(
-                            TextosCasca.inicioSaudacao(nome),
-                            key: chaveSaudacao,
-                            estilo: EstiloTexto.destaque,
-                            cabecalho: true,
-                            alinhamento: TextAlign.center,
+                              if (figura >=
+                                  MemoraDimensoes.pisoDeIlustracao) ...<Widget>[
+                                const SizedBox(width: MemoraEspacamento.md),
+                                MemoraPersonagem(
+                                  key: chaveMemora,
+                                  tamanho: figura.clamp(48.0, 72.0),
+                                ),
+                              ],
+                            ],
                           ),
                           if (atalhos > 0) ...<Widget>[
-                            const SizedBox(height: MemoraEspacamento.lg),
+                            const SizedBox(height: MemoraEspacamento.md),
                             BalaoDeFala(
                               key: chaveTutorial,
                               autor: AutorDoBalao.memora,

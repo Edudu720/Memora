@@ -374,6 +374,21 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           ),
         ],
       ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          IconeDoAplicativo(chave: 'whatsapp'),
+          IconeDoAplicativo(chave: 'facebook'),
+          IconeDoAplicativo(chave: 'instagram'),
+          IconeDoAplicativo(chave: 'youtube'),
+          IconeDoAplicativo(chave: 'google-fotos'),
+          IconeDoAplicativo(chave: 'telegram'),
+          IconeDoAplicativo(chave: 'gov-br'),
+          IconeDoAplicativo(chave: 'meu-inss'),
+        ],
+      ),
 
       const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
           'cartão. No máximo uma principal por tela. A desabilitada só existe '
