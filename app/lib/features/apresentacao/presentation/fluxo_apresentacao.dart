@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_apresentacao.dart';
+import '../../../l10n/textos_casca.dart';
+import '../../casca/casca_interna.dart';
 import '../data/apresentacao_vista.dart';
 
 /// A apresentação inicial da Memora, em três telas curtas (US1, FR-012).
@@ -22,6 +25,12 @@ import '../data/apresentacao_vista.dart';
 /// Se o aparelho recusar a gravação, a pessoa segue para o Início do mesmo
 /// jeito. O preço é ver a apresentação outra vez na próxima entrada; o preço
 /// do contrário seria uma tela da qual não se sai.
+///
+/// ## O "voltar" do aparelho
+///
+/// Na tela 2 ou 3, volta uma tela, **sem gravar nada** (FR-013). Na 1, faz a
+/// mesma pergunta da casca ("Fechar o Memora?"): fechar em silêncio é o
+/// Memora sumir (Princípio II).
 class FluxoApresentacao extends StatefulWidget {
   /// Quantas telas tem a apresentação (FR-012: no máximo três).
   static const int totalDeTelas = 3;
@@ -51,12 +60,17 @@ class FluxoApresentacao extends StatefulWidget {
   /// caminhos** — o fim ou o pulo — e depois de tentar gravar.
   final VoidCallback aoConcluir;
 
+  /// Fecha o aplicativo, depois de a pessoa confirmar. O teste troca por um
+  /// contador.
+  final Future<void> Function() aoFecharOMemora;
+
   /// Cria a apresentação.
   const FluxoApresentacao({
     required this.nome,
     required this.idDaConta,
     required this.vista,
     required this.aoConcluir,
+    this.aoFecharOMemora = CascaInterna.fecharOAplicativo,
     super.key,
   });
 
@@ -77,7 +91,29 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
       _concluir();
       return;
     }
-    setState(() => _indice++);
+    _irParaTela(_indice + 1);
+  }
+
+  /// Os títulos das telas, na ordem — o que o leitor de tela anuncia.
+  static const List<String> _titulos = <String>[
+    TextosApresentacao.tituloOla,
+    TextosApresentacao.tituloConversa,
+    TextosApresentacao.tituloExemplo,
+  ];
+
+  /// Troca de tela e **anuncia** a nova.
+  ///
+  /// Trocar a `key` recria a subárvore, e o leitor de tela não percebe que a
+  /// tela mudou: quem não enxerga ficaria ouvindo o silêncio depois do toque em
+  /// "Continuar". O título é lido; a posição ("passo 2 de 3") já está no
+  /// começo da tela.
+  void _irParaTela(int indice) {
+    setState(() => _indice = indice);
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      _titulos[indice],
+      Directionality.of(context),
+    );
   }
 
   Future<void> _concluir() async {
@@ -94,59 +130,89 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
     widget.aoConcluir();
   }
 
+  Future<void> _voltarDoAparelho() async {
+    if (_indice > 0) {
+      _irParaTela(_indice - 1);
+      return;
+    }
+    bool fechar = false;
+    await DialogoMemora.mostrar(
+      context,
+      dialogo: DialogoMemora(
+        key: CascaInterna.chavePerguntaDeFechar,
+        titulo: TextosCasca.tituloSairDoMemora,
+        mensagem: TextosCasca.perguntaSairDoMemora,
+        rotuloConfirmar: TextosCasca.botaoFecharMemora,
+        aoConfirmar: () {
+          fechar = true;
+          Navigator.of(context).pop();
+        },
+        rotuloFechar: TextosCasca.botaoFicar,
+        aoFechar: () => Navigator.of(context).pop(),
+      ),
+    );
+    if (fechar) await widget.aoFecharOMemora();
+  }
+
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     const int total = FluxoApresentacao.totalDeTelas;
 
-    return Scaffold(
-      backgroundColor: cores.fundo,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          // Uma tela nova começa no topo: sem a chave, a rolagem da anterior
-          // seguia valendo e a pessoa chegava no meio da seguinte.
-          key: FluxoApresentacao.chaveDaTela(_indice),
-          padding: const EdgeInsets.all(MemoraEspacamento.xl),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  Flexible(
-                    child: Semantics(
-                      label: TextosApresentacao.passoDescrito(
-                        _indice + 1,
-                        total,
-                      ),
-                      child: ExcludeSemantics(
-                        child: TextoMemora.apoio(
-                          TextosApresentacao.passo(_indice + 1, total),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool saiu, Object? _) {
+        if (!saiu) _voltarDoAparelho();
+      },
+      child: Scaffold(
+        backgroundColor: cores.fundo,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            // Uma tela nova começa no topo: sem a chave, a rolagem da anterior
+            // seguia valendo e a pessoa chegava no meio da seguinte.
+            key: FluxoApresentacao.chaveDaTela(_indice),
+            padding: const EdgeInsets.all(MemoraEspacamento.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Flexible(
+                      child: Semantics(
+                        label: TextosApresentacao.passoDescrito(
+                          _indice + 1,
+                          total,
+                        ),
+                        child: ExcludeSemantics(
+                          child: TextoMemora.apoio(
+                            TextosApresentacao.passo(_indice + 1, total),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: MemoraEspacamento.sm),
-                  BotaoTerciario(
-                    key: FluxoApresentacao.chavePular,
-                    rotulo: TextosApresentacao.pular,
-                    aoTocar: _concluir,
-                  ),
-                ],
-              ),
-              const SizedBox(height: MemoraEspacamento.lg),
-              ...switch (_indice) {
-                0 => _telaOla(),
-                1 => _telaConversa(),
-                _ => _telaExemplo(),
-              },
-              const SizedBox(height: MemoraEspacamento.xl),
-              BotaoPrimario(
-                key: FluxoApresentacao.chaveContinuar,
-                rotulo: TextosApresentacao.continuar,
-                aoTocar: _continuar,
-              ),
-              const SizedBox(height: MemoraEspacamento.lg),
-            ],
+                    const SizedBox(width: MemoraEspacamento.sm),
+                    BotaoTerciario(
+                      key: FluxoApresentacao.chavePular,
+                      rotulo: TextosApresentacao.pular,
+                      aoTocar: _concluir,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: MemoraEspacamento.lg),
+                ...switch (_indice) {
+                  0 => _telaOla(),
+                  1 => _telaConversa(),
+                  _ => _telaExemplo(),
+                },
+                const SizedBox(height: MemoraEspacamento.xl),
+                BotaoPrimario(
+                  key: FluxoApresentacao.chaveContinuar,
+                  rotulo: TextosApresentacao.continuar,
+                  aoTocar: _continuar,
+                ),
+                const SizedBox(height: MemoraEspacamento.lg),
+              ],
+            ),
           ),
         ),
       ),
