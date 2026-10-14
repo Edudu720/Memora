@@ -82,6 +82,11 @@ class TelaAparencia extends StatelessWidget {
   /// Qual grupo mostrar.
   final GrupoDeAjusteVisual grupo;
 
+  /// O título da tela. Quem a monta o dá, a partir do texto único do
+  /// aplicativo (`l10n/`): o Design System não guarda frase da Memora, e o
+  /// mesmo título aparece na porta que leva até aqui.
+  final String titulo;
+
   /// Volta à tela anterior. Quando existe, a tela ganha o cabeçalho com
   /// "Voltar" no canto de sempre (FR-001); sem ele — a tela montada fora das
   /// Configurações, ou num teste —, só o título.
@@ -89,6 +94,7 @@ class TelaAparencia extends StatelessWidget {
 
   /// Cria a tela de aparência.
   const TelaAparencia({
+    required this.titulo,
     this.grupo = GrupoDeAjusteVisual.aparencia,
     this.aoVoltar,
     super.key,
@@ -99,11 +105,6 @@ class TelaAparencia extends StatelessWidget {
 
   /// Chave do botão que descarta a pré-visualização.
   static const Key chaveDesfazer = Key('aparencia.desfazer');
-
-  String get _titulo => switch (grupo) {
-    GrupoDeAjusteVisual.aparencia => 'Como o Memora fica',
-    GrupoDeAjusteVisual.acessibilidade => 'Enxergar e usar melhor',
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +121,7 @@ class TelaAparencia extends StatelessWidget {
             children: <Widget>[
               if (aoVoltar != null)
                 CabecalhoDeTela(
-                  titulo: _titulo,
+                  titulo: titulo,
                   aoVoltar: aoVoltar,
                   ilustracao: Ilustracao.ajusteAparencia,
                 ),
@@ -135,7 +136,7 @@ class TelaAparencia extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     if (aoVoltar == null) ...<Widget>[
-                      TextoMemora.tituloTela(_titulo),
+                      TextoMemora.tituloTela(titulo),
                       const SizedBox(height: MemoraEspacamento.sm),
                     ],
                     const TextoMemora.apoio(
@@ -210,8 +211,8 @@ class TelaAparencia extends StatelessWidget {
       const SizedBox(height: MemoraEspacamento.md),
       if (atual.tema == EscolhaDeTema.altoContraste) ...<Widget>[
         const TextoMemora.apoio(
-          'Você está com "Mais contraste" ligado. Para mudar, abra '
-          '"Enxergar e usar melhor".',
+          'Você está com "Mais contraste" ligado. Se escolher Claro ou '
+          'Escuro, ele desliga.',
         ),
         const SizedBox(height: MemoraEspacamento.md),
       ],

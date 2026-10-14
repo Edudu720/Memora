@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
@@ -251,9 +253,13 @@ class ConversaEmMemoria implements ConversaLocal {
     _guardadas = List<MensagemDaConversa>.from(mensagens);
   }
 
+  /// Quando verdadeiro, `apagar` falha sem apagar nada (disco, permissão).
+  bool falharAoApagar = false;
+
   @override
   Future<void> apagar() async {
     apagamentos++;
+    if (falharAoApagar) throw const FileSystemException('sem permissão');
     _guardadas = <MensagemDaConversa>[];
   }
 }

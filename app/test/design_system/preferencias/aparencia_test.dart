@@ -23,6 +23,14 @@ class _RepositorioFalso implements RepositorioPreferenciaAparencia {
   }
 }
 
+class _RepositorioQueLancaErro implements RepositorioPreferenciaAparencia {
+  @override
+  Future<PreferenciaAparencia> carregar() async => throw TypeError();
+
+  @override
+  Future<void> salvar(PreferenciaAparencia preferencia) async {}
+}
+
 void main() {
   group('Entidade — faixa da ampliação', () {
     test('escala acima do teto é limitada', () {
@@ -36,8 +44,10 @@ void main() {
 
     test('escala abaixo do piso é limitada', () {
       const PreferenciaAparencia p = PreferenciaAparencia();
-      expect(p.copyWith(escalaTexto: 0.2).escalaTexto,
-          MemoraDimensoes.escalaTextoMin);
+      expect(
+        p.copyWith(escalaTexto: 0.2).escalaTexto,
+        MemoraDimensoes.escalaTextoMin,
+      );
     });
 
     test('padrão é seguir o sistema, sem ampliação extra', () {
@@ -199,6 +209,60 @@ void main() {
 
       expect((await repo.carregar()).tema, PreferenciaAparencia.padrao.tema);
     });
+
+    // Valor de TIPO errado (dado corrompido) faz getBool/getString lançarem
+    // `TypeError`. Cada chave cai no padrão dela, e as outras seguem lidas.
+    final Map<String, Object> boas = <String, Object>{
+      'aparencia.tema': 'escuro',
+      'aparencia.escala_texto': 2.0,
+      'aparencia.reduzir_movimento': true,
+      'aparencia.paleta': 'azul',
+    };
+    final Map<String, Object> ruins = <String, Object>{
+      'aparencia.tema': 7,
+      'aparencia.escala_texto': 'grande',
+      'aparencia.reduzir_movimento': 'sim',
+      'aparencia.paleta': 7,
+    };
+    for (final String chave in ruins.keys) {
+      test('$chave com tipo errado volta ao padrão só nela', () async {
+        final RepositorioPreferenciaAparenciaLocal repo = await abrir(
+          <String, Object>{...boas, chave: ruins[chave]!},
+        );
+
+        final PreferenciaAparencia lida = await repo.carregar();
+        const PreferenciaAparencia padrao = PreferenciaAparencia.padrao;
+
+        expect(
+          lida.tema,
+          chave == 'aparencia.tema' ? padrao.tema : EscolhaDeTema.escuro,
+        );
+        expect(
+          lida.escalaTexto,
+          chave == 'aparencia.escala_texto' ? padrao.escalaTexto : 2.0,
+        );
+        expect(
+          lida.reduzirMovimento,
+          chave == 'aparencia.reduzir_movimento'
+              ? padrao.reduzirMovimento
+              : true,
+        );
+        expect(lida.paleta, padrao.paleta);
+      });
+    }
+
+    test(
+      'o controlador não deixa um Error de leitura impedir de abrir',
+      () async {
+        final ControladorAparencia c = ControladorAparencia(
+          _RepositorioQueLancaErro(),
+        );
+
+        await c.carregar();
+
+        expect(c.atual, PreferenciaAparencia.padrao);
+      },
+    );
   });
 
   group('Pré-visualização antes de confirmar — FR-023', () {
@@ -210,9 +274,13 @@ void main() {
 
       expect(c.atual.tema, EscolhaDeTema.altoContraste);
       expect(c.confirmada.tema, EscolhaDeTema.seguirSistema);
-      expect(repo.gravacoes, 0,
-          reason: 'Experimentar não pode gravar. Quem escolhe um tema '
-              'ilegível precisa poder voltar sem depender de ler a tela.');
+      expect(
+        repo.gravacoes,
+        0,
+        reason:
+            'Experimentar não pode gravar. Quem escolhe um tema '
+            'ilegível precisa poder voltar sem depender de ler a tela.',
+      );
     });
 
     test('confirmar persiste a pré-visualização', () async {
@@ -259,9 +327,13 @@ void main() {
 
       expect(c.atual, PreferenciaAparencia.padrao);
       expect(repo.salva, PreferenciaAparencia.padrao);
-      expect(c.temPreVisualizacao, isFalse,
-          reason: 'A saída de emergência não pode exigir uma confirmação '
-              'adicional de quem já se perdeu.');
+      expect(
+        c.temPreVisualizacao,
+        isFalse,
+        reason:
+            'A saída de emergência não pode exigir uma confirmação '
+            'adicional de quem já se perdeu.',
+      );
     });
   });
 
@@ -287,16 +359,21 @@ void main() {
 
       await c.carregar();
 
-      expect(c.atual, PreferenciaAparencia.padrao,
-          reason: 'Não conseguir ler uma preferência visual jamais pode '
-              'impedir alguém de usar o Memora.');
+      expect(
+        c.atual,
+        PreferenciaAparencia.padrao,
+        reason:
+            'Não conseguir ler uma preferência visual jamais pode '
+            'impedir alguém de usar o Memora.',
+      );
     });
   });
 
   group('Escolha explícita prevalece sobre o sistema — FR-020', () {
     test('seguir sistema usa ThemeMode.system', () {
-      final AparenciaResolvida a =
-          AparenciaResolvida.de(PreferenciaAparencia.padrao);
+      final AparenciaResolvida a = AparenciaResolvida.de(
+        PreferenciaAparencia.padrao,
+      );
       expect(a.modo, ThemeMode.system);
     });
 
@@ -305,24 +382,27 @@ void main() {
         const PreferenciaAparencia(tema: EscolhaDeTema.claro),
       );
       expect(a.modo, ThemeMode.light);
-      expect(a.temaClaro, a.temaEscuro,
-          reason: 'Escolha explícita vale independentemente do aparelho.');
+      expect(
+        a.temaClaro,
+        a.temaEscuro,
+        reason: 'Escolha explícita vale independentemente do aparelho.',
+      );
     });
 
     test('alto contraste vale mesmo com o sistema em modo claro', () {
       final AparenciaResolvida a = AparenciaResolvida.de(
         const PreferenciaAparencia(tema: EscolhaDeTema.altoContraste),
       );
-      final MemoraTheme? tema =
-          a.temaClaro.extension<MemoraTheme>();
+      final MemoraTheme? tema = a.temaClaro.extension<MemoraTheme>();
       expect(tema?.id, MemoraTemaId.altoContraste);
       expect(tema?.contrasteMinimoTexto, 7.0);
     });
   });
 
   group('Ampliação combinada — FR-019', () {
-    testWidgets('multiplica sistema e aplicativo, limitada ao teto',
-        (WidgetTester tester) async {
+    testWidgets('multiplica sistema e aplicativo, limitada ao teto', (
+      WidgetTester tester,
+    ) async {
       late double efetiva;
 
       await tester.pumpWidget(
@@ -344,12 +424,16 @@ void main() {
       );
 
       // 1.5 x 1.4 = 2.1, acima do teto.
-      expect(efetiva, MemoraDimensoes.escalaTextoMax,
-          reason: 'Somar as duas ampliações sem teto estoura o layout.');
+      expect(
+        efetiva,
+        MemoraDimensoes.escalaTextoMax,
+        reason: 'Somar as duas ampliações sem teto estoura o layout.',
+      );
     });
 
-    testWidgets('dentro do teto, o produto é preservado',
-        (WidgetTester tester) async {
+    testWidgets('dentro do teto, o produto é preservado', (
+      WidgetTester tester,
+    ) async {
       late double efetiva;
 
       await tester.pumpWidget(

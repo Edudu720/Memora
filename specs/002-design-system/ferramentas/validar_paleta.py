@@ -169,12 +169,40 @@ def combinacoes(paletas):
             yield tema_nome, {}, "sem paleta (nao se aplica)"
 
 
+def rodar(paletas):
+    """Roda TODAS as combinacoes de `combinacoes()`.
+
+    Devolve `{(tema, rotulo): falhas}`. E o que `main` e o autoteste usam, para
+    que o autoteste exercite o MESMO laco que o portao: uma regressao em
+    `combinacoes()` (um tema que deixa de receber a paleta) precisa reprovar
+    o autoteste, e nao so o caminho que chama `validar()` direto.
+    """
+    resultado = {}
+    for tema_nome, paleta, rotulo in combinacoes(paletas):
+        resultado[(tema_nome, rotulo)] = validar(tema_nome, paleta, rotulo)
+    return resultado
+
+
+# Os temas em que a paleta TEM de valer, escritos aqui de novo e de proposito:
+# a conta do autoteste nao pode depender da constante que ele fiscaliza, senao
+# encolher `TEMAS_COM_PALETA` encolheria junto o que se espera.
+TEMAS_ONDE_A_PALETA_VALE = ("claro", "escuro")
+
+
+def combinacoes_esperadas(paletas):
+    """Quantas combinacoes `combinacoes()` deve gerar, contada de outro jeito."""
+    return (len(TEMAS_ONDE_A_PALETA_VALE) * len(paletas)
+            + len([t for t in TEMAS if t not in TEMAS_ONDE_A_PALETA_VALE]))
+
+
 def main():
-    falhas = 0
-    total = 0
-    for tema_nome, paleta, rotulo in combinacoes(PALETAS):
-        total += 1
-        falhas += validar(tema_nome, paleta, rotulo)
+    resultado = rodar(PALETAS)
+    total = len(resultado)
+    falhas = sum(resultado.values())
+    if total != combinacoes_esperadas(PALETAS):
+        print(f"\nFALHA: {total} combinacoes validadas, esperadas "
+              f"{combinacoes_esperadas(PALETAS)}.")
+        sys.exit(1)
 
     print("\n" + "=" * 60)
     if falhas:
@@ -186,26 +214,48 @@ def main():
 
 
 def autoteste():
-    """Prova que o portao reprova uma paleta de contraste ruim (e so ela).
+    """Prova que o portao reprova uma paleta ruim, em CADA tema onde vale.
 
-    Um validador que nunca reprova nada nao protege nada. Injeta uma paleta
-    ruim -- primaria clara demais sobre o fundo claro -- e confirma que ela
-    reprova; confirma tambem que uma paleta boa continua passando.
+    Um validador que nunca reprova nada nao protege nada. Passa pelo mesmo
+    laco do `main` (`rodar`/`combinacoes`) paletas ruins de proposito -- uma
+    que so estraga o claro, outra que so estraga o escuro -- e exige que cada
+    uma reprove no tema dela e em mais nenhum, que o numero de combinacoes
+    bata com a conta `temas_com_paleta x paletas + temas_sem_paleta`, e que
+    uma paleta boa continue passando nos dois.
     """
-    ruim = {"claro": {"primaria": "#B8C7FF"}}  # ~1,6:1 sobre #F8F8F8
+    ruim_claro = {"claro": {"primaria": "#B8C7FF"}}   # ~1,6:1 sobre #F8F8F8
+    ruim_escuro = {"escuro": {"primaria": "#2A3A6A"}}  # ~1,5:1 sobre #101216
     boa = {"claro": {"primaria": "#0B3BD0"}, "escuro": {"primaria": "#A8C0FF"}}
-    falhou_ruim = validar("claro", ruim, "AUTOTESTE paleta ruim")
-    falhou_boa = (validar("claro", boa, "AUTOTESTE paleta boa")
-                  + validar("escuro", boa, "AUTOTESTE paleta boa"))
+    paletas = {"ruim_claro": ruim_claro, "ruim_escuro": ruim_escuro, "boa": boa}
+
+    resultado = rodar(paletas)
+    esperado = combinacoes_esperadas(paletas)
+    erros = []
+    if len(resultado) != esperado:
+        erros.append(f"{len(resultado)} combinacoes rodaram, esperadas {esperado}")
+
+    for tema, rotulo in (("claro", "paleta ruim_claro"),
+                         ("escuro", "paleta ruim_escuro")):
+        if (tema, rotulo) not in resultado:
+            erros.append(f"{rotulo} nem chegou a ser validada no tema {tema}")
+
+    for (tema, rotulo), falhas in resultado.items():
+        deve_falhar = ((tema == "claro" and rotulo == "paleta ruim_claro")
+                       or (tema == "escuro" and rotulo == "paleta ruim_escuro"))
+        if deve_falhar and falhas == 0:
+            erros.append(f"{rotulo} NAO reprovou no tema {tema}")
+        if not deve_falhar and falhas != 0:
+            erros.append(f"{rotulo} reprovou no tema {tema}, e nao devia")
+        if tema not in TEMAS_COM_PALETA and rotulo.startswith("paleta "):
+            erros.append(f"o tema {tema} recebeu paleta, e nao devia")
+
     print("\n" + "=" * 60)
-    if falhou_ruim == 0:
-        print("AUTOTESTE FALHOU: a paleta de contraste ruim NAO reprovou.")
+    if erros:
+        for erro in erros:
+            print(f"AUTOTESTE FALHOU: {erro}.")
         sys.exit(1)
-    if falhou_boa != 0:
-        print("AUTOTESTE FALHOU: a paleta boa reprovou.")
-        sys.exit(1)
-    print(f"Autoteste ok: a paleta ruim reprovou em {falhou_ruim} par(es) e a "
-          "boa passou.")
+    print(f"Autoteste ok: {len(resultado)} combinacoes pelo laco do portao; as "
+          "paletas ruins reprovaram so no tema delas e a boa passou.")
     sys.exit(0)
 
 

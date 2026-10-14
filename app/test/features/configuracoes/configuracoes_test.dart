@@ -163,6 +163,27 @@ void main() {
       expect(find.text(TextosConfiguracoes.guardadoNuncaFica), findsOneWidget);
     });
 
+    testWidgets('não afirma o que não é verdade: o contato também está no '
+        'servidor, e a conversa viaja a cada pergunta', (WidgetTester t) async {
+      await t.pumpWidget(app(privacidade()));
+
+      expect(
+        TextosConfiguracoes.privacidadeIntro,
+        isNot(contains('outro lugar')),
+        reason: 'o e-mail ou telefone é a conta, e o servidor o conhece',
+      );
+      expect(
+        TextosConfiguracoes.guardadoContatoValor,
+        contains('contato da sua conta'),
+      );
+      expect(TextosConfiguracoes.guardadoConversaValor, contains('viaja'));
+      expect(
+        TextosConfiguracoes.paraQueServeEsquecer,
+        contains('aparência ficam'),
+        reason: 'as preferências de aparência não são apagadas',
+      );
+    });
+
     testWidgets('é informação: só o botão de apagar aceita toque', (
       WidgetTester t,
     ) async {
@@ -853,6 +874,33 @@ void main() {
       await FluxoDentroDaConta.avancar(t, 6);
     }
 
+    testWidgets('o título de Aparência e de Acessibilidade é o da porta que '
+        'leva até elas', (WidgetTester t) async {
+      await entrar(t);
+      await FluxoDentroDaConta.irPara(t, DestinoDaCasca.ajustes);
+
+      for (final (Key, String) par in <(Key, String)>[
+        (TelaConfiguracoes.chaveAparencia, TextosConfiguracoes.portaAparencia),
+        (
+          TelaConfiguracoes.chaveAcessibilidade,
+          TextosConfiguracoes.portaAcessibilidade,
+        ),
+      ]) {
+        await FluxoDentroDaConta.tocar(t, find.byKey(par.$1));
+        await FluxoDentroDaConta.esperarATransicao(t);
+        expect(
+          find.descendant(
+            of: find.byType(TelaAparencia),
+            matching: find.text(par.$2),
+          ),
+          findsWidgets,
+          reason: par.$2,
+        );
+        await FluxoDentroDaConta.tocar(t, find.text('Voltar'));
+        await FluxoDentroDaConta.esperarATransicao(t);
+      }
+    });
+
     testWidgets('Ajustes é a raiz do destino, com as quatro portas', (
       WidgetTester t,
     ) async {
@@ -1034,6 +1082,46 @@ void main() {
             '(e a próxima pergunta o regravaria no aparelho)',
       );
       expect(fluxo.conversa.guardadas, isEmpty);
+    });
+
+    testWidgets('se o aparelho não deixa apagar, Privacidade diz que NÃO '
+        'apagou, e a conversa aberta no Início não cai', (
+      WidgetTester t,
+    ) async {
+      await entrar(t);
+      await fluxo.conversa.guardar(<MensagemDaConversa>[
+        MensagemDaConversa(
+          autor: AutorDaMensagem.pessoa,
+          texto: 'Como eu mando uma foto?',
+          momento: DateTime(2026, 10),
+        ),
+      ]);
+      fluxo.conversa.falharAoApagar = true;
+      await FluxoDentroDaConta.tocar(t, find.byKey(TelaInicio.chaveConversar));
+      await FluxoDentroDaConta.esperarATransicao(t);
+
+      await FluxoDentroDaConta.irAPrivacidade(t);
+      await FluxoDentroDaConta.tocar(
+        t,
+        find.byKey(TelaPrivacidade.chaveApagar),
+      );
+      await FluxoDentroDaConta.tocar(
+        t,
+        find.descendant(
+          of: find.byKey(TelaPrivacidade.chaveConfirmacao),
+          matching: find.text(TextosConfiguracoes.botaoApagarConversa),
+        ),
+      );
+      await FluxoDentroDaConta.tocar(t, simPodeApagar);
+
+      expect(find.byKey(TelaPrivacidade.chaveFalha), findsOneWidget);
+      expect(find.byKey(TelaPrivacidade.chaveApagada), findsNothing);
+      expect(t.takeException(), isNull);
+      expect(
+        fluxo.conversa.guardadas,
+        isNotEmpty,
+        reason: 'a conversa continua no aparelho, e a tela disse isso',
+      );
     });
   });
 }
