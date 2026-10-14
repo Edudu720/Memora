@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 
+import '../../suporte/aparelhos.dart';
+
 class _RepositorioFalso implements RepositorioPreferenciaAparencia {
   PreferenciaAparencia? salva;
   int gravacoes = 0;
@@ -17,7 +19,11 @@ class _RepositorioFalso implements RepositorioPreferenciaAparencia {
   }
 }
 
-Widget _app(ControladorAparencia controlador) {
+Widget _app(
+  ControladorAparencia controlador, {
+  GrupoDeAjusteVisual grupo = GrupoDeAjusteVisual.aparencia,
+  VoidCallback? aoVoltar,
+}) {
   return EscopoAparencia(
     controlador: controlador,
     child: ListenableBuilder(
@@ -30,9 +36,10 @@ Widget _app(ControladorAparencia controlador) {
           themeMode: a.modo,
           builder: (BuildContext context, Widget? child) => AmpliacaoDeTexto(
             fatorDoAplicativo: controlador.atual.escalaTexto,
+            reduzirMovimento: controlador.atual.reduzirMovimento,
             child: child!,
           ),
-          home: const TelaAparencia(),
+          home: TelaAparencia(grupo: grupo, aoVoltar: aoVoltar),
         );
       },
     ),
@@ -66,9 +73,9 @@ void main() {
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(_app(c));
 
-      await _tocar(tester, find.text('Mais contraste'));
+      await _tocar(tester, find.text('Escuro'));
 
-      expect(c.atual.tema, EscolhaDeTema.altoContraste);
+      expect(c.atual.tema, EscolhaDeTema.escuro);
       expect(repo.gravacoes, 0, reason: 'Experimentar não grava.');
       expect(find.text('Salvar deste jeito'), findsOneWidget);
       expect(find.text('Deixar como estava'), findsOneWidget);
@@ -93,7 +100,7 @@ void main() {
       final ControladorAparencia c = ControladorAparencia(repo);
       await tester.pumpWidget(_app(c));
 
-      await _tocar(tester, find.text('Mais contraste'));
+      await _tocar(tester, find.text('Escuro'));
       await _tocar(tester, find.text('Deixar como estava'));
 
       expect(c.atual.tema, EscolhaDeTema.seguirSistema);
@@ -104,7 +111,9 @@ void main() {
         (WidgetTester tester) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
-      await tester.pumpWidget(_app(c));
+      await tester.pumpWidget(
+        _app(c, grupo: GrupoDeAjusteVisual.acessibilidade),
+      );
 
       expect(find.text('Voltar ao jeito original'), findsNothing);
 
@@ -117,7 +126,9 @@ void main() {
         (WidgetTester tester) async {
       final _RepositorioFalso repo = _RepositorioFalso();
       final ControladorAparencia c = ControladorAparencia(repo);
-      await tester.pumpWidget(_app(c));
+      await tester.pumpWidget(
+        _app(c, grupo: GrupoDeAjusteVisual.acessibilidade),
+      );
 
       await _tocar(tester, find.text('Bem grande'));
       await _tocar(tester, find.text('Voltar ao jeito original'));
@@ -164,5 +175,203 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+  });
+
+  group('Aparência: só as cores comuns — FR-038, FR-039a', () {
+    testWidgets('oferece igual ao celular, claro e escuro, e NÃO o alto '
+        'contraste, que mora em Acessibilidade', (WidgetTester tester) async {
+      await tester.pumpWidget(_app(ControladorAparencia(_RepositorioFalso())));
+
+      expect(find.text('Igual ao meu celular'), findsOneWidget);
+      expect(find.text('Claro'), findsOneWidget);
+      expect(find.text('Escuro'), findsOneWidget);
+      expect(find.text('Mais contraste'), findsNothing);
+      // Nem o tamanho da letra nem o movimento: são de Acessibilidade.
+      expect(find.text('Bem grande'), findsNothing);
+      expect(find.text('Menos movimento'), findsNothing);
+    });
+
+    testWidgets('com o alto contraste ligado, diz onde mudar', (
+      WidgetTester tester,
+    ) async {
+      final _RepositorioFalso repo = _RepositorioFalso()
+        ..salva = const PreferenciaAparencia(tema: EscolhaDeTema.altoContraste);
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await c.carregar();
+      await tester.pumpWidget(_app(c));
+
+      expect(find.textContaining('Enxergar e usar melhor'), findsOneWidget);
+    });
+  });
+
+  group('Acessibilidade — FR-039a', () {
+    Widget acessibilidade(ControladorAparencia c) =>
+        _app(c, grupo: GrupoDeAjusteVisual.acessibilidade);
+
+    testWidgets('reúne tamanho da letra, movimento e contraste', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        acessibilidade(ControladorAparencia(_RepositorioFalso())),
+      );
+
+      expect(find.text('Tamanho da letra'), findsOneWidget);
+      expect(find.text('Movimento'), findsOneWidget);
+      expect(find.text('Contraste'), findsOneWidget);
+      expect(find.text('Mais contraste'), findsOneWidget);
+      expect(find.text('Menos movimento'), findsOneWidget);
+    });
+
+    testWidgets('cada opção diz para quem serve', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        acessibilidade(ControladorAparencia(_RepositorioFalso())),
+      );
+
+      expect(
+        find.textContaining('Se as letras parecem pequenas'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Se o que se mexe na tela'), findsOneWidget);
+      expect(
+        find.textContaining('Se é difícil separar a letra do fundo'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('menos movimento: pré-visualiza, não grava, e só salva ao '
+        'confirmar', (WidgetTester tester) async {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await tester.pumpWidget(acessibilidade(c));
+
+      await _tocar(tester, find.text('Menos movimento'));
+
+      expect(c.atual.reduzirMovimento, isTrue);
+      expect(repo.gravacoes, 0, reason: 'Experimentar não grava.');
+      expect(find.byKey(TelaAparencia.chaveSalvar), findsOneWidget);
+      expect(find.byKey(TelaAparencia.chaveDesfazer), findsOneWidget);
+
+      await _tocar(tester, find.byKey(TelaAparencia.chaveSalvar));
+
+      expect(repo.salva?.reduzirMovimento, isTrue);
+      expect(find.byKey(TelaAparencia.chaveSalvar), findsNothing);
+    });
+
+    testWidgets('menos movimento: desfazer volta, e nada foi gravado', (
+      WidgetTester tester,
+    ) async {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await tester.pumpWidget(acessibilidade(c));
+
+      await _tocar(tester, find.text('Menos movimento'));
+      await _tocar(tester, find.byKey(TelaAparencia.chaveDesfazer));
+
+      expect(c.atual.reduzirMovimento, isFalse);
+      expect(repo.gravacoes, 0);
+    });
+
+    testWidgets('menos movimento pré-visualizado chega ao MediaQuery da '
+        'tela, na hora', (WidgetTester tester) async {
+      final ControladorAparencia c = ControladorAparencia(_RepositorioFalso());
+      await tester.pumpWidget(acessibilidade(c));
+      bool reduz() => MediaQuery.disableAnimationsOf(
+        tester.element(find.byType(TelaAparencia)),
+      );
+      expect(reduz(), isFalse);
+
+      await _tocar(tester, find.text('Menos movimento'));
+
+      expect(
+        reduz(),
+        isTrue,
+        reason: 'pré-visualizar precisa mudar a tela antes de salvar',
+      );
+
+      await _tocar(tester, find.byKey(TelaAparencia.chaveDesfazer));
+      expect(reduz(), isFalse);
+    });
+
+    testWidgets('mais contraste: pré-visualiza o tema, e "cores do jeito '
+        'normal" volta a seguir o celular', (WidgetTester tester) async {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await tester.pumpWidget(acessibilidade(c));
+
+      await _tocar(tester, find.text('Mais contraste'));
+      expect(c.atual.tema, EscolhaDeTema.altoContraste);
+      expect(repo.gravacoes, 0);
+
+      await _tocar(tester, find.text('Cores do jeito normal'));
+      expect(c.atual.tema, EscolhaDeTema.seguirSistema);
+    });
+
+    testWidgets('o tamanho da letra pré-visualiza e salva', (
+      WidgetTester tester,
+    ) async {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await tester.pumpWidget(acessibilidade(c));
+
+      await _tocar(tester, find.text('Grande'));
+      expect(c.atual.escalaTexto, TamanhoDeLetra.grande.fator);
+      expect(repo.gravacoes, 0);
+
+      await _tocar(tester, find.byKey(TelaAparencia.chaveSalvar));
+      expect(repo.salva?.escalaTexto, TamanhoDeLetra.grande.fator);
+    });
+
+    testWidgets('as opções atendem à diretriz de alvo de toque', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        acessibilidade(ControladorAparencia(_RepositorioFalso())),
+      );
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      handle.dispose();
+    });
+  });
+
+  group('Matriz — FR-044', () {
+    for (final GrupoDeAjusteVisual grupo in GrupoDeAjusteVisual.values) {
+      for (final Combinacao c in matriz()) {
+        testWidgets('${grupo.name}: não estoura e salvar é alcançável em '
+            '${nomeDa(c)}', (WidgetTester tester) async {
+          vestir(tester, c.aparelho);
+          final _RepositorioFalso repo = _RepositorioFalso();
+          final ControladorAparencia controlador = ControladorAparencia(repo);
+          await tester.pumpWidget(
+            EscopoAparencia(
+              controlador: controlador,
+              child: naCombinacao(
+                c,
+                TelaAparencia(grupo: grupo, aoVoltar: () {}),
+              ),
+            ),
+          );
+          expect(tester.takeException(), isNull, reason: nomeDa(c));
+
+          final String opcao = grupo == GrupoDeAjusteVisual.aparencia
+              ? 'Escuro'
+              : 'Menos movimento';
+          await tester.ensureVisible(find.text(opcao));
+          await tester.pump();
+          await tester.tap(find.text(opcao));
+          await tester.pump();
+          expect(tester.takeException(), isNull, reason: nomeDa(c));
+
+          await exigirAlcancavel(
+            tester,
+            find.byKey(TelaAparencia.chaveSalvar),
+            aparelho: c.aparelho,
+            contexto: '${grupo.name} / ${nomeDa(c)}',
+          );
+          await tester.tap(find.byKey(TelaAparencia.chaveSalvar));
+          await tester.pump();
+          expect(repo.gravacoes, 1, reason: nomeDa(c));
+        });
+      }
+    }
   });
 }

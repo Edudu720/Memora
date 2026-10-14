@@ -16,6 +16,8 @@ class RepositorioPreferenciaAparenciaLocal
     implements RepositorioPreferenciaAparencia {
   static const String _chaveTema = 'aparencia.tema';
   static const String _chaveEscalaTexto = 'aparencia.escala_texto';
+  static const String _chaveReduzirMovimento = 'aparencia.reduzir_movimento';
+  static const String _chavePaleta = 'aparencia.paleta';
 
   final SharedPreferences _preferencias;
 
@@ -38,6 +40,13 @@ class RepositorioPreferenciaAparenciaLocal
       tema: _temaPorNome(nomeTema),
       // copyWith limita a faixa; aqui garantimos o padrão quando ausente.
       escalaTexto: escala ?? PreferenciaAparencia.padrao.escalaTexto,
+      reduzirMovimento:
+          _preferencias.getBool(_chaveReduzirMovimento) ??
+          PreferenciaAparencia.padrao.reduzirMovimento,
+      // Nome de paleta que não existe (retirada numa versão nova, ou dado
+      // corrompido) volta ao padrão: o `copyWith` confere.
+      paleta: _preferencias.getString(_chavePaleta) ??
+          PreferenciaAparencia.paletaPadrao,
     ).copyWith();
   }
 
@@ -45,6 +54,11 @@ class RepositorioPreferenciaAparenciaLocal
   Future<void> salvar(PreferenciaAparencia preferencia) async {
     await _preferencias.setString(_chaveTema, preferencia.tema.name);
     await _preferencias.setDouble(_chaveEscalaTexto, preferencia.escalaTexto);
+    await _preferencias.setBool(
+      _chaveReduzirMovimento,
+      preferencia.reduzirMovimento,
+    );
+    await _preferencias.setString(_chavePaleta, preferencia.paleta);
   }
 
   /// Converte o nome salvo de volta para [EscolhaDeTema].

@@ -6,7 +6,14 @@ Regras aplicadas:
   - Texto grande e icone  3:1
   - Borda de componente   3:1
 
+Paletas prontas de cor de destaque (feature 004, FR-039, R15): cada paleta
+troca so a `primaria` e os tons derivados dela (`sobre_primaria`, `destaque`,
+`medalhao`), e e validada em CADA tema claro e escuro, contra TODOS os pares
+abaixo -- antes de existir. No tema de alto contraste a paleta nao se aplica.
+Uma paleta que reprova em algum tema simplesmente nao entra: nao ganha excecao.
+
 Uso: python validar_paleta.py
+     python validar_paleta.py --autoteste   (prova que o portao reprova)
 Sai com codigo 1 se qualquer par reprovar (serve de portao de build).
 """
 import sys
@@ -83,6 +90,18 @@ TEMAS = {
     },
 }
 
+# Paletas prontas (R15). "azul" e a do prototipo e o padrao: nao sobrescreve
+# nada, ou seja, e exatamente o que ja esta em TEMAS. As demais (verde, roxo,
+# laranja-terra, rosa, grafite) so entram AQUI depois de medidas -- e o valor
+# que passar aqui e o que vai para `app/lib/design_system/tokens/cores.dart`
+# (T122). Formato: {tema: {nome_da_cor: "#RRGGBB"}}, so `claro` e `escuro`.
+PALETAS = {
+    "azul": {},
+}
+
+# Os temas em que a paleta se aplica (R15): alto contraste fica de fora.
+TEMAS_COM_PALETA = ("claro", "escuro")
+
 # (frente, fundo, tipo)  -- tipo define o limiar exigido
 PARES = [
     ("texto",          "fundo",          "texto"),
@@ -115,27 +134,82 @@ PARES = [
     ("perigo",         "superficie_alt", "grafico"),
 ]
 
+def cores_da(tema_nome, paleta):
+    """As cores do tema com a paleta aplicada por cima (so claro/escuro)."""
+    cores = dict(TEMAS[tema_nome]["cores"])
+    if tema_nome in TEMAS_COM_PALETA:
+        cores.update(paleta.get(tema_nome, {}))
+    return cores
+
+
+def validar(tema_nome, paleta, rotulo):
+    """Valida todos os pares de uma combinacao. Devolve quantas falharam."""
+    min_txt = TEMAS[tema_nome]["min_texto"]
+    cores = cores_da(tema_nome, paleta)
+    print(f"\n=== TEMA {tema_nome.upper()} - {rotulo}  (texto >= {min_txt}:1) ===")
+    falhas = 0
+    for frente, fundo, tipo in PARES:
+        exigido = min_txt if tipo == "texto" else 3.0
+        r = contraste(cores[frente], cores[fundo])
+        ok = r >= exigido
+        if not ok:
+            falhas += 1
+        print(f"  {'OK  ' if ok else 'FALHA'} {frente:>14s} sobre {fundo:<15s} "
+              f"{r:6.2f}:1  (exigido {exigido}:1)")
+    return falhas
+
+
+def combinacoes(paletas):
+    """Toda combinacao a validar: cada tema com cada paleta, onde ela vale."""
+    for tema_nome in TEMAS:
+        if tema_nome in TEMAS_COM_PALETA:
+            for nome, paleta in paletas.items():
+                yield tema_nome, paleta, f"paleta {nome}"
+        else:
+            yield tema_nome, {}, "sem paleta (nao se aplica)"
+
+
 def main():
     falhas = 0
-    for nome, tema in TEMAS.items():
-        cores = tema["cores"]
-        min_txt = tema["min_texto"]
-        print(f"\n=== TEMA {nome.upper()}  (texto >= {min_txt}:1) ===")
-        for frente, fundo, tipo in PARES:
-            exigido = min_txt if tipo == "texto" else 3.0
-            r = contraste(cores[frente], cores[fundo])
-            ok = r >= exigido
-            if not ok:
-                falhas += 1
-            print(f"  {'OK  ' if ok else 'FALHA'} {frente:>14s} sobre {fundo:<15s} "
-                  f"{r:6.2f}:1  (exigido {exigido}:1)")
+    total = 0
+    for tema_nome, paleta, rotulo in combinacoes(PALETAS):
+        total += 1
+        falhas += validar(tema_nome, paleta, rotulo)
 
     print("\n" + "=" * 60)
     if falhas:
         print(f"{falhas} par(es) REPROVARAM. Corrija os tokens antes de prosseguir.")
         sys.exit(1)
-    print("Todos os pares aprovados. Paleta em conformidade com a WCAG 2.2.")
+    print(f"Todos os pares aprovados em {total} combinacoes de tema e paleta. "
+          "Paleta em conformidade com a WCAG 2.2.")
     sys.exit(0)
 
+
+def autoteste():
+    """Prova que o portao reprova uma paleta de contraste ruim (e so ela).
+
+    Um validador que nunca reprova nada nao protege nada. Injeta uma paleta
+    ruim -- primaria clara demais sobre o fundo claro -- e confirma que ela
+    reprova; confirma tambem que uma paleta boa continua passando.
+    """
+    ruim = {"claro": {"primaria": "#B8C7FF"}}  # ~1,6:1 sobre #F8F8F8
+    boa = {"claro": {"primaria": "#0B3BD0"}, "escuro": {"primaria": "#A8C0FF"}}
+    falhou_ruim = validar("claro", ruim, "AUTOTESTE paleta ruim")
+    falhou_boa = (validar("claro", boa, "AUTOTESTE paleta boa")
+                  + validar("escuro", boa, "AUTOTESTE paleta boa"))
+    print("\n" + "=" * 60)
+    if falhou_ruim == 0:
+        print("AUTOTESTE FALHOU: a paleta de contraste ruim NAO reprovou.")
+        sys.exit(1)
+    if falhou_boa != 0:
+        print("AUTOTESTE FALHOU: a paleta boa reprovou.")
+        sys.exit(1)
+    print(f"Autoteste ok: a paleta ruim reprovou em {falhou_ruim} par(es) e a "
+          "boa passou.")
+    sys.exit(0)
+
+
 if __name__ == "__main__":
+    if "--autoteste" in sys.argv[1:]:
+        autoteste()
     main()

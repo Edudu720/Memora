@@ -314,6 +314,12 @@ class ControladorConversa extends ChangeNotifier {
 
   /// Apaga a conversa (FR-050).
   Future<void> apagarConversa() async {
+    // Invalida o que está em voo, como o `dispose`: quem apaga quer que a
+    // conversa SUMA, e uma resposta que chegasse depois a regravaria no
+    // aparelho (FR-040, FR-048).
+    _envio++;
+    _cronometro?.cancel();
+    _trechoEmCurso = '';
     _mensagens.clear();
     _acaoOferecida = null;
     _falha = null;
