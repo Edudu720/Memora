@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
+import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
+import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
@@ -100,6 +103,9 @@ void main() {
   final Finder doRegistro = find.byKey(
     TelaHub.chaveDaPorta(TextosAssistente.portaRegistro),
   );
+  final Finder daAjuda = find.byKey(
+    TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
+  );
   final Finder doHub = find.byKey(TelaInicio.chaveVerTudo);
 
   /// Todas as partes do aplicativo e o caminho até cada uma.
@@ -120,8 +126,7 @@ void main() {
       parte: 'meus aplicativos',
       toques: <Finder>[doHub, deApps],
       chegada: find.byWidgetPredicate(
-        (Widget w) =>
-            w is TelaCatalogo && w.categoria.name == 'cotidiano',
+        (Widget w) => w is TelaCatalogo && w.categoria.name == 'cotidiano',
       ),
       via: null,
     ),
@@ -137,6 +142,24 @@ void main() {
       parte: 'o que eu fiz por você',
       toques: <Finder>[doHub, doRegistro],
       chegada: find.byType(TelaRegistro),
+      via: null,
+    ),
+    (
+      parte: 'ajuda',
+      toques: <Finder>[doHub, daAjuda],
+      chegada: find.byType(TelaAjuda),
+      via: null,
+    ),
+    (
+      // A US6 existe para isto: achar, pela Ajuda, como se proteger de um
+      // golpe por telefone. Três toques a partir do Início.
+      parte: 'dicas de segurança contra golpe (pela Ajuda)',
+      toques: <Finder>[
+        doHub,
+        daAjuda,
+        find.byKey(TelaAjuda.chaveDoAssunto(IdDoAssunto.seguranca)),
+      ],
+      chegada: find.byType(TelaAssunto),
       via: null,
     ),
     (
@@ -259,7 +282,8 @@ void main() {
         expect(
           alvo,
           findsOneWidget,
-          reason: 'no caminho "${c.parte}", o toque ${toques + 1} não achou o '
+          reason:
+              'no caminho "${c.parte}", o toque ${toques + 1} não achou o '
               'alvo ($alvo)',
         );
         await tocar(t, alvo);
@@ -297,6 +321,7 @@ void main() {
       TelaHub.chaveDaPorta(TextosAssistente.portaServicos),
       TelaHub.chaveDaPorta(TextosAssistente.portaRegistro),
       TelaHub.chaveDaPorta(TextosAssistente.portaConversa),
+      TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
     };
     expect(
       daTela.difference(daTabela),

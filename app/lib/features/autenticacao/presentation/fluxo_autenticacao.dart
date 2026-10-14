@@ -17,6 +17,11 @@ import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
 import '../../apresentacao/presentation/fluxo_apresentacao.dart';
+import '../../ajuda/data/compartilhar.dart';
+import '../../ajuda/domain/assunto_de_ajuda.dart';
+import '../../ajuda/presentation/ajuda_guiada_da_conversa.dart';
+import '../../ajuda/presentation/tela_ajuda.dart';
+import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/conversa_local.dart';
 import '../../assistente/domain/assistente.dart';
@@ -94,6 +99,14 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
   final AbridorDeAplicativo? abridor;
 
+  /// Quem manda o endereço oficial de download para fora do aplicativo (T089).
+  ///
+  /// **Nulo é "o assunto Compartilhar da Ajuda não existe"** (R12, FR-018):
+  /// sem `MEMORA_URL_DOWNLOAD` no build não há o que compartilhar, e oferecer
+  /// o botão seria porta que não abre nada. Vem de
+  /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
+  final Compartilhador? compartilhador;
+
   /// Onde a conversa fica guardada no aparelho (FR-047).
   ///
   /// Trocável no teste de widget, onde I/O de arquivo real nunca completa.
@@ -118,6 +131,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.limpeza,
     this.dataDeNascimento,
     this.apresentacaoVista,
+    this.compartilhador,
   });
 
   @override
@@ -499,7 +513,82 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           ),
         ),
       ),
+      // A Ajuda (T090, FR-033). Fica dentro deste bloco porque a ajuda guiada
+      // sai direto para a conversa (FR-034): sem assistente, ela levaria a
+      // lugar nenhum — e o Hub sem assistente continua vazio.
+      PortaDoHub(
+        rotulo: TextosAssistente.portaAjuda,
+        descricao: TextosAssistente.descricaoAjuda,
+        ilustracao: Ilustracao.portaAjuda,
+        aoAbrir: () => _abrirAjuda(assistente),
+      ),
     ];
+  }
+
+  /// A Ajuda, com os assuntos que existem agora (T087, FR-033).
+  void _abrirAjuda(RepositorioAssistente assistente) {
+    final Compartilhador? compartilhador = widget.compartilhador;
+    final ApresentacaoVista? vistas = widget.apresentacaoVista;
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaAjuda(
+          assuntos: AssuntoDeAjuda.disponiveis(
+            podeCompartilhar: compartilhador != null,
+          ),
+          aoAbrirAssunto: (AssuntoDeAjuda assunto) =>
+              _abrirAssunto(assunto, assistente),
+          // Rever a apresentação (FR-013) precisa de onde ela é guardada e de
+          // quem é a pessoa: sem isso a porta não existe (FR-018).
+          aoVerApresentacao: vistas == null || _pessoa == null
+              ? null
+              : () => _reverApresentacao(vistas),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre um assunto da Ajuda. "A conversa" é a ajuda guiada; os outros, uma
+  /// ideia por tela.
+  void _abrirAssunto(AssuntoDeAjuda assunto, RepositorioAssistente assistente) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => switch (assunto.id) {
+          IdDoAssunto.conversa => AjudaGuiadaDaConversa(
+            // Direto para a conversa de verdade (FR-034): a ajuda guiada sai da
+            // pilha e a conversa entra no lugar, sem tela no meio e sem deixar
+            // a ajuda guiada por baixo — "Voltar" da conversa leva à Ajuda.
+            aoConversar: () {
+              Navigator.of(contexto).pop();
+              _abrirConversa(assistente);
+            },
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+          _ => TelaAssunto(
+            assunto: assunto,
+            compartilhador: widget.compartilhador,
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+        },
+      ),
+    );
+  }
+
+  /// A apresentação outra vez, a partir da Ajuda (FR-013).
+  ///
+  /// É a mesma [FluxoApresentacao] da primeira entrada, empilhada na casca: ao
+  /// fim ou ao "Pular" ela sai da pilha e a pessoa está de volta na Ajuda.
+  void _reverApresentacao(ApresentacaoVista vistas) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => FluxoApresentacao(
+          nome: _pessoa?.nomeTratamento ?? '',
+          idDaConta: _pessoa!.id,
+          vista: vistas,
+          aoConcluir: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// Abre o Hub por cima do Início (T040).

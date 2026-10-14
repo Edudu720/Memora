@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/ajuda/data/compartilhar.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -82,6 +83,7 @@ class FluxoDentroDaConta {
     GlobalKey? capturavel,
     DataDeNascimentoDoAparelho? datas,
     ApresentacaoVistaDoAparelho? vistas,
+    Compartilhador? compartilhador,
   }) async {
     if (em != null) vestir(t, em.aparelho);
     // Com a guarda da apresentação, a conta de Ana já a viu: o cenário começa
@@ -120,6 +122,7 @@ class FluxoDentroDaConta {
           ultimoAcesso: ultimoAcesso,
           dataDeNascimento: datas,
           apresentacaoVista: vistas,
+          compartilhador: compartilhador,
           inatividade: inatividade,
           avisoDeInatividade: aviso,
           limpeza: LimpezaDeSessao(
