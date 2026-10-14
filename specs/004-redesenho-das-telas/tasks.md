@@ -214,7 +214,7 @@ FR-017. Nenhum teste pulado.
 ### Nas fases seguintes
 
 - [ ] T117 [US1] Boas-vindas na altura toda, só para quem nunca entrou no aparelho (FR-009); **tela de volta** com a Memora ou uma pessoa idosa de fundo, "Entrar" como ação principal (FR-009a); cadastro e login com `CaixaDeEtapa`, sem mudar campos nem regras (FR-010); cumprir o cenário 5 da US1 ("Esqueci minha senha" e "Primeiro acesso" à vista sem rolar no login, em 100% no 320×568) e **retirar o `skip` do teste da T047** em `tela_login_test.dart` (revisão da #45). Substitui o escopo da T051 e amplia o da T052
-- [ ] T118 [US3] O aviso da conversa **aberto até a primeira mensagem e, depois, uma linha** com escudo e o núcleo ("senha" e "código"), que se toca para ler (FR-022, R5 revista). Nunca some, nem por gesto. Portão: depois da primeira mensagem, o aviso fechado ainda contém "senha" e "código"; provar quebrando com o aviso removido. Amplia a T055
+- [X] T118 [US3] O aviso da conversa **aberto até a primeira mensagem e, depois, uma linha** com escudo e o núcleo ("senha" e "código"), que se toca para ler (FR-022, R5 revista). Nunca some, nem por gesto. Portão: depois da primeira mensagem, o aviso fechado ainda contém "senha" e "código"; provar quebrando com o aviso removido. Amplia a T055
 - [ ] T119 [US4] "Meus aplicativos" em **lista**, ícone do aparelho à esquerda e nome ao lado (FR-023 revista). Ajusta a tarefa da tela de aplicativos da fase 6
 - [ ] T120 [US4] **Captura pendente** (FR-028a): passo sem captura mostra um aviso visível com a chave do guia e o número do passo; teste em `catalogo_e_guias_test.dart` lista as pendentes, e a lista precisa chegar a zero antes da T104
 - [X] T121 [US7] Grupo **Acessibilidade** em Ajustes (FR-038, FR-039a): tamanho do texto, reduzir movimento e alto contraste, cada opção com uma frase de para quem serve, com pré-visualização
@@ -257,14 +257,14 @@ apresentando.
 
 ### Tests
 
-- [ ] T053 [P] [US3] Estender o portão da FR-027 da 003 em `app/test/acessibilidade/conversa_acessibilidade_test.dart`, **sem tirar nada dele**: continua em 100%, 150% **e 200%**, com altura mínima da lista e botão de enviar alcançável. Acrescentar o da **FR-022**: em 100% e 150%, lista + campo de escrever ≥ 50% da altura disponível; o título do aviso sempre presente; o **resumo fechado contém "senha" e "código"** (FR-049); aberto, o aviso ≤ 50%. **Provar quebrando**: voltar o aviso antigo, sempre expandido. (Revisão da #36: a versão anterior trocava o portão por um só em 100% e 150%, e perdia os 200%.) Os estados da FR-006 que a tela tiver, por `app/test/suporte/estados_de_tela.dart`
-- [ ] T054 [P] [US3] Estender `app/test/features/assistente/tela_conversa_test.dart`: autor por posição, rosto e nome (FR-020); opções com 56 dp e afastadas (FR-021); confirmação e registro da 003 inalterados (`acao_confirmada_test.dart` passando); os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [X] T053 [P] [US3] Estender o portão da FR-027 da 003 em `app/test/acessibilidade/conversa_acessibilidade_test.dart`, **sem tirar nada dele**: continua em 100%, 150% **e 200%**, com altura mínima da lista e botão de enviar alcançável. Acrescentar o da **FR-022**: em 100% e 150%, lista + campo de escrever ≥ 50% da altura disponível; o título do aviso sempre presente; o **resumo fechado contém "senha" e "código"** (FR-049); aberto, o aviso ≤ 50%. **Provar quebrando**: voltar o aviso antigo, sempre expandido. (Revisão da #36: a versão anterior trocava o portão por um só em 100% e 150%, e perdia os 200%.) Os estados da FR-006 que a tela tiver, por `app/test/suporte/estados_de_tela.dart`
+- [X] T054 [P] [US3] Estender `app/test/features/assistente/tela_conversa_test.dart`: autor por posição, rosto e nome (FR-020); opções com 56 dp e afastadas (FR-021); confirmação e registro da 003 inalterados (`acao_confirmada_test.dart` passando); os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
 
 ### Implementation
 
-- [ ] T055 [US3] Em `app/lib/features/assistente/presentation/telas/tela_conversa.dart`: trocar `_AvisoAntigolpe` e os tetos de 45%/42% pelo `AvisoCompacto`; mensagens em `BalaoDeFala`; Memora com `MemoraPersonagem`
-- [ ] T056 [US3] Com o teclado aberto, esconder a barra inferior em `app/lib/features/casca/casca_interna.dart` e manter a última mensagem e o campo visíveis; caso de teste em `tela_conversa_test.dart` com o teclado simulado (`viewInsets`)
-- [ ] T057 [US3] Na `TelaRecuperacao`, **manter o aviso inteiro** de `app/lib/features/autenticacao/presentation/widgets/aviso_antigolpe.dart`, só no visual novo (borda, rosto preocupado da Memora), sem `AvisoCompacto` (FR-049, revisão da #36). Os portões da FR-023 da 001 em `app/test/features/autenticacao/tela_recuperacao_test.dart` **não mudam**, e precisam continuar passando como estão
+- [X] T055 [US3] Em `app/lib/features/assistente/presentation/telas/tela_conversa.dart`: trocar `_AvisoAntigolpe` e os tetos de 45%/42% pelo `AvisoCompacto`; mensagens em `BalaoDeFala`; Memora com `MemoraPersonagem`
+- [X] T056 [US3] Com o teclado aberto, esconder a barra inferior em `app/lib/features/casca/casca_interna.dart` e manter a última mensagem e o campo visíveis; caso de teste em `tela_conversa_test.dart` com o teclado simulado (`viewInsets`)
+- [X] T057 [US3] Na `TelaRecuperacao`, **manter o aviso inteiro** de `app/lib/features/autenticacao/presentation/widgets/aviso_antigolpe.dart`, só no visual novo (borda, rosto preocupado da Memora), sem `AvisoCompacto` (FR-049, revisão da #36). Os portões da FR-023 da 001 em `app/test/features/autenticacao/tela_recuperacao_test.dart` **não mudam**, e precisam continuar passando como estão
 
 ---
 

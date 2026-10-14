@@ -8,7 +8,11 @@ import 'package:memora/features/assistente/data/repositorio_assistente_simulado.
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/controladores/controlador_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
+import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+
+import '../../suporte/aparelhos.dart';
+import '../../suporte/estados_de_tela.dart';
 
 /// Cenario H2 do quickstart — a assistente ensina antes de oferecer fazer.
 ///
@@ -71,6 +75,18 @@ void main() {
       ),
     );
     await avancar(t);
+  }
+
+  /// Volta a lista ao topo: ela e preguicosa, e depois de uma pergunta so o
+  /// fim esta construido.
+  Future<void> irAoTopo(WidgetTester t) async {
+    t.state<ScrollableState>(
+      find.descendant(
+        of: find.byType(ListView).first,
+        matching: find.byType(Scrollable),
+      ).first,
+    ).position.jumpTo(0);
+    await t.pump();
   }
 
   Future<void> perguntar(WidgetTester t, String texto) async {
@@ -171,6 +187,287 @@ void main() {
       expect(TextosAssistente.avisoAntigolpe.toLowerCase(), contains('senha'));
       expect(TextosAssistente.avisoAntigolpe.toLowerCase(), contains('número'));
     });
+  });
+
+  group('Quem disse o que — FR-020', () {
+    testWidgets('cada fala e um balao com posicao, rosto e nome', (
+      WidgetTester t,
+    ) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+      await perguntar(t, 'como vejo as fotos do meu neto');
+      await irAoTopo(t);
+
+      // O convite da Memora vem antes de tudo: o resto e a conversa.
+      final Finder baloes = find.byType(BalaoDeFala);
+      expect(baloes, findsNWidgets(2));
+      // A ordem na lista e a ordem da conversa: a pessoa perguntou primeiro.
+      final Finder daPessoa = baloes.at(0);
+      final Finder dela = baloes.at(1);
+      expect(t.widget<BalaoDeFala>(daPessoa).autor, AutorDoBalao.pessoa);
+      expect(t.widget<BalaoDeFala>(dela).autor, AutorDoBalao.memora);
+
+      // Nome escrito, nunca so a cor.
+      final Finder nomeDela = find.descendant(
+        of: dela,
+        matching: find.text('Memora'),
+      );
+      final Finder nomeDaPessoa = find.descendant(
+        of: daPessoa,
+        matching: find.text('Você'),
+      );
+      expect(nomeDela, findsOneWidget);
+      expect(nomeDaPessoa, findsOneWidget);
+
+      // Desenho: o rosto da Memora de um lado, o da pessoa do outro.
+      expect(
+        find.descendant(of: dela, matching: find.byType(MemoraPersonagem)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: daPessoa, matching: find.byType(MemoraPersonagem)),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: daPessoa, matching: find.byIcon(Icons.person)),
+        findsOneWidget,
+      );
+
+      // Posicao: a Memora a esquerda, a pessoa a direita.
+      expect(t.getCenter(nomeDaPessoa).dx, greaterThan(t.getCenter(nomeDela).dx));
+    });
+
+    testWidgets('o leitor de tela ouve "Memora disse" e "Você disse"', (
+      WidgetTester t,
+    ) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+      await perguntar(t, 'como vejo as fotos do meu neto');
+      await irAoTopo(t);
+
+      expect(find.bySemanticsLabel(RegExp(r'^Você disse: ')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp(r'^Memora disse: ')), findsOneWidget);
+      h.dispose();
+    });
+  });
+
+  group('A oferta e as opcoes — FR-021', () {
+    testWidgets('as opcoes tem 56 dp, ocupam a largura e ficam afastadas', (
+      WidgetTester t,
+    ) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+      await perguntar(t, 'nao consegui achar');
+
+      final Finder confirmar = find.descendant(
+        of: find.byKey(TelaConversa.chaveConfirmarAbrir),
+        matching: find.byType(BotaoPrimario),
+      );
+      final Finder recusar = find.descendant(
+        of: find.byKey(TelaConversa.chaveConfirmarAbrir),
+        matching: find.byType(BotaoSecundario),
+      );
+      await t.ensureVisible(recusar);
+      await t.pump();
+
+      final Rect a = t.getRect(confirmar);
+      final Rect b = t.getRect(recusar);
+      expect(a.height, greaterThanOrEqualTo(MemoraDimensoes.alvoDecisao));
+      expect(b.height, greaterThanOrEqualTo(MemoraDimensoes.alvoDecisao));
+      expect(
+        b.top - a.bottom,
+        greaterThanOrEqualTo(MemoraEspacamento.md),
+        reason: 'empilhadas e afastadas: o toque errado e questao de tempo',
+      );
+      expect(a.width, closeTo(b.width, 0.5), reason: 'largura inteira');
+    });
+  });
+
+  group('Os estados da FR-006', () {
+    testWidgets('carregando, vazio e erro tem desenho e frase', (
+      WidgetTester t,
+    ) async {
+      // Os controladores ficam prontos ANTES: o `montar` do portao e sincrono.
+      final ControladorConversa vazio = controladorCom();
+      addTearDown(vazio.dispose);
+
+      final ControladorConversa comErro = controladorCom(
+        falha: FalhaDaAssistente.semConexao,
+      );
+      addTearDown(comErro.dispose);
+      await comErro.iniciar();
+      comErro.escrever('oi');
+      await comErro.enviar();
+      expect(comErro.mensagemDeErro, isNotNull);
+
+      final ControladorConversa esperando = ControladorConversa(
+        RepositorioAssistenteSimulado(demora: const Duration(seconds: 1)),
+        local,
+      );
+      addTearDown(esperando.dispose);
+      await esperando.iniciar();
+      esperando.escrever('oi');
+      // Sem await: a resposta so chega com o tempo que o teste vai drenar.
+      final Future<void> resposta = esperando.enviar();
+      expect(esperando.respondendo, isTrue);
+
+      Widget tela(ControladorConversa c) => MaterialApp(
+        theme: TemasMemora.claro,
+        home: TelaConversa(controlador: c),
+      );
+
+      await exigirOsEstadosDaFr006(
+        t,
+        tela: 'TelaConversa',
+        montar: (EstadoDaTela estado) => switch (estado) {
+          EstadoDaTela.carregando => tela(esperando),
+          EstadoDaTela.vazio => tela(vazio),
+          EstadoDaTela.erro => tela(comErro),
+        },
+      );
+
+      await t.pump(const Duration(seconds: 2));
+      await resposta;
+    });
+
+    testWidgets('o vazio e a Memora convidando, e nao uma area em branco', (
+      WidgetTester t,
+    ) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+
+      expect(find.text(TextosAssistente.convite), findsOneWidget);
+      expect(find.byType(MemoraPersonagem), findsWidgets);
+    });
+  });
+
+  group('Teclado aberto — FR-015, T056', () {
+    // A conversa DENTRO da casca, como no aplicativo: o `Scaffold` tira o
+    // teclado do `MediaQuery` do corpo, e testar a tela sozinha nao provaria
+    // a barra que sai nem o campo que sobe.
+    Future<void> montarNaCasca(
+      WidgetTester t,
+      ControladorConversa c,
+      Size aparelho,
+    ) async {
+      vestir(t, aparelho);
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: CascaInterna(
+            aoRegistrarAtividade: () {},
+            raizes: <DestinoDaCasca, WidgetBuilder>{
+              DestinoDaCasca.ajustes: (_) => const SizedBox(),
+              DestinoDaCasca.inicio: (_) => TelaConversa(controlador: c),
+              DestinoDaCasca.perfil: (_) => const SizedBox(),
+            },
+          ),
+        ),
+      );
+      await avancar(t);
+    }
+
+    /// O campo de digitar (o `TextField` de dentro do `CampoTexto`) e a faixa
+    /// que o contem, que rola quando passa do teto.
+    Finder entrada() => find.descendant(
+      of: find.byKey(TelaConversa.chaveCampo),
+      matching: find.byType(TextField),
+    );
+    Finder faixa() => find
+        .ancestor(
+          of: find.byKey(TelaConversa.chaveCampo),
+          matching: find.byType(SingleChildScrollView),
+        )
+        .first;
+
+    /// O teclado sobe e o campo e trazido para dentro da faixa — o que o
+    /// framework faz sozinho quando a pessoa toca nele para escrever.
+    Future<void> abrirOTeclado(WidgetTester t) async {
+      t.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(t.view.resetViewInsets);
+      await avancar(t);
+      await t.ensureVisible(entrada());
+      await avancar(t);
+    }
+
+    void exigirOCampoVisivel(WidgetTester t, Size aparelho) {
+      final double topoDoTeclado = aparelho.height - 300;
+      final Rect digitar = t.getRect(entrada());
+      final Rect area = t.getRect(faixa());
+      expect(
+        digitar.bottom,
+        lessThanOrEqualTo(topoDoTeclado),
+        reason: 'o campo nao pode ficar atras do teclado',
+      );
+      expect(
+        digitar.top,
+        greaterThanOrEqualTo(area.top),
+        reason: 'nem rolado para fora da faixa que o contem',
+      );
+      expect(digitar.bottom, lessThanOrEqualTo(area.bottom));
+    }
+
+    // O teclado de um Android ocupa cerca de 300 dp. Os dois aparelhos mais
+    // comuns da matriz: o 360x800 (Galaxy A/M) e o 390x844.
+    for (final Size aparelho in const <Size>[Size(360, 800), referencia]) {
+      testWidgets(
+        'a barra sai, e a ultima mensagem e o campo seguem visiveis em '
+        '${nomeDo(aparelho)}',
+        (WidgetTester t) async {
+          final ControladorConversa c = controladorCom();
+          addTearDown(c.dispose);
+          await montarNaCasca(t, c, aparelho);
+          await perguntar(t, 'como vejo as fotos do meu neto');
+          await perguntar(t, 'como mando mensagem');
+          await perguntar(t, 'como faco uma ligacao');
+          // Sem oferta no fim: a ultima fala e um balao.
+          expect(c.acaoOferecida, isNull);
+          expect(find.byKey(CascaInterna.chaveDaBarra), findsOneWidget);
+
+          await abrirOTeclado(t);
+
+          expect(t.takeException(), isNull);
+          expect(
+            find.byKey(CascaInterna.chaveDaBarra),
+            findsNothing,
+            reason: 'com o teclado aberto, a barra libera a altura',
+          );
+          exigirOCampoVisivel(t, aparelho);
+
+          // O FIM da ultima fala continua a vista, dentro da lista: sem rolar
+          // de novo quando o teclado sobe, ela ficava atras do campo. So o
+          // fim, de proposito: a lista encolhe com o teclado, e uma resposta
+          // longa nao cabe inteira num pedaco de tela — o que importa e que
+          // as ultimas palavras estejam la, e nao escondidas.
+          final Rect lista = t.getRect(find.byType(ListView).first);
+          final Rect ultima = t.getRect(find.byType(BalaoDeFala).last);
+          expect(ultima.bottom, lessThanOrEqualTo(lista.bottom));
+          expect(ultima.bottom, greaterThan(lista.top + 24));
+          expect(lista.bottom, lessThanOrEqualTo(t.getRect(faixa()).top));
+        },
+      );
+    }
+
+    testWidgets(
+      'em 360x640 com o aviso aberto, o teclado nao estoura a tela',
+      (WidgetTester t) async {
+        final ControladorConversa c = controladorCom();
+        addTearDown(c.dispose);
+        await montarNaCasca(t, c, const Size(360, 640));
+        t.view.viewInsets = const FakeViewPadding(bottom: 300);
+        addTearDown(t.view.resetViewInsets);
+        await avancar(t);
+
+        expect(t.takeException(), isNull);
+        expect(find.byKey(CascaInterna.chaveDaBarra), findsNothing);
+        expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
+      },
+    );
   });
 
   group('A conversa e retomada — FR-049 e FR-050', () {
