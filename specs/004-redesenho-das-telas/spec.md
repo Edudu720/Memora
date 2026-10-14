@@ -4,8 +4,7 @@
 
 **Created**: 2026-10-01
 
-**Status**: Aprovada por Eduardo Juncker em 2026-10-13, com as clarificações
-desta data; ratificação de Henrique Sandrini e Du3101 na revisão da #58
+**Status**: Approved (Aprovada por Eduardo Juncker em 2026-10-13; ratificada por Henrique Sandrini em 2026-10-14 via APK físico — T116, e merge da PR #58)
 
 **Input**: User description: "O front deve ser com um design prático, intuitivo, profissional e moderno. Não estamos satisfeito com a maneira que foi realizada. Deve conter todas as telas do wireframe e melhorar drasticamente na parte de design e acessibilidade para o idoso. Foi focado muito na segurança do projeto e não em sua aparencia e funcionalidades."
 

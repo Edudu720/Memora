@@ -354,12 +354,12 @@ senha do gov.br e onde nunca se digita (US5).
 
 **Independent Test**: deixar o texto maior e sair da conta, sem ajuda (US7).
 
-- [X] T085 [P] [US6] Teste em `app/test/features/ajuda/tela_ajuda_test.dart`: assuntos com desenho e nome; "Segurança" mostra uma dica por vez, incluindo o que o Memora nunca faz (FR-036a); "Ver a apresentação de novo" funciona; **sem `MEMORA_URL_DOWNLOAD`, "Compartilhar" não existe**; com ele, avisa antes e envia só o endereço oficial; matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [X] T086 [US6] Criar `AssuntoDeAjuda` em `app/lib/features/ajuda/domain/assunto_de_ajuda.dart` e o conteúdo em `textos_ajuda.dart`, incluindo "Como baixar um aplicativo" com a conferência do desenvolvedor na loja oficial (FR-036)
-- [X] T087 [US6] Criar `TelaAjuda` e `TelaAssunto` em `app/lib/features/ajuda/presentation/`
-- [X] T088 [US6] Criar a ajuda guiada da conversa (Figuras 15-19) em `app/lib/features/ajuda/presentation/ajuda_guiada_da_conversa.dart`, com `BalaoDeFala` e saída direta para a conversa real (FR-034)
-- [X] T089 [US6] Acrescentar `urlDownload` a `app/lib/services/ambiente/ambiente.dart` (de `--dart-define=MEMORA_URL_DOWNLOAD`) e o envio por `ACTION_SEND` do `android_intent_plus` em `app/lib/features/ajuda/data/compartilhar.dart`; caso em `app/test/services/ambiente_test.dart`
-- [X] T090 [US6] Pôr a porta "Ajuda" no Hub, em `_portasConstruidas()`, usando `portaAjuda` e `descricaoAjuda` de `textos_assistente.dart`  — fecha a primeira metade da T095 da 003. Com a quinta porta, rodar de novo `app/test/acessibilidade/hub_acessibilidade_test.dart`: a FR-017 atual (porta principal sempre à vista e faixa "há mais"; Hub inteiro sem rolar só no 360×800 a 100%) precisa continuar passando com as 5 portas
+- [X] T091 [P] [US7] Teste em `app/test/features/configuracoes/configuracoes_test.dart`: só Aparência, Acessibilidade, Privacidade e Conta (sem "Notificações" e "Idiomas"); galeria só em depuração; Privacidade apaga a conversa **só depois das duas etapas** da `ConfirmacaoMemora.irreversivel` — um toque só não apaga nada, e o botão de apagar não fica ao lado do de cancelar (FR-040). Provar quebrando: trocar pela confirmação simples; Conta mostra o canal, "Sair" pergunta antes, "Sair e esquecer este aparelho" usa `esquecerTudo`; a Conta diz o que o Memora nunca faz (FR-036a); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [X] T092 [US7] Criar `TelaConfiguracoes` em `app/lib/features/configuracoes/presentation/tela_configuracoes.dart`, substituindo a raiz provisória da T024, e apontar `app/test/features/autenticacao/fluxo_sair_confirma_test.dart` para a saída em Conta, mantendo a quebra que ele já prova
+- [X] T093 [US7] Acrescentar "reduzir movimento" a `PreferenciaAparencia` (`app/lib/design_system/preferencias/preferencia_aparencia.dart`), persistida pelo repositório de `app/lib/services/preferencias/` e aplicada sobre o `MediaQuery` no `builder` de `MaterialApp` em `main.dart`; redesenhar `tela_aparencia.dart` com pré-visualização e desfazer (FR-039); `app/test/design_system/reducao_de_movimento_test.dart` e `preferencias/tela_aparencia_test.dart` estendidos
+- [X] T094 [US7] Criar `TelaPrivacidade` em `app/lib/features/configuracoes/presentation/tela_privacidade.dart`: o que fica no aparelho, em linguagem comum, e apagar a conversa pela `ConfirmacaoMemora.irreversivel`, em duas etapas (FR-040; fecha a T085 da 003)
+- [X] T095 [US7] Criar `TelaConta` em `app/lib/features/configuracoes/presentation/tela_conta.dart`, com o canal vindo de `UltimoAcesso` (R10); apontar `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart` para ela, mantendo as quatro quebras que o portão já provou
+- [ ] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador. **Parcial**: preferência `paleta` e validador prontos; falta medir paletas no validador, pôr cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer seletor com pré-visualização em Aparência
 
 ---
 
@@ -399,8 +399,12 @@ senha do gov.br e onde nunca se digita (US5).
 - [ ] T105 **Teste com 5 pessoas de 65+** (V14, SC-002 a SC-004), com os resultados por tarefa e as notas em `specs/004-redesenho-das-telas/teste-com-pessoas.md` — mesma rodada que a T071 da 003 e a T050 da 002 esperam
 - [ ] T106 Revisões obrigatórias conforme `.specify/memory/constitution.md`: código, UX, acessibilidade e segurança
 - [ ] T107 Registrar em `docs/referencia/requisitos-atualizados.md` e `docs/design/divergencias-do-prototipo.md` cada divergência do wireframe desta feature, com o motivo: Planos fora, idade opcional e só no aparelho (FR-042c), Acessibilidade como grupo próprio (FR-038), paletas prontas de cor (FR-039), sem "Idiomas" e "Notificações", pictograma em vez de logotipo, sem o site de ajuda externo, passo a passo dentro do Memora. Atualizar também `specs/003-hub-e-assistente/spec.md` (US1, FR-043 e a tabela das duas categorias): a porta passa a se chamar "Serviços sociais", e banco e saúde continuam na mesma categoria SENSIVEL quando entrarem no catálogo
-- [ ] T108 Atualizar o `CLAUDE.md` com a passagem de contexto da feature
-- [ ] T125 Aplicar a `CaixaDeEtapa` (FR-002a) às telas que pedem ação e ainda não a têm — Ajustes, Conta e Privacidade, a tela de data de nascimento, o passo a passo, a Ajuda e as telas da T099 —, cada uma com o portão de layout da matriz (análise de 2026-10-13)
+- [ ] T125 Aplicar a `CaixaDeEtapa` (FR-002a) às telas que pedem ação e ainda não a têm, cada uma com o portão de layout da matriz (análise de 2026-10-13):
+  - [ ] T125a [US7] Ajustes, Conta e Privacidade
+  - [ ] T125b [US8] Tela de data de nascimento (Perfil)
+  - [ ] T125c [US4] Passo a passo
+  - [ ] T125d [US6] Ajuda
+  - [ ] T125e Telas fora do wireframe da T099
 
 ---
 
