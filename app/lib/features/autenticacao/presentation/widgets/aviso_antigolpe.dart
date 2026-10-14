@@ -31,6 +31,15 @@ import '../../../../l10n/textos_autenticacao.dart';
 ///
 /// Como todo bloco de informação, **não aceita toque** e não usa preenchimento
 /// com a cor primária: pílula e preenchimento são linguagem de ação (FR-012).
+///
+/// ## Aqui o aviso fica inteiro (FR-049, T057)
+///
+/// Na conversa o aviso encolhe depois da primeira mensagem (`AvisoCompacto`),
+/// porque lá a falta de espaço foi medida. **Aqui não**: o golpe desta tela
+/// pede o número de 6 dígitos, e esconder "número" atrás de um toque
+/// enfraqueceria a FR-023 sem resolver problema nenhum. O que mudou na 004 foi
+/// só o visual — a borda de perigo de sempre, e o rosto preocupado da Memora no
+/// lugar do escudo: o aviso passa a vir de alguém que se importa.
 class AvisoAntigolpe extends StatelessWidget {
   /// Chave usada pelos testes para confirmar que o aviso está na tela.
   static const Key chave = Key('recuperacao.aviso_antigolpe');
@@ -58,7 +67,9 @@ class AvisoAntigolpe extends StatelessWidget {
             // A borda é o que separa este bloco do resto da tela sem recorrer a
             // preenchimento forte, que o leria como botão.
             border: Border.all(
-                color: cores.perigo, width: MemoraDimensoes.bordaEnfase),
+              color: cores.perigo,
+              width: MemoraDimensoes.bordaEnfase,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,9 +78,13 @@ class AvisoAntigolpe extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Icon(Icons.shield_outlined,
-                      size: MemoraDimensoes.iconeDestaque,
-                      color: cores.perigo),
+                  // Preocupada, não brava: aviso dado com raiva assusta quem
+                  // precisava ser protegido. Decorativo — o texto ao lado diz
+                  // tudo, e o `Semantics` de fora já anuncia o aviso.
+                  const MemoraPersonagem(
+                    expressao: ExpressaoDaMemora.preocupada,
+                    tamanho: MemoraDimensoes.pisoDeIlustracao,
+                  ),
                   const SizedBox(width: MemoraEspacamento.sm),
                   Expanded(
                     child: TextoMemora(

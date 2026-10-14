@@ -2,11 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
+import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
+import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
+import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
+import 'package:memora/features/configuracoes/presentation/tela_privacidade.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
@@ -97,6 +103,9 @@ void main() {
   final Finder doRegistro = find.byKey(
     TelaHub.chaveDaPorta(TextosAssistente.portaRegistro),
   );
+  final Finder daAjuda = find.byKey(
+    TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
+  );
   final Finder doHub = find.byKey(TelaInicio.chaveVerTudo);
 
   /// Todas as partes do aplicativo e o caminho até cada uma.
@@ -117,8 +126,7 @@ void main() {
       parte: 'meus aplicativos',
       toques: <Finder>[doHub, deApps],
       chegada: find.byWidgetPredicate(
-        (Widget w) =>
-            w is TelaCatalogo && w.categoria.name == 'cotidiano',
+        (Widget w) => w is TelaCatalogo && w.categoria.name == 'cotidiano',
       ),
       via: null,
     ),
@@ -137,6 +145,24 @@ void main() {
       via: null,
     ),
     (
+      parte: 'ajuda',
+      toques: <Finder>[doHub, daAjuda],
+      chegada: find.byType(TelaAjuda),
+      via: null,
+    ),
+    (
+      // A US6 existe para isto: achar, pela Ajuda, como se proteger de um
+      // golpe por telefone. Três toques a partir do Início.
+      parte: 'dicas de segurança contra golpe (pela Ajuda)',
+      toques: <Finder>[
+        doHub,
+        daAjuda,
+        find.byKey(TelaAjuda.chaveDoAssunto(IdDoAssunto.seguranca)),
+      ],
+      chegada: find.byType(TelaAssunto),
+      via: null,
+    ),
+    (
       parte: 'um aplicativo do catálogo (leva à conversa)',
       toques: <Finder>[
         doHub,
@@ -149,25 +175,79 @@ void main() {
     (
       parte: 'ajustes',
       toques: <Finder>[naBarra(DestinoDaCasca.ajustes)],
-      chegada: find.byType(AjustesProvisorios),
+      chegada: find.byType(TelaConfiguracoes),
       via: DestinoDaCasca.ajustes,
     ),
     (
-      parte: 'como eu vejo o Memora (aparência)',
+      parte: 'como o Memora fica (aparência)',
       toques: <Finder>[
         naBarra(DestinoDaCasca.ajustes),
-        find.byKey(AjustesProvisorios.chaveAparencia),
+        find.byKey(TelaConfiguracoes.chaveAparencia),
       ],
-      chegada: find.byType(TelaAparencia),
+      chegada: find.byWidgetPredicate(
+        (Widget w) =>
+            w is TelaAparencia && w.grupo == GrupoDeAjusteVisual.aparencia,
+      ),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'enxergar e usar melhor (acessibilidade)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chaveAcessibilidade),
+      ],
+      chegada: find.byWidgetPredicate(
+        (Widget w) =>
+            w is TelaAparencia && w.grupo == GrupoDeAjusteVisual.acessibilidade,
+      ),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'o que fica guardado (privacidade)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chavePrivacidade),
+      ],
+      chegada: find.byType(TelaPrivacidade),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'apagar a conversa (a pergunta)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chavePrivacidade),
+        find.byKey(TelaPrivacidade.chaveApagar),
+      ],
+      chegada: find.byKey(TelaPrivacidade.chaveConfirmacao),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'minha conta',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chaveConta),
+      ],
+      chegada: find.byType(TelaConta),
       via: DestinoDaCasca.ajustes,
     ),
     (
       parte: 'a saída da conta',
       toques: <Finder>[
         naBarra(DestinoDaCasca.ajustes),
-        find.byKey(AjustesProvisorios.chaveSair),
+        find.byKey(TelaConfiguracoes.chaveConta),
+        find.byKey(TelaConta.chaveSair),
       ],
-      chegada: find.byKey(AjustesProvisorios.chaveConfirmacao),
+      chegada: find.byKey(TelaConta.chaveConfirmacao),
+      via: DestinoDaCasca.ajustes,
+    ),
+    (
+      parte: 'sair e esquecer este aparelho (a pergunta)',
+      toques: <Finder>[
+        naBarra(DestinoDaCasca.ajustes),
+        find.byKey(TelaConfiguracoes.chaveConta),
+        find.byKey(TelaConta.chaveEsquecer),
+      ],
+      chegada: find.byKey(TelaConta.chaveConfirmacaoEsquecer),
       via: DestinoDaCasca.ajustes,
     ),
     (
@@ -182,7 +262,7 @@ void main() {
         parte: 'a galeria (só em desenvolvimento)',
         toques: <Finder>[
           naBarra(DestinoDaCasca.ajustes),
-          find.byKey(AjustesProvisorios.chaveGaleria),
+          find.byKey(TelaConfiguracoes.chaveGaleria),
         ],
         chegada: find.byType(GaleriaMemora),
         via: DestinoDaCasca.ajustes,
@@ -202,7 +282,8 @@ void main() {
         expect(
           alvo,
           findsOneWidget,
-          reason: 'no caminho "${c.parte}", o toque ${toques + 1} não achou o '
+          reason:
+              'no caminho "${c.parte}", o toque ${toques + 1} não achou o '
               'alvo ($alvo)',
         );
         await tocar(t, alvo);
@@ -240,6 +321,7 @@ void main() {
       TelaHub.chaveDaPorta(TextosAssistente.portaServicos),
       TelaHub.chaveDaPorta(TextosAssistente.portaRegistro),
       TelaHub.chaveDaPorta(TextosAssistente.portaConversa),
+      TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
     };
     expect(
       daTela.difference(daTabela),

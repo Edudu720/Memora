@@ -82,6 +82,13 @@ class TextosAssistente {
   /// Título do aviso permanente contra golpe (FR-033).
   static const String tituloAvisoAntigolpe = 'Eu nunca peço sua senha';
 
+  /// O que o aviso diz **fechado**, numa linha (FR-022, FR-049, T118).
+  ///
+  /// É o que a maioria lê, então carrega o núcleo — "senha" e "código" — e
+  /// contém o [tituloAvisoAntigolpe] por inteiro. Um portão confere os dois.
+  static const String resumoAvisoAntigolpe =
+      'Eu nunca peço sua senha nem código.';
+
   /// O aviso, no mesmo idioma da tela de recuperação da feature 001.
   static const String avisoAntigolpe =
       'Nem eu, nem ninguém que diga trabalhar no Memora, vai te pedir sua '
