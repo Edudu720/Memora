@@ -28,6 +28,11 @@ class FluxoDentroDaConta {
   /// Cofre que registra as limpezas.
   final CofreQueRegistra cofre = CofreQueRegistra();
 
+  /// O repositório simulado do aparelho, para o teste semear outras contas
+  /// (`registrarConta`) e entrar com elas no mesmo fluxo. Existe depois de
+  /// [montar].
+  late final RepositorioAutenticacaoSimulado repositorio;
+
   /// Bombeia alguns quadros sem esperar quietude: o `Carregando` anima sem
   /// parar e `pumpAndSettle` travaria.
   static Future<void> avancar(WidgetTester t, [int quadros = 4]) async {
@@ -63,12 +68,12 @@ class FluxoDentroDaConta {
   }) async {
     if (em != null) vestir(t, em.aparelho);
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
-    final RepositorioAutenticacaoSimulado repositorio =
-        RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
-          identificador: 'ana@email.com',
-          senha: 'uma frase que so eu lembro',
-          nome: 'Ana',
-        );
+    repositorio = RepositorioAutenticacaoSimulado(demora: Duration.zero)
+      ..registrarConta(
+        identificador: 'ana@email.com',
+        senha: 'uma frase que so eu lembro',
+        nome: 'Ana',
+      );
 
     // O `EscopoAparencia` em volta, como no `main.dart` de verdade: sem ele, a
     // tela de aparência — que a casca abre em Ajustes — não encontra quem a
@@ -112,10 +117,7 @@ class FluxoDentroDaConta {
     await avancar(t);
 
     await tocar(t, find.text(TextosAutenticacao.botaoJaTenhoConta));
-    await _preencher(t, TelaLogin.chaveIdentificador, 'ana@email.com');
-    await _preencher(t, TelaLogin.chaveSenha, 'uma frase que so eu lembro');
-    await tocar(t, find.byKey(TelaLogin.chaveEntrar));
-    await avancar(t, 6);
+    await entrarComConta(t, 'ana@email.com', 'uma frase que so eu lembro');
 
     expect(
       find.byKey(TelaInicio.chaveSaudacao),
@@ -123,6 +125,28 @@ class FluxoDentroDaConta {
       reason: 'o cenario pressupoe a pessoa dentro da conta, no Inicio',
     );
     expect(dado.apagamentos, 0);
+  }
+
+  /// Preenche o login (já aberto) com [identificador] e [senha] e entra.
+  ///
+  /// Troca o que houver no campo: depois de uma saída o identificador do
+  /// último acesso volta preenchido (FR-012).
+  static Future<void> entrarComConta(
+    WidgetTester t,
+    String identificador,
+    String senha,
+  ) async {
+    await _preencher(t, TelaLogin.chaveIdentificador, identificador);
+    await _preencher(t, TelaLogin.chaveSenha, senha);
+    await tocar(t, find.byKey(TelaLogin.chaveEntrar));
+    await avancar(t, 6);
+  }
+
+  /// Sai pela saída comum de Ajustes, confirmando, e espera o login.
+  static Future<void> sairConfirmando(WidgetTester t) async {
+    await tocarEmSair(t);
+    await tocar(t, find.text(TextosAutenticacao.botaoConfirmarSaida));
+    await avancar(t, 6);
   }
 
   /// Toca no destino [destino] da barra inferior.

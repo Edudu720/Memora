@@ -72,8 +72,9 @@ class FluxoAutenticacao extends StatefulWidget {
 
   /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
   ///
-  /// Opcional: sem ele o fluxo usa uma guarda em memória, que some com o
-  /// aplicativo — o que basta para o teste de widget.
+  /// Opcional: sem ele o fluxo usa uma guarda em memória, que existe para os
+  /// testes. Em produção a `Composicao` exige a guarda real e o `main.dart` a
+  /// repassa aqui.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
