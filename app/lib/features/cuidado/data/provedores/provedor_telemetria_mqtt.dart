@@ -71,14 +71,14 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
     final MqttServerClient cliente = MqttServerClient(hostFinal, clientId)
       ..port = porta
       ..keepAlivePeriod = 30
+      ..setProtocolV311()
       ..logging(on: false)
       ..onConnected = _aoConectar
       ..onDisconnected = _aoDesconectar;
 
     cliente.connectionMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
-        .startClean()
-        .withWillQos(MqttQos.atLeastOnce);
+        .startClean();
 
     _cliente = cliente;
 
@@ -89,7 +89,7 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
       } else {
         _aoDesconectar();
       }
-    } catch (_) {
+    } catch (e) {
       _aoDesconectar();
     }
   }
