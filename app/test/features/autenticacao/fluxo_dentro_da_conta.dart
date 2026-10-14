@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/ajuda/data/compartilhar.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -8,7 +11,9 @@ import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simul
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/casca/casca_interna.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/apresentacao/data/apresentacao_vista.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
+import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
@@ -27,6 +32,23 @@ class FluxoDentroDaConta {
 
   /// Cofre que registra as limpezas.
   final CofreQueRegistra cofre = CofreQueRegistra();
+
+  /// O último acesso do aparelho: o que a saída comum mantém e o
+  /// `esquecerTudo` apaga.
+  final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
+
+  /// A conversa guardada, **uma só** para o fluxo inteiro: é por ela que um
+  /// teste vê se Privacidade apagou o que a conversa gravou.
+  final ConversaEmMemoria conversa = ConversaEmMemoria();
+
+  /// O id que o simulado dá à conta de Ana — o que a apresentação vista e a
+  /// data de nascimento usam como chave.
+  static final String idDaAna = 'simulado-${'ana@email.com'.hashCode.abs()}';
+
+  /// O repositório simulado do aparelho, para o teste semear outras contas
+  /// (`registrarConta`) e entrar com elas no mesmo fluxo. Existe depois de
+  /// [montar].
+  late final RepositorioAutenticacaoSimulado repositorio;
 
   /// Bombeia alguns quadros sem esperar quietude: o `Carregando` anima sem
   /// parar e `pumpAndSettle` travaria.
@@ -60,15 +82,19 @@ class FluxoDentroDaConta {
     Combinacao? em,
     GlobalKey? capturavel,
     DataDeNascimentoDoAparelho? datas,
+    ApresentacaoVistaDoAparelho? vistas,
+    Compartilhador? compartilhador,
   }) async {
     if (em != null) vestir(t, em.aparelho);
-    final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
-    final RepositorioAutenticacaoSimulado repositorio =
-        RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
-          identificador: 'ana@email.com',
-          senha: 'uma frase que so eu lembro',
-          nome: 'Ana',
-        );
+    // Com a guarda da apresentação, a conta de Ana já a viu: o cenário começa
+    // no Início, e a guarda tem o que o `esquecerTudo` deve apagar.
+    if (vistas != null) await vistas.marcarComoVista(idDaAna);
+    repositorio = RepositorioAutenticacaoSimulado(demora: Duration.zero)
+      ..registrarConta(
+        identificador: 'ana@email.com',
+        senha: 'uma frase que so eu lembro',
+        nome: 'Ana',
+      );
 
     // O `EscopoAparencia` em volta, como no `main.dart` de verdade: sem ele, a
     // tela de aparência — que a casca abre em Ajustes — não encontra quem a
@@ -92,16 +118,18 @@ class FluxoDentroDaConta {
         home: FluxoAutenticacao(
           repositorio: repositorio,
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
-          conversaLocal: _ConversaEmMemoria.new,
+          conversaLocal: () => conversa,
           ultimoAcesso: ultimoAcesso,
           dataDeNascimento: datas,
+          apresentacaoVista: vistas,
+          compartilhador: compartilhador,
           inatividade: inatividade,
           avisoDeInatividade: aviso,
           limpeza: LimpezaDeSessao(
             cofre: cofre,
             ultimoAcesso: ultimoAcesso,
             dadosLocais: <DadoLocalDaPessoa>[dado],
-            dadosDoAparelho: <DadoLocalDoAparelho>[?datas],
+            dadosDoAparelho: <DadoLocalDoAparelho>[?datas, ?vistas],
           ),
         ),
       ),
@@ -112,10 +140,7 @@ class FluxoDentroDaConta {
     await avancar(t);
 
     await tocar(t, find.text(TextosAutenticacao.botaoJaTenhoConta));
-    await _preencher(t, TelaLogin.chaveIdentificador, 'ana@email.com');
-    await _preencher(t, TelaLogin.chaveSenha, 'uma frase que so eu lembro');
-    await tocar(t, find.byKey(TelaLogin.chaveEntrar));
-    await avancar(t, 6);
+    await entrarComConta(t, 'ana@email.com', 'uma frase que so eu lembro');
 
     expect(
       find.byKey(TelaInicio.chaveSaudacao),
@@ -123,6 +148,28 @@ class FluxoDentroDaConta {
       reason: 'o cenario pressupoe a pessoa dentro da conta, no Inicio',
     );
     expect(dado.apagamentos, 0);
+  }
+
+  /// Preenche o login (já aberto) com [identificador] e [senha] e entra.
+  ///
+  /// Troca o que houver no campo: depois de uma saída o identificador do
+  /// último acesso volta preenchido (FR-012).
+  static Future<void> entrarComConta(
+    WidgetTester t,
+    String identificador,
+    String senha,
+  ) async {
+    await _preencher(t, TelaLogin.chaveIdentificador, identificador);
+    await _preencher(t, TelaLogin.chaveSenha, senha);
+    await tocar(t, find.byKey(TelaLogin.chaveEntrar));
+    await avancar(t, 6);
+  }
+
+  /// Sai pela saída comum de Ajustes, confirmando, e espera o login.
+  static Future<void> sairConfirmando(WidgetTester t) async {
+    await tocarEmSair(t);
+    await tocar(t, find.text(TextosAutenticacao.botaoConfirmarSaida));
+    await avancar(t, 6);
   }
 
   /// Toca no destino [destino] da barra inferior.
@@ -150,12 +197,34 @@ class FluxoDentroDaConta {
     await esperarATransicao(t);
   }
 
-  /// Vai a Ajustes e toca em "Sair" — o toque que pergunta, e nao o que sai.
+  /// Vai a Ajustes e abre a porta de Conta.
+  static Future<void> irAConta(WidgetTester t) async {
+    await irPara(t, DestinoDaCasca.ajustes);
+    await tocar(t, find.byKey(TelaConfiguracoes.chaveConta));
+    await esperarATransicao(t);
+  }
+
+  /// Vai a Ajustes -> Conta e toca em "Sair" — o toque que pergunta, e nao o
+  /// que sai.
   ///
   /// E o unico caminho de saida (FR-019): nao ha "Sair" no Inicio nem no Hub.
   static Future<void> tocarEmSair(WidgetTester t) async {
+    await irAConta(t);
+    await tocar(t, find.byKey(TelaConta.chaveSair));
+  }
+
+  /// Vai a Ajustes -> Conta e toca em "Sair e esquecer este aparelho" — o
+  /// toque que abre a pergunta.
+  static Future<void> tocarEmEsquecer(WidgetTester t) async {
+    await irAConta(t);
+    await tocar(t, find.byKey(TelaConta.chaveEsquecer));
+  }
+
+  /// Vai a Ajustes -> Privacidade.
+  static Future<void> irAPrivacidade(WidgetTester t) async {
     await irPara(t, DestinoDaCasca.ajustes);
-    await tocar(t, find.byKey(AjustesProvisorios.chaveSair));
+    await tocar(t, find.byKey(TelaConfiguracoes.chavePrivacidade));
+    await esperarATransicao(t);
   }
 }
 
@@ -169,8 +238,15 @@ Future<void> _preencher(WidgetTester t, Key chave, String valor) async {
   await t.pump();
 }
 
-class _ConversaEmMemoria implements ConversaLocal {
+/// A conversa guardada, em memoria, que conta quantas vezes foi apagada.
+class ConversaEmMemoria implements ConversaLocal {
   List<MensagemDaConversa> _guardadas = <MensagemDaConversa>[];
+
+  /// Quantas vezes `apagar` rodou.
+  int apagamentos = 0;
+
+  /// O que esta guardado agora.
+  List<MensagemDaConversa> get guardadas => _guardadas;
 
   @override
   Future<List<MensagemDaConversa>> ler() async => _guardadas;
@@ -180,8 +256,15 @@ class _ConversaEmMemoria implements ConversaLocal {
     _guardadas = List<MensagemDaConversa>.from(mensagens);
   }
 
+  /// Quando verdadeiro, `apagar` falha sem apagar nada (disco, permissão).
+  bool falharAoApagar = false;
+
   @override
-  Future<void> apagar() async => _guardadas = <MensagemDaConversa>[];
+  Future<void> apagar() async {
+    apagamentos++;
+    if (falharAoApagar) throw const FileSystemException('sem permissão');
+    _guardadas = <MensagemDaConversa>[];
+  }
 }
 
 /// Dado local que so conta quantas vezes foi apagado.

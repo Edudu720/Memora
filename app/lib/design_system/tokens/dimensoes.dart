@@ -167,6 +167,18 @@ abstract final class MemoraDimensoes {
   /// o resto do texto rola dentro dele (R5).
   static const double tetoDoAvisoAberto = 0.5;
 
+  /// A faixa do campo de escrever da conversa, com o respiro dela, não passa
+  /// desta fração da altura disponível; acima dela, a faixa rola (T055).
+  ///
+  /// Com o aviso aberto em [tetoDoAvisoAberto], sobram 14% para a lista — o
+  /// piso que a FR-027 da 003 exige em 200%.
+  static const double tetoDoCampoDaConversa = 0.36;
+
+  /// Com o **teclado aberto**, a altura que sobra é pouca, e o campo precisa
+  /// caber inteiro com o botão de enviar (T056): ele ganha esta fração, que
+  /// com o aviso aberto em [tetoDoAvisoAberto] ainda soma 100% — nunca mais.
+  static const double tetoDoCampoComTeclado = 0.5;
+
   /// Fração mínima da altura que a tarefa da tela — a conversa e o campo de
   /// escrever — precisa manter, em 100% e 150% (FR-022).
   static const double alturaMinimaDaTarefa = 0.5;

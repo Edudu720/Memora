@@ -73,7 +73,11 @@ class CascaInterna extends StatefulWidget {
     super.key,
   });
 
-  static Future<void> _fecharDeVerdade() => SystemNavigator.pop();
+  static Future<void> _fecharDeVerdade() => fecharOAplicativo();
+
+  /// Fecha o aplicativo de verdade. Quem pergunta antes (a casca e a
+  /// apresentação) usa a mesma saída.
+  static Future<void> fecharOAplicativo() => SystemNavigator.pop();
 
   /// Chave da barra inferior, para os testes.
   static const Key chaveDaBarra = Key('casca.barra');

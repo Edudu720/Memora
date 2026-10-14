@@ -6,7 +6,7 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_boas_vindas.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/main.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
@@ -14,6 +14,7 @@ import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
 import '../autenticacao/fluxo_dentro_da_conta.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// V1 — a pessoa não vê o andaime (FR-007 e SC-009 da feature 004, T028).
 ///
@@ -47,6 +48,7 @@ void main() {
         controlador: aparencia,
         ultimoAcesso: ultimoAcesso,
         composicao: Composicao(
+          dataDeNascimento: DataDeNascimentoEmMemoria(),
           ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
           autenticacao: RepositorioAutenticacaoSimulado(demora: Duration.zero),
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
@@ -84,11 +86,16 @@ void main() {
     await t.pumpWidget(
       MaterialApp(
         theme: TemasMemora.claro,
-        home: AjustesProvisorios(aoAbrirAparencia: () {}, aoSair: () async {}),
+        home: TelaConfiguracoes(
+          aoAbrirAparencia: () {},
+          aoAbrirAcessibilidade: () {},
+          aoAbrirPrivacidade: () {},
+          aoAbrirConta: () {},
+        ),
       ),
     );
-    expect(find.byKey(AjustesProvisorios.chaveGaleria), findsNothing);
-    expect(find.byKey(AjustesProvisorios.chaveAparencia), findsOneWidget);
+    expect(find.byKey(TelaConfiguracoes.chaveGaleria), findsNothing);
+    expect(find.byKey(TelaConfiguracoes.chaveAparencia), findsOneWidget);
   });
 
   testWidgets(

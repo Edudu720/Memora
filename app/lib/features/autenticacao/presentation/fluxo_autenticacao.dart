@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
-import '../../../l10n/textos_casca.dart';
+import '../../../l10n/textos_configuracoes.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -15,6 +15,13 @@ import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../apresentacao/data/apresentacao_vista.dart';
+import '../../apresentacao/presentation/fluxo_apresentacao.dart';
+import '../../ajuda/data/compartilhar.dart';
+import '../../ajuda/domain/assunto_de_ajuda.dart';
+import '../../ajuda/presentation/ajuda_guiada_da_conversa.dart';
+import '../../ajuda/presentation/tela_ajuda.dart';
+import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/conversa_local.dart';
 import '../../assistente/domain/assistente.dart';
@@ -26,6 +33,9 @@ import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
 import '../../casca/casca_interna.dart';
 import '../../casca/raizes_provisorias.dart';
+import '../../configuracoes/presentation/tela_configuracoes.dart';
+import '../../configuracoes/presentation/tela_conta.dart';
+import '../../configuracoes/presentation/tela_privacidade.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
 import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
@@ -72,14 +82,30 @@ class FluxoAutenticacao extends StatefulWidget {
 
   /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
   ///
-  /// Opcional: sem ele o fluxo usa uma guarda em memória, que some com o
-  /// aplicativo — o que basta para o teste de widget.
+  /// Opcional: sem ele o fluxo usa uma guarda em memória, que existe para os
+  /// testes. Em produção a `Composicao` exige a guarda real e o `main.dart` a
+  /// repassa aqui.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
+  /// Quais contas já viram a apresentação inicial (FR-013, T050).
+  ///
+  /// **Opcional de propósito**: sem ele a pessoa entra direto, como antes da
+  /// 004 — é o que o teste de widget que só quer chegar ao Início espera.
+  /// O aplicativo de verdade sempre o recebe da `Composicao`.
+  final ApresentacaoVista? apresentacaoVista;
 
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
   final AbridorDeAplicativo? abridor;
+
+  /// Quem manda o endereço oficial de download para fora do aplicativo (T089).
+  ///
+  /// **Nulo é "o assunto Compartilhar da Ajuda não existe"** (R12, FR-018):
+  /// sem `MEMORA_URL_DOWNLOAD` no build não há o que compartilhar, e oferecer
+  /// o botão seria porta que não abre nada. Vem de
+  /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
+  final Compartilhador? compartilhador;
 
   /// Onde a conversa fica guardada no aparelho (FR-047).
   ///
@@ -104,6 +130,8 @@ class FluxoAutenticacao extends StatefulWidget {
     super.key,
     this.limpeza,
     this.dataDeNascimento,
+    this.apresentacaoVista,
+    this.compartilhador,
   });
 
   @override
@@ -118,6 +146,10 @@ enum _Etapa {
   primeiraEntrada,
   login,
   recuperacao,
+
+  /// Entrou, e o aplicativo confere se a conta já viu a apresentação.
+  conferindoApresentacao,
+  apresentacao,
   dentro,
 }
 
@@ -166,6 +198,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// expiração apagava o que a pessoa estava digitando (achado da revisão da
   /// PR #38, provado por `fluxo_expiracao_test.dart`).
   bool _expirando = false;
+
+  /// Quantas vezes alguém entrou neste fluxo. A conferência da apresentação é
+  /// uma leitura assíncrona: se a sessão expirar e **outra** pessoa (ou a mesma)
+  /// entrar antes de a leitura antiga voltar, só a resposta da entrada atual
+  /// decide o que se mostra — olhar a etapa não basta, porque ela volta a ser
+  /// `conferindoApresentacao` com a entrada nova.
+  int _geracaoDaEntrada = 0;
 
   /// Conta recém-criada em modo assistido, à espera da confirmação de canal.
   ///
@@ -268,23 +307,70 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _irParaLogin();
   }
 
+  /// A pessoa está autenticada. Antes da casca, passa pela apresentação — mas
+  /// **só** se esta conta ainda não a viu (FR-013).
+  ///
+  /// A sessão e o monitor de inatividade valem desde já: a apresentação é
+  /// tempo de sessão como qualquer outro, e celular esquecido nela expira.
   void _entrou(PessoaAutenticada pessoa) {
     _expirando = false;
+    final int geracao = ++_geracaoDaEntrada;
+    final ApresentacaoVista? vistas = widget.apresentacaoVista;
     setState(() {
       _pessoa = pessoa;
       _canal = widget.ultimoAcesso.identificador();
-      _etapa = _Etapa.dentro;
+      _etapa = vistas == null ? _Etapa.dentro : _Etapa.conferindoApresentacao;
     });
     _monitor.iniciar();
+    if (vistas != null) _conferirApresentacao(vistas, pessoa, geracao);
   }
 
-  Future<void> _sair() async {
+  Future<void> _conferirApresentacao(
+    ApresentacaoVista vistas,
+    PessoaAutenticada pessoa,
+    int geracao,
+  ) async {
+    bool jaViu;
+    try {
+      jaViu = await vistas.jaViu(pessoa.id);
+    } catch (_) {
+      // Sem conseguir ler, mostrar de novo custa uma tela pulável; não mostrar
+      // seria decidir pela pessoa sem saber.
+      jaViu = false;
+    }
+    // Ela pode ter saído, ou a sessão expirado, enquanto se lia — e outra
+    // entrada pode ter começado outra conferência.
+    if (!mounted ||
+        geracao != _geracaoDaEntrada ||
+        _etapa != _Etapa.conferindoApresentacao) {
+      return;
+    }
+    setState(() => _etapa = jaViu ? _Etapa.dentro : _Etapa.apresentacao);
+  }
+
+  /// Sai da conta.
+  ///
+  /// [esquecerTudo] é o "Sair e esquecer este aparelho" de Ajustes → Conta
+  /// (FR-041): além do que a saída comum leva, apaga o que só a leitura
+  /// literal da FR-026 leva — o identificador do último acesso, a data de
+  /// nascimento e a apresentação vista. A saída comum **não** o faz.
+  Future<void> _sair({bool esquecerTudo = false}) async {
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
-    await widget.limpeza?.executar();
+    await widget.limpeza?.executar(esquecerTudo: esquecerTudo);
     if (!mounted) return;
     _fecharRotasAbertas();
     _irParaLogin();
+  }
+
+  /// Conta o toque como atividade numa tela de dentro da conta que **não** é
+  /// a casca: a apresentação. Sem isto, quem a lê devagar seria expulso.
+  Widget _contandoAtividade(Widget tela) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _registrarAtividade(),
+      child: tela,
+    );
   }
 
   /// Uma rota aberta de dentro do fluxo.
@@ -427,7 +513,82 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           ),
         ),
       ),
+      // A Ajuda (T090, FR-033). Fica dentro deste bloco porque a ajuda guiada
+      // sai direto para a conversa (FR-034): sem assistente, ela levaria a
+      // lugar nenhum — e o Hub sem assistente continua vazio.
+      PortaDoHub(
+        rotulo: TextosAssistente.portaAjuda,
+        descricao: TextosAssistente.descricaoAjuda,
+        ilustracao: Ilustracao.portaAjuda,
+        aoAbrir: () => _abrirAjuda(assistente),
+      ),
     ];
+  }
+
+  /// A Ajuda, com os assuntos que existem agora (T087, FR-033).
+  void _abrirAjuda(RepositorioAssistente assistente) {
+    final Compartilhador? compartilhador = widget.compartilhador;
+    final ApresentacaoVista? vistas = widget.apresentacaoVista;
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaAjuda(
+          assuntos: AssuntoDeAjuda.disponiveis(
+            podeCompartilhar: compartilhador != null,
+          ),
+          aoAbrirAssunto: (AssuntoDeAjuda assunto) =>
+              _abrirAssunto(assunto, assistente),
+          // Rever a apresentação (FR-013) precisa de onde ela é guardada e de
+          // quem é a pessoa: sem isso a porta não existe (FR-018).
+          aoVerApresentacao: vistas == null || _pessoa == null
+              ? null
+              : () => _reverApresentacao(vistas),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre um assunto da Ajuda. "A conversa" é a ajuda guiada; os outros, uma
+  /// ideia por tela.
+  void _abrirAssunto(AssuntoDeAjuda assunto, RepositorioAssistente assistente) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => switch (assunto.id) {
+          IdDoAssunto.conversa => AjudaGuiadaDaConversa(
+            // Direto para a conversa de verdade (FR-034): a ajuda guiada sai da
+            // pilha e a conversa entra no lugar, sem tela no meio e sem deixar
+            // a ajuda guiada por baixo — "Voltar" da conversa leva à Ajuda.
+            aoConversar: () {
+              Navigator.of(contexto).pop();
+              _abrirConversa(assistente);
+            },
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+          _ => TelaAssunto(
+            assunto: assunto,
+            compartilhador: widget.compartilhador,
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+        },
+      ),
+    );
+  }
+
+  /// A apresentação outra vez, a partir da Ajuda (FR-013).
+  ///
+  /// É a mesma [FluxoApresentacao] da primeira entrada, empilhada na casca: ao
+  /// fim ou ao "Pular" ela sai da pilha e a pessoa está de volta na Ajuda.
+  void _reverApresentacao(ApresentacaoVista vistas) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => FluxoApresentacao(
+          nome: _pessoa?.nomeTratamento ?? '',
+          idDaConta: _pessoa!.id,
+          vista: vistas,
+          aoConcluir: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// Abre o Hub por cima do Início (T040).
@@ -481,6 +642,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         // sobra cronômetro nem resposta em voo depois de a pessoa sair da
         // tela — ou da conta (FR-048).
         builder: (BuildContext contexto) => _DonaDaConversa(
+          aoAbrir: _conversasAbertas.add,
+          aoFechar: _conversasAbertas.remove,
           criar: () => ControladorConversa(
             assistente,
             widget.conversaLocal(),
@@ -493,8 +656,66 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     );
   }
 
-  void _abrirAparencia() {
-    _empilhar(_rota(builder: (BuildContext _) => const _PaginaDeAparencia()));
+  /// As conversas abertas agora, em qualquer pilha da casca.
+  ///
+  /// Quem apaga a conversa em Privacidade precisa apagá-la também **da tela**:
+  /// uma conversa aberta no Início guarda as mensagens na memória, e a
+  /// próxima pergunta as regravaria no aparelho — desfazendo o apagar.
+  final List<ControladorConversa> _conversasAbertas = <ControladorConversa>[];
+
+  /// Apaga a conversa do aparelho e das telas que a estejam mostrando (T094).
+  Future<void> _apagarConversa() async {
+    // Primeiro as telas: o `_envio++` de cada controlador é síncrono e
+    // invalida o que está em voo. Se o arquivo fosse apagado antes, uma
+    // gravação em andamento poderia recriá-lo com a conversa antiga.
+    for (final ControladorConversa c in List<ControladorConversa>.of(
+      _conversasAbertas,
+    )) {
+      await c.apagarConversa();
+    }
+    // Por último o arquivo, e uma falha aqui SOBE para a tela de Privacidade.
+    await widget.conversaLocal().apagar();
+  }
+
+  /// A tela de aparência, e a de acessibilidade, que dividem a mesma tela.
+  void _abrirAjusteVisual(GrupoDeAjusteVisual grupo) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaAparencia(
+          titulo: switch (grupo) {
+            GrupoDeAjusteVisual.aparencia => TextosConfiguracoes.portaAparencia,
+            GrupoDeAjusteVisual.acessibilidade =>
+              TextosConfiguracoes.portaAcessibilidade,
+          },
+          grupo: grupo,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  void _abrirPrivacidade() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaPrivacidade(
+          aoApagarConversa: _apagarConversa,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  void _abrirConta() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaConta(
+          canal: _canal,
+          aoSair: _sair,
+          aoSairEEsquecer: () => _sair(esquecerTudo: true),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// A galeria, só no modo de desenvolvimento (R9 da 002). Fora dele, nulo —
@@ -557,6 +778,17 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         aoVoltar: () => setState(() => _etapa = _Etapa.login),
         aoConcluir: _recuperou,
       ),
+      _Etapa.conferindoApresentacao => _contandoAtividade(
+        const TelaPreparandoApresentacao(),
+      ),
+      _Etapa.apresentacao => _contandoAtividade(
+        FluxoApresentacao(
+          nome: _pessoa?.nomeTratamento ?? '',
+          idDaConta: _pessoa!.id,
+          vista: widget.apresentacaoVista!,
+          aoConcluir: () => setState(() => _etapa = _Etapa.dentro),
+        ),
+      ),
       // A casca é quem conta a atividade: um `Listener` em volta dela inteira,
       // inclusive das telas empilhadas (R1 da 004). Qualquer toque adia a
       // expiração — inclusive rolar, que é de quem está lendo.
@@ -564,10 +796,14 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         key: _casca,
         aoRegistrarAtividade: _registrarAtividade,
         raizes: <DestinoDaCasca, WidgetBuilder>{
-          DestinoDaCasca.ajustes: (BuildContext _) => AjustesProvisorios(
-            aoAbrirAparencia: _abrirAparencia,
+          DestinoDaCasca.ajustes: (BuildContext _) => TelaConfiguracoes(
+            aoAbrirAparencia: () =>
+                _abrirAjusteVisual(GrupoDeAjusteVisual.aparencia),
+            aoAbrirAcessibilidade: () =>
+                _abrirAjusteVisual(GrupoDeAjusteVisual.acessibilidade),
+            aoAbrirPrivacidade: _abrirPrivacidade,
+            aoAbrirConta: _abrirConta,
             aoAbrirGaleria: _abrirGaleria,
-            aoSair: _sair,
           ),
           // O Início é a raiz, e o Hub se empilha sobre ele (T040). Cada
           // atalho só existe se leva a algum lugar (FR-018): sem assistente
@@ -599,7 +835,16 @@ class _DonaDaConversa extends StatefulWidget {
   final ControladorConversa Function() criar;
   final VoidCallback aoVoltar;
 
-  const _DonaDaConversa({required this.criar, required this.aoVoltar});
+  /// Avisam o fluxo de que há uma conversa aberta, e de quando ela fecha.
+  final void Function(ControladorConversa) aoAbrir;
+  final void Function(ControladorConversa) aoFechar;
+
+  const _DonaDaConversa({
+    required this.criar,
+    required this.aoVoltar,
+    required this.aoAbrir,
+    required this.aoFechar,
+  });
 
   @override
   State<_DonaDaConversa> createState() => _DonaDaConversaState();
@@ -609,7 +854,14 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
   late final ControladorConversa _controlador = widget.criar();
 
   @override
+  void initState() {
+    super.initState();
+    widget.aoAbrir(_controlador);
+  }
+
+  @override
   void dispose() {
+    widget.aoFechar(_controlador);
     _controlador.dispose();
     super.dispose();
   }
@@ -617,30 +869,5 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
   @override
   Widget build(BuildContext context) {
     return TelaConversa(controlador: _controlador, aoVoltar: widget.aoVoltar);
-  }
-}
-
-/// A tela de aparência com barra superior, para o caminho de volta ao Hub.
-///
-/// A `TelaAparencia` nasceu na feature 002 sem barra: ela era uma aba da casca
-/// de demonstração, e aba não precisa de "voltar". Dentro do Hub ela precisa —
-/// a FR-005 exige que o caminho de volta esteja **sempre na mesma posição**, em
-/// todas as telas.
-///
-/// Envolver aqui, em vez de mexer na tela do Design System, mantém o componente
-/// utilizável nos dois contextos.
-class _PaginaDeAparencia extends StatelessWidget {
-  const _PaginaDeAparencia();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.memora.cores.fundo,
-      appBar: BarraSuperior(
-        titulo: TextosCasca.portaAparencia,
-        aoVoltar: () => Navigator.of(context).pop(),
-      ),
-      body: const TelaAparencia(),
-    );
   }
 }

@@ -45,23 +45,6 @@ abstract final class TextosCasca {
   static const String botaoFicar = 'Não, quero continuar';
 
   // ---------------------------------------------------------------------------
-  // Ajustes provisórios — até a US7 (T092)
-  // ---------------------------------------------------------------------------
-
-  /// Título da tela de ajustes.
-  static const String tituloAjustes = 'Ajustes';
-
-  /// A porta da aparência.
-  static const String portaAparencia = 'Como eu vejo o Memora';
-
-  /// O que a porta da aparência faz.
-  static const String descricaoAparencia =
-      'Deixar a letra maior, mudar as cores, enxergar melhor';
-
-  /// A galeria, que só existe no modo de desenvolvimento (R9 da 002).
-  static const String galeria = 'Galeria de componentes (desenvolvimento)';
-
-  // ---------------------------------------------------------------------------
   // Perfil provisório — até a US8 (T097)
   // ---------------------------------------------------------------------------
 
