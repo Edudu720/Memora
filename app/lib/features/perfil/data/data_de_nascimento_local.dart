@@ -89,16 +89,29 @@ class DataDeNascimentoLocal implements DataDeNascimentoDoAparelho {
 class DataDeNascimentoEmMemoria implements DataDeNascimentoDoAparelho {
   final Map<String, DataDeNascimento> _datas = <String, DataDeNascimento>{};
 
+  // O mesmo critério do armazenamento real: sem id a data não tem de quem
+  // ser, e o dublê não pode aceitar o que o de verdade recusa.
   @override
-  Future<DataDeNascimento?> ler(String idDaConta) async => _datas[idDaConta];
+  Future<DataDeNascimento?> ler(String idDaConta) async {
+    if (DataDeNascimentoLocal._semConta(idDaConta)) return null;
+    return _datas[idDaConta];
+  }
 
   @override
   Future<void> guardar(String idDaConta, DataDeNascimento data) async {
+    if (DataDeNascimentoLocal._semConta(idDaConta)) {
+      throw ArgumentError.value(
+        idDaConta,
+        'idDaConta',
+        'sem id da conta a data não tem de quem ser',
+      );
+    }
     _datas[idDaConta] = data;
   }
 
   @override
   Future<void> apagar(String idDaConta) async {
+    if (DataDeNascimentoLocal._semConta(idDaConta)) return;
     _datas.remove(idDaConta);
   }
 

@@ -14,6 +14,7 @@ import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
 import '../autenticacao/fluxo_dentro_da_conta.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// V1 — a pessoa não vê o andaime (FR-007 e SC-009 da feature 004, T028).
 ///
@@ -47,6 +48,7 @@ void main() {
         controlador: aparencia,
         ultimoAcesso: ultimoAcesso,
         composicao: Composicao(
+          dataDeNascimento: DataDeNascimentoEmMemoria(),
           ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
           autenticacao: RepositorioAutenticacaoSimulado(demora: Duration.zero),
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
