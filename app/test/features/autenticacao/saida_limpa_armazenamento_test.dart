@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/autenticacao/data/ultimo_acesso_local.dart';
-import 'package:memora/features/autenticacao/domain/autenticacao.dart';
-import 'package:memora/features/autenticacao/presentation/telas/tela_perfil.dart';
+import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
@@ -69,11 +68,11 @@ void main() {
   });
 
   group('Sair leva dois toques, e o segundo é a confirmação', () {
-    testWidgets('o botão de sair está na tela, sem menu no caminho (FR-024)',
+    testWidgets('o botão de sair está na tela de Conta, sem menu no caminho (FR-024)',
         (WidgetTester tester) async {
       await tester.pumpWidget(_tela(aoSair: () async {}));
 
-      expect(find.byKey(TelaPerfil.chaveSair), findsOneWidget);
+      expect(find.byKey(TelaConta.chaveSair), findsOneWidget);
       expect(find.text(TextosAutenticacao.botaoSair), findsOneWidget);
     });
 
@@ -83,11 +82,11 @@ void main() {
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
 
-      await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
-      await tester.tap(find.byKey(TelaPerfil.chaveSair));
+      await tester.ensureVisible(find.byKey(TelaConta.chaveSair));
+      await tester.tap(find.byKey(TelaConta.chaveSair));
       await tester.pump();
 
-      expect(find.byKey(TelaPerfil.chaveConfirmacao), findsOneWidget);
+      expect(find.byKey(TelaConta.chaveConfirmacao), findsOneWidget);
       expect(saiu, isFalse, reason: 'um toque não pode encerrar a sessão');
     });
 
@@ -95,8 +94,8 @@ void main() {
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
 
-      await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
-      await tester.tap(find.byKey(TelaPerfil.chaveSair));
+      await tester.ensureVisible(find.byKey(TelaConta.chaveSair));
+      await tester.tap(find.byKey(TelaConta.chaveSair));
       await tester.pump();
 
       await tester.ensureVisible(find.text(TextosAutenticacao.botaoConfirmarSaida));
@@ -109,14 +108,14 @@ void main() {
     /// Dois toques, contados. Se um menu ou uma aba entrar no caminho, este
     /// teste continua passando — mas a contagem aqui é o registro do que a
     /// FR-024 exige, e quebrá-la exige mexer nesta linha de propósito.
-    testWidgets('são exatamente dois toques, do perfil até sair',
+    testWidgets('são exatamente dois toques, da Conta até sair',
         (WidgetTester tester) async {
       int toques = 0;
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
 
-      await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
-      await tester.tap(find.byKey(TelaPerfil.chaveSair));
+      await tester.ensureVisible(find.byKey(TelaConta.chaveSair));
+      await tester.tap(find.byKey(TelaConta.chaveSair));
       toques++;
       await tester.pump();
 
@@ -129,12 +128,12 @@ void main() {
       expect(toques, lessThanOrEqualTo(2), reason: 'FR-024: no máximo dois toques');
     });
 
-    testWidgets('desistir volta ao perfil sem encerrar', (WidgetTester tester) async {
+    testWidgets('desistir volta à Conta sem encerrar', (WidgetTester tester) async {
       bool saiu = false;
       await tester.pumpWidget(_tela(aoSair: () async => saiu = true));
 
-      await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
-      await tester.tap(find.byKey(TelaPerfil.chaveSair));
+      await tester.ensureVisible(find.byKey(TelaConta.chaveSair));
+      await tester.tap(find.byKey(TelaConta.chaveSair));
       await tester.pump();
 
       await tester.ensureVisible(find.text(TextosAutenticacao.botaoFicar));
@@ -142,8 +141,8 @@ void main() {
       await tester.pump();
 
       expect(saiu, isFalse);
-      expect(find.byKey(TelaPerfil.chaveSair), findsOneWidget);
-      expect(find.byKey(TelaPerfil.chaveConfirmacao), findsNothing);
+      expect(find.byKey(TelaConta.chaveSair), findsOneWidget);
+      expect(find.byKey(TelaConta.chaveConfirmacao), findsNothing);
     });
   });
 
@@ -153,8 +152,8 @@ void main() {
     /// e "Cancelar" a obriga a decidir o que está sendo cancelado.
     testWidgets('os dois botões são frases completas', (WidgetTester tester) async {
       await tester.pumpWidget(_tela(aoSair: () async {}));
-      await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
-      await tester.tap(find.byKey(TelaPerfil.chaveSair));
+      await tester.ensureVisible(find.byKey(TelaConta.chaveSair));
+      await tester.tap(find.byKey(TelaConta.chaveSair));
       await tester.pump();
 
       expect(find.text(TextosAutenticacao.botaoConfirmarSaida), findsOneWidget);
@@ -167,8 +166,8 @@ void main() {
     testWidgets('a confirmação avisa que a senha será necessária',
         (WidgetTester tester) async {
       await tester.pumpWidget(_tela(aoSair: () async {}));
-      await tester.ensureVisible(find.byKey(TelaPerfil.chaveSair));
-      await tester.tap(find.byKey(TelaPerfil.chaveSair));
+      await tester.ensureVisible(find.byKey(TelaConta.chaveSair));
+      await tester.tap(find.byKey(TelaConta.chaveSair));
       await tester.pump();
 
       expect(find.textContaining('senha'), findsWidgets);
@@ -179,10 +178,11 @@ void main() {
 Widget _tela({required Future<void> Function() aoSair}) {
   return MaterialApp(
     theme: TemasMemora.claro,
-    home: TelaPerfil(
-      pessoa: const PessoaAutenticada(id: 'p1', nomeTratamento: 'Ana'),
+    home: TelaConta(
+      canal: Future<String?>.value('ana@email.com'),
       aoSair: aoSair,
-      aoSairConcluido: () {},
+      aoSairEEsquecer: () async {},
+      aoVoltar: () {},
     ),
   );
 }

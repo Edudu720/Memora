@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/casca/casca_interna.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
@@ -63,7 +63,7 @@ void main() {
 
     await tocarSair(t);
 
-    expect(find.byKey(AjustesProvisorios.chaveConfirmacao), findsOneWidget);
+    expect(find.byKey(TelaConta.chaveConfirmacao), findsOneWidget);
     expect(find.text(TextosAutenticacao.perguntaSair), findsOneWidget);
     expect(find.text(TextosAutenticacao.avisoSair), findsOneWidget);
     expect(
@@ -90,8 +90,8 @@ void main() {
       find.text(TextosAutenticacao.botaoFicar),
     );
 
-    expect(find.byKey(AjustesProvisorios.chaveConfirmacao), findsNothing);
-    expect(find.byKey(AjustesProvisorios.chaveSair), findsOneWidget);
+    expect(find.byKey(TelaConta.chaveConfirmacao), findsNothing);
+    expect(find.byKey(TelaConta.chaveSair), findsOneWidget);
     expect(find.byKey(CascaInterna.chaveDaBarra), findsOneWidget);
     expect(fluxo.dado.apagamentos, 0);
     expect(fluxo.cofre.limpezas, 0);

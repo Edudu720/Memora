@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/aprendizado/data/progresso_de_aprendizado.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
@@ -33,6 +36,7 @@ void main() {
     WidgetTester t, {
     Duration inatividade = const Duration(minutes: 30),
     Duration aviso = const Duration(minutes: 2),
+    List<DadoLocalDaPessoa> maisDados = const <DadoLocalDaPessoa>[],
   }) async {
     dado = _DadoLocalQueRegistra();
     cofre = _CofreQueRegistra();
@@ -56,7 +60,7 @@ void main() {
           limpeza: LimpezaDeSessao(
             cofre: cofre,
             ultimoAcesso: ultimoAcesso,
-            dadosLocais: <DadoLocalDaPessoa>[dado],
+            dadosLocais: <DadoLocalDaPessoa>[dado, ...maisDados],
           ),
         ),
       ),
@@ -121,6 +125,93 @@ void main() {
         reason: 'o celular esquecido na mesa e o caso que a FR-017 existe '
             'para cobrir, e e ali que a conversa precisa sair');
   });
+
+  group('o progresso de aprendizado sai em toda saída (FR-042b)', () {
+    late Directory pasta;
+    late ProgressoDeAprendizado progresso;
+
+    File arquivo() =>
+        File('${pasta.path}/${ProgressoDeAprendizado.nomeDoArquivo}');
+
+    /// Prepara o progresso no disco de verdade. Disco real só anda dentro de
+    /// `runAsync`: o relógio do `testWidgets` é falso.
+    Future<void> guardarProgresso(WidgetTester t) async {
+      await t.runAsync(() async {
+        pasta = Directory.systemTemp.createTempSync('memora_fluxo_progresso_');
+        progresso = ProgressoDeAprendizado(diretorio: () async => pasta);
+        await progresso.registrarConclusao(idDaConta: 'ana', chave: 'tiktok');
+      });
+      addTearDown(() {
+        if (pasta.existsSync()) pasta.deleteSync(recursive: true);
+      });
+      expect(arquivo().existsSync(), isTrue,
+          reason: 'o cenario pressupoe progresso guardado antes da saida');
+    }
+
+    /// Dá ao disco real o tempo de terminar, bombeando quadros entre uma
+    /// espera e outra para as continuações do relógio falso andarem.
+    Future<void> esperarSumir(WidgetTester t) async {
+      for (int i = 0; i < 100 && arquivo().existsSync(); i++) {
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await t.pump(const Duration(milliseconds: 20));
+      }
+      // O arquivo some antes de o `delete()` avisar que terminou: sem estas
+      // voltas a mais, a saida ainda esta esperando por esse aviso.
+      for (int i = 0; i < 3; i++) {
+        await t.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await t.pump(const Duration(milliseconds: 20));
+      }
+    }
+
+    testWidgets('sair da conta o apaga, mesmo quando outro dado local falha',
+        (WidgetTester t) async {
+      await guardarProgresso(t);
+      await montarDentro(
+        t,
+        maisDados: <DadoLocalDaPessoa>[_QueFalha(), progresso],
+      );
+
+      await FluxoDentroDaConta.tocarEmSair(t);
+      final Finder confirmar =
+          find.text(TextosAutenticacao.botaoConfirmarSaida);
+      await t.ensureVisible(confirmar);
+      await t.pump();
+      await t.tap(confirmar);
+      await avancar(t, 6);
+      await esperarSumir(t);
+
+      expect(arquivo().existsSync(), isFalse,
+          reason: 'o progresso fica para trás se a saida parar no dado que '
+              'falhou');
+    });
+
+    testWidgets('a saída por inatividade também o apaga, mesmo com falha',
+        (WidgetTester t) async {
+      await guardarProgresso(t);
+      await montarDentro(
+        t,
+        inatividade: const Duration(seconds: 3),
+        aviso: const Duration(seconds: 1),
+        maisDados: <DadoLocalDaPessoa>[_QueFalha(), progresso],
+      );
+
+      await t.pump(const Duration(seconds: 2));
+      await avancar(t);
+      await t.pump(const Duration(seconds: 1));
+      await avancar(t, 8);
+      await esperarSumir(t);
+      await avancar(t, 6);
+
+      expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
+      expect(arquivo().existsSync(), isFalse,
+          reason: 'celular esquecido na mesa: o que a pessoa ainda nao sabe '
+              'fazer nao pode ficar para quem pegar o aparelho');
+    });
+  });
 }
 
 Future<void> _preencher(WidgetTester t, Key chave, String valor) async {
@@ -138,6 +229,11 @@ class _DadoLocalQueRegistra implements DadoLocalDaPessoa {
 
   @override
   Future<void> apagar() async => apagamentos++;
+}
+
+class _QueFalha implements DadoLocalDaPessoa {
+  @override
+  Future<void> apagar() async => throw StateError('disco cheio');
 }
 
 class _CofreQueRegistra implements CofreDeCredenciais {
