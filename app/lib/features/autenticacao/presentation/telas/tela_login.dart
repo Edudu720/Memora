@@ -54,12 +54,16 @@ class TelaLogin extends StatefulWidget {
   /// caminho, que é o que a FR-015 exige.
   final VoidCallback? aoRecuperar;
 
+  /// Caminho para criar conta pela primeira vez (FR-010, FR-011).
+  final VoidCallback? aoPrimeiroAcesso;
+
   /// Cria a tela de login.
   const TelaLogin({
     required this.controlador,
     required this.aoEntrar,
     this.aoVoltar,
     this.aoRecuperar,
+    this.aoPrimeiroAcesso,
     super.key,
   });
 
@@ -132,94 +136,110 @@ class _TelaLoginState extends State<TelaLogin> {
 
         return Scaffold(
           backgroundColor: cores.fundo,
-          appBar: BarraSuperior(
-            titulo: TextosAutenticacao.tituloLogin,
-            aoVoltar: widget.aoVoltar,
-          ),
+          appBar: widget.aoVoltar != null
+              ? BarraSuperior(
+                  titulo: TextosAutenticacao.tituloLogin,
+                  aoVoltar: widget.aoVoltar,
+                )
+              : null,
           body: SafeArea(
-            top: false,
+            top: widget.aoVoltar == null,
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(MemoraEspacamento.xl),
-              child: CartaoComAvatar(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    const TextoMemora(TextosAutenticacao.conviteLogin),
-
-                    const SizedBox(height: MemoraEspacamento.xxl),
-                    CampoTexto(
-                      key: TelaLogin.chaveIdentificador,
-                      rotulo: TextosAutenticacao.rotuloIdentificador,
-                      textoAjuda: TextosAutenticacao.ajudaIdentificador,
-                      controlador: _campoIdentificador,
-                      tipoTeclado: TextInputType.emailAddress,
-                      aoMudar: c.informarIdentificador,
-                      habilitado: !c.enviando,
+              padding: const EdgeInsets.symmetric(
+                horizontal: MemoraEspacamento.lg,
+                vertical: MemoraEspacamento.sm,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  CaixaDeEtapa(
+                    instrucao: TextosAutenticacao.tituloLogin,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        CampoTexto(
+                          key: TelaLogin.chaveIdentificador,
+                          rotulo: TextosAutenticacao.rotuloIdentificador,
+                          textoAjuda: TextosAutenticacao.ajudaIdentificador,
+                          controlador: _campoIdentificador,
+                          tipoTeclado: TextInputType.emailAddress,
+                          aoMudar: c.informarIdentificador,
+                          habilitado: !c.enviando,
+                        ),
+                        if (c.veioDoUltimoAcesso) ...<Widget>[
+                          const SizedBox(height: MemoraEspacamento.xs),
+                          const TextoMemora.apoio(
+                            TextosAutenticacao.identificadorLembrado,
+                          ),
+                        ],
+                        const SizedBox(height: MemoraEspacamento.md),
+                        CampoSenha(
+                          key: TelaLogin.chaveSenha,
+                          rotulo: TextosAutenticacao.rotuloSenha,
+                          textoAjuda: TextosAutenticacao.ajudaSenha,
+                          controlador: _campoSenha,
+                          aoMudar: c.informarSenha,
+                        ),
+                        if (c.mensagemDeErro != null) ...<Widget>[
+                          const SizedBox(height: MemoraEspacamento.md),
+                          MensagemErro(
+                            mensagem: c.mensagemDeErro!,
+                            // Durante o bloqueio não há o que tentar: o botão de
+                            // repetir só reapresentaria a mesma recusa e faria a
+                            // espera parecer defeito.
+                            aoTentarNovamente: c.bloqueado
+                                ? null
+                                : c.tentarNovamente,
+                          ),
+                        ],
+                        if (c.bloqueado) ...<Widget>[
+                          const SizedBox(height: MemoraEspacamento.sm),
+                          // Texto comum, não título: anunciar a contagem como
+                          // cabeçalho a colocaria no índice de navegação do TalkBack,
+                          // onde ela não é ponto de referência de nada.
+                          TextoMemora(
+                            TextosAutenticacao.contagem(c.segundosRestantes),
+                            key: TelaLogin.chaveContagem,
+                            alinhamento: TextAlign.center,
+                          ),
+                        ],
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        if (c.enviando)
+                          const Carregando(mensagem: TextosAutenticacao.entrando)
+                        else if (!c.bloqueado)
+                          BotaoPrimario(
+                            key: TelaLogin.chaveEntrar,
+                            rotulo: TextosAutenticacao.botaoEntrar,
+                            icone: Icons.arrow_forward,
+                            aoTocar: c.podeEnviar ? c.entrar : null,
+                          ),
+                      ],
                     ),
-
-                    if (c.veioDoUltimoAcesso) ...<Widget>[
-                      const SizedBox(height: MemoraEspacamento.sm),
-                      const TextoMemora.apoio(
-                        TextosAutenticacao.identificadorLembrado,
-                      ),
-                    ],
-
-                    const SizedBox(height: MemoraEspacamento.xl),
-                    CampoSenha(
-                      key: TelaLogin.chaveSenha,
-                      rotulo: TextosAutenticacao.rotuloSenha,
-                      textoAjuda: TextosAutenticacao.ajudaSenha,
-                      controlador: _campoSenha,
-                      aoMudar: c.informarSenha,
+                  ),
+                  if (widget.aoRecuperar != null ||
+                      widget.aoPrimeiroAcesso != null) ...<Widget>[
+                    const SizedBox(height: MemoraEspacamento.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        if (widget.aoRecuperar != null)
+                          Flexible(
+                            child: BotaoTerciario(
+                              rotulo: TextosAutenticacao.botaoRecuperar,
+                              aoTocar: widget.aoRecuperar,
+                            ),
+                          ),
+                        if (widget.aoPrimeiroAcesso != null)
+                          Flexible(
+                            child: BotaoTerciario(
+                              rotulo: TextosAutenticacao.botaoPrimeiroAcesso,
+                              aoTocar: widget.aoPrimeiroAcesso,
+                            ),
+                          ),
+                      ],
                     ),
-
-                    if (c.mensagemDeErro != null) ...<Widget>[
-                      const SizedBox(height: MemoraEspacamento.xl),
-                      MensagemErro(
-                        mensagem: c.mensagemDeErro!,
-                        // Durante o bloqueio não há o que tentar: o botão de
-                        // repetir só reapresentaria a mesma recusa e faria a
-                        // espera parecer defeito.
-                        aoTentarNovamente: c.bloqueado
-                            ? null
-                            : c.tentarNovamente,
-                      ),
-                    ],
-
-                    if (c.bloqueado) ...<Widget>[
-                      const SizedBox(height: MemoraEspacamento.md),
-                      // Texto comum, não título: anunciar a contagem como
-                      // cabeçalho a colocaria no índice de navegação do TalkBack,
-                      // onde ela não é ponto de referência de nada.
-                      TextoMemora(
-                        TextosAutenticacao.contagem(c.segundosRestantes),
-                        key: TelaLogin.chaveContagem,
-                        alinhamento: TextAlign.center,
-                      ),
-                    ],
-
-                    const SizedBox(height: MemoraEspacamento.xxl),
-                    if (c.enviando)
-                      const Carregando(mensagem: TextosAutenticacao.entrando)
-                    else if (!c.bloqueado)
-                      BotaoPrimario(
-                        key: TelaLogin.chaveEntrar,
-                        rotulo: TextosAutenticacao.botaoEntrar,
-                        icone: Icons.arrow_forward,
-                        aoTocar: c.podeEnviar ? c.entrar : null,
-                      ),
-
-                    if (widget.aoRecuperar != null) ...<Widget>[
-                      const SizedBox(height: MemoraEspacamento.xl),
-                      BotaoTerciario(
-                        rotulo: TextosAutenticacao.botaoRecuperar,
-                        aoTocar: widget.aoRecuperar,
-                        larguraTotal: true,
-                      ),
-                    ],
-                    const SizedBox(height: MemoraEspacamento.xxl),
                   ],
-                ),
+                ],
               ),
             ),
           ),

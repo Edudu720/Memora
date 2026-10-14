@@ -62,6 +62,17 @@ Perguntados ao Henrique, que decidiu:
 ### Em aberto
 
 - A revisão dos dois Eduardos.
-- **Rever o Início e o Hub novos** (os da fase 3) depois das mudanças acima. O
-  que se viu foi a fundação; o veredito sobre as telas novas é o da próxima
-  rodada.
+- **Rever o Início e o Hub novos**: realizada pelo Henrique via APK no celular em 2026-10-14 (ver abaixo).
+
+---
+
+## T116 — Segunda rodada: Início e Hub novos no aparelho real (2026-10-14)
+
+**Quem**: Henrique Moreira Sandrini (Scrum Master).
+
+**O que foi visto**: o aplicativo instalado no celular físico via APK com as telas novas da Fase 3/3b integradas (Início com a Memora e caixas de tutorial, Hub com acabamento refinado das portas, ícones da barra inferior, redução de respiro dinâmico).
+
+### Veredito
+
+**Aprovado.** As telas do Início e do Hub cumprem o acabamento e a linguagem visual definidos. O portão do merge está liberado para prosseguir com a implementação das fases seguintes no Spec-Kit.
+

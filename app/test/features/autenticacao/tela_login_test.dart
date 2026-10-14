@@ -9,6 +9,7 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart'
 import 'package:memora/l10n/textos_autenticacao.dart';
 
 import '../../suporte/aparelhos.dart';
+import '../../suporte/fonte.dart';
 import 'dubles_autenticacao.dart';
 
 Widget _app(Widget filho) => MaterialApp(theme: TemasMemora.claro, home: filho);
@@ -114,6 +115,8 @@ Future<void> _tentar(
 }
 
 void main() {
+  setUpAll(carregarAtkinson);
+
   group('Formulário — FR-011', () {
     testWidgets('pede exatamente duas coisas', (WidgetTester t) async {
       await _montar(t, repositorio: _comContaDeAna());
@@ -155,6 +158,7 @@ void main() {
             controlador: c,
             aoEntrar: (PessoaAutenticada _) {},
             aoRecuperar: () {},
+            aoPrimeiroAcesso: () {},
           ),
         ),
       );
@@ -208,8 +212,7 @@ void main() {
     // fica escrito e pulado — quando a T117 entrar, tirar o `skip` e ele passa
     // a ser o portão.
     testWidgets(
-      '[PULADO até a T117, que redesenha o login] "Esqueci minha senha" e '
-      '"Primeiro acesso" estão à vista sem rolar, 320x568 a 100%',
+      '"Esqueci minha senha" e "Primeiro acesso" estão à vista sem rolar, 320x568 a 100%',
       (WidgetTester t) async {
         await montarComCaminhos(t);
 
@@ -227,7 +230,6 @@ void main() {
           );
         }
       },
-      skip: true,
     );
   });
 

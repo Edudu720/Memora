@@ -13,6 +13,7 @@ import 'controladores/controlador_recuperacao.dart';
 import 'telas/tela_boas_vindas.dart';
 import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
+import 'telas/tela_de_volta.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
@@ -140,6 +141,7 @@ class FluxoAutenticacao extends StatefulWidget {
 
 enum _Etapa {
   boasVindas,
+  volta,
   cadastro,
   entregaDoAparelho,
   confirmarCanal,
@@ -175,6 +177,27 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   ControladorRecuperacao? _recuperacao;
 
   _Etapa _etapa = _Etapa.boasVindas;
+  _Etapa _etapaDeEntrada = _Etapa.boasVindas;
+
+  @override
+  void initState() {
+    super.initState();
+    _conferirUltimoAcessoInicial();
+  }
+
+  Future<void> _conferirUltimoAcessoInicial() async {
+    final String? lembrado = await widget.ultimoAcesso.identificador();
+    if (!mounted) return;
+    if (lembrado != null && lembrado.trim().isNotEmpty) {
+      setState(() {
+        _etapaDeEntrada = _Etapa.volta;
+        if (_etapa == _Etapa.boasVindas) {
+          _etapa = _Etapa.volta;
+        }
+      });
+    }
+  }
+
   PessoaAutenticada? _pessoa;
 
   late final ArmazenamentoDaDataDeNascimento _datas =
@@ -258,6 +281,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     await widget.ultimoAcesso.lembrar(
       _recuperacao!.identificador.trim().toLowerCase(),
     );
+    _etapaDeEntrada = _Etapa.volta;
     if (!mounted) return;
     _entrou(pessoa);
   }
@@ -270,6 +294,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// deveria fechar.
   Future<void> _cadastrou(PessoaAutenticada pessoa) async {
     await widget.ultimoAcesso.lembrar(_cadastro.canal.trim().toLowerCase());
+    _etapaDeEntrada = _Etapa.volta;
     if (!mounted) return;
 
     // Cadastro comum entra direto (FR-009). O assistido não: a conta existe,
@@ -359,6 +384,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     await widget.repositorio.encerrarSessao();
     await widget.limpeza?.executar(esquecerTudo: esquecerTudo);
     if (!mounted) return;
+    if (esquecerTudo) {
+      _etapaDeEntrada = _Etapa.boasVindas;
+    }
     _fecharRotasAbertas();
     _irParaLogin();
   }
@@ -743,9 +771,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         aoComecar: () => setState(() => _etapa = _Etapa.cadastro),
         aoJaTerConta: _irParaLogin,
       ),
+      _Etapa.volta => TelaDeVolta(
+        aoEntrar: _irParaLogin,
+        aoCriarConta: () => setState(() => _etapa = _Etapa.cadastro),
+      ),
       _Etapa.cadastro => TelaCadastro(
         controlador: _cadastro,
-        aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
+        aoVoltar: () => setState(() => _etapa = _etapaDeEntrada),
         aoConcluir: _cadastrou,
         aoEntregarAparelho: () =>
             setState(() => _etapa = _Etapa.entregaDoAparelho),
@@ -769,9 +801,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       ),
       _Etapa.login => TelaLogin(
         controlador: _login!,
-        aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
+        aoVoltar: () => setState(() => _etapa = _etapaDeEntrada),
         aoEntrar: _entrou,
         aoRecuperar: _irParaRecuperacao,
+        aoPrimeiroAcesso: () => setState(() => _etapa = _Etapa.cadastro),
       ),
       _Etapa.recuperacao => TelaRecuperacao(
         controlador: _recuperacao!,
