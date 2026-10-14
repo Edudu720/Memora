@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Nada do que a Memora guarda no aparelho sai dele (D3 da feature 003,
+    FR-042c da 004).
+
+    Sem este arquivo o Android copiaria `shared_prefs/` (data de nascimento,
+    ultimo acesso, preferencias, cofre das credenciais) e `app_flutter/` (a
+    conversa da assistente) para o Google Drive e para o aparelho novo. No
+    Android 12+, `allowBackup="false"` sozinho NAO barra a transferencia entre
+    aparelhos; so estas regras barram. Quem precisar de algo de volta num
+    aparelho novo entra de novo: as chaves do Keystore nao migram, e dado
+    cifrado restaurado nao decifra.
+
+    Sintaxe: https://developer.android.com/identity/data/autobackup
+    Todo dominio precisa estar nas DUAS secoes; o sem_backup_test.dart
+    reprova se faltar algum.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="external" path="."/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" path="."/>
+        <exclude domain="file" path="."/>
+        <exclude domain="database" path="."/>
+        <exclude domain="sharedpref" path="."/>
+        <exclude domain="external" path="."/>
+    </device-transfer>
+</data-extraction-rules>
