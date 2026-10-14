@@ -10,6 +10,7 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart'
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/casca/raizes_provisorias.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
@@ -58,6 +59,7 @@ class FluxoDentroDaConta {
     Duration aviso = const Duration(minutes: 2),
     Combinacao? em,
     GlobalKey? capturavel,
+    DataDeNascimentoDoAparelho? datas,
   }) async {
     if (em != null) vestir(t, em.aparelho);
     final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
@@ -92,12 +94,14 @@ class FluxoDentroDaConta {
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
           conversaLocal: _ConversaEmMemoria.new,
           ultimoAcesso: ultimoAcesso,
+          dataDeNascimento: datas,
           inatividade: inatividade,
           avisoDeInatividade: aviso,
           limpeza: LimpezaDeSessao(
             cofre: cofre,
             ultimoAcesso: ultimoAcesso,
             dadosLocais: <DadoLocalDaPessoa>[dado],
+            dadosDoAparelho: <DadoLocalDoAparelho>[?datas],
           ),
         ),
       ),

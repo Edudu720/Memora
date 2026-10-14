@@ -23,6 +23,7 @@ import '../../assistente/presentation/telas/tela_catalogo.dart';
 import '../../assistente/presentation/telas/tela_conversa.dart';
 import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
+import '../../perfil/data/data_de_nascimento_local.dart';
 import '../../casca/casca_interna.dart';
 import '../../casca/raizes_provisorias.dart';
 import '../../hub/presentation/telas/tela_hub.dart';
@@ -69,6 +70,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// automática por inatividade.
   final LimpezaDeSessao? limpeza;
 
+  /// Onde o Perfil guarda a data de nascimento, por conta (T123, FR-042c).
+  ///
+  /// Opcional: sem ele o fluxo usa uma guarda em memória, que some com o
+  /// aplicativo — o que basta para o teste de widget.
+  final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
@@ -96,6 +103,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
     super.key,
     this.limpeza,
+    this.dataDeNascimento,
   });
 
   @override
@@ -136,6 +144,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   _Etapa _etapa = _Etapa.boasVindas;
   PessoaAutenticada? _pessoa;
+
+  late final ArmazenamentoDaDataDeNascimento _datas =
+      widget.dataDeNascimento ?? DataDeNascimentoEmMemoria();
 
   /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
   /// abre vai para a pilha do destino à vista, por [_empilhar].
@@ -571,6 +582,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           DestinoDaCasca.perfil: (BuildContext _) => PerfilProvisorio(
             nome: _pessoa?.nomeTratamento ?? '',
             canal: _canal,
+            dataDeNascimento: _datas,
+            idDaConta: _pessoa?.id,
           ),
         },
       ),
