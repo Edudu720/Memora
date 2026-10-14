@@ -54,10 +54,11 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
       _controladorStatus.add(_statusAtual);
     }
 
-    String hostFinal = broker;
+    final String brokerAlvo = broker.trim().isEmpty ? 'broker.hivemq.com' : broker.trim();
+    String hostFinal = brokerAlvo;
     try {
       final List<InternetAddress> addresses = await InternetAddress.lookup(
-        broker,
+        brokerAlvo,
         type: InternetAddressType.IPv4,
       );
       if (addresses.isNotEmpty) {

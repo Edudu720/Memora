@@ -16,7 +16,14 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     required this.repositorioContato,
     ProvedorDeTelemetria? provedorInicial,
   }) {
-    _provedorAtual = provedorInicial ?? ProvedorDeTelemetriaSimulado();
+    _provedorAtual = provedorInicial ?? ProvedorDeTelemetriaMqtt();
+    _dispositivo = DispositivoCuidado(
+      id: 'pulseira-01',
+      nome: 'Dispositivo de Cuidado',
+      modoOperacao: (_provedorAtual is ProvedorDeTelemetriaMqtt)
+          ? ModoOperacaoIot.mqtt
+          : ModoOperacaoIot.simulado,
+    );
     _iniciarOuvintes();
     _carregarContato();
   }
@@ -24,10 +31,7 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
   final RepositorioContatoEmergencia repositorioContato;
   late ProvedorDeTelemetria _provedorAtual;
 
-  DispositivoCuidado _dispositivo = const DispositivoCuidado(
-    id: 'pulseira-01',
-    nome: 'Dispositivo de Cuidado',
-  );
+  late DispositivoCuidado _dispositivo;
 
   ContatoEmergencia? _contatoEmergencia;
   EventoQueda? _quedaAtiva;
@@ -76,15 +80,20 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
   }
 
   Future<void> alternarModo(ModoOperacaoIot novoModo, {String? broker, String? topico}) async {
-    if (_dispositivo.modoOperacao == novoModo && broker == null && topico == null) return;
+    final String brokerFinal = (broker != null && broker.trim().isNotEmpty)
+        ? broker.trim()
+        : _dispositivo.brokerHost;
+    final String topicoFinal = (topico != null && topico.trim().isNotEmpty)
+        ? topico.trim()
+        : _dispositivo.topicoBase;
 
     await _provedorAtual.desconectar();
     _provedorAtual.descartar();
 
     if (novoModo == ModoOperacaoIot.mqtt) {
       _provedorAtual = ProvedorDeTelemetriaMqtt(
-        broker: broker ?? _dispositivo.brokerHost,
-        topicoBase: topico ?? _dispositivo.topicoBase,
+        broker: brokerFinal,
+        topicoBase: topicoFinal,
       );
     } else {
       _provedorAtual = ProvedorDeTelemetriaSimulado();
@@ -92,8 +101,8 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
 
     _dispositivo = _dispositivo.copyWith(
       modoOperacao: novoModo,
-      brokerHost: broker ?? _dispositivo.brokerHost,
-      topicoBase: topico ?? _dispositivo.topicoBase,
+      brokerHost: brokerFinal,
+      topicoBase: topicoFinal,
     );
 
     _iniciarOuvintes();
