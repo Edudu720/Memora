@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'design_system/design_system.dart';
-import 'features/ajuda/data/compartilhar.dart';
 import 'features/apresentacao/data/apresentacao_vista.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
@@ -36,6 +35,7 @@ Future<void> main() async {
     ultimoAcesso: ultimoAcesso,
     dataDeNascimento: dataDeNascimento,
     apresentacaoVista: apresentacaoVista,
+    guardarCatalogo: true,
   );
 
   final String? aviso = composicao.avisoDeIntegracaoParcial;
@@ -110,8 +110,6 @@ class AplicativoMemora extends StatelessWidget {
               apresentacaoVista: composicao.apresentacaoVista,
               assistente: composicao.assistente,
               abridor: const AbridorDeAplicativoAndroid(),
-              // Só existe com `MEMORA_URL_DOWNLOAD` no build (R12, T089).
-              compartilhador: Compartilhador.doAmbiente(composicao.ambiente),
             ),
           );
         },
