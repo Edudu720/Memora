@@ -154,7 +154,7 @@ app/
 │   │   ├── assistente/       # conversa e catálogos redesenhados
 │   │   ├── aprendizado/      # guias, passo a passo, progresso                     (novo)
 │   │   ├── ajuda/            # assuntos e a ajuda guiada da conversa               (novo)
-│   │   ├── configuracoes/    # Aparência, Privacidade, Conta                       (novo)
+│   │   ├── configuracoes/    # Aparência, Acessibilidade, Privacidade, Conta       (novo)
 │   │   ├── perfil/           # Perfil                                              (novo)
 │   │   └── autenticacao/     # telas redesenhadas; FluxoAutenticacao monta a casca
 │   ├── l10n/                 # + textos_guias, textos_ajuda, textos_casca
@@ -182,7 +182,7 @@ passa a testar a tela de Conta, que é onde sair passa a morar (FR-019).
 | Risco | Efeito | Resposta |
 |---|---|---|
 | A Atkinson, mais larga, estoura telas que hoje passam | Retrabalho nas telas da 001 e da 003 | Primeira tarefa da fundação: trocar a fonte e rodar a matriz **antes** de qualquer tela nova (R3) |
-| Hub com 5 cartões ilustrados não cabe sem rolar a 150% no 320×568 | FR-017 reprova | A ilustração cede primeiro (regra 7); se ainda não couber, voltar à spec — não afrouxar o teste |
+| ~~Hub com 5 cartões ilustrados não cabe sem rolar a 150% no 320×568~~ — **resolvido** | A medição da T113 mostrou a regra inviável e a FR-017 foi reescrita (decisão do Henrique, 2026-10-02) | Vale a FR-017 atual: porta principal sempre à vista com a faixa "há mais"; Hub inteiro sem rolar só no 360×800 a 100%; exceção do 320×568 a 200%. Coberto por `hub_cabe_sem_rolar_test.dart` |
 | Objeção acadêmica às capturas de outros aplicativos | Guias sem imagem | Plano B da R6: esquema vetorial, sem mudar código |
 | Produção de conteúdo (~16 guias) ser o gargalo, e não o código | Prazo de novembro | Guias entram por item, junto com a linha do catálogo; o teste da R8 impede item sem guia. A US4 entrega com os guias dos aplicativos do wireframe primeiro |
 | A revisão de design reprovar a linguagem tarde | Refazer todas as telas | A US2 vem primeiro e para numa revisão da equipe antes das demais (R14) |

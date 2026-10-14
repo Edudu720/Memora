@@ -29,5 +29,5 @@ adaptador do canal e um simulado. O simulado é o que roda em todo teste de
 widget: canal de plataforma não existe em `flutter test`, e o simulado deixa o
 teste escolher o que está instalado.
 
-⚠️ **O ícone é cacheado em memória, por pacote, durante a execução.** A grade de
+⚠️ **O ícone é cacheado em memória, por pacote, durante a execução.** A lista de
 "Meus aplicativos" pede vários de uma vez, e cada pedido atravessa o canal.

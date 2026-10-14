@@ -59,8 +59,9 @@ como adjetivo:
    002). Um cartão tocável seria a terceira linguagem que essa regra proíbe. A
    pílula grande é a própria linguagem do wireframe (as pílulas azuis do Hub),
    com desenho e explicação.
-4. **Fundo com profundidade**: superfície clara com cartões levemente elevados
-   (sombra suave, raio de 24), em vez de pílula azul sobre cinza liso.
+4. **Fundo com profundidade**: superfície clara com sombra suave, em vez de
+   pílula azul sobre cinza liso. A porta (ação) é pílula com `MemoraRaio.porta`
+   (ver o contrato de `CartaoDePorta`); a informação continua no `Cartao`.
 5. **A Memora é personagem**: o robô do wireframe, redesenhado, em todo lugar
    onde ela fala (FR-003).
 6. **Espaço respira**: o espaçamento entre blocos sobe um degrau (`xl` → `xxl`)
@@ -161,16 +162,20 @@ número em px não é o que a pessoa vê.
 **Decisão**:
 - **A Memora** (o robô do wireframe) é redesenhada pela equipe em SVG, com
   quatro expressões: neutra, falando, comemorando e preocupada (para os
-  avisos). Substitui o `AvatarMemora` de hoje.
-- **As demais ilustrações** (pessoas, portas do Hub, assuntos da Ajuda, estados
-  vazio e erro) vêm de um conjunto de **licença aberta que permita alteração**
-  e são recoloridas com a paleta. A licença de cada arquivo fica registrada em
-  `app/assets/ilustracoes/LICENCAS.md`.
+  avisos). É o `MemoraPersonagem`. O `AvatarMemora` **não** é substituído: é o
+  retrato do casal no cartão do cadastro e do login, e o nome é anterior ao
+  personagem (T013; `CLAUDE.md`, seção 8).
+- **As demais ilustrações** (pessoas, portas do Hub, estados vazio e erro e,
+  se houver, os assuntos da Ajuda) eram previstas de um conjunto de **licença
+  aberta que permita alteração**. Na implementação entraram como **desenho
+  original da equipe** (nota da T011), o que simplifica a licença; cada arquivo
+  continua registrado em `app/assets/ilustracoes/LICENCAS.md`.
 - **Nos temas escuro e de alto contraste**, ilustração com cores próprias fica
   sobre um **medalhão** claro, como os círculos do wireframe. Ilustração de
   traço único continua recebendo `cor`.
 - Tudo continua passando pelo enum `Ilustracao`: arquivo que não existe **não
-  compila**.
+  compila**. (Vale para as ilustrações. Para as capturas dos guias, a regra é
+  outra: ver a FR-028a e a R6.)
 
 **Por quê**: o wireframe usava ilustrações de banco de imagens, sem licença
 registrada; não dá para levá-las para uma entrega que vai ser apresentada. E
@@ -186,7 +191,9 @@ equipe não quer).
 ## R5 — Aviso de segurança proporcional
 
 **Decisão**: novo componente `AvisoCompacto`, que mostra **o título do aviso e
-uma linha**, com "Ler o aviso inteiro" para expandir. Expandido, ele empurra o
+uma linha**, com "Ler o aviso inteiro" para expandir. O estado inicial depende
+da conversa (FR-022 revista na T044): aberto até a primeira mensagem, depois
+uma linha. Expandido, ele empurra o
 conteúdo, mas nunca passa de 50% da altura disponível; acima disso o texto
 rola dentro dele. **Só a conversa (FR-022) passa a usá-lo.**
 
@@ -227,8 +234,11 @@ que a maioria vê.
 
 **Decisão**:
 - **Conteúdo em Dart, tipado** (`features/aprendizado/data/guias/`), um arquivo
-  por guia. Um passo que aponta para uma imagem que não existe **não compila**,
-  pelo mesmo enum das ilustrações. Os textos ficam em `l10n/textos_guias.dart`,
+  por guia. A captura de um passo que ainda não existe **não derruba a
+  construção nem o teste**: o passo mostra um aviso visível de **captura
+  pendente**, com a chave do guia e o número do passo, e o texto continua
+  funcionando (FR-028a). Um teste lista as pendentes, e a lista precisa zerar
+  antes da revisão de design final. Os textos ficam em `l10n/textos_guias.dart`,
   pela estrutura preparada da D3 da 002.
 - **As imagens são capturas de tela feitas pela equipe**, numa conta de teste
   sem dado real, guardadas em `app/assets/guias/<chave>/passo_N.png`, em 3x.
@@ -301,7 +311,7 @@ exige o logotipo, isso é uma reabertura da spec, por causa do golpe acima.
    contrato da 003 ganha o campo `chave` — mudança **aditiva**, que não quebra
    cliente nenhum.
 2. **Acrescenta os serviços sociais do wireframe**, todos `SENSIVEL`, sem pacote:
-   e-Título, Serasa, FGTS, Poupatempo, Carteira Digital de Trânsito, Correios e
+   e-Título, Serasa, FGTS, Poupatempo, Carteira Digital (o documento do gov.br, e não a de Trânsito; T080, resolvida), Correios e
    Carteira de Trabalho Digital. Gov.br e Meu INSS já existem.
 
 **Aplicativos cotidianos do wireframe**: entram **TikTok, Kwai, Messenger,

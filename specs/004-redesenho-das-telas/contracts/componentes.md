@@ -50,8 +50,11 @@ O aviso permanente que não ocupa a tela (R5). **Só a conversa o usa**; a recup
 | `textoCompleto` | sim | Visível só aberto. Aberto, o aviso não passa de 50% da altura que **sobra** da tela, descontado o teclado (lido da `View`: o `Scaffold` o apaga do `MediaQuery`); o resto rola dentro dele |
 | `expressao` | não | Rosto da Memora "preocupada" ao lado |
 
-Fechado por padrão. A escolha de abrir **não** é lembrada entre telas: quem
-abriu uma vez vê fechado na próxima, para o aviso não virar paisagem aberta.
+Estado inicial (FR-022 revista na T044): **aberto até a pessoa mandar a
+primeira mensagem da conversa**; a partir dela, **uma linha** com escudo e o
+núcleo do aviso ("senha" e "código"), que se toca para ler inteiro. Nunca some.
+A escolha de abrir ou fechar **não** é lembrada entre telas, para o aviso não
+virar paisagem aberta.
 
 ## `BalaoDeFala`
 
@@ -79,7 +82,8 @@ Desenha, nesta ordem: a moldura de celular, a captura, o **selo "Exemplo"** no
 canto superior (FR-028, sempre presente, contraste medido nos três temas), o
 **destaque** (anel na região relativa, com contraste de 3:1 contra a captura
 nos dois lados do anel) e, embaixo, o texto. Se o passo `temCampoDeSenha`, o
-aviso da FR-032 vem acima do texto, como `AvisoCompacto`.
+aviso da FR-032 vem acima do texto **inteiro, nunca como `AvisoCompacto`**
+(FR-049: o compacto é só da conversa).
 
 ## `IndicadorDePasso`
 
