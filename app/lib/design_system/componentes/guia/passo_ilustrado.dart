@@ -316,14 +316,7 @@ class _MolduraDeCelular extends StatelessWidget {
                         int? frame,
                         bool wasSynchronouslyLoaded,
                       ) {
-                        if (wasSynchronouslyLoaded || frame != null) {
-                          return child;
-                        }
-                        return const Center(
-                          child: Carregando(
-                            mensagem: TextosGuias.capturaCarregando,
-                          ),
-                        );
+                        return child;
                       },
                       errorBuilder: (
                         BuildContext context,

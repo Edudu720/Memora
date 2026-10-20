@@ -28,7 +28,7 @@ void main() {
           ? catalogo
           : <ServicoDoCatalogo>[
               ...catalogo,
-              item('TikTok', 'Ver v\xc3\xaddeos curtos'),
+              item('TikTok', 'Ver vídeos curtos'),
             ];
 
   group('por trecho', () {

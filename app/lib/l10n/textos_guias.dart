@@ -244,32 +244,32 @@ abstract final class TextosGuias {
       'Conversa do Telegram com balão de mensagem e botão de envio com avião de papel.';
 
   // TikTok (T070)
-  /// T\xc3\xadtulo do guia do TikTok.
-  static const String tituloTiktok = 'Como assistir e buscar v\xc3\xaddeos no TikTok';
+  /// Título do guia do TikTok.
+  static const String tituloTiktok = 'Como assistir e buscar vídeos no TikTok';
   /// Passo 1 do TikTok.
   static const String tiktokPasso1 =
-      'Abra o TikTok. Voc\xc3\xaa ver\xc3\xa1 v\xc3\xaddeos passando um ap\xc3\xb3s o outro na sua tela.';
-  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 1 do TikTok.
+      'Abra o TikTok. Você verá vídeos passando um após o outro na sua tela.';
+  /// Descrição da captura do passo 1 do TikTok.
   static const String tiktokCaptura1 =
-      'Tela principal do TikTok com um v\xc3\xaddeo ocupando a tela inteira e op\xc3\xa7\xc3\xb5es de intera\xc3\xa7\xc3\xa3o \xc3\xa0 direita.';
+      'Tela principal do TikTok com um vídeo ocupando a tela inteira e opções de interação à direita.';
   /// Passo 2 do TikTok.
   static const String tiktokPasso2 =
-      'Deslize o dedo de baixo para cima para trocar de v\xc3\xaddeo e ver o pr\xc3\xb3ximo.';
-  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 2 do TikTok.
+      'Deslize o dedo de baixo para cima para trocar de vídeo e ver o próximo.';
+  /// Descrição da captura do passo 2 do TikTok.
   static const String tiktokCaptura2 =
-      'Gesto de deslizar o dedo na tela para avan\xc3\xa7ar ao pr\xc3\xb3ximo v\xc3\xaddeo.';
+      'Gesto de deslizar o dedo na tela para avançar ao próximo vídeo.';
   /// Passo 3 do TikTok.
   static const String tiktokPasso3 =
-      'Para procurar um assunto espec\xc3\xadfico, toque na lupa de busca no canto superior.';
-  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 3 do TikTok.
+      'Para procurar um assunto específico, toque na lupa de busca no canto superior.';
+  /// Descrição da captura do passo 3 do TikTok.
   static const String tiktokCaptura3 =
-      '\xc3\x8dcone de lupa no topo da tela para abrir o campo de busca.';
+      'Ícone de lupa no topo da tela para abrir o campo de busca.';
   /// Passo 4 do TikTok.
   static const String tiktokPasso4 =
-      'Digite o que deseja encontrar (como receitas ou artesanato) e toque no v\xc3\xaddeo que gostar.';
-  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 4 do TikTok.
+      'Digite o que deseja encontrar (como receitas ou artesanato) e toque no vídeo que gostar.';
+  /// Descrição da captura do passo 4 do TikTok.
   static const String tiktokCaptura4 =
-      'Resultados de busca no TikTok organizados em lista de v\xc3\xaddeos.';
+      'Resultados de busca no TikTok organizados em lista de vídeos.';
 
   // Gov.br (T078)
   /// Título do guia do Gov.br.

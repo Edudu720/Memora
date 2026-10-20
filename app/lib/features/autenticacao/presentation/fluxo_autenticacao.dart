@@ -677,6 +677,18 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     );
   }
 
+  /// Abre a tela de registro de atividades com a assistente.
+  void _abrirRegistro(RepositorioAssistente assistente) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaRegistro(
+          repositorio: assistente,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
   /// Abre o guia de aprendizado passo a passo (FR-027).
   void _abrirGuia({
     required Guia guia,
@@ -897,6 +909,21 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
                 ? null
                 : () => _abrirConversa(widget.assistente!),
             aoVerTudo: _portasConstruidas().isEmpty ? null : _abrirHub,
+            aoAbrirAplicativos: widget.assistente == null
+                ? null
+                : () => _abrirCatalogo(
+                      widget.assistente!,
+                      CategoriaDoServico.cotidiano,
+                    ),
+            aoAbrirServicos: widget.assistente == null
+                ? null
+                : () => _abrirCatalogo(
+                      widget.assistente!,
+                      CategoriaDoServico.sensivel,
+                    ),
+            aoAbrirRegistro: widget.assistente == null
+                ? null
+                : () => _abrirRegistro(widget.assistente!),
           ),
           DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',

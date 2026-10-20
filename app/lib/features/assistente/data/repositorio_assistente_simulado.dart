@@ -94,7 +94,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       id: 'tiktok',
       chave: 'tiktok',
       nomeExibido: 'TikTok',
-      descricaoCurta: 'Assistir a v\xc3\xaddeos e seguir criadores de conte\xc3\xbado',
+      descricaoCurta: 'Assistir a vídeos e seguir criadores de conteúdo',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
     ),

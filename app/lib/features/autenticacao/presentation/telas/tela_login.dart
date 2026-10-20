@@ -144,14 +144,47 @@ class _TelaLoginState extends State<TelaLogin> {
               : null,
           body: SafeArea(
             top: widget.aoVoltar == null,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: MemoraEspacamento.lg,
-                vertical: MemoraEspacamento.sm,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints caixa) {
+                final bool cabeMascote = caixa.maxHeight >= 640;
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: MemoraEspacamento.lg,
+                    vertical: MemoraEspacamento.sm,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      // Top Hero Mascot Banner inspirado no design-1.jpg
+                      if (cabeMascote)
+                        Container(
+                    margin: const EdgeInsets.only(bottom: MemoraEspacamento.md),
+                    padding: const EdgeInsets.all(MemoraEspacamento.md),
+                    decoration: BoxDecoration(
+                      color: cores.superficie,
+                      borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                      border: Border.all(color: cores.borda),
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        const Center(
+                          child: MemoraPersonagem(),
+                        ),
+                        const SizedBox(height: MemoraEspacamento.sm),
+                        const TextoMemora(
+                          'Memora',
+                          estilo: EstiloTexto.destaque,
+                          alinhamento: TextAlign.center,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.xs),
+                        const TextoMemora.apoio(
+                          'Seu assistente digital para usar o celular com facilidade',
+                          alinhamento: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
                   CaixaDeEtapa(
                     instrucao: TextosAutenticacao.tituloLogin,
                     child: Column(
@@ -241,9 +274,11 @@ class _TelaLoginState extends State<TelaLogin> {
                   ],
                 ],
               ),
-            ),
-          ),
-        );
+            );
+          },
+        ),
+      ),
+    );
       },
     );
   }
