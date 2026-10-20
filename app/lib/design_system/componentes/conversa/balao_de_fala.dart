@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
+import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
@@ -102,20 +104,18 @@ class BalaoDeFala extends StatelessWidget {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final bool modoClaro = cores == MemoraCores.claro;
-    const Radius curvo = Radius.circular(18);
-    const Radius ponta = Radius.circular(6);
+    const Radius curvo = Radius.circular(MemoraRaio.balao);
+    const Radius ponta = Radius.circular(MemoraRaio.balaoPonta);
 
     final Color corDeFundo = _daMemora
         ? (modoClaro ? cores.destaque : cores.superficie)
-        : (modoClaro ? const Color(0xFFEAEFF5) : cores.superficieAlt);
+        : cores.superficieAlt;
 
     final Border borda = _daMemora
         ? (modoClaro
-            ? Border.all(color: const Color(0xFFBFDBFE))
+            ? Border.all(color: cores.destaque)
             : Border.all(color: cores.borda))
-        : (modoClaro
-            ? Border.all(color: const Color(0xFFD0D7DE))
-            : Border.all(color: cores.borda));
+        : Border.all(color: cores.borda);
 
     final Widget balao = Flexible(
       child: Container(
@@ -137,8 +137,8 @@ class BalaoDeFala extends StatelessWidget {
           ),
           boxShadow: <BoxShadow>[
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 4,
+              color: MemoraElevacao.sombra,
+              blurRadius: MemoraElevacao.porta,
               offset: const Offset(0, 2),
             ),
           ],

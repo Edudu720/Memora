@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
+import '../../features/aprendizado/domain/guia.dart';
 import '../design_system.dart';
 
 /// A galeria do Design System — T045, FR-033 e R9.
@@ -455,6 +456,27 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       ),
       const SizedBox(height: MemoraEspacamento.md),
       const BalaoDeFala.escrevendo(),
+
+      const _Secao(
+        'Passo a passo',
+        'Guia ilustrado com moldura, destaque, selo de exemplo e indicador textual.',
+      ),
+      const IndicadorDePasso(posicao: 2, total: 4),
+      const SizedBox(height: MemoraEspacamento.md),
+      PassoIlustrado(
+        passo: const Passo(
+          captura: CapturaDoGuia.lojaOficial,
+          destaque: RegiaoRelativa(x: 0.2, y: 0.3, largura: 0.6, altura: 0.2),
+          texto: 'Toque no botão de pesquisa no canto superior.',
+          descricaoDaCaptura: 'Tela inicial do aplicativo com a lupa no topo.',
+        ),
+        posicao: 2,
+        total: 4,
+        aoContinuar: () {},
+        aoVoltar: () {},
+        aoTelaDiferente: () {},
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
 
       const _Secao('Sobreposições', 'Diálogo e folha inferior abrem por cima '
           'do conteúdo — toque para ver.'),

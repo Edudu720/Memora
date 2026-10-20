@@ -38,6 +38,9 @@ final class CapturaDoGuia {
   /// O caminho do asset, relativo à raiz do aplicativo.
   String get caminho => 'assets/guias/$chave/passo_$numero.png';
 
+  /// Captura para orientar a baixar na loja oficial (revisão da #47).
+  static const CapturaDoGuia lojaOficial = CapturaDoGuia._('loja', 1);
+
   // As capturas entram aqui, uma `static const` por imagem, junto com o guia
   // que as usa. Exemplo, quando existir o primeiro:
   //

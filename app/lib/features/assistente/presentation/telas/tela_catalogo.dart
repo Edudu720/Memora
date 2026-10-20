@@ -161,13 +161,12 @@ class _ItemDoCatalogo extends StatelessWidget {
       child: Material(
         key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
         color: cores.superficie,
-        elevation: 1,
-        shadowColor: Colors.black.withValues(alpha: 0.06),
+        elevation: MemoraElevacao.cartao,
+        shadowColor: MemoraElevacao.sombra,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(MemoraRaio.cartao),
           side: BorderSide(
             color: cores.borda.withValues(alpha: 0.35),
-            width: 1.2,
           ),
         ),
         child: InkWell(

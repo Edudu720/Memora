@@ -17,6 +17,9 @@ abstract final class MemoraDimensoes {
   /// 8 dp — separação mínima entre dois alvos de toque.
   static const double separacaoAlvo = 8;
 
+  /// 1.0 dp — espessura padrao de contornos e bordas.
+  static const double espessuraBorda = 1.0;
+
   /// Teto da escala de texto combinada entre sistema e aplicativo.
   ///
   /// Sem teto, o layout quebra em casos extremos e a pessoa fica sem saída
@@ -93,6 +96,15 @@ abstract final class MemoraDimensoes {
 
   /// 20 dp — o giro que cabe **dentro** de um botão, ao lado do rótulo.
   static const double indicadorEmBotao = 20;
+
+  /// 6 dp — espessura da barra de progresso em indicador de passo a passo.
+  static const double alturaIndicadorDePasso = 6;
+
+  /// 240 dp — altura mínima da moldura de celular do passo a passo (T065).
+  static const double alturaMinimaMolduraPasso = 240;
+
+  /// 380 dp — altura máxima da moldura de celular do passo a passo (T065).
+  static const double alturaMaximaMolduraPasso = 380;
 
   /// 2.5 dp — espessura do giro pequeno.
   static const double espessuraIndicadorEmBotao = 2.5;
