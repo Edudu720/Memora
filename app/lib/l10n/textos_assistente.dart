@@ -150,6 +150,16 @@ class TextosAssistente {
   /// Título do catálogo sem itens.
   static const String catalogoVazioTitulo = 'Ainda não tem nada aqui';
 
+  /// Mensagem de carregamento do catálogo (FR-006).
+  static const String carregandoCatalogo = 'Carregando opções...';
+
+  /// Rótulo do campo de busca de aplicativos (FR-023).
+  static const String rotuloBuscaAplicativos = 'Buscar aplicativo';
+
+  /// Ajuda do campo de busca de aplicativos (FR-023).
+  static const String ajudaBuscaAplicativos =
+      'Digite o nome do aplicativo para filtrar a lista';
+
   /// Explicação do catálogo sem itens.
   ///
   /// Não promete "em breve" (H1): promessa sem data, para quem já tem medo de

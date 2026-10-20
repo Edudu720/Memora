@@ -37,12 +37,6 @@ final RegExp formatoDaChave = RegExp(r'^[a-z0-9-]+$');
 /// guia (tire-o da lista) e se um item do catálogo sem guia não estiver aqui
 /// (um item novo nasce com guia, ou não nasce — R8).
 const Set<String> itensSemGuiaAnterioresA004 = <String>{
-  'whatsapp',
-  'facebook',
-  'instagram',
-  'youtube',
-  'google-fotos',
-  'telegram',
   'gov-br',
   'meu-inss',
 };
@@ -298,6 +292,33 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
 
       expect(problemas, isEmpty, reason: problemas.join('\n'));
     });
+
+    test('capturas pendentes são registradas sem reprovar a construção (FR-028a)', () {
+      final List<String> pendentes = <String>[
+        for (final Guia g in todosOsGuias)
+          ...capturasPendentesDoGuia(
+            g,
+            capturaExiste: (CapturaDoGuia c) => File(c.caminho).existsSync(),
+          ),
+      ];
+      if (pendentes.isNotEmpty) {
+        // ignore: avoid_print
+        print('Capturas pendentes (FR-028a):\n${pendentes.join('\n')}');
+      }
+    });
+
+    test('a pasta de capturas de cada guia está declarada em assets no pubspec.yaml', () {
+      final String pubspec = File('pubspec.yaml').readAsStringSync();
+      for (final Guia g in todosOsGuias) {
+        final String declaracao = 'assets/guias/${g.chave}/';
+        expect(
+          pubspec.contains(declaracao),
+          isTrue,
+          reason:
+              'A pasta "$declaracao" precisa estar declarada na seção assets do pubspec.yaml.',
+        );
+      }
+    });
   });
 
   // O registro está vazio, então os testes acima passam sem examinar nenhum
@@ -421,11 +442,16 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       );
     });
 
-    test('captura que não existe em assets reprova', () {
+    test('captura ausente entra na lista de pendentes em vez de reprovar (FR-028a)', () {
+      final List<String> pendentes = capturasPendentesDoGuia(
+        guia(),
+        capturaExiste: (CapturaDoGuia _) => false,
+      );
       expect(
-        problemas(guia(), arquivoExiste: false),
+        pendentes,
         contains(contains('assets/guias/exemplo/passo_1.png')),
       );
+      expect(problemas(guia(), arquivoExiste: false), isEmpty);
     });
 
     test('serviço sensível sem "o que ter em mãos" reprova', () {
@@ -505,6 +531,24 @@ Set<String>? linhasDeCapturas(String capturasMd) {
 /// há item. O aviso da FR-032 nos passos com `temCampoDeSenha` é da tela, e é
 /// conferido nos testes dela (T065, T067, T076) — aqui só se confere o que está
 /// nos dados.
+/// Lista as capturas pendentes de um guia (FR-028a).
+List<String> capturasPendentesDoGuia(
+  Guia guia, {
+  required bool Function(CapturaDoGuia) capturaExiste,
+}) {
+  final String quem = 'Guia "${guia.chave}"';
+  final List<String> pendentes = <String>[];
+  for (int i = 0; i < guia.passos.length; i++) {
+    final Passo p = guia.passos[i];
+    if (!capturaExiste(p.captura)) {
+      pendentes.add(
+        '$quem, passo ${i + 1}: ${p.captura.caminho} pendente.',
+      );
+    }
+  }
+  return pendentes;
+}
+
 List<String> problemasDoGuia(
   Guia guia, {
   required CategoriaDoServico? categoria,
@@ -534,11 +578,7 @@ List<String> problemasDoGuia(
     if (p.texto.trim().isEmpty) {
       problemas.add('$quem, passo ${i + 1}: sem texto.');
     }
-    if (!capturaExiste(p.captura)) {
-      problemas.add(
-        '$quem, passo ${i + 1}: ${p.captura.caminho} não existe em assets.',
-      );
-    }
+    // FR-028a: captura ausente não reprova a construção (entra na lista de pendentes).
   }
 
   if (categoria == CategoriaDoServico.sensivel &&

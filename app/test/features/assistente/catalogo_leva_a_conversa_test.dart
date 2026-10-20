@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/aprendizado/domain/guia.dart';
+import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -14,6 +16,7 @@ import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
+import '../../suporte/estados_de_tela.dart';
 
 /// Tocar num serviço do catálogo leva à conversa que ensina (T077).
 ///
@@ -111,32 +114,39 @@ String _textoDoCampo(WidgetTester t) {
 }
 
 void main() {
-  for (final (String porta, String servico) in <(String, String)>[
-    (TextosAssistente.portaAplicativos, 'WhatsApp'),
-    (TextosAssistente.portaServicos, 'Gov.br'),
-  ]) {
-    testWidgets('em "$porta", tocar em $servico abre a conversa já perguntando',
-        (WidgetTester t) async {
-      await _chegarAoHub(t);
+  testWidgets('em "Meus aplicativos", tocar em WhatsApp (com guia) abre o passo a passo',
+      (WidgetTester t) async {
+    await _chegarAoHub(t);
 
-      await _tocar(t, find.byKey(TelaHub.chaveDaPorta(porta)));
-      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem(servico)));
+    await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaAplicativos)));
+    await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')));
 
-      expect(
-        find.byType(TelaConversa),
-        findsOneWidget,
-        reason: 'O item do catálogo precisa levar a algum lugar. Botão que não '
-            'abre nada faz quem toca concluir que quebrou o aparelho (FR-003).',
-      );
-      expect(_textoDoCampo(t), TextosAssistente.perguntaSobre(servico));
-      expect(
-        find.text(TextosAssistente.perguntaSobre(servico)),
-        findsOneWidget,
-        reason: 'A pergunta fica no campo, e não vira mensagem: quem envia é a '
-            'pessoa.',
-      );
-    });
-  }
+    expect(
+      find.byType(TelaPassoAPasso),
+      findsOneWidget,
+      reason: 'O item com guia embarcado abre o passo a passo (FR-027, contracts/catalogo.md).',
+    );
+  });
+
+  testWidgets('em "Serviços sociais", tocar em Gov.br (sem guia) abre a conversa já perguntando',
+      (WidgetTester t) async {
+    await _chegarAoHub(t);
+
+    await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaServicos)));
+    await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Gov.br')));
+
+    expect(
+      find.byType(TelaConversa),
+      findsOneWidget,
+      reason: 'O item do catálogo sem guia abre a conversa com a Memora.',
+    );
+    expect(_textoDoCampo(t), TextosAssistente.perguntaSobre('Gov.br'));
+    expect(
+      find.text(TextosAssistente.perguntaSobre('Gov.br')),
+      findsOneWidget,
+      reason: 'A pergunta fica no campo, e não vira mensagem: quem envia é a pessoa.',
+    );
+  });
 
   test('o estado vazio do catálogo não promete "em breve" (H1)', () {
     // O H1 do quickstart: nenhuma porta leva a tela vazia ou a "em breve".
@@ -145,5 +155,101 @@ void main() {
         isNot(contains('breve')));
     expect(TextosAssistente.catalogoVazioExplicacao.toLowerCase(),
         isNot(contains('breve')));
+  });
+
+  group('Estados — FR-006', () {
+    testWidgets('o Catálogo tem carregando, erro e vazio com frase e desenho',
+        (WidgetTester t) async {
+      await exigirOsEstadosDaFr006(
+        t,
+        tela: 'TelaCatalogo',
+        montar: (EstadoDaTela estado) => MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+            estadoDeTeste: switch (estado) {
+              EstadoDaTela.carregando => 'carregando',
+              EstadoDaTela.erro => 'erro',
+              EstadoDaTela.vazio => 'vazio',
+            },
+          ),
+        ),
+      );
+    });
+  });
+
+  group('Busca no topo — FR-023', () {
+    testWidgets('filtrar a lista exibe apenas o serviço buscado ou estado vazio',
+        (WidgetTester t) async {
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      expect(find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')), findsOneWidget);
+
+      await _preencher(t, TelaCatalogo.chaveBusca, 'face');
+      await _avancar(t);
+      expect(find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')), findsNothing);
+      expect(find.byKey(TelaCatalogo.chaveDoItem('Facebook')), findsOneWidget);
+
+      await _preencher(t, TelaCatalogo.chaveBusca, 'inexistente123');
+      await _avancar(t);
+      expect(find.text('Nenhum aplicativo encontrado'), findsOneWidget);
+    });
+  });
+
+  group('Abertura de guia vs conversa — FR-027, contracts/catalogo.md', () {
+    testWidgets('item sem guia abre conversa; item com guia abre passo a passo',
+        (WidgetTester t) async {
+      Guia? guiaAberto;
+      ServicoDoCatalogo? servicoEscolhido;
+
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+            aoAbrirGuia: (Guia g, ServicoDoCatalogo s) => guiaAberto = g,
+            aoEscolher: (ServicoDoCatalogo s) => servicoEscolhido = s,
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      // WhatsApp possui guia embarcado (T071):
+      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')));
+      expect(guiaAberto?.chave, 'whatsapp');
+      expect(servicoEscolhido, isNull);
+
+      // Gov.br em serviços sensíveis ainda não possui guia embarcado:
+      guiaAberto = null;
+      servicoEscolhido = null;
+
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.sensivel,
+            aoAbrirGuia: (Guia g, ServicoDoCatalogo s) => guiaAberto = g,
+            aoEscolher: (ServicoDoCatalogo s) => servicoEscolhido = s,
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Gov.br')));
+      expect(guiaAberto, isNull);
+      expect(servicoEscolhido?.chave, 'gov-br');
+    });
   });
 }

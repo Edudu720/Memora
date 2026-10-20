@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memora/design_system/componentes/guia/passo_ilustrado.dart';
 import 'package:memora/design_system/design_system.dart';
-import 'package:memora/features/aprendizado/data/progresso_de_aprendizado.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
 import 'package:memora/features/assistente/data/catalogo_guardado.dart';
@@ -22,7 +20,7 @@ void main() {
   final Guia guiaTeste = Guia(
     chave: 'tiktok',
     titulo: 'Aprender a usar o TikTok',
-    capturadoEm: DateTime(2026, 10, 1),
+    capturadoEm: DateTime(2026, 10),
     versaoCapturada: '34.0.0',
     passos: const <Passo>[
       Passo(
@@ -326,9 +324,7 @@ void main() {
       'Começa por um passo de baixar na loja oficial quando não está instalado',
       (WidgetTester t) async {
         final ConsultaDeAplicativosSimulada consulta =
-            ConsultaDeAplicativosSimulada(
-          instalados: const <String>{}, // Não instalado
-        );
+            ConsultaDeAplicativosSimulada(); // Não instalado (padrão vazio)
 
         await t.pumpWidget(
           montarApp(

@@ -42,6 +42,9 @@ import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
+import '../../aprendizado/data/progresso_de_aprendizado.dart';
+import '../../aprendizado/domain/guia.dart';
+import '../../aprendizado/presentation/tela_passo_a_passo.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -108,6 +111,9 @@ class FluxoAutenticacao extends StatefulWidget {
   /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
   final Compartilhador? compartilhador;
 
+  /// Onde o progresso nos guias de aprendizado e guardado (FR-042a).
+  final ProgressoDeAprendizado? progresso;
+
   /// Onde a conversa fica guardada no aparelho (FR-047).
   ///
   /// Trocável no teste de widget, onde I/O de arquivo real nunca completa.
@@ -133,6 +139,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.dataDeNascimento,
     this.apresentacaoVista,
     this.compartilhador,
+    this.progresso,
   });
 
   @override
@@ -645,13 +652,48 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
-          // Sem isto, todo item era um botão desabilitado: a porta que não
-          // abre da FR-003, nas duas portas de serviço do Hub (T077).
+          // Se o item tiver guia de passo a passo embarcado, abre o guia;
+          // caso contrário, vai para a conversa já perguntando (T069, FR-027).
+          aoAbrirGuia: (Guia guia, ServicoDoCatalogo servico) => _abrirGuia(
+            guia: guia,
+            servico: servico,
+            assistente: assistente,
+          ),
           aoEscolher: (ServicoDoCatalogo servico) => _abrirConversa(
             assistente,
             rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre o guia de aprendizado passo a passo (FR-027).
+  void _abrirGuia({
+    required Guia guia,
+    required ServicoDoCatalogo servico,
+    required RepositorioAssistente assistente,
+  }) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaPassoAPasso(
+          guia: guia,
+          servico: servico,
+          repositorioAssistente: assistente,
+          progresso: widget.progresso,
+          idDaConta: _pessoa?.id,
+          aoPedirParaAbrir: (String pedido) => _abrirConversa(
+            assistente,
+            rascunho: pedido,
+          ),
+          aoConversarSobreDiferenca: () => _abrirConversa(
+            assistente,
+            rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+          aoVoltarAoHub: () => Navigator.of(contexto).pop(),
+          aoSair: () => Navigator.of(contexto).pop(),
         ),
       ),
     );

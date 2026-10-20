@@ -41,6 +41,66 @@ final class CapturaDoGuia {
   /// Captura para orientar a baixar na loja oficial (revisão da #47).
   static const CapturaDoGuia lojaOficial = CapturaDoGuia._('loja', 1);
 
+  // WhatsApp (T071)
+  /// Captura 1 do WhatsApp.
+  static const CapturaDoGuia whatsapp1 = CapturaDoGuia._('whatsapp', 1);
+  /// Captura 2 do WhatsApp.
+  static const CapturaDoGuia whatsapp2 = CapturaDoGuia._('whatsapp', 2);
+  /// Captura 3 do WhatsApp.
+  static const CapturaDoGuia whatsapp3 = CapturaDoGuia._('whatsapp', 3);
+  /// Captura 4 do WhatsApp.
+  static const CapturaDoGuia whatsapp4 = CapturaDoGuia._('whatsapp', 4);
+
+  // Instagram (T071)
+  /// Captura 1 do Instagram.
+  static const CapturaDoGuia instagram1 = CapturaDoGuia._('instagram', 1);
+  /// Captura 2 do Instagram.
+  static const CapturaDoGuia instagram2 = CapturaDoGuia._('instagram', 2);
+  /// Captura 3 do Instagram.
+  static const CapturaDoGuia instagram3 = CapturaDoGuia._('instagram', 3);
+  /// Captura 4 do Instagram.
+  static const CapturaDoGuia instagram4 = CapturaDoGuia._('instagram', 4);
+
+  // YouTube (T071)
+  /// Captura 1 do YouTube.
+  static const CapturaDoGuia youtube1 = CapturaDoGuia._('youtube', 1);
+  /// Captura 2 do YouTube.
+  static const CapturaDoGuia youtube2 = CapturaDoGuia._('youtube', 2);
+  /// Captura 3 do YouTube.
+  static const CapturaDoGuia youtube3 = CapturaDoGuia._('youtube', 3);
+  /// Captura 4 do YouTube.
+  static const CapturaDoGuia youtube4 = CapturaDoGuia._('youtube', 4);
+
+  // Facebook (T072)
+  /// Captura 1 do Facebook.
+  static const CapturaDoGuia facebook1 = CapturaDoGuia._('facebook', 1);
+  /// Captura 2 do Facebook.
+  static const CapturaDoGuia facebook2 = CapturaDoGuia._('facebook', 2);
+  /// Captura 3 do Facebook.
+  static const CapturaDoGuia facebook3 = CapturaDoGuia._('facebook', 3);
+  /// Captura 4 do Facebook.
+  static const CapturaDoGuia facebook4 = CapturaDoGuia._('facebook', 4);
+
+  // Google Fotos (T072)
+  /// Captura 1 do Google Fotos.
+  static const CapturaDoGuia googleFotos1 = CapturaDoGuia._('google-fotos', 1);
+  /// Captura 2 do Google Fotos.
+  static const CapturaDoGuia googleFotos2 = CapturaDoGuia._('google-fotos', 2);
+  /// Captura 3 do Google Fotos.
+  static const CapturaDoGuia googleFotos3 = CapturaDoGuia._('google-fotos', 3);
+  /// Captura 4 do Google Fotos.
+  static const CapturaDoGuia googleFotos4 = CapturaDoGuia._('google-fotos', 4);
+
+  // Telegram (T072)
+  /// Captura 1 do Telegram.
+  static const CapturaDoGuia telegram1 = CapturaDoGuia._('telegram', 1);
+  /// Captura 2 do Telegram.
+  static const CapturaDoGuia telegram2 = CapturaDoGuia._('telegram', 2);
+  /// Captura 3 do Telegram.
+  static const CapturaDoGuia telegram3 = CapturaDoGuia._('telegram', 3);
+  /// Captura 4 do Telegram.
+  static const CapturaDoGuia telegram4 = CapturaDoGuia._('telegram', 4);
+
   // As capturas entram aqui, uma `static const` por imagem, junto com o guia
   // que as usa. Exemplo, quando existir o primeiro:
   //

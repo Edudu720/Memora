@@ -21,4 +21,9 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 
 | Chave | Capturado em | Versão do aplicativo | Aparelho | Quem capturou |
 |---|---|---|---|---|
-| — | — | — | — | — |
+| whatsapp | 2026-10-01 | 2.24.19 | Galaxy A14 | Equipe Memora |
+| instagram | 2026-10-01 | 350.0.0 | Galaxy A14 | Equipe Memora |
+| youtube | 2026-10-01 | 19.38.0 | Galaxy A14 | Equipe Memora |
+| facebook | 2026-10-01 | 480.0.0 | Galaxy A14 | Equipe Memora |
+| google-fotos | 2026-10-01 | 6.95.0 | Galaxy A14 | Equipe Memora |
+| telegram | 2026-10-01 | 11.1.0 | Galaxy A14 | Equipe Memora |

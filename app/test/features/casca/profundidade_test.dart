@@ -5,6 +5,7 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
+import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
@@ -163,11 +164,21 @@ void main() {
       via: null,
     ),
     (
-      parte: 'um aplicativo do catálogo (leva à conversa)',
+      parte: 'um aplicativo do catálogo (leva ao passo a passo)',
       toques: <Finder>[
         doHub,
         deApps,
         find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')),
+      ],
+      chegada: find.byType(TelaPassoAPasso),
+      via: null,
+    ),
+    (
+      parte: 'um serviço social sem guia (leva à conversa)',
+      toques: <Finder>[
+        doHub,
+        deServicos,
+        find.byKey(TelaCatalogo.chaveDoItem('Gov.br')),
       ],
       chegada: find.byKey(TelaConversa.chaveCampo),
       via: null,
