@@ -174,13 +174,13 @@ void main() {
       via: null,
     ),
     (
-      parte: 'um serviço social sem guia (leva à conversa)',
+      parte: 'um serviço social do catálogo (leva ao passo a passo)',
       toques: <Finder>[
         doHub,
         deServicos,
         find.byKey(TelaCatalogo.chaveDoItem('Gov.br')),
       ],
-      chegada: find.byKey(TelaConversa.chaveCampo),
+      chegada: find.byType(TelaPassoAPasso),
       via: null,
     ),
     (

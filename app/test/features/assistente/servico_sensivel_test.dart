@@ -5,6 +5,12 @@ import 'package:memora/features/assistente/data/repositorio_assistente_simulado.
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import 'package:memora/features/aprendizado/data/guias/gov_br.dart';
+import 'package:memora/features/aprendizado/data/guias/guias.dart';
+import 'package:memora/features/aprendizado/domain/guia.dart';
+import 'package:memora/l10n/textos_guias.dart';
+
+import '../../suporte/estados_de_tela.dart';
 
 /// Cenario H4 do quickstart — servico sensivel nao abre, nem com insistencia.
 ///
@@ -145,6 +151,86 @@ void main() {
       for (final ServicoDoCatalogo s in sensiveis) {
         expect(s.memoraPodeAbrir, isFalse, reason: '${s.nomeExibido} abrivel');
       }
+    });
+  });
+
+  group('US5 e T076 — Regras de proteção e apresentação de serviços sensíveis', () {
+    testWidgets(
+      'cada serviço sensível tem pictograma e nome, e nenhum botão de abrir (R7, FR-041)',
+      (WidgetTester t) async {
+        await montarCatalogo(t, CategoriaDoServico.sensivel);
+
+        expect(find.byType(IconeDoAplicativo), findsWidgets);
+        expect(find.text('Gov.br'), findsOneWidget);
+        expect(find.text('Meu INSS'), findsOneWidget);
+
+        expect(find.text('Abrir'), findsNothing);
+        expect(find.byIcon(Icons.open_in_new_rounded), findsNothing);
+      },
+    );
+
+    test('todo guia sensível declara precisaTerEmMaos não vazio (FR-032)', () {
+      final List<Guia> sensiveis = todosOsGuias
+          .where((Guia g) => g.chave == 'gov-br' || g.chave == 'meu-inss')
+          .toList();
+
+      expect(sensiveis, isNotEmpty);
+      for (final Guia g in sensiveis) {
+        expect(
+          g.precisaTerEmMaos,
+          isNotEmpty,
+          reason: 'Guia ${g.chave} precisa declarar itens em precisaTerEmMaos',
+        );
+      }
+    });
+
+    testWidgets(
+      'passo com temCampoDeSenha mostra o aviso da FR-032 inteiro, nunca compacto (FR-049)',
+      (WidgetTester t) async {
+        final Guia guiaComSenha = guiaGovBr;
+        final Passo passoComSenha = guiaComSenha.passos.firstWhere(
+          (Passo p) => p.temCampoDeSenha,
+        );
+
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: Scaffold(
+              body: PassoIlustrado(
+                passo: passoComSenha,
+                posicao: 4,
+                total: guiaComSenha.passos.length,
+              ),
+            ),
+          ),
+        );
+        await t.pump();
+
+        expect(find.text(TextosGuias.tituloAvisoSenha), findsOneWidget);
+        expect(find.text(TextosGuias.avisoSenha), findsOneWidget);
+        expect(find.byType(AvisoCompacto), findsNothing);
+      },
+    );
+
+    testWidgets('catálogo sensível atende aos estados da FR-006 com frase e desenho', (
+      WidgetTester t,
+    ) async {
+      await exigirOsEstadosDaFr006(
+        t,
+        tela: 'TelaCatalogo (sensível)',
+        montar: (EstadoDaTela estado) => MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: assistente,
+            categoria: CategoriaDoServico.sensivel,
+            estadoDeTeste: switch (estado) {
+              EstadoDaTela.carregando => 'carregando',
+              EstadoDaTela.erro => 'erro',
+              EstadoDaTela.vazio => 'vazio',
+            },
+          ),
+        ),
+      );
     });
   });
 }

@@ -101,6 +101,28 @@ final class CapturaDoGuia {
   /// Captura 4 do Telegram.
   static const CapturaDoGuia telegram4 = CapturaDoGuia._('telegram', 4);
 
+  // Gov.br (T078)
+  /// Captura 1 do Gov.br.
+  static const CapturaDoGuia govBr1 = CapturaDoGuia._('gov-br', 1);
+  /// Captura 2 do Gov.br.
+  static const CapturaDoGuia govBr2 = CapturaDoGuia._('gov-br', 2);
+  /// Captura 3 do Gov.br.
+  static const CapturaDoGuia govBr3 = CapturaDoGuia._('gov-br', 3);
+  /// Captura 4 do Gov.br (com campo de senha vazio).
+  static const CapturaDoGuia govBr4 = CapturaDoGuia._('gov-br', 4);
+  /// Captura 5 do Gov.br.
+  static const CapturaDoGuia govBr5 = CapturaDoGuia._('gov-br', 5);
+
+  // Meu INSS (T079)
+  /// Captura 1 do Meu INSS.
+  static const CapturaDoGuia meuInss1 = CapturaDoGuia._('meu-inss', 1);
+  /// Captura 2 do Meu INSS (com tela de senha oficial vazia).
+  static const CapturaDoGuia meuInss2 = CapturaDoGuia._('meu-inss', 2);
+  /// Captura 3 do Meu INSS.
+  static const CapturaDoGuia meuInss3 = CapturaDoGuia._('meu-inss', 3);
+  /// Captura 4 do Meu INSS.
+  static const CapturaDoGuia meuInss4 = CapturaDoGuia._('meu-inss', 4);
+
   // As capturas entram aqui, uma `static const` por imagem, junto com o guia
   // que as usa. Exemplo, quando existir o primeiro:
   //

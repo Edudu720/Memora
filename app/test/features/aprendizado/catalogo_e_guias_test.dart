@@ -36,10 +36,7 @@ final RegExp formatoDaChave = RegExp(r'^[a-z0-9-]+$');
 /// **A lista só pode encolher.** O teste reprova se um item daqui já tiver
 /// guia (tire-o da lista) e se um item do catálogo sem guia não estiver aqui
 /// (um item novo nasce com guia, ou não nasce — R8).
-const Set<String> itensSemGuiaAnterioresA004 = <String>{
-  'gov-br',
-  'meu-inss',
-};
+const Set<String> itensSemGuiaAnterioresA004 = <String>{};
 
 /// O registro das capturas, a partir de `app/`.
 const String caminhoDeCapturasMd = 'assets/guias/CAPTURAS.md';

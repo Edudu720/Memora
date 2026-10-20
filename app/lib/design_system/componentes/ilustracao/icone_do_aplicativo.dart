@@ -201,54 +201,111 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
+    // Serviços sensíveis / sociais: pictogramas neutros do Memora, sem logotipo oficial (R7)
     if (normalizada.contains('gov')) {
       return Container(
-        color: const Color(0xFF003399),
+        color: cores.superficieAlt,
         alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.account_balance_rounded,
-              color: Colors.white,
-              size: tamanho * 0.52,
-            ),
-            Text(
-              'gov.br',
-              style: TextStyle(
-                color: const Color(0xFFFFCC29),
-                fontSize: tamanho * 0.20,
-                fontWeight: FontWeight.bold,
-                height: 1.0,
-              ),
-            ),
-          ],
+        child: Icon(
+          Icons.account_balance_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
         ),
       );
     }
 
     if (normalizada.contains('inss')) {
       return Container(
-        color: const Color(0xFF0B2B6B),
+        color: cores.superficieAlt,
         alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.health_and_safety_rounded,
-              color: const Color(0xFFFFCC29),
-              size: tamanho * 0.52,
-            ),
-            Text(
-              'INSS',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: tamanho * 0.22,
-                fontWeight: FontWeight.bold,
-                height: 1.0,
-              ),
-            ),
-          ],
+        child: Icon(
+          Icons.health_and_safety_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('titulo')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.how_to_vote_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('serasa')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.verified_user_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('fgts')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.savings_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('poupatempo')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.schedule_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('carteira') && !normalizada.contains('trabalho')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.badge_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('trabalho')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.contact_page_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
+        ),
+      );
+    }
+
+    if (normalizada.contains('correios')) {
+      return Container(
+        color: cores.superficieAlt,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.markunread_mailbox_rounded,
+          color: cores.primaria,
+          size: tamanho * 0.65,
         ),
       );
     }

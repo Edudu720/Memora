@@ -105,6 +105,9 @@ flutter:
     - assets/guias/facebook/
     - assets/guias/google-fotos/
     - assets/guias/telegram/
+    # Guias de serviços sociais (T078, T079)
+    - assets/guias/gov-br/
+    - assets/guias/meu-inss/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

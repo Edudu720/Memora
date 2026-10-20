@@ -242,4 +242,66 @@ abstract final class TextosGuias {
   /// Descrição da captura do passo 4 do Telegram.
   static const String telegramCaptura4 =
       'Conversa do Telegram com balão de mensagem e botão de envio com avião de papel.';
+
+  // Gov.br (T078)
+  /// Título do guia do Gov.br.
+  static const String tituloGovBr = 'Como acessar sua conta Gov.br';
+  /// Passo 1 do Gov.br.
+  static const String govBrPasso1 =
+      'Toque no botão azul "Entrar com gov.br", no meio da tela.';
+  /// Descrição da captura do passo 1 do Gov.br.
+  static const String govBrCaptura1 =
+      'Tela inicial do aplicativo Gov.br com o botão Entrar com gov.br em destaque.';
+  /// Passo 2 do Gov.br.
+  static const String govBrPasso2 =
+      'Toque na caixa branca e digite os 11 números do seu CPF, sem pontos nem traço.';
+  /// Descrição da captura do passo 2 do Gov.br.
+  static const String govBrCaptura2 =
+      'Tela de identificação do Gov.br com campo para digitação do CPF.';
+  /// Passo 3 do Gov.br.
+  static const String govBrPasso3 =
+      'Toque no botão azul "Continuar", logo abaixo do campo de CPF.';
+  /// Descrição da captura do passo 3 do Gov.br.
+  static const String govBrCaptura3 =
+      'Botão Continuar habilitado após a digitação do CPF.';
+  /// Passo 4 do Gov.br.
+  static const String govBrPasso4 =
+      'Digite a sua senha no campo próprio. Lembre-se: sua senha só se digita no aplicativo oficial.';
+  /// Descrição da captura do passo 4 do Gov.br.
+  static const String govBrCaptura4 =
+      'Tela oficial do Gov.br com o campo de senha vazio.';
+  /// Passo 5 do Gov.br.
+  static const String govBrPasso5 =
+      'Toque no botão "Entrar". Parabéns! Você aprendeu a acessar sua conta oficial do governo com segurança.';
+  /// Descrição da captura do passo 5 do Gov.br.
+  static const String govBrCaptura5 =
+      'Tela principal logada do Gov.br exibindo a carteira de documentos e serviços.';
+
+  // Meu INSS (T079)
+  /// Título do guia do Meu INSS.
+  static const String tituloMeuInss = 'Como consultar benefícios no Meu INSS';
+  /// Passo 1 do Meu INSS.
+  static const String meuInssPasso1 =
+      'Toque no botão azul "Entrar com gov.br", embaixo, para se conectar.';
+  /// Descrição da captura do passo 1 do Meu INSS.
+  static const String meuInssCaptura1 =
+      'Tela inicial do Meu INSS com opção de acesso pelo Gov.br.';
+  /// Passo 2 do Meu INSS.
+  static const String meuInssPasso2 =
+      'Digite seu CPF e senha da conta gov.br oficial na tela de acesso.';
+  /// Descrição da captura do passo 2 do Meu INSS.
+  static const String meuInssCaptura2 =
+      'Tela oficial de login com campos de CPF e senha vazios.';
+  /// Passo 3 do Meu INSS.
+  static const String meuInssPasso3 =
+      'Toque no cartão "Extrato de Pagamento", no alto da tela inicial.';
+  /// Descrição da captura do passo 3 do Meu INSS.
+  static const String meuInssCaptura3 =
+      'Painel do Meu INSS mostrando os atalhos de extrato e agendamentos.';
+  /// Passo 4 do Meu INSS.
+  static const String meuInssPasso4 =
+      'Veja o extrato com o valor e a data do seu pagamento. Parabéns! Você já sabe conferir seu benefício.';
+  /// Descrição da captura do passo 4 do Meu INSS.
+  static const String meuInssCaptura4 =
+      'Demonstrativo detalhado do pagamento do benefício no Meu INSS.';
 }

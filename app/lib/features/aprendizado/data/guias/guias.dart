@@ -1,7 +1,9 @@
 import '../../domain/guia.dart';
 import 'facebook.dart';
 import 'google_fotos.dart';
+import 'gov_br.dart';
 import 'instagram.dart';
+import 'meu_inss.dart';
 import 'telegram.dart';
 import 'whatsapp.dart';
 import 'youtube.dart';
@@ -19,6 +21,8 @@ final List<Guia> todosOsGuias = <Guia>[
   guiaFacebook,
   guiaGoogleFotos,
   guiaTelegram,
+  guiaGovBr,
+  guiaMeuInss,
 ];
 
 /// O guia do item de catálogo [chave], ou `null` quando ele ainda não tem.

@@ -49,6 +49,26 @@ class _ConversaEmMemoria implements ConversaLocal {
   Future<void> apagar() async => _guardadas = <MensagemDaConversa>[];
 }
 
+class _RepositorioComServicoSemGuia extends RepositorioAssistenteSimulado {
+  _RepositorioComServicoSemGuia() : super(demora: Duration.zero);
+
+  @override
+  Future<List<ServicoDoCatalogo>> catalogo() async {
+    final List<ServicoDoCatalogo> lista = await super.catalogo();
+    return <ServicoDoCatalogo>[
+      ...lista,
+      const ServicoDoCatalogo(
+        id: 'novo-servico',
+        chave: 'novo-servico',
+        nomeExibido: 'Serviço Futuro',
+        descricaoCurta: 'Serviço novo do servidor ainda sem guia embarcado',
+        categoria: CategoriaDoServico.sensivel,
+        memoraPodeAbrir: false,
+      ),
+    ];
+  }
+}
+
 /// Bombeia alguns quadros sem esperar quietude: o `Carregando` anima sem parar.
 Future<void> _avancar(WidgetTester t, [int quadros = 4]) async {
   for (int i = 0; i < quadros; i++) {
@@ -74,13 +94,13 @@ Future<void> _preencher(WidgetTester t, Key chave, String valor) async {
 }
 
 /// Monta o fluxo real e entra pelo cadastro, até o Hub (pelo Início).
-Future<void> _chegarAoHub(WidgetTester t) async {
+Future<void> _chegarAoHub(WidgetTester t, [RepositorioAssistente? assistente]) async {
   await t.pumpWidget(
     MaterialApp(
       theme: TemasMemora.claro,
       home: FluxoAutenticacao(
         repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
-        assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+        assistente: assistente ?? RepositorioAssistenteSimulado(demora: Duration.zero),
         conversaLocal: _ConversaEmMemoria.new,
         ultimoAcesso: UltimoAcessoEmMemoria(),
       ),
@@ -128,7 +148,7 @@ void main() {
     );
   });
 
-  testWidgets('em "Serviços sociais", tocar em Gov.br (sem guia) abre a conversa já perguntando',
+  testWidgets('em "Serviços sociais", tocar em Gov.br (com guia) abre o passo a passo',
       (WidgetTester t) async {
     await _chegarAoHub(t);
 
@@ -136,16 +156,31 @@ void main() {
     await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Gov.br')));
 
     expect(
-      find.byType(TelaConversa),
+      find.byType(TelaPassoAPasso),
       findsOneWidget,
-      reason: 'O item do catálogo sem guia abre a conversa com a Memora.',
+      reason: 'O serviço social com guia embarcado abre o passo a passo (US5).',
     );
-    expect(_textoDoCampo(t), TextosAssistente.perguntaSobre('Gov.br'));
-    expect(
-      find.text(TextosAssistente.perguntaSobre('Gov.br')),
-      findsOneWidget,
-      reason: 'A pergunta fica no campo, e não vira mensagem: quem envia é a pessoa.',
+  });
+
+  testWidgets('no fluxo real, tocar em item sem guia abre conversa com a pergunta preenchida',
+      (WidgetTester t) async {
+    await _chegarAoHub(t, _RepositorioComServicoSemGuia());
+
+    await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaServicos)));
+    await _avancar(t, 10);
+    final Finder item = find.byKey(TelaCatalogo.chaveDoItem('Serviço Futuro'));
+    await t.scrollUntilVisible(
+      item,
+      100,
+      scrollable: find.descendant(
+        of: find.byKey(TelaCatalogo.chaveLista),
+        matching: find.byType(Scrollable),
+      ).first,
     );
+    await _tocar(t, item);
+
+    expect(find.byType(TelaConversa), findsOneWidget);
+    expect(_textoDoCampo(t), TextosAssistente.perguntaSobre('Serviço Futuro'));
   });
 
   test('o estado vazio do catálogo não promete "em breve" (H1)', () {
@@ -230,15 +265,18 @@ void main() {
       expect(guiaAberto?.chave, 'whatsapp');
       expect(servicoEscolhido, isNull);
 
-      // Gov.br em serviços sensíveis ainda não possui guia embarcado:
+      // Limpa e testa item sem guia (serviço novo sem guia embarcado):
       guiaAberto = null;
       servicoEscolhido = null;
+
+      final RepositorioAssistenteSimulado repoComItemSemGuia =
+          _RepositorioComServicoSemGuia();
 
       await t.pumpWidget(
         MaterialApp(
           theme: TemasMemora.claro,
           home: TelaCatalogo(
-            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            repositorio: repoComItemSemGuia,
             categoria: CategoriaDoServico.sensivel,
             aoAbrirGuia: (Guia g, ServicoDoCatalogo s) => guiaAberto = g,
             aoEscolher: (ServicoDoCatalogo s) => servicoEscolhido = s,
@@ -247,9 +285,9 @@ void main() {
       );
       await _avancar(t);
 
-      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Gov.br')));
+      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Serviço Futuro')));
       expect(guiaAberto, isNull);
-      expect(servicoEscolhido?.chave, 'gov-br');
+      expect(servicoEscolhido?.chave, 'novo-servico');
     });
   });
 }
