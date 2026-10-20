@@ -57,8 +57,111 @@ class IconeDoAplicativo extends StatelessWidget {
       return Container(
         color: const Color(0xFF25D366),
         alignment: Alignment.center,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.chat_bubble_rounded,
+              color: Colors.white,
+              size: tamanho * 0.72,
+            ),
+            Icon(
+              Icons.phone_rounded,
+              color: const Color(0xFF25D366),
+              size: tamanho * 0.38,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (normalizada.contains('tiktok')) {
+      return Container(
+        color: const Color(0xFF010101),
+        alignment: Alignment.center,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Transform.translate(
+              offset: const Offset(-1.5, -1.5),
+              child: Icon(
+                Icons.music_note_rounded,
+                color: const Color(0xFF00F2FE),
+                size: tamanho * 0.65,
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(1.5, 1.5),
+              child: Icon(
+                Icons.music_note_rounded,
+                color: const Color(0xFFFE2C55),
+                size: tamanho * 0.65,
+              ),
+            ),
+            Icon(
+              Icons.music_note_rounded,
+              color: Colors.white,
+              size: tamanho * 0.65,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (normalizada.contains('messenger')) {
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomLeft,
+            end: Alignment.topRight,
+            colors: <Color>[
+              Color(0xFF00C6FF),
+              Color(0xFF0078FF),
+              Color(0xFFA100FF),
+            ],
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.chat_bubble_rounded,
+              color: Colors.white,
+              size: tamanho * 0.72,
+            ),
+            Icon(
+              Icons.bolt_rounded,
+              color: const Color(0xFF0078FF),
+              size: tamanho * 0.42,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (normalizada.contains('netflix')) {
+      return Container(
+        color: Colors.black,
+        alignment: Alignment.center,
+        child: Text(
+          'N',
+          style: TextStyle(
+            color: const Color(0xFFE50914),
+            fontSize: tamanho * 0.75,
+            fontWeight: FontWeight.w900,
+            fontFamily: 'sans-serif',
+          ),
+        ),
+      );
+    }
+
+    if (normalizada.contains('kwai')) {
+      return Container(
+        color: const Color(0xFFFF5000),
+        alignment: Alignment.center,
         child: Icon(
-          Icons.chat_bubble_rounded,
+          Icons.videocam_rounded,
           color: Colors.white,
           size: tamanho * 0.65,
         ),

@@ -12,6 +12,7 @@ import 'meu_inss.dart';
 import 'poupatempo.dart';
 import 'serasa.dart';
 import 'telegram.dart';
+import 'tiktok.dart';
 import 'whatsapp.dart';
 import 'youtube.dart';
 
@@ -28,6 +29,7 @@ final List<Guia> todosOsGuias = <Guia>[
   guiaFacebook,
   guiaGoogleFotos,
   guiaTelegram,
+  guiaTiktok,
   guiaGovBr,
   guiaMeuInss,
   guiaETitulo,

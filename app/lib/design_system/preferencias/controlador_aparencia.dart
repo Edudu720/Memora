@@ -72,6 +72,10 @@ class ControladorAparencia extends ChangeNotifier {
   void preVisualizarReducaoDeMovimento({required bool reduzir}) =>
       preVisualizar(atual.copyWith(reduzirMovimento: reduzir));
 
+  /// Atalho para pré-visualizar apenas a paleta de cor de destaque.
+  void preVisualizarPaleta(String paleta) =>
+      preVisualizar(atual.copyWith(paleta: paleta));
+
   /// Persiste a pré-visualização. Sem pré-visualização, não faz nada.
   Future<void> confirmar() async {
     final PreferenciaAparencia? pendente = _emPreVisualizacao;

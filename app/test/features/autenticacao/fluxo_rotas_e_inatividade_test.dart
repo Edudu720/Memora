@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/perfil/presentation/tela_perfil.dart';
 import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/l10n/textos_casca.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
@@ -159,7 +159,7 @@ void main() {
         findsNothing,
         reason: 'a aparência, aberta em Ajustes, ficou para trás do login',
       );
-      expect(find.byType(PerfilProvisorio), findsNothing);
+      expect(find.byType(TelaPerfil), findsNothing);
       expect(find.byType(NavegacaoInferior), findsNothing);
       expect(fluxo.dado.apagamentos, 1);
     });

@@ -201,6 +201,16 @@ class TelaAparencia extends StatelessWidget {
     EscolhaDeTema.escuro,
   ];
 
+  static const List<({String id, String rotulo, String descricao})> _paletasDisponiveis =
+      <({String id, String rotulo, String descricao})>[
+    (id: 'azul', rotulo: 'Azul', descricao: 'A cor original do Memora'),
+    (id: 'verde', rotulo: 'Verde', descricao: 'Tom suave de folha'),
+    (id: 'roxo', rotulo: 'Roxo', descricao: 'Tom suave de violeta'),
+    (id: 'laranja-terra', rotulo: 'Laranja-terra', descricao: 'Tom acolhedor de cerâmica'),
+    (id: 'rosa', rotulo: 'Rosa', descricao: 'Tom suave de flor'),
+    (id: 'grafite', rotulo: 'Grafite', descricao: 'Tom neutro e sóbrio'),
+  ];
+
   List<Widget> _opcoesDeAparencia(
     ControladorAparencia controlador,
     PreferenciaAparencia atual,
@@ -225,6 +235,29 @@ class TelaAparencia extends StatelessWidget {
         ),
         const SizedBox(height: MemoraEspacamento.md),
       ],
+      const SizedBox(height: MemoraEspacamento.xl),
+      const TextoMemora.tituloSecao('Cor de destaque'),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const TextoMemora.apoio(
+        'Muda a cor dos botões principais e detalhes da tela.',
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      if (atual.tema == EscolhaDeTema.altoContraste) ...<Widget>[
+        const TextoMemora.apoio(
+          'No tema "Mais contraste", a cor de destaque fica desativada para manter o contraste máximo.',
+        ),
+        const SizedBox(height: MemoraEspacamento.md),
+      ] else
+        for (final ({String id, String rotulo, String descricao}) p in _paletasDisponiveis) ...<Widget>[
+          OpcaoSelecionavel(
+            key: Key('aparencia.paleta.${p.id}'),
+            rotulo: p.rotulo,
+            descricao: p.descricao,
+            selecionada: atual.paleta == p.id,
+            aoSelecionar: () => controlador.preVisualizarPaleta(p.id),
+          ),
+          const SizedBox(height: MemoraEspacamento.md),
+        ],
     ];
   }
 

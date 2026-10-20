@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
+import '../../../services/acessibilidade/memora_binding_atividade.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../../../l10n/textos_configuracoes.dart';
@@ -33,7 +34,7 @@ import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
 import '../../casca/casca_interna.dart';
-import '../../casca/raizes_provisorias.dart';
+import '../../perfil/presentation/tela_perfil.dart';
 import '../../configuracoes/presentation/tela_configuracoes.dart';
 import '../../configuracoes/presentation/tela_conta.dart';
 import '../../configuracoes/presentation/tela_privacidade.dart';
@@ -174,6 +175,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     aoExpirar: _expirarPorInatividade,
   );
 
+  late final RastreadorDeAtividadeGlobal _rastreadorGlobal =
+      RastreadorDeAtividadeGlobal(aoRegistrarAtividade: _registrarAtividade);
+
   /// Recriado a cada visita ao login: o controlador tenta renovar a sessão no
   /// `initState` da tela, e reaproveitar um que já concluiu deixaria estado
   /// velho decidindo o que a pessoa vê.
@@ -245,6 +249,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   @override
   void dispose() {
+    _rastreadorGlobal.parar();
     _cadastro.dispose();
     _login?.dispose();
     _recuperacao?.dispose();
@@ -354,6 +359,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _etapa = vistas == null ? _Etapa.dentro : _Etapa.conferindoApresentacao;
     });
     _monitor.iniciar();
+    _rastreadorGlobal.iniciar();
     if (vistas != null) _conferirApresentacao(vistas, pessoa, geracao);
   }
 
@@ -387,6 +393,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// literal da FR-026 leva — o identificador do último acesso, a data de
   /// nascimento e a apresentação vista. A saída comum **não** o faz.
   Future<void> _sair({bool esquecerTudo = false}) async {
+    _rastreadorGlobal.parar();
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
     await widget.limpeza?.executar(esquecerTudo: esquecerTudo);
@@ -480,6 +487,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   Future<void> _expirarPorInatividade() async {
     // Antes de qualquer espera: daqui em diante, nada reinicia a contagem.
     _expirando = true;
+    _rastreadorGlobal.parar();
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
 
@@ -890,9 +898,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
                 : () => _abrirConversa(widget.assistente!),
             aoVerTudo: _portasConstruidas().isEmpty ? null : _abrirHub,
           ),
-          DestinoDaCasca.perfil: (BuildContext _) => PerfilProvisorio(
+          DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',
             canal: _canal,
+            progresso: widget.progresso,
             dataDeNascimento: _datas,
             idDaConta: _pessoa?.id,
           ),

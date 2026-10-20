@@ -222,9 +222,9 @@ FR-017. Nenhum teste pulado.
 - [X] T119 [US4] "Meus aplicativos" em **lista**, ícone do aparelho à esquerda e nome ao lado (FR-023 revista). Ajusta a tarefa da tela de aplicativos da fase 6
 - [X] T120 [US4] **Captura pendente** (FR-028a): passo sem captura mostra um aviso visível com a chave do guia e o número do passo; teste em `catalogo_e_guias_test.dart` lista as pendentes, e a lista precisa chegar a zero antes da T104 (revisão da #47) O verificador de guias em `catalogo_e_guias_test.dart` hoje **reprova** guia com captura ausente, o que contradiz a FR-028a ("captura pendente"): trocar por uma **lista de pendentes**, não por falha. E conferir também que a pasta das capturas está declarada em `assets` no `pubspec.yaml` — `File(...).existsSync()` passa com PNG em disco que não foi empacotado.
 - [X] T121 [US7] Grupo **Acessibilidade** em Ajustes (FR-038, FR-039a): tamanho do texto, reduzir movimento e alto contraste, cada opção com uma frase de para quem serve, com pré-visualização
-- [ ] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador **Feita pela metade na Fase 9 (não marcada)**: a preferência `paleta` (identificador, desconhecido volta a `azul`) e o suporte do `validar_paleta.py` a paleta × tema claro e escuro, com `--autoteste`, já existem. **Falta**: medir as cinco ou seis paletas no validador (`PALETAS`), pôr as cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer a escolha com pré-visualização em Aparência
+- [X] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador **Feita pela metade na Fase 9 (não marcada)**: a preferência `paleta` (identificador, desconhecido volta a `azul`) e o suporte do `validar_paleta.py` a paleta × tema claro e escuro, com `--autoteste`, já existem. **Falta**: medir as cinco ou seis paletas no validador (`PALETAS`), pôr as cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer a escolha com pré-visualização em Aparência
 - [X] T123 [US8] **Data de nascimento opcional** no Perfil (FR-042c, `data-model.md`): só no aparelho, por conta, em `shared_preferences`; não é `DadoLocalDaPessoa`; sai com `esquecerTudo`. A idade é calculada na exibição. Teste de unidade da gravação e da saída; teste de widget do convite e da exibição
-- [ ] T124 [US5] Carteira Digital é o documento do gov.br (T080, resolvida): a `chave` na V10 é `carteira-digital`, e o guia da T082 segue essa leitura
+- [X] T124 [US5] Carteira Digital é o documento do gov.br (T080, resolvida): a `chave` na V10 é `carteira-digital`, e o guia da T082 segue essa leitura
 
 ---
 
@@ -305,12 +305,12 @@ desconhecido, e repetir sozinha sem ele (US4).
 
 ### Conteúdo e catálogo
 
-- [ ] T070 [US4] Guia do **TikTok** (Figuras 21-24 do wireframe): capturas em `app/assets/guias/tiktok/`, `app/lib/features/aprendizado/data/guias/tiktok.dart`, textos em `textos_guias.dart`, linha em `CAPTURAS.md`, pasta declarada no `pubspec.yaml`
+- [X] T070 [US4] Guia do **TikTok** (Figuras 21-24 do wireframe): capturas em `app/assets/guias/tiktok/`, `app/lib/features/aprendizado/data/guias/tiktok.dart`, textos em `textos_guias.dart`, linha em `CAPTURAS.md`, pasta declarada no `pubspec.yaml`
 - [X] T071 [P] [US4] Guias de **WhatsApp**, **Instagram** e **YouTube**, no mesmo formato da T070, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [X] T072 [P] [US4] Guias de **Facebook**, **Google Fotos** e **Telegram**, no mesmo formato, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
-- [ ] T073 [US4] Conferir num aparelho real os pacotes de TikTok, Kwai, Messenger, Gmail, Netflix e Google, descartando o que for instável entre fabricantes, como a V5 fez; registrar o resultado em `data-model.md`
+- [X] T073 [US4] Conferir num aparelho real os pacotes de TikTok, Kwai, Messenger, Gmail, Netflix e Google, descartando o que for instável entre fabricantes, como a V5 fez; registrar o resultado em `data-model.md`
 - [ ] T074 [US4] Guias dos aplicativos aprovados na T073, no formato da T070, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
-- [ ] T075 [US4] Criar `backend/src/main/resources/db/migration/V9__aplicativos_do_wireframe.sql` só com os aplicativos que têm guia, acrescentar os pacotes ao `<queries>` de `AndroidManifest.xml` e as linhas ao `RepositorioAssistenteSimulado`; `CatalogoSemeadoTest` atualizado
+- [X] T075 [US4] Criar `backend/src/main/resources/db/migration/V9__aplicativos_do_wireframe.sql` só com os aplicativos que têm guia, acrescentar os pacotes ao `<queries>` de `AndroidManifest.xml` e as linhas ao `RepositorioAssistenteSimulado`; `CatalogoSemeadoTest` atualizado
 
 ---
 
@@ -360,7 +360,7 @@ senha do gov.br e onde nunca se digita (US5).
 - [X] T093 [US7] Acrescentar "reduzir movimento" a `PreferenciaAparencia` (`app/lib/design_system/preferencias/preferencia_aparencia.dart`), persistida pelo repositório de `app/lib/services/preferencias/` e aplicada sobre o `MediaQuery` no `builder` de `MaterialApp` em `main.dart`; redesenhar `tela_aparencia.dart` com pré-visualização e desfazer (FR-039); `app/test/design_system/reducao_de_movimento_test.dart` e `preferencias/tela_aparencia_test.dart` estendidos
 - [X] T094 [US7] Criar `TelaPrivacidade` em `app/lib/features/configuracoes/presentation/tela_privacidade.dart`: o que fica no aparelho, em linguagem comum, e apagar a conversa pela `ConfirmacaoMemora.irreversivel`, em duas etapas (FR-040; fecha a T085 da 003)
 - [X] T095 [US7] Criar `TelaConta` em `app/lib/features/configuracoes/presentation/tela_conta.dart`, com o canal vindo de `UltimoAcesso` (R10); apontar `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart` para ela, mantendo as quatro quebras que o portão já provou
-- [ ] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador. **Parcial**: preferência `paleta` e validador prontos; falta medir paletas no validador, pôr cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer seletor com pré-visualização em Aparência
+- [X] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador. **Parcial**: preferência `paleta` e validador prontos; falta medir paletas no validador, pôr cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer seletor com pré-visualização em Aparência
 
 ---
 
@@ -370,8 +370,8 @@ senha do gov.br e onde nunca se digita (US5).
 
 **Independent Test**: dizer, olhando o Perfil, qual canal está ligado à conta (US8).
 
-- [ ] T096 [P] [US8] Teste em `app/test/features/perfil/tela_perfil_test.dart`: nome, desenho, canal e o mais aprendido como **informação** (o mesmo critério de `informacao_nao_e_acao_test.dart`); a frase de "vamos aprender juntos" quando vazio; nenhum campo de plano, e a idade só como informação e só se a pessoa a informou, pela `SecaoIdade` da T123 (FR-042, FR-042c); **nenhuma chamada ao repositório** ao abrir (dublê espião); some quando a sessão expira (FR-050); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [ ] T097 [US8] Criar `TelaPerfil` em `app/lib/features/perfil/presentation/tela_perfil.dart`, ligar como raiz do destino Perfil e **apagar** `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart` (pendência da #35)
+- [X] T096 [P] [US8] Teste em `app/test/features/perfil/tela_perfil_test.dart`: nome, desenho, canal e o mais aprendido como **informação** (o mesmo critério de `informacao_nao_e_acao_test.dart`); a frase de "vamos aprender juntos" quando vazio; nenhum campo de plano, e a idade só como informação e só se a pessoa a informou, pela `SecaoIdade` da T123 (FR-042, FR-042c); **nenhuma chamada ao repositório** ao abrir (dublê espião); some quando a sessão expira (FR-050); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
+- [X] T097 [US8] Criar `TelaPerfil` em `app/lib/features/perfil/presentation/tela_perfil.dart`, ligar como raiz do destino Perfil e **apagar** `app/lib/features/autenticacao/presentation/telas/tela_perfil.dart` (pendência da #35)
 
 ---
 
@@ -379,7 +379,7 @@ senha do gov.br e onde nunca se digita (US5).
 
 **Goal**: garantir que não existe plano, assinatura nem pagamento.
 
-- [ ] T098 [US9] Teste em `app/test/features/casca/sem_planos_test.dart`: varre os textos de `app/lib/l10n/` e a árvore de cada tela da casca atrás de "plano", "assinatura", "pagamento" e "premium", e reprova ao achar. O mesmo teste procura, nos textos de `l10n/`, os termos técnicos da FR-008 — "Hub", "Chatbot" e "App" como palavra inteira, aceitando "aplicativo" por extenso — e reprova nomeando o texto. Provar quebrando: pôr "Plano" numa porta do Hub
+- [X] T098 [US9] Teste em `app/test/features/casca/sem_planos_test.dart`: varre os textos de `app/lib/l10n/` e a árvore de cada tela da casca atrás de "plano", "assinatura", "pagamento" e "premium", e reprova ao achar. O mesmo teste procura, nos textos de `l10n/`, os termos técnicos da FR-008 — "Hub", "Chatbot" e "App" como palavra inteira, aceitando "aplicativo" por extenso — e reprova nomeando o texto. Provar quebrando: pôr "Plano" numa porta do Hub
 
 ---
 
@@ -387,10 +387,10 @@ senha do gov.br e onde nunca se digita (US5).
 
 ### Achados da revisão das #36 a #38 que viraram tarefa (2026-10-01)
 
-- [ ] T109 **Atividade pelo leitor de tela e pelo teclado conta como atividade** (FR-017 da 001). O `Listener` da casca só vê `onPointerDown`: o toque duplo do TalkBack chega como `SemanticsAction.tap`, e digitar não gera ponteiro — quem usa leitor de tela é avisado de inatividade a cada 28 minutos mesmo ativo. Contar ações semânticas (por exemplo num `WidgetsFlutterBinding` próprio que sobrescreva `performSemanticsAction`) e mudanças de texto, com teste por `semanticsOwner.performAction` em `app/test/features/casca/atividade_acessivel_test.dart`. Achado da revisão da #38; pré-existente desde a US2 da 001
-- [ ] T110 Toque **dentro de um diálogo** conta como atividade: hoje os diálogos abertos no `Navigator` de fora ficam fora do `Listener` da casca (o aviso de inatividade se salva porque registra atividade sozinho). Teste em `app/test/features/casca/atividade_acessivel_test.dart`
+- [X] T109 **Atividade pelo leitor de tela e pelo teclado conta como atividade** (FR-017 da 001). O `Listener` da casca só vê `onPointerDown`: o toque duplo do TalkBack chega como `SemanticsAction.tap`, e digitar não gera ponteiro — quem usa leitor de tela é avisado de inatividade a cada 28 minutos mesmo ativo. Contar ações semânticas (por exemplo num `WidgetsFlutterBinding` próprio que sobrescreva `performSemanticsAction`) e mudanças de texto, com teste por `semanticsOwner.performAction` em `app/test/features/casca/atividade_acessivel_test.dart`. Achado da revisão da #38; pré-existente desde a US2 da 001
+- [X] T110 Toque **dentro de um diálogo** conta como atividade: hoje os diálogos abertos no `Navigator` de fora ficam fora do `Listener` da casca (o aviso de inatividade se salva porque registra atividade sozinho). Teste em `app/test/features/casca/atividade_acessivel_test.dart`
 
-- [ ] T098a Teste em `app/test/features/casca/sem_campo_de_segredo_test.dart`: varre `app/lib/features/` e reprova qualquer uso de `CampoSenha` ou `CampoCodigo` fora de `features/autenticacao/` (FR-048). Provar quebrando: pôr um `CampoSenha` na `TelaPerfil`
+- [X] T098a Teste em `app/test/features/casca/sem_campo_de_segredo_test.dart`: varre `app/lib/features/` e reprova qualquer uso de `CampoSenha` ou `CampoCodigo` fora de `features/autenticacao/` (FR-048). Provar quebrando: pôr um `CampoSenha` na `TelaPerfil`
 - [ ] T099 [P] Redesenhar as telas fora do wireframe na mesma linguagem: `tela_confirmar_canal.dart`, `tela_entrega_do_aparelho.dart`, `tela_primeira_entrada.dart` (em `autenticacao/presentation/telas/`), `tela_recuperacao.dart` (em `autenticacao/presentation/telas/`; a spec a lista entre as telas fora do wireframe a redesenhar, e a T057 só cuida do aviso), `tela_registro.dart` (em `assistente/presentation/telas/`) e a `ConfirmacaoMemora`; `fluxo_assistido_test.dart`, `tela_registro_test.dart` e `registro_acessibilidade_test.dart` passando na matriz completa
 - [ ] T100 [P] Cruzar `app/test/design_system/galeria_test.dart` com os três temas e confirmar que todo componente novo aparece
 - [ ] T101 **Estender** `app/test/album/album_de_telas_test.dart`, criado na T043, a todas as telas da feature e às de fora do wireframe redesenhadas na T099

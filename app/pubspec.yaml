@@ -105,6 +105,7 @@ flutter:
     - assets/guias/facebook/
     - assets/guias/google-fotos/
     - assets/guias/telegram/
+    - assets/guias/tiktok/
     # Guias de serviços sociais (T078, T079, T081, T082)
     - assets/guias/gov-br/
     - assets/guias/meu-inss/

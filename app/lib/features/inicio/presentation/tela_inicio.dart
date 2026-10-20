@@ -197,11 +197,32 @@ class TelaInicio extends StatelessWidget {
                             CaixaDeEtapa(
                               key: chaveCaixaConversar,
                               instrucao: TextosCasca.inicioInstrucaoConversar,
-                              child: BotaoPrimario(
-                                key: chaveConversar,
-                                rotulo: TextosCasca.inicioConversar,
-                                icone: Icons.chat_bubble_outline,
-                                aoTocar: aoConversar,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  BotaoPrimario(
+                                    key: chaveConversar,
+                                    rotulo: TextosCasca.inicioConversar,
+                                    icone: Icons.chat_bubble_rounded,
+                                    aoTocar: aoConversar,
+                                  ),
+                                  const SizedBox(height: MemoraEspacamento.sm),
+                                  Row(
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.check_circle_outline_rounded,
+                                        size: MemoraDimensoes.iconePequeno,
+                                        color: cores.sucesso,
+                                      ),
+                                      const SizedBox(width: MemoraEspacamento.xs),
+                                      const Expanded(
+                                        child: TextoMemora.apoio(
+                                          'Tire d\xc3\xbavidas sobre celular, aplicativos e internet',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
                           if (aoConversar != null && aoVerTudo != null)
@@ -210,19 +231,40 @@ class TelaInicio extends StatelessWidget {
                             CaixaDeEtapa(
                               key: chaveCaixaVerTudo,
                               instrucao: TextosCasca.inicioInstrucaoVerTudo,
-                              child: conversarEPrincipal
-                                  ? BotaoSecundario(
-                                      key: chaveVerTudo,
-                                      rotulo: TextosCasca.inicioVerTudo,
-                                      icone: Icons.apps_outlined,
-                                      aoTocar: aoVerTudo,
-                                    )
-                                  : BotaoPrimario(
-                                      key: chaveVerTudo,
-                                      rotulo: TextosCasca.inicioVerTudo,
-                                      icone: Icons.apps_outlined,
-                                      aoTocar: aoVerTudo,
-                                    ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  conversarEPrincipal
+                                      ? BotaoSecundario(
+                                          key: chaveVerTudo,
+                                          rotulo: TextosCasca.inicioVerTudo,
+                                          icone: Icons.apps_rounded,
+                                          aoTocar: aoVerTudo,
+                                        )
+                                      : BotaoPrimario(
+                                          key: chaveVerTudo,
+                                          rotulo: TextosCasca.inicioVerTudo,
+                                          icone: Icons.apps_rounded,
+                                          aoTocar: aoVerTudo,
+                                        ),
+                                  const SizedBox(height: MemoraEspacamento.sm),
+                                  Row(
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.grid_view_rounded,
+                                        size: MemoraDimensoes.iconePequeno,
+                                        color: cores.primaria,
+                                      ),
+                                      const SizedBox(width: MemoraEspacamento.xs),
+                                      const Expanded(
+                                        child: TextoMemora.apoio(
+                                          'WhatsApp, Gov.br, fotos, ajuda e registros',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                         ],
                       ),

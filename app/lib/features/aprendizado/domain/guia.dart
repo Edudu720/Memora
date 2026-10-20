@@ -101,6 +101,16 @@ final class CapturaDoGuia {
   /// Captura 4 do Telegram.
   static const CapturaDoGuia telegram4 = CapturaDoGuia._('telegram', 4);
 
+  // TikTok (T070)
+  /// Captura 1 do TikTok.
+  static const CapturaDoGuia tiktok1 = CapturaDoGuia._('tiktok', 1);
+  /// Captura 2 do TikTok.
+  static const CapturaDoGuia tiktok2 = CapturaDoGuia._('tiktok', 2);
+  /// Captura 3 do TikTok.
+  static const CapturaDoGuia tiktok3 = CapturaDoGuia._('tiktok', 3);
+  /// Captura 4 do TikTok.
+  static const CapturaDoGuia tiktok4 = CapturaDoGuia._('tiktok', 4);
+
   // Gov.br (T078)
   /// Captura 1 do Gov.br.
   static const CapturaDoGuia govBr1 = CapturaDoGuia._('gov-br', 1);

@@ -10,7 +10,7 @@ import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 import 'package:memora/features/casca/casca_interna.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/perfil/presentation/tela_perfil.dart';
 import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/features/configuracoes/presentation/tela_privacidade.dart';
@@ -264,7 +264,7 @@ void main() {
     (
       parte: 'meu perfil',
       toques: <Finder>[naBarra(DestinoDaCasca.perfil)],
-      chegada: find.byType(PerfilProvisorio),
+      chegada: find.byType(TelaPerfil),
       via: DestinoDaCasca.perfil,
     ),
     // A galeria só existe em depuração (R9 da 002); fora dela não há caminho.

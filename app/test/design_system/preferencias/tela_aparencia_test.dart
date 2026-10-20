@@ -219,6 +219,89 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('exibe as seis paletas validadas em Aparencia (T122)', (
+      WidgetTester tester,
+    ) async {
+      final ControladorAparencia c = ControladorAparencia(_RepositorioFalso());
+      await tester.pumpWidget(_app(c));
+
+      expect(find.text('Cor de destaque'), findsOneWidget);
+      expect(find.text('Azul'), findsOneWidget);
+      expect(find.text('Verde'), findsOneWidget);
+      expect(find.text('Roxo'), findsOneWidget);
+      expect(find.text('Laranja-terra'), findsOneWidget);
+      expect(find.text('Rosa'), findsOneWidget);
+      expect(find.text('Grafite'), findsOneWidget);
+    });
+
+    testWidgets('trocar de paleta pre-visualiza e so salva ao confirmar', (
+      WidgetTester tester,
+    ) async {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await tester.pumpWidget(_app(c));
+
+      expect(c.atual.paleta, 'azul');
+      expect(c.temPreVisualizacao, isFalse);
+
+      await _tocar(tester, find.text('Verde'));
+      expect(c.atual.paleta, 'verde');
+      expect(c.temPreVisualizacao, isTrue);
+      expect(repo.gravacoes, 0, reason: 'Nao deve gravar sem confirmar');
+
+      await _tocar(tester, find.byKey(TelaAparencia.chaveSalvar));
+      expect(repo.gravacoes, 1);
+      expect(repo.salva?.paleta, 'verde');
+      expect(c.confirmada.paleta, 'verde');
+      expect(c.temPreVisualizacao, isFalse);
+    });
+
+    testWidgets('descartar volta para a paleta confirmada', (
+      WidgetTester tester,
+    ) async {
+      final _RepositorioFalso repo = _RepositorioFalso();
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await tester.pumpWidget(_app(c));
+
+      await _tocar(tester, find.text('Roxo'));
+      expect(c.atual.paleta, 'roxo');
+
+      await _tocar(tester, find.byKey(TelaAparencia.chaveDesfazer));
+      expect(c.atual.paleta, 'azul');
+      expect(c.temPreVisualizacao, isFalse);
+      expect(repo.gravacoes, 0);
+    });
+
+    test('valor desconhecido volta ao padrao azul (FR-039)', () {
+      expect(PreferenciaAparencia.paletaValida('inexistente'), 'azul');
+      expect(PreferenciaAparencia.paletaValida(null), 'azul');
+      expect(PreferenciaAparencia.paletaValida('verde'), 'verde');
+    });
+
+    testWidgets('no alto contraste, paletas nao sao exibidas e nao alteram o tema', (
+      WidgetTester tester,
+    ) async {
+      final _RepositorioFalso repo = _RepositorioFalso()
+        ..salva = const PreferenciaAparencia(tema: EscolhaDeTema.altoContraste);
+      final ControladorAparencia c = ControladorAparencia(repo);
+      await c.carregar();
+      await tester.pumpWidget(_app(c));
+
+      expect(
+        find.textContaining('No tema "Mais contraste", a cor de destaque fica desativada'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('aparencia.paleta.verde')), findsNothing);
+
+      final ThemeData temaAltoContraste = TemasMemora.porId(
+        MemoraTemaId.altoContraste,
+        paleta: 'verde',
+      );
+      final MemoraCores cores =
+          temaAltoContraste.extension<MemoraTheme>()!.cores;
+      expect(cores.primaria, MemoraCores.altoContraste.primaria);
+    });
   });
 
   group('Acessibilidade — FR-039a', () {

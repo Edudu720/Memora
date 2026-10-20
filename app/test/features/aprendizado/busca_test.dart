@@ -23,10 +23,13 @@ void main() {
     memoraPodeAbrir: true,
   );
 
-  final List<ServicoDoCatalogo> comTiktok = <ServicoDoCatalogo>[
-    ...catalogo,
-    item('TikTok', 'Ver vídeos curtos'),
-  ];
+  final List<ServicoDoCatalogo> comTiktok =
+      catalogo.any((ServicoDoCatalogo s) => s.chave == 'tiktok')
+          ? catalogo
+          : <ServicoDoCatalogo>[
+              ...catalogo,
+              item('TikTok', 'Ver v\xc3\xaddeos curtos'),
+            ];
 
   group('por trecho', () {
     test('"tik" acha o TikTok', () {

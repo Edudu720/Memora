@@ -91,6 +91,14 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       memoraPodeAbrir: true,
     ),
     ServicoDoCatalogo(
+      id: 'tiktok',
+      chave: 'tiktok',
+      nomeExibido: 'TikTok',
+      descricaoCurta: 'Assistir a v\xc3\xaddeos e seguir criadores de conte\xc3\xbado',
+      categoria: CategoriaDoServico.cotidiano,
+      memoraPodeAbrir: true,
+    ),
+    ServicoDoCatalogo(
       id: 'gov-br',
       chave: 'gov-br',
       nomeExibido: 'Gov.br',

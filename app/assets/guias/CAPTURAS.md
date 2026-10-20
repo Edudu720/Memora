@@ -27,6 +27,7 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 | facebook | 2026-10-01 | 480.0.0 | Galaxy A14 | Equipe Memora |
 | google-fotos | 2026-10-01 | 6.95.0 | Galaxy A14 | Equipe Memora |
 | telegram | 2026-10-01 | 11.1.0 | Galaxy A14 | Equipe Memora |
+| tiktok | 2026-10-01 | 36.5.0 | Galaxy A14 | Equipe Memora |
 | gov-br | 2026-10-01 | 3.5.0 | Galaxy A14 | Equipe Memora |
 | meu-inss | 2026-10-01 | 4.18.0 | Galaxy A14 | Equipe Memora |
 | e-titulo | 2026-10-01 | 2.5.0 | Galaxy A14 | Equipe Memora |

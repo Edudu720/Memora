@@ -52,24 +52,25 @@ class AparenciaResolvida {
   /// o modo do aparelho** (FR-020) — inclusive no alto contraste, que é
   /// aplicado independentemente de o sistema estar claro ou escuro.
   factory AparenciaResolvida.de(PreferenciaAparencia preferencia) {
+    final String paleta = preferencia.paleta;
     switch (preferencia.tema) {
       case EscolhaDeTema.seguirSistema:
         return AparenciaResolvida._(
-          temaClaro: TemasMemora.porId(MemoraTemaId.claro),
-          temaEscuro: TemasMemora.porId(MemoraTemaId.escuro),
+          temaClaro: TemasMemora.porId(MemoraTemaId.claro, paleta: paleta),
+          temaEscuro: TemasMemora.porId(MemoraTemaId.escuro, paleta: paleta),
           modo: ThemeMode.system,
         );
       case EscolhaDeTema.claro:
-        return _fixo(MemoraTemaId.claro, ThemeMode.light);
+        return _fixo(MemoraTemaId.claro, ThemeMode.light, paleta: paleta);
       case EscolhaDeTema.escuro:
-        return _fixo(MemoraTemaId.escuro, ThemeMode.dark);
+        return _fixo(MemoraTemaId.escuro, ThemeMode.dark, paleta: paleta);
       case EscolhaDeTema.altoContraste:
-        return _fixo(MemoraTemaId.altoContraste, ThemeMode.dark);
+        return _fixo(MemoraTemaId.altoContraste, ThemeMode.dark, paleta: paleta);
     }
   }
 
-  static AparenciaResolvida _fixo(MemoraTemaId id, ThemeMode modo) {
-    final ThemeData tema = TemasMemora.porId(id);
+  static AparenciaResolvida _fixo(MemoraTemaId id, ThemeMode modo, {String? paleta}) {
+    final ThemeData tema = TemasMemora.porId(id, paleta: paleta);
     return AparenciaResolvida._(
       temaClaro: tema,
       temaEscuro: tema,

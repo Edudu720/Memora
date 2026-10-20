@@ -19,12 +19,28 @@ abstract final class TemasMemora {
   static final ThemeData altoContraste =
       _construir(MemoraTheme.altoContraste, Brightness.dark);
 
-  /// Retorna o tema correspondente ao identificador.
-  static ThemeData porId(MemoraTemaId id) => switch (id) {
+  /// Retorna o tema correspondente ao identificador, opcionalmente com uma [paleta] (FR-039, R15).
+  static ThemeData porId(MemoraTemaId id, {String? paleta}) {
+    final String? paletaNormalizada = (paleta == null || paleta == 'azul') ? null : paleta;
+    if (paletaNormalizada == null) {
+      return switch (id) {
         MemoraTemaId.claro => claro,
         MemoraTemaId.escuro => escuro,
         MemoraTemaId.altoContraste => altoContraste,
       };
+    }
+    return switch (id) {
+      MemoraTemaId.claro => _construir(
+          MemoraTheme.claro.comPaleta(paletaNormalizada),
+          Brightness.light,
+        ),
+      MemoraTemaId.escuro => _construir(
+          MemoraTheme.escuro.comPaleta(paletaNormalizada),
+          Brightness.dark,
+        ),
+      MemoraTemaId.altoContraste => altoContraste,
+    };
+  }
 
   static ThemeData _construir(MemoraTheme memora, Brightness brilho) {
     final MemoraCores c = memora.cores;

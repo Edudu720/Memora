@@ -8,13 +8,14 @@ import 'features/assistente/data/abridor_de_aplicativo.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
 import 'features/perfil/data/data_de_nascimento_local.dart';
+import 'services/acessibilidade/memora_binding_atividade.dart';
 import 'services/ambiente/ambiente.dart';
 import 'services/ambiente/composicao.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 import 'services/seguranca/cofre_de_credenciais.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  MemoraWidgetsFlutterBinding.ensureInitialized();
   registrarLicencasEmbarcadas();
   final RepositorioPreferenciaAparenciaLocal repositorio =
       await RepositorioPreferenciaAparenciaLocal.abrir();

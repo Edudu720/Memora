@@ -70,12 +70,15 @@ class MemoraPersonagem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
+    final int cachePx = (tamanho * 2.5).clamp(48, 512).round();
     final Widget imagem = expressao.imagemPng != null
         ? Image.asset(
             'assets/ilustracoes/${expressao.imagemPng}',
             width: tamanho,
             height: tamanho,
             fit: BoxFit.contain,
+            cacheWidth: cachePx,
+            cacheHeight: cachePx,
           )
         : IlustracaoMemora(
             expressao.ilustracao,

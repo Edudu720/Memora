@@ -54,7 +54,7 @@ abstract final class TextosGuias {
   static const String sairDoGuia = 'Sair do passo a passo';
 
   /// Ação de conclusão no último passo.
-  static const String voltarAoHub = 'Voltar ao Hub';
+  static const String voltarAoHub = 'Voltar ao início';
 
   /// Ação permitida apenas para cotidiano com catálogo do servidor (FR-027).
   static const String pecaParaAbrir = 'Peça à Memora para abrir';
@@ -243,6 +243,34 @@ abstract final class TextosGuias {
   static const String telegramCaptura4 =
       'Conversa do Telegram com balão de mensagem e botão de envio com avião de papel.';
 
+  // TikTok (T070)
+  /// T\xc3\xadtulo do guia do TikTok.
+  static const String tituloTiktok = 'Como assistir e buscar v\xc3\xaddeos no TikTok';
+  /// Passo 1 do TikTok.
+  static const String tiktokPasso1 =
+      'Abra o TikTok. Voc\xc3\xaa ver\xc3\xa1 v\xc3\xaddeos passando um ap\xc3\xb3s o outro na sua tela.';
+  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 1 do TikTok.
+  static const String tiktokCaptura1 =
+      'Tela principal do TikTok com um v\xc3\xaddeo ocupando a tela inteira e op\xc3\xa7\xc3\xb5es de intera\xc3\xa7\xc3\xa3o \xc3\xa0 direita.';
+  /// Passo 2 do TikTok.
+  static const String tiktokPasso2 =
+      'Deslize o dedo de baixo para cima para trocar de v\xc3\xaddeo e ver o pr\xc3\xb3ximo.';
+  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 2 do TikTok.
+  static const String tiktokCaptura2 =
+      'Gesto de deslizar o dedo na tela para avan\xc3\xa7ar ao pr\xc3\xb3ximo v\xc3\xaddeo.';
+  /// Passo 3 do TikTok.
+  static const String tiktokPasso3 =
+      'Para procurar um assunto espec\xc3\xadfico, toque na lupa de busca no canto superior.';
+  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 3 do TikTok.
+  static const String tiktokCaptura3 =
+      '\xc3\x8dcone de lupa no topo da tela para abrir o campo de busca.';
+  /// Passo 4 do TikTok.
+  static const String tiktokPasso4 =
+      'Digite o que deseja encontrar (como receitas ou artesanato) e toque no v\xc3\xaddeo que gostar.';
+  /// Descri\xc3\xa7\xc3\xa3o da captura do passo 4 do TikTok.
+  static const String tiktokCaptura4 =
+      'Resultados de busca no TikTok organizados em lista de v\xc3\xaddeos.';
+
   // Gov.br (T078)
   /// Título do guia do Gov.br.
   static const String tituloGovBr = 'Como acessar sua conta Gov.br';
@@ -294,16 +322,16 @@ abstract final class TextosGuias {
       'Tela oficial de login com campos de CPF e senha vazios.';
   /// Passo 3 do Meu INSS.
   static const String meuInssPasso3 =
-      'Toque no cartão "Extrato de Pagamento", no alto da tela inicial.';
+      'Toque no cartão "Extrato de Benefício", no alto da tela inicial.';
   /// Descrição da captura do passo 3 do Meu INSS.
   static const String meuInssCaptura3 =
       'Painel do Meu INSS mostrando os atalhos de extrato e agendamentos.';
   /// Passo 4 do Meu INSS.
   static const String meuInssPasso4 =
-      'Veja o extrato com o valor e a data do seu pagamento. Parabéns! Você já sabe conferir seu benefício.';
+      'Veja o extrato com o valor e a data do seu benefício. Parabéns! Você já sabe conferir seu benefício.';
   /// Descrição da captura do passo 4 do Meu INSS.
   static const String meuInssCaptura4 =
-      'Demonstrativo detalhado do pagamento do benefício no Meu INSS.';
+      'Demonstrativo detalhado do benefício no Meu INSS.';
 
   // e-Título (T081)
   /// Título do guia do e-Título.

@@ -9,6 +9,7 @@ import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 import 'package:memora/features/perfil/domain/data_de_nascimento.dart';
 import 'package:memora/features/perfil/presentation/secao_idade.dart';
 import 'package:memora/features/perfil/presentation/tela_data_de_nascimento.dart';
+import 'package:memora/features/perfil/presentation/tela_perfil.dart';
 import 'package:memora/l10n/textos_perfil.dart';
 
 import '../../suporte/aparelhos.dart';
@@ -531,7 +532,7 @@ void main() {
       await tocar(t, find.byKey(TelaDataDeNascimento.chaveGuardar));
 
       expect(find.byKey(SecaoIdade.chaveIdade), findsOneWidget);
-      expect(find.byType(PerfilProvisorio), findsOneWidget);
+      expect(find.byType(TelaPerfil), findsOneWidget);
     });
 
     testWidgets('uma conta não vê a idade de outra no mesmo aparelho', (

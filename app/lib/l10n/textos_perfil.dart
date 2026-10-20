@@ -5,6 +5,25 @@
 /// e os erros dizem o que fazer, sem bronca.
 abstract final class TextosPerfil {
   // ---------------------------------------------------------------------------
+  // Perfil geral (US8, FR-042)
+  // ---------------------------------------------------------------------------
+
+  /// Título da tela de perfil.
+  static const String tituloPerfil = 'Meu perfil';
+
+  /// Rótulo do nome.
+  static const String rotuloNome = 'Como você quer ser chamada';
+
+  /// Rótulo do canal de contato.
+  static const String rotuloCanal = 'E-mail ou telefone da conta';
+
+  /// Rótulo do aplicativo mais aprendido.
+  static const String rotuloMaisAprendido = 'O que você mais aprendeu';
+
+  /// Frase na voz da Memora quando a pessoa ainda não concluiu nenhum passo a passo.
+  static const String maisAprendidoVazio = 'Ainda vamos aprender juntos!';
+
+  // ---------------------------------------------------------------------------
   // A idade no Perfil
   // ---------------------------------------------------------------------------
 
