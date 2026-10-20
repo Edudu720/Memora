@@ -79,3 +79,4 @@ bool _verificarArquivo(String caminho, String conteudo) {
   }
   return true;
 }
+

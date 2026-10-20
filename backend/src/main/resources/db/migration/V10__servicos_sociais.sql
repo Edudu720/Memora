@@ -42,3 +42,4 @@ VALUES
     (gen_random_uuid(), 'carteira-de-trabalho', 'Carteira de Trabalho Digital', 'SENSIVEL', NULL,
      'Acessar contratos de trabalho, férias e seguro-desemprego',
      TRUE, now(), now());
+

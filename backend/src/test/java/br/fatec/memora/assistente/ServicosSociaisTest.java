@@ -98,3 +98,4 @@ class ServicosSociaisTest extends TesteComBanco {
                 .hasMessageContaining("ck_servico_sensivel_nao_abre");
     }
 }
+

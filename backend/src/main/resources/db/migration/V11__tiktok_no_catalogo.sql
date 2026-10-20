@@ -11,3 +11,4 @@ VALUES
     (gen_random_uuid(), 'tiktok', 'TikTok', 'COTIDIANO', 'com.zhiliaoapp.musically',
      'Assistir a vídeos e seguir criadores de conteúdo',
      TRUE, now(), now());
+
