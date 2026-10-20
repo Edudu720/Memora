@@ -1,9 +1,16 @@
 import '../../domain/guia.dart';
+import 'carteira_de_trabalho.dart';
+import 'carteira_digital.dart';
+import 'correios.dart';
+import 'e_titulo.dart';
 import 'facebook.dart';
+import 'fgts.dart';
 import 'google_fotos.dart';
 import 'gov_br.dart';
 import 'instagram.dart';
 import 'meu_inss.dart';
+import 'poupatempo.dart';
+import 'serasa.dart';
 import 'telegram.dart';
 import 'whatsapp.dart';
 import 'youtube.dart';
@@ -23,6 +30,13 @@ final List<Guia> todosOsGuias = <Guia>[
   guiaTelegram,
   guiaGovBr,
   guiaMeuInss,
+  guiaETitulo,
+  guiaSerasa,
+  guiaFgts,
+  guiaPoupatempo,
+  guiaCarteiraDigital,
+  guiaCorreios,
+  guiaCarteiraDeTrabalho,
 ];
 
 /// O guia do item de catálogo [chave], ou `null` quando ele ainda não tem.

@@ -316,6 +316,31 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
         );
       }
     });
+
+    test('o tamanho total de assets/guias/ não passa de 8 MB (T084, contracts/guias.md)', () {
+      final Directory pastaGuias = Directory('assets/guias');
+      expect(
+        pastaGuias.existsSync(),
+        isTrue,
+        reason: 'Diretório assets/guias não encontrado.',
+      );
+
+      int tamanhoTotalEmBytes = 0;
+      for (final FileSystemEntity entidade in pastaGuias.listSync(recursive: true)) {
+        if (entidade is File) {
+          tamanhoTotalEmBytes += entidade.lengthSync();
+        }
+      }
+
+      const int limite8MB = 8 * 1024 * 1024;
+      expect(
+        tamanhoTotalEmBytes,
+        lessThanOrEqualTo(limite8MB),
+        reason:
+            'A pasta assets/guias/ ultrapassou o limite de 8 MB: '
+            '${(tamanhoTotalEmBytes / (1024 * 1024)).toStringAsFixed(2)} MB.',
+      );
+    });
   });
 
   // O registro está vazio, então os testes acima passam sem examinar nenhum

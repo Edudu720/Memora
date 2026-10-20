@@ -304,4 +304,200 @@ abstract final class TextosGuias {
   /// Descrição da captura do passo 4 do Meu INSS.
   static const String meuInssCaptura4 =
       'Demonstrativo detalhado do pagamento do benefício no Meu INSS.';
+
+  // e-Título (T081)
+  /// Título do guia do e-Título.
+  static const String tituloETitulo = 'Como acessar seu título no e-Título';
+  /// Passo 1 do e-Título.
+  static const String eTituloPasso1 =
+      'Abra o aplicativo e toque no botão azul "Entrar", no meio da tela.';
+  /// Descrição da captura do passo 1 do e-Título.
+  static const String eTituloCaptura1 =
+      'Tela de boas-vindas do aplicativo oficial e-Título com botão Entrar.';
+  /// Passo 2 do e-Título.
+  static const String eTituloPasso2 =
+      'Digite os números do seu CPF ou Título de Eleitor no primeiro campo.';
+  /// Descrição da captura do passo 2 do e-Título.
+  static const String eTituloCaptura2 =
+      'Tela de identificação com campo de CPF ou Título de Eleitor.';
+  /// Passo 3 do e-Título.
+  static const String eTituloPasso3 =
+      'Digite a sua senha cadastrada no e-Título. Lembre-se: digite apenas no aplicativo oficial.';
+  /// Descrição da captura do passo 3 do e-Título.
+  static const String eTituloCaptura3 =
+      'Tela de autenticação do e-Título com campo de senha vazio.';
+  /// Passo 4 do e-Título.
+  static const String eTituloPasso4 =
+      'Veja o seu documento digital com sua foto e local de votação. Parabéns! Seu título está na palma da mão.';
+  /// Descrição da captura do passo 4 do e-Título.
+  static const String eTituloCaptura4 =
+      'Tela do título eleitoral digital exibindo dados eleitorais e QR Code de validação.';
+
+  // Serasa (T081)
+  /// Título do guia do Serasa.
+  static const String tituloSerasa = 'Como consultar seu CPF no Serasa';
+  /// Passo 1 do Serasa.
+  static const String serasaPasso1 =
+      'Abra o aplicativo e toque no botão "Entrar", embaixo na tela.';
+  /// Descrição da captura do passo 1 do Serasa.
+  static const String serasaCaptura1 =
+      'Tela inicial do aplicativo Serasa com destaque para o botão de acesso.';
+  /// Passo 2 do Serasa.
+  static const String serasaPasso2 =
+      'Digite seu CPF e a senha da sua conta Serasa no campo protegido.';
+  /// Descrição da captura do passo 2 do Serasa.
+  static const String serasaCaptura2 =
+      'Tela oficial de autenticação da Serasa com campo de senha vazio.';
+  /// Passo 3 do Serasa.
+  static const String serasaPasso3 =
+      'Toque em "Meu CPF" no menu inferior para consultar sua pontuação.';
+  /// Descrição da captura do passo 3 do Serasa.
+  static const String serasaCaptura3 =
+      'Tela principal do Serasa destacando o menu Meu CPF.';
+  /// Passo 4 do Serasa.
+  static const String serasaPasso4 =
+      'Confira sua pontuação de score e pendências financeiras. Parabéns! Agora você acompanha sua situação financeira com segurança.';
+  /// Descrição da captura do passo 4 do Serasa.
+  static const String serasaCaptura4 =
+      'Painel do Serasa Score mostrando a pontuação e status de pendências.';
+
+  // FGTS (T081)
+  /// Título do guia do FGTS.
+  static const String tituloFgts = 'Como consultar o saldo do FGTS';
+  /// Passo 1 do FGTS.
+  static const String fgtsPasso1 =
+      'Toque no botão laranja "Entrar no aplicativo", no meio da tela.';
+  /// Descrição da captura do passo 1 do FGTS.
+  static const String fgtsCaptura1 =
+      'Tela de boas-vindas do FGTS da Caixa com o botão Entrar no aplicativo.';
+  /// Passo 2 do FGTS.
+  static const String fgtsPasso2 =
+      'Digite o seu CPF e toque em "Próximo" para avançar.';
+  /// Descrição da captura do passo 2 do FGTS.
+  static const String fgtsCaptura2 =
+      'Tela de identificação por CPF do aplicativo FGTS.';
+  /// Passo 3 do FGTS.
+  static const String fgtsPasso3 =
+      'Digite sua senha numérica da Caixa no teclado seguro do aplicativo oficial.';
+  /// Descrição da captura do passo 3 do FGTS.
+  static const String fgtsCaptura3 =
+      'Tela de senha da Caixa Econômica Federal com campos de senha vazios.';
+  /// Passo 4 do FGTS.
+  static const String fgtsPasso4 =
+      'Veja na tela o saldo total de suas contas de FGTS. Parabéns! Você já sabe conferir seus depósitos trabalhistas.';
+  /// Descrição da captura do passo 4 do FGTS.
+  static const String fgtsCaptura4 =
+      'Extrato do FGTS exibindo valores e empresas trabalhadas.';
+
+  // Poupatempo (T081)
+  /// Título do guia do Poupatempo.
+  static const String tituloPoupatempo = 'Como agendar serviços no Poupatempo';
+  /// Passo 1 do Poupatempo.
+  static const String poupatempoPasso1 =
+      'Toque no botão "Entrar com gov.br" no alto da tela inicial.';
+  /// Descrição da captura do passo 1 do Poupatempo.
+  static const String poupatempoCaptura1 =
+      'Tela inicial do Poupatempo SP com opção de acesso pelo Gov.br.';
+  /// Passo 2 do Poupatempo.
+  static const String poupatempoPasso2 =
+      'Informe seu CPF e senha da conta gov.br no ambiente oficial.';
+  /// Descrição da captura do passo 2 do Poupatempo.
+  static const String poupatempoCaptura2 =
+      'Ambiente oficial de identificação com campo de senha vazio.';
+  /// Passo 3 do Poupatempo.
+  static const String poupatempoPasso3 =
+      'Toque em "Serviços" e escolha o documento que precisa agendar.';
+  /// Descrição da captura do passo 3 do Poupatempo.
+  static const String poupatempoCaptura3 =
+      'Lista de serviços disponíveis para agendamento no Poupatempo.';
+  /// Passo 4 do Poupatempo.
+  static const String poupatempoPasso4 =
+      'Escolha o dia, horário e posto de atendimento mais próximo. Parabéns! Seu agendamento está concluído.';
+  /// Descrição da captura do passo 4 do Poupatempo.
+  static const String poupatempoCaptura4 =
+      'Confirmação do agendamento com data, hora e endereço do posto Poupatempo.';
+
+  // Carteira Digital (T082)
+  /// Título do guia da Carteira Digital.
+  static const String tituloCarteiraDigital = 'Como acessar seus documentos na Carteira Digital';
+  /// Passo 1 da Carteira Digital.
+  static const String carteiraDigitalPasso1 =
+      'Toque no botão "Entrar com gov.br" na tela principal.';
+  /// Descrição da captura do passo 1 da Carteira Digital.
+  static const String carteiraDigitalCaptura1 =
+      'Tela de abertura da Carteira Digital com botão de conexão gov.br.';
+  /// Passo 2 da Carteira Digital.
+  static const String carteiraDigitalPasso2 =
+      'Digite o seu CPF e senha da conta gov.br no ambiente oficial protegido.';
+  /// Descrição da captura do passo 2 da Carteira Digital.
+  static const String carteiraDigitalCaptura2 =
+      'Tela de autenticação unificada do governo com campo de senha protegido e vazio.';
+  /// Passo 3 da Carteira Digital.
+  static const String carteiraDigitalPasso3 =
+      'Toque na aba "Documentos" no menu inferior para ver sua lista.';
+  /// Descrição da captura do passo 3 da Carteira Digital.
+  static const String carteiraDigitalCaptura3 =
+      'Aba Documentos exibindo miniaturas de RG e certidões cadastradas.';
+  /// Passo 4 da Carteira Digital.
+  static const String carteiraDigitalPasso4 =
+      'Toque no documento para abrir em tamanho legível. Parabéns! Seus documentos oficiais estão sempre seguros com você.';
+  /// Descrição da captura do passo 4 da Carteira Digital.
+  static const String carteiraDigitalCaptura4 =
+      'Documento digital oficial aberto com dados legíveis e código de autenticidade.';
+
+  // Correios (T082)
+  /// Título do guia dos Correios.
+  static const String tituloCorreios = 'Como rastrear encomendas nos Correios';
+  /// Passo 1 dos Correios.
+  static const String correiosPasso1 =
+      'Toque na barra "Rastrear encomendas", no topo da tela inicial.';
+  /// Descrição da captura do passo 1 dos Correios.
+  static const String correiosCaptura1 =
+      'Tela principal do aplicativo Correios destacando o campo de rastreamento.';
+  /// Passo 2 dos Correios.
+  static const String correiosPasso2 =
+      'Digite o código da sua encomenda de 13 letras e números.';
+  /// Descrição da captura do passo 2 dos Correios.
+  static const String correiosCaptura2 =
+      'Teclado ativo digitando código de rastreamento no padrão dos Correios.';
+  /// Passo 3 dos Correios.
+  static const String correiosPasso3 =
+      'Caso queira receber alertas, entre com seu login e senha do idCorreios.';
+  /// Descrição da captura do passo 3 dos Correios.
+  static const String correiosCaptura3 =
+      'Tela opcional de acesso idCorreios com campo de senha vazio.';
+  /// Passo 4 dos Correios.
+  static const String correiosPasso4 =
+      'Veja onde seu pacote está e a previsão de entrega. Parabéns! Agora você sabe rastrear qualquer entrega dos Correios.';
+  /// Descrição da captura do passo 4 dos Correios.
+  static const String correiosCaptura4 =
+      'Histórico de rastreamento com cidades por onde o pacote passou e data prevista.';
+
+  // Carteira de Trabalho Digital (T082)
+  /// Título do guia da Carteira de Trabalho Digital.
+  static const String tituloCarteiraDeTrabalho = 'Como acessar a Carteira de Trabalho Digital';
+  /// Passo 1 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoPasso1 =
+      'Toque no botão azul "Entrar com gov.br" no meio da tela.';
+  /// Descrição da captura do passo 1 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura1 =
+      'Tela de apresentação da Carteira de Trabalho Digital com botão de acesso.';
+  /// Passo 2 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoPasso2 =
+      'Digite o seu CPF e a senha oficial da sua conta gov.br.';
+  /// Descrição da captura do passo 2 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura2 =
+      'Tela oficial de autenticação com campos de CPF e senha vazios.';
+  /// Passo 3 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoPasso3 =
+      'Toque na aba "Contratos", embaixo, para ver seus registros de emprego.';
+  /// Descrição da captura do passo 3 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura3 =
+      'Menu Contratos mostrando a lista de empregos anteriores e atuais.';
+  /// Passo 4 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoPasso4 =
+      'Confira as datas de admissão, cargo e anotações da empresa. Parabéns! Seu histórico de trabalho está sempre acessível.';
+  /// Descrição da captura do passo 4 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura4 =
+      'Detalhes de um contrato de trabalho com data de admissão e salário anotados.';
 }

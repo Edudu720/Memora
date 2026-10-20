@@ -56,7 +56,6 @@ class _RepositorioComServicoSemGuia extends RepositorioAssistenteSimulado {
   Future<List<ServicoDoCatalogo>> catalogo() async {
     final List<ServicoDoCatalogo> lista = await super.catalogo();
     return <ServicoDoCatalogo>[
-      ...lista,
       const ServicoDoCatalogo(
         id: 'novo-servico',
         chave: 'novo-servico',
@@ -65,6 +64,7 @@ class _RepositorioComServicoSemGuia extends RepositorioAssistenteSimulado {
         categoria: CategoriaDoServico.sensivel,
         memoraPodeAbrir: false,
       ),
+      ...lista,
     ];
   }
 }
@@ -167,17 +167,8 @@ void main() {
     await _chegarAoHub(t, _RepositorioComServicoSemGuia());
 
     await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaServicos)));
-    await _avancar(t, 10);
-    final Finder item = find.byKey(TelaCatalogo.chaveDoItem('Serviço Futuro'));
-    await t.scrollUntilVisible(
-      item,
-      100,
-      scrollable: find.descendant(
-        of: find.byKey(TelaCatalogo.chaveLista),
-        matching: find.byType(Scrollable),
-      ).first,
-    );
-    await _tocar(t, item);
+    await _avancar(t, 6);
+    await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Serviço Futuro')));
 
     expect(find.byType(TelaConversa), findsOneWidget);
     expect(_textoDoCampo(t), TextosAssistente.perguntaSobre('Serviço Futuro'));

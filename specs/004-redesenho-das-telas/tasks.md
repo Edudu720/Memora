@@ -327,10 +327,10 @@ senha do gov.br e onde nunca se digita (US5).
 - [X] T079 [P] [US5] Guia do **Meu INSS**, no mesmo formato, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [X] T080 [US5] **Confirmar com a equipe** qual "Carteira Digital" o wireframe quis dizer, e registrar a resposta na nota ¹ de `specs/004-redesenho-das-telas/data-model.md`, antes de capturar
   → **Resolvida em 2026-10-01**: é o documento digital do gov.br (Henrique). Nota ¹ do `data-model.md` atualizada.
-- [ ] T081 [P] [US5] Guias de **e-Título**, **Serasa**, **FGTS** e **Poupatempo**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
-- [ ] T082 [P] [US5] Guias de **Carteira Digital** (conforme T080), **Correios** e **Carteira de Trabalho Digital**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
-- [ ] T083 [US5] Criar `backend/src/main/resources/db/migration/V10__servicos_sociais.sql` (todas `SENSIVEL`, `identificador_android` nulo) e as mesmas linhas no simulado; teste `backend/src/test/java/br/fatec/memora/assistente/ServicosSociaisTest.java`: inserir uma das novas com pacote é recusado por `ck_servico_sensivel_nao_abre`; apaga só o que criar
-- [ ] T084 [US5] Medir `app/assets/guias/` e reprovar acima de 8 MB, num caso de `catalogo_e_guias_test.dart`
+- [X] T081 [P] [US5] Guias de **e-Título**, **Serasa**, **FGTS** e **Poupatempo**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
+- [X] T082 [P] [US5] Guias de **Carteira Digital** (conforme T080), **Correios** e **Carteira de Trabalho Digital**, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
+- [X] T083 [US5] Criar `backend/src/main/resources/db/migration/V10__servicos_sociais.sql` (todas `SENSIVEL`, `identificador_android` nulo) e as mesmas linhas no simulado; teste `backend/src/test/java/br/fatec/memora/assistente/ServicosSociaisTest.java`: inserir uma das novas com pacote é recusado por `ck_servico_sensivel_nao_abre`; apaga só o que criar
+- [X] T084 [US5] Medir `app/assets/guias/` e reprovar acima de 8 MB, num caso de `catalogo_e_guias_test.dart`
 
 ---
 

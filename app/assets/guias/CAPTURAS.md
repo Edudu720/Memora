@@ -29,3 +29,10 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 | telegram | 2026-10-01 | 11.1.0 | Galaxy A14 | Equipe Memora |
 | gov-br | 2026-10-01 | 3.5.0 | Galaxy A14 | Equipe Memora |
 | meu-inss | 2026-10-01 | 4.18.0 | Galaxy A14 | Equipe Memora |
+| e-titulo | 2026-10-01 | 2.5.0 | Galaxy A14 | Equipe Memora |
+| serasa | 2026-10-01 | 10.12.0 | Galaxy A14 | Equipe Memora |
+| fgts | 2026-10-01 | 4.8.1 | Galaxy A14 | Equipe Memora |
+| poupatempo | 2026-10-01 | 5.2.0 | Galaxy A14 | Equipe Memora |
+| carteira-digital | 2026-10-01 | 3.1.2 | Galaxy A14 | Equipe Memora |
+| correios | 2026-10-01 | 4.1.0 | Galaxy A14 | Equipe Memora |
+| carteira-de-trabalho | 2026-10-01 | 5.8.0 | Galaxy A14 | Equipe Memora |
