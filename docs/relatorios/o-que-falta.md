@@ -14,6 +14,40 @@ para ninguém precisar caçar nos cinco `tasks.md`.
 > ordem** é a primeira tarefa — a ordem está na seção 2, e mesclar fora dela
 > quebra a compilação da `master`.
 
+> 🚀 **2026-10-21 — o APK para outras pessoas vai usar o Render, e isso é a
+> próxima sessão de quem pegar a implantação** (decisão do Henrique). Até lá, o
+> app só fala com a IA no celular **por cabo** (`adb reverse`, ver o `CLAUDE.md`).
+> O que separa o repositório de um APK instalável com backend e IA funcionando:
+>
+> 1. **T113 da 003 — `INTERNET` no manifesto principal**
+>    (`app/android/app/src/main/AndroidManifest.xml`). Sem ela o APK de
+>    **release** não fala com servidor nenhum; o de depuração só funciona porque
+>    o Flutter põe a permissão nesse modo.
+> 2. **Chave de assinatura própria do Memora.** Hoje o release é assinado com a
+>    chave de **depuração da máquina de quem gera** (`build.gradle.kts`,
+>    `signingConfigs.getByName("debug")`): APK de outra máquina não instala por
+>    cima ("signatures do not match") e a pessoa perde o que está no aparelho.
+>    A chave **não vai para o git**.
+> 3. **Backend no Render**, com `https://` — o release recusa `http://` fora de
+>    depuração (`Ambiente.exigirTlsForaDeDepuracao`). Não existe `Dockerfile`
+>    ainda. Banco: Postgres gerenciado (do Render ou Neon). No plano gratuito o
+>    serviço **dorme** sem uso e a primeira resposta leva 30-60 s, mais que os
+>    30 s que o app espera pela primeira palavra (`esperaMaxima`).
+> 4. **Variáveis fixas no Render**: `memora.token.segredo`,
+>    `MEMORA_CHAVE_ORIGEM` (≥ 32 bytes), `MEMORA_ASSISTENTE_PROVEDOR=gemini`,
+>    `GEMINI_API_KEY` e a URL do banco. Sem as duas primeiras fixas, cada
+>    reinício derruba a sessão de todo mundo.
+> 5. **Não suba com o perfil `producao`**: ele não tem `EnviadorDeCodigo`
+>    (T065a) e a aplicação não sobe, de propósito. Sem ele, o código de
+>    verificação e o de "Esqueci minha senha" vão **para o log** — avise quem
+>    testar que recuperar a senha não funciona.
+> 6. **Modelo do Gemini**: o padrão é `gemini-3.8-flash` (ADR-002), e em
+>    2026-10-21 ele deu **503 por sobrecarga** e levou 25 s para dizer "oi". No
+>    celular o teste correu com `MEMORA_ASSISTENTE_GEMINI_MODELO=gemini-3.6-flash`
+>    (2,9 s). Trocar o padrão é decisão da equipe e emenda a ADR-002.
+> 7. **Gerar o release** com
+>    `--dart-define=MEMORA_URL_BASE=https://<servico>.onrender.com/v1 --dart-define=MEMORA_SERVIDOR_REAL=true`.
+
 ---
 
 ## 1. O que depende de decisão ou de gente — e não de código
@@ -27,7 +61,8 @@ a novembro com centenas de testes verdes e sem fazer o que promete.
 | **Ratificar a spec da 004**, aprovada pelo Eduardo em 2026-10-13 | Henrique e Du3101, aprovando a #58 | Formalmente, o Princípio IV | `Status` da `spec.md` da 004 |
 | **T116: segunda rodada da revisão de design, no celular** | Henrique | **O merge de toda tela nova** (decisão de 2026-10-13: portão do merge, não do código) | T116 da 004 |
 | **Teste com 5 pessoas de 65+** | Equipe | Portão de saída das features 001, 002, 003 e 004 | T085 (001), T050/T051 (002), T071 (003), T105 (004) |
-| **Mesclar a `feature/003-fase11-convergencia`** (abrir a PR) | Henrique | **A T071**: a chave gratuita do Gemini pode ser usada no teste com as 5 pessoas (decidido em 2026-10-13, seguindo a emenda à ADR-002), mas **só com o aviso e o consentimento da FR-051 no aplicativo**, e eles só existem nessa branch | Emenda à ADR-002 na `003-fase11`; T101-T104 da 003 |
+| ~~**Mesclar a `feature/003-fase11-convergencia`**~~ | — | ✅ **Na `master` em 2026-10-21**, junto com a fase 12, direto e sem PR (pedido do Henrique): o aviso e o consentimento da FR-051 estão no app, então a T071 pode usar a chave gratuita | T100-T113 da 003 |
+| **Implantar no Render e gerar o APK de release** | Próxima sessão (decisão do Henrique, 2026-10-21) | Mandar o APK a qualquer pessoa com a IA funcionando | Lista de 7 passos no topo deste documento |
 | **Provedor de envio de e-mail/SMS** | Equipe | Código de verificação e de recuperação chegarem a alguém; o perfil `producao` não sobe sem ele | T065a da 001 |
 | **Registrar o app no Google e no Facebook** | Equipe | Login social; aprovação do Facebook não é rápida | Fase 8 da 001 (T079-T083) |
 | **Verba para um provedor de IA que não treine com a conversa** | Equipe | Cumprir a FR-051 original; hoje é risco aceito, sem data (ADR-002) | ADR-002; FR-051 da 003 |

@@ -4,8 +4,35 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-> 🔌 **2026-10-21 — as fases 11 e 12 da 003 entraram na branch
-> `integracao/003-fase11-12-na-master`**, pelo Henrique. Estavam só na máquina
+**Última sessão**: 2026-10-21 — **a assistente real chega à `master` e é
+testada no celular**, pelo Henrique. Entrou **direto na `master`, sem PR**, a
+pedido dele. **Ninguém revisou ainda.**
+
+> 🚀 **Próxima demanda de quem assumir a implantação: o backend no Render e o
+> APK de release.** Decisão do Henrique, adiada para outra sessão. Os 7 passos
+> estão no topo de [`docs/relatorios/o-que-falta.md`](docs/relatorios/o-que-falta.md):
+> T113 (`INTERNET`), chave de assinatura própria, `Dockerfile` + Render com
+> `https://`, variáveis fixas, **sem** o perfil `producao` (T065a), modelo do
+> Gemini e o `--dart-define` do release. **Até lá, a IA só funciona no celular
+> por cabo**: backend local com `MEMORA_ASSISTENTE_PROVEDOR=gemini`, APK de
+> **depuração** com `MEMORA_URL_BASE=http://localhost:8080/v1` e
+> `adb reverse tcp:8080 tcp:8080` (o firewall do Windows bloqueia a 8080 pela
+> rede, e as redes da máquina do Henrique são "Públicas").
+>
+> **Depois da integração, ainda nesta sessão, no celular**: a falha do Gemini
+> reabria o aviso a cada erro (T129, consertado); o aviso virou **só o escudo**,
+> o negrito (`**x**`) passou a funcionar e a resposta aparece letra a letra
+> (T130-T132, clarificação de 2026-10-21 na spec da 004, FR-020a/b, FR-022 e
+> FR-049 revistas); e cada conversa terminava com `AuthorizationDeniedException`
+> no log: o despacho `ASYNC` do fim do SSE passava pela segurança sem o filtro
+> do token (`ConfiguracaoDeSegurancaWeb` libera só `DispatcherType.ASYNC`,
+> `DespachoAssincronoDaConversaTest`). **2249 testes no app; 417 no backend**,
+> todos verdes menos o `ClienteDaAssistenteGeminiRealTest` (sobrecarga do
+> Google no `gemini-3.8-flash`; o teste no celular usou
+> `MEMORA_ASSISTENTE_GEMINI_MODELO=gemini-3.6-flash`).
+
+> 🔌 **2026-10-21 — as fases 11 e 12 da 003 entraram na `master`** (pela branch
+> `integracao/003-fase11-12-na-master`), pelo Henrique. Estavam só na máquina
 > dele desde 2026-10-09, e **a `master` não tinha nada delas**: com
 > `MEMORA_SERVIDOR_REAL=true` o app ainda conversava com o **simulado** (a T036
 > nunca tinha subido). É por isso que a IA "não funcionava" na versão da #55.
@@ -19,10 +46,9 @@
 > citava o "serviço de fora", foi reprovado pelo teste do teclado e encurtou.
 > **2187 testes no app, 414 de 415 no backend** — o que falta é o
 > `ClienteDaAssistenteGeminiRealTest`, com **503 do Google** (modelo
-> sobrecarregado, não código). Falta ainda: a T113 (`INTERNET` no manifesto
-> principal) e testar no celular.
+> sobrecarregado, não código).
 
-**Última sessão**: 2026-10-13 — **revisão das #44 a #48 e as fases 5 e 8
+Sessão anterior: 2026-10-13 — **revisão das #44 a #48 e as fases 5 e 8
 da 004**, pelo Eduardo (Opus orquestrando e revisando, agentes Sonnet
 escrevendo; um revisor independente por PR). As cinco PRs saíram "com
 correções", nenhuma com problema crítico. O veredito de cada uma está num
