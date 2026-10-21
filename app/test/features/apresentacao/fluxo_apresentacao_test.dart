@@ -9,6 +9,7 @@ import 'package:memora/features/apresentacao/presentation/fluxo_apresentacao.dar
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.dart';
+import 'package:memora/features/autenticacao/presentation/telas/tela_de_volta.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
@@ -773,7 +774,12 @@ void main() {
       await montar(t);
       // A sessão continua válida no repositório: ao abrir o login, ela é
       // renovada em silêncio (FR-016) e a pessoa entra sem digitar nada.
-      await tocar(t, find.text(TextosAutenticacao.botaoJaTenhoConta));
+      final Finder botaoEntrar = find.byKey(TelaDeVolta.chaveEntrar);
+      if (botaoEntrar.evaluate().isNotEmpty) {
+        await tocar(t, botaoEntrar);
+      } else {
+        await tocar(t, find.text(TextosAutenticacao.botaoJaTenhoConta));
+      }
       await avancar(t, 8);
 
       exigirApresentacao('não terminou nem pulou: não foi vista');

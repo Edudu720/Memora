@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visão Geral do Memora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: coluna de leitura com índice lateral; telas mostradas como celulares em miniatura ao lado do texto. */
+:root {
+  --fundo: #F8F8F8;
+  --superficie: #FFFFFF;
+  --superficie-alt: #ECEEF3;
+  --destaque: #E3EAFF;
+  --primaria: #1040F8;
+  --sobre-primaria: #FFFFFF;
+  --texto: #111111;
+  --texto-suave: #4A4A4A;
+  --borda: #C9CCD4;
+  --borda-forte: #6B6B6B;
+  --sucesso: #186A2E;
+  --sucesso-fundo: #E2F2E6;
+  --aviso: #8A5A00;
+  --aviso-fundo: #FBF0D9;
+  --plano: #4A4A4A;
+  --plano-fundo: #ECEEF3;
+  --perigo: #B3231F;
+  --aparelho: #1B1E24;
+  --fonte: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fundo: #101216; --superficie: #1B1E24; --superficie-alt: #2A2E36; --destaque: #22305A;
+    --primaria: #9CB8FF; --sobre-primaria: #06132E; --texto: #F2F4F8; --texto-suave: #C2C7D0;
+    --borda: #3A3F4A; --borda-forte: #8A909C; --sucesso: #7CD69A; --sucesso-fundo: #17301F;
+    --aviso: #F2C46B; --aviso-fundo: #3A2E12; --plano: #C2C7D0; --plano-fundo: #2A2E36;
+    --perigo: #FF9B95; --aparelho: #000000; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --fundo: #101216; --superficie: #1B1E24; --superficie-alt: #2A2E36; --destaque: #22305A;
+  --primaria: #9CB8FF; --sobre-primaria: #06132E; --texto: #F2F4F8; --texto-suave: #C2C7D0;
+  --borda: #3A3F4A; --borda-forte: #8A909C; --sucesso: #7CD69A; --sucesso-fundo: #17301F;
+  --aviso: #F2C46B; --aviso-fundo: #3A2E12; --plano: #C2C7D0; --plano-fundo: #2A2E36;
+  --perigo: #FF9B95; --aparelho: #000000; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--fundo); color: var(--texto);
+  font-family: var(--fonte); font-size: 17px; line-height: 1.6;
+}
+a { color: var(--primaria); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--primaria); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3, h4 { line-height: 1.2; text-wrap: balance; margin: 0; }
+h2 { font-size: 1.85rem; }
+h3 { font-size: 1.3rem; }
+h4 { font-size: 1.05rem; }
+p { margin: 0; }
+strong { font-weight: 700; }
+
+.pagina {
+  max-width: 1180px; margin: 0 auto; padding-inline: 20px;
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px;
+}
+@media (max-width: 900px) { .pagina { grid-template-columns: minmax(0, 1fr); gap: 0; } .indice { display: none; } }
+
+/* Índice lateral */
+.indice { position: sticky; top: 0; align-self: start; padding-block: 40px; }
+.indice p { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 12px; }
+.indice ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; border-left: 2px solid var(--borda); }
+.indice a { display: block; padding: 6px 0 6px 14px; color: var(--texto-suave); text-decoration: none; font-size: .95rem; margin-left: -2px; border-left: 2px solid transparent; }
+.indice a:hover { color: var(--texto); border-left-color: var(--primaria); }
+
+main { min-width: 0; padding-block: 40px 80px; display: grid; gap: 80px; }
+section { display: grid; gap: 24px; scroll-margin-top: 24px; }
+.rotulo { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; color: var(--primaria); font-weight: 700; }
+.leitura { max-width: 66ch; display: grid; gap: 14px; }
+.suave { color: var(--texto-suave); }
+
+/* Abertura */
+.abertura { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: center; padding-top: 16px; }
+@media (max-width: 720px) { .abertura { grid-template-columns: minmax(0, 1fr); } }
+.abertura h1 { font-size: clamp(2.6rem, 6vw, 4rem); letter-spacing: -.01em; }
+.abertura h1 span { color: var(--primaria); }
+.lema { font-size: 1.35rem; margin-top: 12px; max-width: 32ch; }
+.ficha { margin-top: 28px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px 28px; max-width: 640px; }
+.ficha div { display: grid; gap: 2px; }
+.ficha dt { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-suave); }
+.ficha dd { margin: 0; font-weight: 700; }
+.pergunta {
+  border: 2px solid var(--primaria); border-radius: 20px; padding: 20px 24px;
+  background: var(--destaque); font-size: 1.15rem; max-width: 66ch;
+}
+.pergunta small { display: block; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--primaria); font-weight: 700; margin-bottom: 4px; }
+
+/* Grade de cartões simples */
+.grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.bloco { background: var(--superficie); border: 1px solid var(--borda); border-radius: 14px; padding: 18px 20px; display: grid; gap: 6px; align-content: start; }
+.bloco h4 { display: flex; gap: 10px; align-items: baseline; }
+.bloco .n { font-variant-numeric: tabular-nums; color: var(--primaria); font-weight: 700; }
+.bloco p { color: var(--texto-suave); font-size: .97rem; }
+
+/* Funcionalidades */
+.funcoes { display: grid; gap: 20px; }
+.funcao { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; padding-top: 20px; border-top: 1px solid var(--borda); }
+@media (max-width: 640px) { .funcao { grid-template-columns: minmax(0, 1fr); gap: 10px; } }
+.funcao header { display: grid; gap: 6px; align-content: start; }
+.funcao header .cod { font-family: var(--mono); font-size: .85rem; color: var(--texto-suave); }
+.funcao ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
+.funcao li::marker { color: var(--primaria); }
+
+/* Selos de situação */
+.selo { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; white-space: nowrap; letter-spacing: .02em; }
+.selo::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.selo.pronta { color: var(--sucesso); background: var(--sucesso-fundo); }
+.selo.redesenho { color: var(--aviso); background: var(--aviso-fundo); }
+.selo.planejada { color: var(--plano); background: var(--plano-fundo); }
+.selo.planejada::before { background: transparent; border: 1.5px solid currentColor; }
+.legenda { display: flex; flex-wrap: wrap; gap: 10px 20px; font-size: .92rem; color: var(--texto-suave); align-items: center; }
+
+/* Mapa de navegação */
+.mapa-rolagem { overflow-x: auto; border: 1px solid var(--borda); border-radius: 16px; background: var(--superficie); }
+.mapa { min-width: 760px; padding: 24px; display: grid; grid-template-columns: 1fr 28px 1fr 28px 1.15fr 28px 1.2fr; align-items: center; gap: 0; }
+.coluna { display: grid; gap: 10px; }
+.coluna > small { font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-suave); }
+.no { border: 1.5px solid var(--borda-forte); border-radius: 10px; padding: 8px 12px; font-size: .9rem; background: var(--fundo); line-height: 1.3; }
+.no.principal { border-color: var(--primaria); background: var(--destaque); font-weight: 700; }
+.no.tracejado { border-style: dashed; color: var(--texto-suave); }
+.no em { display: block; font-style: normal; font-size: .78rem; color: var(--texto-suave); font-weight: 400; }
+.seta { color: var(--borda-forte); text-align: center; font-size: 1.2rem; }
+
+/* Telas */
+.grupo { display: grid; gap: 28px; }
+.grupo > header { display: grid; gap: 8px; max-width: 66ch; }
+.tela { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 640px) { .tela { grid-template-columns: minmax(0, 1fr); } .tela .celular { justify-self: center; } }
+.tela-texto { display: grid; gap: 12px; min-width: 0; }
+.tela-texto h3 { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.tela-texto .protege { border-left: 3px solid var(--primaria); padding: 4px 0 4px 14px; font-size: .97rem; }
+.tela-texto .protege b { color: var(--primaria); }
+.tela-texto ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.tela-texto li::marker { color: var(--primaria); }
+
+/* Celular em miniatura: cores do tema claro do próprio aplicativo, fixas de propósito */
+.celular {
+  width: 236px; max-width: 100%; aspect-ratio: 9 / 18.5; background: var(--aparelho);
+  border-radius: 30px; padding: 9px; box-shadow: 0 10px 30px rgba(16, 20, 40, .18);
+}
+.visor {
+  --c-fundo: #F8F8F8; --c-sup: #FFFFFF; --c-pri: #1040F8; --c-dest: #E3EAFF; --c-texto: #111111; --c-suave: #4A4A4A; --c-borda: #B8BCC6;
+  height: 100%; border-radius: 22px; background: var(--c-fundo); color: var(--c-texto); overflow: hidden;
+  display: flex; flex-direction: column; font-size: 10.5px; line-height: 1.35;
+}
+.barra-status { display: flex; justify-content: space-between; padding: 7px 14px 3px; font-size: 8.5px; font-weight: 700; color: var(--c-suave); font-variant-numeric: tabular-nums; }
+.corpo { flex: 1; padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 7px; min-height: 0; }
+.v-titulo { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.v-voltar { font-size: 9.5px; color: var(--c-pri); font-weight: 700; }
+.v-texto { color: var(--c-suave); }
+.v-texto b { color: var(--c-pri); }
+.v-botao { background: var(--c-pri); color: #FFF; border-radius: 999px; padding: 8px 10px; text-align: center; font-weight: 700; font-size: 10.5px; }
+.v-botao.sec { background: transparent; color: var(--c-pri); border: 1.5px solid var(--c-pri); }
+.v-botao.ter { background: transparent; color: var(--c-pri); text-decoration: underline; padding: 4px; }
+.v-campo { display: grid; gap: 2px; }
+.v-campo span { font-size: 9px; font-weight: 700; }
+.v-campo i { display: block; height: 22px; border: 1.5px solid var(--c-borda); border-radius: 7px; background: var(--c-sup); font-style: normal; color: var(--c-suave); font-size: 9px; padding: 4px 7px; }
+.v-info { border-bottom: 1px solid var(--c-borda); padding: 5px 0; display: grid; gap: 1px; }
+.v-info span { font-size: 8.5px; color: var(--c-suave); }
+.v-info strong { font-size: 10.5px; }
+.v-porta { background: var(--c-pri); color: #FFF; border-radius: 16px; padding: 7px 9px; display: flex; gap: 8px; align-items: center; }
+.v-porta.clara { background: var(--c-dest); color: var(--c-texto); }
+.v-porta .med { width: 24px; height: 24px; border-radius: 50%; background: #E3EAFF; flex: none; display: grid; place-items: center; color: #1040F8; font-weight: 700; font-size: 11px; }
+.v-porta.clara .med { background: #FFF; }
+.v-porta b { display: block; font-size: 10.5px; }
+.v-porta small { font-size: 8.5px; opacity: .9; }
+.v-aviso { background: #FFF6E0; border: 1.5px solid #B07A00; border-radius: 9px; padding: 6px 8px; font-size: 9px; color: #3D2B00; }
+.v-aviso b { display: block; font-size: 9.5px; }
+.v-aviso.fino { padding: 4px 8px; }
+.v-balao { max-width: 82%; padding: 6px 8px; border-radius: 12px; font-size: 9.5px; }
+.v-balao.dela { background: var(--c-sup); border: 1px solid var(--c-borda); border-bottom-left-radius: 3px; align-self: flex-start; }
+.v-balao.minha { background: var(--c-dest); border-bottom-right-radius: 3px; align-self: flex-end; }
+.v-balao small { display: block; font-size: 8px; font-weight: 700; color: var(--c-suave); }
+.v-dialogo { margin-top: auto; background: var(--c-sup); border-radius: 14px; padding: 10px; display: grid; gap: 6px; box-shadow: 0 -2px 14px rgba(0,0,0,.14); }
+.v-memora { width: 46px; height: 46px; border-radius: 50%; background: var(--c-dest); display: grid; place-items: center; align-self: center; }
+.v-memora svg { width: 34px; height: 34px; }
+.v-memora.grande { width: 76px; height: 76px; }
+.v-memora.grande svg { width: 56px; height: 56px; }
+.v-dica { background: var(--c-sup); border: 1.5px solid var(--c-pri); border-radius: 12px; padding: 6px 8px; display: flex; gap: 6px; align-items: center; font-size: 9.5px; }
+.v-dica .v-memora { width: 26px; height: 26px; flex: none; }
+.v-dica .v-memora svg { width: 20px; height: 20px; }
+.v-faixa { margin-top: auto; text-align: center; font-size: 8.5px; color: var(--c-suave); font-weight: 700; }
+.v-lista { display: grid; gap: 5px; }
+.v-item { display: flex; align-items: center; gap: 7px; background: var(--c-sup); border: 1px solid var(--c-borda); border-radius: 10px; padding: 6px 8px; font-size: 10px; }
+.v-item .ico { width: 18px; height: 18px; border-radius: 5px; flex: none; }
+.v-item small { margin-left: auto; color: var(--c-pri); font-weight: 700; font-size: 8.5px; }
+.v-escrever { margin-top: auto; display: flex; gap: 5px; }
+.v-escrever i { flex: 1; height: 24px; border: 1.5px solid var(--c-borda); border-radius: 999px; background: var(--c-sup); font-style: normal; font-size: 8.5px; color: var(--c-suave); padding: 5px 9px; }
+.v-escrever b { background: var(--c-pri); color: #FFF; border-radius: 999px; padding: 5px 8px; font-size: 9px; }
+.v-nav { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--c-sup); border-top: 1px solid var(--c-borda); padding: 5px 4px 8px; }
+.v-nav span { display: grid; justify-items: center; gap: 2px; font-size: 8px; color: var(--c-suave); padding-top: 3px; border-top: 2.5px solid transparent; }
+.v-nav span i { width: 14px; height: 14px; border: 1.8px solid currentColor; border-radius: 4px; }
+.v-nav span.ativo { color: var(--c-pri); font-weight: 700; border-top-color: var(--c-pri); }
+.v-nav span.ativo i { background: var(--c-dest); }
+.v-passos { display: flex; gap: 3px; }
+.v-passos i { flex: 1; height: 4px; border-radius: 2px; background: var(--c-borda); }
+.v-passos i.feito { background: var(--c-pri); }
+.v-exemplo { flex: 1; min-height: 70px; border: 1.5px dashed var(--c-borda); border-radius: 10px; display: grid; place-items: center; color: var(--c-suave); font-size: 8.5px; position: relative; background: var(--c-sup); }
+.v-exemplo::after { content: ""; position: absolute; width: 26px; height: 26px; border: 2.5px solid var(--c-pri); border-radius: 50%; right: 22%; bottom: 18%; }
+.v-centro { margin: auto 0; display: grid; gap: 9px; justify-items: center; text-align: center; }
+
+/* Tabela */
+.tabela-rolagem { overflow-x: auto; border: 1px solid var(--borda); border-radius: 14px; background: var(--superficie); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .95rem; }
+th, td { text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--borda); vertical-align: top; }
+th { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--texto-suave); font-weight: 700; background: var(--superficie-alt); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.barra-progresso { display: flex; align-items: center; gap: 10px; }
+.barra-progresso span { flex: 1; min-width: 70px; height: 8px; border-radius: 4px; background: var(--superficie-alt); overflow: hidden; }
+.barra-progresso span i { display: block; height: 100%; background: var(--primaria); border-radius: 4px; }
+
+.alerta { border: 1.5px solid var(--perigo); border-radius: 14px; padding: 16px 20px; display: grid; gap: 6px; background: var(--superficie); }
+.alerta h4 { color: var(--perigo); }
+
+footer.rodape { border-top: 1px solid var(--borda); padding-top: 20px; color: var(--texto-suave); font-size: .9rem; display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="memora" viewBox="0 0 40 40">
+      <circle cx="20" cy="17" r="11" fill="#F2C9A8"/>
+      <path d="M8 17c0-8 5-12 12-12s12 4 12 12c-2-3-5-5-8-5h-8c-3 0-6 2-8 5z" fill="#6B6F7A"/>
+      <circle cx="16" cy="18" r="1.4" fill="#111"/>
+      <circle cx="24" cy="18" r="1.4" fill="#111"/>
+      <path d="M16 22.5c2.2 2 5.8 2 8 0" stroke="#111" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <path d="M8 38c1-7 6-10 12-10s11 3 12 10z" fill="#1040F8"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="pagina">
+  <nav class="indice" aria-label="Índice">
+    <p>Neste documento</p>
+    <ol>
+      <li><a href="#o-que-e">O que é o Memora</a></li>
+      <li><a href="#principios">Princípios</a></li>
+      <li><a href="#funcionalidades">Funcionalidades</a></li>
+      <li><a href="#navegacao">Como se navega</a></li>
+      <li><a href="#telas-entrada">Telas: entrar na conta</a></li>
+      <li><a href="#telas-dentro">Telas: dentro do Memora</a></li>
+      <li><a href="#telas-assistente">Telas: a assistente</a></li>
+      <li><a href="#telas-planejadas">Telas planejadas</a></li>
+      <li><a href="#seguranca">Segurança contra golpes</a></li>
+      <li><a href="#tecnologia">Como é construído</a></li>
+      <li><a href="#estado">Onde o projeto está</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ABERTURA -->
+    <section class="abertura" aria-labelledby="titulo">
+      <div>
+        <p class="rotulo">Projeto Integrador · FATEC Americana</p>
+        <h1 id="titulo"><span>Memora</span></h1>
+        <p class="lema">Eu te ensino a usar o celular, no seu ritmo.</p>
+        <dl class="ficha">
+          <div><dt>Equipe</dt><dd>NewXz</dd></div>
+          <div><dt>Integrantes</dt><dd>Eduardo Juncker Toras, Eduardo Moraes Trevisan, Henrique Moreira Sandrini</dd></div>
+          <div><dt>Plataforma</dt><dd>Aplicativo Android</dd></div>
+          <div><dt>Situação em</dt><dd>10 de outubro de 2026</dd></div>
+        </dl>
+      </div>
+      <div class="celular" aria-label="Tela de boas-vindas do Memora">
+        <div class="visor">
+          <div class="barra-status"><span>9:41</span><span>●●● 100%</span></div>
+          <div class="corpo">
+            <div class="v-centro">
+              <div class="v-memora grande"><svg><use href="#memora"/></svg></div>
+              <div class="v-titulo"><span style="color:#1040F8">Memora</span> — eu te ensino a usar o celular, no seu ritmo.</div>
+              <div class="v-texto">Aqui você aprende a <b>mandar mensagem</b>, <b>ver as fotos</b> de quem você ama e <b>fazer chamada de vídeo</b>.</div>
+            </div>
+            <div class="v-botao">Começar minha jornada</div>
+            <div class="v-botao ter">Já tenho uma conta</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- O QUE É -->
+    <section id="o-que-e" aria-labelledby="h-o-que-e">
+      <p class="rotulo">O que é</p>
+      <h2 id="h-o-que-e">Um aplicativo que ensina pessoas idosas a usar o smartphone</h2>
+      <div class="leitura">
+        <p>O Memora é um aplicativo Android para pessoas idosas que têm dificuldade com o celular. Ele não faz as coisas no lugar da pessoa. Ele mostra o caminho, um passo de cada vez, para que da próxima vez ela consiga sozinha.</p>
+        <p>Quem conduz o aprendizado é a <strong>Memora</strong>, uma personagem com rosto e nome. A pessoa conversa com ela do jeito que fala, sem precisar escrever bonito, e pergunta coisas como "como vejo as fotos do meu neto". A Memora responde com a explicação e, quando faz sentido, oferece abrir o aplicativo, sempre pedindo confirmação antes.</p>
+        <p>O público é também o alvo preferido de golpes digitais no Brasil. Por isso cada tela do Memora foi pensada também do ponto de vista de um golpista: o que ele pediria, e como o aplicativo impede que isso aconteça.</p>
+      </div>
+      <p class="pergunta"><small>A pergunta que valida cada decisão</small>Um idoso conseguiria usar isso sozinho?</p>
+    </section>
+
+    <!-- PRINCÍPIOS -->
+    <section id="principios" aria-labelledby="h-principios">
+      <p class="rotulo">Regras que não se negociam</p>
+      <h2 id="h-principios">Os sete princípios do projeto</h2>
+      <p class="leitura suave">Estão na constituição do projeto e valem para qualquer decisão. Quando dois deles entram em conflito, vence o que vem primeiro.</p>
+      <div class="grade">
+        <div class="bloco"><h4><span class="n">I</span> Segurança acima de tudo</h4><p>Vence prazo, desempenho e conveniência.</p></div>
+        <div class="bloco"><h4><span class="n">II</span> Proteção contra engenharia social</h4><p>Toda tela responde: como um golpista exploraria isto?</p></div>
+        <div class="bloco"><h4><span class="n">III</span> Acessibilidade é requisito</h4><p>WCAG 2.2 AA, áreas de toque de 48 dp e texto legível a 200%.</p></div>
+        <div class="bloco"><h4><span class="n">IV</span> Especificação antes de código</h4><p>Nada é implementado sem uma especificação aprovada.</p></div>
+        <div class="bloco"><h4><span class="n">V</span> Arquitetura limpa</h4><p>O código é organizado por funcionalidade, com camadas separadas.</p></div>
+        <div class="bloco"><h4><span class="n">VI</span> A IA nunca age sozinha</h4><p>Toda ação exige confirmação da pessoa e fica registrada.</p></div>
+        <div class="bloco"><h4><span class="n">VII</span> Ensinar, não substituir</h4><p>O objetivo é a autonomia da pessoa, não a dependência do aplicativo.</p></div>
+      </div>
+    </section>
+
+    <!-- FUNCIONALIDADES -->
+    <section id="funcionalidades" aria-labelledby="h-funcionalidades">
+      <p class="rotulo">Funcionalidades</p>
+      <h2 id="h-funcionalidades">O que o Memora faz</h2>
+      <p class="leitura suave">O trabalho está dividido em quatro funcionalidades, cada uma com especificação, plano e lista de tarefas próprias.</p>
+      <div class="funcoes">
+        <article class="funcao">
+          <header><span class="cod">Feature 001</span><h3>Conta acessível</h3></header>
+          <ul>
+            <li><strong>Cadastro simples</strong>: nome de tratamento, um e-mail <em>ou</em> um telefone, e uma senha.</li>
+            <li><strong>Modo assistido</strong>: um familiar pode ajudar a preencher, mas o aplicativo pede o celular de volta antes da senha. A senha é sempre criada pela própria pessoa, e a primeira entrada também é feita por ela.</li>
+            <li><strong>Login que lembra o e-mail</strong> do último acesso, para a pessoa não precisar digitá-lo de novo.</li>
+            <li><strong>Bloqueio gentil</strong>: depois de cinco senhas erradas, uma pausa com contagem regressiva e a explicação do motivo, sem tom de castigo.</li>
+            <li><strong>Recuperar a senha</strong> por um código de 6 números, com um aviso permanente de que ninguém do Memora pede esse código.</li>
+            <li><strong>Sair com confirmação</strong> e saída automática depois de 30 minutos sem uso, para o caso do celular esquecido na mesa.</li>
+          </ul>
+        </article>
+        <article class="funcao">
+          <header><span class="cod">Feature 002</span><h3>Sistema visual</h3></header>
+          <ul>
+            <li><strong>Três temas</strong>: claro, escuro e alto contraste, todos medidos contra a WCAG.</li>
+            <li><strong>Texto ampliável até 200%</strong> sem que nenhuma tela quebre, testado em quatro tamanhos de celular.</li>
+            <li><strong>Ação parece ação, informação parece informação</strong>: botões usam formato de pílula preenchida; dados nunca usam esse formato, para a pessoa não tocar no que não é tocável.</li>
+            <li><strong>Reduzir movimento</strong>: as animações respeitam a configuração do celular.</li>
+          </ul>
+        </article>
+        <article class="funcao">
+          <header><span class="cod">Feature 003</span><h3>Hub e a assistente</h3></header>
+          <ul>
+            <li><strong>Conversa com a Memora</strong>: perguntas em linguagem comum, respostas com o caminho. A inteligência vem do Google Gemini.</li>
+            <li><strong>Meus aplicativos</strong>: aplicativos do dia a dia que a Memora ensina e pode abrir, sempre com confirmação.</li>
+            <li><strong>Serviços sociais</strong>: Gov.br e Meu INSS. A Memora só ensina; nunca abre, nem a pedido.</li>
+            <li><strong>O que eu fiz por você</strong>: um registro de tudo o que a Memora abriu no lugar da pessoa, com data e hora.</li>
+            <li><strong>A conversa fica só no celular</strong>, nunca no servidor.</li>
+          </ul>
+        </article>
+        <article class="funcao">
+          <header><span class="cod">Feature 004</span><h3>Redesenho das telas</h3></header>
+          <ul>
+            <li><strong>A Memora como personagem</strong>, presente nas telas e nos balões de fala.</li>
+            <li><strong>Barra inferior fixa</strong> com três destinos: Ajustes, Início e Meu perfil.</li>
+            <li><strong>Telas que faltavam</strong>: Início, apresentação da Memora, Ajuda, passo a passo de aplicativos e serviços, Perfil e Ajustes completos.</li>
+            <li><strong>Avisos de segurança que cabem no desenho</strong>, em vez de ocupar a tela inteira.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <!-- NAVEGAÇÃO -->
+    <section id="navegacao" aria-labelledby="h-navegacao">
+      <p class="rotulo">Mapa</p>
+      <h2 id="h-navegacao">Como se navega pelo aplicativo</h2>
+      <p class="leitura suave">Da esquerda para a direita: a entrada, a conta e o que existe lá dentro. As caixas tracejadas são telas planejadas que ainda não existem.</p>
+      <div class="mapa-rolagem">
+        <div class="mapa" role="img" aria-label="Boas-vindas leva a Cadastro ou Login. O cadastro assistido passa por Entrega do aparelho, Confirmar o contato e Primeira entrada. Depois da conta vem o Início, com a barra inferior de Ajustes, Início e Meu perfil. Do Início se vai ao Hub, que leva a Conversa, Meus aplicativos, Serviços sociais e O que eu fiz por você.">
+          <div class="coluna">
+            <small>Chegada</small>
+            <div class="no principal">Boas-vindas</div>
+            <div class="no tracejado">Olá, apresentação e exemplo <em>planejadas</em></div>
+          </div>
+          <div class="seta">→</div>
+          <div class="coluna">
+            <small>Conta</small>
+            <div class="no">Criar conta</div>
+            <div class="no">Entrar</div>
+            <div class="no">Recuperar senha</div>
+            <div class="no">Modo assistido <em>entrega do aparelho → confirmar contato → primeira entrada</em></div>
+          </div>
+          <div class="seta">→</div>
+          <div class="coluna">
+            <small>Barra inferior</small>
+            <div class="no">Ajustes <em>aparência, sair</em></div>
+            <div class="no principal">Início</div>
+            <div class="no">Meu perfil <em>dados, idade opcional</em></div>
+          </div>
+          <div class="seta">→</div>
+          <div class="coluna">
+            <small>Hub</small>
+            <div class="no principal">Conversar com a Memora</div>
+            <div class="no">Meus aplicativos</div>
+            <div class="no">Serviços sociais</div>
+            <div class="no">O que eu fiz por você</div>
+            <div class="no tracejado">Ajuda e passo a passo <em>planejadas</em></div>
+          </div>
+        </div>
+      </div>
+      <div class="legenda">
+        <span>Situação de cada tela:</span>
+        <span class="selo pronta">Pronta</span><span>funciona e já está no visual novo</span>
+        <span class="selo redesenho">Funciona, em redesenho</span><span>existe, mas ainda no visual antigo</span>
+        <span class="selo planejada">Planejada</span><span>especificada, ainda não construída</span>
+      </div>
+    </section>
+
+    <!-- TELAS: ENTRADA -->
+    <section id="telas-entrada" class="grupo" aria-labelledby="h-entrada">
+      <header>
+        <p class="rotulo">Telas · parte 1</p>
+        <h2 id="h-entrada">Entrar na conta</h2>
+        <p class="suave">Os textos das maquetes são os textos reais do aplicativo, na voz da Memora.</p>
+      </header>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-titulo">Criar minha conta</div>
+              <div class="v-campo"><span>Tem alguém te ajudando agora?</span><i>Não, estou sozinha</i></div>
+              <div class="v-campo"><span>Como posso te chamar?</span><i>Ana</i></div>
+              <div class="v-campo"><span>Como você quer entrar?</span><i>E-mail · Telefone</i></div>
+              <div class="v-campo"><span>Seu e-mail</span><i>ana@email.com</i></div>
+              <div class="v-campo"><span>Crie sua senha</span><i>••••••••</i></div>
+              <div class="v-botao" style="margin-top:auto">Criar minha conta</div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Boas-vindas e cadastro <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>A primeira tela diz o que o Memora é antes de dizer o que ele faz, porque muitas vezes quem instalou foi um filho ou neto. Tem um único botão principal, <strong>"Começar minha jornada"</strong>, e um caminho discreto para quem já tem conta.</p>
+          <p>O cadastro pede o mínimo: como a pessoa quer ser chamada, um e-mail <em>ou</em> um telefone, e a senha. A regra da senha aparece enquanto ela digita, e é a mesma em todo o aplicativo.</p>
+          <p class="protege"><b>O que protege:</b> se o e-mail já tiver conta, o aplicativo responde exatamente igual. Assim, ninguém descobre quem usa o Memora tentando cadastrar o e-mail de outra pessoa.</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-centro">
+                <div class="v-memora grande"><svg><use href="#memora"/></svg></div>
+                <div class="v-titulo">Agora é com você</div>
+                <div class="v-texto">A senha é a chave da conta, e ela precisa ser só de quem vai usar o Memora. Por favor, devolva o celular agora, antes deste próximo passo.</div>
+              </div>
+              <div class="v-botao">Pronto, o celular está comigo</div>
+              <div class="v-botao ter">Prefiro fazer depois</div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Modo assistido <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>Quando a pessoa responde que alguém está ajudando, o acompanhante preenche nome e contato e o aplicativo <strong>para antes da senha</strong>. O campo de senha nem existe na tela até o celular voltar para a dona da conta.</p>
+          <ul>
+            <li><strong>Entrega do aparelho</strong>: agradece a ajuda e pede o celular de volta.</li>
+            <li><strong>Confirmar o contato</strong>: um código de 6 números é enviado ao e-mail ou telefone informado.</li>
+            <li><strong>Primeira entrada</strong>: "Sua conta está pronta". A pessoa entra sozinha uma vez, para ver que consegue, com o acompanhante ainda por perto.</li>
+          </ul>
+          <p class="protege"><b>O que protege:</b> a conta assistida só fica ativa depois que o contato é confirmado. Um acompanhante mal-intencionado não termina a conta sozinho nem fica sabendo a senha.</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-titulo">Entrar na minha conta</div>
+              <div class="v-texto">Que bom te ver de novo! Preciso só de duas coisas.</div>
+              <div class="v-campo"><span>Seu e-mail ou telefone</span><i>ana@email.com</i></div>
+              <div class="v-campo"><span>Sua senha</span><i>•••••••• &nbsp;👁</i></div>
+              <div class="v-botao">Entrar</div>
+              <div class="v-botao ter">Esqueci minha senha</div>
+              <div class="v-aviso" style="margin-top:auto"><b>Pausa de 1 minuto</b>Acontece com todo mundo, fica tranquila. Como foram várias tentativas seguidas, vou dar uma pausa…</div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Login e bloqueio <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>O e-mail ou telefone do último acesso já vem preenchido. A senha pode ser conferida tocando no "olhinho".</p>
+          <p>Depois de cinco senhas erradas, o botão de entrar some e aparece uma pausa com contagem regressiva. O texto acolhe, explica que a pausa existe para impedir que outra pessoa fique adivinhando a senha, diz quanto falta e oferece criar uma senha nova. Quando o tempo acaba, o botão volta sozinho.</p>
+          <p class="protege"><b>O que protege:</b> a resposta para senha errada e para conta inexistente é igual, inclusive no tempo que leva. Isso foi medido: sem esse cuidado, a diferença de tempo revelaria quem tem conta.</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-aviso"><b>Eu nunca peço sua senha</b>Nem ninguém que diga trabalhar no Memora vai pedir sua senha ou um número de confirmação.</div>
+              <div class="v-titulo">Vamos criar uma senha nova</div>
+              <div class="v-texto">Esquecer senha acontece com todo mundo, e tem conserto.</div>
+              <div class="v-campo"><span>O número que eu enviei</span><i>_ _ _ _ _ _</i></div>
+              <div class="v-campo"><span>Sua senha nova</span><i>••••••••</i></div>
+              <div class="v-botao" style="margin-top:auto">Salvar minha senha nova</div>
+              <div class="v-botao ter">Pedir outro número</div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Recuperar o acesso <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>Uma tela em três etapas: informar o e-mail ou telefone, digitar o código recebido junto com a senha nova, e a confirmação final.</p>
+          <p>O aviso antigolpe fica <strong>no topo, antes do formulário</strong>, nas três etapas. Ele fala da senha e também do código de 6 números, porque é exatamente esse código que o golpista pede ao telefone, fingindo ser do suporte.</p>
+          <p>A tela final avisa que todos os outros aparelhos foram desconectados. Quem recupera a conta pode estar fazendo isso justamente porque alguém entrou nela.</p>
+          <p class="protege"><b>O que protege:</b> o código só é enviado para contato já confirmado, vale uma única vez, e a troca da senha encerra todas as sessões abertas.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- TELAS: DENTRO -->
+    <section id="telas-dentro" class="grupo" aria-labelledby="h-dentro">
+      <header>
+        <p class="rotulo">Telas · parte 2</p>
+        <h2 id="h-dentro">Dentro do Memora</h2>
+        <p class="suave">Depois de entrar, a pessoa sempre vê a barra inferior com três destinos. O destino atual é marcado por cor, por um traço em cima e por texto em negrito, para não depender só da cor.</p>
+      </header>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-titulo">Oi, Ana!</div>
+              <div class="v-dica"><div class="v-memora"><svg><use href="#memora"/></svg></div>Aqui você escolhe o que quer fazer. Toque numa das caixas abaixo.</div>
+              <div class="v-texto">Tem uma dúvida sobre o celular? Converse comigo.</div>
+              <div class="v-porta"><span class="med">?</span><span><b>Conversar com a Memora</b></span></div>
+              <div class="v-texto">Quer ver tudo o que o Memora tem? Toque aqui.</div>
+              <div class="v-porta clara"><span class="med">▦</span><span><b>Ver tudo o que eu faço</b></span></div>
+            </div>
+            <div class="v-nav"><span><i></i>Ajustes</span><span class="ativo"><i></i>Início</span><span><i></i>Meu perfil</span></div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Início <span class="selo pronta">Pronta</span></h3>
+          <p>A tela que a pessoa verá mais vezes. A Memora cumprimenta pelo nome de tratamento e um balão de tutorial explica o que fazer ali.</p>
+          <p>Cada atalho vem numa caixa com uma instrução acima, em forma de pergunta: <strong>"Conversar com a Memora"</strong> para quem tem uma dúvida, e <strong>"Ver tudo o que eu faço"</strong>, que leva ao Hub.</p>
+          <p>Tocar em "Voltar" no Início pergunta antes: "Fechar o Memora? Você continua na sua conta."</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-voltar">← Voltar</div>
+              <div class="v-titulo">Vamos começar?</div>
+              <div class="v-porta"><span class="med">?</span><span><b>Conversar com a Memora</b><small>Me pergunte o que quiser</small></span></div>
+              <div class="v-porta clara"><span class="med">▦</span><span><b>Meus aplicativos</b><small>Eu te ensino e posso abrir</small></span></div>
+              <div class="v-porta clara"><span class="med">⌂</span><span><b>Serviços sociais</b><small>Eu só te ensino o caminho</small></span></div>
+              <div class="v-porta clara"><span class="med">✓</span><span><b>O que eu fiz por você</b><small>O que eu abri para você</small></span></div>
+              <div class="v-faixa">↓ Há mais abaixo</div>
+            </div>
+            <div class="v-nav"><span><i></i>Ajustes</span><span class="ativo"><i></i>Início</span><span><i></i>Meu perfil</span></div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Hub <span class="selo pronta">Pronta</span></h3>
+          <p>Todas as partes do Memora, cada uma numa "porta" com desenho, nome em linguagem comum e uma linha dizendo o que faz. A conversa é a porta principal, em destaque.</p>
+          <ul>
+            <li>Uma parte que ainda não funciona <strong>não aparece</strong>. Oferecer um caminho que não leva a lugar nenhum confunde mais do que ajuda.</li>
+            <li>Com o texto muito ampliado, quando nem todas as portas cabem, uma faixa avisa <strong>"Há mais abaixo"</strong>. O leitor de tela também anuncia.</li>
+            <li>O "Voltar" fica sempre no mesmo lugar, em todas as telas abertas pelo Hub.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-titulo">Meu perfil</div>
+              <div class="v-memora" style="align-self:flex-start;background:#E3EAFF"><svg><use href="#memora"/></svg></div>
+              <div class="v-info"><span>Como você quer ser chamada</span><strong>Ana</strong></div>
+              <div class="v-info"><span>E-mail ou telefone da conta</span><strong>ana@email.com</strong></div>
+              <div class="v-info"><span>Idade</span><strong>73 anos</strong></div>
+              <div class="v-botao sec" style="margin-top:auto">Mudar a data</div>
+              <div class="v-botao ter">Tirar a idade do meu perfil</div>
+            </div>
+            <div class="v-nav"><span><i></i>Ajustes</span><span><i></i>Início</span><span class="ativo"><i></i>Meu perfil</span></div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Meu perfil <span class="selo redesenho">Em construção</span></h3>
+          <p>Mostra o que o Memora já sabe: nome de tratamento e o contato da conta, apresentados como <strong>informação</strong>, sem nenhuma aparência de botão.</p>
+          <p>A idade é <strong>opcional</strong>. Se a pessoa quiser, conta quando nasceu (dia, mês e ano em campos separados, com ajuda em cada um) e a idade aparece no perfil. A data fica guardada só no celular, nunca vai para o servidor, e pode ser tirada a qualquer momento, com confirmação.</p>
+          <p>Planejado: mostrar qual aplicativo a pessoa mais aprendeu a usar. O Memora não tem planos pagos, e por isso o perfil não mostra plano nenhum.</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-titulo">Ajustes</div>
+              <div class="v-porta clara"><span class="med">Aa</span><span><b>Como eu vejo o Memora</b><small>Deixar a letra maior, mudar as cores, enxergar melhor</small></span></div>
+              <div class="v-porta clara"><span class="med">⇥</span><span><b>Sair da minha conta</b></span></div>
+              <div class="v-dialogo">
+                <b style="font-size:11px">Quer mesmo sair da sua conta?</b>
+                <span class="v-texto">Você vai precisar da senha para voltar.</span>
+                <div class="v-botao">Sim, quero sair</div>
+                <div class="v-botao sec">Não, quero ficar</div>
+              </div>
+            </div>
+            <div class="v-nav"><span class="ativo"><i></i>Ajustes</span><span><i></i>Início</span><span><i></i>Meu perfil</span></div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Ajustes e Aparência <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p><strong>"Como eu vejo o Memora"</strong> deixa escolher o tema (claro, escuro ou alto contraste) e o tamanho da letra. A pessoa vê o efeito antes de confirmar e pode desfazer.</p>
+          <p><strong>Sair</strong> sempre pergunta antes e explica que vai precisar da senha para voltar. Ao sair, a conversa e todas as credenciais são apagadas do celular; só o e-mail fica lembrado, para facilitar a próxima entrada.</p>
+          <p>Planejado: grupos de Acessibilidade, Privacidade (ver o que fica guardado e apagar a conversa) e Conta, e a escolha entre cores de destaque prontas, cada combinação validada por contraste.</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- TELAS: ASSISTENTE -->
+    <section id="telas-assistente" class="grupo" aria-labelledby="h-assistente">
+      <header>
+        <p class="rotulo">Telas · parte 3</p>
+        <h2 id="h-assistente">A assistente</h2>
+        <p class="suave">As telas que dão sentido ao Memora. Todas abrem a partir do Hub.</p>
+      </header>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-voltar">← Voltar</div>
+              <div class="v-aviso fino"><b>🛡 Eu nunca peço sua senha</b></div>
+              <div class="v-balao minha"><small>Você</small>Quero abrir o WhatsApp</div>
+              <div class="v-balao dela"><small>Memora</small>O WhatsApp é aquele ícone verde com um telefone. Quer tentar achar na sua tela?</div>
+              <div class="v-dialogo">
+                <b style="font-size:11px">Posso abrir para você?</b>
+                <div class="v-botao">Sim, abra o WhatsApp</div>
+                <div class="v-botao sec">Prefiro tentar sozinha</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Conversar com a Memora <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>A pessoa escreve do jeito que fala: "Pode me perguntar do jeito que você fala. Não precisa escrever bonito, e não tem pergunta boba." A resposta chega aos poucos, enquanto a Memora "pensa".</p>
+          <p>Quando a Memora oferece abrir um aplicativo, as duas opções aparecem como frases completas e grandes, bem separadas. Depois de abrir, ela conta o caminho que fez, para a pessoa reconhecer da próxima vez. Se a pessoa preferir tentar sozinha, a Memora comemora: "Viu? Foi você quem fez."</p>
+          <ul>
+            <li>O aviso <strong>"Eu nunca peço sua senha"</strong> fica aberto até a primeira mensagem e depois encolhe para uma linha fina, que a pessoa toca para ler inteiro. Ele encolhe, mas nunca some.</li>
+            <li>Se a internet falhar, o texto escrito continua no campo, e a Memora diz que não foi culpa da pessoa.</li>
+            <li>Há um limite diário de conversas: "Conversamos bastante hoje. Vamos continuar amanhã?"</li>
+          </ul>
+          <p class="protege"><b>O que protege:</b> a sugestão de abrir um aplicativo vinda da IA não é obedecida direto. O servidor confere numa lista fechada, no banco de dados, e descarta qualquer sugestão que não passe. A pessoa nem chega a ver a oferta.</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-voltar">← Voltar</div>
+              <div class="v-titulo">Serviços sociais</div>
+              <div class="v-texto">Eu só te ensino o caminho.</div>
+              <div class="v-lista">
+                <div class="v-item"><span class="ico" style="background:#1351B4"></span>Gov.br<small>Me ensina</small></div>
+                <div class="v-item"><span class="ico" style="background:#0C7A43"></span>Meu INSS<small>Me ensina</small></div>
+              </div>
+              <div class="v-balao dela" style="margin-top:auto;max-width:100%"><small>Memora</small>Esse eu te ensino, mas não abro. É de propósito: se eu abrisse banco e governo, alguém poderia ligar dizendo ser do suporte e pedir a mesma coisa.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Meus aplicativos e Serviços sociais <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>Uma mesma tela, com duas listas que vêm do servidor:</p>
+          <ul>
+            <li><strong>Meus aplicativos</strong>: aplicativos do dia a dia (WhatsApp, YouTube, Instagram e outros). Tocar abre a conversa já com a pergunta "Você me ensina a usar…?". A Memora ensina e, se a pessoa pedir e confirmar, pode abrir.</li>
+            <li><strong>Serviços sociais</strong>: Gov.br e Meu INSS. A Memora ensina e explica por que não abre.</li>
+          </ul>
+          <p>No redesenho, "Meus aplicativos" vira uma grade de ícones com o nome embaixo e uma busca que funciona mesmo sem acento.</p>
+          <p class="protege"><b>O que protege:</b> o banco de dados recusa, por regra própria, que um serviço sensível tenha o dado necessário para ser aberto. Não existe caminho no código que contorne isso.</p>
+        </div>
+      </article>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-voltar">← Voltar</div>
+              <div class="v-titulo">O que eu fiz por você</div>
+              <div class="v-texto">Sempre que eu abrir alguma coisa no seu lugar, eu anoto aqui. Assim você pode conferir quando quiser.</div>
+              <div class="v-lista">
+                <div class="v-item" style="display:grid;gap:1px"><b>Abri o WhatsApp, porque você me pediu: "quero falar com minha filha"</b><span class="v-texto" style="font-size:8.5px">8 de outubro, às 14h32</span></div>
+                <div class="v-item" style="display:grid;gap:1px"><b>Abri o YouTube para você</b><span class="v-texto" style="font-size:8.5px">6 de outubro, às 10h05</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>O que eu fiz por você <span class="selo redesenho">Funciona, em redesenho</span></h3>
+          <p>O registro de cada vez que a Memora abriu um aplicativo no lugar da pessoa, com o pedido e a data. É o princípio "a IA nunca age sozinha" em forma de tela: toda ação fica anotada e pode ser conferida pela pessoa ou por alguém de confiança.</p>
+          <p>Quando ainda não há nada: "Ainda não precisei fazer nada no seu lugar. Continue assim que logo você não vai mais precisar de mim para isso."</p>
+        </div>
+      </article>
+    </section>
+
+    <!-- TELAS: PLANEJADAS -->
+    <section id="telas-planejadas" class="grupo" aria-labelledby="h-planejadas">
+      <header>
+        <p class="rotulo">Telas · parte 4</p>
+        <h2 id="h-planejadas">Telas planejadas</h2>
+        <p class="suave">Especificadas na feature 004 a partir do wireframe do projeto, ainda não construídas.</p>
+      </header>
+
+      <article class="tela">
+        <div class="celular" aria-hidden="true">
+          <div class="visor">
+            <div class="barra-status"><span>9:41</span><span>100%</span></div>
+            <div class="corpo">
+              <div class="v-voltar">← Voltar</div>
+              <div class="v-passos"><i class="feito"></i><i class="feito"></i><i></i><i></i></div>
+              <div class="v-texto" style="font-size:9px">Passo 2 de 4</div>
+              <div class="v-exemplo">imagem de exemplo da tela</div>
+              <div class="v-texto" style="color:#111">Toque no botão de lupa, no alto da tela, para procurar um vídeo.</div>
+              <div class="v-botao">Continuar</div>
+              <div class="v-botao ter">Voltar ao passo anterior</div>
+            </div>
+          </div>
+        </div>
+        <div class="tela-texto">
+          <h3>Passo a passo de aplicativos e serviços <span class="selo planejada">Planejada</span></h3>
+          <p>Ao escolher um aplicativo, a Memora mostra o caminho <strong>um passo por tela</strong>: a imagem do que a pessoa vai encontrar, o ponto a tocar destacado, uma frase curta e em que passo ela está. No fim, a Memora parabeniza e oferece voltar ao Hub.</p>
+          <p>Nos serviços do governo, a primeira tela diz o que ter em mãos, e as telas de senha vêm marcadas como exemplo, com o aviso de que a senha só se digita no aplicativo oficial.</p>
+          <p class="protege"><b>O que protege:</b> o passo a passo acontece <strong>dentro do Memora</strong>, nunca por cima do outro aplicativo. Aparecer por cima exigiria a permissão de sobreposição, a mais usada por vírus bancários no Brasil, e ensinaria a pessoa a concedê-la.</p>
+        </div>
+      </article>
+
+      <div class="tabela-rolagem">
+        <table>
+          <thead><tr><th>Tela</th><th>Para que serve</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Olá, Apresentação e Exemplo</strong></td><td>Logo depois do cadastro, a Memora se apresenta em até três telas curtas: quem ela é, para que serve a conversa e um exemplo. Pode ser pulada e revista pela Ajuda.</td></tr>
+            <tr><td><strong>Ajuda</strong></td><td>Assuntos com desenho e nome: o aplicativo, a Memora, a conversa, os serviços, como baixar um aplicativo, como compartilhar o Memora e dicas contra golpes, uma por vez.</td></tr>
+            <tr><td><strong>Ajuda guiada da conversa</strong></td><td>Um exemplo de conversa passo a passo, com saída direta para conversar de verdade.</td></tr>
+            <tr><td><strong>Ajustes completos</strong></td><td>Grupos de Aparência, Acessibilidade, Privacidade e Conta, e a opção de esquecer também o e-mail lembrado, para celular compartilhado.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="leitura suave">A tela de <strong>Planos</strong> do wireframe ficou fora de propósito: monetização nunca foi decidida pela equipe, e uma tela de plano prepararia a pessoa para o golpe "seu plano venceu".</p>
+    </section>
+
+    <!-- SEGURANÇA -->
+    <section id="seguranca" aria-labelledby="h-seguranca">
+      <p class="rotulo">Segurança</p>
+      <h2 id="h-seguranca">Como o Memora protege contra golpes</h2>
+      <div class="leitura">
+        <p>A decisão que organiza a assistente inteira: <strong>a resposta da IA não é autorização</strong>. A IA pode sugerir abrir um aplicativo; quem decide é uma consulta fixa ao banco de dados, depois da resposta. Alguém pode convencer um modelo de linguagem. Ninguém convence uma linha de tabela.</p>
+      </div>
+      <div class="grade">
+        <div class="bloco"><h4>Uma única ação</h4><p>A Memora só pode abrir aplicativos do dia a dia. Enviar mensagem e ligar ficaram de fora por serem irreversíveis e por serem o que um golpista pediria.</p></div>
+        <div class="bloco"><h4>Quanto mais sensível, menos toca</h4><p>Banco, Gov.br e Meu INSS ela só ensina. Abrir o banco pela pessoa treinaria nela o gesto que o golpista precisa que ela tenha.</p></div>
+        <div class="bloco"><h4>Conversa só no celular</h4><p>A conversa nunca é guardada no servidor e é apagada quando a pessoa sai da conta.</p></div>
+        <div class="bloco"><h4>Aviso antigolpe permanente</h4><p>"Eu nunca peço sua senha" aparece na conversa e na recuperação de senha, e cita também o código de confirmação.</p></div>
+        <div class="bloco"><h4>Confirmação e registro</h4><p>Nada é aberto sem a pessoa tocar em "Sim", e tudo o que foi aberto fica em "O que eu fiz por você".</p></div>
+        <div class="bloco"><h4>Testes que tentam quebrar</h4><p>Cada proteção tem um teste, e cada teste foi validado quebrando a proteção de propósito para confirmar que ele reprova. São 38 proteções verificadas assim.</p></div>
+      </div>
+    </section>
+
+    <!-- TECNOLOGIA -->
+    <section id="tecnologia" aria-labelledby="h-tecnologia">
+      <p class="rotulo">Por dentro</p>
+      <h2 id="h-tecnologia">Como é construído</h2>
+      <div class="tabela-rolagem">
+        <table>
+          <thead><tr><th>Parte</th><th>Tecnologia</th><th>Observação</th></tr></thead>
+          <tbody>
+            <tr><td>Aplicativo</td><td>Flutter (Dart), só Android</td><td>Fonte Atkinson Hyperlegible, criada para leitura com baixa visão</td></tr>
+            <tr><td>Servidor</td><td>Java 21 com Spring Boot</td><td>Escolha registrada na ADR-001</td></tr>
+            <tr><td>Banco de dados</td><td>PostgreSQL 16</td><td>Esquema controlado por migrations (Flyway)</td></tr>
+            <tr><td>Inteligência da assistente</td><td>Google Gemini (<span style="font-family:var(--mono)">gemini-3.8-flash</span>)</td><td>Nível gratuito, escolhido em 3 de outubro de 2026 (ADR-002). Sem configuração, um simulado responde</td></tr>
+            <tr><td>Senhas</td><td>Argon2id, 64 MiB</td><td>Calibrado para cerca de 240 ms por tentativa</td></tr>
+            <tr><td>Método</td><td>Spec Driven Development</td><td>Constituição, especificação, plano, tarefas e só então código</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ESTADO -->
+    <section id="estado" aria-labelledby="h-estado">
+      <p class="rotulo">Andamento</p>
+      <h2 id="h-estado">Onde o projeto está</h2>
+      <p class="leitura suave">Tarefas concluídas em cada funcionalidade, contadas nos arquivos de tarefas em 10 de outubro de 2026. A entrega é em novembro de 2026.</p>
+      <div class="tabela-rolagem">
+        <table>
+          <thead><tr><th>Funcionalidade</th><th>Tarefas</th><th>Progresso</th><th>O que falta</th></tr></thead>
+          <tbody>
+            <tr><td>001 · Conta acessível</td><td class="num">79 de 92</td><td><div class="barra-progresso"><span><i style="width:86%"></i></span>86%</div></td><td>Login com Google e Facebook, envio real de e-mail e SMS, validação</td></tr>
+            <tr><td>002 · Sistema visual</td><td class="num">50 de 53</td><td><div class="barra-progresso"><span><i style="width:94%"></i></span>94%</div></td><td>Teste com pessoas idosas e revisões finais</td></tr>
+            <tr><td>003 · Hub e assistente</td><td class="num">71 de 99</td><td><div class="barra-progresso"><span><i style="width:72%"></i></span>72%</div></td><td>Custo e latência da IA, validação, ajustes de convergência</td></tr>
+            <tr><td>004 · Redesenho das telas</td><td class="num">49 de 128</td><td><div class="barra-progresso"><span><i style="width:38%"></i></span>38%</div></td><td>Apresentação, conversa, passo a passo, Ajuda, Ajustes e Perfil</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="leitura suave">Testes automatizados: 413 no servidor (medido em 3 de outubro) e 1.061 no aplicativo (medido em 2 de outubro).</p>
+
+      <div class="alerta">
+        <h4>O que depende de decisão da equipe, e não de código</h4>
+        <ul style="margin:0;padding-left:1.1em;display:grid;gap:6px">
+          <li><strong>Teste com 5 pessoas de 65 anos ou mais</strong>: é o critério de saída obrigatório de todas as funcionalidades.</li>
+          <li><strong>Privacidade da IA</strong>: no nível gratuito, o Google pode usar o conteúdo das conversas para treinar modelos, e revisores humanos podem lê-lo. Isso contraria um requisito do projeto (FR-051). O teste com as 5 pessoas não pode usar a chave gratuita.</li>
+          <li><strong>Provedor de envio de e-mail e SMS</strong>: sem ele, os códigos de verificação não chegam a ninguém fora do ambiente de testes.</li>
+          <li><strong>Cadastro do aplicativo no Google e no Facebook</strong>, para o login social.</li>
+          <li><strong>Capturas de tela para os guias</strong> de passo a passo.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="rodape">
+      <p>Memora · Equipe NewXz · Projeto Integrador da FATEC Americana</p>
+      <p>Fonte: especificações das features 001 a 004, textos do aplicativo e relatórios do repositório, em 10 de outubro de 2026.</p>
+    </footer>
+
+  </main>
+</div>
+</body>
+</html>

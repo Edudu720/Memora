@@ -141,7 +141,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
                   const AvisoAntigolpe(),
                   const SizedBox(height: MemoraEspacamento.xxl),
                   ...switch (c.etapa) {
-                    EtapaRecuperacao.pedirCodigo => _pedirCodigo(c),
+                    EtapaRecuperacao.pedirCodigo => _pedirCodigo(c, cores),
                     EtapaRecuperacao.definirSenha => _definirSenha(c),
                     EtapaRecuperacao.concluida => _concluida(c, cores),
                   },
@@ -155,23 +155,52 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
     );
   }
 
-  List<Widget> _pedirCodigo(ControladorRecuperacao c) => <Widget>[
-        const TextoMemora(TextosAutenticacao.conviteRecuperacao),
-        const SizedBox(height: MemoraEspacamento.xxl),
-        CampoTexto(
-          key: TelaRecuperacao.chaveIdentificador,
-          rotulo: TextosAutenticacao.rotuloIdentificador,
-          textoAjuda: TextosAutenticacao.ajudaIdentificador,
-          controlador: _campoIdentificador,
-          tipoTeclado: TextInputType.emailAddress,
-          aoMudar: c.informarIdentificador,
-          habilitado: !c.enviando,
+  List<Widget> _pedirCodigo(ControladorRecuperacao c, MemoraCores cores) => <Widget>[
+        Container(
+          padding: const EdgeInsets.all(MemoraEspacamento.md),
+          decoration: BoxDecoration(
+            color: cores.superficie,
+            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+            border: Border.all(color: cores.borda),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: MemoraElevacao.sombra,
+                blurRadius: MemoraElevacao.cartao,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Row(
+            children: <Widget>[
+              MemoraPersonagem(
+                expressao: ExpressaoDaMemora.falando,
+                tamanho: MemoraDimensoes.alvoDecisao,
+              ),
+              SizedBox(width: MemoraEspacamento.md),
+              Expanded(
+                child: TextoMemora(TextosAutenticacao.conviteRecuperacao),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: MemoraEspacamento.lg),
+        CaixaDeEtapa(
+          instrucao: 'Informe o contato da sua conta',
+          child: CampoTexto(
+            key: TelaRecuperacao.chaveIdentificador,
+            rotulo: TextosAutenticacao.rotuloIdentificador,
+            textoAjuda: TextosAutenticacao.ajudaIdentificador,
+            controlador: _campoIdentificador,
+            tipoTeclado: TextInputType.emailAddress,
+            aoMudar: c.informarIdentificador,
+            habilitado: !c.enviando,
+          ),
         ),
         if (c.mensagemDeErro != null) ...<Widget>[
-          const SizedBox(height: MemoraEspacamento.xl),
+          const SizedBox(height: MemoraEspacamento.lg),
           MensagemErro(mensagem: c.mensagemDeErro!),
         ],
-        const SizedBox(height: MemoraEspacamento.xxl),
+        const SizedBox(height: MemoraEspacamento.xl),
         if (c.enviando)
           const Carregando(mensagem: TextosAutenticacao.pedindoCodigo)
         else
@@ -184,31 +213,40 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
       ];
 
   List<Widget> _definirSenha(ControladorRecuperacao c) => <Widget>[
-        // A confirmação da FR-019 é a mesma frase exista a conta ou não. Ela é
-        // texto comum, e não mensagem de sucesso: dizer "pronto!" a quem
-        // digitou um e-mail sem conta afirmaria algo que não sabemos.
+        // A confirmação da FR-019 é a mesma frase exista a conta ou não.
         TextoMemora(
           c.confirmacaoDoPedido ?? '',
           key: TelaRecuperacao.chaveConfirmacao,
         ),
-        const SizedBox(height: MemoraEspacamento.xxl),
-        CampoCodigo(
-          key: TelaRecuperacao.chaveCodigo,
-          rotulo: TextosAutenticacao.rotuloCodigo,
-          controlador: _campoCodigo,
-          erro: c.mensagemDeErro,
-          aoMudar: c.informarCodigo,
-        ),
-        const SizedBox(height: MemoraEspacamento.xl),
-        CampoSenha(
-          key: TelaRecuperacao.chaveSenhaNova,
-          rotulo: TextosAutenticacao.rotuloSenhaNova,
-          textoAjuda: TextosAutenticacao.ajudaSenhaNova,
-          aoMudar: c.informarSenha,
+        const SizedBox(height: MemoraEspacamento.lg),
+        CaixaDeEtapa(
+          instrucao: 'Digite o número que você recebeu',
+          child: CampoCodigo(
+            key: TelaRecuperacao.chaveCodigo,
+            rotulo: TextosAutenticacao.rotuloCodigo,
+            controlador: _campoCodigo,
+            erro: c.mensagemDeErro,
+            aoMudar: c.informarCodigo,
+          ),
         ),
         const SizedBox(height: MemoraEspacamento.lg),
-        RegrasDeSenha(atendidas: c.regrasAtendidas),
-        const SizedBox(height: MemoraEspacamento.xxl),
+        CaixaDeEtapa(
+          instrucao: 'Crie sua nova senha',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              RegrasDeSenha(atendidas: c.regrasAtendidas),
+              const SizedBox(height: MemoraEspacamento.md),
+              CampoSenha(
+                key: TelaRecuperacao.chaveSenhaNova,
+                rotulo: TextosAutenticacao.rotuloSenhaNova,
+                textoAjuda: TextosAutenticacao.ajudaSenhaNova,
+                aoMudar: c.informarSenha,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: MemoraEspacamento.xl),
         if (c.enviando)
           const Carregando(mensagem: TextosAutenticacao.trocandoSenha)
         else
@@ -229,15 +267,42 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
 
   List<Widget> _concluida(ControladorRecuperacao c, MemoraCores cores) =>
       <Widget>[
-        Icon(Icons.check_circle,
-            size: MemoraDimensoes.iconeCelebracao,
-            color: cores.sucesso),
-        const SizedBox(height: MemoraEspacamento.xl),
-        const TextoMemora(
-          TextosAutenticacao.avisoSessoesEncerradas,
-          alinhamento: TextAlign.center,
+        Center(
+          child: Container(
+            width: MemoraDimensoes.ilustracaoCabecalho,
+            height: MemoraDimensoes.ilustracaoCabecalho,
+            decoration: BoxDecoration(
+              color: cores.sucesso.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: MemoraPersonagem(
+                expressao: ExpressaoDaMemora.comemorando,
+              ),
+            ),
+          ),
         ),
-        const SizedBox(height: MemoraEspacamento.xxl),
+        const SizedBox(height: MemoraEspacamento.lg),
+        Container(
+          padding: const EdgeInsets.all(MemoraEspacamento.lg),
+          decoration: BoxDecoration(
+            color: cores.superficie,
+            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+            border: Border.all(color: cores.borda),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: MemoraElevacao.sombra,
+                blurRadius: MemoraElevacao.cartao,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const TextoMemora(
+            TextosAutenticacao.avisoSessoesEncerradas,
+            alinhamento: TextAlign.center,
+          ),
+        ),
+        const SizedBox(height: MemoraEspacamento.xl),
         BotaoPrimario(
           key: TelaRecuperacao.chaveContinuar,
           rotulo: TextosAutenticacao.botaoEntrarComSenhaNova,

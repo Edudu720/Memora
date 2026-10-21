@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
 import '../../features/assistente/data/repositorio_assistente_simulado.dart';
@@ -91,6 +92,7 @@ class Composicao {
     DataDeNascimentoDoAparelho? dataDeNascimento,
     ApresentacaoVistaDoAparelho? apresentacaoVista,
     ProgressoDeAprendizado? progresso,
+    SharedPreferences? preferencias,
     bool guardarCatalogo = false,
   }) {
     final DataDeNascimentoDoAparelho datas =
@@ -106,7 +108,7 @@ class Composicao {
             cliente: api.MemoraApi(basePathOverride: ambiente.urlBase),
             cofre: cofre,
           )
-        : RepositorioAutenticacaoSimulado();
+        : RepositorioAutenticacaoSimulado(preferencias: preferencias);
 
     return Composicao(
       ambiente: ambiente,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
@@ -102,24 +103,45 @@ class BalaoDeFala extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    const Radius curvo = Radius.circular(MemoraRaio.cartao);
-    const Radius ponta = Radius.circular(MemoraRaio.padrao / 3);
+    final bool modoClaro = cores == MemoraCores.claro;
+    const Radius curvo = Radius.circular(MemoraRaio.balao);
+    const Radius ponta = Radius.circular(MemoraRaio.balaoPonta);
+
+    final Color corDeFundo = _daMemora
+        ? (modoClaro ? cores.destaque : cores.superficie)
+        : cores.superficieAlt;
+
+    final Border borda = _daMemora
+        ? (modoClaro
+            ? Border.all(color: cores.destaque)
+            : Border.all(color: cores.borda))
+        : Border.all(color: cores.borda);
 
     final Widget balao = Flexible(
       child: Container(
         constraints: const BoxConstraints(
           maxWidth: MemoraDimensoes.larguraMaximaDeLeitura,
         ),
-        padding: const EdgeInsets.all(MemoraEspacamento.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: MemoraEspacamento.lg,
+          vertical: MemoraEspacamento.md,
+        ),
         decoration: BoxDecoration(
-          color: _daMemora ? cores.superficie : cores.superficieAlt,
-          border: Border.all(color: cores.borda),
+          color: corDeFundo,
+          border: borda,
           borderRadius: BorderRadius.only(
             topLeft: _daMemora ? ponta : curvo,
             topRight: _daMemora ? curvo : ponta,
             bottomLeft: curvo,
             bottomRight: curvo,
           ),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: MemoraElevacao.sombra,
+              blurRadius: MemoraElevacao.porta,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Semantics(
           label: texto == null
@@ -130,7 +152,10 @@ class BalaoDeFala extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                TextoMemora.apoio(nomeDe(autor)),
+                TextoMemora.apoio(
+                  nomeDe(autor),
+                  cor: _daMemora ? cores.primaria : cores.textoSuave,
+                ),
                 const SizedBox(height: MemoraEspacamento.xs),
                 if (texto != null)
                   TextoMemora(texto!)

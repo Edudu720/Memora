@@ -47,82 +47,111 @@ class TelaBoasVindas extends StatelessWidget {
     return Scaffold(
       backgroundColor: cores.fundo,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(MemoraEspacamento.lg),
-          child: Cartao(
-            padding: const EdgeInsets.all(MemoraEspacamento.xl),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // Cabeçalho: o casal à esquerda, a apresentação à direita.
-                Row(
-                  children: <Widget>[
-                    const IlustracaoMemora(Ilustracao.casalIdoso, altura: 84),
-                    const SizedBox(width: MemoraEspacamento.md),
-                    const Expanded(
-                      child: TextoComDestaque(
-                        TextosAutenticacao.apresentacao,
-                        estilo: EstiloTexto.corpoForte,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints caixa) {
+            final double alturaMinima =
+                (caixa.maxHeight - 2 * MemoraEspacamento.lg).clamp(
+                  0.0,
+                  double.infinity,
+                );
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(MemoraEspacamento.lg),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: alturaMinima),
+                child: Cartao(
+                  padding: const EdgeInsets.all(MemoraEspacamento.xl),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          // Cabeçalho: o casal à esquerda, a apresentação à direita.
+                          Row(
+                            children: <Widget>[
+                              const IlustracaoMemora(
+                                Ilustracao.casalIdoso,
+                                altura: 84,
+                              ),
+                              const SizedBox(width: MemoraEspacamento.md),
+                              const Expanded(
+                                child: TextoComDestaque(
+                                  TextosAutenticacao.apresentacao,
+                                  estilo: EstiloTexto.corpoForte,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: MemoraEspacamento.xxl),
+
+                          // O que a pessoa vai aprender, com a ilustração ao lado.
+                          Row(
+                            children: <Widget>[
+                              const Expanded(
+                                child: TextoComDestaque(
+                                  TextosAutenticacao.oQueVouEnsinar,
+                                ),
+                              ),
+                              const SizedBox(width: MemoraEspacamento.md),
+                              const IlustracaoMemora(
+                                Ilustracao.pessoaComCelular,
+                                altura: 132,
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: MemoraEspacamento.lg),
+                          // A linha que sobe. Recebe a cor do tema porque é desenhada
+                          // com `currentColor`: sem ela, sumiria no tema escuro.
+                          IlustracaoMemora(
+                            Ilustracao.linhaJornada,
+                            // Altura obrigatória: largura infinita sem altura definida
+                            // faz o SVG receber restrição infinita e o layout estoura.
+                            altura: 40,
+                            largura: double.infinity,
+                            fit: BoxFit.fill,
+                            cor: cores.textoSuave,
+                          ),
+                          const SizedBox(height: MemoraEspacamento.lg),
+
+                          const TextoComDestaque(TextosAutenticacao.promessa),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
 
-                const SizedBox(height: MemoraEspacamento.xxl),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          const SizedBox(height: MemoraEspacamento.xxl),
 
-                // O que a pessoa vai aprender, com a ilustração ao lado.
-                Row(
-                  children: <Widget>[
-                    const Expanded(
-                      child: TextoComDestaque(
-                        TextosAutenticacao.oQueVouEnsinar,
+                          // A ÚNICA ação principal da tela.
+                          BotaoPrimario(
+                            key: TelaBoasVindas.chaveComecar,
+                            rotulo: TextosAutenticacao.botaoComecar,
+                            icone: Icons.arrow_forward,
+                            aoTocar: aoComecar,
+                          ),
+
+                          if (aoJaTerConta != null) ...<Widget>[
+                            const SizedBox(height: MemoraEspacamento.lg),
+                            BotaoTerciario(
+                              rotulo: TextosAutenticacao.botaoJaTenhoConta,
+                              aoTocar: aoJaTerConta,
+                              larguraTotal: true,
+                            ),
+                          ],
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: MemoraEspacamento.md),
-                    const IlustracaoMemora(
-                      Ilustracao.pessoaComCelular,
-                      altura: 132,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: MemoraEspacamento.lg),
-                // A linha que sobe. Recebe a cor do tema porque é desenhada
-                // com `currentColor`: sem ela, sumiria no tema escuro.
-                IlustracaoMemora(
-                  Ilustracao.linhaJornada,
-                  // Altura obrigatória: largura infinita sem altura definida
-                  // faz o SVG receber restrição infinita e o layout estoura.
-                  altura: 40,
-                  largura: double.infinity,
-                  fit: BoxFit.fill,
-                  cor: cores.textoSuave,
-                ),
-                const SizedBox(height: MemoraEspacamento.lg),
-
-                const TextoComDestaque(TextosAutenticacao.promessa),
-
-                const SizedBox(height: MemoraEspacamento.xxl),
-
-                // A ÚNICA ação principal da tela.
-                BotaoPrimario(
-                  key: TelaBoasVindas.chaveComecar,
-                  rotulo: TextosAutenticacao.botaoComecar,
-                  icone: Icons.arrow_forward,
-                  aoTocar: aoComecar,
-                ),
-
-                if (aoJaTerConta != null) ...<Widget>[
-                  const SizedBox(height: MemoraEspacamento.lg),
-                  BotaoTerciario(
-                    rotulo: TextosAutenticacao.botaoJaTenhoConta,
-                    aoTocar: aoJaTerConta,
-                    larguraTotal: true,
+                    ],
                   ),
-                ],
-              ],
-            ),
-          ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

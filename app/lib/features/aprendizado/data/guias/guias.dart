@@ -1,17 +1,45 @@
 import '../../domain/guia.dart';
+import 'carteira_de_trabalho.dart';
+import 'carteira_digital.dart';
+import 'correios.dart';
+import 'e_titulo.dart';
+import 'facebook.dart';
+import 'fgts.dart';
+import 'google_fotos.dart';
+import 'gov_br.dart';
+import 'instagram.dart';
+import 'meu_inss.dart';
+import 'poupatempo.dart';
+import 'serasa.dart';
+import 'telegram.dart';
+import 'tiktok.dart';
+import 'whatsapp.dart';
+import 'youtube.dart';
 
 /// Todos os guias embarcados no aplicativo, por `chave` (T061).
 ///
-/// ## Está vazio, e o teste sabe
-///
-/// As capturas e os textos vêm com cada guia (T070 em diante). Enquanto isso, o
-/// registro é vazio e `catalogo_e_guias_test.dart` carrega a lista explícita de
-/// itens do catálogo que ainda não têm guia — ela diminui a cada guia que
-/// entra, e o teste reprova se alguém esquecer de tirar o item dela.
+/// As capturas e os textos vêm com cada guia (T070 em diante).
 ///
 /// Para acrescentar um guia: um arquivo `<chave>.dart` nesta pasta, com uma
 /// constante `Guia`, e uma linha na lista abaixo. Nada mais registra guia.
-const List<Guia> todosOsGuias = <Guia>[];
+final List<Guia> todosOsGuias = <Guia>[
+  guiaWhatsapp,
+  guiaInstagram,
+  guiaYoutube,
+  guiaFacebook,
+  guiaGoogleFotos,
+  guiaTelegram,
+  guiaTiktok,
+  guiaGovBr,
+  guiaMeuInss,
+  guiaETitulo,
+  guiaSerasa,
+  guiaFgts,
+  guiaPoupatempo,
+  guiaCarteiraDigital,
+  guiaCorreios,
+  guiaCarteiraDeTrabalho,
+];
 
 /// O guia do item de catálogo [chave], ou `null` quando ele ainda não tem.
 ///

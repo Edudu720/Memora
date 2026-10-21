@@ -97,6 +97,76 @@ TEMAS = {
 # (T122). Formato: {tema: {nome_da_cor: "#RRGGBB"}}, so `claro` e `escuro`.
 PALETAS = {
     "azul": {},
+    "verde": {
+        "claro": {
+            "primaria": "#12632B",
+            "sobre_primaria": "#FFFFFF",
+            "destaque": "#E0F2E5",
+            "medalhao": "#E0F2E5",
+        },
+        "escuro": {
+            "primaria": "#8FE2A5",
+            "sobre_primaria": "#062A12",
+            "destaque": "#143D22",
+            "medalhao": "#D2F5DC",
+        },
+    },
+    "roxo": {
+        "claro": {
+            "primaria": "#5D28A6",
+            "sobre_primaria": "#FFFFFF",
+            "destaque": "#EFE6FD",
+            "medalhao": "#EFE6FD",
+        },
+        "escuro": {
+            "primaria": "#CDAFFF",
+            "sobre_primaria": "#230A47",
+            "destaque": "#351B5C",
+            "medalhao": "#ECDEFF",
+        },
+    },
+    "laranja-terra": {
+        "claro": {
+            "primaria": "#93370D",
+            "sobre_primaria": "#FFFFFF",
+            "destaque": "#FCE9DF",
+            "medalhao": "#FCE9DF",
+        },
+        "escuro": {
+            "primaria": "#FFB188",
+            "sobre_primaria": "#381002",
+            "destaque": "#4E210D",
+            "medalhao": "#FFE2D3",
+        },
+    },
+    "rosa": {
+        "claro": {
+            "primaria": "#941B55",
+            "sobre_primaria": "#FFFFFF",
+            "destaque": "#FDE6F0",
+            "medalhao": "#FDE6F0",
+        },
+        "escuro": {
+            "primaria": "#FFAECB",
+            "sobre_primaria": "#38041B",
+            "destaque": "#541233",
+            "medalhao": "#FFE0EC",
+        },
+    },
+    "grafite": {
+        "claro": {
+            "primaria": "#344154",
+            "sobre_primaria": "#FFFFFF",
+            "destaque": "#E7ECF2",
+            "medalhao": "#E7ECF2",
+        },
+        "escuro": {
+            "primaria": "#B7C6DE",
+            "sobre_primaria": "#0E1826",
+            "destaque": "#232D3B",
+            "medalhao": "#E2EAF5",
+        },
+    },
 }
 
 # Os temas em que a paleta se aplica (R15): alto contraste fica de fora.

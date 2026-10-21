@@ -98,6 +98,24 @@ flutter:
     - assets/icones/navegacao/
     # A licença da fonte vai junto, e aparece em "Licenças" do aplicativo.
     - assets/fontes/atkinson_hyperlegible_next/OFL.txt
+    # Guias de aplicativos cotidianos (T071, T072)
+    - assets/guias/whatsapp/
+    - assets/guias/instagram/
+    - assets/guias/youtube/
+    - assets/guias/facebook/
+    - assets/guias/google-fotos/
+    - assets/guias/telegram/
+    - assets/guias/tiktok/
+    # Guias de serviços sociais (T078, T079, T081, T082)
+    - assets/guias/gov-br/
+    - assets/guias/meu-inss/
+    - assets/guias/e-titulo/
+    - assets/guias/serasa/
+    - assets/guias/fgts/
+    - assets/guias/poupatempo/
+    - assets/guias/carteira-digital/
+    - assets/guias/correios/
+    - assets/guias/carteira-de-trabalho/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

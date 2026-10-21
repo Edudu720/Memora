@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_autenticacao.dart';
 import '../../domain/autenticacao.dart';
+import '../../data/repositorio_autenticacao_simulado.dart';
 
 /// Confirma a posse do canal com o código de 6 dígitos (FR-052, FR-062).
 ///
@@ -145,25 +146,75 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(MemoraEspacamento.xl),
+          padding: const EdgeInsets.symmetric(
+            horizontal: MemoraEspacamento.lg,
+            vertical: MemoraEspacamento.md,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              TextoMemora(
-                TextosAutenticacao.pedidoConfirmarCanal(widget.canalVisivel),
+              // Cartão acolhedor com a assistente Memora
+              Container(
+                padding: const EdgeInsets.all(MemoraEspacamento.md),
+                decoration: BoxDecoration(
+                  color: cores.superficie,
+                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                  border: Border.all(color: cores.borda),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: MemoraElevacao.sombra,
+                      blurRadius: MemoraElevacao.cartao,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: <Widget>[
+                    const MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.falando,
+                      tamanho: MemoraDimensoes.alvoDecisao,
+                    ),
+                    const SizedBox(width: MemoraEspacamento.md),
+                    Expanded(
+                      child: TextoMemora(
+                        TextosAutenticacao.pedidoConfirmarCanal(
+                          widget.canalVisivel,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: MemoraEspacamento.xxl),
-              CampoCodigo(
-                key: TelaConfirmarCanal.chaveCodigo,
-                rotulo: TextosAutenticacao.rotuloCodigo,
-                erro: _erro,
-                aoMudar: (String valor) => setState(() => _codigo = valor),
+              const SizedBox(height: MemoraEspacamento.lg),
+
+              CaixaDeEtapa(
+                instrucao: 'Digite o número que você recebeu',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    CampoCodigo(
+                      key: TelaConfirmarCanal.chaveCodigo,
+                      rotulo: TextosAutenticacao.rotuloCodigo,
+                      erro: _erro,
+                      aoMudar: (String valor) =>
+                          setState(() => _codigo = valor),
+                    ),
+                    if (widget.repositorio
+                        is RepositorioAutenticacaoSimulado) ...<Widget>[
+                      const SizedBox(height: MemoraEspacamento.sm),
+                      const TextoMemora.apoio(
+                        'Código para demonstração: 123456',
+                      ),
+                    ],
+                    if (_aviso != null) ...<Widget>[
+                      const SizedBox(height: MemoraEspacamento.sm),
+                      TextoMemora.apoio(_aviso!),
+                    ],
+                  ],
+                ),
               ),
-              if (_aviso != null) ...<Widget>[
-                const SizedBox(height: MemoraEspacamento.md),
-                TextoMemora.apoio(_aviso!),
-              ],
-              const SizedBox(height: MemoraEspacamento.xxl),
+
+              const SizedBox(height: MemoraEspacamento.xl),
               if (_enviando)
                 const Carregando(mensagem: 'Estou conferindo...')
               else
@@ -179,7 +230,7 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
                 rotulo: TextosAutenticacao.botaoReenviarCodigo,
                 aoTocar: _enviando ? null : () => _pedirCodigo(avisar: true),
               ),
-              const SizedBox(height: MemoraEspacamento.xxl),
+              const SizedBox(height: MemoraEspacamento.lg),
             ],
           ),
         ),

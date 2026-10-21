@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
+import '../../../services/acessibilidade/memora_binding_atividade.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../../../l10n/textos_configuracoes.dart';
@@ -13,6 +14,7 @@ import 'controladores/controlador_recuperacao.dart';
 import 'telas/tela_boas_vindas.dart';
 import 'telas/tela_cadastro.dart';
 import 'telas/tela_confirmar_canal.dart';
+import 'telas/tela_de_volta.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
@@ -32,7 +34,7 @@ import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
 import '../../casca/casca_interna.dart';
-import '../../casca/raizes_provisorias.dart';
+import '../../perfil/presentation/tela_perfil.dart';
 import '../../configuracoes/presentation/tela_configuracoes.dart';
 import '../../configuracoes/presentation/tela_conta.dart';
 import '../../configuracoes/presentation/tela_privacidade.dart';
@@ -41,6 +43,9 @@ import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
+import '../../aprendizado/data/progresso_de_aprendizado.dart';
+import '../../aprendizado/domain/guia.dart';
+import '../../aprendizado/presentation/tela_passo_a_passo.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -107,6 +112,9 @@ class FluxoAutenticacao extends StatefulWidget {
   /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
   final Compartilhador? compartilhador;
 
+  /// Onde o progresso nos guias de aprendizado e guardado (FR-042a).
+  final ProgressoDeAprendizado? progresso;
+
   /// Onde a conversa fica guardada no aparelho (FR-047).
   ///
   /// Trocável no teste de widget, onde I/O de arquivo real nunca completa.
@@ -132,6 +140,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.dataDeNascimento,
     this.apresentacaoVista,
     this.compartilhador,
+    this.progresso,
   });
 
   @override
@@ -140,6 +149,7 @@ class FluxoAutenticacao extends StatefulWidget {
 
 enum _Etapa {
   boasVindas,
+  volta,
   cadastro,
   entregaDoAparelho,
   confirmarCanal,
@@ -165,6 +175,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     aoExpirar: _expirarPorInatividade,
   );
 
+  late final RastreadorDeAtividadeGlobal _rastreadorGlobal =
+      RastreadorDeAtividadeGlobal(aoRegistrarAtividade: _registrarAtividade);
+
   /// Recriado a cada visita ao login: o controlador tenta renovar a sessão no
   /// `initState` da tela, e reaproveitar um que já concluiu deixaria estado
   /// velho decidindo o que a pessoa vê.
@@ -175,6 +188,27 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   ControladorRecuperacao? _recuperacao;
 
   _Etapa _etapa = _Etapa.boasVindas;
+  _Etapa _etapaDeEntrada = _Etapa.boasVindas;
+
+  @override
+  void initState() {
+    super.initState();
+    _conferirUltimoAcessoInicial();
+  }
+
+  Future<void> _conferirUltimoAcessoInicial() async {
+    final String? lembrado = await widget.ultimoAcesso.identificador();
+    if (!mounted) return;
+    if (lembrado != null && lembrado.trim().isNotEmpty) {
+      setState(() {
+        _etapaDeEntrada = _Etapa.volta;
+        if (_etapa == _Etapa.boasVindas) {
+          _etapa = _Etapa.volta;
+        }
+      });
+    }
+  }
+
   PessoaAutenticada? _pessoa;
 
   late final ArmazenamentoDaDataDeNascimento _datas =
@@ -215,6 +249,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   @override
   void dispose() {
+    _rastreadorGlobal.parar();
     _cadastro.dispose();
     _login?.dispose();
     _recuperacao?.dispose();
@@ -258,6 +293,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     await widget.ultimoAcesso.lembrar(
       _recuperacao!.identificador.trim().toLowerCase(),
     );
+    _etapaDeEntrada = _Etapa.volta;
     if (!mounted) return;
     _entrou(pessoa);
   }
@@ -270,6 +306,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// deveria fechar.
   Future<void> _cadastrou(PessoaAutenticada pessoa) async {
     await widget.ultimoAcesso.lembrar(_cadastro.canal.trim().toLowerCase());
+    _etapaDeEntrada = _Etapa.volta;
     if (!mounted) return;
 
     // Cadastro comum entra direto (FR-009). O assistido não: a conta existe,
@@ -322,6 +359,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _etapa = vistas == null ? _Etapa.dentro : _Etapa.conferindoApresentacao;
     });
     _monitor.iniciar();
+    _rastreadorGlobal.iniciar();
     if (vistas != null) _conferirApresentacao(vistas, pessoa, geracao);
   }
 
@@ -355,10 +393,14 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// literal da FR-026 leva — o identificador do último acesso, a data de
   /// nascimento e a apresentação vista. A saída comum **não** o faz.
   Future<void> _sair({bool esquecerTudo = false}) async {
+    _rastreadorGlobal.parar();
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
     await widget.limpeza?.executar(esquecerTudo: esquecerTudo);
     if (!mounted) return;
+    if (esquecerTudo) {
+      _etapaDeEntrada = _Etapa.boasVindas;
+    }
     _fecharRotasAbertas();
     _irParaLogin();
   }
@@ -445,6 +487,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   Future<void> _expirarPorInatividade() async {
     // Antes de qualquer espera: daqui em diante, nada reinicia a contagem.
     _expirando = true;
+    _rastreadorGlobal.parar();
     _monitor.parar();
     await widget.repositorio.encerrarSessao();
 
@@ -617,13 +660,60 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
-          // Sem isto, todo item era um botão desabilitado: a porta que não
-          // abre da FR-003, nas duas portas de serviço do Hub (T077).
+          // Se o item tiver guia de passo a passo embarcado, abre o guia;
+          // caso contrário, vai para a conversa já perguntando (T069, FR-027).
+          aoAbrirGuia: (Guia guia, ServicoDoCatalogo servico) => _abrirGuia(
+            guia: guia,
+            servico: servico,
+            assistente: assistente,
+          ),
           aoEscolher: (ServicoDoCatalogo servico) => _abrirConversa(
             assistente,
             rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre a tela de registro de atividades com a assistente.
+  void _abrirRegistro(RepositorioAssistente assistente) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaRegistro(
+          repositorio: assistente,
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre o guia de aprendizado passo a passo (FR-027).
+  void _abrirGuia({
+    required Guia guia,
+    required ServicoDoCatalogo servico,
+    required RepositorioAssistente assistente,
+  }) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaPassoAPasso(
+          guia: guia,
+          servico: servico,
+          repositorioAssistente: assistente,
+          progresso: widget.progresso,
+          idDaConta: _pessoa?.id,
+          aoPedirParaAbrir: (String pedido) => _abrirConversa(
+            assistente,
+            rascunho: pedido,
+          ),
+          aoConversarSobreDiferenca: () => _abrirConversa(
+            assistente,
+            rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+          aoVoltarAoHub: () => Navigator.of(contexto).pop(),
+          aoSair: () => Navigator.of(contexto).pop(),
         ),
       ),
     );
@@ -743,9 +833,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         aoComecar: () => setState(() => _etapa = _Etapa.cadastro),
         aoJaTerConta: _irParaLogin,
       ),
+      _Etapa.volta => TelaDeVolta(
+        aoEntrar: _irParaLogin,
+        aoCriarConta: () => setState(() => _etapa = _Etapa.cadastro),
+      ),
       _Etapa.cadastro => TelaCadastro(
         controlador: _cadastro,
-        aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
+        aoVoltar: () => setState(() => _etapa = _etapaDeEntrada),
         aoConcluir: _cadastrou,
         aoEntregarAparelho: () =>
             setState(() => _etapa = _Etapa.entregaDoAparelho),
@@ -769,9 +863,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       ),
       _Etapa.login => TelaLogin(
         controlador: _login!,
-        aoVoltar: () => setState(() => _etapa = _Etapa.boasVindas),
+        aoVoltar: () => setState(() => _etapa = _etapaDeEntrada),
         aoEntrar: _entrou,
         aoRecuperar: _irParaRecuperacao,
+        aoPrimeiroAcesso: () => setState(() => _etapa = _Etapa.cadastro),
       ),
       _Etapa.recuperacao => TelaRecuperacao(
         controlador: _recuperacao!,
@@ -814,10 +909,26 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
                 ? null
                 : () => _abrirConversa(widget.assistente!),
             aoVerTudo: _portasConstruidas().isEmpty ? null : _abrirHub,
+            aoAbrirAplicativos: widget.assistente == null
+                ? null
+                : () => _abrirCatalogo(
+                      widget.assistente!,
+                      CategoriaDoServico.cotidiano,
+                    ),
+            aoAbrirServicos: widget.assistente == null
+                ? null
+                : () => _abrirCatalogo(
+                      widget.assistente!,
+                      CategoriaDoServico.sensivel,
+                    ),
+            aoAbrirRegistro: widget.assistente == null
+                ? null
+                : () => _abrirRegistro(widget.assistente!),
           ),
-          DestinoDaCasca.perfil: (BuildContext _) => PerfilProvisorio(
+          DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',
             canal: _canal,
+            progresso: widget.progresso,
             dataDeNascimento: _datas,
             idDaConta: _pessoa?.id,
           ),

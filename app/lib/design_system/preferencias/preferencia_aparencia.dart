@@ -101,7 +101,14 @@ class PreferenciaAparencia {
   static const String paletaPadrao = 'azul';
 
   /// As paletas que existem nesta versão do aplicativo.
-  static const Set<String> paletasConhecidas = <String>{paletaPadrao};
+  static const Set<String> paletasConhecidas = <String>{
+    paletaPadrao,
+    'verde',
+    'roxo',
+    'laranja-terra',
+    'rosa',
+    'grafite',
+  };
 
   /// [nome] se for uma paleta que existe, senão [paletaPadrao].
   static String paletaValida(String? nome) =>

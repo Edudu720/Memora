@@ -98,6 +98,10 @@ class _TelaConversaState extends State<TelaConversa>
   @override
   void didChangeMetrics() => _rolarParaOFim();
 
+  int _ultimoTotalMensagens = 0;
+  bool _ultimoRespondendo = false;
+  String _ultimoTrecho = '';
+
   void _aoMudar() {
     // O controlador é dono do valor; o campo apenas o reflete. Importa depois
     // de enviar, quando o rascunho é limpo por quem não é a pessoa.
@@ -109,7 +113,19 @@ class _TelaConversaState extends State<TelaConversa>
         ),
       );
     }
-    _rolarParaOFim();
+
+    final ControladorConversa c = widget.controlador;
+    final bool precisaRolar = c.mensagens.length != _ultimoTotalMensagens ||
+        c.respondendo != _ultimoRespondendo ||
+        c.trechoEmCurso != _ultimoTrecho ||
+        c.acaoOferecida != null;
+    _ultimoTotalMensagens = c.mensagens.length;
+    _ultimoRespondendo = c.respondendo;
+    _ultimoTrecho = c.trechoEmCurso;
+
+    if (precisaRolar) {
+      _rolarParaOFim();
+    }
   }
 
   void _rolarParaOFim() {

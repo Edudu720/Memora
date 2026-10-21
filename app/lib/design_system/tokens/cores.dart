@@ -187,4 +187,130 @@ class MemoraCores {
       sobrePerigo: Color.lerp(a.sobrePerigo, b.sobrePerigo, t)!,
     );
   }
+
+  /// As seis paletas prontas de cor de destaque (FR-039, R15).
+  ///
+  /// Todas as combinacoes com os temas claro e escuro foram medidas e aprovadas
+  /// em `specs/002-design-system/ferramentas/validar_paleta.py` contra a WCAG 2.2 AA.
+  static const Map<String, PaletaDeDestaque> paletas = <String, PaletaDeDestaque>{
+    'azul': PaletaDeDestaque(
+      primariaClaro: Color(0xFF1040F8),
+      sobrePrimariaClaro: Color(0xFFFFFFFF),
+      destaqueClaro: Color(0xFFE3EAFF),
+      medalhaoClaro: Color(0xFFE3EAFF),
+      primariaEscuro: Color(0xFF9CB8FF),
+      sobrePrimariaEscuro: Color(0xFF06132E),
+      destaqueEscuro: Color(0xFF22305A),
+      medalhaoEscuro: Color(0xFFDCE5FF),
+    ),
+    'verde': PaletaDeDestaque(
+      primariaClaro: Color(0xFF12632B),
+      sobrePrimariaClaro: Color(0xFFFFFFFF),
+      destaqueClaro: Color(0xFFE0F2E5),
+      medalhaoClaro: Color(0xFFE0F2E5),
+      primariaEscuro: Color(0xFF8FE2A5),
+      sobrePrimariaEscuro: Color(0xFF062A12),
+      destaqueEscuro: Color(0xFF143D22),
+      medalhaoEscuro: Color(0xFFD2F5DC),
+    ),
+    'roxo': PaletaDeDestaque(
+      primariaClaro: Color(0xFF5D28A6),
+      sobrePrimariaClaro: Color(0xFFFFFFFF),
+      destaqueClaro: Color(0xFFEFE6FD),
+      medalhaoClaro: Color(0xFFEFE6FD),
+      primariaEscuro: Color(0xFFCDAFFF),
+      sobrePrimariaEscuro: Color(0xFF230A47),
+      destaqueEscuro: Color(0xFF351B5C),
+      medalhaoEscuro: Color(0xFFECDEFF),
+    ),
+    'laranja-terra': PaletaDeDestaque(
+      primariaClaro: Color(0xFF93370D),
+      sobrePrimariaClaro: Color(0xFFFFFFFF),
+      destaqueClaro: Color(0xFFFCE9DF),
+      medalhaoClaro: Color(0xFFFCE9DF),
+      primariaEscuro: Color(0xFFFFB188),
+      sobrePrimariaEscuro: Color(0xFF381002),
+      destaqueEscuro: Color(0xFF4E210D),
+      medalhaoEscuro: Color(0xFFFFE2D3),
+    ),
+    'rosa': PaletaDeDestaque(
+      primariaClaro: Color(0xFF941B55),
+      sobrePrimariaClaro: Color(0xFFFFFFFF),
+      destaqueClaro: Color(0xFFFDE6F0),
+      medalhaoClaro: Color(0xFFFDE6F0),
+      primariaEscuro: Color(0xFFFFAECB),
+      sobrePrimariaEscuro: Color(0xFF38041B),
+      destaqueEscuro: Color(0xFF541233),
+      medalhaoEscuro: Color(0xFFFFE0EC),
+    ),
+    'grafite': PaletaDeDestaque(
+      primariaClaro: Color(0xFF344154),
+      sobrePrimariaClaro: Color(0xFFFFFFFF),
+      destaqueClaro: Color(0xFFE7ECF2),
+      medalhaoClaro: Color(0xFFE7ECF2),
+      primariaEscuro: Color(0xFFB7C6DE),
+      sobrePrimariaEscuro: Color(0xFF0E1826),
+      destaqueEscuro: Color(0xFF232D3B),
+      medalhaoEscuro: Color(0xFFE2EAF5),
+    ),
+  };
+
+  /// Aplica a paleta [nome] sobre este conjunto de cores.
+  ///
+  /// No tema de alto contraste, a paleta **nao se aplica** (FR-039, R15): ele
+  /// existe para o maximo contraste, e qualquer cor de destaque seria concessao.
+  ///
+  /// Se [nome] for nulo ou desconhecido, volta a paleta padrao ('azul').
+  MemoraCores comPaleta(String? nome, {required bool ehEscuro}) {
+    final PaletaDeDestaque pal = paletas[nome] ?? paletas['azul']!;
+    if (ehEscuro) {
+      return copyWith(
+        primaria: pal.primariaEscuro,
+        sobrePrimaria: pal.sobrePrimariaEscuro,
+        destaque: pal.destaqueEscuro,
+        medalhao: pal.medalhaoEscuro,
+      );
+    } else {
+      return copyWith(
+        primaria: pal.primariaClaro,
+        sobrePrimaria: pal.sobrePrimariaClaro,
+        destaque: pal.destaqueClaro,
+        medalhao: pal.medalhaoClaro,
+      );
+    }
+  }
+}
+
+/// Cores de destaque de uma paleta nos temas claro e escuro (FR-039, R15).
+@immutable
+class PaletaDeDestaque {
+  /// Primaria no tema claro.
+  final Color primariaClaro;
+  /// Sobre primaria no tema claro.
+  final Color sobrePrimariaClaro;
+  /// Destaque suave no tema claro.
+  final Color destaqueClaro;
+  /// Medalhao claro no tema claro.
+  final Color medalhaoClaro;
+
+  /// Primaria no tema escuro.
+  final Color primariaEscuro;
+  /// Sobre primaria no tema escuro.
+  final Color sobrePrimariaEscuro;
+  /// Destaque suave no tema escuro.
+  final Color destaqueEscuro;
+  /// Medalhao no tema escuro.
+  final Color medalhaoEscuro;
+
+  /// Cria uma paleta de destaque.
+  const PaletaDeDestaque({
+    required this.primariaClaro,
+    required this.sobrePrimariaClaro,
+    required this.destaqueClaro,
+    required this.medalhaoClaro,
+    required this.primariaEscuro,
+    required this.sobrePrimariaEscuro,
+    required this.destaqueEscuro,
+    required this.medalhaoEscuro,
+  });
 }

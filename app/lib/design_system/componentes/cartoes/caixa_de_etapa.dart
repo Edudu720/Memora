@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../texto/texto_memora.dart';
@@ -74,6 +75,13 @@ class CaixaDeEtapa extends StatelessWidget {
           color: cores.superficie,
           borderRadius: BorderRadius.circular(MemoraRaio.cartao),
           border: Border.all(color: cores.borda),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: MemoraElevacao.sombra,
+              blurRadius: MemoraElevacao.cartao * 2,
+              offset: const Offset(0, MemoraElevacao.cartao),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

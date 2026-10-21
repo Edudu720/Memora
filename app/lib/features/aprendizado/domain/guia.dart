@@ -38,6 +38,171 @@ final class CapturaDoGuia {
   /// O caminho do asset, relativo à raiz do aplicativo.
   String get caminho => 'assets/guias/$chave/passo_$numero.png';
 
+  /// Captura para orientar a baixar na loja oficial (revisão da #47).
+  static const CapturaDoGuia lojaOficial = CapturaDoGuia._('loja', 1);
+
+  // WhatsApp (T071)
+  /// Captura 1 do WhatsApp.
+  static const CapturaDoGuia whatsapp1 = CapturaDoGuia._('whatsapp', 1);
+  /// Captura 2 do WhatsApp.
+  static const CapturaDoGuia whatsapp2 = CapturaDoGuia._('whatsapp', 2);
+  /// Captura 3 do WhatsApp.
+  static const CapturaDoGuia whatsapp3 = CapturaDoGuia._('whatsapp', 3);
+  /// Captura 4 do WhatsApp.
+  static const CapturaDoGuia whatsapp4 = CapturaDoGuia._('whatsapp', 4);
+
+  // Instagram (T071)
+  /// Captura 1 do Instagram.
+  static const CapturaDoGuia instagram1 = CapturaDoGuia._('instagram', 1);
+  /// Captura 2 do Instagram.
+  static const CapturaDoGuia instagram2 = CapturaDoGuia._('instagram', 2);
+  /// Captura 3 do Instagram.
+  static const CapturaDoGuia instagram3 = CapturaDoGuia._('instagram', 3);
+  /// Captura 4 do Instagram.
+  static const CapturaDoGuia instagram4 = CapturaDoGuia._('instagram', 4);
+
+  // YouTube (T071)
+  /// Captura 1 do YouTube.
+  static const CapturaDoGuia youtube1 = CapturaDoGuia._('youtube', 1);
+  /// Captura 2 do YouTube.
+  static const CapturaDoGuia youtube2 = CapturaDoGuia._('youtube', 2);
+  /// Captura 3 do YouTube.
+  static const CapturaDoGuia youtube3 = CapturaDoGuia._('youtube', 3);
+  /// Captura 4 do YouTube.
+  static const CapturaDoGuia youtube4 = CapturaDoGuia._('youtube', 4);
+
+  // Facebook (T072)
+  /// Captura 1 do Facebook.
+  static const CapturaDoGuia facebook1 = CapturaDoGuia._('facebook', 1);
+  /// Captura 2 do Facebook.
+  static const CapturaDoGuia facebook2 = CapturaDoGuia._('facebook', 2);
+  /// Captura 3 do Facebook.
+  static const CapturaDoGuia facebook3 = CapturaDoGuia._('facebook', 3);
+  /// Captura 4 do Facebook.
+  static const CapturaDoGuia facebook4 = CapturaDoGuia._('facebook', 4);
+
+  // Google Fotos (T072)
+  /// Captura 1 do Google Fotos.
+  static const CapturaDoGuia googleFotos1 = CapturaDoGuia._('google-fotos', 1);
+  /// Captura 2 do Google Fotos.
+  static const CapturaDoGuia googleFotos2 = CapturaDoGuia._('google-fotos', 2);
+  /// Captura 3 do Google Fotos.
+  static const CapturaDoGuia googleFotos3 = CapturaDoGuia._('google-fotos', 3);
+  /// Captura 4 do Google Fotos.
+  static const CapturaDoGuia googleFotos4 = CapturaDoGuia._('google-fotos', 4);
+
+  // Telegram (T072)
+  /// Captura 1 do Telegram.
+  static const CapturaDoGuia telegram1 = CapturaDoGuia._('telegram', 1);
+  /// Captura 2 do Telegram.
+  static const CapturaDoGuia telegram2 = CapturaDoGuia._('telegram', 2);
+  /// Captura 3 do Telegram.
+  static const CapturaDoGuia telegram3 = CapturaDoGuia._('telegram', 3);
+  /// Captura 4 do Telegram.
+  static const CapturaDoGuia telegram4 = CapturaDoGuia._('telegram', 4);
+
+  // TikTok (T070)
+  /// Captura 1 do TikTok.
+  static const CapturaDoGuia tiktok1 = CapturaDoGuia._('tiktok', 1);
+  /// Captura 2 do TikTok.
+  static const CapturaDoGuia tiktok2 = CapturaDoGuia._('tiktok', 2);
+  /// Captura 3 do TikTok.
+  static const CapturaDoGuia tiktok3 = CapturaDoGuia._('tiktok', 3);
+  /// Captura 4 do TikTok.
+  static const CapturaDoGuia tiktok4 = CapturaDoGuia._('tiktok', 4);
+
+  // Gov.br (T078)
+  /// Captura 1 do Gov.br.
+  static const CapturaDoGuia govBr1 = CapturaDoGuia._('gov-br', 1);
+  /// Captura 2 do Gov.br.
+  static const CapturaDoGuia govBr2 = CapturaDoGuia._('gov-br', 2);
+  /// Captura 3 do Gov.br.
+  static const CapturaDoGuia govBr3 = CapturaDoGuia._('gov-br', 3);
+  /// Captura 4 do Gov.br (com campo de senha vazio).
+  static const CapturaDoGuia govBr4 = CapturaDoGuia._('gov-br', 4);
+  /// Captura 5 do Gov.br.
+  static const CapturaDoGuia govBr5 = CapturaDoGuia._('gov-br', 5);
+
+  // Meu INSS (T079)
+  /// Captura 1 do Meu INSS.
+  static const CapturaDoGuia meuInss1 = CapturaDoGuia._('meu-inss', 1);
+  /// Captura 2 do Meu INSS (com tela de senha oficial vazia).
+  static const CapturaDoGuia meuInss2 = CapturaDoGuia._('meu-inss', 2);
+  /// Captura 3 do Meu INSS.
+  static const CapturaDoGuia meuInss3 = CapturaDoGuia._('meu-inss', 3);
+  /// Captura 4 do Meu INSS.
+  static const CapturaDoGuia meuInss4 = CapturaDoGuia._('meu-inss', 4);
+
+  // e-Título (T081)
+  /// Captura 1 do e-Título.
+  static const CapturaDoGuia eTitulo1 = CapturaDoGuia._('e-titulo', 1);
+  /// Captura 2 do e-Título.
+  static const CapturaDoGuia eTitulo2 = CapturaDoGuia._('e-titulo', 2);
+  /// Captura 3 do e-Título (com campo de senha oficial vazio).
+  static const CapturaDoGuia eTitulo3 = CapturaDoGuia._('e-titulo', 3);
+  /// Captura 4 do e-Título.
+  static const CapturaDoGuia eTitulo4 = CapturaDoGuia._('e-titulo', 4);
+
+  // Serasa (T081)
+  /// Captura 1 do Serasa.
+  static const CapturaDoGuia serasa1 = CapturaDoGuia._('serasa', 1);
+  /// Captura 2 do Serasa (com campo de senha oficial vazio).
+  static const CapturaDoGuia serasa2 = CapturaDoGuia._('serasa', 2);
+  /// Captura 3 do Serasa.
+  static const CapturaDoGuia serasa3 = CapturaDoGuia._('serasa', 3);
+  /// Captura 4 do Serasa.
+  static const CapturaDoGuia serasa4 = CapturaDoGuia._('serasa', 4);
+
+  // FGTS (T081)
+  /// Captura 1 do FGTS.
+  static const CapturaDoGuia fgts1 = CapturaDoGuia._('fgts', 1);
+  /// Captura 2 do FGTS (com campo de senha oficial Caixa vazio).
+  static const CapturaDoGuia fgts2 = CapturaDoGuia._('fgts', 2);
+  /// Captura 3 do FGTS.
+  static const CapturaDoGuia fgts3 = CapturaDoGuia._('fgts', 3);
+  /// Captura 4 do FGTS.
+  static const CapturaDoGuia fgts4 = CapturaDoGuia._('fgts', 4);
+
+  // Poupatempo (T081)
+  /// Captura 1 do Poupatempo.
+  static const CapturaDoGuia poupatempo1 = CapturaDoGuia._('poupatempo', 1);
+  /// Captura 2 do Poupatempo (com campo de senha oficial vazio).
+  static const CapturaDoGuia poupatempo2 = CapturaDoGuia._('poupatempo', 2);
+  /// Captura 3 do Poupatempo.
+  static const CapturaDoGuia poupatempo3 = CapturaDoGuia._('poupatempo', 3);
+  /// Captura 4 do Poupatempo.
+  static const CapturaDoGuia poupatempo4 = CapturaDoGuia._('poupatempo', 4);
+
+  // Carteira Digital (T082)
+  /// Captura 1 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital1 = CapturaDoGuia._('carteira-digital', 1);
+  /// Captura 2 da Carteira Digital (com campo de senha oficial Gov.br vazio).
+  static const CapturaDoGuia carteiraDigital2 = CapturaDoGuia._('carteira-digital', 2);
+  /// Captura 3 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital3 = CapturaDoGuia._('carteira-digital', 3);
+  /// Captura 4 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital4 = CapturaDoGuia._('carteira-digital', 4);
+
+  // Correios (T082)
+  /// Captura 1 dos Correios.
+  static const CapturaDoGuia correios1 = CapturaDoGuia._('correios', 1);
+  /// Captura 2 dos Correios (com campo de senha oficial vazio).
+  static const CapturaDoGuia correios2 = CapturaDoGuia._('correios', 2);
+  /// Captura 3 dos Correios.
+  static const CapturaDoGuia correios3 = CapturaDoGuia._('correios', 3);
+  /// Captura 4 dos Correios.
+  static const CapturaDoGuia correios4 = CapturaDoGuia._('correios', 4);
+
+  // Carteira de Trabalho Digital (T082)
+  /// Captura 1 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho1 = CapturaDoGuia._('carteira-de-trabalho', 1);
+  /// Captura 2 da Carteira de Trabalho Digital (com campo de senha Gov.br vazio).
+  static const CapturaDoGuia carteiraDeTrabalho2 = CapturaDoGuia._('carteira-de-trabalho', 2);
+  /// Captura 3 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho3 = CapturaDoGuia._('carteira-de-trabalho', 3);
+  /// Captura 4 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho4 = CapturaDoGuia._('carteira-de-trabalho', 4);
+
   // As capturas entram aqui, uma `static const` por imagem, junto com o guia
   // que as usa. Exemplo, quando existir o primeiro:
   //

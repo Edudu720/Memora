@@ -5,11 +5,12 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
+import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 import 'package:memora/features/casca/casca_interna.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/perfil/presentation/tela_perfil.dart';
 import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/features/configuracoes/presentation/tela_privacidade.dart';
@@ -163,13 +164,23 @@ void main() {
       via: null,
     ),
     (
-      parte: 'um aplicativo do catálogo (leva à conversa)',
+      parte: 'um aplicativo do catálogo (leva ao passo a passo)',
       toques: <Finder>[
         doHub,
         deApps,
         find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')),
       ],
-      chegada: find.byKey(TelaConversa.chaveCampo),
+      chegada: find.byType(TelaPassoAPasso),
+      via: null,
+    ),
+    (
+      parte: 'um serviço social do catálogo (leva ao passo a passo)',
+      toques: <Finder>[
+        doHub,
+        deServicos,
+        find.byKey(TelaCatalogo.chaveDoItem('Gov.br')),
+      ],
+      chegada: find.byType(TelaPassoAPasso),
       via: null,
     ),
     (
@@ -253,7 +264,7 @@ void main() {
     (
       parte: 'meu perfil',
       toques: <Finder>[naBarra(DestinoDaCasca.perfil)],
-      chegada: find.byType(PerfilProvisorio),
+      chegada: find.byType(TelaPerfil),
       via: DestinoDaCasca.perfil,
     ),
     // A galeria só existe em depuração (R9 da 002); fora dela não há caminho.
