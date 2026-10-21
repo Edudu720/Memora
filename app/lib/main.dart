@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,16 +18,17 @@ import 'services/seguranca/cofre_de_credenciais.dart';
 Future<void> main() async {
   MemoraWidgetsFlutterBinding.ensureInitialized();
   registrarLicencasEmbarcadas();
+  final SharedPreferences preferencias = await SharedPreferences.getInstance();
   final RepositorioPreferenciaAparenciaLocal repositorio =
-      await RepositorioPreferenciaAparenciaLocal.abrir();
+      RepositorioPreferenciaAparenciaLocal(preferencias);
   final ControladorAparencia controlador = ControladorAparencia(repositorio);
   await controlador.carregar();
 
-  final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
+  final UltimoAcessoLocal ultimoAcesso = UltimoAcessoLocal(preferencias);
   final DataDeNascimentoLocal dataDeNascimento =
-      await DataDeNascimentoLocal.abrir();
+      DataDeNascimentoLocal(preferencias);
   final ApresentacaoVistaLocal apresentacaoVista =
-      await ApresentacaoVistaLocal.abrir();
+      ApresentacaoVistaLocal(preferencias);
 
   // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
   // lugar. Ver `services/ambiente/composicao.dart`.
@@ -36,6 +38,7 @@ Future<void> main() async {
     ultimoAcesso: ultimoAcesso,
     dataDeNascimento: dataDeNascimento,
     apresentacaoVista: apresentacaoVista,
+    preferencias: preferencias,
     guardarCatalogo: true,
   );
 

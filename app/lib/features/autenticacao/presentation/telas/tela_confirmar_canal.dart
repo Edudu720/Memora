@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_autenticacao.dart';
 import '../../domain/autenticacao.dart';
+import '../../data/repositorio_autenticacao_simulado.dart';
 
 /// Confirma a posse do canal com o código de 6 dígitos (FR-052, FR-062).
 ///
@@ -159,6 +160,12 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
                 erro: _erro,
                 aoMudar: (String valor) => setState(() => _codigo = valor),
               ),
+              if (widget.repositorio is RepositorioAutenticacaoSimulado) ...<Widget>[
+                const SizedBox(height: MemoraEspacamento.sm),
+                const TextoMemora.apoio(
+                  'Código para demonstração: 123456',
+                ),
+              ],
               if (_aviso != null) ...<Widget>[
                 const SizedBox(height: MemoraEspacamento.md),
                 TextoMemora.apoio(_aviso!),

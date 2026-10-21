@@ -11,7 +11,6 @@ import '../../tokens/raio.dart';
 import '../botoes/botao_primario.dart';
 import '../botoes/botao_secundario.dart';
 import '../botoes/botao_terciario.dart';
-import '../feedback/carregando.dart';
 import '../ilustracao/ilustracao_memora.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
