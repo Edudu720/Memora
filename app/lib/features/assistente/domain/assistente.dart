@@ -146,6 +146,14 @@ class AcaoRegistrada {
 /// São **códigos**, não mensagens: o texto exibido vive na camada de
 /// apresentação, para que a persona da Memora fique num lugar só — mesma
 /// escolha de `FalhaAutenticacao`.
+///
+/// ## O mapeamento que o repositório real vai fazer (T036)
+///
+/// O servidor responde sempre `200` e conta a falha dentro do stream, num
+/// evento `erro` cujo campo `codigo` decide qual destas falhas é:
+/// `LIMITE_DE_CONVERSAS` vira [limiteDeConversas], `ASSISTENTE_INDISPONIVEL`
+/// vira [assistenteIndisponivel] e `ERRO_INESPERADO` vira [inesperada].
+/// [semConexao] e [sessaoExpirada] nascem no aparelho, da rede e do `401`.
 enum FalhaDaAssistente {
   /// Sem conexão.
   semConexao,
@@ -153,11 +161,42 @@ enum FalhaDaAssistente {
   /// A sessão caiu.
   sessaoExpirada,
 
-  /// A cota diária de conversas acabou (R7).
+  /// A cota diária de conversas acabou (R7). Volta no dia seguinte.
   limiteDeConversas,
 
+  /// O serviço que gera as respostas está fora do ar, sem cota ou não
+  /// respondeu no prazo (FR-057). A dificuldade é da Memora, e passa.
+  assistenteIndisponivel,
+
   /// Qualquer outra falha.
-  inesperada,
+  inesperada;
+
+  /// A pessoa pode tentar de novo agora? (FR-052, FR-057)
+  ///
+  /// Só as falhas **passageiras** oferecem. O limite diário diz que volta
+  /// amanhã — um botão ali prometeria o que não vai acontecer —, e a sessão
+  /// caída não se resolve reenviando a mesma pergunta.
+  bool get passageira => switch (this) {
+        semConexao || assistenteIndisponivel || inesperada => true,
+        limiteDeConversas || sessaoExpirada => false,
+      };
+}
+
+/// Uma chamada da assistente que não pôde ser feita, e por quê.
+///
+/// É o que as chamadas **sem** tipo de resposta próprio (catálogo, registro,
+/// ação) lançam: as telas já tratam qualquer `Exception` como "não consegui
+/// carregar", e quem precisar distinguir a sessão perdida da rede tem o
+/// [falha] para isso. A conversa a converte em `AssistenteFalhou`.
+class FalhaDeChamadaDaAssistente implements Exception {
+  /// O que aconteceu.
+  final FalhaDaAssistente falha;
+
+  /// Cria a falha.
+  const FalhaDeChamadaDaAssistente(this.falha);
+
+  @override
+  String toString() => 'FalhaDeChamadaDaAssistente($falha)';
 }
 
 /// O que a Memora respondeu a um turno da conversa.
@@ -188,11 +227,11 @@ class AssistenteFalhou extends RespostaDaAssistente {
   /// Qual falha ocorreu.
   final FalhaDaAssistente falha;
 
-  /// Quando tentar de novo, em segundos. Presente no limite diário.
-  final int? tentarNovamenteEmSegundos;
-
   /// Cria uma falha.
-  const AssistenteFalhou(this.falha, {this.tentarNovamenteEmSegundos});
+  ///
+  /// Não há campo de espera: o contrato não o tem, e o limite diário diz
+  /// "amanhã" em vez de um prazo (FR-053, T106).
+  const AssistenteFalhou(this.falha);
 }
 
 /// Contrato da assistente, usado pela camada de apresentação.

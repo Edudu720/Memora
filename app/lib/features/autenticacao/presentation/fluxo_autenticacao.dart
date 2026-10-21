@@ -25,6 +25,7 @@ import '../../ajuda/presentation/ajuda_guiada_da_conversa.dart';
 import '../../ajuda/presentation/tela_ajuda.dart';
 import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
+import '../../assistente/data/aceite_do_aviso.dart';
 import '../../assistente/data/conversa_local.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
@@ -46,6 +47,7 @@ import '../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
 import '../../aprendizado/presentation/tela_passo_a_passo.dart';
+import '../../../services/seguranca/sessao_perdida.dart';
 
 /// Liga as telas das User Stories 1 e 2.
 ///
@@ -98,6 +100,14 @@ class FluxoAutenticacao extends StatefulWidget {
   /// 004 — é o que o teste de widget que só quer chegar ao Início espera.
   /// O aplicativo de verdade sempre o recebe da `Composicao`.
   final ApresentacaoVista? apresentacaoVista;
+  /// Avisa que a sessão caiu **no meio do uso**, fora do que o monitor vê (T111).
+  ///
+  /// A camada de dados da assistente renova a sessão em silêncio; quando a
+  /// renovação é recusada, quem sabe é ela, e quem leva a pessoa à entrada é este
+  /// fluxo — pelo **mesmo** caminho da inatividade (`_expirarSessao`), com a
+  /// mesma limpeza. Opcional porque a maioria dos testes de tela não tem o que
+  /// avisar.
+  final SessaoPerdida? sessaoPerdida;
 
   /// Quem abre outro aplicativo, depois da confirmação da pessoa.
   ///
@@ -120,6 +130,13 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Trocável no teste de widget, onde I/O de arquivo real nunca completa.
   final ConversaLocal Function() conversaLocal;
 
+  /// Onde fica guardado que a pessoa aceitou o aviso de privacidade (FR-051).
+  ///
+  /// Opcional, e o padrão é o lado seguro: sem ele, o aceite vive só nesta
+  /// execução e a conversa pergunta de novo na seguinte. Em produção quem o dá
+  /// é a `Composicao`, que é também quem o põe na lista da `LimpezaDeSessao`.
+  final AceiteDoAviso? aceiteDoAviso;
+
   /// Quanto tempo parado até a sessão cair (FR-017).
   final Duration inatividade;
 
@@ -132,6 +149,8 @@ class FluxoAutenticacao extends StatefulWidget {
     this.assistente,
     this.abridor,
     this.conversaLocal = ConversaLocal.new,
+    this.aceiteDoAviso,
+    this.sessaoPerdida,
     required this.ultimoAcesso,
     this.inatividade = MonitorDeSessao.inatividadePadrao,
     this.avisoDeInatividade = MonitorDeSessao.avisoPadrao,
@@ -172,11 +191,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     inatividade: widget.inatividade,
     aviso: widget.avisoDeInatividade,
     aoAvisar: _avisarDeInatividade,
-    aoExpirar: _expirarPorInatividade,
+    aoExpirar: _expirarSessao,
   );
 
   late final RastreadorDeAtividadeGlobal _rastreadorGlobal =
       RastreadorDeAtividadeGlobal(aoRegistrarAtividade: _registrarAtividade);
+  /// O aceite de quando ninguém deu um: só nesta execução, nunca em disco.
+  final AceiteDoAviso _aceiteNestaExecucao = _AceiteSoNaMemoria();
 
   /// Recriado a cada visita ao login: o controlador tenta renovar a sessão no
   /// `initState` da tela, e reaproveitar um que já concluiu deixaria estado
@@ -193,6 +214,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   @override
   void initState() {
     super.initState();
+    widget.sessaoPerdida?.addListener(_aoPerderASessao);
     _conferirUltimoAcessoInicial();
   }
 
@@ -250,6 +272,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   @override
   void dispose() {
     _rastreadorGlobal.parar();
+    widget.sessaoPerdida?.removeListener(_aoPerderASessao);
     _cadastro.dispose();
     _login?.dispose();
     _recuperacao?.dispose();
@@ -484,7 +507,29 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     _monitor.registrarAtividade();
   }
 
-  Future<void> _expirarPorInatividade() async {
+  /// A sessão caiu no meio do uso — a renovação em silêncio foi recusada (T111).
+  ///
+  /// Só vale com a pessoa **dentro**: fora dela não há o que encerrar, e uma
+  /// resposta tardia de uma conversa que já saiu da tela não pode arrastar quem
+  /// está no login para um segundo login. Duas chamadas em voo levam o mesmo
+  /// `401` e avisam duas vezes; o `_expirando` deixa passar só a primeira.
+  void _aoPerderASessao() {
+    if (_etapa != _Etapa.dentro || _expirando) return;
+    _expirarSessao();
+  }
+
+  /// Leva a pessoa de volta à entrada porque a sessão acabou.
+  ///
+  /// É o caminho **único** de saída automática: o monitor o chama por
+  /// inatividade (FR-017) e a assistente o chama por sessão perdida (T111). A
+  /// limpeza, o fechamento do que está aberto e a trava `_expirando` são os
+  /// mesmos nos dois — duas saídas automáticas com limpezas diferentes seriam
+  /// duas chances de uma esquecer o que a outra apaga.
+  ///
+  /// A entrada não mostra frase nenhuma, tal como na inatividade: lá o aviso
+  /// veio **antes**, no diálogo dos últimos segundos; aqui a conversa já disse,
+  /// na própria tela, que precisa que a pessoa entre de novo.
+  Future<void> _expirarSessao() async {
     // Antes de qualquer espera: daqui em diante, nada reinicia a contagem.
     _expirando = true;
     _rastreadorGlobal.parar();
@@ -737,6 +782,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           criar: () => ControladorConversa(
             assistente,
             widget.conversaLocal(),
+            aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
             abridor: widget.abridor,
             rascunhoInicial: rascunho,
           ),
@@ -936,6 +982,23 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       ),
     };
   }
+}
+
+/// O aceite de reserva: vale enquanto o aplicativo estiver aberto e nada mais.
+///
+/// Existe para que o controlador da conversa sempre tenha um [AceiteDoAviso] —
+/// e para que a falta de um nunca resulte em "aceito sem ninguém ter aceito".
+class _AceiteSoNaMemoria implements AceiteDoAviso {
+  bool _aceito = false;
+
+  @override
+  Future<bool> aceitou() async => _aceito;
+
+  @override
+  Future<void> registrar() async => _aceito = true;
+
+  @override
+  Future<void> apagar() async => _aceito = false;
 }
 
 /// Cria o [ControladorConversa] e o descarta quando a rota sai.

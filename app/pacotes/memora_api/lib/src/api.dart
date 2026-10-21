@@ -7,8 +7,10 @@ import 'package:memora_api/src/auth/api_key_auth.dart';
 import 'package:memora_api/src/auth/basic_auth.dart';
 import 'package:memora_api/src/auth/bearer_auth.dart';
 import 'package:memora_api/src/auth/oauth.dart';
+import 'package:memora_api/src/api/assistente_api.dart';
 import 'package:memora_api/src/api/cadastro_api.dart';
 import 'package:memora_api/src/api/canais_de_contato_api.dart';
+import 'package:memora_api/src/api/catalogo_api.dart';
 import 'package:memora_api/src/api/recuperao_de_acesso_api.dart';
 import 'package:memora_api/src/api/sesso_api.dart';
 
@@ -63,6 +65,12 @@ class MemoraApi {
     }
   }
 
+  /// Get AssistenteApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AssistenteApi getAssistenteApi() {
+    return AssistenteApi(dio);
+  }
+
   /// Get CadastroApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   CadastroApi getCadastroApi() {
@@ -73,6 +81,12 @@ class MemoraApi {
   /// by doing that all interceptors will not be executed
   CanaisDeContatoApi getCanaisDeContatoApi() {
     return CanaisDeContatoApi(dio);
+  }
+
+  /// Get CatalogoApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  CatalogoApi getCatalogoApi() {
+    return CatalogoApi(dio);
   }
 
   /// Get RecuperaoDeAcessoApi instance, base route and serializer can be overridden by a given but be careful,

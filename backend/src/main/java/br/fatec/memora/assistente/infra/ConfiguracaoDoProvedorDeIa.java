@@ -61,15 +61,23 @@ public class ConfiguracaoDoProvedorDeIa {
 
         LOG.info("Provedor de IA: gemini, modelo {}.", modelo);
         // O nivel gratuito do Gemini deixa o Google usar o conteudo para melhorar
-        // os produtos dele, e isso desfaz a FR-051. Nao ha como saber daqui se a
-        // chave e gratuita ou paga, entao o aviso e condicional e fica visivel a
-        // cada subida: e a pendencia que a ADR-002 registra.
+        // os produtos dele e revisores humanos podem le-lo. Desde 2026-10-03 isso
+        // e RISCO ACEITO, nao violacao: a FR-051 foi reescrita e a Emenda 1 ao
+        // Principio I (constituicao v1.1.0) o permite, desde que haja aviso
+        // permanente na conversa, consentimento antes da primeira mensagem e
+        // nenhum dado da pessoa enviado ao servico. A saida e trocar por um
+        // servico que nao treine assim que houver verba. Nao ha como saber daqui
+        // se a chave e gratuita ou paga, entao o aviso e condicional e fica
+        // visivel a cada subida (ADR-002).
         LOG.warn(
                 "Se a chave GEMINI_API_KEY for do nivel GRATUITO, o Google pode usar o conteudo "
                         + "das conversas para melhorar os produtos dele e revisores humanos "
-                        + "podem le-lo: a FR-051 (treino proibido, retencao ate 30 dias) NAO esta "
-                        + "cumprida. Nao use conversas reais de pessoas assim. Ver "
-                        + "docs/architecture/adr-002-provedor-de-ia.md e a T086.");
+                        + "podem le-lo. Isso e risco aceito (FR-051 reescrita, Emenda 1 ao "
+                        + "Principio I), condicionado a aviso permanente na conversa, "
+                        + "consentimento antes da primeira mensagem e nenhum dado da pessoa "
+                        + "enviado ao servico. A saida e trocar por um servico que nao treine "
+                        + "assim que houver verba (T086). Ver "
+                        + "docs/architecture/adr-002-provedor-de-ia.md.");
         return cliente;
     }
 }

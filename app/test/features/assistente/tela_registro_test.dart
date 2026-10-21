@@ -9,6 +9,7 @@ import 'package:memora/features/assistente/presentation/controladores/controlado
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// Cenario H9 — o registro mostra o que foi feito, e so isso (T060).
 ///
@@ -62,6 +63,7 @@ void main() {
     final ControladorConversa c = ControladorConversa(
       assistente,
       _ConversaEmMemoria(),
+      aceite: AceiteEmMemoria(),
       abridor: abridor,
     );
     addTearDown(c.dispose);
@@ -108,6 +110,7 @@ void main() {
       final ControladorConversa c = ControladorConversa(
         assistente,
         _ConversaEmMemoria(),
+        aceite: AceiteEmMemoria(),
         abridor: abridor,
       );
       addTearDown(c.dispose);

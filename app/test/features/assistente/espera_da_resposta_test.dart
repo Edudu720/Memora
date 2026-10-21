@@ -5,6 +5,7 @@ import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/controladores/controlador_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// A espera pela resposta tem fim (FR-052, SC-007 — T078).
 ///
@@ -96,6 +97,7 @@ void main() {
     controlador = ControladorConversa(
       repositorio,
       _ConversaEmMemoria(),
+      aceite: AceiteEmMemoria(),
       rascunhoInicial: _pergunta,
     );
     await controlador.iniciar();
@@ -221,7 +223,12 @@ void main() {
     final _RepositorioControlado repo = _RepositorioControlado();
     final _ConversaQueConta local = _ConversaQueConta();
     final ControladorConversa c =
-        ControladorConversa(repo, local, rascunhoInicial: _pergunta);
+        ControladorConversa(
+      repo,
+      local,
+      aceite: AceiteEmMemoria(),
+      rascunhoInicial: _pergunta,
+    );
     await c.iniciar();
 
     unawaited(c.enviar());
@@ -259,6 +266,7 @@ void main() {
     repositorio = _RepositorioControlado();
     final _ConversaQueConta local = _ConversaQueConta();
     controlador = ControladorConversa(
+      aceite: AceiteEmMemoria(),
       repositorio,
       local,
       rascunhoInicial: _pergunta,

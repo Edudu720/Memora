@@ -9,6 +9,7 @@ import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// O catálogo guardado no aparelho (T069b, FR-024a).
 ///
@@ -329,6 +330,7 @@ void main() {
 
     test('com guardarCatalogo, a consulta do catálogo vem envolvida', () {
       final Composicao composicao = Composicao.resolver(
+        aceiteDoAviso: AceiteEmMemoria(),
         ambiente: simulado,
         cofre: _Cofre(),
         ultimoAcesso: UltimoAcessoEmMemoria(),
@@ -340,6 +342,7 @@ void main() {
 
     test('por padrão não, para o teste de widget não tocar o disco', () {
       final Composicao composicao = Composicao.resolver(
+        aceiteDoAviso: AceiteEmMemoria(),
         ambiente: simulado,
         cofre: _Cofre(),
         ultimoAcesso: UltimoAcessoEmMemoria(),

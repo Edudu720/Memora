@@ -13,6 +13,8 @@ import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 
 import '../features/autenticacao/dubles_autenticacao.dart';
 import '../features/autenticacao/fluxo_dentro_da_conta.dart';
+import '../suporte/aceite_em_memoria.dart';
+import 'package:memora/services/seguranca/sessao_perdida.dart';
 
 /// V9 — redução de movimento (FR-027, FR-028).
 ///
@@ -280,6 +282,8 @@ void main() {
           controlador: aparencia,
           ultimoAcesso: ultimoAcesso,
           composicao: Composicao(
+            aceiteDoAviso: AceiteEmMemoria(),
+            sessaoPerdida: SessaoPerdida(),
             ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
             autenticacao: RepositorioAutenticacaoSimulado(
               demora: Duration.zero,

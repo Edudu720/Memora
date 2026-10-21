@@ -19,6 +19,8 @@ import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
+import 'package:memora/services/seguranca/sessao_perdida.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../../suporte/aparelhos.dart';
 import 'dubles_autenticacao.dart';
@@ -72,6 +74,10 @@ class FluxoDentroDaConta {
   /// tema da combinação (FR-044): é como a matriz roda **pelo fluxo real**, com
   /// a barra inferior e as pilhas da casca, e não só a tela isolada.
   ///
+  /// [assistente] troca a assistente simulada (a do teste da sessão perdida usa
+  /// a real, sobre um transporte falso) e [sessaoPerdida] é o aviso que o fluxo
+  /// escuta (T111).
+  ///
   /// [capturavel] põe um `RepaintBoundary` com essa chave em volta do
   /// aplicativo inteiro: é por onde o álbum de telas (T043) tira a foto da tela
   /// que a pessoa de fato vê.
@@ -84,6 +90,8 @@ class FluxoDentroDaConta {
     DataDeNascimentoDoAparelho? datas,
     ApresentacaoVistaDoAparelho? vistas,
     Compartilhador? compartilhador,
+    RepositorioAssistente? assistente,
+    SessaoPerdida? sessaoPerdida,
   }) async {
     if (em != null) vestir(t, em.aparelho);
     // Com a guarda da apresentação, a conta de Ana já a viu: o cenário começa
@@ -117,8 +125,12 @@ class FluxoDentroDaConta {
               ),
         home: FluxoAutenticacao(
           repositorio: repositorio,
-          assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+          assistente:
+              assistente ??
+              RepositorioAssistenteSimulado(demora: Duration.zero),
+          sessaoPerdida: sessaoPerdida,
           conversaLocal: () => conversa,
+          aceiteDoAviso: AceiteEmMemoria(),
           ultimoAcesso: ultimoAcesso,
           dataDeNascimento: datas,
           apresentacaoVista: vistas,

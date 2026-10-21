@@ -14,6 +14,7 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.da
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
 import '../../suporte/estados_de_tela.dart';
@@ -102,6 +103,7 @@ Future<void> _chegarAoHub(WidgetTester t, [RepositorioAssistente? assistente]) a
         repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
         assistente: assistente ?? RepositorioAssistenteSimulado(demora: Duration.zero),
         conversaLocal: _ConversaEmMemoria.new,
+        aceiteDoAviso: AceiteEmMemoria(),
         ultimoAcesso: UltimoAcessoEmMemoria(),
       ),
     ),

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'design_system/design_system.dart';
 import 'features/apresentacao/data/apresentacao_vista.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
+import 'features/assistente/data/aceite_do_aviso.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
 import 'features/perfil/data/data_de_nascimento_local.dart';
@@ -29,6 +30,7 @@ Future<void> main() async {
       DataDeNascimentoLocal(preferencias);
   final ApresentacaoVistaLocal apresentacaoVista =
       ApresentacaoVistaLocal(preferencias);
+  final AceiteDoAvisoLocal aceiteDoAviso = AceiteDoAvisoLocal(preferencias);
 
   // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
   // lugar. Ver `services/ambiente/composicao.dart`.
@@ -40,12 +42,8 @@ Future<void> main() async {
     apresentacaoVista: apresentacaoVista,
     preferencias: preferencias,
     guardarCatalogo: true,
+    aceiteDoAviso: aceiteDoAviso,
   );
-
-  final String? aviso = composicao.avisoDeIntegracaoParcial;
-  if (aviso != null) {
-    debugPrint('[Memora] $aviso');
-  }
 
   runApp(
     AplicativoMemora(
@@ -112,7 +110,9 @@ class AplicativoMemora extends StatelessWidget {
               limpeza: composicao.limpeza,
               dataDeNascimento: composicao.dataDeNascimento,
               apresentacaoVista: composicao.apresentacaoVista,
+              sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
+              aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoAndroid(),
             ),
           );

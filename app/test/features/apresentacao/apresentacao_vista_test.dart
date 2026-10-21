@@ -6,6 +6,7 @@ import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// A guarda da apresentação vista (T046, T048, FR-013, R11): grava por conta,
 /// **sobrevive** à saída comum e **só** o `esquecerTudo` a leva — de todas as
@@ -150,6 +151,7 @@ void main() {
         // instância da lista. Se forem duas, ou se a lista estiver sem ela, o
         // `esquecerTudo` deixa as contas do aparelho para trás.
         final Composicao composicao = Composicao.resolver(
+          aceiteDoAviso: AceiteEmMemoria(),
           ambiente: const Ambiente(
             urlBase: 'http://10.0.2.2:8080/v1',
             usaServidorReal: false,

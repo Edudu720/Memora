@@ -7,6 +7,7 @@ import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// O ciclo de vida da data de nascimento (T123, FR-042c): **fica** na saída
 /// comum, para a pessoa não digitá-la de novo a cada entrada, e **sai** com o
@@ -83,6 +84,7 @@ void main() {
     // O que a pessoa vê no Perfil e o que a saída esquece precisam ser a mesma
     // instância: lista errada na composição deixaria a data no aparelho.
     final Composicao composicao = Composicao.resolver(
+      aceiteDoAviso: AceiteEmMemoria(),
       ambiente: const Ambiente(
         urlBase: 'http://10.0.2.2:8080/v1',
         usaServidorReal: false,

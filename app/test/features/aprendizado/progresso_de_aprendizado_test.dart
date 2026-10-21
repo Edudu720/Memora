@@ -9,6 +9,8 @@ import 'package:memora/services/ambiente/composicao.dart';
 import '../autenticacao/dubles_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
+import '../../suporte/aceite_em_memoria.dart';
+import 'package:memora/services/seguranca/sessao_perdida.dart';
 
 /// O progresso de aprendizado (T062, T064; FR-042a, FR-042b).
 ///
@@ -256,6 +258,7 @@ void main() {
         await concluir('ana', 'tiktok', 2);
 
         final Composicao composicao = Composicao.resolver(
+          aceiteDoAviso: AceiteEmMemoria(),
           ambiente: simulado,
           cofre: _Cofre(),
           ultimoAcesso: UltimoAcessoEmMemoria(),
@@ -279,6 +282,8 @@ void main() {
       final _EspiaDeRepositorio assistente = _EspiaDeRepositorio();
       final _EspiaDeAutenticacao autenticacao = _EspiaDeAutenticacao();
       final Composicao composicao = Composicao(
+        aceiteDoAviso: AceiteEmMemoria(),
+        sessaoPerdida: SessaoPerdida(),
         ambiente: simulado,
         autenticacao: autenticacao,
         assistente: assistente,

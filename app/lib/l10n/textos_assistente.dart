@@ -95,6 +95,64 @@ class TextosAssistente {
       'senha ou um número de confirmação — nem por telefone, nem por mensagem, '
       'nem por e-mail. Se alguém pedir, é golpe: pode desligar sem responder.';
 
+  /// Título do aviso de privacidade (FR-051), junto ao antigolpe.
+  static const String tituloAvisoPrivacidade = 'Não escreva dados pessoais aqui';
+
+  /// O aviso de privacidade.
+  ///
+  /// Diz **para onde** o texto vai e **o que não escrever**: os quatro tipos
+  /// (senha, documento, endereço, saúde e dinheiro) são o que a FR-051 lista, e
+  /// há teste que reprova se algum sumir. Ele não promete sigilo — o serviço de
+  /// fora é do nível gratuito, e a ADR-002 registra por quê.
+  static const String avisoPrivacidade =
+      'Para eu te responder, o que você escreve vai para um serviço de fora do '
+      'Memora, e pessoas de lá podem ler. Não escreva senha, documento, '
+      'endereço, nem nada sobre sua saúde ou seu dinheiro.';
+
+  /// A linha que os **dois** avisos dizem fechados, depois da primeira
+  /// mensagem (FR-022 da 004, FR-033 e FR-051 da 003).
+  ///
+  /// Carrega o núcleo dos dois avisos inteiros: **senha** e **código**, do
+  /// golpe, e **dados pessoais**, da privacidade — e contém o
+  /// [tituloAvisoAntigolpe] por inteiro, como o portão da T118 exige.
+  ///
+  /// Para onde o texto vai ("um serviço de fora") fica no aviso aberto e na
+  /// explicação do aceite, que a pessoa lê antes da primeira mensagem. Dizer
+  /// isso também aqui dobrava a linha, e com o teclado aberto o aviso tomava o
+  /// lugar da conversa (`tela_conversa_test`, "Teclado aberto").
+  static const String resumoDosAvisos =
+      '$resumoAvisoAntigolpe Não escreva dados pessoais.';
+
+  /// Os dois avisos inteiros, na mesma caixa: o do golpe e o de privacidade.
+  static const String avisosInteiros =
+      '$avisoAntigolpe\n\n$tituloAvisoPrivacidade. $avisoPrivacidade';
+
+  // ---------------------------------------------------------------------------
+  // O consentimento antes da primeira mensagem — FR-051
+  // ---------------------------------------------------------------------------
+
+  /// Título da explicação que antecede a primeira mensagem.
+  static const String tituloAceite = 'Antes de conversarmos';
+
+  /// A explicação, em linguagem comum.
+  ///
+  /// Diz as quatro coisas que a FR-051 exige que a pessoa saiba antes de
+  /// escrever: o texto sai do Memora, vai para o Google, pode ser usado para
+  /// melhorar os programas dele e pode ser lido por gente. E o que não
+  /// escrever.
+  static const String corpoDoAceite =
+      'Para eu conseguir te responder, o que você escrever aqui é enviado a um '
+      'serviço do Google, fora do Memora. Esse serviço pode usar a conversa '
+      'para melhorar os programas dele, e pessoas de lá podem lê-la. Por isso, '
+      'nunca escreva senha, documento, endereço, nem nada sobre sua saúde ou '
+      'seu dinheiro.';
+
+  /// Aceita. Diz o que acontece, e não "OK".
+  static const String botaoAceitar = 'Entendi, vamos conversar';
+
+  /// Recusa. Quem recusa segue com o resto do Memora, só sem a conversa.
+  static const String botaoRecusarAceite = 'Agora não';
+
   // ---------------------------------------------------------------------------
   // A oferta de executar — US3
   // ---------------------------------------------------------------------------
@@ -192,9 +250,23 @@ class TextosAssistente {
   static const String limiteDeConversas =
       'Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui.';
 
-  /// A sessão caiu.
+  /// O serviço que gera as respostas está fora do ar, sem cota ou não
+  /// respondeu no prazo (FR-057).
+  ///
+  /// Mesma frase que o servidor usa. A dificuldade é **da Memora**, e o texto
+  /// diz isso; e promete só "daqui a pouco", que é verdade para falha passageira
+  /// — o limite do dia, que volta amanhã, tem texto próprio.
+  static const String assistenteIndisponivel =
+      'Estou com um pouquinho de dificuldade para pensar agora — não foi nada '
+      'que você fez. Vamos tentar de novo daqui a pouco? 😊';
+
+  /// A sessão caiu — a renovação em silêncio foi recusada (T108, T111).
+  ///
+  /// Quem chega aqui estava **usando** o Memora, então a frase de antes ("faz
+  /// um tempinho que você não usa") era errada. E ela é breve de propósito: o
+  /// fluxo já está levando a pessoa à entrada.
   static const String sessaoExpirada =
-      'Faz um tempinho que você não usa o Memora. Vamos entrar de novo?';
+      'Por segurança, preciso que você entre de novo 😊';
 
   /// Qualquer outra falha.
   static const String inesperada =
@@ -218,6 +290,14 @@ class TextosAssistente {
   static String naoConsegiAbrir(String aplicativo) =>
       'Não encontrei o $aplicativo no seu celular. Pode ser que ele não esteja '
       'instalado ainda — quer que eu te mostre como procurar na loja?';
+
+  /// O aplicativo abriu, mas o registro da ação não chegou ao servidor (T112).
+  ///
+  /// Conta a verdade sem culpar a pessoa e sem palavra técnica: o que ela fez
+  /// funcionou, e o que não funcionou foi a anotação da Memora.
+  static String naoAnoteiNoRegistro(String aplicativo) =>
+      'Abri o $aplicativo, mas não consegui anotar isso no seu Registro. '
+      'Não foi nada que você fez — pode usar o aplicativo com calma 😊';
 
   // ---------------------------------------------------------------------------
   // Registro — US4

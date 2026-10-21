@@ -10,6 +10,7 @@ import 'package:memora/features/assistente/presentation/controladores/controlado
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../../suporte/aparelhos.dart';
 import '../../suporte/estados_de_tela.dart';
@@ -57,6 +58,7 @@ void main() {
     return ControladorConversa(
       RepositorioAssistenteSimulado(demora: Duration.zero, falhaForcada: falha),
       local,
+      aceite: AceiteEmMemoria(),
     );
   }
 
@@ -305,6 +307,7 @@ void main() {
       expect(comErro.mensagemDeErro, isNotNull);
 
       final ControladorConversa esperando = ControladorConversa(
+        aceite: AceiteEmMemoria(),
         RepositorioAssistenteSimulado(demora: const Duration(seconds: 1)),
         local,
       );

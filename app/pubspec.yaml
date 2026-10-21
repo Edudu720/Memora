@@ -81,6 +81,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
+  # Lê o `openapi.yaml` no teste que prende o leitor de SSE ao contrato (T110).
+  # Já vinha no lock como dependência transitiva; declarada aqui porque depender
+  # de transitiva quebra sem aviso quando a de cima muda. Parsear o YAML de
+  # verdade — em vez de expressão regular sobre texto — é o que faz o teste
+  # enxergar `enum` e `required` como o gerador os enxerga.
+  yaml: ^3.1.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

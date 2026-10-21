@@ -28,6 +28,36 @@ funcionalidade e segurança, a segurança sempre vence.
 **Por quê:** o público-alvo é o mais visado por golpes digitais no Brasil. Uma falha
 aqui não gera bug — gera vítima.
 
+#### Emenda 1 — o provedor de IA no nível gratuito (v1.1.0, 2026-10-03)
+
+**Aprovada por unanimidade** pela equipe — Eduardo Juncker Toras, Eduardo Moraes
+Trevisan e Henrique Moreira Sandrini —, conforme registrado pelo Henrique em
+2026-10-03.
+
+**O que ela permite**: que a assistente da feature 003 use um serviço externo
+que treina com o conteúdo das conversas e deixa revisores humanos lê-lo (o nível
+gratuito da ADR-002), **inclusive com pessoas reais** e no teste com as 5
+pessoas de 65+. É a única exceção a este princípio, e vale só para isso.
+
+**Justificativa**: a equipe não tem verba para o nível pago, e sem assistente
+real o produto não pode ser avaliado pelas pessoas para quem ele existe. A
+alternativa era não ter produto para avaliar.
+
+**Condições — sem elas, a exceção não vale**:
+
+1. a conversa avisa, de forma permanente, que o que for escrito é lido por um
+   serviço de fora, e pede que não se escreva senha, documento, endereço nem
+   dado de saúde ou de dinheiro;
+2. nada é enviado antes de a pessoa dizer que entendeu, e quem recusa continua
+   com o restante do Memora;
+3. nenhum dado que identifique a pessoa viaja ao serviço;
+4. a exceção **acaba** assim que houver verba: o serviço é trocado por um que
+   não treine e retenha no máximo 30 dias, por escrito (FR-051 da 003).
+
+**O que ela não muda**: todo o resto deste princípio. Em particular, ela não é
+precedente — outro conflito entre segurança e custo continua exigindo emenda
+própria, com aprovação unânime.
+
 ### II. Segurança Contra Engenharia Social (INEGOCIÁVEL)
 
 Para **cada tela**, a spec deve responder: *"Como um golpista tentaria explorar esta tela?"*
@@ -212,4 +242,9 @@ pressa de prazo.
 - Princípios marcados **(INEGOCIÁVEL)** não admitem exceção; admitem apenas
   emenda formal com aprovação unânime da equipe.
 
-**Versão**: 1.0.0 | **Ratificada**: 2026-07-24 | **Última alteração**: 2026-07-24
+**Versão**: 1.1.0 | **Ratificada**: 2026-07-24 | **Última alteração**: 2026-10-03
+
+| Versão | Data | Mudança |
+|---|---|---|
+| 1.0.0 | 2026-07-24 | Ratificação |
+| 1.1.0 | 2026-10-03 | Emenda 1 ao Princípio I — provedor de IA no nível gratuito, com condições e prazo de saída. Aprovação unânime |

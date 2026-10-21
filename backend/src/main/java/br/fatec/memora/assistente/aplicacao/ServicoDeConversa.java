@@ -46,14 +46,24 @@ import org.springframework.stereotype.Service;
 public class ServicoDeConversa {
 
     /**
-     * Teto de turnos que viajam num pedido.
+     * Teto de <b>turnos</b> que viajam num pedido (FR-056).
      *
-     * <p>Protege duas coisas ao mesmo tempo: o custo, que cresce com o
-     * histórico (R3), e o contexto do modelo. Conversa mais longa que isto
-     * segue funcionando — o que se perde são os turnos mais antigos, que é
-     * exatamente o que uma pessoa esqueceria também.
+     * <p>Um turno é uma <b>troca</b>: a mensagem da pessoa e a resposta da
+     * Memora (data-model.md, "Turno — a unidade de conta"). Protege duas coisas
+     * ao mesmo tempo: o custo, que cresce com o histórico (R3), e o contexto do
+     * modelo. Conversa mais longa que isto segue funcionando — o que se perde
+     * são os turnos mais antigos, que é exatamente o que uma pessoa esqueceria
+     * também.
      */
     public static final int TURNOS_NO_PEDIDO = 20;
+
+    /**
+     * Teto de <b>mensagens</b> do {@code historico}: dois por turno (FR-056).
+     *
+     * <p>É também o {@code maxItems} do contrato, e o controlador valida com
+     * esta mesma constante para os dois números não divergirem.
+     */
+    public static final int MENSAGENS_NO_PEDIDO = 2 * TURNOS_NO_PEDIDO;
 
     private final ClienteDaAssistente assistente;
     private final PersonaDaMemora persona;
@@ -136,17 +146,20 @@ public class ServicoDeConversa {
     }
 
     /**
-     * Os turnos mais recentes, até o teto.
+     * As mensagens dos {@value #TURNOS_NO_PEDIDO} turnos mais recentes — as
+     * últimas {@value #MENSAGENS_NO_PEDIDO} (FR-056).
      *
      * <p>Corta pelo <b>fim</b>: numa conversa longa, o que importa para o
-     * próximo passo é o que acabou de ser dito.
+     * próximo passo é o que acabou de ser dito. O aparelho já manda só estas;
+     * o corte aqui é defesa, e conta em mensagens porque o {@code historico} é
+     * uma lista de mensagens, não de trocas.
      */
     private List<ClienteDaAssistente.Turno> ultimosTurnos(
             List<ClienteDaAssistente.Turno> historico) {
         if (historico == null || historico.isEmpty()) {
             return List.of();
         }
-        int inicio = Math.max(0, historico.size() - TURNOS_NO_PEDIDO);
+        int inicio = Math.max(0, historico.size() - MENSAGENS_NO_PEDIDO);
         return List.copyOf(historico.subList(inicio, historico.size()));
     }
 

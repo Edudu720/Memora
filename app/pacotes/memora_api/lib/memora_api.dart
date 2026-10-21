@@ -9,11 +9,19 @@ export 'package:memora_api/src/auth/bearer_auth.dart';
 export 'package:memora_api/src/auth/oauth.dart';
 
 
+export 'package:memora_api/src/api/assistente_api.dart';
 export 'package:memora_api/src/api/cadastro_api.dart';
 export 'package:memora_api/src/api/canais_de_contato_api.dart';
+export 'package:memora_api/src/api/catalogo_api.dart';
 export 'package:memora_api/src/api/recuperao_de_acesso_api.dart';
 export 'package:memora_api/src/api/sesso_api.dart';
 
+export 'package:memora_api/src/model/acao_autorizada.dart';
+export 'package:memora_api/src/model/acao_registrada.dart';
+export 'package:memora_api/src/model/assistente_acao_post_request.dart';
+export 'package:memora_api/src/model/assistente_catalogo_get200_response.dart';
+export 'package:memora_api/src/model/assistente_conversa_post_request.dart';
+export 'package:memora_api/src/model/assistente_registro_get200_response.dart';
 export 'package:memora_api/src/model/auth_recuperacao_confirmar_post_request.dart';
 export 'package:memora_api/src/model/auth_recuperacao_solicitar_post202_response.dart';
 export 'package:memora_api/src/model/auth_recuperacao_solicitar_post_request.dart';
@@ -25,6 +33,9 @@ export 'package:memora_api/src/model/canal.dart';
 export 'package:memora_api/src/model/canal_requisicao.dart';
 export 'package:memora_api/src/model/entrar_requisicao.dart';
 export 'package:memora_api/src/model/erro.dart';
+export 'package:memora_api/src/model/erro_da_conversa.dart';
+export 'package:memora_api/src/model/mensagem.dart';
 export 'package:memora_api/src/model/pessoa_resposta.dart';
+export 'package:memora_api/src/model/servico.dart';
 export 'package:memora_api/src/model/sessao_resposta.dart';
 

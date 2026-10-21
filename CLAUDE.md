@@ -4,6 +4,24 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
+> 🔌 **2026-10-21 — as fases 11 e 12 da 003 entraram na branch
+> `integracao/003-fase11-12-na-master`**, pelo Henrique. Estavam só na máquina
+> dele desde 2026-10-09, e **a `master` não tinha nada delas**: com
+> `MEMORA_SERVIDOR_REAL=true` o app ainda conversava com o **simulado** (a T036
+> nunca tinha subido). É por isso que a IA "não funcionava" na versão da #55.
+> A integração traz `repositorio_assistente_api.dart`, renovação em silêncio,
+> sessão perdida (T111), registro da ação que falha (T112), o contrato fundido
+> e o cliente regenerado, a Emenda 1 e o aceite/aviso da FR-051. **Fica a
+> conversa da #55** (a do Eduardo); a fase 5 da branch do Henrique
+> (`feature/004-fase5-conversa`) **não** entrou — o `c376318` (T125-T128 dele)
+> colide com a numeração da `master`. Os dois avisos agora são **uma caixa só**
+> no `AvisoCompacto` (`resumoDosAvisos`/`avisosInteiros`); o resumo longo, que
+> citava o "serviço de fora", foi reprovado pelo teste do teclado e encurtou.
+> **2187 testes no app, 414 de 415 no backend** — o que falta é o
+> `ClienteDaAssistenteGeminiRealTest`, com **503 do Google** (modelo
+> sobrecarregado, não código). Falta ainda: a T113 (`INTERNET` no manifesto
+> principal) e testar no celular.
+
 **Última sessão**: 2026-10-13 — **revisão das #44 a #48 e as fases 5 e 8
 da 004**, pelo Eduardo (Opus orquestrando e revisando, agentes Sonnet
 escrevendo; um revisor independente por PR). As cinco PRs saíram "com
@@ -97,15 +115,24 @@ gravada como variável **de usuário** do Windows na máquina do Henrique;
 continua o simulado. `ClienteDaAssistenteGeminiRealTest` passou contra o
 Google (~5 s). **413 testes** no backend.
 
-> 🔴 **O nível gratuito viola a FR-051**: o Google usa o conteúdo para treinar
-> e revisores humanos podem lê-lo. Está na ADR-002, e a T086 continua aberta.
-> **O teste com as 5 pessoas de 65+ (T071) não pode usar a chave gratuita.**
-> **Próximo: `/speckit-clarify` da 003**, que o Henrique vai rodar, para rever
-> a FR-051, o teto de turnos (a R3 diz "encerra com elegância"; o código faz
-> janela deslizante de 20) e a voz (hoje fora de escopo; transcrição e fala).
-> Pendentes: o portão "chave nunca na URL" (`chaveNoCabecalho`) **não foi
-> provado quebrando** — o classificador de permissões bloqueou a quebra; a T068
-> (custo e latência); e o app no celular ainda fala com o simulado.
+> ✅ **Atualizado no mesmo dia (2026-10-03, à noite): o nível gratuito virou
+> risco aceito.** O `/speckit-clarify` reescreveu a FR-051, e a equipe aprovou
+> **por unanimidade** a **Emenda 1 ao Princípio I** (constituição **v1.1.0**).
+> Quatro condições: aviso permanente na conversa, consentimento antes da
+> primeira mensagem, nenhum dado da pessoa enviado e troca de serviço quando
+> houver verba. As duas primeiras foram feitas na **fase 11 da 003**
+> (T100-T106, branch `feature/003-fase11-convergencia`), e a T086 fechou. A
+> T071 pode usar a chave gratuita **desde que o APK tenha o aviso e o
+> consentimento**. Também: FR-056 (janela de **20 turnos = 40 mensagens**; turno
+> é uma troca), FR-057 (provedor fora do ar ≠ limite diário, campo `codigo` no
+> evento `erro` do SSE) e a **voz vai para uma feature 005**, processada no
+> aparelho. **1130** testes no app, **413** no backend.
+>
+> Pendentes: a `ConversaLocal` guarda só 40 mensagens em disco (contra a
+> FR-056; resolver com a T082); a T036 (o app ainda fala com o simulado da
+> assistente, mesmo com servidor real); o portão "chave nunca na URL"
+> (`chaveNoCabecalho`) **não foi provado quebrando**; a T068 (custo e
+> latência).
 
 Sessão anterior: 2026-10-02 (tarde) — feature 004, Phase 3b, T111-T115, na
 `master` sem PR; a T116 (segunda revisão no celular) segue pendente.
