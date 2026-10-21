@@ -391,8 +391,8 @@ senha do gov.br e onde nunca se digita (US5).
 - [X] T110 Toque **dentro de um diálogo** conta como atividade: hoje os diálogos abertos no `Navigator` de fora ficam fora do `Listener` da casca (o aviso de inatividade se salva porque registra atividade sozinho). Teste em `app/test/features/casca/atividade_acessivel_test.dart`
 
 - [X] T098a Teste em `app/test/features/casca/sem_campo_de_segredo_test.dart`: varre `app/lib/features/` e reprova qualquer uso de `CampoSenha` ou `CampoCodigo` fora de `features/autenticacao/` (FR-048). Provar quebrando: pôr um `CampoSenha` na `TelaPerfil`
-- [ ] T099 [P] Redesenhar as telas fora do wireframe na mesma linguagem: `tela_confirmar_canal.dart`, `tela_entrega_do_aparelho.dart`, `tela_primeira_entrada.dart` (em `autenticacao/presentation/telas/`), `tela_recuperacao.dart` (em `autenticacao/presentation/telas/`; a spec a lista entre as telas fora do wireframe a redesenhar, e a T057 só cuida do aviso), `tela_registro.dart` (em `assistente/presentation/telas/`) e a `ConfirmacaoMemora`; `fluxo_assistido_test.dart`, `tela_registro_test.dart` e `registro_acessibilidade_test.dart` passando na matriz completa
-- [ ] T100 [P] Cruzar `app/test/design_system/galeria_test.dart` com os três temas e confirmar que todo componente novo aparece
+- [X] T099 [P] Redesenhar as telas fora do wireframe na mesma linguagem: `tela_confirmar_canal.dart`, `tela_entrega_do_aparelho.dart`, `tela_primeira_entrada.dart` (em `autenticacao/presentation/telas/`), `tela_recuperacao.dart` (em `autenticacao/presentation/telas/`; a spec a lista entre as telas fora do wireframe a redesenhar, e a T057 só cuida do aviso), `tela_registro.dart` (em `assistente/presentation/telas/`) e a `ConfirmacaoMemora`; `fluxo_assistido_test.dart`, `tela_registro_test.dart` e `registro_acessibilidade_test.dart` passando na matriz completa
+- [X] T100 [P] Cruzar `app/test/design_system/galeria_test.dart` com os três temas e confirmar que todo componente novo aparece
 - [ ] T101 **Estender** `app/test/album/album_de_telas_test.dart`, criado na T043, a todas as telas da feature e às de fora do wireframe redesenhadas na T099
 - [ ] T102 Preencher a tabela "Onde cada cenário roda" do [quickstart.md](quickstart.md) e conferir a tabela de inventário da [spec.md](spec.md): cada uma das 35 telas do wireframe existe no álbum, ou tem a decisão de não existir registrada (SC-001)
 - [ ] T103 Verificação completa: `flutter analyze`, `flutter test`, `validar_paleta.py`, `validar_tokens.py` e `--autoteste`, `mvnw clean test`. Registrar as contagens (contando `<testcase` no backend — ver a armadilha do `tests=` no `CLAUDE.md`) e listar, com motivo, todo teste antigo que mudou de forma (V11)
@@ -405,7 +405,7 @@ senha do gov.br e onde nunca se digita (US5).
   - [ ] T125b [US8] Tela de data de nascimento (Perfil)
   - [ ] T125c [US4] Passo a passo
   - [ ] T125d [US6] Ajuda
-  - [ ] T125e Telas fora do wireframe da T099
+  - [X] T125e Telas fora do wireframe da T099
 
 ---
 

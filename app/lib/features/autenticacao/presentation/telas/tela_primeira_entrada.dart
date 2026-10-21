@@ -53,11 +53,23 @@ class TelaPrimeiraEntrada extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const SizedBox(height: MemoraEspacamento.xxl),
-              Icon(Icons.emoji_events_outlined,
-                  size: MemoraDimensoes.iconeCelebracao,
-                  color: cores.sucesso),
-              const SizedBox(height: MemoraEspacamento.xl),
+              const SizedBox(height: MemoraEspacamento.lg),
+              Center(
+                child: Container(
+                  width: MemoraDimensoes.ilustracaoCabecalho,
+                  height: MemoraDimensoes.ilustracaoCabecalho,
+                  decoration: BoxDecoration(
+                    color: cores.sucesso.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.comemorando,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: MemoraEspacamento.lg),
               TextoMemora.tituloTela(
                 nome.isEmpty
                     ? TextosAutenticacao.tituloPrimeiraEntrada
@@ -65,9 +77,24 @@ class TelaPrimeiraEntrada extends StatelessWidget {
                 alinhamento: TextAlign.center,
               ),
               const SizedBox(height: MemoraEspacamento.lg),
-              const TextoMemora(
-                TextosAutenticacao.convitePrimeiraEntrada,
-                alinhamento: TextAlign.center,
+              Container(
+                padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                decoration: BoxDecoration(
+                  color: cores.superficie,
+                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                  border: Border.all(color: cores.borda),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: MemoraElevacao.sombra,
+                      blurRadius: MemoraElevacao.cartao,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const TextoMemora(
+                  TextosAutenticacao.convitePrimeiraEntrada,
+                  alinhamento: TextAlign.center,
+                ),
               ),
               const SizedBox(height: MemoraEspacamento.xxxl),
               BotaoPrimario(

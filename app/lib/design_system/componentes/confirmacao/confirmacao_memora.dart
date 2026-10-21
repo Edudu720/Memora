@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamento.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_perigo.dart';
+import '../ilustracao/memora_personagem.dart';
 import '../botoes/botao_primario.dart';
 import '../botoes/botao_secundario.dart';
 import '../texto/texto_memora.dart';
@@ -117,16 +119,36 @@ class _ConfirmacaoMemoraState extends State<ConfirmacaoMemora> {
         color: cores.superficie,
         borderRadius: BorderRadius.circular(MemoraRaio.cartao),
         border: Border.all(color: cores.borda),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: MemoraElevacao.sombra,
+            blurRadius: MemoraElevacao.cartao,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          TextoMemora(
-            _aguardandoSegundaConfirmacao
-                ? 'Tem certeza mesmo?'
-                : widget.pergunta,
-            estilo: EstiloTexto.corpoForte,
+          Row(
+            children: <Widget>[
+              MemoraPersonagem(
+                expressao: widget.irreversivel
+                    ? ExpressaoDaMemora.preocupada
+                    : ExpressaoDaMemora.falando,
+                
+              ),
+              const SizedBox(width: MemoraEspacamento.md),
+              Expanded(
+                child: TextoMemora(
+                  _aguardandoSegundaConfirmacao
+                      ? 'Tem certeza mesmo?'
+                      : widget.pergunta,
+                  estilo: EstiloTexto.corpoForte,
+                ),
+              ),
+            ],
           ),
           if (widget.aviso != null) ...<Widget>[
             const SizedBox(height: MemoraEspacamento.sm),
