@@ -111,6 +111,13 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 - Q: As paletas prontas valem no tema de alto contraste? → A: **Não.** A paleta vale no claro e no escuro; o alto contraste existe para o máximo contraste, e qualquer cor de destaque seria concessão (FR-039, R15).
 - Q: A segunda rodada da revisão de design no celular (T116) é portão para as próximas telas? → A: **É portão do merge, não do código.** As telas novas podem ser implementadas, mas nenhuma PR de tela nova entra na `master` antes da T116. Vale para o que for implementado a partir de agora (fase 7, Perfil, T099, T117, T125); as PRs de tela já abertas em 2026-10-13 (#45, #46, #47, #55, #56) seguem a ordem de merge, porque a própria T116 precisa delas no aparelho (Assumptions).
 
+### Session 2026-10-21 — a conversa no celular, com a assistente real (Henrique)
+
+- Q: Depois da primeira pergunta, como fica o aviso da conversa? → A: **Só o escudo vermelho, num canto**, que a pessoa toca para ler os avisos inteiros (o do golpe e o de privacidade). A linha com o núcleo ("senha" e "código") tomava espaço demais na tela pequena. O núcleo continua **para o leitor de tela**, no rótulo do escudo, e o aviso continua sem poder sumir. Risco aceito, decisão do Henrique: quem enxerga e está sob pressão ao telefone deixa de ver a frase sem tocar. Mudam FR-022 e FR-049.
+- Q: Uma falha do serviço de fora reabre o aviso? → A: **Não.** Aberto só até a primeira pergunta, mesmo que a falha devolva a pergunta ao campo (FR-022). Era defeito: o aviso se recriava aberto a cada erro.
+- Q: A resposta da Memora pode ter negrito? → A: **Sim, só negrito** (`**assim**`), para destacar o nome de aplicativo ou botão. Nenhum asterisco aparece na tela nem chega ao leitor de tela (FR-020a).
+- Q: Como a espera e a resposta aparecem? → A: **Só o balão da Memora se formando**, sem a frase "Estou pensando..." embaixo do campo; e a resposta **vai aparecendo aos poucos**, letra a letra, como quem escreve. Com "reduzir movimento", aparece de uma vez (FR-020b).
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -533,6 +540,15 @@ assinatura ou pagamento, e não encontrar nenhuma.
 
 - **FR-020**: A conversa MUST distinguir a fala da Memora e a da pessoa por
   posição, desenho e nome, nunca só pela cor.
+- **FR-020a**: A fala da Memora MUST mostrar em negrito o trecho entre `**` e
+  MUST NOT mostrar os asteriscos. O leitor de tela MUST receber o texto sem
+  marca nenhuma. Nenhuma outra formatação é interpretada; marca sem par fica
+  como texto comum (clarificação de 2026-10-21).
+- **FR-020b**: Enquanto a Memora prepara a resposta, a espera MUST aparecer
+  **só** como o balão dela se formando, sem frase de espera embaixo do campo.
+  A resposta MUST ir aparecendo aos poucos, como quem escreve, e, com "reduzir
+  movimento", MUST aparecer de uma vez. O leitor de tela MUST anunciar a fala
+  inteira, e não letra a letra (clarificação de 2026-10-21).
 - **FR-021**: Quando a Memora oferece executar algo, as opções MUST aparecer
   como frases completas, com toque grande e afastadas uma da outra, mantendo as
   regras de confirmação da 003.
@@ -540,10 +556,12 @@ assinatura ou pagamento, e não encontrar nenhuma.
   legíveis, e a conversa com o campo de escrever MUST ocupar pelo menos metade
   da altura disponível em 100% e 150% de ampliação, no menor aparelho
   suportado. O aviso de que a Memora nunca pede senha nem código MUST ficar
-  aberto até a pessoa mandar a primeira mensagem da conversa e, a partir dela,
-  encolher para **uma linha** com escudo e o núcleo do aviso ("senha" e
-  "código"), que a pessoa toca para ler inteiro. Ele MUST NOT sumir, nem por
-  gesto da pessoa (revisão da T044).
+  aberto até a pessoa mandar a primeira pergunta da conversa — e só até ela,
+  mesmo que uma falha devolva a pergunta ao campo — e, a partir dela, encolher
+  para **o escudo**, num canto, que a pessoa toca para ler os avisos inteiros.
+  O escudo MUST ter alvo de toque de 48 dp e MUST levar ao leitor de tela o
+  núcleo do aviso ("senha" e "código"). Ele MUST NOT sumir, nem por gesto da
+  pessoa (revisão da T044; escudo na clarificação de 2026-10-21).
 
 ### Requisitos Funcionais — Aplicativos e passo a passo
 
@@ -698,8 +716,10 @@ assinatura ou pagamento, e não encontrar nenhuma.
   recuperação de acesso o aviso continua inteiro: o golpe daquela tela pede o
   número de 6 dígitos, e esconder o "número" atrás de um toque enfraqueceria a
   FR-023 da 001 sem resolver problema nenhum (revisão da #36). O resumo
-  sempre visível de qualquer aviso compacto MUST conter o núcleo do aviso — na
-  conversa, "senha" e "código".
+  sempre visível de qualquer aviso compacto MUST conter o núcleo do aviso —
+  exceto o da conversa depois da primeira pergunta, que é só o escudo e leva o
+  núcleo ("senha" e "código") no rótulo para o leitor de tela (FR-022,
+  clarificação de 2026-10-21).
 - **FR-050**: Os dados mostrados no Perfil e em Conta MUST ser só os da própria
   conta, e MUST sumir da tela quando a sessão expira.
 
