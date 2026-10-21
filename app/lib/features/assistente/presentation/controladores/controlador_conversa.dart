@@ -138,6 +138,13 @@ class ControladorConversa extends ChangeNotifier {
   /// (FR-015) — autorizado não é o mesmo que consentido.
   AcaoAutorizada? get acaoOferecida => _acaoOferecida;
 
+  /// A pessoa já enviou alguma pergunta por este controlador?
+  ///
+  /// **Não volta a falso**, nem quando a falha devolve a pergunta ao campo e a
+  /// conversa fica vazia de novo: é o que mantém o aviso recolhido depois da
+  /// primeira pergunta (FR-022 da 004).
+  bool get jaPerguntou => _envio > 0;
+
   /// O que a pessoa pediu por último, para o registro da ação.
   String get ultimoPedido => _ultimoPedido;
 

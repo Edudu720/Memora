@@ -231,4 +231,39 @@ void main() {
       );
     });
   });
+
+  // Achado no celular em 2026-10-21: a falha devolve a pergunta ao campo e a
+  // tira da conversa, que volta a ficar vazia — e o aviso, que decidia abrir
+  // por "conversa vazia", se recriava ABERTO a cada erro do serviço de fora.
+  group('A falha não reabre o aviso (FR-022 da 004)', () {
+    testWidgets('depois da primeira falha o aviso continua recolhido', (
+      WidgetTester t,
+    ) async {
+      final ControladorConversa c = await falhar(
+        t,
+        FalhaDaAssistente.assistenteIndisponivel,
+      );
+
+      expect(c.mensagens, isEmpty, reason: 'a pergunta voltou ao campo');
+      expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
+      expect(
+        find.byKey(AvisoCompacto.chaveTextoCompleto),
+        findsNothing,
+        reason: 'a pessoa já viu o aviso aberto antes de perguntar',
+      );
+    });
+
+    testWidgets('nem depois de tentar de novo e falhar outra vez', (
+      WidgetTester t,
+    ) async {
+      await falhar(t, FalhaDaAssistente.assistenteIndisponivel);
+      await t.ensureVisible(botaoDeTentarDeNovo());
+      await t.pump();
+      await t.tap(botaoDeTentarDeNovo());
+      await avancar(t);
+
+      expect(find.byKey(TelaConversa.chaveErro), findsOneWidget);
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
+    });
+  });
 }

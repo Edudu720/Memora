@@ -171,6 +171,11 @@ class _TelaConversaState extends State<TelaConversa>
       builder: (BuildContext context, _) {
         final ControladorConversa c = widget.controlador;
         final bool primeiraVez = c.mensagens.isEmpty;
+        // Aberto só até a primeira pergunta. "A conversa está vazia" sozinho
+        // não serve: a falha devolve a pergunta ao campo e a tira da conversa
+        // (FR-052), e o aviso se recriava aberto a cada erro do serviço de
+        // fora — achado no celular em 2026-10-21.
+        final bool avisoAberto = primeiraVez && !c.jaPerguntou;
         // O teclado vem da janela (`View`): o `Scaffold` o tira do
         // `MediaQuery` que entrega ao corpo, e de dentro dele nunca o veríamos.
         final bool tecladoAberto =
@@ -222,12 +227,12 @@ class _TelaConversaState extends State<TelaConversa>
                             // é isso que o recolhe: o aviso é recriado fechado,
                             // em uma linha. Voltar a abrir é com a pessoa.
                             child: AvisoCompacto(
-                              key: ValueKey<bool>(primeiraVez),
+                              key: ValueKey<bool>(avisoAberto),
                               titulo: TextosAssistente.tituloAvisoAntigolpe,
                               resumo: TextosAssistente.resumoDosAvisos,
                               textoCompleto: TextosAssistente.avisosInteiros,
                               comMemora: false,
-                              abertoNoComeco: primeiraVez,
+                              abertoNoComeco: avisoAberto,
                               fechadoEmUmaLinha: true,
                             ),
                           ),
