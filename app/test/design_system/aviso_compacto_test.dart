@@ -196,6 +196,103 @@ void main() {
     }
   });
 
+  group('Só o escudo — T130, FR-022 e FR-049', () {
+    const String resumoDosAvisos =
+        'Eu nunca peço sua senha nem código. Não escreva dados pessoais.';
+
+    Widget escudo({bool aberto = false}) => AvisoCompacto(
+      titulo: 'Eu nunca peço sua senha',
+      resumo: resumoDosAvisos,
+      textoCompleto: completo,
+      comMemora: false,
+      abertoNoComeco: aberto,
+      fechadoSoEscudo: true,
+    );
+
+    testWidgets('fechado, é só um escudo: nenhum texto na tela', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app(escudo()));
+      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.byType(Text), findsNothing);
+      expect(find.text(resumoDosAvisos), findsNothing);
+      expect(find.text(AvisoCompacto.rotuloAbrir), findsNothing);
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
+    });
+
+    testWidgets('o escudo tem 48 dp e fica no canto direito', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app(escudo()));
+      final Rect r = t.getRect(find.byKey(AvisoCompacto.chaveAlternar));
+      expect(r.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+      expect(r.height, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+      expect(r.right, t.getRect(find.byType(AvisoCompacto)).right);
+      // O aviso inteiro mede o alvo e nada mais: sem moldura, sem respiro.
+      expect(
+        t.getSize(find.byType(AvisoCompacto)).height,
+        MemoraDimensoes.alvoMinimo,
+      );
+    });
+
+    testWidgets('tocar abre os avisos inteiros, e "Mostrar menos" volta ao '
+        'escudo — encolhe, nunca some', (WidgetTester t) async {
+      await t.pumpWidget(app(escudo()));
+      await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
+      await t.pump();
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsOneWidget);
+      expect(find.text(AvisoCompacto.rotuloFechar), findsOneWidget);
+
+      await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
+      await t.pump();
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
+      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.byType(Text), findsNothing);
+    });
+
+    testWidgets('abertoNoComeco nasce com o texto completo', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app(escudo(aberto: true)));
+      expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsOneWidget);
+      expect(find.text(completo), findsOneWidget);
+    });
+
+    testWidgets('é um botão de verdade para o leitor de tela, com o núcleo no '
+        'rótulo', (WidgetTester t) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      await t.pumpWidget(app(escudo()));
+      final SemanticsData dados = t
+          .getSemantics(find.byKey(AvisoCompacto.chaveAlternar))
+          .getSemanticsData();
+      expect(dados.flagsCollection.isButton, isTrue);
+      // Sem `onTap` o TalkBack anuncia o botão e o duplo-toque não ativa nada.
+      expect(dados.hasAction(SemanticsAction.tap), isTrue);
+      expect(dados.label, resumoDosAvisos);
+      expect(dados.label.toLowerCase(), contains('senha'));
+      expect(dados.label.toLowerCase(), contains('código'));
+      expect(dados.hint, AvisoCompacto.rotuloAbrir);
+      await expectLater(t, meetsGuideline(androidTapTargetGuideline));
+      h.dispose();
+    });
+
+    for (final Combinacao c in matriz(
+      temas: <MemoraTemaId>[MemoraTemaId.claro],
+    )) {
+      testWidgets('não estoura em ${nomeDa(c)}', (WidgetTester t) async {
+        vestir(t, c.aparelho);
+        await t.pumpWidget(
+          naCombinacao(
+            c,
+            Scaffold(body: SingleChildScrollView(child: escudo())),
+          ),
+        );
+        expect(t.takeException(), isNull, reason: nomeDa(c));
+        expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      });
+    }
+  });
+
   group('Aberto, não passa de metade da tela — R5', () {
     for (final Combinacao c in matriz()) {
       testWidgets('em ${nomeDa(c)}', (WidgetTester t) async {

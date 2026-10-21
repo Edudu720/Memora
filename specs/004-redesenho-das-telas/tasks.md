@@ -274,9 +274,9 @@ apresentando.
 ### A conversa no celular, com a assistente real (clarificação de 2026-10-21)
 
 - [X] T129 [US3] A falha do serviço de fora **não reabre** o aviso: o controlador sabe se já houve pergunta (`jaPerguntou`), e o aviso fica recolhido mesmo com a pergunta devolvida ao campo (FR-022). Portão em `app/test/features/assistente/falhas_da_conversa_test.dart`, que reprovava antes do conserto
-- [ ] T130 [US3] Depois da primeira pergunta, o aviso vira **só o escudo** num canto (alvo de 48 dp), que abre os avisos inteiros; o rótulo para o leitor de tela leva "senha" e "código" (FR-022, FR-049). Ajustar os portões da T118 que procuravam o resumo escrito
-- [ ] T131 [P] [US3] **Negrito** na fala da Memora: `**trecho**` vira negrito, sem asterisco na tela nem no leitor de tela; marca sem par fica como texto (FR-020a). Teste de unidade do analisador e de widget do `BalaoDeFala`
-- [ ] T132 [US3] **Espera e escrita**: tirar o "Estou pensando..." de baixo do campo (fica só o `BalaoDeFala.escrevendo`) e fazer a resposta aparecer aos poucos, letra a letra, por `MemoraMovimento.efetiva` — de uma vez com "reduzir movimento" —, com o leitor de tela recebendo a fala inteira (FR-020b)
+- [X] T130 [US3] Depois da primeira pergunta, o aviso vira **só o escudo** num canto (alvo de 48 dp), que abre os avisos inteiros; o rótulo para o leitor de tela leva "senha" e "código" (FR-022, FR-049). Ajustar os portões da T118 que procuravam o resumo escrito
+- [X] T131 [P] [US3] **Negrito** na fala da Memora: `**trecho**` vira negrito, sem asterisco na tela nem no leitor de tela; marca sem par fica como texto (FR-020a). Teste de unidade do analisador e de widget do `BalaoDeFala`
+- [X] T132 [US3] **Espera e escrita**: tirar o "Estou pensando..." de baixo do campo (fica só o `BalaoDeFala.escrevendo`) e fazer a resposta aparecer aos poucos, letra a letra, por `MemoraMovimento.efetiva` — de uma vez com "reduzir movimento" —, com o leitor de tela recebendo a fala inteira (FR-020b)
 
 ---
 

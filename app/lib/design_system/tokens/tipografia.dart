@@ -81,6 +81,14 @@ abstract final class MemoraTipografia {
     height: 1.5,
   );
 
+  /// O peso do trecho em negrito dentro de um texto corrido (FR-020a).
+  ///
+  /// É o `Bold` declarado no `pubspec.yaml`, e não o `w600` do [corpoForte]: no
+  /// meio de uma frase de 400, 600 ficava perto demais para ser visto de
+  /// relance, e o negrito existe justamente para destacar o nome de um
+  /// aplicativo ou de um botão.
+  static const FontWeight pesoDoNegrito = FontWeight.w700;
+
   /// Rótulo dentro de botão.
   static const TextStyle rotuloBotao = TextStyle(
     fontFamily: familia,

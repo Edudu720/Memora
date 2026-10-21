@@ -13,8 +13,10 @@ import '../controladores/controlador_conversa.dart';
 /// enganado ao telefone é conduzido direto ao campo de escrever. Aviso embaixo
 /// da conversa só é lido por quem já não precisava dele.
 ///
-/// **Aberto até a primeira mensagem; depois, uma linha** com o escudo e o
-/// núcleo ("senha" e "código"), que se toca para ler inteiro. Ele nunca some,
+/// **Aberto até a primeira pergunta; depois, só o escudo** num canto (T130),
+/// que se toca para ler os avisos inteiros. O núcleo ("senha" e "código") segue
+/// no rótulo do escudo, para o leitor de tela — e quem enxerga deixa de ver a
+/// frase sem tocar, risco aceito pelo Henrique em 2026-10-21. Ele nunca some,
 /// nem por gesto: o golpista pressiona a pessoa **durante** a conversa, e
 /// "feche esse aviso" é o que ele pediria. O que a FR-022 pede de espaço — a
 /// lista e o campo com pelo menos metade da altura — sai das frações abaixo, e
@@ -23,6 +25,15 @@ import '../controladores/controlador_conversa.dart';
 /// ## Quem disse o quê (FR-020)
 ///
 /// Cada fala é um `BalaoDeFala`: posição, rosto e nome escrito, nunca só cor.
+///
+/// ## A espera e a escrita são do balão, e só dele (FR-020b, T132)
+///
+/// Enquanto a Memora responde, a espera é o balão dela se formando — nenhuma
+/// frase embaixo do campo, que fica desabilitado, junto com o botão, no mesmo
+/// lugar. Depois, a **última** fala dela vai aparecendo aos poucos; as antigas,
+/// inclusive as lidas do disco, aparecem inteiras. O balão que mostra o texto
+/// chegando e a mensagem final em que ele se transforma têm a mesma `key`:
+/// a escrita continua de onde estava, sem recomeçar nem piscar.
 ///
 /// ## O aviso de privacidade mora na mesma caixa (FR-051)
 ///
@@ -125,6 +136,15 @@ class _TelaConversaState extends State<TelaConversa>
   bool _ultimoRespondendo = false;
   String _ultimoTrecho = '';
 
+  /// A posição, na conversa, da fala da Memora que **acabou de chegar**, e que
+  /// portanto vai aparecendo aos poucos (FR-020b). Nenhuma, até chegar uma.
+  ///
+  /// Fala que já estava lá — a conversa lida do disco — nunca é marcada, e
+  /// por isso nunca anima. É uma posição, e não "a última mensagem": quando a
+  /// falha tira a pergunta da conversa, a última passa a ser uma fala antiga,
+  /// que não pode recomeçar a ser escrita.
+  int _emEscrita = -1;
+
   void _aoMudar() {
     // O controlador é dono do valor; o campo apenas o reflete. Importa depois
     // de enviar, quando o rascunho é limpo por quem não é a pessoa.
@@ -138,6 +158,11 @@ class _TelaConversaState extends State<TelaConversa>
     }
 
     final ControladorConversa c = widget.controlador;
+    if (c.jaPerguntou &&
+        c.mensagens.length > _ultimoTotalMensagens &&
+        c.mensagens.last.autor == AutorDaMensagem.memora) {
+      _emEscrita = c.mensagens.length - 1;
+    }
     final bool precisaRolar = c.mensagens.length != _ultimoTotalMensagens ||
         c.respondendo != _ultimoRespondendo ||
         c.trechoEmCurso != _ultimoTrecho ||
@@ -160,6 +185,31 @@ class _TelaConversaState extends State<TelaConversa>
       if (!_rolagem.hasClients) return;
       _rolagem.jumpTo(_rolagem.position.maxScrollExtent);
     });
+  }
+
+  /// A chave da fala que está sendo escrita: ela amarra o texto que chega à
+  /// mensagem final, na posição `indice` da conversa.
+  Key _chaveDaEscrita(int indice) => ValueKey<String>('conversa.fala.$indice');
+
+  /// A fala `indice` da conversa.
+  Widget _fala(ControladorConversa c, int indice) {
+    final MensagemDaConversa m = c.mensagens[indice];
+    final bool daMemora = m.autor == AutorDaMensagem.memora;
+    // Só a fala que acabou de chegar, e só enquanto é a última: ao mandar a
+    // próxima pergunta, ela aparece inteira. `!respondendo` evita que a mesma
+    // chave exista em dois balões ao mesmo tempo.
+    final bool escrevendo = daMemora &&
+        indice == _emEscrita &&
+        indice == c.mensagens.length - 1 &&
+        !c.respondendo;
+
+    return BalaoDeFala(
+      key: escrevendo ? _chaveDaEscrita(indice) : null,
+      autor: daMemora ? AutorDoBalao.memora : AutorDoBalao.pessoa,
+      texto: m.texto,
+      escreverAosPoucos: escrevendo,
+      aoEscrever: escrevendo ? _rolarParaOFim : null,
+    );
   }
 
   @override
@@ -207,9 +257,15 @@ class _TelaConversaState extends State<TelaConversa>
 
                 return Column(
                   children: <Widget>[
-                    // Permanente, e no topo. Ver a nota da classe.
+                    // Permanente, e no topo. Ver a nota da classe. Recolhido, é
+                    // só um escudo de 48 dp: sem o respiro de cima e de baixo,
+                    // para devolver o espaço à conversa.
                     Padding(
-                      padding: const EdgeInsets.all(MemoraEspacamento.md),
+                      padding: avisoAberto
+                          ? const EdgeInsets.all(MemoraEspacamento.md)
+                          : const EdgeInsets.symmetric(
+                              horizontal: MemoraEspacamento.md,
+                            ),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           maxHeight:
@@ -223,9 +279,9 @@ class _TelaConversaState extends State<TelaConversa>
                           key: TelaConversa.chaveAviso,
                           child: KeyedSubtree(
                             key: TelaConversa.chaveAvisoPrivacidade,
-                            // A chave muda quando a primeira mensagem chega, e
+                            // A chave muda quando a primeira pergunta é feita, e
                             // é isso que o recolhe: o aviso é recriado fechado,
-                            // em uma linha. Voltar a abrir é com a pessoa.
+                            // só o escudo. Voltar a abrir é com a pessoa.
                             child: AvisoCompacto(
                               key: ValueKey<bool>(avisoAberto),
                               titulo: TextosAssistente.tituloAvisoAntigolpe,
@@ -233,7 +289,7 @@ class _TelaConversaState extends State<TelaConversa>
                               textoCompleto: TextosAssistente.avisosInteiros,
                               comMemora: false,
                               abertoNoComeco: avisoAberto,
-                              fechadoEmUmaLinha: true,
+                              fechadoSoEscudo: true,
                             ),
                           ),
                         ),
@@ -268,14 +324,10 @@ class _TelaConversaState extends State<TelaConversa>
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
 
-                            for (final MensagemDaConversa m
-                                in c.mensagens) ...<Widget>[
-                              BalaoDeFala(
-                                autor: m.autor == AutorDaMensagem.memora
-                                    ? AutorDoBalao.memora
-                                    : AutorDoBalao.pessoa,
-                                texto: m.texto,
-                              ),
+                            for (int i = 0;
+                                i < c.mensagens.length;
+                                i++) ...<Widget>[
+                              _fala(c, i),
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
 
@@ -283,9 +335,15 @@ class _TelaConversaState extends State<TelaConversa>
                               if (c.trechoEmCurso.isEmpty)
                                 const BalaoDeFala.escrevendo()
                               else
+                                // A mesma chave da mensagem em que este texto
+                                // vai se transformar: a posição que ela terá.
                                 BalaoDeFala(
+                                  key: _chaveDaEscrita(c.mensagens.length),
                                   autor: AutorDoBalao.memora,
                                   texto: c.trechoEmCurso,
+                                  escreverAosPoucos: true,
+                                  emAndamento: true,
+                                  aoEscrever: _rolarParaOFim,
                                 ),
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
@@ -368,17 +426,16 @@ class _TelaConversaState extends State<TelaConversa>
                                   habilitado: !c.respondendo,
                                 ),
                                 const SizedBox(height: MemoraEspacamento.md),
-                                if (c.respondendo)
-                                  const Carregando(
-                                    mensagem: TextosAssistente.pensando,
-                                  )
-                                else
-                                  BotaoPrimario(
-                                    key: TelaConversa.chaveEnviar,
-                                    rotulo: TextosAssistente.botaoEnviar,
-                                    icone: Icons.send,
-                                    aoTocar: c.podeEnviar ? c.enviar : null,
-                                  ),
+                                // Enquanto a Memora responde o botão fica no
+                                // lugar, desabilitado (`podeEnviar` é falso): a
+                                // espera aparece só no balão dela, e a faixa
+                                // não muda de altura (FR-020b).
+                                BotaoPrimario(
+                                  key: TelaConversa.chaveEnviar,
+                                  rotulo: TextosAssistente.botaoEnviar,
+                                  icone: Icons.send,
+                                  aoTocar: c.podeEnviar ? c.enviar : null,
+                                ),
                               ],
                             ),
                           ),

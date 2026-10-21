@@ -11,6 +11,7 @@ import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 import '../../suporte/aceite_em_memoria.dart';
+import '../../suporte/escrita_da_resposta.dart';
 
 import '../../suporte/aparelhos.dart';
 import '../../suporte/estados_de_tela.dart';
@@ -98,6 +99,7 @@ void main() {
     await t.ensureVisible(enviar);
     await t.tap(enviar);
     await avancar(t);
+    await esperarAEscrita(t);
   }
 
   group('H2 — ensinar vem antes de fazer (FR-014)', () {

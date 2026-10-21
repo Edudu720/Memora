@@ -432,12 +432,22 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         textoCompleto: 'Para os lugares onde o rosto dela já está na tela.',
         comMemora: false,
       ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const AvisoCompacto(
+        titulo: 'Aviso só com o escudo',
+        resumo: 'Eu nunca peço sua senha nem código.',
+        textoCompleto: 'Fechado, é só o escudo num canto (48 dp): o resumo vai '
+            'no rótulo para o leitor de tela. Toque para ler o aviso inteiro.',
+        comMemora: false,
+        fechadoSoEscudo: true,
+      ),
 
       const _Secao('Conversa', 'Quem disse é dito por posição, rosto e nome — '
           'nunca só pela cor.'),
       BalaoDeFala(
         autor: AutorDoBalao.memora,
-        texto: 'Quer que eu abra o WhatsApp para você?',
+        // O que está entre `**` vai em negrito (FR-020a): o nome do aplicativo.
+        texto: 'Quer que eu abra o **WhatsApp** para você?',
         opcoes: <OpcaoDoBalao>[
           OpcaoDoBalao(
             rotulo: 'Sim, pode abrir',

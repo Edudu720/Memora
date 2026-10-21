@@ -73,12 +73,6 @@ class TextosAssistente {
   /// Rótulo do botão de enviar.
   static const String botaoEnviar = 'Perguntar';
 
-  /// Mensagem enquanto a Memora responde.
-  ///
-  /// Existe porque tela parada é o que faz este público concluir que o aparelho
-  /// travou (SC-007).
-  static const String pensando = 'Estou pensando...';
-
   /// Título do aviso permanente contra golpe (FR-033).
   static const String tituloAvisoAntigolpe = 'Eu nunca peço sua senha';
 
@@ -109,17 +103,16 @@ class TextosAssistente {
       'Memora, e pessoas de lá podem ler. Não escreva senha, documento, '
       'endereço, nem nada sobre sua saúde ou seu dinheiro.';
 
-  /// A linha que os **dois** avisos dizem fechados, depois da primeira
-  /// mensagem (FR-022 da 004, FR-033 e FR-051 da 003).
+  /// O que o **escudo** diz ao leitor de tela, depois da primeira pergunta
+  /// (FR-022 e FR-049 da 004, T130; FR-033 e FR-051 da 003).
   ///
-  /// Carrega o núcleo dos dois avisos inteiros: **senha** e **código**, do
-  /// golpe, e **dados pessoais**, da privacidade — e contém o
+  /// Não está escrito na tela — fechado, o aviso é só o escudo —, é o rótulo
+  /// dele. Carrega o núcleo dos dois avisos inteiros: **senha** e **código**,
+  /// do golpe, e **dados pessoais**, da privacidade — e contém o
   /// [tituloAvisoAntigolpe] por inteiro, como o portão da T118 exige.
   ///
   /// Para onde o texto vai ("um serviço de fora") fica no aviso aberto e na
-  /// explicação do aceite, que a pessoa lê antes da primeira mensagem. Dizer
-  /// isso também aqui dobrava a linha, e com o teclado aberto o aviso tomava o
-  /// lugar da conversa (`tela_conversa_test`, "Teclado aberto").
+  /// explicação do aceite, que a pessoa lê antes da primeira pergunta.
   static const String resumoDosAvisos =
       '$resumoAvisoAntigolpe Não escreva dados pessoais.';
 

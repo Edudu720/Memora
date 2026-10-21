@@ -21,6 +21,19 @@ abstract final class MemoraMovimento {
   /// mudança acontece sem transição, e o sinal continua lá.
   static const double escalaPressionado = 0.97;
 
+  /// Quanto leva para a Memora "escrever" cada letra da resposta (FR-020b).
+  ///
+  /// Perto do ritmo de quem escreve devagar, mas ainda confortável de ler
+  /// acompanhando. Com "reduzir movimento" o texto aparece inteiro de uma vez.
+  static const Duration escritaPorLetra = Duration(milliseconds: 18);
+
+  /// O mais que a escrita pode ficar atrás do que já chegou (FR-020b).
+  ///
+  /// Quando a resposta chega depressa e é longa, a escrita acelera para não
+  /// passar disso: animação que faz a pessoa esperar para ler o que já está
+  /// pronto deixa de ser acompanhamento e vira atraso.
+  static const Duration escritaAtrasoMaximo = Duration(seconds: 2);
+
   /// Duração efetiva, considerando a preferência de redução de movimento.
   static Duration efetiva(Duration desejada, {required bool reduzirMovimento}) {
     return reduzirMovimento ? Duration.zero : desejada;

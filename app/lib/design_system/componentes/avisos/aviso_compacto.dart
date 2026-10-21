@@ -41,6 +41,18 @@ import '../texto/texto_memora.dart';
 /// a conversa, e "feche esse aviso" é o que ele pediria. Por isso este
 /// componente **não tem** como ser dispensado: nem botão, nem gesto.
 ///
+/// ## A conversa, depois da primeira pergunta: só o escudo (T130)
+///
+/// Com [fechadoSoEscudo], fechado, o aviso **não tem texto nenhum na tela**:
+/// é um escudo vermelho num canto, com alvo de 48 dp, que a pessoa toca para ler
+/// os avisos inteiros. A linha com o núcleo ("senha" e "código") tomava espaço
+/// demais num aparelho pequeno, e a decisão do Henrique (2026-10-21) foi trocá-la
+/// pelo escudo — **risco aceito**: quem enxerga, e está sob pressão ao
+/// telefone, deixa de ver a frase sem tocar.
+///
+/// O núcleo continua **para o leitor de tela**, no rótulo do escudo, e o aviso
+/// continua sem poder sumir: nem botão, nem gesto.
+///
 /// ## É informação
 ///
 /// Borda em `perigo` e fundo neutro, como o `AvisoAntigolpe` sempre foi:
@@ -73,6 +85,12 @@ class AvisoCompacto extends StatefulWidget {
   /// que a maioria vai ler (FR-049).
   final bool fechadoEmUmaLinha;
 
+  /// Fechado, mostra **só o escudo**, num canto e sem moldura, em vez do
+  /// título, do resumo e do botão "Ler o aviso inteiro". O [resumo] vai no
+  /// rótulo do escudo, para o leitor de tela (FR-022, FR-049, T130). Prevalece
+  /// sobre [fechadoEmUmaLinha].
+  final bool fechadoSoEscudo;
+
   /// Cria o aviso.
   const AvisoCompacto({
     required this.titulo,
@@ -81,6 +99,7 @@ class AvisoCompacto extends StatefulWidget {
     this.comMemora = true,
     this.abertoNoComeco = false,
     this.fechadoEmUmaLinha = false,
+    this.fechadoSoEscudo = false,
     super.key,
   });
 
@@ -143,6 +162,44 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     );
   }
 
+  /// Só o escudo, no canto de cima à direita: um botão de 48 dp, sem texto.
+  ///
+  /// O resumo é o rótulo para o leitor de tela. `button: true` sozinho não
+  /// basta: sem `onTap` na própria `Semantics`, o TalkBack anuncia o botão e o
+  /// duplo-toque não ativa nada.
+  Widget _soEscudo(MemoraCores cores) {
+    return Align(
+      alignment: Alignment.centerRight,
+      heightFactor: 1,
+      child: Semantics(
+        button: true,
+        onTap: _alternar,
+        label: widget.resumo,
+        hint: AvisoCompacto.rotuloAbrir,
+        excludeSemantics: true,
+        child: InkWell(
+          key: AvisoCompacto.chaveAlternar,
+          onTap: _alternar,
+          customBorder: const CircleBorder(),
+          // Tamanho fixo, e não "no mínimo": um `Center` dentro de um mínimo
+          // se estica até o máximo que o pai oferece, e o escudo tomava a
+          // altura toda que o aviso aberto teria.
+          child: SizedBox(
+            width: MemoraDimensoes.alvoMinimo,
+            height: MemoraDimensoes.alvoMinimo,
+            child: Center(
+              child: Icon(
+                Icons.shield_outlined,
+                size: MemoraDimensoes.iconeDestaque,
+                color: cores.perigo,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _cabeca(MemoraCores cores) {
     return Row(
       children: <Widget>[
@@ -187,6 +244,8 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     ).viewInsets.bottom;
     final double sobra = MediaQuery.sizeOf(context).height - teclado;
     final double teto = sobra * MemoraDimensoes.tetoDoAvisoAberto;
+
+    if (!_aberto && widget.fechadoSoEscudo) return _soEscudo(cores);
 
     return Container(
       width: double.infinity,
