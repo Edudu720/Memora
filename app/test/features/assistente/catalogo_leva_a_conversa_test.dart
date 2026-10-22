@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/aprendizado/domain/guia.dart';
+import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -12,8 +14,10 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.da
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
+import '../../suporte/estados_de_tela.dart';
 
 /// Tocar num serviço do catálogo leva à conversa que ensina (T077).
 ///
@@ -46,6 +50,26 @@ class _ConversaEmMemoria implements ConversaLocal {
   Future<void> apagar() async => _guardadas = <MensagemDaConversa>[];
 }
 
+class _RepositorioComServicoSemGuia extends RepositorioAssistenteSimulado {
+  _RepositorioComServicoSemGuia() : super(demora: Duration.zero);
+
+  @override
+  Future<List<ServicoDoCatalogo>> catalogo() async {
+    final List<ServicoDoCatalogo> lista = await super.catalogo();
+    return <ServicoDoCatalogo>[
+      const ServicoDoCatalogo(
+        id: 'novo-servico',
+        chave: 'novo-servico',
+        nomeExibido: 'Serviço Futuro',
+        descricaoCurta: 'Serviço novo do servidor ainda sem guia embarcado',
+        categoria: CategoriaDoServico.sensivel,
+        memoraPodeAbrir: false,
+      ),
+      ...lista,
+    ];
+  }
+}
+
 /// Bombeia alguns quadros sem esperar quietude: o `Carregando` anima sem parar.
 Future<void> _avancar(WidgetTester t, [int quadros = 4]) async {
   for (int i = 0; i < quadros; i++) {
@@ -71,14 +95,15 @@ Future<void> _preencher(WidgetTester t, Key chave, String valor) async {
 }
 
 /// Monta o fluxo real e entra pelo cadastro, até o Hub (pelo Início).
-Future<void> _chegarAoHub(WidgetTester t) async {
+Future<void> _chegarAoHub(WidgetTester t, [RepositorioAssistente? assistente]) async {
   await t.pumpWidget(
     MaterialApp(
       theme: TemasMemora.claro,
       home: FluxoAutenticacao(
         repositorio: RepositorioAutenticacaoSimulado(demora: Duration.zero),
-        assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+        assistente: assistente ?? RepositorioAssistenteSimulado(demora: Duration.zero),
         conversaLocal: _ConversaEmMemoria.new,
+        aceiteDoAviso: AceiteEmMemoria(),
         ultimoAcesso: UltimoAcessoEmMemoria(),
       ),
     ),
@@ -111,32 +136,45 @@ String _textoDoCampo(WidgetTester t) {
 }
 
 void main() {
-  for (final (String porta, String servico) in <(String, String)>[
-    (TextosAssistente.portaAplicativos, 'WhatsApp'),
-    (TextosAssistente.portaServicos, 'Gov.br'),
-  ]) {
-    testWidgets('em "$porta", tocar em $servico abre a conversa já perguntando',
-        (WidgetTester t) async {
-      await _chegarAoHub(t);
+  testWidgets('em "Meus aplicativos", tocar em WhatsApp (com guia) abre o passo a passo',
+      (WidgetTester t) async {
+    await _chegarAoHub(t);
 
-      await _tocar(t, find.byKey(TelaHub.chaveDaPorta(porta)));
-      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem(servico)));
+    await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaAplicativos)));
+    await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')));
 
-      expect(
-        find.byType(TelaConversa),
-        findsOneWidget,
-        reason: 'O item do catálogo precisa levar a algum lugar. Botão que não '
-            'abre nada faz quem toca concluir que quebrou o aparelho (FR-003).',
-      );
-      expect(_textoDoCampo(t), TextosAssistente.perguntaSobre(servico));
-      expect(
-        find.text(TextosAssistente.perguntaSobre(servico)),
-        findsOneWidget,
-        reason: 'A pergunta fica no campo, e não vira mensagem: quem envia é a '
-            'pessoa.',
-      );
-    });
-  }
+    expect(
+      find.byType(TelaPassoAPasso),
+      findsOneWidget,
+      reason: 'O item com guia embarcado abre o passo a passo (FR-027, contracts/catalogo.md).',
+    );
+  });
+
+  testWidgets('em "Serviços sociais", tocar em Gov.br (com guia) abre o passo a passo',
+      (WidgetTester t) async {
+    await _chegarAoHub(t);
+
+    await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaServicos)));
+    await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Gov.br')));
+
+    expect(
+      find.byType(TelaPassoAPasso),
+      findsOneWidget,
+      reason: 'O serviço social com guia embarcado abre o passo a passo (US5).',
+    );
+  });
+
+  testWidgets('no fluxo real, tocar em item sem guia abre conversa com a pergunta preenchida',
+      (WidgetTester t) async {
+    await _chegarAoHub(t, _RepositorioComServicoSemGuia());
+
+    await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaServicos)));
+    await _avancar(t, 6);
+    await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Serviço Futuro')));
+
+    expect(find.byType(TelaConversa), findsOneWidget);
+    expect(_textoDoCampo(t), TextosAssistente.perguntaSobre('Serviço Futuro'));
+  });
 
   test('o estado vazio do catálogo não promete "em breve" (H1)', () {
     // O H1 do quickstart: nenhuma porta leva a tela vazia ou a "em breve".
@@ -145,5 +183,104 @@ void main() {
         isNot(contains('breve')));
     expect(TextosAssistente.catalogoVazioExplicacao.toLowerCase(),
         isNot(contains('breve')));
+  });
+
+  group('Estados — FR-006', () {
+    testWidgets('o Catálogo tem carregando, erro e vazio com frase e desenho',
+        (WidgetTester t) async {
+      await exigirOsEstadosDaFr006(
+        t,
+        tela: 'TelaCatalogo',
+        montar: (EstadoDaTela estado) => MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+            estadoDeTeste: switch (estado) {
+              EstadoDaTela.carregando => 'carregando',
+              EstadoDaTela.erro => 'erro',
+              EstadoDaTela.vazio => 'vazio',
+            },
+          ),
+        ),
+      );
+    });
+  });
+
+  group('Busca no topo — FR-023', () {
+    testWidgets('filtrar a lista exibe apenas o serviço buscado ou estado vazio',
+        (WidgetTester t) async {
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      expect(find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')), findsOneWidget);
+
+      await _preencher(t, TelaCatalogo.chaveBusca, 'face');
+      await _avancar(t);
+      expect(find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')), findsNothing);
+      expect(find.byKey(TelaCatalogo.chaveDoItem('Facebook')), findsOneWidget);
+
+      await _preencher(t, TelaCatalogo.chaveBusca, 'inexistente123');
+      await _avancar(t);
+      expect(find.text('Nenhum aplicativo encontrado'), findsOneWidget);
+    });
+  });
+
+  group('Abertura de guia vs conversa — FR-027, contracts/catalogo.md', () {
+    testWidgets('item sem guia abre conversa; item com guia abre passo a passo',
+        (WidgetTester t) async {
+      Guia? guiaAberto;
+      ServicoDoCatalogo? servicoEscolhido;
+
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+            aoAbrirGuia: (Guia g, ServicoDoCatalogo s) => guiaAberto = g,
+            aoEscolher: (ServicoDoCatalogo s) => servicoEscolhido = s,
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      // WhatsApp possui guia embarcado (T071):
+      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('WhatsApp')));
+      expect(guiaAberto?.chave, 'whatsapp');
+      expect(servicoEscolhido, isNull);
+
+      // Limpa e testa item sem guia (serviço novo sem guia embarcado):
+      guiaAberto = null;
+      servicoEscolhido = null;
+
+      final RepositorioAssistenteSimulado repoComItemSemGuia =
+          _RepositorioComServicoSemGuia();
+
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: repoComItemSemGuia,
+            categoria: CategoriaDoServico.sensivel,
+            aoAbrirGuia: (Guia g, ServicoDoCatalogo s) => guiaAberto = g,
+            aoEscolher: (ServicoDoCatalogo s) => servicoEscolhido = s,
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Serviço Futuro')));
+      expect(guiaAberto, isNull);
+      expect(servicoEscolhido?.chave, 'novo-servico');
+    });
   });
 }

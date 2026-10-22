@@ -8,6 +8,7 @@ import '../../domain/repositorios/provedor_telemetria.dart';
 
 /// Controlador da tela "Você está bem?" com temporizador regressivo de 45 segundos.
 class ControladorVerificacaoQueda extends ChangeNotifier {
+  /// Cria o controlador de verificação de queda.
   ControladorVerificacaoQueda({
     required this.evento,
     required this.provedor,
@@ -20,20 +21,38 @@ class ControladorVerificacaoQueda extends ChangeNotifier {
     _iniciarTemporizador();
   }
 
+  /// Evento de queda que originou o alerta.
   final EventoQueda evento;
+
+  /// Provedor de telemetria para envio do comando de cessar alarme.
   final ProvedorDeTelemetria provedor;
+
+  /// Caso de uso de acionamento de socorro.
   final DispararSocorroEmergencia casoDeUsoSocorro;
+
+  /// Nome da pessoa idosa monitorada.
   final String nomePessoaIdosa;
+
+  /// Contato de emergência cadastrado, se houver.
   final ContatoEmergencia? contatoEmergencia;
+
+  /// Tempo inicial do cronômetro regressivo em segundos.
   final int segundosIniciais;
+
+  /// Callback executado ao encerrar a verificação.
   final VoidCallback? aoEncerrar;
 
   Timer? _temporizador;
   int _segundosRestantes;
   StatusConfirmacaoQueda _status = StatusConfirmacaoQueda.aguardandoConfirmacao;
 
+  /// Segundos restantes no cronômetro regressivo.
   int get segundosRestantes => _segundosRestantes;
+
+  /// Status atual da confirmação de queda.
   StatusConfirmacaoQueda get status => _status;
+
+  /// Indica se ainda está aguardando resposta da pessoa idosa.
   bool get estaAtivo => _status == StatusConfirmacaoQueda.aguardandoConfirmacao;
 
   void _iniciarTemporizador() {
@@ -101,4 +120,3 @@ class ControladorVerificacaoQueda extends ChangeNotifier {
     super.dispose();
   }
 }
-

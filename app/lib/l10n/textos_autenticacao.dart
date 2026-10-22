@@ -45,13 +45,13 @@ abstract final class TextosAutenticacao {
 
   /// Ajuda do campo de identificador.
   static const String ajudaIdentificador =
-      'O mesmo que você usou para criar a conta';
+      'O e-mail ou telefone da sua conta';
 
   /// Rótulo do campo de senha.
   static const String rotuloSenha = 'Sua senha';
 
   /// Ajuda do campo de senha.
-  static const String ajudaSenha = 'Se quiser conferir, toque no olhinho';
+  static const String ajudaSenha = 'Sua frase ou senha cadastrada';
 
   /// Rótulo do botão que entra.
   static const String botaoEntrar = 'Entrar';
@@ -61,6 +61,12 @@ abstract final class TextosAutenticacao {
 
   /// Caminho para quem esqueceu a senha.
   static const String botaoRecuperar = 'Esqueci minha senha';
+
+  /// Caminho para quem ainda não tem conta (FR-010, FR-011).
+  static const String botaoPrimeiroAcesso = 'Primeiro acesso';
+
+  /// Instrução da caixa de etapa de login (FR-002a, FR-010).
+  static const String instrucaoEtapaLogin = 'Informe seus dados para entrar';
 
   /// Aviso de que o identificador veio preenchido do último acesso (FR-012).
   static const String identificadorLembrado =
@@ -378,6 +384,39 @@ abstract final class TextosAutenticacao {
 
   /// Caminho discreto para quem já tem conta.
   static const String botaoJaTenhoConta = 'Já tenho uma conta';
+
+  // --- Boas-vindas de volta (FR-009a, T117) --------------------------------
+
+  /// Título na tela de volta para quem já usou o aplicativo neste aparelho.
+  static const String tituloBoasVindasDeVolta =
+      'Que bom te ver por aqui de novo!';
+
+  /// Mensagem de boas-vindas de volta.
+  static const String mensagemBoasVindasDeVolta =
+      'Seu espaço continua pronto para você continuar aprendendo no seu ritmo.';
+
+  /// Caminho secundário na tela de volta para começar com outra conta.
+  static const String botaoCriarOutraConta = 'Criar outra conta';
+
+  // --- Instruções das caixas de etapa do cadastro (FR-002a, FR-010) --------
+
+  /// Instrução da caixa de ajuda/modo assistido.
+  static const String instrucaoEtapaCadastroAjuda =
+      'Tem alguém te ajudando agora?';
+
+  /// Instrução da caixa de identificação.
+  static const String instrucaoEtapaCadastroIdentificacao =
+      'Como posso te chamar?';
+
+  /// Instrução da caixa de canal.
+  static const String instrucaoEtapaCadastroCanal = 'Como você quer entrar?';
+
+  /// Instrução da caixa de senha.
+  static const String instrucaoEtapaCadastroSenha = 'Crie sua senha';
+
+  /// Instrução antes de pedir o aparelho de volta.
+  static const String instrucaoEtapaCadastroPedirAparelho =
+      'Agora vamos criar a senha';
 
   // --- Sair da conta (US4, T075 e T076) ------------------------------------
 

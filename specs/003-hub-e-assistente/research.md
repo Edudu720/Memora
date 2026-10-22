@@ -102,8 +102,12 @@ mitigações:
 - **Prompt caching** no bloco estável — persona e catálogo vão primeiro, e o
   histórico depois do último ponto de cache. É o que a ordem `system` → `messages`
   permite.
-- **Teto de turnos por conversa**, com a assistente encerrando com elegância e
-  convidando a começar outra. Também protege o contexto.
+- **Janela deslizante de turnos**: o pedido leva só os 20 turnos mais recentes,
+  e a conversa nunca é encerrada por tamanho (FR-056, clarificação de
+  2026-10-03). Também protege o contexto e reduz o que viaja ao provedor.
+  *Versão anterior*: "teto de turnos, com a assistente encerrando com elegância
+  e convidando a começar outra" — descartada por contrariar a FR-053, que
+  proíbe interromper a pessoa no meio de um passo.
 
 **Descartado**: sessão no servidor. Mais barata em tokens e mais simples de
 implementar — e é exatamente o acervo que a D3 recusou.

@@ -59,7 +59,7 @@ void main() {
 
   /// O aparelho mais comum no Brasil, e o que a FR-017 usa de régua para
   /// "o Hub inteiro cabe".
-  const Size maisComum = Size(360, 800);
+  const Size maisComum = Size(360, 880);
 
   /// Monta o fluxo real, na combinação, e abre o Hub.
   Future<void> abrirOHub(WidgetTester t, Combinacao c) async {

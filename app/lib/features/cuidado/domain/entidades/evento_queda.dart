@@ -4,6 +4,7 @@ import 'enums_cuidado.dart';
 /// Registro de um evento de queda detectado pelos sensores.
 @immutable
 class EventoQueda {
+  /// Cria um registro de [EventoQueda].
   const EventoQueda({
     required this.id,
     required this.timestamp,
@@ -14,6 +15,7 @@ class EventoQueda {
     this.encerradoEm,
   });
 
+  /// Cria um novo evento de queda com janela padrão de 45 segundos.
   factory EventoQueda.novo({
     required int bpm,
     required double aceleracao,
@@ -23,11 +25,10 @@ class EventoQueda {
       timestamp: DateTime.now(),
       bpmNoImpacto: bpm,
       aceleracaoNoImpacto: aceleracao,
-      status: StatusConfirmacaoQueda.aguardandoConfirmacao,
-      tempoRestanteSegundos: 45,
     );
   }
 
+  /// Reconstrói um [EventoQueda] a partir de um payload JSON.
   factory EventoQueda.fromJson(Map<String, dynamic> json) {
     return EventoQueda(
       id: json['id'] as String? ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -36,19 +37,32 @@ class EventoQueda {
           : DateTime.now(),
       bpmNoImpacto: (json['bpm'] as num?)?.toInt() ?? 0,
       aceleracaoNoImpacto: (json['aceleracao'] as num?)?.toDouble() ?? 2.5,
-      status: StatusConfirmacaoQueda.aguardandoConfirmacao,
       tempoRestanteSegundos: (json['tempo_restante'] as num?)?.toInt() ?? 45,
     );
   }
 
+  /// Identificador único do evento.
   final String id;
+
+  /// Data e hora em que o impacto foi detectado.
   final DateTime timestamp;
+
+  /// Batimentos por minuto registrados no instante do impacto.
   final int bpmNoImpacto;
+
+  /// Magnitude de aceleração (em G) no instante do impacto.
   final double aceleracaoNoImpacto;
+
+  /// Estado atual da confirmação de bem-estar.
   final StatusConfirmacaoQueda status;
+
+  /// Segundos restantes antes do acionamento automático de socorro.
   final int tempoRestanteSegundos;
+
+  /// Momento em que o evento foi encerrado.
   final DateTime? encerradoEm;
 
+  /// Cria uma cópia deste evento com os campos informados alterados.
   EventoQueda copyWith({
     String? id,
     DateTime? timestamp,
@@ -93,4 +107,3 @@ class EventoQueda {
         encerradoEm,
       );
 }
-

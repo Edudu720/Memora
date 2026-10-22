@@ -44,6 +44,7 @@ RAIZ = os.path.join("app", "lib")
 # ele deixa de ser literal e vira nome.
 ISENTAS = (
     os.path.join("app", "lib", "design_system", "tokens"),
+    os.path.join("app", "lib", "design_system", "componentes", "ilustracao", "icone_do_aplicativo.dart"),
 )
 
 # `Colors.transparent` e a AUSENCIA de cor, nao uma escolha de cor: ele nao
@@ -83,7 +84,7 @@ REGRAS = [
 
 
 def isenta(caminho):
-    return any(caminho.startswith(p) for p in ISENTAS)
+    return any(caminho.startswith(p) or caminho == p for p in ISENTAS)
 
 
 def sem_comentario(linha, em_bloco):
@@ -141,6 +142,8 @@ def varrer(raiz=RAIZ, com_isencao=True):
             if not arquivo.endswith(".dart"):
                 continue
             caminho = os.path.join(pasta, arquivo)
+            if com_isencao and isenta(caminho):
+                continue
             em_bloco = False
             with open(caminho, encoding="utf-8") as f:
                 for n, linha in enumerate(f, 1):

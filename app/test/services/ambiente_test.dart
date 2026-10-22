@@ -1,9 +1,15 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_api.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
+import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_api.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
+import '../features/assistente/suporte_da_api_falsa.dart';
+import '../suporte/aceite_em_memoria.dart';
 
 import '../features/autenticacao/dubles_autenticacao.dart';
 
@@ -12,6 +18,59 @@ import '../features/autenticacao/dubles_autenticacao.dart';
 /// O que estes testes protegem é menos a configuração e mais **duas escolhas**:
 /// que o padrão seja o simulado, e que texto puro não passe fora de depuração.
 void main() {
+  group('Ambiente — o endereço oficial de download (T089, FR-035, FR-037)', () {
+    test('sem `MEMORA_URL_DOWNLOAD`, não há endereço', () {
+      // O aplicativo ainda não está publicado: nenhum endereço, e o assunto
+      // "Compartilhar" da Ajuda não existe (R12).
+      expect(Ambiente.doAmbiente().urlDownload, isNull);
+    });
+
+    test('um endereço `https://` com servidor serve, e vem limpo', () {
+      expect(
+        Ambiente.enderecoOficial('  https://memora.fatec.example/baixar  '),
+        'https://memora.fatec.example/baixar',
+      );
+    });
+
+    test('vazio, só espaços ou ausente não é endereço', () {
+      expect(Ambiente.enderecoOficial(null), isNull);
+      expect(Ambiente.enderecoOficial(''), isNull);
+      expect(Ambiente.enderecoOficial('   '), isNull);
+    });
+
+    test('o que não é `https://` não serve: sem cifra, a rede adultera', () {
+      expect(Ambiente.enderecoOficial('http://memora.example/baixar'), isNull);
+      expect(Ambiente.enderecoOficial('ftp://memora.example/baixar'), isNull);
+      expect(Ambiente.enderecoOficial('intent://memora.example'), isNull);
+      expect(Ambiente.enderecoOficial('memora.example/baixar'), isNull);
+    });
+
+    test('usuário na frente do servidor é a isca do golpe, e não serve', () {
+      // `https://loja.com@golpe.example` lê-se como "da loja" e leva ao golpe.
+      expect(
+        Ambiente.enderecoOficial('https://play.google.com@golpe.example/x'),
+        isNull,
+      );
+    });
+
+    test('espaço ou quebra de linha no meio não serve', () {
+      expect(Ambiente.enderecoOficial('https://memora.example/a b'), isNull);
+      expect(
+        Ambiente.enderecoOficial('https://memora.example/a\nhttps://golpe'),
+        isNull,
+      );
+    });
+
+    test('o ambiente construído à mão guarda o endereço que recebeu', () {
+      const Ambiente ambiente = Ambiente(
+        urlBase: '',
+        usaServidorReal: false,
+        urlDownload: 'https://memora.example/baixar',
+      );
+      expect(ambiente.urlDownload, 'https://memora.example/baixar');
+    });
+  });
+
   group('Ambiente', () {
     test('sem nada configurado, o padrão é o simulado', () {
       final Ambiente ambiente = Ambiente.doAmbiente();
@@ -19,18 +78,22 @@ void main() {
       expect(
         ambiente.usaServidorReal,
         isFalse,
-        reason: 'quem clona e roda `flutter run` precisa ver o app funcionando, '
+        reason:
+            'quem clona e roda `flutter run` precisa ver o app funcionando, '
             'não uma tela de erro de rede',
       );
     });
 
-    test('o padrão aponta para o hospedeiro do emulador, não para localhost', () {
-      // `localhost` dentro do emulador e o proprio emulador: o servidor da
-      // maquina fica invisivel, e o erro `Connection refused` parece servidor
-      // fora do ar. E a primeira pedra em que toda integracao Android tropeca.
-      expect(Ambiente.urlBasePadrao, contains('10.0.2.2'));
-      expect(Ambiente.urlBasePadrao, isNot(contains('localhost')));
-    });
+    test(
+      'o padrão aponta para o hospedeiro do emulador, não para localhost',
+      () {
+        // `localhost` dentro do emulador e o proprio emulador: o servidor da
+        // maquina fica invisivel, e o erro `Connection refused` parece servidor
+        // fora do ar. E a primeira pedra em que toda integracao Android tropeca.
+        expect(Ambiente.urlBasePadrao, contains('10.0.2.2'));
+        expect(Ambiente.urlBasePadrao, isNot(contains('localhost')));
+      },
+    );
 
     test('reconhece endereço cifrado', () {
       const Ambiente cifrado = Ambiente(
@@ -87,7 +150,8 @@ void main() {
           usaServidorReal: false,
         ),
         cofre: _CofreDeMentira(),
-      ultimoAcesso: UltimoAcessoEmMemoria(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoSimulado>());
@@ -100,39 +164,93 @@ void main() {
           usaServidorReal: true,
         ),
         cofre: _CofreDeMentira(),
-      ultimoAcesso: UltimoAcessoEmMemoria(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
       expect(composicao.autenticacao, isA<RepositorioAutenticacaoApi>());
     });
 
-    /// A ressalva precisa aparecer para quem rodar contra o servidor. Sem ela,
-    /// a assistente simulada vira surpresa no meio de uma demonstração.
-    test('avisa que a assistente continua simulada quando o servidor é real', () {
-      final Composicao real = Composicao.resolver(
-        ambiente: const Ambiente(
-          urlBase: 'https://api.memora.app/v1',
-          usaServidorReal: true,
-        ),
-        cofre: _CofreDeMentira(),
-      ultimoAcesso: UltimoAcessoEmMemoria(),
-      );
+    /// Não existe aplicativo com conta de verdade e assistente de mentira
+    /// (spec 003, clarificação de 2026-10-09): a escolha é uma só.
+    test(
+      'com servidor real, a assistente fala com a API — não com o simulado',
+      () {
+        final Composicao composicao = Composicao.resolver(
+          ambiente: const Ambiente(
+            urlBase: 'https://api.memora.app/v1',
+            usaServidorReal: true,
+          ),
+          cofre: _CofreDeMentira(),
+          ultimoAcesso: UltimoAcessoEmMemoria(),
+          aceiteDoAviso: AceiteEmMemoria(),
+        );
 
-      expect(real.avisoDeIntegracaoParcial, isNotNull);
-      expect(real.avisoDeIntegracaoParcial, contains('ASSISTENTE'));
-    });
+        expect(composicao.assistente, isA<RepositorioAssistenteApi>());
+        expect(
+          composicao.assistente,
+          isNot(isA<RepositorioAssistenteSimulado>()),
+          reason:
+              'servidor real com assistente simulada é o aplicativo que '
+              'promete uma conversa que ninguém atende',
+        );
+      },
+    );
 
-    test('não avisa nada quando tudo é simulado', () {
-      final Composicao simulada = Composicao.resolver(
+    /// A ligação inteira, sem rede: a assistente que a Composicao monta, ao
+    /// levar `401` e ter a renovação recusada, aciona o MESMO aviso que a
+    /// Composicao entrega ao fluxo (T111). Sem isto, um `SessaoPerdida` criado
+    /// aqui e outro lá passaria em todos os testes e não ligaria nada.
+    test(
+      'a sessão perdida na assistente aciona o aviso da Composicao',
+      () async {
+        final CofreEmMemoria cofre = CofreEmMemoria();
+        final AdaptadorFalso servidor = AdaptadorFalso(
+          (_, _) async => respostaJson(401, <String, Object>{
+            'codigo': 'CREDENCIAIS_INVALIDAS',
+            'mensagem': 'x',
+          }),
+        );
+        final Dio dio = Dio(BaseOptions(baseUrl: 'https://api.memora.app/v1'))
+          ..httpClientAdapter = servidor;
+        final Composicao composicao = Composicao.resolver(
+          ambiente: const Ambiente(
+            urlBase: 'https://api.memora.app/v1',
+            usaServidorReal: true,
+          ),
+          cofre: cofre,
+          ultimoAcesso: UltimoAcessoEmMemoria(),
+          aceiteDoAviso: AceiteEmMemoria(),
+          dioDeTeste: dio,
+        );
+
+        await expectLater(
+          composicao.assistente.catalogo(),
+          throwsA(
+            isA<FalhaDeChamadaDaAssistente>().having(
+              (FalhaDeChamadaDaAssistente e) => e.falha,
+              'falha',
+              FalhaDaAssistente.sessaoExpirada,
+            ),
+          ),
+        );
+
+        expect(composicao.sessaoPerdida.avisos, 1);
+      },
+    );
+
+    test('sem servidor real, a assistente é simulada', () {
+      final Composicao composicao = Composicao.resolver(
         ambiente: const Ambiente(
           urlBase: 'http://10.0.2.2:8080/v1',
           usaServidorReal: false,
         ),
         cofre: _CofreDeMentira(),
-      ultimoAcesso: UltimoAcessoEmMemoria(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
       );
 
-      expect(simulada.avisoDeIntegracaoParcial, isNull);
+      expect(composicao.assistente, isA<RepositorioAssistenteSimulado>());
     });
   });
 }

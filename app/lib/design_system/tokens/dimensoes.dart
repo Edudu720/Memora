@@ -17,6 +17,9 @@ abstract final class MemoraDimensoes {
   /// 8 dp — separação mínima entre dois alvos de toque.
   static const double separacaoAlvo = 8;
 
+  /// 1.0 dp — espessura padrao de contornos e bordas.
+  static const double espessuraBorda = 1.0;
+
   /// Teto da escala de texto combinada entre sistema e aplicativo.
   ///
   /// Sem teto, o layout quebra em casos extremos e a pessoa fica sem saída
@@ -94,6 +97,15 @@ abstract final class MemoraDimensoes {
   /// 20 dp — o giro que cabe **dentro** de um botão, ao lado do rótulo.
   static const double indicadorEmBotao = 20;
 
+  /// 6 dp — espessura da barra de progresso em indicador de passo a passo.
+  static const double alturaIndicadorDePasso = 6;
+
+  /// 240 dp — altura mínima da moldura de celular do passo a passo (T065).
+  static const double alturaMinimaMolduraPasso = 240;
+
+  /// 380 dp — altura máxima da moldura de celular do passo a passo (T065).
+  static const double alturaMaximaMolduraPasso = 380;
+
   /// 2.5 dp — espessura do giro pequeno.
   static const double espessuraIndicadorEmBotao = 2.5;
 
@@ -166,6 +178,18 @@ abstract final class MemoraDimensoes {
   /// O aviso compacto, aberto, não passa desta fração da altura disponível;
   /// o resto do texto rola dentro dele (R5).
   static const double tetoDoAvisoAberto = 0.5;
+
+  /// A faixa do campo de escrever da conversa, com o respiro dela, não passa
+  /// desta fração da altura disponível; acima dela, a faixa rola (T055).
+  ///
+  /// Com o aviso aberto em [tetoDoAvisoAberto], sobram 14% para a lista — o
+  /// piso que a FR-027 da 003 exige em 200%.
+  static const double tetoDoCampoDaConversa = 0.36;
+
+  /// Com o **teclado aberto**, a altura que sobra é pouca, e o campo precisa
+  /// caber inteiro com o botão de enviar (T056): ele ganha esta fração, que
+  /// com o aviso aberto em [tetoDoAvisoAberto] ainda soma 100% — nunca mais.
+  static const double tetoDoCampoComTeclado = 0.5;
 
   /// Fração mínima da altura que a tarefa da tela — a conversa e o campo de
   /// escrever — precisa manter, em 100% e 150% (FR-022).

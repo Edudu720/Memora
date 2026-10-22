@@ -52,24 +52,25 @@ class AparenciaResolvida {
   /// o modo do aparelho** (FR-020) — inclusive no alto contraste, que é
   /// aplicado independentemente de o sistema estar claro ou escuro.
   factory AparenciaResolvida.de(PreferenciaAparencia preferencia) {
+    final String paleta = preferencia.paleta;
     switch (preferencia.tema) {
       case EscolhaDeTema.seguirSistema:
         return AparenciaResolvida._(
-          temaClaro: TemasMemora.porId(MemoraTemaId.claro),
-          temaEscuro: TemasMemora.porId(MemoraTemaId.escuro),
+          temaClaro: TemasMemora.porId(MemoraTemaId.claro, paleta: paleta),
+          temaEscuro: TemasMemora.porId(MemoraTemaId.escuro, paleta: paleta),
           modo: ThemeMode.system,
         );
       case EscolhaDeTema.claro:
-        return _fixo(MemoraTemaId.claro, ThemeMode.light);
+        return _fixo(MemoraTemaId.claro, ThemeMode.light, paleta: paleta);
       case EscolhaDeTema.escuro:
-        return _fixo(MemoraTemaId.escuro, ThemeMode.dark);
+        return _fixo(MemoraTemaId.escuro, ThemeMode.dark, paleta: paleta);
       case EscolhaDeTema.altoContraste:
-        return _fixo(MemoraTemaId.altoContraste, ThemeMode.dark);
+        return _fixo(MemoraTemaId.altoContraste, ThemeMode.dark, paleta: paleta);
     }
   }
 
-  static AparenciaResolvida _fixo(MemoraTemaId id, ThemeMode modo) {
-    final ThemeData tema = TemasMemora.porId(id);
+  static AparenciaResolvida _fixo(MemoraTemaId id, ThemeMode modo, {String? paleta}) {
+    final ThemeData tema = TemasMemora.porId(id, paleta: paleta);
     return AparenciaResolvida._(
       temaClaro: tema,
       temaEscuro: tema,
@@ -84,10 +85,19 @@ class AparenciaResolvida {
 /// O resultado combinado é limitado a [MemoraDimensoes.escalaTextoMax]: sem
 /// teto, somar as duas ampliações estoura o layout e a pessoa fica sem saída.
 ///
+/// Aplica também "reduzir movimento" (FR-039a): ligado, o aplicativo inteiro
+/// passa a ver `disableAnimations` verdadeiro, e todo componente que consulta
+/// `MediaQuery.disableAnimationsOf` — o que o portão do V9 exige de todos —
+/// deixa de animar. Desligado, **só a configuração do sistema vale**: esta
+/// preferência soma à do aparelho, e nunca a desfaz.
+///
 /// Use no `builder` do [MaterialApp].
 class AmpliacaoDeTexto extends StatelessWidget {
   /// Fator escolhido pela pessoa dentro do aplicativo.
   final double fatorDoAplicativo;
+
+  /// Reduzir o movimento por escolha da pessoa, além do que o sistema pedir.
+  final bool reduzirMovimento;
 
   /// Conteúdo do aplicativo.
   final Widget child;
@@ -96,6 +106,7 @@ class AmpliacaoDeTexto extends StatelessWidget {
   const AmpliacaoDeTexto({
     required this.fatorDoAplicativo,
     required this.child,
+    this.reduzirMovimento = false,
     super.key,
   });
 
@@ -109,7 +120,10 @@ class AmpliacaoDeTexto extends StatelessWidget {
     );
 
     return MediaQuery(
-      data: dados.copyWith(textScaler: TextScaler.linear(combinado)),
+      data: dados.copyWith(
+        textScaler: TextScaler.linear(combinado),
+        disableAnimations: dados.disableAnimations || reduzirMovimento,
+      ),
       child: child,
     );
   }

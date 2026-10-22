@@ -22,7 +22,7 @@ void main() {
         provedorInicial: provedor,
       );
 
-      final Combinacao combinacaoPadrao = (
+      const Combinacao combinacaoPadrao = (
         aparelho: referencia,
         escala: 1.0,
         tema: MemoraTemaId.claro,
@@ -78,4 +78,3 @@ void main() {
     });
   });
 }
-

@@ -8,6 +8,8 @@ import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/controladores/controlador_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
+import '../../suporte/escrita_da_resposta.dart';
 
 /// Cenarios H7 e H8 — confirmar antes, e avisar antes de sair (T056).
 ///
@@ -44,7 +46,12 @@ void main() {
   });
 
   ControladorConversa criarControlador() =>
-      ControladorConversa(assistente, local, abridor: abridor);
+      ControladorConversa(
+        assistente,
+        local,
+        aceite: AceiteEmMemoria(),
+        abridor: abridor,
+      );
 
   Future<void> avancar(WidgetTester t) async {
     for (int quadro = 0; quadro < 6; quadro++) {
@@ -66,6 +73,7 @@ void main() {
     await t.ensureVisible(enviar);
     await t.tap(enviar);
     await avancar(t);
+    await esperarAEscrita(t);
   }
 
   /// Confirma a acao e deixa a tela reagir.

@@ -73,6 +73,15 @@ class MemoraTheme extends ThemeExtension<MemoraTheme> {
     altoContraste,
   ];
 
+  /// Devolve uma copia deste tema com a paleta de destaque aplicada (FR-039, R15).
+  MemoraTheme comPaleta(String nome) {
+    if (id == MemoraTemaId.altoContraste) return this;
+    final bool ehEscuro = id == MemoraTemaId.escuro;
+    return copyWith(
+      cores: cores.comPaleta(nome, ehEscuro: ehEscuro),
+    );
+  }
+
   @override
   MemoraTheme copyWith({
     MemoraTemaId? id,

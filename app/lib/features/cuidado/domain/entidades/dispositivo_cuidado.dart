@@ -5,6 +5,7 @@ import 'telemetria_iot.dart';
 /// Entidade que representa o dispositivo de monitoramento vestível do idoso.
 @immutable
 class DispositivoCuidado {
+  /// Cria uma instância de [DispositivoCuidado].
   const DispositivoCuidado({
     required this.id,
     required this.nome,
@@ -15,16 +16,31 @@ class DispositivoCuidado {
     this.topicoBase = 'memora/iot/demonstracao-01',
   });
 
+  /// Identificador do dispositivo.
   final String id;
+
+  /// Nome amigável do dispositivo.
   final String nome;
+
+  /// Estado atual da conexão.
   final StatusConexaoIot statusConexao;
+
+  /// Última leitura de telemetria recebida.
   final TelemetriaIot? ultimaTelemetria;
+
+  /// Modo de operação ativo (simulado ou MQTT).
   final ModoOperacaoIot modoOperacao;
+
+  /// Endereço do broker MQTT.
   final String brokerHost;
+
+  /// Prefixo base dos tópicos MQTT.
   final String topicoBase;
 
+  /// Indica se o dispositivo está conectado no momento.
   bool get estaConectado => statusConexao == StatusConexaoIot.conectado;
 
+  /// Cria uma cópia deste dispositivo com os campos informados alterados.
   DispositivoCuidado copyWith({
     String? id,
     String? nome,
@@ -69,4 +85,3 @@ class DispositivoCuidado {
         topicoBase,
       );
 }
-

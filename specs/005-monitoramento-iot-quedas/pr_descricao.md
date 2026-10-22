@@ -2,14 +2,14 @@
 
 ## 📌 Resumo da PR
 
-Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ESP32 com MPU6050 e medidor de BPM simulado com potenciômetro) com o aplicativo Memora. O sistema monitora batimentos cardíacos e movimentação do idoso em tempo real e, ao detectar uma queda brusca, inicia um protocolo de segurança e verificação de bem-estar:
+Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ESP32 com MPU6050 e medidor de BPM simulado com potenciômetro) com o aplicativo Memora, devidamente sincronizada com o estado mais recente da `master` (Features 003 e 004). O sistema monitora batimentos cardíacos e movimentação do idoso em tempo real e, ao detectar uma queda brusca, inicia um protocolo de segurança e verificação de bem-estar:
 
 1. **Alerta Imediato**: O celular vibra e apresenta uma tela de confirmação acessível com a pergunta *"Você está bem?"* e um cronômetro regressivo de 45 segundos.
 2. **Resposta Positiva ("Estou bem")**: Interrompe o alarme imediatamente no celular e envia um comando via MQTT ao ESP32 (`{"comando":"CESSAR_ALARME"}`), desligando o buzzer sonoro.
 3. **Falta de Resposta (45 s) ou Resposta Negativa ("Preciso de ajuda")**: Aciona automaticamente socorro duplo ao contato de emergência cadastrado:
    - Abre o discador nativo do Android (`ACTION_DIAL`) com o telefone pré-preenchido.
    - Prepara o disparo de mensagem nativa (`ACTION_SENDTO`) contendo aviso com hora, data e texto de segurança antigolpe (Princípio II da Constituição).
-4. **Integração Real-Time com o Simulador Wokwi**: Permite conexão direta via broker MQTT (`broker.hivemq.com:1883`) com o firmware em execução no Wokwi (`https://wokwi.com/projects/477262321619688449`), além de um modo simulador integrado para testes offline.
+4. **Integração Real-Time com o Simulador Wokwi**: Permite conexão direta via broker MQTT 3.1.1 (`broker.hivemq.com:1883`) com o firmware em execução no Wokwi (`https://wokwi.com/projects/477262321619688449`), além de um modo simulador integrado para testes offline.
 
 ---
 
@@ -20,15 +20,18 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
   - Adicionada dependência `mqtt_client: ^10.3.3` para comunicação bidirecional em tempo real com o broker MQTT.
 - `app/android/app/src/main/AndroidManifest.xml`:
   - Adicionadas permissões `<uses-permission android:name="android.permission.INTERNET"/>` e `<uses-permission android:name="android.permission.VIBRATE"/>`.
-  - Adicionado bloco `<queries>` declarando suporte às intents nativas `android.intent.action.DIAL` (esquema `tel`) e `android.intent.action.SENDTO` (esquema `smsto`), exigido pelo Android 11+ para interação entre aplicativos.
+  - Habilitado `android:usesCleartextTraffic="true"` na `<application>` para permitir tráfego TCP/MQTT na porta 1883 com o broker público do Wokwi (`broker.hivemq.com`), preservando integralmente as regras de segurança `allowBackup="false"`, `fullBackupContent` e `dataExtractionRules` da `master`.
+  - Adicionadas as `<intent>` para `android.intent.action.DIAL` (esquema `tel`) e `android.intent.action.SENDTO` (esquema `smsto`) dentro de `<queries>` (junto aos pacotes de aplicativos e TikTok da `master`), exigido pelo Android 11+ para interação entre aplicativos.
 
-### 2. Integração no Hub Principal
+### 2. Integração no Hub Principal e Casca de Navegação
 - `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`:
-  - Adicionada a porta do Hub para o **Dispositivo de Cuidado**, conectando a navegação à `TelaDispositivoCuidado`, inicializando o repositório de contatos e injetando o nome da pessoa idosa.
+  - Sincronizado com a `master` (mantendo a porta `Ajuda do aplicativo` e guias de assunto) e adicionada a porta do Hub para o **Dispositivo de Cuidado**, conectando a navegação à `TelaDispositivoCuidado`, inicializando o repositório de contatos e injetando o nome da pessoa idosa.
+- `app/test/features/casca/profundidade_test.dart` e `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart`:
+  - Registrada a rota `deCuidado` no teste de profundidade máxima (SC-006: máximo de 3 toques a partir do Hub) e ajustada a dimensão vertical de referência do Hub para acomodar as 6 portas do sistema sem rolagem.
 
 ---
 
-## 📂 Arquivos Criados e Detalhamento de Funções
+## 📂 Arquivos Criados no Módulo IoT (`app/lib/features/cuidado/`) e Detalhamento
 
 ### Camada de Domínio (`app/lib/features/cuidado/domain/`)
 
@@ -76,6 +79,10 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
   - Métodos: `conectar()`, `desconectar()`, `simularQueda(...)` (injeta alerta de queda com 45 s de timeout), `atualizarTelemetriaManual(...)`, `enviarComandoCessarAlarme()`, `descartar()`.
 - `provedor_telemetria_mqtt.dart`:
   - `ProvedorDeTelemetriaMqtt`: Cliente MQTT real via `MqttServerClient`.
+  - Recursos de resiliência em emulador/dispositivo:
+    - Sanitização automática de host (remove esquemas `mqtt://`, `tcp://`, barras e portas coladas) e de tópico base.
+    - Resolução DNS priorizando IPv4 (`InternetAddress.lookup(host, type: InternetAddressType.IPv4)`) para evitar falhas de rota IPv6 em emuladores Android.
+    - Negociação explícita do protocolo **MQTT 3.1.1** (`setProtocolV311()`), compatível com `broker.hivemq.com` e `PubSubClient` do ESP32.
   - Métodos:
     - `conectar()`: Estabelece conexão com o broker HiveMQ e assina tópicos de telemetria (`/telemetria`) e alerta (`/alerta`).
     - `_processarMensagensMqtt(...)`: Desserializa payloads JSON e repassa para os streams de domínio.
@@ -100,7 +107,7 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
 
 #### 2. Controladores de Estado (`presentation/controladores/`)
 - `controlador_dispositivo_cuidado.dart`:
-  - `ControladorDispositivoCuidado`: Escuta os streams do provedor atual, mantém a última telemetria, gerencia o modo de operação (`simulado` vs `mqtt`), carrega e salva contatos de emergência e propaga eventos de queda para a tela.
+  - `ControladorDispositivoCuidado`: Escuta os streams do provedor atual, mantém a última telemetria, gerencia o modo de operação (`simulado` vs `mqtt`), expõe mensagens de diagnóstico em caso de falha de rede (`ultimoErroConexao`), carrega e salva contatos de emergência e propaga eventos de queda para a tela.
 - `controlador_verificacao_queda.dart`:
   - `ControladorVerificacaoQueda`: Gerencia a contagem regressiva de 45 segundos através de um `Timer.periodic`.
   - Métodos:
@@ -141,8 +148,10 @@ Código C++ completo desenvolvido para execução no simulador Wokwi:
 
 ## 🧪 Testes Automatizados e Portões de Qualidade
 
-1. **`specs/005-monitoramento-iot-quedas/validar_suite_cuidado.py`**:
-   - Criada suíte completa em Python que executa e valida 7 passos críticos:
+1. **`flutter analyze`**:
+   - **0 avisos, 0 erros, 0 infos** (100% documentado com Dartdoc conforme `public_member_api_docs`).
+2. **`specs/005-monitoramento-iot-quedas/validar_suite_cuidado.py`**:
+   - Suíte completa em Python que executa e valida 7 passos críticos (7/7 aprovados):
      - Validação de contraste WCAG 2.2 AA e AAA (66 pares aprovados em `validar_paleta.py`).
      - Validação de tokens semânticos (0 literais visuais em `validar_tokens.py`).
      - Validação estrutural do firmware ESP32 Wokwi.
@@ -150,22 +159,23 @@ Código C++ completo desenvolvido para execução no simulador Wokwi:
      - Validação das regras de DDD e normalização `+55` de telefones.
      - Validação da cláusula de segurança antigolpe.
      - Verificação da integridade de todos os arquivos.
-2. **Testes Unitários e de Widget**:
+3. **Testes Unitários, de Widget e de Acessibilidade**:
    - `app/test/features/cuidado/domain/entidades_test.dart`
-   - `app/test/features/cuidado/data/provedores_test.dart`
+   - `app/test/features/cuidado/data/provedores_test.dart` (inclui teste real de conexão ao broker `broker.hivemq.com`)
    - `app/test/features/cuidado/presentation/tela_dispositivo_cuidado_test.dart`
    - `app/test/features/cuidado/presentation/tela_verificacao_queda_test.dart`
+   - `app/test/features/casca/profundidade_test.dart` e `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart`
    - Matriz de testes cobrindo 4 aparelhos (320x568 até 390x844), 3 escalas de texto (100%, 150%, 200%) e 3 temas (claro, escuro, alto contraste) com zero estouro de layout.
 
 ---
 
 ## 📋 Checklist de Validação
 
+- [x] Sincronizado com a `master` mais recente (Features 001, 002, 003 e 004).
 - [x] Conformidade total com a Constituição Memora (WCAG 2.2 AA, piso 16 sp, tokens semânticos).
 - [x] Zero valores visuais literais fora de `design_system/tokens/` (`validar_tokens.py` zerado).
+- [x] `flutter analyze` com zero pendências.
 - [x] Alarme com 45 segundos de tolerância antes da escalada de emergência.
 - [x] Silenciamento sonoro bidirecional imediato via MQTT ao responder "Estou bem".
-- [x] Suporte ao simulador Wokwi via broker público HiveMQ.
+- [x] Suporte ao simulador Wokwi via broker público HiveMQ (MQTT 3.1.1 + IPv4).
 - [x] Suporte a números nacionais e com prefixo `+55`.
-- [x] Branches publicadas no GitHub: `spec/005-monitoramento-iot-quedas` e `feature/005-fase1-2-fundacao-iot`.
-

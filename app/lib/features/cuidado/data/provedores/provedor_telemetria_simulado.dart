@@ -7,10 +7,12 @@ import '../../domain/repositorios/provedor_telemetria.dart';
 
 /// Implementação simulada em memória para desenvolvimento, testes e apresentações.
 class ProvedorDeTelemetriaSimulado implements ProvedorDeTelemetria {
+  /// Cria um provedor simulado com o [intervaloEnvio] configurado.
   ProvedorDeTelemetriaSimulado({
     this.intervaloEnvio = const Duration(milliseconds: 500),
   });
 
+  /// Intervalo entre emissões periódicas de telemetria.
   final Duration intervaloEnvio;
   final Random _random = Random();
 
@@ -38,6 +40,7 @@ class ProvedorDeTelemetriaSimulado implements ProvedorDeTelemetria {
   @override
   Stream<StatusConexaoIot> get streamStatusConexao => _controladorStatus.stream;
 
+  /// Retorna o estado atual da conexão simulada.
   StatusConexaoIot get statusAtual => _statusAtual;
 
   @override
@@ -116,4 +119,3 @@ class ProvedorDeTelemetriaSimulado implements ProvedorDeTelemetria {
     _controladorStatus.close();
   }
 }
-

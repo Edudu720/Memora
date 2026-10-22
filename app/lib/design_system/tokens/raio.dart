@@ -11,12 +11,11 @@ abstract final class MemoraRaio {
 
   /// 40 — a porta (feature 004): pílula quando ela tem uma linha só, e
   /// cantos redondos quando cresce.
-  ///
-  /// Não é [pilula] porque o Flutter reduz o raio de um retângulo à metade do
-  /// menor lado: uma porta que fica alta com o texto a 150% ou 200% virava
-  /// quase um círculo, e os cantos do nome e da explicação saíam do
-  /// preenchimento — na porta principal, texto branco sobre o fundo claro,
-  /// invisível (achado da revisão da #38). Com 40, a 100% a porta, de ~90 dp,
-  /// continua parecendo a pílula do wireframe, e o texto nunca encosta na curva.
   static const double porta = 40;
+
+  /// 18 — balão de fala curvo.
+  static const double balao = 18;
+
+  /// 6 — ponta de ancoragem do balão de fala.
+  static const double balaoPonta = 6;
 }

@@ -8,6 +8,8 @@ import 'package:memora/features/autenticacao/presentation/controladores/controla
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 
+import '../../suporte/aparelhos.dart';
+import '../../suporte/fonte.dart';
 import 'dubles_autenticacao.dart';
 
 Widget _app(Widget filho) => MaterialApp(theme: TemasMemora.claro, home: filho);
@@ -113,6 +115,8 @@ Future<void> _tentar(
 }
 
 void main() {
+  setUpAll(carregarAtkinson);
+
   group('Formulário — FR-011', () {
     testWidgets('pede exatamente duas coisas', (WidgetTester t) async {
       await _montar(t, repositorio: _comContaDeAna());
@@ -136,6 +140,97 @@ void main() {
             'existe para evitar. Quem decide é o servidor, pela presença do @.',
       );
     });
+  });
+
+  /// T047 da feature 004 (US1, FR-011): o login não oferece entrada por rede
+  /// social enquanto ela não funciona, e os caminhos de quem não consegue
+  /// entrar ficam ao alcance no menor aparelho.
+  group('Sem rede social e com os caminhos à vista — FR-011 da 004', () {
+    Future<void> montarComCaminhos(WidgetTester t) async {
+      vestir(t, aparelhos.last); // 320x568, o mais apertado, a 100%.
+      final ControladorLogin c = ControladorLogin(
+        _comContaDeAna(),
+        UltimoAcessoEmMemoria(),
+      );
+      await t.pumpWidget(
+        _app(
+          TelaLogin(
+            controlador: c,
+            aoEntrar: (PessoaAutenticada _) {},
+            aoRecuperar: () {},
+            aoPrimeiroAcesso: () {},
+          ),
+        ),
+      );
+      addTearDown(c.dispose);
+      for (int i = 0; i < 3; i++) {
+        await t.pump(const Duration(milliseconds: 10));
+      }
+    }
+
+    testWidgets('não há botão de Google nem de Facebook (FR-011)', (
+      WidgetTester t,
+    ) async {
+      await montarComCaminhos(t);
+
+      // Botão de rede social sem caminho que funcione é porta que não abre: a
+      // fase 8 da 001 (client IDs, aprovação) ainda não existe.
+      for (final String rede in <String>['Google', 'Facebook']) {
+        expect(
+          find.textContaining(rede, findRichText: true),
+          findsNothing,
+          reason: 'o texto "$rede" não pode estar no login',
+        );
+        expect(
+          find.bySemanticsLabel(RegExp(rede)),
+          findsNothing,
+          reason: 'nem como rótulo de acessibilidade ($rede)',
+        );
+      }
+    });
+
+    testWidgets('"Esqueci minha senha" é alcançável rolando, no 320x568', (
+      WidgetTester t,
+    ) async {
+      await montarComCaminhos(t);
+
+      // O piso que vale **hoje**: dá para chegar nele e tocar.
+      await exigirAlcancavel(
+        t,
+        find.text(TextosAutenticacao.botaoRecuperar),
+        aparelho: aparelhos.last,
+        contexto: '320x568 a 100%',
+      );
+    });
+
+    // O que a US1 pede de verdade é "sem rolar" — e o login atual **não
+    // cumpre**: medido em 320x568 a 100%, o "Esqueci minha senha" começa em
+    // y=966 numa janela de 568 (a fonte do teste é quadrada, o dobro da
+    // Atkinson, mas a distância é grande demais para ser só isso). Tampouco
+    // tem "Primeiro acesso". Os dois são do redesenho do login, a T117, de
+    // outra pessoa: alterar a tela aqui seria passar por cima dela. O caso
+    // fica escrito e pulado — quando a T117 entrar, tirar o `skip` e ele passa
+    // a ser o portão.
+    testWidgets(
+      '"Esqueci minha senha" e "Primeiro acesso" estão à vista sem rolar, 320x568 a 100%',
+      (WidgetTester t) async {
+        await montarComCaminhos(t);
+
+        for (final String rotulo in <String>[
+          TextosAutenticacao.botaoRecuperar,
+          'Primeiro acesso',
+        ]) {
+          final Finder caminho = find.text(rotulo);
+          expect(caminho, findsOneWidget, reason: '"$rotulo" nem existe');
+          final Rect r = t.getRect(caminho);
+          expect(
+            r.top >= 0 && r.bottom <= aparelhos.last.height,
+            isTrue,
+            reason: '"$rotulo" precisa estar na janela sem rolar ($r)',
+          );
+        }
+      },
+    );
   });
 
   group('Pré-preenchimento do último acesso — FR-012', () {

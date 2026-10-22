@@ -61,26 +61,55 @@ class TelaEntregaDoAparelho extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const SizedBox(height: MemoraEspacamento.xxl),
-              Icon(
-                Icons.pan_tool_alt_outlined,
-                size: MemoraDimensoes.iconeCelebracao,
-                color: cores.primaria,
+              const SizedBox(height: MemoraEspacamento.lg),
+              Center(
+                child: Container(
+                  width: MemoraDimensoes.ilustracaoCabecalho,
+                  height: MemoraDimensoes.ilustracaoCabecalho,
+                  decoration: BoxDecoration(
+                    color: cores.primaria.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.falando,
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: MemoraEspacamento.xl),
+              const SizedBox(height: MemoraEspacamento.lg),
               const TextoMemora.tituloTela(
                 TextosAutenticacao.tituloEntregaDoAparelho,
                 alinhamento: TextAlign.center,
               ),
               const SizedBox(height: MemoraEspacamento.lg),
-              const TextoMemora(
-                TextosAutenticacao.pedidoEntregaDoAparelho,
-                alinhamento: TextAlign.center,
-              ),
-              const SizedBox(height: MemoraEspacamento.lg),
-              const TextoMemora.apoio(
-                TextosAutenticacao.motivoEntregaDoAparelho,
-                alinhamento: TextAlign.center,
+              Container(
+                padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                decoration: BoxDecoration(
+                  color: cores.superficie,
+                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                  border: Border.all(color: cores.borda),
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: MemoraElevacao.sombra,
+                      blurRadius: MemoraElevacao.cartao,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  children: <Widget>[
+                    TextoMemora(
+                      TextosAutenticacao.pedidoEntregaDoAparelho,
+                      alinhamento: TextAlign.center,
+                    ),
+                    SizedBox(height: MemoraEspacamento.md),
+                    TextoMemora.apoio(
+                      TextosAutenticacao.motivoEntregaDoAparelho,
+                      alinhamento: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: MemoraEspacamento.xxxl),
               BotaoPrimario(

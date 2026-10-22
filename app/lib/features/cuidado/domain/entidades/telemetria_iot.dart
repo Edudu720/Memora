@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 /// Amostra instantânea de telemetria emitida pelo ESP32 ou simulador.
 @immutable
 class TelemetriaIot {
+  /// Cria uma leitura de [TelemetriaIot].
   const TelemetriaIot({
     required this.timestamp,
     required this.bpm,
@@ -12,13 +13,14 @@ class TelemetriaIot {
     required this.estadoSensor,
   });
 
+  /// Reconstrói uma leitura [TelemetriaIot] a partir de um mapa JSON.
   factory TelemetriaIot.fromJson(Map<String, dynamic> json) {
     final int bpmLido = (json['bpm'] as num?)?.toInt() ?? 0;
     final double aceleracaoLida = (json['aceleracao'] as num?)?.toDouble() ?? 1.0;
     final double movimentoLido = (json['movimento'] as num?)?.toDouble() ?? 0.0;
     final bool movimentoBool = json['em_movimento'] as bool? ?? (movimentoLido >= 5.0);
     final String estado = json['estado'] as String? ?? 'INERTE';
-    
+
     DateTime dataHora;
     if (json['timestamp'] is int) {
       dataHora = DateTime.fromMillisecondsSinceEpoch(json['timestamp'] as int);
@@ -36,13 +38,25 @@ class TelemetriaIot {
     );
   }
 
+  /// Instante da leitura.
   final DateTime timestamp;
+
+  /// Frequência cardíaca em batimentos por minuto.
   final int bpm;
+
+  /// Aceleração resultante em múltiplos de G.
   final double aceleracaoG;
+
+  /// Índice numérico de movimentação.
   final double nivelMovimento;
+
+  /// Indica se a pessoa está em movimento ativo.
   final bool emMovimento;
+
+  /// Estado reportado pela máquina de estados do firmware.
   final String estadoSensor;
 
+  /// Converte esta leitura para mapa JSON.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'timestamp': timestamp.millisecondsSinceEpoch,
@@ -54,6 +68,7 @@ class TelemetriaIot {
     };
   }
 
+  /// Cria uma cópia desta leitura com os campos informados alterados.
   TelemetriaIot copyWith({
     DateTime? timestamp,
     int? bpm,
@@ -94,4 +109,3 @@ class TelemetriaIot {
         estadoSensor,
       );
 }
-

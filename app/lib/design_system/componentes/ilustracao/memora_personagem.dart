@@ -5,26 +5,27 @@ import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
 import 'ilustracao_memora.dart';
 
-/// Como a Memora está, em cada momento.
+/// Como a Memora está, em cada momento (alinhado com as ideias de design).
 enum ExpressaoDaMemora {
-  /// Em repouso: cabeçalhos, Início.
-  neutra(Ilustracao.memoraNeutra),
+  /// Em repouso: cabeçalhos, Início, Boas-vindas (acenando).
+  neutra(Ilustracao.memoraNeutra, 'memora_perfil_robo.png'),
 
-  /// Falando: apresentação, conversa, ajuda guiada.
-  falando(Ilustracao.memoraFalando),
+  /// Falando / Ajuda: apresentação, conversa, ajuda guiada (pensando).
+  falando(Ilustracao.memoraFalando, 'memora_ajuda_robo.png'),
 
-  /// Comemorando: fim do passo a passo, conta criada.
-  comemorando(Ilustracao.memoraComemorando),
+  /// Comemorando / Conclusão: fim do passo a passo, conta criada (sucesso).
+  comemorando(Ilustracao.memoraComemorando, 'memora_conclusao_robo.png'),
 
-  /// Preocupada: ao lado dos avisos de segurança. **Preocupada, não brava** —
-  /// a primeira versão do desenho lia como raiva, e um aviso dado com raiva
-  /// assusta quem precisava ser protegido.
-  preocupada(Ilustracao.memoraPreocupada);
+  /// Preocupada / Alerta: ao lado dos avisos de segurança (com escudo).
+  preocupada(Ilustracao.memoraPreocupada, 'memora_alerta_robo.png');
 
-  const ExpressaoDaMemora(this.ilustracao);
+  const ExpressaoDaMemora(this.ilustracao, [this.imagemPng]);
 
-  /// O desenho desta expressão.
+  /// O desenho desta expressão em SVG.
   final Ilustracao ilustracao;
+
+  /// Imagem em alta resolução, se disponível.
+  final String? imagemPng;
 }
 
 /// O rosto da Memora (FR-003 da feature 004).
@@ -69,7 +70,24 @@ class MemoraPersonagem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    return SizedBox.square(
+    final int cachePx = (tamanho * 2.5).clamp(48, 512).round();
+    final Widget imagem = expressao.imagemPng != null
+        ? Image.asset(
+            'assets/ilustracoes/${expressao.imagemPng}',
+            width: tamanho,
+            height: tamanho,
+            fit: BoxFit.contain,
+            cacheWidth: cachePx,
+            cacheHeight: cachePx,
+          )
+        : IlustracaoMemora(
+            expressao.ilustracao,
+            altura: tamanho,
+            largura: tamanho,
+            descricao: descricao,
+          );
+
+    final Widget conteudo = SizedBox.square(
       dimension: tamanho,
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -78,16 +96,15 @@ class MemoraPersonagem extends StatelessWidget {
         ),
         child: ClipOval(
           child: Align(
-            alignment: Alignment.bottomCenter,
-            child: IlustracaoMemora(
-              expressao.ilustracao,
-              altura: tamanho,
-              largura: tamanho,
-              descricao: descricao,
-            ),
+            child: imagem,
           ),
         ),
       ),
     );
+
+    if (descricao == null) {
+      return ExcludeSemantics(child: conteudo);
+    }
+    return Semantics(image: true, label: descricao, child: conteudo);
   }
 }

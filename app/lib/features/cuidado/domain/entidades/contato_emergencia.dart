@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 /// Contato de emergência cadastrado para receber alertas em caso de queda sem confirmação.
 @immutable
 class ContatoEmergencia {
+  /// Cria um contato de emergência.
   const ContatoEmergencia({
     required this.id,
     required this.nome,
@@ -11,6 +12,7 @@ class ContatoEmergencia {
     this.ativo = true,
   });
 
+  /// Reconstrói um [ContatoEmergencia] a partir de um mapa JSON.
   factory ContatoEmergencia.fromJson(Map<String, dynamic> json) {
     return ContatoEmergencia(
       id: json['id'] as String? ?? '',
@@ -21,10 +23,19 @@ class ContatoEmergencia {
     );
   }
 
+  /// Identificador único do contato.
   final String id;
+
+  /// Nome da pessoa de confiança.
   final String nome;
+
+  /// Telefone com DDD.
   final String telefone;
+
+  /// Relação ou parentesco com a pessoa idosa.
   final String parentesco;
+
+  /// Indica se o contato está ativo para acionamento.
   final bool ativo;
 
   /// Retorna o telefone limpo (somente números, normalizando DDI +55 se presente).
@@ -42,6 +53,7 @@ class ContatoEmergencia {
     return nome.trim().isNotEmpty && (limpo.length == 10 || limpo.length == 11);
   }
 
+  /// Converte este contato para mapa JSON.
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'id': id,
@@ -52,6 +64,7 @@ class ContatoEmergencia {
     };
   }
 
+  /// Cria uma cópia deste contato com os campos informados alterados.
   ContatoEmergencia copyWith({
     String? id,
     String? nome,

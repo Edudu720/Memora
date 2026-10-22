@@ -86,6 +86,33 @@ acesso.
 > acima. A tarefa correspondente precisa escolher e justificar — provavelmente um
 > arquivo em diretório privado do aplicativo, apagado por `LimpezaDeSessao`.
 
+### Turno — a unidade de conta (T104, 2026-10-03)
+
+**Um turno é uma troca**: uma mensagem da pessoa e a resposta da Memora. É a
+unidade que o servidor já usava para a FR-053 (`UsoDaAssistente.TURNOS_POR_CONVERSA
+= 30`, um a cada pedido), e passa a ser a da FR-056.
+
+| Regra | Turnos | Mensagens no `historico` |
+|---|---|---|
+| FR-056 — o que viaja ao provedor | 20 | **40** — o `maxItems` do contrato |
+| FR-053 — tamanho de uma conversa para o limite diário | 30 | — (conta pedidos, não lê o histórico) |
+
+O **aparelho** manda só as 40 mensagens mais recentes e guarda todas; o servidor
+corta de novo nas mesmas 40, por defesa (`ServicoDeConversa`). Antes, o corte do
+servidor era de 20 **mensagens** (10 turnos), e o aparelho mandava a conversa
+inteira — que o servidor recusava com `400` a partir da 41ª mensagem.
+
+### Aceite do aviso de privacidade (FR-051, T102, 2026-10-03)
+
+Um booleano em `SharedPreferences`. **Não é credencial** e não é conteúdo de
+conversa — diz só que a pessoa leu o aviso. Por isso não vai no cofre (o V8
+reprova sobra lá) nem precisa do arquivo privado da conversa.
+
+**É apagado ao sair da conta**, como `DadoLocalDaPessoa` da `LimpezaDeSessao`:
+num celular compartilhado, quem entra depois com outra conta precisa ler o aviso
+de novo. O preço é perguntar outra vez a quem sai e volta, e sair é raro (a
+sessão dura 60 dias).
+
 ---
 
 ## Como as duas categorias mudam o comportamento

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
@@ -30,7 +29,7 @@ void main() {
         contatoEmergencia: contatoTeste,
       );
 
-      final Combinacao combinacaoPadrao = (
+      const Combinacao combinacaoPadrao = (
         aparelho: referencia,
         escala: 1.0,
         tema: MemoraTemaId.claro,
@@ -66,7 +65,7 @@ void main() {
         aoEncerrar: () => encerrou = true,
       );
 
-      final Combinacao combinacaoPadrao = (
+      const Combinacao combinacaoPadrao = (
         aparelho: referencia,
         escala: 1.0,
         tema: MemoraTemaId.claro,
@@ -121,4 +120,3 @@ void main() {
     });
   });
 }
-

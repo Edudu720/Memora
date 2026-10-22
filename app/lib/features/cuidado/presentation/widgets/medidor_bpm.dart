@@ -3,11 +3,13 @@ import '../../../../design_system/design_system.dart';
 
 /// Exibe a frequência cardíaca medida em BPM de forma clara e acessível.
 class MedidorBpm extends StatelessWidget {
+  /// Cria o medidor de frequência cardíaca em BPM.
   const MedidorBpm({
     required this.bpm,
     super.key,
   });
 
+  /// Frequência cardíaca atual em batimentos por minuto.
   final int bpm;
 
   @override
@@ -24,7 +26,6 @@ class MedidorBpm extends StatelessWidget {
         border: Border.all(color: cores.borda),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(

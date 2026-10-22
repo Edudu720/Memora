@@ -5,6 +5,7 @@ import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/assistente/presentation/controladores/controlador_conversa.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 /// A espera pela resposta tem fim (FR-052, SC-007 — T078).
 ///
@@ -96,6 +97,7 @@ void main() {
     controlador = ControladorConversa(
       repositorio,
       _ConversaEmMemoria(),
+      aceite: AceiteEmMemoria(),
       rascunhoInicial: _pergunta,
     );
     await controlador.iniciar();
@@ -221,7 +223,12 @@ void main() {
     final _RepositorioControlado repo = _RepositorioControlado();
     final _ConversaQueConta local = _ConversaQueConta();
     final ControladorConversa c =
-        ControladorConversa(repo, local, rascunhoInicial: _pergunta);
+        ControladorConversa(
+      repo,
+      local,
+      aceite: AceiteEmMemoria(),
+      rascunhoInicial: _pergunta,
+    );
     await c.iniciar();
 
     unawaited(c.enviar());
@@ -252,5 +259,41 @@ void main() {
     // escreveu nada: "o que você escreveu continua aqui" não cabe ali.
     expect(TextosAssistente.semConexao.toLowerCase(),
         isNot(contains('você escreveu')));
+  });
+
+  testWidgets('apagar a conversa com uma resposta em voo: o que chega depois '
+      'não volta nem regrava (FR-040)', (WidgetTester t) async {
+    repositorio = _RepositorioControlado();
+    final _ConversaQueConta local = _ConversaQueConta();
+    controlador = ControladorConversa(
+      aceite: AceiteEmMemoria(),
+      repositorio,
+      local,
+      rascunhoInicial: _pergunta,
+    );
+    await controlador.iniciar();
+
+    unawaited(controlador.enviar());
+    await t.pump();
+    repositorio.aoReceberTrecho!('Primeiro, abra ');
+    expect(controlador.respondendo, isTrue);
+
+    await controlador.apagarConversa();
+    final int gravacoesAoApagar = local.gravacoes;
+
+    // A resposta e um trecho soltos DEPOIS de apagar.
+    repositorio.aoReceberTrecho!('o aplicativo da galeria');
+    repositorio.pendentes.first.complete(
+      const AssistenteRespondeu('Abra a galeria.'),
+    );
+    await t.pump();
+    await t.pump(ControladorConversa.esperaMaxima);
+
+    expect(controlador.mensagens, isEmpty);
+    expect(await local.ler(), isEmpty, reason: 'regravou no aparelho');
+    expect(local.gravacoes, gravacoesAoApagar);
+    expect(controlador.trechoEmCurso, isEmpty);
+    expect(controlador.respondendo, isFalse);
+    expect(controlador.estado, EstadoConversa.aguardando);
   });
 }

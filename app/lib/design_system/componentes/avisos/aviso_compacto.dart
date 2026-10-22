@@ -29,8 +29,29 @@ import '../texto/texto_memora.dart';
 /// - **Aberto, não passa de [MemoraDimensoes.tetoDoAvisoAberto] da altura que
 ///   sobra da tela**, descontado o teclado; o resto rola por dentro. Fração, e
 ///   não pixel — a lição do teto da conversa.
-/// - **Começa fechado a cada montagem.** Quem abriu uma vez não deixa o aviso
-///   aberto para sempre, virando paisagem.
+/// - **Começa fechado a cada montagem**, salvo [abertoNoComeco]. Quem abriu
+///   uma vez não deixa o aviso aberto para sempre, virando paisagem.
+///
+/// ## A conversa: aberto até a primeira mensagem, depois uma linha (T118)
+///
+/// Com [abertoNoComeco] e [fechadoEmUmaLinha], o aviso nasce aberto e, quando
+/// quem usa o recria fechado (outra `key`), vira **uma linha**: o escudo e o
+/// [resumo], que a pessoa toca para ler inteiro. Encolher é o que a revisão da
+/// T044 pediu; **sumir** foi recusado — o golpista pressiona a pessoa durante
+/// a conversa, e "feche esse aviso" é o que ele pediria. Por isso este
+/// componente **não tem** como ser dispensado: nem botão, nem gesto.
+///
+/// ## A conversa, depois da primeira pergunta: só o escudo (T130)
+///
+/// Com [fechadoSoEscudo], fechado, o aviso **não tem texto nenhum na tela**:
+/// é um escudo vermelho num canto, com alvo de 48 dp, que a pessoa toca para ler
+/// os avisos inteiros. A linha com o núcleo ("senha" e "código") tomava espaço
+/// demais num aparelho pequeno, e a decisão do Henrique (2026-10-21) foi trocá-la
+/// pelo escudo — **risco aceito**: quem enxerga, e está sob pressão ao
+/// telefone, deixa de ver a frase sem tocar.
+///
+/// O núcleo continua **para o leitor de tela**, no rótulo do escudo, e o aviso
+/// continua sem poder sumir: nem botão, nem gesto.
 ///
 /// ## É informação
 ///
@@ -55,12 +76,30 @@ class AvisoCompacto extends StatefulWidget {
   /// O rosto preocupado da Memora ao lado do título.
   final bool comMemora;
 
+  /// Nasce aberto, em vez de fechado.
+  final bool abertoNoComeco;
+
+  /// Fechado, mostra **uma linha** — o escudo e o [resumo], tocável — em vez
+  /// do título, do resumo e do botão "Ler o aviso inteiro". O [resumo] precisa
+  /// então carregar o núcleo do aviso, e conter o [titulo]: é a única coisa
+  /// que a maioria vai ler (FR-049).
+  final bool fechadoEmUmaLinha;
+
+  /// Fechado, mostra **só o escudo**, num canto e sem moldura, em vez do
+  /// título, do resumo e do botão "Ler o aviso inteiro". O [resumo] vai no
+  /// rótulo do escudo, para o leitor de tela (FR-022, FR-049, T130). Prevalece
+  /// sobre [fechadoEmUmaLinha].
+  final bool fechadoSoEscudo;
+
   /// Cria o aviso.
   const AvisoCompacto({
     required this.titulo,
     required this.resumo,
     required this.textoCompleto,
     this.comMemora = true,
+    this.abertoNoComeco = false,
+    this.fechadoEmUmaLinha = false,
+    this.fechadoSoEscudo = false,
     super.key,
   });
 
@@ -81,7 +120,85 @@ class AvisoCompacto extends StatefulWidget {
 }
 
 class _AvisoCompactoState extends State<AvisoCompacto> {
-  bool _aberto = false;
+  late bool _aberto = widget.abertoNoComeco;
+
+  void _alternar() => setState(() => _aberto = !_aberto);
+
+  /// A linha única: escudo, núcleo do aviso e uma seta, tudo um alvo só.
+  Widget _linha(MemoraCores cores) {
+    return Semantics(
+      button: true,
+      onTap: _alternar,
+      label: widget.resumo,
+      hint: AvisoCompacto.rotuloAbrir,
+      excludeSemantics: true,
+      child: InkWell(
+        key: AvisoCompacto.chaveAlternar,
+        onTap: _alternar,
+        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: MemoraDimensoes.alvoMinimo,
+          ),
+          child: Row(
+            children: <Widget>[
+              Icon(
+                Icons.shield_outlined,
+                size: MemoraDimensoes.iconeDestaque,
+                color: cores.perigo,
+              ),
+              const SizedBox(width: MemoraEspacamento.sm),
+              Expanded(child: TextoMemora(widget.resumo)),
+              const SizedBox(width: MemoraEspacamento.sm),
+              Icon(
+                Icons.expand_more,
+                size: MemoraDimensoes.iconePadrao,
+                color: cores.texto,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Só o escudo, no canto de cima à direita: um botão de 48 dp, sem texto.
+  ///
+  /// O resumo é o rótulo para o leitor de tela. `button: true` sozinho não
+  /// basta: sem `onTap` na própria `Semantics`, o TalkBack anuncia o botão e o
+  /// duplo-toque não ativa nada.
+  Widget _soEscudo(MemoraCores cores) {
+    return Align(
+      alignment: Alignment.centerRight,
+      heightFactor: 1,
+      child: Semantics(
+        button: true,
+        onTap: _alternar,
+        label: widget.resumo,
+        hint: AvisoCompacto.rotuloAbrir,
+        excludeSemantics: true,
+        child: InkWell(
+          key: AvisoCompacto.chaveAlternar,
+          onTap: _alternar,
+          customBorder: const CircleBorder(),
+          // Tamanho fixo, e não "no mínimo": um `Center` dentro de um mínimo
+          // se estica até o máximo que o pai oferece, e o escudo tomava a
+          // altura toda que o aviso aberto teria.
+          child: SizedBox(
+            width: MemoraDimensoes.alvoMinimo,
+            height: MemoraDimensoes.alvoMinimo,
+            child: Center(
+              child: Icon(
+                Icons.shield_outlined,
+                size: MemoraDimensoes.iconeDestaque,
+                color: cores.perigo,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _cabeca(MemoraCores cores) {
     return Row(
@@ -122,15 +239,22 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     // O teclado vem da janela (`View`), e não do `MediaQuery`: o `Scaffold`
     // tira o teclado do `MediaQuery` que entrega ao corpo, e de dentro dele o
     // aviso nunca o veria.
-    final double teclado =
-        MediaQueryData.fromView(View.of(context)).viewInsets.bottom;
+    final double teclado = MediaQueryData.fromView(
+      View.of(context),
+    ).viewInsets.bottom;
     final double sobra = MediaQuery.sizeOf(context).height - teclado;
     final double teto = sobra * MemoraDimensoes.tetoDoAvisoAberto;
+
+    if (!_aberto && widget.fechadoSoEscudo) return _soEscudo(cores);
 
     return Container(
       width: double.infinity,
       constraints: _aberto ? BoxConstraints(maxHeight: teto) : null,
-      padding: const EdgeInsets.all(MemoraEspacamento.md),
+      padding: EdgeInsets.all(
+        _aberto || !widget.fechadoEmUmaLinha
+            ? MemoraEspacamento.md
+            : MemoraEspacamento.sm,
+      ),
       decoration: BoxDecoration(
         color: cores.superficieAlt,
         borderRadius: BorderRadius.circular(MemoraRaio.padrao),
@@ -140,47 +264,49 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
           width: MemoraDimensoes.bordaEnfase,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          // Aberto, o título rola junto com o texto, e só o botão fica fixo.
-          // A primeira versão deixava título e botão fixos e o texto rolando
-          // entre os dois: a 200% num 320×568, as partes fixas sozinhas já
-          // passavam da metade da tela, e o aviso estourava 225 px. O título
-          // continua na árvore — que é o que os portões procuram.
-          if (_aberto)
-            Flexible(
-              child: SingleChildScrollView(
-                key: AvisoCompacto.chaveTextoCompleto,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    _cabeca(cores),
-                    const SizedBox(height: MemoraEspacamento.xs),
-                    TextoMemora(widget.textoCompleto),
-                  ],
+      child: !_aberto && widget.fechadoEmUmaLinha
+          ? _linha(cores)
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                // Aberto, o título rola junto com o texto, e só o botão fica fixo.
+                // A primeira versão deixava título e botão fixos e o texto rolando
+                // entre os dois: a 200% num 320×568, as partes fixas sozinhas já
+                // passavam da metade da tela, e o aviso estourava 225 px. O título
+                // continua na árvore — que é o que os portões procuram.
+                if (_aberto)
+                  Flexible(
+                    child: SingleChildScrollView(
+                      key: AvisoCompacto.chaveTextoCompleto,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          _cabeca(cores),
+                          const SizedBox(height: MemoraEspacamento.xs),
+                          TextoMemora(widget.textoCompleto),
+                        ],
+                      ),
+                    ),
+                  )
+                else ...<Widget>[
+                  _cabeca(cores),
+                  const SizedBox(height: MemoraEspacamento.xs),
+                  TextoMemora(widget.resumo),
+                ],
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: BotaoTerciario(
+                    key: AvisoCompacto.chaveAlternar,
+                    rotulo: _aberto
+                        ? AvisoCompacto.rotuloFechar
+                        : AvisoCompacto.rotuloAbrir,
+                    aoTocar: _alternar,
+                  ),
                 ),
-              ),
-            )
-          else ...<Widget>[
-            _cabeca(cores),
-            const SizedBox(height: MemoraEspacamento.xs),
-            TextoMemora(widget.resumo),
-          ],
-          Align(
-            alignment: Alignment.centerLeft,
-            child: BotaoTerciario(
-              key: AvisoCompacto.chaveAlternar,
-              rotulo: _aberto
-                  ? AvisoCompacto.rotuloFechar
-                  : AvisoCompacto.rotuloAbrir,
-              aoTocar: () => setState(() => _aberto = !_aberto),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -12,6 +12,7 @@ import '../../domain/repositorios/repositorio_contato_emergencia.dart';
 
 /// Controlador da tela do Dispositivo de Cuidado.
 class ControladorDispositivoCuidado extends ChangeNotifier {
+  /// Cria o controlador do dispositivo de cuidado.
   ControladorDispositivoCuidado({
     required this.repositorioContato,
     ProvedorDeTelemetria? provedorInicial,
@@ -28,6 +29,7 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     _carregarContato();
   }
 
+  /// Repositório responsável por persistir o contato de emergência.
   final RepositorioContatoEmergencia repositorioContato;
   late ProvedorDeTelemetria _provedorAtual;
 
@@ -40,9 +42,16 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
   StreamSubscription<StatusConexaoIot>? _subStatus;
   StreamSubscription<EventoQueda>? _subQueda;
 
+  /// Estado atual do dispositivo.
   DispositivoCuidado get dispositivo => _dispositivo;
+
+  /// Contato de emergência cadastrado, se houver.
   ContatoEmergencia? get contatoEmergencia => _contatoEmergencia;
+
+  /// Evento de queda ativo aguardando verificação.
   EventoQueda? get quedaAtiva => _quedaAtiva;
+
+  /// Provedor de telemetria ativo no momento.
   ProvedorDeTelemetria get provedor => _provedorAtual;
 
   Future<void> _carregarContato() async {
@@ -71,14 +80,17 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     });
   }
 
+  /// Inicia a conexão com o provedor de telemetria atual.
   Future<void> conectar() async {
     await _provedorAtual.conectar();
   }
 
+  /// Encerra a conexão com o provedor de telemetria atual.
   Future<void> desconectar() async {
     await _provedorAtual.desconectar();
   }
 
+  /// Alterna entre o modo simulado e o modo MQTT (Wokwi / ESP32).
   Future<void> alternarModo(ModoOperacaoIot novoModo, {String? broker, String? topico}) async {
     final String brokerFinal = (broker != null && broker.trim().isNotEmpty)
         ? broker.trim()
@@ -110,18 +122,21 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Salva o [contato] de emergência no repositório local.
   Future<void> salvarContato(ContatoEmergencia contato) async {
     await repositorioContato.salvarContato(contato);
     _contatoEmergencia = contato;
     notifyListeners();
   }
 
+  /// Dispara uma simulação de queda quando em modo simulado.
   void simularQuedaTeste() {
     if (_provedorAtual is ProvedorDeTelemetriaSimulado) {
       (_provedorAtual as ProvedorDeTelemetriaSimulado).simularQueda();
     }
   }
 
+  /// Limpa o evento de queda ativo após abrir a tela de verificação.
   void limparQuedaAtiva() {
     _quedaAtiva = null;
     notifyListeners();
@@ -136,4 +151,3 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     super.dispose();
   }
 }
-

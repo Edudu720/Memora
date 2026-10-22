@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../domain/autenticacao.dart';
 
 /// Implementação **provisória** que simula o servidor.
@@ -42,6 +45,11 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
   /// Relógio, trocável no teste para a escada caber em milissegundos.
   final DateTime Function() agora;
 
+  static const String _chavePreferenciasContas = 'memora.contas_simuladas';
+  static const String _chavePreferenciasSessao = 'memora.sessao_ativa_simulada';
+
+  final SharedPreferences? _preferencias;
+
   final Map<String, _ContaSimulada> _contas = <String, _ContaSimulada>{};
 
   int _falhasSeguidas = 0;
@@ -51,13 +59,88 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
 
   /// Cria o repositório simulado.
   RepositorioAutenticacaoSimulado({
+    SharedPreferences? preferencias,
     Set<String>? canaisJaCadastrados,
     this.demora = const Duration(milliseconds: 700),
     this.falhaForcada,
     this.escadaDeBloqueio = escadaPadrao,
     DateTime Function()? agora,
-  })  : canaisJaCadastrados = canaisJaCadastrados ?? <String>{},
-        agora = agora ?? DateTime.now;
+  })  : _preferencias = preferencias,
+        canaisJaCadastrados = canaisJaCadastrados ?? <String>{},
+        agora = agora ?? DateTime.now {
+    _carregarDePreferencias();
+  }
+
+  void _carregarDePreferencias() {
+    final SharedPreferences? prefs = _preferencias;
+    if (prefs == null) return;
+    try {
+      final String? jsonStr = prefs.getString(_chavePreferenciasContas);
+      if (jsonStr != null && jsonStr.isNotEmpty) {
+        final dynamic mapaBruto = jsonDecode(jsonStr);
+        if (mapaBruto is Map<String, dynamic>) {
+          for (final MapEntry<String, dynamic> entrada in mapaBruto.entries) {
+            if (entrada.value is Map<String, dynamic>) {
+              final Map<String, dynamic> dados =
+                  entrada.value as Map<String, dynamic>;
+              final String chave = entrada.key;
+              final String senha = dados['senha'] as String? ?? '';
+              final String id =
+                  dados['id'] as String? ?? 'simulado-';
+              final String nome = dados['nome'] as String? ?? 'Usuário';
+              final String canalId = dados['canalId'] as String? ??
+                  'canal-';
+              final bool pendente = dados['pendente'] as bool? ?? false;
+              _contas[chave] = _ContaSimulada(
+                senha: senha,
+                pessoa: PessoaAutenticada(
+                  id: id,
+                  nomeTratamento: nome,
+                  canalId: canalId,
+                ),
+                canalId: canalId,
+                pendenteDeVerificacao: pendente,
+              );
+            }
+          }
+        }
+      }
+    } catch (_) {
+      // Ignora erro de parsing na carga
+    }
+
+    if (_contas.isEmpty) {
+      registrarConta(
+        identificador: 'dona.maria@memora.app',
+        senha: 'senha123456',
+        nome: 'Dona Maria',
+      );
+      _salvarEmPreferencias();
+    }
+  }
+
+  Future<void> _salvarEmPreferencias() async {
+    final SharedPreferences? prefs = _preferencias;
+    if (prefs == null) return;
+    try {
+      final Map<String, dynamic> mapaParaSalvar = <String, dynamic>{};
+      for (final MapEntry<String, _ContaSimulada> entrada in _contas.entries) {
+        mapaParaSalvar[entrada.key] = <String, dynamic>{
+          'senha': entrada.value.senha,
+          'id': entrada.value.pessoa.id,
+          'nome': entrada.value.pessoa.nomeTratamento,
+          'canalId': entrada.value.canalId,
+          'pendente': entrada.value.pendenteDeVerificacao,
+        };
+      }
+      await prefs.setString(
+        _chavePreferenciasContas,
+        jsonEncode(mapaParaSalvar),
+      );
+    } catch (_) {
+      // Ignora falha de gravação local
+    }
+  }
 
   /// Contas criadas nesta execução, para a demonstração poder entrar depois de
   /// cadastrar. Exposto só para leitura, e só para teste.
@@ -95,9 +178,13 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
         pendenteDeVerificacao: dados.modoAssistido,
         canalId: canalId,
       );
+      await _salvarEmPreferencias();
     }
 
     _ultimaSessao = pessoa;
+    if (!dados.modoAssistido) {
+      await _preferencias?.setString(_chavePreferenciasSessao, chave);
+    }
     return AutenticacaoConcluida(pessoa);
   }
 
@@ -155,12 +242,26 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     _bloqueiosAplicados = 0;
     _bloqueadaAte = null;
     _ultimaSessao = conta.pessoa;
+    await _preferencias?.setString(
+      _chavePreferenciasSessao,
+      _normalizar(dados.identificador),
+    );
     return AutenticacaoConcluida(conta.pessoa);
   }
 
   @override
   Future<ResultadoAutenticacao> renovarSessao() async {
     await Future<void>.delayed(demora);
+
+    if (_ultimaSessao == null && _preferencias != null) {
+      final String? ativa = _preferencias.getString(_chavePreferenciasSessao);
+      if (ativa != null && _contas.containsKey(ativa)) {
+        final _ContaSimulada? conta = _contas[ativa];
+        if (conta != null && !conta.pendenteDeVerificacao) {
+          _ultimaSessao = conta.pessoa;
+        }
+      }
+    }
 
     final PessoaAutenticada? pessoa = _ultimaSessao;
     if (pessoa == null) {
@@ -170,7 +271,10 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
   }
 
   @override
-  Future<void> encerrarSessao() async => _ultimaSessao = null;
+  Future<void> encerrarSessao() async {
+    _ultimaSessao = null;
+    await _preferencias?.remove(_chavePreferenciasSessao);
+  }
 
   /// O código que o simulado sempre "envia".
   ///
@@ -217,6 +321,7 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     // Confirmar a posse é o que conclui o cadastro assistido: daqui em diante a
     // conta entra.
     conta.pendenteDeVerificacao = false;
+    await _salvarEmPreferencias();
     return const CanalConcluido();
   }
 
@@ -293,6 +398,7 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
       canalId: conta.canalId,
     );
     _contas[chave] = trocada;
+    await _salvarEmPreferencias();
 
     // Trocar a senha limpa o bloqueio: quem chegou aqui provou posse do canal,
     // e continuar barrada depois disso seria punir a pessoa certa.
@@ -300,6 +406,7 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
     _bloqueiosAplicados = 0;
     _bloqueadaAte = null;
     _ultimaSessao = trocada.pessoa;
+    await _preferencias?.setString(_chavePreferenciasSessao, chave);
 
     return AutenticacaoConcluida(trocada.pessoa);
   }
@@ -334,6 +441,15 @@ class RepositorioAutenticacaoSimulado implements RepositorioAutenticacao {
       pendenteDeVerificacao: pendenteDeVerificacao,
       canalId: canalId,
     );
+    _salvarEmPreferencias();
+  }
+
+  /// Limpa todas as contas simuladas salvas localmente no aparelho.
+  Future<void> limparArmazenamento() async {
+    _contas.clear();
+    _ultimaSessao = null;
+    await _preferencias?.remove(_chavePreferenciasContas);
+    await _preferencias?.remove(_chavePreferenciasSessao);
   }
 
   /// Quantos segundos faltam do bloqueio, ou zero se não há bloqueio.

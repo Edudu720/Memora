@@ -3,6 +3,7 @@ package br.fatec.memora.autenticacao.api;
 import br.fatec.memora.autenticacao.infra.RepositorioPessoaUsuaria;
 import br.fatec.memora.autenticacao.seguranca.EmissorDeTokenDeAcesso;
 import br.fatec.memora.autenticacao.seguranca.FiltroDeTokenDeAcesso;
+import jakarta.servlet.DispatcherType;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -125,7 +126,16 @@ public class ConfiguracaoDeSegurancaWeb {
                         sessao -> sessao.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         rotas ->
-                                rotas.requestMatchers(
+                                // O despacho ASYNC so existe depois de uma
+                                // requisicao que ja passou pela cadeia e foi
+                                // autorizada: e o fim do SSE da conversa. O
+                                // FiltroDeTokenDeAcesso nao roda de novo nele,
+                                // e sem esta linha cada conversa terminava
+                                // com AuthorizationDeniedException no log
+                                // (DespachoAssincronoDaConversaTest).
+                                rotas.dispatcherTypeMatchers(DispatcherType.ASYNC)
+                                        .permitAll()
+                                        .requestMatchers(
                                                 HttpMethod.POST,
                                                 CAMINHO_CADASTRO,
                                                 CAMINHO_ENTRAR,

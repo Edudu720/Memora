@@ -5,6 +5,7 @@ import '../../domain/repositorios/repositorio_contato_emergencia.dart';
 
 /// Implementação local do repositório de contato de emergência usando SharedPreferences.
 class RepositorioContatoEmergenciaLocal implements RepositorioContatoEmergencia {
+  /// Cria uma instância de [RepositorioContatoEmergenciaLocal].
   RepositorioContatoEmergenciaLocal([SharedPreferences? preferences])
       : _prefsInstancia = preferences;
 
@@ -44,4 +45,3 @@ class RepositorioContatoEmergenciaLocal implements RepositorioContatoEmergencia 
     await prefs.remove(_chaveContato);
   }
 }
-

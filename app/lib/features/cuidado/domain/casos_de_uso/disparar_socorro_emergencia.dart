@@ -3,6 +3,7 @@ import '../entidades/contato_emergencia.dart';
 
 /// Caso de uso que realiza o acionamento de emergência via telefone nativo e SMS/WhatsApp.
 class DispararSocorroEmergencia {
+  /// Cria uma instância de [DispararSocorroEmergencia].
   const DispararSocorroEmergencia();
 
   /// Executa a chamada do discador com o número preenchido e prepara o envio de SMS com o texto padronizado.
@@ -61,4 +62,3 @@ class DispararSocorroEmergencia {
         '(AVISO DE SEGURANÇA: O Memora NUNCA solicita dinheiro, transferências ou senhas).';
   }
 }
-

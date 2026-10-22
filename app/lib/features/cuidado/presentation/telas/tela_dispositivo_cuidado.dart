@@ -14,6 +14,7 @@ import 'tela_verificacao_queda.dart';
 
 /// Tela dedicada à visualização e integração do Dispositivo de Cuidado (ESP32 / Wokwi).
 class TelaDispositivoCuidado extends StatefulWidget {
+  /// Cria a tela do dispositivo de cuidado.
   const TelaDispositivoCuidado({
     required this.controlador,
     required this.aoVoltar,
@@ -21,8 +22,13 @@ class TelaDispositivoCuidado extends StatefulWidget {
     super.key,
   });
 
+  /// Controlador que gerencia o estado da conexão e telemetria.
   final ControladorDispositivoCuidado controlador;
+
+  /// Callback para retornar à tela anterior.
   final VoidCallback aoVoltar;
+
+  /// Nome da pessoa idosa monitorada.
   final String nomePessoaIdosa;
 
   @override

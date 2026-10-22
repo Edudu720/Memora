@@ -4,15 +4,20 @@ import '../../domain/entidades/contato_emergencia.dart';
 
 /// Modal para cadastrar ou editar o contato de emergência.
 class DialogoContatoEmergencia extends StatefulWidget {
+  /// Cria o diálogo de contato de emergência.
   const DialogoContatoEmergencia({
     this.contatoAtual,
     required this.aoSalvar,
     super.key,
   });
 
+  /// Contato já cadastrado para edição, se houver.
   final ContatoEmergencia? contatoAtual;
+
+  /// Callback acionado ao salvar um contato válido.
   final ValueChanged<ContatoEmergencia> aoSalvar;
 
+  /// Exibe o diálogo modal para cadastro ou edição do contato de emergência.
   static Future<void> exibir({
     required BuildContext context,
     ContatoEmergencia? contatoAtual,
@@ -20,7 +25,6 @@ class DialogoContatoEmergencia extends StatefulWidget {
   }) {
     return showDialog<void>(
       context: context,
-      barrierDismissible: true,
       builder: (BuildContext ctx) => DialogoContatoEmergencia(
         contatoAtual: contatoAtual,
         aoSalvar: aoSalvar,

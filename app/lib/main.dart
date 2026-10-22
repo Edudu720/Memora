@@ -1,25 +1,36 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'design_system/design_system.dart';
+import 'features/apresentacao/data/apresentacao_vista.dart';
 import 'features/assistente/data/abridor_de_aplicativo.dart';
+import 'features/assistente/data/aceite_do_aviso.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
+import 'features/perfil/data/data_de_nascimento_local.dart';
+import 'services/acessibilidade/memora_binding_atividade.dart';
 import 'services/ambiente/ambiente.dart';
 import 'services/ambiente/composicao.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 import 'services/seguranca/cofre_de_credenciais.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  MemoraWidgetsFlutterBinding.ensureInitialized();
   registrarLicencasEmbarcadas();
+  final SharedPreferences preferencias = await SharedPreferences.getInstance();
   final RepositorioPreferenciaAparenciaLocal repositorio =
-      await RepositorioPreferenciaAparenciaLocal.abrir();
+      RepositorioPreferenciaAparenciaLocal(preferencias);
   final ControladorAparencia controlador = ControladorAparencia(repositorio);
   await controlador.carregar();
 
-  final UltimoAcessoLocal ultimoAcesso = await UltimoAcessoLocal.abrir();
+  final UltimoAcessoLocal ultimoAcesso = UltimoAcessoLocal(preferencias);
+  final DataDeNascimentoLocal dataDeNascimento =
+      DataDeNascimentoLocal(preferencias);
+  final ApresentacaoVistaLocal apresentacaoVista =
+      ApresentacaoVistaLocal(preferencias);
+  final AceiteDoAvisoLocal aceiteDoAviso = AceiteDoAvisoLocal(preferencias);
 
   // A escolha entre servidor real e simulado acontece aqui, e em nenhum outro
   // lugar. Ver `services/ambiente/composicao.dart`.
@@ -27,12 +38,12 @@ Future<void> main() async {
     ambiente: Ambiente.doAmbiente(),
     cofre: CofreSeguroDoSistema(),
     ultimoAcesso: ultimoAcesso,
+    dataDeNascimento: dataDeNascimento,
+    apresentacaoVista: apresentacaoVista,
+    preferencias: preferencias,
+    guardarCatalogo: true,
+    aceiteDoAviso: aceiteDoAviso,
   );
-
-  final String? aviso = composicao.avisoDeIntegracaoParcial;
-  if (aviso != null) {
-    debugPrint('[Memora] $aviso');
-  }
 
   runApp(
     AplicativoMemora(
@@ -83,6 +94,7 @@ class AplicativoMemora extends StatelessWidget {
             themeMode: aparencia.modo,
             builder: (BuildContext context, Widget? child) => AmpliacaoDeTexto(
               fatorDoAplicativo: atual.escalaTexto,
+              reduzirMovimento: atual.reduzirMovimento,
               child: child!,
             ),
             // O aplicativo de verdade, sem a casca de demonstração que existiu
@@ -96,7 +108,11 @@ class AplicativoMemora extends StatelessWidget {
               repositorio: composicao.autenticacao,
               ultimoAcesso: ultimoAcesso,
               limpeza: composicao.limpeza,
+              dataDeNascimento: composicao.dataDeNascimento,
+              apresentacaoVista: composicao.apresentacaoVista,
+              sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
+              aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoAndroid(),
             ),
           );

@@ -1,10 +1,10 @@
 # ADR 002 — Provedor de IA da assistente
 
-- **Status:** Aceito **com uma violação conhecida da FR-051** — ver "A violação, com todas as letras"
+- **Status:** Aceito — **risco aceito** pela FR-051 revista em 2026-10-03 e pela Emenda 1 ao Princípio I (constituição v1.1.0, aprovação unânime). Ver "A violação, com todas as letras" e "Revisão de 2026-10-03"
 - **Data da decisão:** 2026-10-02
 - **Decisor:** Henrique Moreira Sandrini (Scrum Master)
 - **Contexto normativo:** [Constituição do Projeto](../../.specify/memory/constitution.md) — Princípio I (Segurança Acima de Tudo) e Princípio VI (A IA nunca age sozinha); [spec da 003](../../specs/003-hub-e-assistente/spec.md) — FR-022, FR-034, FR-047 e **FR-051**; [R2 do research](../../specs/003-hub-e-assistente/research.md)
-- **Tarefas:** T061 (escolha), T062 (este documento), T063-T065 (adaptador, chave, teto de turnos), **T086 (continua aberta)**
+- **Tarefas:** T061 (escolha), T062 (este documento), T063-T065 (adaptador, chave, teto de turnos), T086 (encerrada pela T105), T101-T105 (aviso, consentimento, revisão)
 
 ---
 
@@ -51,6 +51,38 @@ qualquer decisão que dependa deles — termos mudam):
 - **API** — REST em
   `https://generativelanguage.googleapis.com/v1beta/models/{modelo}:streamGenerateContent?alt=sse`
   (SSE) e `:generateContent`; autenticação pelo cabeçalho `x-goog-api-key`.
+
+## Revisão de 2026-10-03 — o risco passou a ser aceito
+
+O `/speckit-clarify` de 2026-10-03 reescreveu a FR-051, e a equipe aprovou **por
+unanimidade** a Emenda 1 ao Princípio I da constituição (v1.1.0). O que esta ADR
+chama de "violação" abaixo continua sendo verdade sobre o serviço — o Google
+treina com o conteúdo e revisores podem lê-lo —, mas **deixou de ser violação da
+spec**: virou risco aceito, com quatro condições, todas na FR-051 e na emenda:
+
+1. aviso permanente na conversa para não escrever senha, documento, endereço,
+   saúde nem dinheiro (T101);
+2. consentimento antes da primeira mensagem, e quem recusa fica com o resto do
+   Memora (T102);
+3. nenhum dado que identifique a pessoa no pedido (já provado por
+   `PedidoAoProvedorTest.semDadoPessoal`);
+4. **saída obrigatória**: trocar por um serviço que não treine e retenha no
+   máximo 30 dias, por escrito, assim que houver verba. Não há data.
+
+Consequências práticas, que **substituem** os itens de "Até que a revisão
+aconteça" logo abaixo:
+
+- **A T086 está encerrada** (pela T105): a evidência de termos que ela exigia
+  deixou de ser requisito enquanto o serviço for do tipo gratuito. Ela volta a
+  valer na troca de serviço da condição 4.
+- **A T071 pode usar a chave gratuita**, desde que as condições 1 e 2 estejam no
+  aplicativo que as pessoas usarem. Sem o aviso e o consentimento no app, a
+  emenda não vale.
+- O WARN de subida foi reescrito: diz que, com chave gratuita, o risco é o
+  aceito pela FR-051 e pela emenda, e lembra a condição de saída.
+- O teto de turnos (T065) passou a ser **janela deslizante de 20 turnos = 40
+  mensagens** (FR-056; turno é uma troca). A divergência anotada em "O que foi
+  feito para o cache" está resolvida.
 
 ## A violação, com todas as letras
 
@@ -245,5 +277,5 @@ mais antigos. Não foi alterado: é decisão de produto, não deste ADR.
 - [ ] Rodar `ClienteDaAssistenteGeminiRealTest` com uma chave real (a T068 mede
       custo e latência de uma conversa típica)
 - [ ] Comparar o Gemini com ao menos mais um candidato nas conversas da R2 (R2, "Como decidir")
-- [ ] **T086** — evidência da FR-051 nos termos do nível pago, ou revisão da FR-051
+- [x] **T086** — revisão da FR-051 feita em 2026-10-03 (risco aceito, Emenda 1); a evidência de termos volta a valer na troca de serviço
 - [ ] T093 — recusa a serviço sensível idêntica sob insistência, com o modelo real

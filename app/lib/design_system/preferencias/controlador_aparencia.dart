@@ -45,7 +45,9 @@ class ControladorAparencia extends ChangeNotifier {
   Future<void> carregar() async {
     try {
       _confirmada = await _repositorio.carregar();
-    } on Exception {
+    } on Object {
+      // `Object` e não `Exception`: dado de tipo errado lança `TypeError`,
+      // que é um `Error`, e o `main` espera este método antes do `runApp`.
       _confirmada = PreferenciaAparencia.padrao;
     }
     _emPreVisualizacao = null;
@@ -65,6 +67,14 @@ class ControladorAparencia extends ChangeNotifier {
   /// Atalho para pré-visualizar apenas a ampliação de texto.
   void preVisualizarEscalaTexto(double escala) =>
       preVisualizar(atual.copyWith(escalaTexto: escala));
+
+  /// Atalho para pré-visualizar apenas "reduzir movimento".
+  void preVisualizarReducaoDeMovimento({required bool reduzir}) =>
+      preVisualizar(atual.copyWith(reduzirMovimento: reduzir));
+
+  /// Atalho para pré-visualizar apenas a paleta de cor de destaque.
+  void preVisualizarPaleta(String paleta) =>
+      preVisualizar(atual.copyWith(paleta: paleta));
 
   /// Persiste a pré-visualização. Sem pré-visualização, não faz nada.
   Future<void> confirmar() async {

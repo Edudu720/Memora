@@ -9,11 +9,13 @@ import '../widgets/cronometro_regressivo_queda.dart';
 /// 1. "Estou bem" (cessa alarme local e silencia ESP32 via MQTT).
 /// 2. "Preciso de ajuda" ou expiração do tempo de 45 s (aciona discador e mensagem).
 class TelaVerificacaoQueda extends StatelessWidget {
+  /// Cria a tela de verificação de queda.
   const TelaVerificacaoQueda({
     required this.controlador,
     super.key,
   });
 
+  /// Controlador do cronômetro e ações de confirmação.
   final ControladorVerificacaoQueda controlador;
 
   @override
@@ -43,7 +45,6 @@ class TelaVerificacaoQueda extends StatelessWidget {
                       children: <Widget>[
                         // Topo: Identificação e Alerta
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
                             const SizedBox(height: MemoraEspacamento.md),
                             Container(

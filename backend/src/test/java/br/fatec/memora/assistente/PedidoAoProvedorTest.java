@@ -23,11 +23,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
  * <h2>Duas garantias que valem para qualquer provedor</h2>
  *
  * <ul>
- *   <li><b>Teto de turnos (R3).</b> O histórico viaja a cada turno e é cobrado
- *       como entrada; o custo de uma conversa cresce com o quadrado do número de
- *       turnos. {@link ServicoDeConversa#TURNOS_NO_PEDIDO} corta pelo
- *       <b>fim</b>: ficam os mais recentes. O corte já existia e não tinha teste
- *       — o que não tem teste, um dia alguém "simplifica".
+ *   <li><b>Teto de turnos (R3, FR-056).</b> O histórico viaja a cada turno e é
+ *       cobrado como entrada; o custo de uma conversa cresce com o quadrado do
+ *       número de turnos. Um turno é uma troca (duas mensagens), então
+ *       {@link ServicoDeConversa#TURNOS_NO_PEDIDO} = 20 turnos são
+ *       {@link ServicoDeConversa#MENSAGENS_NO_PEDIDO} = 40 mensagens, o mesmo
+ *       {@code maxItems} do contrato. O corte é pelo <b>fim</b>: ficam as mais
+ *       recentes. O corte já existia e não tinha teste — o que não tem teste,
+ *       um dia alguém "simplifica".
  *   <li><b>A mensagem da pessoa não é instrução (FR-034).</b> Persona e
  *       catálogo vêm do servidor, em campos próprios do {@code Pedido}; o que
  *       a pessoa escreve só pode chegar em {@code mensagem} ou em
@@ -84,18 +87,27 @@ class PedidoAoProvedorTest extends TesteComBanco {
     }
 
     @Test
-    @DisplayName("conversa longa: so os turnos mais recentes viajam, ate o teto")
+    @DisplayName("conversa longa: so os 20 turnos (40 mensagens) mais recentes viajam (FR-056)")
     void tetoDeTurnos() {
-        int total = ServicoDeConversa.TURNOS_NO_PEDIDO + 25;
+        // 50 mensagens = 25 trocas; o teto e 20 turnos = 40 mensagens.
+        int total = 50;
 
         conversa.conversar(pessoaId, "mensagem atual", historicoDe(total), trecho -> {});
 
         List<ClienteDaAssistente.Turno> enviados = assistente.ultimoPedido().historico();
-        assertThat(enviados).hasSize(ServicoDeConversa.TURNOS_NO_PEDIDO);
+        assertThat(ServicoDeConversa.MENSAGENS_NO_PEDIDO)
+                .as("20 turnos de duas mensagens")
+                .isEqualTo(40);
+        assertThat(enviados).hasSize(40);
         assertThat(enviados.get(0).texto())
-                .as("corta pelo comeco: ficam os mais recentes")
-                .isEqualTo("turno-" + (total - ServicoDeConversa.TURNOS_NO_PEDIDO + 1));
-        assertThat(enviados.get(enviados.size() - 1).texto()).isEqualTo("turno-" + total);
+                .as("corta pelo comeco: ficam as 40 ultimas")
+                .isEqualTo("turno-11");
+        assertThat(enviados.get(enviados.size() - 1).texto()).isEqualTo("turno-50");
+        for (int i = 0; i < enviados.size(); i++) {
+            assertThat(enviados.get(i).texto())
+                    .as("na ordem original, sem buracos")
+                    .isEqualTo("turno-" + (11 + i));
+        }
     }
 
     @Test

@@ -3,13 +3,17 @@ import '../../../../design_system/design_system.dart';
 
 /// Exibe o cronômetro regressivo da verificação de queda (iniciando em 45 s).
 class CronometroRegressivoQueda extends StatelessWidget {
+  /// Cria o cronômetro regressivo de verificação de queda.
   const CronometroRegressivoQueda({
     required this.segundosRestantes,
     this.totalSegundos = 45,
     super.key,
   });
 
+  /// Quantidade de segundos restantes até o acionamento automático.
   final int segundosRestantes;
+
+  /// Duração total da janela de verificação em segundos.
   final int totalSegundos;
 
   @override

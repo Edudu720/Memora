@@ -83,7 +83,8 @@ public class ControladorConversa {
     /** O que o aplicativo envia. */
     public record ConversaRequisicao(
             @JsonProperty("mensagem") @NotBlank @Size(max = 2000) String mensagem,
-            @JsonProperty("historico") @Size(max = 40) List<TurnoRequisicao> historico) {}
+            @JsonProperty("historico") @Size(max = ServicoDeConversa.MENSAGENS_NO_PEDIDO)
+                    List<TurnoRequisicao> historico) {}
 
     /** Um turno do histórico, vindo do aparelho (FR-047). */
     public record TurnoRequisicao(

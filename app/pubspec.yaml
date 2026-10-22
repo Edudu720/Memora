@@ -85,6 +85,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
 
+  # Lê o `openapi.yaml` no teste que prende o leitor de SSE ao contrato (T110).
+  # Já vinha no lock como dependência transitiva; declarada aqui porque depender
+  # de transitiva quebra sem aviso quando a de cima muda. Parsear o YAML de
+  # verdade — em vez de expressão regular sobre texto — é o que faz o teste
+  # enxergar `enum` e `required` como o gerador os enxerga.
+  yaml: ^3.1.3
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -102,6 +109,24 @@ flutter:
     - assets/icones/navegacao/
     # A licença da fonte vai junto, e aparece em "Licenças" do aplicativo.
     - assets/fontes/atkinson_hyperlegible_next/OFL.txt
+    # Guias de aplicativos cotidianos (T071, T072)
+    - assets/guias/whatsapp/
+    - assets/guias/instagram/
+    - assets/guias/youtube/
+    - assets/guias/facebook/
+    - assets/guias/google-fotos/
+    - assets/guias/telegram/
+    - assets/guias/tiktok/
+    # Guias de serviços sociais (T078, T079, T081, T082)
+    - assets/guias/gov-br/
+    - assets/guias/meu-inss/
+    - assets/guias/e-titulo/
+    - assets/guias/serasa/
+    - assets/guias/fgts/
+    - assets/guias/poupatempo/
+    - assets/guias/carteira-digital/
+    - assets/guias/correios/
+    - assets/guias/carteira-de-trabalho/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

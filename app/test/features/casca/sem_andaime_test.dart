@@ -5,15 +5,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
+import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_boas_vindas.dart';
-import 'package:memora/features/casca/raizes_provisorias.dart';
+import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/main.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
 import 'package:memora/services/ambiente/composicao.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
+import 'package:memora/services/seguranca/sessao_perdida.dart';
+import '../../suporte/aceite_em_memoria.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
 import '../autenticacao/fluxo_dentro_da_conta.dart';
+import 'package:memora/features/perfil/data/data_de_nascimento_local.dart';
 
 /// V1 — a pessoa não vê o andaime (FR-007 e SC-009 da feature 004, T028).
 ///
@@ -47,9 +51,12 @@ void main() {
         controlador: aparencia,
         ultimoAcesso: ultimoAcesso,
         composicao: Composicao(
+          dataDeNascimento: DataDeNascimentoEmMemoria(),
           ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
           autenticacao: RepositorioAutenticacaoSimulado(demora: Duration.zero),
           assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+          aceiteDoAviso: AceiteEmMemoria(),
+          sessaoPerdida: SessaoPerdida(),
           limpeza: LimpezaDeSessao(
             cofre: CofreQueRegistra(),
             ultimoAcesso: ultimoAcesso,
@@ -74,6 +81,38 @@ void main() {
     );
   });
 
+  testWidgets('o aplicativo entrega ao fluxo o aviso de sessão perdida da '
+      'Composicao (T111)', (WidgetTester t) async {
+    // O `main.dart` é quem liga a Composicao ao fluxo. Se esquecer o
+    // `sessaoPerdida`, a assistente avisa e ninguém escuta — e nenhum teste do
+    // fluxo, que recebe o aviso por parâmetro, perceberia.
+    final UltimoAcessoEmMemoria ultimoAcesso = UltimoAcessoEmMemoria();
+    final Composicao composicao = Composicao(
+      ambiente: const Ambiente(urlBase: '', usaServidorReal: false),
+      autenticacao: RepositorioAutenticacaoSimulado(demora: Duration.zero),
+      assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+      aceiteDoAviso: AceiteEmMemoria(),
+      sessaoPerdida: SessaoPerdida(),
+      limpeza: LimpezaDeSessao(
+        cofre: CofreQueRegistra(),
+        ultimoAcesso: ultimoAcesso,
+      ),
+    );
+    await t.pumpWidget(
+      AplicativoMemora(
+        controlador: ControladorAparencia(PreferenciaEmMemoria()),
+        ultimoAcesso: ultimoAcesso,
+        composicao: composicao,
+      ),
+    );
+    await t.pump();
+
+    final FluxoAutenticacao fluxo = t.widget<FluxoAutenticacao>(
+      find.byType(FluxoAutenticacao),
+    );
+    expect(fluxo.sessaoPerdida, same(composicao.sessaoPerdida));
+  });
+
   testWidgets('sem galeria disponível, Ajustes não tem linha que leve a ela', (
     WidgetTester t,
   ) async {
@@ -84,11 +123,16 @@ void main() {
     await t.pumpWidget(
       MaterialApp(
         theme: TemasMemora.claro,
-        home: AjustesProvisorios(aoAbrirAparencia: () {}, aoSair: () async {}),
+        home: TelaConfiguracoes(
+          aoAbrirAparencia: () {},
+          aoAbrirAcessibilidade: () {},
+          aoAbrirPrivacidade: () {},
+          aoAbrirConta: () {},
+        ),
       ),
     );
-    expect(find.byKey(AjustesProvisorios.chaveGaleria), findsNothing);
-    expect(find.byKey(AjustesProvisorios.chaveAparencia), findsOneWidget);
+    expect(find.byKey(TelaConfiguracoes.chaveGaleria), findsNothing);
+    expect(find.byKey(TelaConfiguracoes.chaveAparencia), findsOneWidget);
   });
 
   testWidgets(

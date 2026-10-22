@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
+import '../../features/aprendizado/domain/guia.dart';
 import '../design_system.dart';
 
 /// A galeria do Design System — T045, FR-033 e R9.
@@ -374,6 +375,21 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           ),
         ],
       ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          IconeDoAplicativo(chave: 'whatsapp'),
+          IconeDoAplicativo(chave: 'facebook'),
+          IconeDoAplicativo(chave: 'instagram'),
+          IconeDoAplicativo(chave: 'youtube'),
+          IconeDoAplicativo(chave: 'google-fotos'),
+          IconeDoAplicativo(chave: 'telegram'),
+          IconeDoAplicativo(chave: 'gov-br'),
+          IconeDoAplicativo(chave: 'meu-inss'),
+        ],
+      ),
 
       const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
           'cartão. No máximo uma principal por tela. A desabilitada só existe '
@@ -416,12 +432,22 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         textoCompleto: 'Para os lugares onde o rosto dela já está na tela.',
         comMemora: false,
       ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const AvisoCompacto(
+        titulo: 'Aviso só com o escudo',
+        resumo: 'Eu nunca peço sua senha nem código.',
+        textoCompleto: 'Fechado, é só o escudo num canto (48 dp): o resumo vai '
+            'no rótulo para o leitor de tela. Toque para ler o aviso inteiro.',
+        comMemora: false,
+        fechadoSoEscudo: true,
+      ),
 
       const _Secao('Conversa', 'Quem disse é dito por posição, rosto e nome — '
           'nunca só pela cor.'),
       BalaoDeFala(
         autor: AutorDoBalao.memora,
-        texto: 'Quer que eu abra o WhatsApp para você?',
+        // O que está entre `**` vai em negrito (FR-020a): o nome do aplicativo.
+        texto: 'Quer que eu abra o **WhatsApp** para você?',
         opcoes: <OpcaoDoBalao>[
           OpcaoDoBalao(
             rotulo: 'Sim, pode abrir',
@@ -440,6 +466,27 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       ),
       const SizedBox(height: MemoraEspacamento.md),
       const BalaoDeFala.escrevendo(),
+
+      const _Secao(
+        'Passo a passo',
+        'Guia ilustrado com moldura, destaque, selo de exemplo e indicador textual.',
+      ),
+      const IndicadorDePasso(posicao: 2, total: 4),
+      const SizedBox(height: MemoraEspacamento.md),
+      PassoIlustrado(
+        passo: const Passo(
+          captura: CapturaDoGuia.lojaOficial,
+          destaque: RegiaoRelativa(x: 0.2, y: 0.3, largura: 0.6, altura: 0.2),
+          texto: 'Toque no botão de pesquisa no canto superior.',
+          descricaoDaCaptura: 'Tela inicial do aplicativo com a lupa no topo.',
+        ),
+        posicao: 2,
+        total: 4,
+        aoContinuar: () {},
+        aoVoltar: () {},
+        aoTelaDiferente: () {},
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
 
       const _Secao('Sobreposições', 'Diálogo e folha inferior abrem por cima '
           'do conteúdo — toque para ver.'),

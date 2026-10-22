@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
+import 'texto_com_negrito.dart';
+import 'texto_da_fala.dart';
 
 /// Quem fala.
 enum AutorDoBalao {
@@ -57,6 +60,16 @@ class OpcaoDoBalao {
 ///
 /// O balão em si não aceita toque: só as opções. Fundo neutro e borda, como
 /// sempre foi (FR-012 da 002).
+///
+/// ## A fala da Memora tem negrito e pode ir aparecendo aos poucos
+///
+/// Na fala da **Memora**, o que está entre `**` vira negrito e os asteriscos
+/// não aparecem (FR-020a). A fala da **pessoa** é mostrada como foi digitada:
+/// nada nela é interpretado.
+///
+/// Com [escreverAosPoucos], a fala vai aparecendo letra a letra (FR-020b). O
+/// leitor de tela recebe sempre a fala **inteira**, sem marcas — nunca a parte
+/// que já apareceu.
 class BalaoDeFala extends StatelessWidget {
   /// Quem fala.
   final AutorDoBalao autor;
@@ -69,11 +82,27 @@ class BalaoDeFala extends StatelessWidget {
   /// quem está do outro lado.
   final List<OpcaoDoBalao> opcoes;
 
+  /// A fala da Memora vai aparecendo aos poucos, como quem escreve (FR-020b)?
+  ///
+  /// Só vale para a Memora. Quem usa liga isto apenas na **última** fala dela;
+  /// as antigas aparecem inteiras.
+  final bool escreverAosPoucos;
+
+  /// O texto ainda está chegando? Faz o `**` ainda aberto valer como negrito
+  /// até o fim do que chegou, em vez de mostrar os asteriscos.
+  final bool emAndamento;
+
+  /// Chamado a cada letra que entra na tela — para a lista rolar atrás.
+  final VoidCallback? aoEscrever;
+
   /// Cria uma fala.
   const BalaoDeFala({
     required this.autor,
     required String this.texto,
     this.opcoes = const <OpcaoDoBalao>[],
+    this.escreverAosPoucos = false,
+    this.emAndamento = false,
+    this.aoEscrever,
     super.key,
   });
 
@@ -85,7 +114,10 @@ class BalaoDeFala extends StatelessWidget {
   const BalaoDeFala.escrevendo({super.key})
     : autor = AutorDoBalao.memora,
       texto = null,
-      opcoes = const <OpcaoDoBalao>[];
+      opcoes = const <OpcaoDoBalao>[],
+      escreverAosPoucos = false,
+      emAndamento = false,
+      aoEscrever = null;
 
   /// Nome escrito de quem fala.
   static String nomeDe(AutorDoBalao autor) =>
@@ -102,37 +134,71 @@ class BalaoDeFala extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    const Radius curvo = Radius.circular(MemoraRaio.cartao);
-    const Radius ponta = Radius.circular(MemoraRaio.padrao / 3);
+    final bool modoClaro = cores == MemoraCores.claro;
+    const Radius curvo = Radius.circular(MemoraRaio.balao);
+    const Radius ponta = Radius.circular(MemoraRaio.balaoPonta);
+
+    final Color corDeFundo = _daMemora
+        ? (modoClaro ? cores.destaque : cores.superficie)
+        : cores.superficieAlt;
+
+    final Border borda = _daMemora
+        ? (modoClaro
+            ? Border.all(color: cores.destaque)
+            : Border.all(color: cores.borda))
+        : Border.all(color: cores.borda);
 
     final Widget balao = Flexible(
       child: Container(
         constraints: const BoxConstraints(
           maxWidth: MemoraDimensoes.larguraMaximaDeLeitura,
         ),
-        padding: const EdgeInsets.all(MemoraEspacamento.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: MemoraEspacamento.lg,
+          vertical: MemoraEspacamento.md,
+        ),
         decoration: BoxDecoration(
-          color: _daMemora ? cores.superficie : cores.superficieAlt,
-          border: Border.all(color: cores.borda),
+          color: corDeFundo,
+          border: borda,
           borderRadius: BorderRadius.only(
             topLeft: _daMemora ? ponta : curvo,
             topRight: _daMemora ? curvo : ponta,
             bottomLeft: curvo,
             bottomRight: curvo,
           ),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: MemoraElevacao.sombra,
+              blurRadius: MemoraElevacao.porta,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Semantics(
+          // A fala inteira e sem marcas, nunca a parte que já apareceu: o
+          // TalkBack não pode reanunciar a cada letra (FR-020b, FR-020a).
           label: texto == null
               ? 'Memora está $textoEscrevendo'
-              : '${nomeDe(autor)} disse: $texto',
+              : '${nomeDe(autor)} disse: '
+                    '${_daMemora ? textoSemMarcas(texto!, emAndamento: emAndamento) : texto}',
           child: ExcludeSemantics(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                TextoMemora.apoio(nomeDe(autor)),
+                TextoMemora.apoio(
+                  nomeDe(autor),
+                  cor: _daMemora ? cores.primaria : cores.textoSuave,
+                ),
                 const SizedBox(height: MemoraEspacamento.xs),
-                if (texto != null)
+                if (texto != null && _daMemora)
+                  TextoDaFala(
+                    texto!,
+                    aosPoucos: escreverAosPoucos,
+                    emAndamento: emAndamento,
+                    aoAvancar: aoEscrever,
+                  )
+                else if (texto != null)
                   TextoMemora(texto!)
                 else
                   TextoMemora('• • •  $textoEscrevendo', cor: cores.textoSuave),

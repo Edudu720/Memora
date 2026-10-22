@@ -10,14 +10,20 @@ import '../../domain/repositorios/provedor_telemetria.dart';
 
 /// Implementação do Provedor de Telemetria com conexão real MQTT via broker.
 class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
+  /// Cria um provedor MQTT apontando para o [broker], [porta] e [topicoBase].
   ProvedorDeTelemetriaMqtt({
     this.broker = 'broker.hivemq.com',
     this.porta = 1883,
     this.topicoBase = 'memora/iot/demonstracao-01',
   });
 
+  /// Endereço do broker MQTT.
   final String broker;
+
+  /// Porta TCP do broker MQTT.
   final int porta;
+
+  /// Prefixo base dos tópicos MQTT.
   final String topicoBase;
 
   MqttServerClient? _cliente;
@@ -175,4 +181,3 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
     if (!_controladorStatus.isClosed) _controladorStatus.close();
   }
 }
-

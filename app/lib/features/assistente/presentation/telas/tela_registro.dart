@@ -79,8 +79,33 @@ class _TelaRegistroState extends State<TelaRegistro> {
           key: TelaRegistro.chaveLista,
           padding: const EdgeInsets.all(MemoraEspacamento.lg),
           children: <Widget>[
-            const TextoMemora(TextosAssistente.explicacaoDoRegistro),
-            const SizedBox(height: MemoraEspacamento.xl),
+            Container(
+              padding: const EdgeInsets.all(MemoraEspacamento.md),
+              decoration: BoxDecoration(
+                color: cores.superficie,
+                borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                border: Border.all(color: cores.borda),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: MemoraElevacao.sombra,
+                    blurRadius: MemoraElevacao.cartao,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                children: <Widget>[
+                  MemoraPersonagem(
+                    tamanho: MemoraDimensoes.alvoDecisao,
+                  ),
+                  SizedBox(width: MemoraEspacamento.md),
+                  Expanded(
+                    child: TextoMemora(TextosAssistente.explicacaoDoRegistro),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: MemoraEspacamento.lg),
 
             if (_falhou)
               MensagemErro(
@@ -120,11 +145,28 @@ class _LinhaDoRegistro extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CampoInformacao(
-      rotulo: TextosAssistente.quandoAconteceu(acao.ocorridoEm),
-      valor: TextosAssistente.oQueFoiFeito(
-        acao.nomeExibido,
-        acao.pedidoResumido,
+    final MemoraCores cores = context.memora.cores;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cores.superficie,
+        borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+        border: Border.all(color: cores.borda),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: MemoraElevacao.sombra,
+            blurRadius: MemoraElevacao.cartao,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(MemoraEspacamento.xs),
+      child: CampoInformacao(
+        rotulo: TextosAssistente.quandoAconteceu(acao.ocorridoEm),
+        valor: TextosAssistente.oQueFoiFeito(
+          acao.nomeExibido,
+          acao.pedidoResumido,
+        ),
       ),
     );
   }

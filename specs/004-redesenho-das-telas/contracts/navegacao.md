@@ -19,6 +19,10 @@ Boas-vindas ──▶ Cadastro ──▶ (assistido?) Entrega do aparelho ─▶
 ```
 
 - **Sem barra inferior.** Fora da conta não há para onde a barra levar.
+- **Duas entradas, decididas pelo identificador do último acesso**: as
+  boas-vindas completas **só para quem nunca entrou neste aparelho** (FR-009);
+  para quem já entrou, a **tela de volta**, com "Entrar" como ação principal e
+  o caminho para criar outra conta (FR-009a).
 - A apresentação (Olá → Apresentação → Exemplo) aparece **entre** a autenticação
   e o Início, só para conta que não a viu (FR-012, FR-013).
 
@@ -30,7 +34,7 @@ Três destinos fixos na barra inferior, cada um com pilha própria:
 |---|---|---|
 | **Configurações** | Lista de grupos | Aparência · Acessibilidade · Privacidade · Conta · (galeria, só em depuração) |
 | **Início** | Início | Hub → Conversa · Meus aplicativos · Serviços sociais · Ajuda · O que eu fiz por você → passo a passo |
-| **Perfil** | Perfil | — |
+| **Perfil** | Perfil | A tela de data de nascimento, opcional e só no aparelho (FR-042c) |
 
 **Regras**:
 

@@ -1,9 +1,12 @@
-/// Enums de domínio para o módulo de cuidado e integração IoT.
-
 /// Status de conectividade do aplicativo com o dispositivo de cuidado.
 enum StatusConexaoIot {
+  /// Sem conexão ativa com o dispositivo.
   desconectado,
+
+  /// Tentando estabelecer conexão com o dispositivo.
   conectando,
+
+  /// Conectado e recebendo telemetria em tempo real.
   conectado,
 }
 
@@ -30,4 +33,3 @@ enum ModoOperacaoIot {
   /// Conexão em tempo real com broker MQTT (Wokwi ou ESP32 físico).
   mqtt,
 }
-

@@ -3,13 +3,17 @@ import '../../../../design_system/design_system.dart';
 
 /// Exibe o status de movimentação da pessoa de forma amigável e acolhedora.
 class IndicadorMovimento extends StatelessWidget {
+  /// Cria o indicador visual de estado de movimento.
   const IndicadorMovimento({
     required this.emMovimento,
     required this.nivelMovimento,
     super.key,
   });
 
+  /// Indica se a pessoa está em movimento ativo.
   final bool emMovimento;
+
+  /// Valor numérico do nível de movimento.
   final double nivelMovimento;
 
   @override
