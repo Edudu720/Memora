@@ -43,6 +43,9 @@ import '../../hub/presentation/telas/tela_hub.dart';
 import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
+import '../../cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import '../../cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
+import '../../cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
@@ -610,7 +613,28 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         ilustracao: Ilustracao.portaAjuda,
         aoAbrir: () => _abrirAjuda(assistente),
       ),
+      PortaDoHub(
+        rotulo: 'Dispositivo de Cuidado',
+        descricao: 'Batimentos, movimento e alerta de queda',
+        ilustracao: Ilustracao.portaServicos,
+        aoAbrir: _abrirDispositivoCuidado,
+      ),
     ];
+  }
+
+  /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
+  void _abrirDispositivoCuidado() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaDispositivoCuidado(
+          controlador: ControladorDispositivoCuidado(
+            repositorioContato: RepositorioContatoEmergenciaLocal(),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+          nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
+        ),
+      ),
+    );
   }
 
   /// A Ajuda, com os assuntos que existem agora (T087, FR-033).

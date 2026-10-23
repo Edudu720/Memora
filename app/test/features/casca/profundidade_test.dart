@@ -10,6 +10,7 @@ import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
 import 'package:memora/features/casca/casca_interna.dart';
+import 'package:memora/features/cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
 import 'package:memora/features/perfil/presentation/tela_perfil.dart';
 import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
 import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
@@ -107,6 +108,9 @@ void main() {
   final Finder daAjuda = find.byKey(
     TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
   );
+  final Finder deCuidado = find.byKey(
+    TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
+  );
   final Finder doHub = find.byKey(TelaInicio.chaveVerTudo);
 
   /// Todas as partes do aplicativo e o caminho até cada uma.
@@ -149,6 +153,12 @@ void main() {
       parte: 'ajuda',
       toques: <Finder>[doHub, daAjuda],
       chegada: find.byType(TelaAjuda),
+      via: null,
+    ),
+    (
+      parte: 'dispositivo de cuidado',
+      toques: <Finder>[doHub, deCuidado],
+      chegada: find.byType(TelaDispositivoCuidado),
       via: null,
     ),
     (
@@ -333,6 +343,7 @@ void main() {
       TelaHub.chaveDaPorta(TextosAssistente.portaRegistro),
       TelaHub.chaveDaPorta(TextosAssistente.portaConversa),
       TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
+      TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
     };
     expect(
       daTela.difference(daTabela),
