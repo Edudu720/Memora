@@ -75,7 +75,7 @@ class CodificadorComTetoTest {
 
                 // Espera as duas primeiras chegarem ao dublê e dá tempo às demais de
                 // tentarem entrar: se o teto vazar, o pico passa de 2 aqui.
-                aguardar(() -> dubles.emAndamento.get() == 2);
+                aguardar(() -> dubles.emAndamento.get() >= 2);
                 Thread.sleep(300);
                 assertThat(dubles.emAndamento.get()).isEqualTo(2);
 
