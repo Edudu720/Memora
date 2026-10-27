@@ -537,7 +537,10 @@ void main() {
 
     setUp(() async {
       temporario = await Directory.systemTemp.createTemp('memora_conversa');
-      disco = ConversaLocal(diretorio: () async => temporario);
+      disco = ConversaLocal(
+        diretorio: () async => temporario,
+        agora: () => DateTime(2026, 8, 29, 12),
+      );
     });
 
     tearDown(() async {
@@ -633,6 +636,37 @@ void main() {
       expect(lida, hasLength(ConversaLocal.turnosGuardados));
       // Corta pelo comeco: numa conversa longa, o que importa e o fim.
       expect(lida.last.texto, endsWith('${ConversaLocal.turnosGuardados + 9}'));
+    });
+
+    test('apaga do aparelho as mensagens com mais de 30 dias (FR-054, T082)', () async {
+      final DateTime agora = DateTime(2026, 10, 27, 12);
+      final ConversaLocal discoComRelogio = ConversaLocal(
+        diretorio: () async => temporario,
+        agora: () => agora,
+      );
+
+      await discoComRelogio.guardar(<MensagemDaConversa>[
+        MensagemDaConversa(
+          autor: AutorDaMensagem.pessoa,
+          texto: 'mensagem com 35 dias',
+          momento: agora.subtract(const Duration(days: 35)),
+        ),
+        MensagemDaConversa(
+          autor: AutorDaMensagem.memora,
+          texto: 'mensagem com 31 dias',
+          momento: agora.subtract(const Duration(days: 31)),
+        ),
+        MensagemDaConversa(
+          autor: AutorDaMensagem.pessoa,
+          texto: 'mensagem recente com 5 dias',
+          momento: agora.subtract(const Duration(days: 5)),
+        ),
+      ]);
+
+      final List<MensagemDaConversa> lida = await discoComRelogio.ler();
+
+      expect(lida, hasLength(1));
+      expect(lida.single.texto, 'mensagem recente com 5 dias');
     });
   });
 }

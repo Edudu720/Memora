@@ -4,6 +4,7 @@ import br.fatec.memora.assistente.dominio.UsoDaAssistente;
 import br.fatec.memora.assistente.infra.RepositorioUsoDaAssistente;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -121,7 +122,10 @@ public class LimitePorConta {
         return teto;
     }
 
+    /** Fuso horário oficial para contagem diária (T092, FR-053). */
+    public static final ZoneId FUSO_HORARIO = ZoneId.of("America/Sao_Paulo");
+
     private LocalDate hoje() {
-        return LocalDate.now(relogio);
+        return LocalDate.now(relogio.withZone(FUSO_HORARIO));
     }
 }
