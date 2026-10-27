@@ -80,6 +80,7 @@ class Composicao {
   ///
   /// É a mesma instância que a [limpeza] apaga em **toda** saída.
   final ProgressoDeAprendizado? progresso;
+
   /// Avisa que a sessão caiu no meio do uso (T111).
   ///
   /// É o **mesmo objeto** que a assistente aciona e que o fluxo escuta:
@@ -98,6 +99,22 @@ class Composicao {
     this.progresso,
     required this.sessaoPerdida,
   });
+
+  /// Os prazos do transporte que fala com o servidor.
+  ///
+  /// O cliente gerado, sozinho, espera **3 s** pela resposta. No plano
+  /// gratuito do Render (0,1 de CPU) um cadastro ou uma entrada levam de 2,6 a
+  /// 20 s, porque o Argon2 de ~240 ms vira segundos e os hashes simultâneos
+  /// esperam na fila (medido em 2026-10-27). Com 3 s o servidor respondia e a
+  /// pessoa via "Não consegui falar com a internet". A conversa tem prazo
+  /// próprio, maior, no `RepositorioAssistenteApi`.
+  @visibleForTesting
+  static BaseOptions opcoesDoTransporte(String urlBase) => BaseOptions(
+    baseUrl: urlBase,
+    connectTimeout: const Duration(seconds: 15),
+    receiveTimeout: const Duration(seconds: 30),
+    sendTimeout: const Duration(seconds: 15),
+  );
 
   /// Resolve as dependências a partir do ambiente.
   ///
@@ -132,8 +149,7 @@ class Composicao {
       // [dioDeTeste] existe para o teste trocar o transporte e provar a
       // ligação inteira (assistente → renovação → aviso) sem rede.
       final api.MemoraApi cliente = api.MemoraApi(
-        dio: dioDeTeste,
-        basePathOverride: ambiente.urlBase,
+        dio: dioDeTeste ?? Dio(opcoesDoTransporte(ambiente.urlBase)),
       );
       final RepositorioAutenticacaoApi autenticacaoReal =
           RepositorioAutenticacaoApi(cliente: cliente, cofre: cofre);
@@ -148,7 +164,9 @@ class Composicao {
         ),
       );
     } else {
-      autenticacao = RepositorioAutenticacaoSimulado(preferencias: preferencias);
+      autenticacao = RepositorioAutenticacaoSimulado(
+        preferencias: preferencias,
+      );
       assistente = RepositorioAssistenteSimulado();
     }
 
