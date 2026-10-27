@@ -13,6 +13,12 @@ services:
     dockerContext: backend
     plan: free
     region: virginia
+    # So reconstroi quando o backend muda: commit so no app/ ou em docs/ nao
+    # derruba o servidor para subir a mesma coisa (~3,5 min a 0,1 de CPU).
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
     # O liveness nao toca no banco. O /actuator/health toca, e o Neon gratuito dorme
     # sem uso e cobra tempo de computacao a cada consulta do Render.
     healthCheckPath: /actuator/health/liveness
