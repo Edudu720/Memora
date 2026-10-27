@@ -1,0 +1,35 @@
+# Blueprint do Render para o Memora Backend
+# Documentacao: https://render.com/docs/blueprint-spec
+
+databases:
+  - name: memora-postgres
+    databaseName: memora
+    user: memora
+    plan: free
+    region: oregon # ou ohio, frankfurt
+
+services:
+  - type: web
+    name: memora-backend
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    region: oregon
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: memora-postgres
+          property: connectionString
+      - key: MEMORA_ASSISTENTE_PROVEDOR
+        value: gemini
+      - key: MEMORA_ASSISTENTE_GEMINI_MODELO
+        value: gemini-3.6-flash
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MEMORA_TOKEN_SEGREDO
+        generateValue: true
+      - key: MEMORA_CHAVE_ORIGEM
+        generateValue: true
+

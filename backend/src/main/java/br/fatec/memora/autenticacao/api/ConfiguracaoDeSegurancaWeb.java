@@ -136,6 +136,10 @@ public class ConfiguracaoDeSegurancaWeb {
                                 rotas.dispatcherTypeMatchers(DispatcherType.ASYNC)
                                         .permitAll()
                                         .requestMatchers(
+                                                HttpMethod.GET,
+                                                "/actuator/health")
+                                        .permitAll()
+                                        .requestMatchers(
                                                 HttpMethod.POST,
                                                 CAMINHO_CADASTRO,
                                                 CAMINHO_ENTRAR,
