@@ -2,7 +2,11 @@
 set -e
 
 # Se DATABASE_URL estiver presente (padrao fornecido pelo Render / Neon / Supabase),
-# normaliza para os parametros JDBC aceitos pelo Spring Boot
+# normaliza para os parametros JDBC aceitos pelo Spring Boot.
+# postgresql://u:p@host/banco?sslmode=require -> jdbc:postgresql://host/banco?sslmode=require
+# Parametros da consulta passam intactos. O "channel_binding=require" que o Neon
+# acrescenta as vezes e ignorado pelo pgjdbc 42.7 (medido: a conexao abre igual),
+# entao nao precisa ser removido.
 if [ -n "$DATABASE_URL" ]; then
     CLEAN_URL=$(echo "$DATABASE_URL" | sed -E 's/^postgres(ql)?:\/\///')
     if echo "$CLEAN_URL" | grep -q "@"; then

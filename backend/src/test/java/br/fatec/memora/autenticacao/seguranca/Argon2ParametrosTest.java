@@ -25,7 +25,7 @@ class Argon2ParametrosTest {
             Pattern.compile("^\\$argon2(id|i|d)\\$v=(\\d+)\\$m=(\\d+),t=(\\d+),p=(\\d+)\\$");
 
     private final PasswordEncoder codificador =
-            new ConfiguracaoDeSenha().codificadorDeSenha();
+            new ConfiguracaoDeSenha().codificadorDeSenha("");
 
     @Test
     @DisplayName("a memória usada não fica abaixo do mínimo da OWASP")

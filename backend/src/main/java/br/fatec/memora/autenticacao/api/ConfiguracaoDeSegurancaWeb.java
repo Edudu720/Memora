@@ -135,9 +135,14 @@ public class ConfiguracaoDeSegurancaWeb {
                                 // (DespachoAssincronoDaConversaTest).
                                 rotas.dispatcherTypeMatchers(DispatcherType.ASYNC)
                                         .permitAll()
+                                        // So estes dois, e so GET: nada de
+                                        // /actuator/**. O liveness e o que o
+                                        // Render consulta, e nao toca no banco
+                                        // (ver ConfiguracaoDeSegurancaWebTest).
                                         .requestMatchers(
                                                 HttpMethod.GET,
-                                                "/actuator/health")
+                                                "/actuator/health",
+                                                "/actuator/health/liveness")
                                         .permitAll()
                                         .requestMatchers(
                                                 HttpMethod.POST,

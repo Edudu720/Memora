@@ -1,12 +1,9 @@
 # Blueprint do Render para o Memora Backend
 # Documentacao: https://render.com/docs/blueprint-spec
 
-databases:
-  - name: memora-postgres
-    databaseName: memora
-    user: memora
-    plan: free
-    region: oregon # ou ohio, frankfurt
+# Sem secao "databases": o banco e o Neon (plano gratuito, aws-us-east-1), criado
+# fora do Render. A regiao virginia fica perto dele e a mais perto do Brasil
+# entre as do Render.
 
 services:
   - type: web
@@ -15,13 +12,26 @@ services:
     dockerfilePath: backend/Dockerfile
     dockerContext: backend
     plan: free
-    region: oregon
-    healthCheckPath: /actuator/health
+    region: virginia
+    # So reconstroi quando o backend muda: commit so no app/ ou em docs/ nao
+    # derruba o servidor para subir a mesma coisa (~3,5 min a 0,1 de CPU).
+    buildFilter:
+      paths:
+        - backend/**
+        - render.yaml
+    # O liveness nao toca no banco. O /actuator/health toca, e o Neon gratuito dorme
+    # sem uso e cobra tempo de computacao a cada consulta do Render.
+    healthCheckPath: /actuator/health/liveness
     envVars:
+      # URL DIRETA do Neon (a do painel "Connection string" sem o "Pooled
+      # connection"), nunca a do host "-pooler": o PgBouncer em modo transacao
+      # atrapalha o Flyway. Formato:
+      #   postgresql://usuario:senha@host/banco?sslmode=require
+      # O docker-entrypoint.sh a converte em jdbc:postgresql://host/banco?...
+      # com usuario e senha separados. Um "&channel_binding=require" no fim e
+      # aceito e ignorado pelo driver.
       - key: DATABASE_URL
-        fromDatabase:
-          name: memora-postgres
-          property: connectionString
+        sync: false
       - key: MEMORA_ASSISTENTE_PROVEDOR
         value: gemini
       - key: MEMORA_ASSISTENTE_GEMINI_MODELO
