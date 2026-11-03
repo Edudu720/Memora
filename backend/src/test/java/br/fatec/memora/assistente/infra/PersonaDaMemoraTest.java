@@ -43,4 +43,22 @@ class PersonaDaMemoraTest {
                 .doesNotContain("por conta própria")
                 .contains("mesmo que a pessoa peça");
     }
+    @Test
+    @DisplayName("afirma ser um programa de computador sem ficar repetindo (FR-013, T084)")
+    void afirmaSerProgramaSemRepetir() {
+        assertThat(TEXTO)
+                .contains("programa de computador")
+                .contains("sem ficar repetindo");
+    }
+
+    @Test
+    @DisplayName("recusa ação financeira e irreversível explicando por quê (FR-018, FR-031, FR-037, T087)")
+    void recusaAcaoFinanceiraEIrreversivel() {
+        assertThat(TEXTO)
+                .contains("ação financeira")
+                .contains("pix")
+                .contains("transferir")
+                .contains("irreversíveis")
+                .contains("segurança do dinheiro");
+    }
 }

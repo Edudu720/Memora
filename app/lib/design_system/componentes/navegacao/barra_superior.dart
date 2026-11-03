@@ -18,8 +18,16 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
   /// Acionada ao voltar. Quando nula, o botão não aparece.
   final VoidCallback? aoVoltar;
 
+  /// Ação opcional à direita da barra.
+  final Widget? acao;
+
   /// Cria a barra superior.
-  const BarraSuperior({required this.titulo, this.aoVoltar, super.key});
+  const BarraSuperior({
+    required this.titulo,
+    this.aoVoltar,
+    this.acao,
+    super.key,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(MemoraDimensoes.alvoDecisao);
@@ -77,6 +85,7 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
                   child: TextoMemora.tituloSecao(titulo, maxLinhas: 2),
                 ),
               ),
+              ?acao,
             ],
           ),
         ),

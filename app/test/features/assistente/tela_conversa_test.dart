@@ -495,6 +495,15 @@ void main() {
       expect(segunda.mensagens, hasLength(quantas));
     });
 
+    testWidgets('o convite inicial diz que e um programa (FR-013, T084)', (WidgetTester t) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+
+      expect(find.text(TextosAssistente.convite), findsOneWidget);
+      expect(TextosAssistente.convite.toLowerCase(), contains('programa'));
+    });
+
     testWidgets('apagar a conversa apaga mesmo', (WidgetTester t) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
@@ -506,6 +515,42 @@ void main() {
 
       expect(c.mensagens, isEmpty);
       expect(await local.ler(), isEmpty);
+    });
+
+    testWidgets('controle visivel para apagar e recomecar com confirmacao (FR-050, T085)', (WidgetTester t) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+
+      // Antes de haver mensagens, o controle de recomecar nao aparece
+      expect(find.byKey(TelaConversa.chaveRecomecar), findsNothing);
+
+      await perguntar(t, 'como mando mensagem');
+      expect(find.byKey(TelaConversa.chaveRecomecar), findsOneWidget);
+
+      // Toca no botao de recomecar
+      await t.tap(find.byKey(TelaConversa.chaveRecomecar));
+      await t.pumpAndSettle();
+
+      // Dialogo de confirmacao aparece
+      expect(find.text(TextosAssistente.tituloRecomecar), findsOneWidget);
+      expect(find.text(TextosAssistente.botaoCancelarRecomeco), findsOneWidget);
+      expect(find.text(TextosAssistente.botaoConfirmarRecomeco), findsOneWidget);
+
+      // Cancelar nao apaga nada
+      await t.tap(find.text(TextosAssistente.botaoCancelarRecomeco));
+      await t.pumpAndSettle();
+      expect(c.mensagens, isNotEmpty);
+
+      // Toca novamente e confirma
+      await t.tap(find.byKey(TelaConversa.chaveRecomecar));
+      await t.pumpAndSettle();
+      await t.tap(find.text(TextosAssistente.botaoConfirmarRecomeco));
+      await t.pumpAndSettle();
+
+      expect(c.mensagens, isEmpty);
+      expect(await local.ler(), isEmpty);
+      expect(find.text(TextosAssistente.convite), findsOneWidget);
     });
   });
 

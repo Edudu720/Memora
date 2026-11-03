@@ -138,14 +138,25 @@ public class EventoDaAssistente {
         this.ocorridoEm = Objects.requireNonNull(ocorridoEm, "ocorridoEm");
     }
 
+    private static final java.util.regex.Pattern DIGITOS_CONSECUTIVOS =
+            java.util.regex.Pattern.compile("\\b\\d{4,}\\b");
+
+    private static final java.util.regex.Pattern TERMOS_DE_SEGREDO =
+            java.util.regex.Pattern.compile(
+                    "(?i)\\b(senha|c[oó]digo|codigo|token|pin)\\s*(?:[:=]|é|e)?\\s*(\\S+)",
+                    java.util.regex.Pattern.UNICODE_CHARACTER_CLASS);
+
     /**
-     * Corta o pedido no limite da coluna.
+     * Sanitiza e corta o pedido no limite da coluna (T079, FR-036).
+     *
+     * <p>Filtra senha, código, token e sequência de 4 ou mais dígitos do
+     * {@code pedido_resumido} antes de gravar na trilha de auditoria.
      *
      * <p>Truncar em vez de recusar é deliberado: uma exceção aqui abortaria o
      * registro de uma ação que <b>já aconteceu</b>, e trilha com buraco é pior
      * que trilha com frase cortada.
      */
-    private static String truncar(String pedido) {
+    static String truncar(String pedido) {
         if (pedido == null) {
             return null;
         }
@@ -153,9 +164,14 @@ public class EventoDaAssistente {
         if (limpo.isEmpty()) {
             return null;
         }
-        return limpo.length() <= LIMITE_DO_RESUMO
-                ? limpo
-                : limpo.substring(0, LIMITE_DO_RESUMO);
+        // Mascara termos de segredo (senha, código, pin, token)
+        String sanitizado = TERMOS_DE_SEGREDO.matcher(limpo).replaceAll(m -> m.group(1) + " ***");
+        // Mascara sequências longas de dígitos (4 ou mais)
+        sanitizado = DIGITOS_CONSECUTIVOS.matcher(sanitizado).replaceAll("***");
+
+        return sanitizado.length() <= LIMITE_DO_RESUMO
+                ? sanitizado
+                : sanitizado.substring(0, LIMITE_DO_RESUMO);
     }
 
     public UUID getId() {

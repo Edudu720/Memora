@@ -58,10 +58,30 @@ class TextosAssistente {
   /// Título da tela de conversa.
   static const String tituloConversa = 'Conversar com a Memora';
 
-  /// Convite da primeira mensagem.
+  /// Convite da primeira mensagem (FR-013, T084).
+  ///
+  /// Deixa claro que a Memora é um programa de computador, sem repetir o aviso.
   static const String convite =
+      'Eu sou a Memora, um programa de computador para te ajudar. '
       'Pode me perguntar do jeito que você fala. Não precisa escrever bonito, '
       'e não tem pergunta boba 😊';
+
+  /// Rótulo da ação de recomeçar a conversa (T085, FR-050).
+  static const String rotuloRecomecar = 'Recomeçar conversa';
+
+  /// Título do diálogo que confirma o recomeço (T085, FR-050).
+  static const String tituloRecomecar = 'Apagar e recomeçar?';
+
+  /// Explicação do que acontece ao recomeçar a conversa.
+  static const String explicacaoRecomecar =
+      'As mensagens desta conversa serão apagadas deste aparelho e '
+      'começaremos uma nova conversa do início.';
+
+  /// Botão de confirmação de recomeço.
+  static const String botaoConfirmarRecomeco = 'Sim, recomeçar';
+
+  /// Botão que cancela o recomeço.
+  static const String botaoCancelarRecomeco = 'Continuar conversa';
 
   /// Rótulo do campo de mensagem.
   static const String rotuloMensagem = 'Escreva aqui sua pergunta';
