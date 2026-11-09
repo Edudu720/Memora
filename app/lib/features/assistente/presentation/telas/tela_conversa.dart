@@ -264,7 +264,8 @@ class _TelaConversaState extends State<TelaConversa>
                 ? Semantics(
                     button: true,
                     label: TextosAssistente.rotuloRecomecar,
-                    child: ExcludeSemantics(
+                    child: Tooltip(
+                      message: TextosAssistente.rotuloRecomecar,
                       child: InkWell(
                         key: TelaConversa.chaveRecomecar,
                         onTap: () => _confirmarRecomeco(context, c),
@@ -273,17 +274,11 @@ class _TelaConversaState extends State<TelaConversa>
                             minWidth: MemoraDimensoes.alvoMinimo,
                             minHeight: MemoraDimensoes.alvoMinimo,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: MemoraEspacamento.md,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Icon(Icons.restart_alt, color: cores.primaria),
-                                const SizedBox(width: MemoraEspacamento.xs),
-                                TextoMemora('Recomeçar', cor: cores.primaria),
-                              ],
+                          child: Center(
+                            child: Icon(
+                              Icons.restart_alt,
+                              color: cores.primaria,
+                              size: MemoraDimensoes.iconePadrao,
                             ),
                           ),
                         ),

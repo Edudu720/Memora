@@ -69,6 +69,9 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Chamado para ir à conversa ao relatar tela diferente.
   final VoidCallback? aoConversarSobreDiferenca;
 
+  /// Chamado ao tocar em "Ficou com alguma dúvida? Pode perguntar" no último passo.
+  final void Function(String duvida)? aoTirarDuvida;
+
   /// Estado inicial fixado para testes de estado (FR-006).
   final String? estadoDeTeste;
 
@@ -87,6 +90,7 @@ class TelaPassoAPasso extends StatefulWidget {
     this.aoSair,
     this.aoPedirParaAbrir,
     this.aoConversarSobreDiferenca,
+    this.aoTirarDuvida,
     this.estadoDeTeste,
     super.key,
   });
@@ -380,6 +384,21 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                           widget.servico?.nomeExibido ?? widget.guia.titulo,
                         ),
                       )
+                  : null,
+              aoTirarDuvida: eUltimo &&
+                      (widget.aoTirarDuvida != null ||
+                          widget.aoConversarSobreDiferenca != null)
+                  ? () {
+                      if (widget.aoTirarDuvida != null) {
+                        widget.aoTirarDuvida!(
+                          TextosGuias.rascunhoDuvida(
+                            widget.servico?.nomeExibido ?? widget.guia.titulo,
+                          ),
+                        );
+                      } else {
+                        widget.aoConversarSobreDiferenca!();
+                      }
+                    }
                   : null,
             ),
           ],

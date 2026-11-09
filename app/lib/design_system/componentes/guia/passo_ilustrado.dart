@@ -45,6 +45,9 @@ class PassoIlustrado extends StatelessWidget {
   /// Chave do botão para pedir para a Memora abrir o aplicativo (FR-027).
   static const Key chavePedirParaAbrir = Key('passo.pedir_para_abrir');
 
+  /// Chave do botão para tirar dúvidas com o chatbot no final do guia.
+  static const Key chaveTirarDuvida = Key('passo.tirar_duvida');
+
   /// Os dados da etapa atual.
   final Passo passo;
 
@@ -69,6 +72,9 @@ class PassoIlustrado extends StatelessWidget {
   /// Chamada ao tocar em "Peça à Memora para abrir" no último passo.
   final VoidCallback? aoPedirParaAbrir;
 
+  /// Chamada ao tocar em "Ficou com alguma dúvida? Pode perguntar" no último passo.
+  final VoidCallback? aoTirarDuvida;
+
   /// Se deve envolver o conteúdo em um [SingleChildScrollView].
   final bool rolar;
 
@@ -82,6 +88,7 @@ class PassoIlustrado extends StatelessWidget {
     this.aoSair,
     this.aoTelaDiferente,
     this.aoPedirParaAbrir,
+    this.aoTirarDuvida,
     this.rolar = true,
     super.key,
   });
@@ -209,13 +216,22 @@ class PassoIlustrado extends StatelessWidget {
           ),
           const SizedBox(height: MemoraEspacamento.xl),
 
-          // 5. Ações (Avançar/Concluir, Minha tela está diferente, Voltar, Sair)
+          // 5. Ações (Avançar/Concluir, Dúvidas, Minha tela está diferente, Voltar, Sair)
           if (eUltimoPasso && aoPedirParaAbrir != null) ...<Widget>[
             BotaoSecundario(
               key: chavePedirParaAbrir,
               rotulo: TextosGuias.pecaParaAbrir,
               icone: Icons.chat_bubble_outline,
               aoTocar: aoPedirParaAbrir,
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+          ],
+          if (eUltimoPasso && aoTirarDuvida != null) ...<Widget>[
+            BotaoSecundario(
+              key: chaveTirarDuvida,
+              rotulo: TextosGuias.ficouComDuvida,
+              icone: Icons.chat_bubble_outline,
+              aoTocar: aoTirarDuvida,
             ),
             const SizedBox(height: MemoraEspacamento.md),
           ],
