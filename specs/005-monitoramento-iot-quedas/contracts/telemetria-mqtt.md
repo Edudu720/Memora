@@ -4,13 +4,15 @@ Define os tópicos, formatos exatos de mensagens JSON geradas pelo firmware do *
 
 ---
 
-## 1. Parâmetros de Conexão e Tópicos MQTT
+## 1. Parâmetros de Conexão, TLS e Autenticação MQTT (`FR-013`, `FR-022`)
 
-- **Broker padrão**: `broker.hivemq.com`
-- **Porta TCP**: `1883` (protocolo **MQTT 3.1.1**)
+- **Broker padrão (`MEMORA_MQTT_BROKER`)**: `broker.hivemq.com`
+- **Porta TCP/TLS (`MEMORA_MQTT_PORTA`)**: `1883` (TCP padrão de bancada) ou `8883` (TLS cifrado em produção)
+- **TLS (`MEMORA_MQTT_TLS`)**: Ativado automaticamente quando `usarTls == true` ou `porta == 8883` (`SecurityContext.defaultContext`)
+- **Credenciais opcionais (`MEMORA_MQTT_USUARIO` / `MEMORA_MQTT_SENHA`)**: Suporte a autenticação `username`/`password` no handshake MQTT (`connect(usuario, senha)` no app e `MQTT_USER`/`MQTT_PASS` no ESP32)
 - **ClientID do ESP32**: `Memora-ESP32-<MAC_HEX>` (derivado de `ESP.getEfuseMac()`)
 - **ClientID do App**: `MemoraApp_<timestamp_ms>`
-- **Prefixo base configurável**: `memora/iot/{dispositivoId}` (padrão: `memora/iot/demonstracao-01`)
+- **Prefixo base configurável (`MEMORA_MQTT_TOPICO_BASE`)**: `memora/iot/{dispositivoId}` (padrão: `memora/iot/demonstracao-01`)
 
 ---
 

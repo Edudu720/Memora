@@ -11,7 +11,7 @@ import sys
 import subprocess
 
 def test_paleta_wcag():
-    print("[1/7] Testando Contraste WCAG 2.2 da Paleta de Cores...")
+    print("[1/8] Testando Contraste WCAG 2.2 da Paleta de Cores...")
     cmd = [sys.executable, os.path.join("specs", "002-design-system", "ferramentas", "validar_paleta.py")]
     res = subprocess.run(cmd, capture_output=True, text=True)
     assert res.returncode == 0, f"Falha na validação de paleta:\n{res.stdout}\n{res.stderr}"
@@ -19,7 +19,7 @@ def test_paleta_wcag():
     print("  -> Aprovado: Todos os 66 pares atendem WCAG 2.2 AA e AAA.")
 
 def test_tokens_design_system():
-    print("[2/7] Testando Ausência de Literais Visuais (validar_tokens.py)...")
+    print("[2/8] Testando Ausência de Literais Visuais (validar_tokens.py)...")
     cmd = [sys.executable, os.path.join("specs", "002-design-system", "ferramentas", "validar_tokens.py")]
     res = subprocess.run(cmd, capture_output=True, text=True)
     assert res.returncode == 0, f"Falha na validação de tokens:\n{res.stdout}\n{res.stderr}"
@@ -27,7 +27,7 @@ def test_tokens_design_system():
     print("  -> Aprovado: Zero valores visuais literais fora dos tokens.")
 
 def test_firmware_esp32_fisico():
-    print("[3/7] Validando Firmware ESP32 Físico (firmware_wokwi.ino)...")
+    print("[3/8] Validando Firmware ESP32 Físico (firmware_wokwi.ino)...")
     caminho_ino = os.path.join("specs", "005-monitoramento-iot-quedas", "firmware_wokwi.ino")
     assert os.path.exists(caminho_ino), f"Arquivo não encontrado: {caminho_ino}"
     with open(caminho_ino, "r", encoding="utf-8") as f:
@@ -36,6 +36,8 @@ def test_firmware_esp32_fisico():
     assert "#include <PulseSensorPlayground.h>" in codigo
     assert 'MQTT_BROKER = "broker.hivemq.com"' in codigo
     assert "MQTT_PORT = 1883" in codigo
+    assert "MQTT_USER" in codigo
+    assert "MQTT_PASS" in codigo
     assert "memora/iot/demonstracao-01/telemetria" in codigo
     assert "memora/iot/demonstracao-01/alerta" in codigo
     assert "memora/iot/demonstracao-01/comando" in codigo
@@ -50,7 +52,7 @@ def test_firmware_esp32_fisico():
     print("  -> Aprovado: Firmware do ESP32 físico validado (MPU autocalibrado, PulseSensor no GPIO 34, 6 estados e MQTT).")
 
 def test_contratos_mqtt():
-    print("[4/7] Validando Conformidade dos Payloads MQTT com os Contratos do ESP32 Físico...")
+    print("[4/8] Validando Conformidade dos Payloads MQTT com os Contratos do ESP32 Físico...")
     estados_validos = [
         "INERTE",
         "EM_MOVIMENTO",
@@ -100,7 +102,7 @@ def test_contratos_mqtt():
     print("  -> Aprovado: Esquemas de telemetria, alerta pós-impacto e comando conformes com o ESP32 físico.")
 
 def test_validacao_contato_emergencia():
-    print("[5/7] Testando Regras de Validação de Contato de Emergência...")
+    print("[5/8] Testando Regras de Validação de Contato de Emergência...")
     def eh_contato_valido(nome, telefone):
         limpo = re.sub(r'\D', '', telefone)
         if limpo.startswith('55') and len(limpo) in (12, 13):
@@ -122,7 +124,7 @@ def test_validacao_contato_emergencia():
     print("  -> Aprovado: Regras de DDD e validação de números de 10/11 dígitos validadas.")
 
 def test_mensagem_antigolpe():
-    print("[6/7] Validando Conformidade Antigolpe na Mensagem de Emergência...")
+    print("[6/8] Validando Acionamento via WhatsApp e Conformidade Antigolpe na Mensagem de Emergência...")
     caminho_caso_uso = os.path.join(
         "app", "lib", "features", "cuidado", "domain", "casos_de_uso", "disparar_socorro_emergencia.dart"
     )
@@ -133,10 +135,13 @@ def test_mensagem_antigolpe():
     assert "NUNCA solicita dinheiro, transferências ou senhas" in codigo
     assert "45 segundos" in codigo
     assert "ALERTA MEMORA" in codigo
-    print("  -> Aprovado: Mensagem cumpre o Princípio II (Antigolpe) da Constituição.")
+    assert "whatsapp://send?phone=" in codigo
+    assert "com.whatsapp" in codigo
+    assert "https://wa.me/" in codigo
+    print("  -> Aprovado: Mensagem pré-pronta via WhatsApp cumpre o FR-020 e o Princípio II (Antigolpe).")
 
 def test_integridade_arquivos_feature():
-    print("[7/7] Verificando Integridade Estrutural de Arquivos da Feature 005...")
+    print("[7/8] Verificando Integridade Estrutural de Arquivos da Feature 005...")
     arquivos_esperados = [
         os.path.join("app", "lib", "features", "cuidado", "domain", "entidades", "enums_cuidado.dart"),
         os.path.join("app", "lib", "features", "cuidado", "domain", "entidades", "telemetria_iot.dart"),
@@ -165,6 +170,37 @@ def test_integridade_arquivos_feature():
 
     print("  -> Aprovado: Todos os 20 arquivos principais da feature 005 estão íntegros e presentes.")
 
+def test_seguranca_issue_43():
+    print("[8/8] Validando Segurança, Privacidade de Sessão e TLS MQTT (Issue #43)...")
+    caminho_manifest = os.path.join("app", "android", "app", "src", "main", "AndroidManifest.xml")
+    with open(caminho_manifest, "r", encoding="utf-8") as f:
+        manifest = f.read()
+    assert 'usesCleartextTraffic="true"' not in manifest, "usesCleartextTraffic='true' ainda está presente no AndroidManifest.xml"
+    assert 'android:scheme="whatsapp"' in manifest, "Scheme whatsapp ausente em <queries> do AndroidManifest.xml"
+
+    caminho_repo = os.path.join(
+        "app", "lib", "features", "cuidado", "data", "repositorios", "repositorio_contato_emergencia_local.dart"
+    )
+    with open(caminho_repo, "r", encoding="utf-8") as f:
+        codigo_repo = f.read()
+    assert "DadoLocalDaPessoa" in codigo_repo
+    assert "Future<void> apagar()" in codigo_repo
+
+    caminho_comp = os.path.join("app", "lib", "services", "ambiente", "composicao.dart")
+    with open(caminho_comp, "r", encoding="utf-8") as f:
+        codigo_comp = f.read()
+    assert "RepositorioContatoEmergenciaLocal(preferencias)" in codigo_comp
+
+    caminho_mqtt = os.path.join(
+        "app", "lib", "features", "cuidado", "data", "provedores", "provedor_telemetria_mqtt.dart"
+    )
+    with open(caminho_mqtt, "r", encoding="utf-8") as f:
+        codigo_mqtt = f.read()
+    assert "usarTls" in codigo_mqtt
+    assert "SecurityContext.defaultContext" in codigo_mqtt
+    assert "authenticateAs" in codigo_mqtt
+    print("  -> Aprovado: Manifesto sem cleartext HTTP, DadoLocalDaPessoa registrado na sessão e suporte a TLS/Auth no MQTT.")
+
 def main():
     print("=" * 65)
     print("SUÍTE DE TESTES AUTOMATIZADOS - MÓDULO IOT MEMORA (FEATURE 005)")
@@ -177,9 +213,10 @@ def main():
     test_validacao_contato_emergencia()
     test_mensagem_antigolpe()
     test_integridade_arquivos_feature()
+    test_seguranca_issue_43()
 
     print("=" * 65)
-    print("TODOS OS TESTES AUTOMATIZADOS PASSARAM COM SUCESSO! (7/7)")
+    print("TODOS OS TESTES AUTOMATIZADOS PASSARAM COM SUCESSO! (8/8)")
     print("=" * 65)
 
 if __name__ == "__main__":

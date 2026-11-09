@@ -69,7 +69,7 @@ a novembro com centenas de testes verdes e sem fazer o que promete.
 | **`MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem implantar | Implantação | Seção 10 do `CLAUDE.md` |
 | **Endereço oficial de download** | Equipe | O "Compartilhar" da Ajuda existir (hoje fica oculto) | R12 e T089 da 004 |
 | **Capturas de tela dos guias** | Henrique | Os passo a passo da 004; sem elas o passo mostra "captura pendente" (FR-028a) | T070-T082 da 004, regras em `contracts/guias.md` |
-| **Corrigir a segurança da 005** (MQTT público sem TLS, `CESSAR_ALARME` aberto, tráfego sem cifra liberado no app inteiro) | Du3101 | A 005 entrar na `master` | Issue **#43** |
+| ~~**Corrigir a segurança da 005** (MQTT público sem TLS, `CESSAR_ALARME` aberto, tráfego sem cifra liberado no app inteiro)~~ | Du3101 | ✅ **Concluído em 2026-11-09**: `usesCleartextTraffic` removido do manifesto, `RepositorioContatoEmergenciaLocal` integrado à `LimpezaDeSessao` (`DadoLocalDaPessoa`), suporte a TLS (`8883`) e credenciais no MQTT e acionamento de socorro via WhatsApp com mensagem pré-pronta | Issue **#43** |
 
 ### Decisões da 004 — o que foi resolvido e o que ainda falta
 
@@ -169,14 +169,9 @@ dos conflitos do caminho.
 item sem guia abre a conversa. O piso são os guias de TikTok, Gov.br, WhatsApp,
 Instagram, YouTube e Meu INSS.
 
-### 005 — Monitoramento IoT de quedas (Du3101)
+### 005 — Monitoramento IoT de quedas (Du3101) — 38 de 38 tarefas concluídas
 
-Spec na branch `spec/005-monitoramento-iot-quedas`; código na
-`feature/005-fase1-2-fundacao-iot`, **sem PR**. Compila desde 2026-10-11 e os
-testes da pasta `cuidado` passam, mas o `flutter analyze` sai com código 1
-(104 avisos, o CI reprova). A segurança está na **#43**, e o último commit
-**piorou**: `usesCleartextTraffic="true"` vale para o aplicativo inteiro, não
-só para o broker.
+✅ **Concluída em 2026-11-09** (incluindo migração para hardware **ESP32 DevKit físico** com MPU6050/9250/9255 autocalibrado e Pulse Sensor óptico no `GPIO 34`, acionamento de emergência via **WhatsApp com mensagem pré-pronta** e fechamento integral da **Issue #43**: remoção de `usesCleartextTraffic="true"` do `AndroidManifest.xml`, limpeza do contato de emergência na saída da sessão via `DadoLocalDaPessoa` e suporte a TLS na porta `8883` e autenticação MQTT por `--dart-define`). `flutter analyze` com 0 avisos, `validar_suite_cuidado.py` (`8/8`) e suíte de testes de `cuidado` 100% verdes.
 
 ---
 

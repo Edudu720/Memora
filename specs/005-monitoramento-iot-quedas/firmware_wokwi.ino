@@ -24,8 +24,11 @@ const char* WIFI_PASS = "K14n S4b3";
 
 // ----------------------- MQTT -------------------------------
 // Broker publico apenas para testes/demonstracao.
+// Para brokers autenticados em producao, preencha MQTT_USER e MQTT_PASS.
 const char* MQTT_BROKER = "broker.hivemq.com";
 const uint16_t MQTT_PORT = 1883;
+const char* MQTT_USER = "";
+const char* MQTT_PASS = "";
 
 // Mantidos iguais aos topicos do sketch anterior para preservar
 // a integracao existente com o Memora.
@@ -475,7 +478,11 @@ void reconectarMQTTSeNecessario() {
   String clientId = "Memora-ESP32-" + String((uint32_t)(ESP.getEfuseMac() & 0xFFFFFFFF), HEX);
   Serial.print("Conectando ao MQTT... ");
 
-  if (mqttClient.connect(clientId.c_str())) {
+  bool conectado = (strlen(MQTT_USER) > 0)
+                       ? mqttClient.connect(clientId.c_str(), MQTT_USER, MQTT_PASS)
+                       : mqttClient.connect(clientId.c_str());
+
+  if (conectado) {
     Serial.println("conectado!");
     mqttClient.subscribe(TOPICO_COMANDO);
     if (alertaPendente) publicarAlertaQueda();

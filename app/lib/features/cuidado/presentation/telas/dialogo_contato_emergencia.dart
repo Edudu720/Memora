@@ -107,7 +107,7 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
             ),
             const SizedBox(height: MemoraEspacamento.xs),
             Text(
-              'Pessoa de confiança que avisaremos se você sofrer uma queda e não responder.',
+              'Pessoa de confiança que receberá uma mensagem pré-pronta no WhatsApp se você sofrer uma queda e não responder.',
               style: MemoraTipografia.apoio.copyWith(
                 color: cores.textoSuave,
               ),
