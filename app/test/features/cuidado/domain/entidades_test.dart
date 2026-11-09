@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/features/cuidado/domain/casos_de_uso/disparar_socorro_emergencia.dart';
 import 'package:memora/features/cuidado/domain/entidades/contato_emergencia.dart';
 import 'package:memora/features/cuidado/domain/entidades/dispositivo_cuidado.dart';
 import 'package:memora/features/cuidado/domain/entidades/enums_cuidado.dart';
@@ -124,6 +125,7 @@ void main() {
       );
 
       expect(contato.telefoneNumeros, '19987654321');
+      expect(contato.telefoneWhatsapp, '5519987654321');
       expect(contato.ehValido, isTrue);
     });
 
@@ -143,6 +145,37 @@ void main() {
         parentesco: 'Filho',
       );
       expect(telefoneInvalido.ehValido, isFalse);
+    });
+  });
+
+  group('DispararSocorroEmergencia', () {
+    test('formata URI do WhatsApp com DDI 55 e mensagem pré-pronta com cláusula antigolpe', () {
+      const ContatoEmergencia contato = ContatoEmergencia(
+        id: 'c1',
+        nome: 'Mariana',
+        telefone: '(19) 98765-4321',
+        parentesco: 'Filha',
+      );
+      final DateTime horario = DateTime(2026, 11, 9, 14, 35);
+
+      final String mensagem = DispararSocorroEmergencia.formatarMensagemSocorro(
+        nomeIdoso: 'Dona Helena',
+        horario: horario,
+      );
+      expect(mensagem, contains('ALERTA MEMORA: O sensor de cuidado de Dona Helena'));
+      expect(mensagem, contains('09/11 às 14:35'));
+      expect(
+        mensagem,
+        contains('(AVISO DE SEGURANÇA: O Memora NUNCA solicita dinheiro, transferências ou senhas).'),
+      );
+
+      final String uri = DispararSocorroEmergencia.formatarUriWhatsapp(
+        contato: contato,
+        nomeIdoso: 'Dona Helena',
+        horario: horario,
+      );
+      expect(uri, startsWith('whatsapp://send?phone=5519987654321&text='));
+      expect(Uri.decodeComponent(uri.split('&text=').last), equals(mensagem));
     });
   });
 

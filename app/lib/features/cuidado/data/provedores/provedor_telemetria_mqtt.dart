@@ -10,21 +10,53 @@ import '../../domain/repositorios/provedor_telemetria.dart';
 
 /// Implementação do Provedor de Telemetria com conexão real MQTT via broker.
 class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
-  /// Cria um provedor MQTT apontando para o [broker], [porta] e [topicoBase].
+  /// Cria um provedor MQTT apontando para o [broker], [porta] e [topicoBase],
+  /// com suporte opcional a TLS ([usarTls]) e autenticação ([usuario], [senha]).
   ProvedorDeTelemetriaMqtt({
-    this.broker = 'broker.hivemq.com',
-    this.porta = 1883,
-    this.topicoBase = 'memora/iot/demonstracao-01',
-  });
+    this.broker = const String.fromEnvironment(
+      'MEMORA_MQTT_BROKER',
+      defaultValue: 'broker.hivemq.com',
+    ),
+    this.porta = const int.fromEnvironment(
+      'MEMORA_MQTT_PORTA',
+      defaultValue: 1883,
+    ),
+    this.topicoBase = const String.fromEnvironment(
+      'MEMORA_MQTT_TOPICO_BASE',
+      defaultValue: 'memora/iot/demonstracao-01',
+    ),
+    this.usarTls = const bool.fromEnvironment('MEMORA_MQTT_TLS'),
+    String? usuario,
+    String? senha,
+  })  : usuario = usuario ??
+            (const String.fromEnvironment('MEMORA_MQTT_USUARIO').isEmpty
+                ? null
+                : const String.fromEnvironment('MEMORA_MQTT_USUARIO')),
+        senha = senha ??
+            (const String.fromEnvironment('MEMORA_MQTT_SENHA').isEmpty
+                ? null
+                : const String.fromEnvironment('MEMORA_MQTT_SENHA'));
 
   /// Endereço do broker MQTT.
   final String broker;
 
-  /// Porta TCP do broker MQTT.
+  /// Porta TCP/TLS do broker MQTT.
   final int porta;
 
   /// Prefixo base dos tópicos MQTT.
   final String topicoBase;
+
+  /// Indica se a conexão deve utilizar TLS/SSL explicitamente.
+  final bool usarTls;
+
+  /// Usuário opcional para autenticação no broker MQTT.
+  final String? usuario;
+
+  /// Senha opcional para autenticação no broker MQTT.
+  final String? senha;
+
+  /// Indica se o transporte seguro TLS está ativo (por flag ou porta 8883).
+  bool get tlsAtivo => usarTls || porta == 8883;
 
   MqttServerClient? _cliente;
 
@@ -62,16 +94,18 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
 
     final String brokerAlvo = broker.trim().isEmpty ? 'broker.hivemq.com' : broker.trim();
     String hostFinal = brokerAlvo;
-    try {
-      final List<InternetAddress> addresses = await InternetAddress.lookup(
-        brokerAlvo,
-        type: InternetAddressType.IPv4,
-      );
-      if (addresses.isNotEmpty) {
-        hostFinal = addresses.first.address;
+    if (!tlsAtivo) {
+      try {
+        final List<InternetAddress> addresses = await InternetAddress.lookup(
+          brokerAlvo,
+          type: InternetAddressType.IPv4,
+        );
+        if (addresses.isNotEmpty) {
+          hostFinal = addresses.first.address;
+        }
+      } catch (_) {
+        // Mantém o broker original caso a resolução falhe
       }
-    } catch (_) {
-      // Mantém o broker original caso a resolução falhe
     }
 
     final String clientId = 'MemoraApp_${DateTime.now().millisecondsSinceEpoch}';
@@ -83,14 +117,29 @@ class ProvedorDeTelemetriaMqtt implements ProvedorDeTelemetria {
       ..onConnected = _aoConectar
       ..onDisconnected = _aoDesconectar;
 
-    cliente.connectionMessage = MqttConnectMessage()
+    if (tlsAtivo) {
+      cliente.secure = true;
+      cliente.securityContext = SecurityContext.defaultContext;
+    }
+
+    MqttConnectMessage connectMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
         .startClean();
+
+    final String? usuarioLimpo =
+        (usuario != null && usuario!.trim().isNotEmpty) ? usuario!.trim() : null;
+    if (usuarioLimpo != null) {
+      connectMessage = connectMessage.authenticateAs(usuarioLimpo, senha ?? '');
+    }
+
+    cliente.connectionMessage = connectMessage;
 
     _cliente = cliente;
 
     try {
-      final MqttClientConnectionStatus? status = await cliente.connect();
+      final MqttClientConnectionStatus? status = usuarioLimpo != null
+          ? await cliente.connect(usuarioLimpo, senha ?? '')
+          : await cliente.connect();
       if (status?.state == MqttConnectionState.connected) {
         _aoConectar();
       } else {

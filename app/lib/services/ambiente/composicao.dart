@@ -18,6 +18,7 @@ import '../../features/assistente/data/catalogo_guardado.dart';
 import '../../features/aprendizado/data/progresso_de_aprendizado.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../../features/apresentacao/data/apresentacao_vista.dart';
+import '../../features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
 import '../../features/perfil/data/data_de_nascimento_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 import '../seguranca/sessao_perdida.dart';
@@ -205,6 +206,7 @@ class Composicao {
           ConversaLocal(),
           aprendizado,
           aceiteDoAviso,
+          RepositorioContatoEmergenciaLocal(preferencias),
         ],
         dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas],
       ),

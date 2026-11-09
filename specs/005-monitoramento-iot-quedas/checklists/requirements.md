@@ -38,9 +38,10 @@
   - Princípio III: Acessibilidade WCAG 2.2 AA (48x48 dp, 200% escala, contraste e TalkBack).
   - Princípio VI: IA acolhedora e auditável, sem decisões médicas autônomas.
   - Princípio VII: Didática e transparência de funcionamento para a família.
-- As 3 marcações de [NEEDS CLARIFICATION] foram resolvidas em 2026-10-09 (ver Clarifications na spec):
-  1. Conexão via protocolo MQTT direto via broker (FR-013) com fallback para simulador interno (FR-019).
+- As marcações de [NEEDS CLARIFICATION] foram resolvidas em 2026-10-09 e atualizadas em 2026-11-09 (ver Clarifications na spec):
+  1. Conexão via protocolo MQTT direto via broker com suporte a TLS (`8883`) e autenticação (FR-013, FR-022) e fallback para simulador interno (FR-019).
   2. Janela de 45 segundos para a pergunta "Você está bem?" antes de escalar (FR-009, FR-010).
-  3. Disparo para o contato de emergência via ligação telefônica direta + notificação/mensagem de texto (FR-012, FR-020).
-- Todos os 16 itens de qualidade do checklist estão aprovados. Pronto para `/speckit-plan`.
+  3. Disparo prioritário para o contato de emergência via **WhatsApp com mensagem pré-pronta** (`whatsapp://send?phone=55<numero>&text=<mensagem>`) e fallback resiliente para `wa.me` / SMS / ligação telefônica direta (FR-012, FR-020).
+  4. Limpeza automática do contato de emergência na saída da sessão via `DadoLocalDaPessoa` (FR-021) e remoção de `usesCleartextTraffic="true"` global (FR-022).
+- Todos os 16 itens de qualidade do checklist base estão aprovados. Checklist detalhado de fechamento disponível em [seguranca-e-emergencia.md](seguranca-e-emergencia.md).
 

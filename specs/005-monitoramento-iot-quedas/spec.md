@@ -64,9 +64,10 @@ Ao detectar uma queda potencial, o sistema prioriza a verificação direta e ime
 - **Q: Qual é o tempo de tolerância da contagem regressiva na tela de verificação ("Você está bem?") antes de disparar o alerta de emergência?** → **A: 45 segundos**. Tempo adequado para que uma pessoa idosa de 65+ anos ouça o alarme, pegue o celular e toque com calma em "Estou bem", prevenindo falso pânico sem retardar socorro em casos reais de imobilidade (FR-009, FR-010).
 - **Q: Por qual canal o alerta de emergência deve ser disparado para o contato cadastrado caso o idoso não responda ou peça ajuda?** → **A: Ligação telefônica direta (discador) + Notificação/Mensagem**. O aplicativo aciona imediatamente a chamada nativa do celular para o contato de emergência e prepara/dispara a mensagem de texto com o relatório da ocorrência (horário, identificação e aviso preventivo contra golpes) (FR-012, FR-020).
 
-### Session 2026-11-09 (Migração para Hardware ESP32 Físico)
+### Session 2026-11-09 (Migração para Hardware ESP32 Físico, Segurança Issue #43 e Socorro via WhatsApp)
 
 - **Q: Como o sistema evolui com a chegada do hardware ESP32 físico em substituição ao simulador Wokwi?** → **A: Hardware ESP32 DevKit com MPU6050/9250/9255 autocalibrado e Pulse Sensor óptico PPG no GPIO 34**. O protótipo físico não utiliza LEDs nem buzzer na placa (concentrando o alerta vibratório/visual no celular e usando `CESSAR_ALARME` para destravar o estado `QUEDA_DETECTADA` no ESP32), opera com máquina de 6 estados (incluindo janela de 3 segundos pós-impacto para descartar falsos positivos) e envia `bpm_valido`, `bpm_antes_da_queda` e `movimento_pos_impacto` nos payloads MQTT.
+- **Q: Como o alerta de texto de emergência deve ser enviado ao contato cadastrado e como garantir a privacidade/segurança (Issue #43)?** → **A: Envio prioritário via WhatsApp com mensagem pré-pronta (`whatsapp://send?phone=55<numero>&text=<mensagem>`) + Limpeza de Sessão + Suporte a MQTT sobre TLS (8883) sem tráfego HTTP cleartext**. O caso de uso `DispararSocorroEmergencia` abre diretamente a conversa do contato de emergência no WhatsApp com o texto do alerta e a cláusula antigolpe já preenchidos (mantendo fallback para `https://wa.me/` ou SMS/Discador nativo caso o WhatsApp não esteja instalado). O `RepositorioContatoEmergenciaLocal` implementa `DadoLocalDaPessoa` para ser apagado em toda saída de sessão (`FR-026`/`FR-048`), o `AndroidManifest.xml` não utiliza `usesCleartextTraffic="true"` e o `ProvedorDeTelemetriaMqtt` suporta TLS (`8883`) e credenciais de autenticação configuráveis via `--dart-define`.
 
 ---
 
@@ -168,7 +169,9 @@ O estudante, desenvolvedor ou cuidador deseja validar o funcionamento com o simu
 - **FR-017**: Todo elemento interativo DEVE conter rótulos semânticos para leitores de tela (TalkBack).
 - **FR-018**: O sistema NUNCA deve solicitar transferências financeiras, PIX, senhas ou códigos de verificação durante ou após o fluxo de alerta de emergência.
 - **FR-019**: O sistema DEVE disponibilizar um provedor de telemetria simulado embutido no aplicativo para testes de desenvolvimento e demonstração independente de rede externa.
-- **FR-020**: O disparo de emergência DEVE acionar a **ligação telefônica direta** (discador nativo do aparelho com o número do contato) e preparar/disparar o envio de **mensagem/notificação de texto** (SMS/WhatsApp) com o relatório da ocorrência.
+- **FR-020**: O disparo de emergência DEVE abrir prioritariamente a conversa do contato de emergência no **WhatsApp** (`whatsapp://send?phone=55<numero>&text=<mensagem>`) com a mensagem de socorro e a cláusula antigolpe já preenchidas e prontas para envio, mantendo fallback resiliente (`https://wa.me/` ou SMS/Discador nativo `smsto:` / `tel:`) caso o WhatsApp não esteja instalado no aparelho.
+- **FR-021**: O contato de emergência salvo localmente (`RepositorioContatoEmergenciaLocal`) DEVE implementar `DadoLocalDaPessoa` e ser removido automaticamente do aparelho ao encerrar a sessão da conta (`LimpezaDeSessao`).
+- **FR-022**: O provedor MQTT (`ProvedorDeTelemetriaMqtt`) DEVE suportar conexão cifrada via TLS (`porta 8883` / `usarTls`) e autenticação por usuário/senha parametrizáveis via `--dart-define`, e o `AndroidManifest.xml` NÃO DEVE habilitar `usesCleartextTraffic="true"` globalmente.
 
 ---
 

@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../domain/entidades/contato_emergencia.dart';
 import '../../domain/repositorios/repositorio_contato_emergencia.dart';
 
 /// Implementação local do repositório de contato de emergência usando SharedPreferences.
-class RepositorioContatoEmergenciaLocal implements RepositorioContatoEmergencia {
+class RepositorioContatoEmergenciaLocal
+    implements RepositorioContatoEmergencia, DadoLocalDaPessoa {
   /// Cria uma instância de [RepositorioContatoEmergenciaLocal].
   RepositorioContatoEmergenciaLocal([SharedPreferences? preferences])
       : _prefsInstancia = preferences;
@@ -44,4 +46,7 @@ class RepositorioContatoEmergenciaLocal implements RepositorioContatoEmergencia 
     final SharedPreferences prefs = await _prefs;
     await prefs.remove(_chaveContato);
   }
+
+  @override
+  Future<void> apagar() => removerContato();
 }

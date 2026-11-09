@@ -284,7 +284,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                 ),
                               ] else ...<Widget>[
                                 Text(
-                                  'Nenhum contato cadastrado. Cadastre alguém para receber avisos caso sofra uma queda.',
+                                  'Nenhum contato cadastrado. Cadastre alguém para receber uma mensagem pré-pronta no WhatsApp caso sofra uma queda.',
                                   style: MemoraTipografia.apoio.copyWith(
                                     color: cores.textoSuave,
                                   ),

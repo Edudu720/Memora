@@ -47,6 +47,15 @@ class ContatoEmergencia {
     return limpo;
   }
 
+  /// Retorna o telefone formatado com o DDI 55 (Brasil) para links de WhatsApp.
+  String get telefoneWhatsapp {
+    final String limpo = telefoneNumeros;
+    if (limpo.length == 10 || limpo.length == 11) {
+      return '55$limpo';
+    }
+    return limpo;
+  }
+
   /// Validação: precisa ter nome preenchido e telefone com DDD (10 ou 11 dígitos).
   bool get ehValido {
     final String limpo = telefoneNumeros;

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_mqtt.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
 import 'package:memora/features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
 import 'package:memora/features/cuidado/domain/entidades/contato_emergencia.dart';
 import 'package:memora/features/cuidado/domain/entidades/enums_cuidado.dart';
 import 'package:memora/features/cuidado/domain/entidades/evento_queda.dart';
 import 'package:memora/features/cuidado/domain/entidades/telemetria_iot.dart';
+import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -90,6 +92,53 @@ void main() {
 
       await repo.removerContato();
       expect(await repo.obterContato(), isNull);
+    });
+
+    test('implementa DadoLocalDaPessoa e apaga contato de emergência na saída da sessão', () async {
+      final RepositorioContatoEmergenciaLocal repo =
+          RepositorioContatoEmergenciaLocal();
+      expect(repo, isA<DadoLocalDaPessoa>());
+
+      await repo.salvarContato(
+        const ContatoEmergencia(
+          id: 'c2',
+          nome: 'Filho Pedro',
+          telefone: '(19) 98888-7777',
+          parentesco: 'Filho',
+        ),
+      );
+      expect(await repo.obterContato(), isNotNull);
+
+      final DadoLocalDaPessoa dadoLocal = repo;
+      await dadoLocal.apagar();
+      expect(await repo.obterContato(), isNull);
+    });
+  });
+
+  group('ProvedorDeTelemetriaMqtt', () {
+    test('ativa TLS automaticamente na porta 8883 ou quando usarTls=true e aceita credenciais', () {
+      final ProvedorDeTelemetriaMqtt padrao = ProvedorDeTelemetriaMqtt();
+      expect(padrao.porta, 1883);
+      expect(padrao.tlsAtivo, isFalse);
+      expect(padrao.usuario, isNull);
+      padrao.descartar();
+
+      final ProvedorDeTelemetriaMqtt portaTls = ProvedorDeTelemetriaMqtt(
+        broker: 'cluster.hivemq.cloud',
+        porta: 8883,
+        usuario: 'memora_iot',
+        senha: 'segredo_mqtt',
+      );
+      expect(portaTls.tlsAtivo, isTrue);
+      expect(portaTls.usuario, 'memora_iot');
+      expect(portaTls.senha, 'segredo_mqtt');
+      portaTls.descartar();
+
+      final ProvedorDeTelemetriaMqtt flagTls = ProvedorDeTelemetriaMqtt(
+        usarTls: true,
+      );
+      expect(flagTls.tlsAtivo, isTrue);
+      flagTls.descartar();
     });
   });
 }

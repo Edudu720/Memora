@@ -1,12 +1,14 @@
 import 'package:android_intent_plus/android_intent.dart';
 import '../entidades/contato_emergencia.dart';
 
-/// Caso de uso que realiza o acionamento de emergência via telefone nativo e SMS/WhatsApp.
+/// Caso de uso que realiza o acionamento de emergência via WhatsApp com mensagem
+/// pré-pronta (e fallback resiliente para wa.me, SMS e discador nativo).
 class DispararSocorroEmergencia {
   /// Cria uma instância de [DispararSocorroEmergencia].
   const DispararSocorroEmergencia();
 
-  /// Executa a chamada do discador com o número preenchido e prepara o envio de SMS com o texto padronizado.
+  /// Executa a abertura do WhatsApp com a conversa do contato e a mensagem de
+  /// socorro pré-pronta, recorrendo a fallbacks caso o WhatsApp não esteja disponível.
   Future<void> executar({
     required ContatoEmergencia contato,
     required String nomeIdoso,
@@ -15,24 +17,45 @@ class DispararSocorroEmergencia {
     final String numeroLimpo = contato.telefoneNumeros;
     if (numeroLimpo.isEmpty) return;
 
-    // 1. Disparar discador nativo com o número preenchido
+    final String mensagem = formatarMensagemSocorro(
+      nomeIdoso: nomeIdoso,
+      horario: horarioOcorrencia,
+    );
+
+    // 1. Prioridade máxima: abrir diretamente a conversa no WhatsApp com a mensagem pré-pronta
+    final String uriWhatsapp = formatarUriWhatsapp(
+      contato: contato,
+      nomeIdoso: nomeIdoso,
+      horario: horarioOcorrencia,
+    );
     try {
-      final AndroidIntent intentLigacao = AndroidIntent(
-        action: 'android.intent.action.DIAL',
-        data: 'tel:$numeroLimpo',
+      final AndroidIntent intentWhatsapp = AndroidIntent(
+        action: 'android.intent.action.VIEW',
+        data: uriWhatsapp,
+        package: 'com.whatsapp',
       );
-      await intentLigacao.launch();
+      await intentWhatsapp.launch();
+      return;
     } catch (_) {
-      // Ignora erro se plataforma não suportar intent nativa
+      // Prossegue para o fallback universal wa.me caso o pacote com.whatsapp falhe
     }
 
-    // 2. Preparar e enviar SMS nativo com mensagem explicativa e aviso antigolpe
+    // 2. Fallback universal: link https://wa.me/<telefone_ddi_55>?text=<mensagem>
+    final String uriWaMe =
+        'https://wa.me/${contato.telefoneWhatsapp}?text=${Uri.encodeComponent(mensagem)}';
     try {
-      final String mensagem = _formatarMensagemSocorro(
-        nomeIdoso: nomeIdoso,
-        horario: horarioOcorrencia,
+      final AndroidIntent intentWaMe = AndroidIntent(
+        action: 'android.intent.action.VIEW',
+        data: uriWaMe,
       );
+      await intentWaMe.launch();
+      return;
+    } catch (_) {
+      // Prossegue para o fallback de SMS e discador nativo
+    }
 
+    // 3. Fallback nativo: SMS com texto preenchido + Discador com número preenchido
+    try {
       final AndroidIntent intentSms = AndroidIntent(
         action: 'android.intent.action.SENDTO',
         data: 'smsto:$numeroLimpo',
@@ -44,10 +67,33 @@ class DispararSocorroEmergencia {
     } catch (_) {
       // Ignora erro se plataforma não suportar intent nativa
     }
+
+    try {
+      final AndroidIntent intentLigacao = AndroidIntent(
+        action: 'android.intent.action.DIAL',
+        data: 'tel:$numeroLimpo',
+      );
+      await intentLigacao.launch();
+    } catch (_) {
+      // Ignora erro se plataforma não suportar intent nativa
+    }
+  }
+
+  /// Gera a URI `whatsapp://send?phone=55...&text=...` com a mensagem de socorro codificada.
+  static String formatarUriWhatsapp({
+    required ContatoEmergencia contato,
+    required String nomeIdoso,
+    required DateTime horario,
+  }) {
+    final String mensagem = formatarMensagemSocorro(
+      nomeIdoso: nomeIdoso,
+      horario: horario,
+    );
+    return 'whatsapp://send?phone=${contato.telefoneWhatsapp}&text=${Uri.encodeComponent(mensagem)}';
   }
 
   /// Gera a mensagem padronizada em conformidade com o Princípio II (Antigolpe).
-  static String _formatarMensagemSocorro({
+  static String formatarMensagemSocorro({
     required String nomeIdoso,
     required DateTime horario,
   }) {
