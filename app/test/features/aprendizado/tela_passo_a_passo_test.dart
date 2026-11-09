@@ -256,6 +256,45 @@ void main() {
         expect(find.text(TextosGuias.pecaParaAbrir), findsNothing);
       },
     );
+
+    testWidgets(
+      'Cenário 5d: Último passo oferece "Ficou com alguma dúvida? Pode perguntar" '
+      'e redireciona para a conversa com o rascunho de dúvida preenchido',
+      (WidgetTester t) async {
+        String? duvidaRecebida;
+
+        await t.pumpWidget(
+          montarApp(
+            TelaPassoAPasso(
+              guia: guiaTeste,
+              servico: servicoCotidiano,
+              origemDoCatalogo: OrigemDoCatalogo.servidor,
+              aoTirarDuvida: (String duvida) => duvidaRecebida = duvida,
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        // Navega até o último passo (passo 3)
+        await t.ensureVisible(find.byKey(PassoIlustrado.chaveContinuar));
+        await t.tap(find.byKey(PassoIlustrado.chaveContinuar));
+        await t.pumpAndSettle();
+
+        await t.ensureVisible(find.byKey(PassoIlustrado.chaveContinuar));
+        await t.tap(find.byKey(PassoIlustrado.chaveContinuar));
+        await t.pumpAndSettle();
+
+        expect(find.byKey(PassoIlustrado.chaveTirarDuvida), findsOneWidget);
+        expect(find.text(TextosGuias.ficouComDuvida), findsOneWidget);
+
+        // Toca em "Ficou com alguma dúvida? Pode perguntar"
+        await t.ensureVisible(find.byKey(PassoIlustrado.chaveTirarDuvida));
+        await t.tap(find.byKey(PassoIlustrado.chaveTirarDuvida));
+        await t.pumpAndSettle();
+
+        expect(duvidaRecebida, TextosGuias.rascunhoDuvida('TikTok'));
+      },
+    );
   });
 
   group('Defesa contra Engenharia Social e Golpes (FR-026)', () {

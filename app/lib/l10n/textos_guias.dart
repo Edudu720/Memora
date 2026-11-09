@@ -56,6 +56,13 @@ abstract final class TextosGuias {
   /// Ação de conclusão no último passo.
   static const String voltarAoHub = 'Voltar ao início';
 
+  /// Convite no final do guia para tirar dúvidas com o chatbot (revisão WhatsApp).
+  static const String ficouComDuvida = 'Ficou com alguma dúvida? Pode perguntar';
+
+  /// Rascunho inicial na conversa quando a pessoa tira dúvida no final do guia.
+  static String rascunhoDuvida(String aplicativo) =>
+      'Tenho uma dúvida sobre o $aplicativo';
+
   /// Ação permitida apenas para cotidiano com catálogo do servidor (FR-027).
   static const String pecaParaAbrir = 'Peça à Memora para abrir';
 

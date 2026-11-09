@@ -54,26 +54,13 @@ class IconeDoAplicativo extends StatelessWidget {
     String normalizada,
     MemoraCores cores,
   ) {
-    // 1. WhatsApp
+    // 1. WhatsApp (logo oficial fornecida)
     if (normalizada.contains('whatsapp')) {
-      return Container(
-        color: const Color(0xFF25D366),
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.chat_bubble_rounded,
-              color: Colors.white,
-              size: tamanho * 0.74,
-            ),
-            Icon(
-              Icons.phone_rounded,
-              color: const Color(0xFF25D366),
-              size: tamanho * 0.40,
-            ),
-          ],
-        ),
+      return Image.asset(
+        'assets/ilustracoes/whatsapp_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 

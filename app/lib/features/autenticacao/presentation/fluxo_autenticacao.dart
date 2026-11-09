@@ -780,6 +780,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             assistente,
             rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
           ),
+          aoTirarDuvida: (String duvida) => _abrirConversa(
+            assistente,
+            rascunho: duvida,
+          ),
           aoVoltar: () => Navigator.of(contexto).pop(),
           aoVoltarAoHub: () => Navigator.of(contexto).pop(),
           aoSair: () => Navigator.of(contexto).pop(),
