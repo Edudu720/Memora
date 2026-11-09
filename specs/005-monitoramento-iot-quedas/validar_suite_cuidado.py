@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Suíte de Testes Automatizados e Verificação do Módulo IoT de Cuidado (Feature 005)
-Valida contratos MQTT, lógica de máquina de estados, regras de telefone,
-paleta de cores WCAG 2.2, tokens de design system e firmware ESP32 Wokwi.
+Valida contratos MQTT, lógica da máquina de 6 estados do ESP32 físico, regras de telefone,
+paleta de cores WCAG 2.2, tokens de design system e firmware ESP32 físico (MPU + Pulse Sensor).
 """
 import json
 import os
@@ -26,60 +26,78 @@ def test_tokens_design_system():
     assert "Nenhum literal encontrado" in res.stdout
     print("  -> Aprovado: Zero valores visuais literais fora dos tokens.")
 
-def test_firmware_wokwi_ino():
-    print("[3/7] Validando Firmware ESP32 Wokwi (firmware_wokwi.ino)...")
+def test_firmware_esp32_fisico():
+    print("[3/7] Validando Firmware ESP32 Físico (firmware_wokwi.ino)...")
     caminho_ino = os.path.join("specs", "005-monitoramento-iot-quedas", "firmware_wokwi.ino")
     assert os.path.exists(caminho_ino), f"Arquivo não encontrado: {caminho_ino}"
     with open(caminho_ino, "r", encoding="utf-8") as f:
         codigo = f.read()
 
-    assert 'WIFI_SSID = "Wokwi-GUEST"' in codigo
+    assert "#include <PulseSensorPlayground.h>" in codigo
     assert 'MQTT_BROKER = "broker.hivemq.com"' in codigo
-    assert 'MQTT_PORT = 1883' in codigo
-    assert 'memora/iot/demonstracao-01/telemetria' in codigo
-    assert 'memora/iot/demonstracao-01/alerta' in codigo
-    assert 'memora/iot/demonstracao-01/comando' in codigo
-    assert 'SDA_PIN 21' in codigo
-    assert 'SCL_PIN 22' in codigo
-    assert 'BPM_PIN 34' in codigo
-    assert 'BUZZER_PIN 14' in codigo
-    assert 'CESSAR_ALARME' in codigo
-    assert 'noTone(BUZZER_PIN)' in codigo
-    assert 'tone(BUZZER_PIN, 2000)' in codigo
-    print("  -> Aprovado: Firmware configurado corretamente com Wi-Fi, MQTT, tópicos, pinos e cancelamento de buzzer.")
+    assert "MQTT_PORT = 1883" in codigo
+    assert "memora/iot/demonstracao-01/telemetria" in codigo
+    assert "memora/iot/demonstracao-01/alerta" in codigo
+    assert "memora/iot/demonstracao-01/comando" in codigo
+    assert "SDA_PIN 21" in codigo
+    assert "SCL_PIN 22" in codigo
+    assert "PULSE_PIN 34" in codigo
+    assert "MPU_ADDR_1 0x68" in codigo
+    assert "calibrarMPU()" in codigo
+    assert "EM_MOVIMENTO" in codigo
+    assert "QUEDA_DETECTADA" in codigo
+    assert "CESSAR_ALARME" in codigo
+    print("  -> Aprovado: Firmware do ESP32 físico validado (MPU autocalibrado, PulseSensor no GPIO 34, 6 estados e MQTT).")
 
 def test_contratos_mqtt():
-    print("[4/7] Validando Conformidade dos Payloads MQTT com os Contratos...")
-    # 1. Payload de Telemetria
+    print("[4/7] Validando Conformidade dos Payloads MQTT com os Contratos do ESP32 Físico...")
+    estados_validos = [
+        "INERTE",
+        "EM_MOVIMENTO",
+        "QUEDA_LIVRE",
+        "AGUARDANDO_IMPACTO",
+        "POS_IMPACTO",
+        "QUEDA_DETECTADA",
+    ]
+
+    # 1. Payload de Telemetria do ESP32 físico
     telemetria_exemplo = {
         "bpm": 76,
+        "bpm_valido": True,
         "movimento": 14.2,
         "aceleracao": 1.02,
         "em_movimento": True,
-        "estado": "MOVIMENTO",
-        "timestamp": 1728512345000
+        "estado": "EM_MOVIMENTO",
+        "timestamp": 145500,
     }
     assert isinstance(telemetria_exemplo["bpm"], int) and 0 <= telemetria_exemplo["bpm"] <= 240
+    assert isinstance(telemetria_exemplo["bpm_valido"], bool)
     assert isinstance(telemetria_exemplo["movimento"], (int, float)) and telemetria_exemplo["movimento"] >= 0
     assert isinstance(telemetria_exemplo["aceleracao"], (int, float))
     assert isinstance(telemetria_exemplo["em_movimento"], bool)
-    assert telemetria_exemplo["estado"] in ["INERTE", "MOVIMENTO", "QUEDA_LIVRE", "AGUARDANDO_IMPACTO", "POS_IMPACTO"]
+    assert telemetria_exemplo["estado"] in estados_validos
 
-    # 2. Payload de Alerta de Queda
+    # 2. Payload de Alerta de Queda do ESP32 físico
     alerta_exemplo = {
         "evento": "QUEDA_DETECTADA",
-        "bpm": 92,
+        "bpm": 0,
+        "bpm_valido": False,
+        "bpm_antes_da_queda": 84,
         "aceleracao": 3.10,
-        "timestamp": 1728512360000
+        "movimento_pos_impacto": 3.2,
+        "timestamp": 148900,
     }
     assert alerta_exemplo["evento"] == "QUEDA_DETECTADA"
     assert isinstance(alerta_exemplo["bpm"], int)
+    assert isinstance(alerta_exemplo["bpm_valido"], bool)
+    assert isinstance(alerta_exemplo["bpm_antes_da_queda"], int)
     assert alerta_exemplo["aceleracao"] >= 2.5
+    assert 0.0 <= alerta_exemplo["movimento_pos_impacto"] < 10.0
 
     # 3. Payload de Comando de Cessação
     comando_exemplo = {"comando": "CESSAR_ALARME"}
     assert comando_exemplo["comando"] == "CESSAR_ALARME"
-    print("  -> Aprovado: Esquemas de telemetria, alerta e comando conformes com a especificação.")
+    print("  -> Aprovado: Esquemas de telemetria, alerta pós-impacto e comando conformes com o ESP32 físico.")
 
 def test_validacao_contato_emergencia():
     print("[5/7] Testando Regras de Validação de Contato de Emergência...")
@@ -154,7 +172,7 @@ def main():
 
     test_paleta_wcag()
     test_tokens_design_system()
-    test_firmware_wokwi_ino()
+    test_firmware_esp32_fisico()
     test_contratos_mqtt()
     test_validacao_contato_emergencia()
     test_mensagem_antigolpe()

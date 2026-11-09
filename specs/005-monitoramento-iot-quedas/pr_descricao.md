@@ -1,15 +1,15 @@
-# Pull Request: Implementação do Monitoramento IoT, Detecção de Quedas e Integração Wokwi (Feature 005)
+# Pull Request: Implementação do Monitoramento IoT, Detecção de Quedas e Integração com ESP32 Físico (Feature 005)
 
 ## 📌 Resumo da PR
 
-Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ESP32 com MPU6050 e medidor de BPM simulado com potenciômetro) com o aplicativo Memora, devidamente sincronizada com o estado mais recente da `master` (Features 003 e 004). O sistema monitora batimentos cardíacos e movimentação do idoso em tempo real e, ao detectar uma queda brusca, inicia um protocolo de segurança e verificação de bem-estar:
+Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (**ESP32 DevKit físico** com acelerômetro/giroscópio **MPU6050/MPU9250/MPU9255** autocalibrado e sensor óptico de batimentos cardíacos **Pulse Sensor PPG** no `GPIO 34`) com o aplicativo Memora, devidamente sincronizada com o estado mais recente da `master` (Features 003 e 004). O sistema monitora batimentos cardíacos e movimentação do idoso em tempo real e, ao confirmar uma queda (queda livre + impacto + imobilidade pós-impacto de 3 segundos), inicia um protocolo de segurança e verificação de bem-estar:
 
 1. **Alerta Imediato**: O celular vibra e apresenta uma tela de confirmação acessível com a pergunta *"Você está bem?"* e um cronômetro regressivo de 45 segundos.
-2. **Resposta Positiva ("Estou bem")**: Interrompe o alarme imediatamente no celular e envia um comando via MQTT ao ESP32 (`{"comando":"CESSAR_ALARME"}`), desligando o buzzer sonoro.
+2. **Resposta Positiva ("Estou bem")**: Interrompe o alarme imediatamente no celular e envia um comando via MQTT ao ESP32 (`{"comando":"CESSAR_ALARME"}`), destravando a máquina de estados embarcada (`QUEDA_DETECTADA` ➔ `INERTE`).
 3. **Falta de Resposta (45 s) ou Resposta Negativa ("Preciso de ajuda")**: Aciona automaticamente socorro duplo ao contato de emergência cadastrado:
    - Abre o discador nativo do Android (`ACTION_DIAL`) com o telefone pré-preenchido.
    - Prepara o disparo de mensagem nativa (`ACTION_SENDTO`) contendo aviso com hora, data e texto de segurança antigolpe (Princípio II da Constituição).
-4. **Integração Real-Time com o Simulador Wokwi**: Permite conexão direta via broker MQTT 3.1.1 (`broker.hivemq.com:1883`) com o firmware em execução no Wokwi (`https://wokwi.com/projects/477262321619688449`), além de um modo simulador integrado para testes offline.
+4. **Integração em Tempo Real com o ESP32 Físico + Modo Simulador**: Permite conexão direta via broker MQTT 3.1.1 (`broker.hivemq.com:1883`) com o firmware em execução no ESP32 físico, além de um modo Simulador integrado para testes offline.
 
 ---
 
@@ -20,7 +20,7 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
   - Adicionada dependência `mqtt_client: ^10.3.3` para comunicação bidirecional em tempo real com o broker MQTT.
 - `app/android/app/src/main/AndroidManifest.xml`:
   - Adicionadas permissões `<uses-permission android:name="android.permission.INTERNET"/>` e `<uses-permission android:name="android.permission.VIBRATE"/>`.
-  - Habilitado `android:usesCleartextTraffic="true"` na `<application>` para permitir tráfego TCP/MQTT na porta 1883 com o broker público do Wokwi (`broker.hivemq.com`), preservando integralmente as regras de segurança `allowBackup="false"`, `fullBackupContent` e `dataExtractionRules` da `master`.
+  - Habilitado `android:usesCleartextTraffic="true"` na `<application>` para permitir tráfego TCP/MQTT na porta 1883 com o broker público (`broker.hivemq.com`), preservando integralmente as regras de segurança `allowBackup="false"`, `fullBackupContent` e `dataExtractionRules` da `master`.
   - Adicionadas as `<intent>` para `android.intent.action.DIAL` (esquema `tel`) e `android.intent.action.SENDTO` (esquema `smsto`) dentro de `<queries>` (junto aos pacotes de aplicativos e TikTok da `master`), exigido pelo Android 11+ para interação entre aplicativos.
 
 ### 2. Integração no Hub Principal e Casca de Navegação
@@ -41,11 +41,11 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
   - `StatusConfirmacaoQueda`: Estados da máquina de confirmação (`aguardandoConfirmacao`, `canceladoPeloUsuario`, `socorroAcionado`, `tempoExpirado`).
   - `ModoOperacaoIot`: Modos de execução do provedor (`simulado`, `mqtt`).
 - `telemetria_iot.dart`:
-  - Entidade `TelemetriaIot`: Dados instantâneos do sensor (`timestamp`, `bpm`, `aceleracaoG`, `nivelMovimento`, `emMovimento`, `estadoSensor`).
-  - Métodos: `fromJson(Map<String, dynamic>)` resiliente com fallbacks, `toJson()`, `copyWith(...)`, `operator ==`, `hashCode`.
+  - Entidade `TelemetriaIot`: Dados instantâneos do sensor (`timestamp`, `bpm`, `bpmValido`, `aceleracaoG`, `nivelMovimento`, `emMovimento`, `estadoSensor`).
+  - Métodos: `fromJson(Map<String, dynamic>)` resiliente com suporte a `bpm_valido`, aos 6 estados do ESP32 físico (`INERTE`, `EM_MOVIMENTO`, `QUEDA_LIVRE`, `AGUARDANDO_IMPACTO`, `POS_IMPACTO`, `QUEDA_DETECTADA`) e normalização de `timestamp` oriundo de `millis()`, além de `toJson()`, `copyWith(...)`, `operator ==`, `hashCode`.
 - `evento_queda.dart`:
-  - Entidade `EventoQueda`: Registra o evento de queda com dados no momento do impacto.
-  - Métodos: `EventoQueda.novo(...)` com contador padrão de 45 segundos, `fromJson(...)`, `toJson()`, `copyWith(...)`.
+  - Entidade `EventoQueda`: Registra o evento de queda com dados no momento do impacto (`bpmNoImpacto`, `bpmValido`, `bpmAntesDaQueda`, `aceleracaoNoImpacto`, `movimentoPosImpacto`).
+  - Métodos: `EventoQueda.novo(...)` com contador padrão de 45 segundos, `fromJson(...)` (com fallback automático para `bpm_antes_da_queda` caso o dedo solte do sensor óptico durante o impacto), `copyWith(...)`.
 - `contato_emergencia.dart`:
   - Entidade `ContatoEmergencia`: Pessoa de confiança (`id`, `nome`, `telefone`, `parentesco`, `ativo`).
   - Propriedades/Métodos:
@@ -80,7 +80,6 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
 - `provedor_telemetria_mqtt.dart`:
   - `ProvedorDeTelemetriaMqtt`: Cliente MQTT real via `MqttServerClient`.
   - Recursos de resiliência em emulador/dispositivo:
-    - Sanitização automática de host (remove esquemas `mqtt://`, `tcp://`, barras e portas coladas) e de tópico base.
     - Resolução DNS priorizando IPv4 (`InternetAddress.lookup(host, type: InternetAddressType.IPv4)`) para evitar falhas de rota IPv6 em emuladores Android.
     - Negociação explícita do protocolo **MQTT 3.1.1** (`setProtocolV311()`), compatível com `broker.hivemq.com` e `PubSubClient` do ESP32.
   - Métodos:
@@ -99,7 +98,7 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
 
 #### 1. Widgets do Design System (`presentation/widgets/`)
 - `medidor_bpm.dart`:
-  - `MedidorBpm`: Exibe a frequência cardíaca com tipografia `MemoraTipografia.destaque` (36 sp) e `MemoraTipografia.corpo`, ícone `MemoraDimensoes.iconeDestaque` e texto de apoio com classificação médica acessível.
+  - `MedidorBpm`: Exibe a frequência cardíaca com tipografia `MemoraTipografia.destaque` (36 sp) e `MemoraTipografia.corpo`, ícone `MemoraDimensoes.iconeDestaque` e orientação acessível quando o Pulse Sensor óptico aguarda posicionamento do dedo (`!bpmValido || bpm <= 0`).
 - `indicador_movimento.dart`:
   - `IndicadorMovimento`: Exibe o estado da pessoa ("Em movimento ativo" ou "Em repouso tranquilo") com cores semânticas (`cores.sucesso` / `cores.primaria`) e ícones de alta visibilidade.
 - `cronometro_regressivo_queda.dart`:
@@ -107,7 +106,7 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
 
 #### 2. Controladores de Estado (`presentation/controladores/`)
 - `controlador_dispositivo_cuidado.dart`:
-  - `ControladorDispositivoCuidado`: Escuta os streams do provedor atual, mantém a última telemetria, gerencia o modo de operação (`simulado` vs `mqtt`), expõe mensagens de diagnóstico em caso de falha de rede (`ultimoErroConexao`), carrega e salva contatos de emergência e propaga eventos de queda para a tela.
+  - `ControladorDispositivoCuidado`: Escuta os streams do provedor atual, mantém a última telemetria, gerencia o modo de operação (`simulado` vs `mqtt`), carrega e salva contatos de emergência e propaga eventos de queda para a tela.
 - `controlador_verificacao_queda.dart`:
   - `ControladorVerificacaoQueda`: Gerencia a contagem regressiva de 45 segundos através de um `Timer.periodic`.
   - Métodos:
@@ -122,7 +121,7 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
     - Indicador de status de conexão com cor do Design System e texto explícito.
     - Cartões de frequência cardíaca (`MedidorBpm`) e movimentação (`IndicadorMovimento`).
     - Cartão com os dados do contato de emergência e botão para cadastrar/editar.
-    - Painel expansível para integração com Wokwi (configuração de host/tópico MQTT) e botão de teste `BotaoPerigo` para simulação manual de queda.
+    - Painel expansível para conexão com o **ESP32 Físico** (configuração de host/tópico MQTT) e botão de teste `BotaoPerigo` para simulação manual de queda.
 - `tela_verificacao_queda.dart`:
   - Tela de alerta imediato com affordance maximizada para idosos:
     - Pergunta em destaque *"Você está bem?"* (`MemoraTipografia.destaque`).
@@ -134,15 +133,14 @@ Esta PR implementa a integração completa do **Dispositivo de Cuidado IoT** (ES
 
 ---
 
-### Firmware ESP32 Wokwi (`specs/005-monitoramento-iot-quedas/firmware_wokwi.ino`)
+### Firmware do ESP32 Físico (`specs/005-monitoramento-iot-quedas/firmware_wokwi.ino`)
 
-Código C++ completo desenvolvido para execução no simulador Wokwi:
-- Conexão Wi-Fi com a rede `Wokwi-GUEST`.
-- Leitura dos registradores do acelerômetro e giroscópio MPU6050 via protocolo I2C (pinos 21 e 22).
-- Leitura da simulação de BPM via conversor analógico-digital (ADC, pino 34).
-- Máquina de estados de detecção de queda: `INERTE` ➔ `MOVIMENTO` ➔ `QUEDA_LIVRE` ➔ `AGUARDANDO_IMPACTO` ➔ `POS_IMPACTO`.
-- Acionamento do buzzer contínuo em frequência fixa (2000 Hz) na confirmação de queda.
-- Assinatura do tópico MQTT `memora/iot/demonstracao-01/comando` para escuta do comando `CESSAR_ALARME`, executando `noTone(BUZZER_PIN)` e retornando o estado para `INERTE`.
+Código C++ completo desenvolvido para execução no **ESP32 DevKit físico**:
+- Conexão Wi-Fi 2,4 GHz com reconexão não-bloqueante a cada 10s e MQTT com `ClientID` baseado no endereço MAC físico (`Memora-ESP32-<MAC>`).
+- Autodetecção e leitura do acelerômetro e giroscópio **MPU6050 (`0x68`), MPU9250 (`0x71`) e MPU9255 (`0x73`)** via protocolo I2C (`SDA=21`, `SCL=22`, clock `100 kHz`), configurado em `±8 g` e `±250 graus/s`, com rotina de calibração inicial de **300 amostras em repouso**.
+- Leitura óptica real de batimentos cardíacos (**Pulse Sensor PPG**) no `GPIO 34` (`ADC1`, resolução de `10 bits`) utilizando a biblioteca `PulseSensorPlayground` a `500 Hz`.
+- Máquina de 6 estados de detecção de queda: `INERTE` ➔ `EM_MOVIMENTO` ➔ `QUEDA_LIVRE` (`< 0.55g` por `>= 80ms`) ➔ `AGUARDANDO_IMPACTO` (`>= 2.5g` em até `1000ms`) ➔ `POS_IMPACTO` (`3000ms` verificando imobilidade `< 10.0/100`) ➔ `QUEDA_DETECTADA`.
+- Assinatura do tópico MQTT `memora/iot/demonstracao-01/comando` para escuta do comando `CESSAR_ALARME`, retornando o estado de `QUEDA_DETECTADA` para `INERTE`.
 
 ---
 
@@ -154,14 +152,14 @@ Código C++ completo desenvolvido para execução no simulador Wokwi:
    - Suíte completa em Python que executa e valida 7 passos críticos (7/7 aprovados):
      - Validação de contraste WCAG 2.2 AA e AAA (66 pares aprovados em `validar_paleta.py`).
      - Validação de tokens semânticos (0 literais visuais em `validar_tokens.py`).
-     - Validação estrutural do firmware ESP32 Wokwi.
-     - Validação dos esquemas JSON de payload MQTT.
+     - Validação estrutural do firmware ESP32 físico (`PulseSensorPlayground`, `calibrarMPU`, 6 estados).
+     - Validação dos esquemas JSON de payload MQTT (`bpm_valido`, `bpm_antes_da_queda`, `movimento_pos_impacto`).
      - Validação das regras de DDD e normalização `+55` de telefones.
      - Validação da cláusula de segurança antigolpe.
      - Verificação da integridade de todos os arquivos.
 3. **Testes Unitários, de Widget e de Acessibilidade**:
    - `app/test/features/cuidado/domain/entidades_test.dart`
-   - `app/test/features/cuidado/data/provedores_test.dart` (inclui teste real de conexão ao broker `broker.hivemq.com`)
+   - `app/test/features/cuidado/data/provedores_test.dart`
    - `app/test/features/cuidado/presentation/tela_dispositivo_cuidado_test.dart`
    - `app/test/features/cuidado/presentation/tela_verificacao_queda_test.dart`
    - `app/test/features/casca/profundidade_test.dart` e `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart`
@@ -176,6 +174,6 @@ Código C++ completo desenvolvido para execução no simulador Wokwi:
 - [x] Zero valores visuais literais fora de `design_system/tokens/` (`validar_tokens.py` zerado).
 - [x] `flutter analyze` com zero pendências.
 - [x] Alarme com 45 segundos de tolerância antes da escalada de emergência.
-- [x] Silenciamento sonoro bidirecional imediato via MQTT ao responder "Estou bem".
-- [x] Suporte ao simulador Wokwi via broker público HiveMQ (MQTT 3.1.1 + IPv4).
+- [x] Reconhecimento e destravamento remoto imediato via MQTT (`CESSAR_ALARME`) ao responder "Estou bem".
+- [x] Suporte ao hardware ESP32 físico (MPU autocalibrado + Pulse Sensor óptico PPG) via broker público HiveMQ (MQTT 3.1.1 + IPv4).
 - [x] Suporte a números nacionais e com prefixo `+55`.

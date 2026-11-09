@@ -6,17 +6,21 @@ class MedidorBpm extends StatelessWidget {
   /// Cria o medidor de frequência cardíaca em BPM.
   const MedidorBpm({
     required this.bpm,
+    this.bpmValido = true,
     super.key,
   });
 
   /// Frequência cardíaca atual em batimentos por minuto.
   final int bpm;
 
+  /// Indica se a leitura atual do sensor óptico PPG é válida.
+  final bool bpmValido;
+
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-
-    final String textoBpm = bpm > 0 ? '$bpm' : '--';
+    final bool leituraAtiva = bpmValido && bpm > 0;
+    final String textoBpm = leituraAtiva ? '$bpm' : '--';
 
     return Container(
       padding: const EdgeInsets.all(MemoraEspacamento.md),
@@ -75,10 +79,11 @@ class MedidorBpm extends StatelessWidget {
           ),
           const SizedBox(height: MemoraEspacamento.xs),
           Text(
-            _classificacaoBpm(bpm),
+            _classificacaoBpm(leituraAtiva ? bpm : 0),
             style: MemoraTipografia.apoio.copyWith(
               color: cores.textoSuave,
             ),
+            textAlign: TextAlign.center,
             textScaler: escalaTextoLimitada(context),
           ),
         ],
@@ -87,7 +92,7 @@ class MedidorBpm extends StatelessWidget {
   }
 
   static String _classificacaoBpm(int valor) {
-    if (valor <= 0) return 'Aguardando leitura do sensor';
+    if (valor <= 0) return 'Posicione o dedo no sensor para medir';
     if (valor < 60) return 'Ritmo calmo em repouso';
     if (valor <= 100) return 'Ritmo normal e estável';
     return 'Ritmo elevado';
