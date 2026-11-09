@@ -282,7 +282,13 @@ class _TelaConversaState extends State<TelaConversa>
                               children: <Widget>[
                                 Icon(Icons.restart_alt, color: cores.primaria),
                                 const SizedBox(width: MemoraEspacamento.xs),
-                                TextoMemora('Recomeçar', cor: cores.primaria),
+                                Flexible(
+                                  child: TextoMemora(
+                                    'Recomeçar',
+                                    cor: cores.primaria,
+                                    maxLinhas: 1,
+                                  ),
+                                ),
                               ],
                             ),
                           ),

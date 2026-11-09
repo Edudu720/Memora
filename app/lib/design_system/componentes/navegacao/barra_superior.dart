@@ -44,49 +44,77 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
           constraints: const BoxConstraints(
             minHeight: MemoraDimensoes.alvoDecisao,
           ),
-          child: Row(
-            children: <Widget>[
-              if (aoVoltar != null)
-                Semantics(
-                  button: true,
-                  label: 'Voltar',
-                  onTap: aoVoltar,
-                  child: ExcludeSemantics(
-                    child: InkWell(
-                      onTap: aoVoltar,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minWidth: MemoraDimensoes.alvoMinimo,
-                          minHeight: MemoraDimensoes.alvoMinimo,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: MemoraEspacamento.md,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(Icons.arrow_back, color: cores.primaria),
-                              const SizedBox(width: MemoraEspacamento.xs),
-                              // Palavra escrita: seta sozinha é ambígua.
-                              TextoMemora('Voltar', cor: cores.primaria),
-                            ],
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints restricoes) {
+              final bool temOsDoisLados = aoVoltar != null && acao != null;
+              final double tetoLateral = restricoes.maxWidth *
+                  (temOsDoisLados
+                      ? MemoraDimensoes.tetoDoCampoDaConversa
+                      : MemoraDimensoes.tetoDoAvisoAberto);
+
+              return Row(
+                children: <Widget>[
+                  if (aoVoltar != null)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: tetoLateral),
+                      child: Semantics(
+                        button: true,
+                        label: 'Voltar',
+                        onTap: aoVoltar,
+                        child: ExcludeSemantics(
+                          child: InkWell(
+                            onTap: aoVoltar,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minWidth: MemoraDimensoes.alvoMinimo,
+                                minHeight: MemoraDimensoes.alvoMinimo,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: MemoraEspacamento.md,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.arrow_back,
+                                      color: cores.primaria,
+                                    ),
+                                    const SizedBox(
+                                      width: MemoraEspacamento.xs,
+                                    ),
+                                    // Palavra escrita: seta sozinha é ambígua.
+                                    Flexible(
+                                      child: TextoMemora(
+                                        'Voltar',
+                                        cor: cores.primaria,
+                                        maxLinhas: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: MemoraEspacamento.md,
+                      ),
+                      child: TextoMemora.tituloSecao(titulo, maxLinhas: 2),
+                    ),
                   ),
-                ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: MemoraEspacamento.md,
-                  ),
-                  child: TextoMemora.tituloSecao(titulo, maxLinhas: 2),
-                ),
-              ),
-              ?acao,
-            ],
+                  if (acao != null)
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: tetoLateral),
+                      child: acao,
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
