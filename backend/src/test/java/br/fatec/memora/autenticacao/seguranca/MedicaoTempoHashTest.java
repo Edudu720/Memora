@@ -29,7 +29,7 @@ class MedicaoTempoHashTest {
     private static final long PISO_MILISSEGUNDOS = 150;
 
     private final PasswordEncoder codificador =
-            new ConfiguracaoDeSenha().codificadorDeSenha();
+            new ConfiguracaoDeSenha().codificadorDeSenha("");
 
     @Test
     @DisplayName("o hash custa tempo suficiente neste ambiente")

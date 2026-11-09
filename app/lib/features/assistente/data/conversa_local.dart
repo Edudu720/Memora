@@ -39,14 +39,28 @@ class ConversaLocal implements DadoLocalDaPessoa {
   /// acumular, sem proveito, um histórico Confidencial que nunca será usado.
   static const int turnosGuardados = 40;
 
+  /// Prazo máximo de retenção das mensagens no aparelho (FR-054, T082).
+  ///
+  /// Mensagens com mais de 30 dias são expurgadas tanto na leitura quanto
+  /// na gravação, garantindo que o histórico antigo não se acumule no aparelho.
+  static const Duration retencaoMaxima = Duration(days: 30);
+
   /// Diretório onde gravar. Trocável no teste, que não tem plataforma.
   final Future<Directory> Function() _diretorio;
 
+  /// Relógio, trocável no teste para simular passagem de dias.
+  final DateTime Function() _agora;
+
   /// Cria o armazenamento da conversa.
-  ConversaLocal({Future<Directory> Function()? diretorio})
-    : _diretorio = diretorio ?? getApplicationDocumentsDirectory;
+  ConversaLocal({
+    Future<Directory> Function()? diretorio,
+    DateTime Function()? agora,
+  })  : _diretorio = diretorio ?? getApplicationDocumentsDirectory,
+        _agora = agora ?? DateTime.now;
 
   /// Lê a conversa guardada. Lista vazia quando não há nenhuma.
+  ///
+  /// Mensagens com mais de 30 dias são automaticamente expurgadas (FR-054).
   Future<List<MensagemDaConversa>> ler() async {
     try {
       // Le direto e trata a ausencia como conversa vazia, em vez de
@@ -57,10 +71,15 @@ class ConversaLocal implements DadoLocalDaPessoa {
       );
       if (conteudo is! List) return const <MensagemDaConversa>[];
 
-      return conteudo
+      final List<MensagemDaConversa> todas = conteudo
           .whereType<Map<String, dynamic>>()
           .map(_mensagemDe)
           .whereType<MensagemDaConversa>()
+          .toList();
+
+      final DateTime limite = _agora().subtract(retencaoMaxima);
+      return todas
+          .where((MensagemDaConversa m) => !m.momento.isBefore(limite))
           .toList();
     } on Exception {
       // Arquivo corrompido, permissão negada, disco cheio: a conversa é
@@ -70,12 +89,17 @@ class ConversaLocal implements DadoLocalDaPessoa {
     }
   }
 
-  /// Grava a conversa, mantendo apenas os turnos mais recentes.
+  /// Grava a conversa, mantendo apenas os turnos mais recentes dos últimos 30 dias.
   Future<void> guardar(List<MensagemDaConversa> mensagens) async {
+    final DateTime limite = _agora().subtract(retencaoMaxima);
+    final List<MensagemDaConversa> validas = mensagens
+        .where((MensagemDaConversa m) => !m.momento.isBefore(limite))
+        .toList();
+
     final List<MensagemDaConversa> recentes =
-        mensagens.length <= turnosGuardados
-        ? mensagens
-        : mensagens.sublist(mensagens.length - turnosGuardados);
+        validas.length <= turnosGuardados
+        ? validas
+        : validas.sublist(validas.length - turnosGuardados);
 
     try {
       final File arquivo = await _arquivo();

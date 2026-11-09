@@ -105,6 +105,41 @@ void main() {
       );
     });
 
+    testWidgets('nenhum segredo ou codigo chega ao registro (FR-036, T079)',
+        (WidgetTester t) async {
+      final ControladorConversa c = ControladorConversa(
+        assistente,
+        _ConversaEmMemoria(),
+        aceite: AceiteEmMemoria(),
+        abridor: abridor,
+      );
+      addTearDown(c.dispose);
+
+      await t.pumpWidget(
+        MaterialApp(theme: TemasMemora.claro, home: TelaConversa(controlador: c)),
+      );
+      await avancar(t);
+
+      // Usuário relata problema contendo código
+      await t.enterText(
+        find.byKey(TelaConversa.chaveCampo),
+        'não consegui achar meu código é 123456',
+      );
+      await avancar(t);
+      await t.tap(find.byKey(TelaConversa.chaveEnviar));
+      await avancar(t);
+
+      await t.runAsync(() => c.confirmarAcao());
+      await avancar(t);
+
+      final List<AcaoRegistrada> acoes = await assistente.registro();
+      expect(acoes, hasLength(1));
+      expect(acoes.first.pedidoResumido, isNot(contains('123456')));
+
+      await montarRegistro(t);
+      expect(find.textContaining('123456'), findsNothing);
+    });
+
     testWidgets('a tarefa so ENSINADA nao aparece (FR-025)',
         (WidgetTester t) async {
       final ControladorConversa c = ControladorConversa(

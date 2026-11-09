@@ -48,6 +48,12 @@ public class ClienteDaAssistenteSimulado implements ClienteDaAssistente {
             "Vamos com calma, um passo de cada vez. Primeiro, procure o "
                     + "quadradinho colorido na sua tela inicial 😊";
 
+    /** Resposta padrão de recusa financeira (T087, FR-018, FR-031, FR-037). */
+    public static final String RECUSA_FINANCEIRA_PADRAO =
+            "Não posso fazer transferências nem pagamentos. Eu sou um programa de computador feito "
+                    + "para te ensinar a usar o celular com segurança, e por proteção do seu dinheiro eu nunca "
+                    + "mexo com finanças nem com contas 😊";
+
     private String proximoTexto = RESPOSTA_PADRAO;
     private Sugestao proximaSugestao;
     private Pedido ultimoPedido;
@@ -118,9 +124,30 @@ public class ClienteDaAssistenteSimulado implements ClienteDaAssistente {
         // Entrega em pedaços, como um provedor real entregaria: o controlador
         // e a tela precisam ser exercitados no modo em que vão funcionar, e não
         // num caminho especial que só existe no teste.
-        for (String palavra : proximoTexto.split(" ")) {
+        String textoDevolvido = proximoTexto;
+        Optional<Sugestao> sugestaoDevolvida = Optional.ofNullable(proximaSugestao);
+
+        if (RESPOSTA_PADRAO.equals(proximoTexto) && proximaSugestao == null && ehPedidoFinanceiro(pedido)) {
+            textoDevolvido = RECUSA_FINANCEIRA_PADRAO;
+            sugestaoDevolvida = Optional.empty();
+        }
+
+        for (String palavra : textoDevolvido.split(" ")) {
             aoReceberTrecho.accept(palavra + " ");
         }
-        return new Resposta(proximoTexto, Optional.ofNullable(proximaSugestao));
+        return new Resposta(textoDevolvido, sugestaoDevolvida);
+    }
+    private static boolean ehPedidoFinanceiro(Pedido pedido) {
+        if (pedido == null || pedido.mensagem() == null) {
+            return false;
+        }
+        String texto = pedido.mensagem().toLowerCase(java.util.Locale.ROOT);
+        return texto.contains("transfere")
+                || texto.contains("transferir")
+                || texto.contains("pix")
+                || texto.contains("pagar")
+                || texto.contains("r$")
+                || texto.contains("apagar conta")
+                || texto.contains("apagar dados");
     }
 }

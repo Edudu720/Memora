@@ -109,9 +109,13 @@ class ControladorConversa extends ChangeNotifier {
   EstadoConversa _estado = EstadoConversa.abrindo;
   FalhaDaAssistente? _falha;
   AcaoAutorizada? _acaoOferecida;
+  bool _recusouExecucao = false;
   String _rascunho;
   String _trechoEmCurso = '';
   String _ultimoPedido = '';
+
+  /// Se a pessoa já recusou a execução de uma ação nesta conversa (T083, FR-016).
+  bool get recusouExecucao => _recusouExecucao;
 
   /// As mensagens da conversa, da mais antiga para a mais nova.
   List<MensagemDaConversa> get mensagens =>
@@ -193,6 +197,9 @@ class ControladorConversa extends ChangeNotifier {
     _mensagens
       ..clear()
       ..addAll(guardadas);
+    _recusouExecucao = _mensagens.any(
+      (MensagemDaConversa m) => m.texto == TextosAssistente.botaoPrefiroTentar,
+    );
     _aceitou = jaAceitou;
     _estado = EstadoConversa.aguardando;
     notifyListeners();
@@ -283,7 +290,8 @@ class ControladorConversa extends ChangeNotifier {
           ),
         );
         // Vem do servidor, ou não vem. Este controlador nunca a cria.
-        _acaoOferecida = acao;
+        // Se a pessoa já recusou a execução nesta conversa, a oferta não se repete (FR-016, T083).
+        _acaoOferecida = _recusouExecucao ? null : acao;
         _estado = EstadoConversa.aguardando;
         await _local.guardar(_mensagens);
 
@@ -316,7 +324,16 @@ class ControladorConversa extends ChangeNotifier {
   /// "não" é o comportamento que a spec proíbe, e o que faria alguém aceitar
   /// só para a pergunta parar.
   void recusarAcao() {
+    _recusouExecucao = true;
     _acaoOferecida = null;
+    _mensagens.add(
+      MensagemDaConversa(
+        autor: AutorDaMensagem.pessoa,
+        texto: TextosAssistente.botaoPrefiroTentar,
+        momento: DateTime.now(),
+      ),
+    );
+    unawaited(_local.guardar(_mensagens));
     notifyListeners();
   }
 
@@ -454,6 +471,7 @@ class ControladorConversa extends ChangeNotifier {
     _mensagens.clear();
     _acaoOferecida = null;
     _falha = null;
+    _recusouExecucao = false;
     _estado = EstadoConversa.aguardando;
     try {
       await _local.apagar();

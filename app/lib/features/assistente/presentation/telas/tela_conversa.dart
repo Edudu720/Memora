@@ -88,6 +88,12 @@ class TelaConversa extends StatefulWidget {
   /// Chave do botão que recusa a oferta.
   static const Key chaveRecusarAbrir = Key('conversa.recusar_abrir');
 
+  /// Chave do botão de recomeçar a conversa (T085).
+  static const Key chaveRecomecar = Key('conversa.recomecar');
+
+  /// Chave do diálogo de confirmação de recomeço (T085).
+  static const Key chaveConfirmarRecomeco = Key('conversa.confirmar_recomeco');
+
   /// Controlador da tela.
   final ControladorConversa controlador;
 
@@ -187,6 +193,24 @@ class _TelaConversaState extends State<TelaConversa>
     });
   }
 
+  void _confirmarRecomeco(BuildContext context, ControladorConversa c) {
+    DialogoMemora.mostrar(
+      context,
+      dialogo: DialogoMemora(
+        key: TelaConversa.chaveConfirmarRecomeco,
+        titulo: TextosAssistente.tituloRecomecar,
+        mensagem: TextosAssistente.explicacaoRecomecar,
+        rotuloConfirmar: TextosAssistente.botaoConfirmarRecomeco,
+        aoConfirmar: () {
+          Navigator.of(context).pop();
+          c.apagarConversa();
+        },
+        rotuloFechar: TextosAssistente.botaoCancelarRecomeco,
+        aoFechar: () => Navigator.of(context).pop(),
+      ),
+    );
+  }
+
   /// A chave da fala que está sendo escrita: ela amarra o texto que chega à
   /// mensagem final, na posição `indice` da conversa.
   Key _chaveDaEscrita(int indice) => ValueKey<String>('conversa.fala.$indice');
@@ -236,6 +260,37 @@ class _TelaConversaState extends State<TelaConversa>
           appBar: BarraSuperior(
             titulo: TextosAssistente.tituloConversa,
             aoVoltar: widget.aoVoltar,
+            acao: (c.mensagens.isNotEmpty && !c.precisaDoAceite)
+                ? Semantics(
+                    button: true,
+                    label: TextosAssistente.rotuloRecomecar,
+                    child: ExcludeSemantics(
+                      child: InkWell(
+                        key: TelaConversa.chaveRecomecar,
+                        onTap: () => _confirmarRecomeco(context, c),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            minWidth: MemoraDimensoes.alvoMinimo,
+                            minHeight: MemoraDimensoes.alvoMinimo,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: MemoraEspacamento.md,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(Icons.restart_alt, color: cores.primaria),
+                                const SizedBox(width: MemoraEspacamento.xs),
+                                TextoMemora('Recomeçar', cor: cores.primaria),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
           ),
           body: SafeArea(
             top: false,

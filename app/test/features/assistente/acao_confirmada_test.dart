@@ -132,6 +132,22 @@ void main() {
       expect(find.byKey(TelaConversa.chaveConfirmarAbrir), findsNothing);
     });
 
+    testWidgets('recusar a oferta impede que ela volte na mesma conversa (FR-016, T083, US3/AC2)',
+        (WidgetTester t) async {
+      final ControladorConversa c = await chegarNaOferta(t);
+
+      c.recusarAcao();
+      await avancar(t);
+
+      expect(c.recusouExecucao, isTrue);
+      expect(c.mensagens.last.texto, TextosAssistente.botaoPrefiroTentar);
+
+      // Nova tentativa com a mesma queixa na mesma conversa nao produz nova oferta
+      await perguntar(t, 'nao consegui achar');
+      expect(c.acaoOferecida, isNull);
+      expect(find.byKey(TelaConversa.chaveConfirmarAbrir), findsNothing);
+    });
+
     testWidgets('confirmar abre o aplicativo certo', (WidgetTester t) async {
       final ControladorConversa c = await chegarNaOferta(t);
       final String pacote = c.acaoOferecida!.identificadorAndroid;

@@ -259,11 +259,22 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       (ServicoDoCatalogo s) => s.id == servicoId,
       orElse: () => catalogoDaDemonstracao.first,
     );
+    // Sanitiza segredos e dígitos longos no simulado também (T079, FR-036).
+    final String sanitizado = pedidoResumido
+        .replaceAll(
+          RegExp(
+            r'\b(senha|c[oó]digo|codigo|pin|token)\s*(?:[:=]|é|e)?\s*\S+',
+            caseSensitive: false,
+          ),
+          r' ***',
+        )
+        .replaceAll(RegExp(r'\b\d{4,}\b'), '***');
+
     acoesRegistradas.insert(
       0,
       AcaoRegistrada(
         nomeExibido: servico.nomeExibido,
-        pedidoResumido: pedidoResumido,
+        pedidoResumido: sanitizado,
         ocorridoEm: DateTime.now(),
       ),
     );

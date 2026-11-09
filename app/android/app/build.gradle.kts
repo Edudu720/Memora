@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -30,11 +32,40 @@ android {
         versionName = flutter.versionName
     }
 
+    // A chave do Memora mora fora do repositorio: key.properties e o .jks estao
+    // no android/.gitignore. Sem eles (CI, outra maquina), o release cai na
+    // chave de depuracao, com aviso: APK assinado assim nao instala por cima
+    // de um assinado com a chave do Memora. Ver docs/deploy/render.md.
+    val propriedadesDaChave = Properties()
+    val arquivoDaChave = rootProject.file("key.properties")
+    val temChaveDoMemora = arquivoDaChave.exists()
+    if (temChaveDoMemora) {
+        arquivoDaChave.inputStream().use { propriedadesDaChave.load(it) }
+    }
+
+    signingConfigs {
+        if (temChaveDoMemora) {
+            create("memora") {
+                storeFile = file(propriedadesDaChave.getProperty("storeFile"))
+                storePassword = propriedadesDaChave.getProperty("storePassword")
+                keyAlias = propriedadesDaChave.getProperty("keyAlias")
+                keyPassword = propriedadesDaChave.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig =
+                if (temChaveDoMemora) {
+                    signingConfigs.getByName("memora")
+                } else {
+                    logger.warn(
+                        "AVISO: android/key.properties ausente; o release sera " +
+                            "assinado com a chave de DEPURACAO desta maquina.",
+                    )
+                    signingConfigs.getByName("debug")
+                }
         }
     }
 }

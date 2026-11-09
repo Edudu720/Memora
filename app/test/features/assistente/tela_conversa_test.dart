@@ -495,6 +495,15 @@ void main() {
       expect(segunda.mensagens, hasLength(quantas));
     });
 
+    testWidgets('o convite inicial diz que e um programa (FR-013, T084)', (WidgetTester t) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+
+      expect(find.text(TextosAssistente.convite), findsOneWidget);
+      expect(TextosAssistente.convite.toLowerCase(), contains('programa'));
+    });
+
     testWidgets('apagar a conversa apaga mesmo', (WidgetTester t) async {
       final ControladorConversa c = controladorCom();
       addTearDown(c.dispose);
@@ -506,6 +515,42 @@ void main() {
 
       expect(c.mensagens, isEmpty);
       expect(await local.ler(), isEmpty);
+    });
+
+    testWidgets('controle visivel para apagar e recomecar com confirmacao (FR-050, T085)', (WidgetTester t) async {
+      final ControladorConversa c = controladorCom();
+      addTearDown(c.dispose);
+      await montar(t, c);
+
+      // Antes de haver mensagens, o controle de recomecar nao aparece
+      expect(find.byKey(TelaConversa.chaveRecomecar), findsNothing);
+
+      await perguntar(t, 'como mando mensagem');
+      expect(find.byKey(TelaConversa.chaveRecomecar), findsOneWidget);
+
+      // Toca no botao de recomecar
+      await t.tap(find.byKey(TelaConversa.chaveRecomecar));
+      await t.pumpAndSettle();
+
+      // Dialogo de confirmacao aparece
+      expect(find.text(TextosAssistente.tituloRecomecar), findsOneWidget);
+      expect(find.text(TextosAssistente.botaoCancelarRecomeco), findsOneWidget);
+      expect(find.text(TextosAssistente.botaoConfirmarRecomeco), findsOneWidget);
+
+      // Cancelar nao apaga nada
+      await t.tap(find.text(TextosAssistente.botaoCancelarRecomeco));
+      await t.pumpAndSettle();
+      expect(c.mensagens, isNotEmpty);
+
+      // Toca novamente e confirma
+      await t.tap(find.byKey(TelaConversa.chaveRecomecar));
+      await t.pumpAndSettle();
+      await t.tap(find.text(TextosAssistente.botaoConfirmarRecomeco));
+      await t.pumpAndSettle();
+
+      expect(c.mensagens, isEmpty);
+      expect(await local.ler(), isEmpty);
+      expect(find.text(TextosAssistente.convite), findsOneWidget);
     });
   });
 
@@ -537,7 +582,10 @@ void main() {
 
     setUp(() async {
       temporario = await Directory.systemTemp.createTemp('memora_conversa');
-      disco = ConversaLocal(diretorio: () async => temporario);
+      disco = ConversaLocal(
+        diretorio: () async => temporario,
+        agora: () => DateTime(2026, 8, 29, 12),
+      );
     });
 
     tearDown(() async {
@@ -633,6 +681,37 @@ void main() {
       expect(lida, hasLength(ConversaLocal.turnosGuardados));
       // Corta pelo comeco: numa conversa longa, o que importa e o fim.
       expect(lida.last.texto, endsWith('${ConversaLocal.turnosGuardados + 9}'));
+    });
+
+    test('apaga do aparelho as mensagens com mais de 30 dias (FR-054, T082)', () async {
+      final DateTime agora = DateTime(2026, 10, 27, 12);
+      final ConversaLocal discoComRelogio = ConversaLocal(
+        diretorio: () async => temporario,
+        agora: () => agora,
+      );
+
+      await discoComRelogio.guardar(<MensagemDaConversa>[
+        MensagemDaConversa(
+          autor: AutorDaMensagem.pessoa,
+          texto: 'mensagem com 35 dias',
+          momento: agora.subtract(const Duration(days: 35)),
+        ),
+        MensagemDaConversa(
+          autor: AutorDaMensagem.memora,
+          texto: 'mensagem com 31 dias',
+          momento: agora.subtract(const Duration(days: 31)),
+        ),
+        MensagemDaConversa(
+          autor: AutorDaMensagem.pessoa,
+          texto: 'mensagem recente com 5 dias',
+          momento: agora.subtract(const Duration(days: 5)),
+        ),
+      ]);
+
+      final List<MensagemDaConversa> lida = await discoComRelogio.ler();
+
+      expect(lida, hasLength(1));
+      expect(lida.single.texto, 'mensagem recente com 5 dias');
     });
   });
 }
