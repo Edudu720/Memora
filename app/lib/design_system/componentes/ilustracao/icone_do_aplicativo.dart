@@ -158,19 +158,13 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 6. Telegram
+    // 6. Telegram (logo oficial fornecida)
     if (normalizada.contains('telegram')) {
-      return Container(
-        color: const Color(0xFF229ED9),
-        alignment: Alignment.center,
-        child: Transform.translate(
-          offset: Offset(-tamanho * 0.03, 0),
-          child: Icon(
-            Icons.send_rounded,
-            color: Colors.white,
-            size: tamanho * 0.58,
-          ),
-        ),
+      return Image.asset(
+        'assets/ilustracoes/telegram_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
