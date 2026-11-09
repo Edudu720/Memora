@@ -26,7 +26,7 @@ cd app; flutter pub get
 
 ---
 
-## 2. Execução da Suíte Automatizada de Portões (7/7)
+## 2. Execução da Suíte Automatizada de Portões (8/8)
 
 Na raiz do repositório:
 
@@ -88,10 +88,17 @@ flutter test test/features/cuidado/
 
 ---
 
-### V5 — Escalada de Emergência por Expiração de 45s ou "Preciso de ajuda" (FR-009, FR-010, FR-020)
+### V5 — Escalada de Emergência via WhatsApp com Mensagem Pré-Pronta (FR-009, FR-010, FR-020)
 1. Cadastrar um contato de emergência válido com DDD na `TelaDispositivoCuidado`.
 2. Disparar um evento de queda (pelo ESP32 físico ou pelo botão *"Simular Queda de Teste"* no modo Simulador).
 3. Tocar em **"Preciso de ajuda"** (ou aguardar os 45 segundos zerarem).
 4. **Espera-se**:
-   - Abertura imediata do discador nativo do Android (`ACTION_DIAL`) com o telefone preenchido.
-   - Preparação do SMS nativo (`ACTION_SENDTO`) com data, horário e a cláusula obrigatória antigolpe.
+   - Abertura imediata da conversa do contato de emergência no **WhatsApp** (`whatsapp://send?phone=55<numero>&text=<mensagem>`) com a mensagem de socorro, data, horário e a cláusula obrigatória antigolpe já preenchidos e prontos para envio (ou fallback para `wa.me` / SMS / discador caso o WhatsApp não esteja instalado).
+
+---
+
+### V6 — Privacidade na Saída da Conta e Segurança de Rede (FR-021, FR-022, Issue #43)
+1. Com um contato de emergência salvo, encerrar a sessão da conta no aplicativo (`LimpezaDeSessao.executar()`).
+2. **Espera-se**:
+   - O `RepositorioContatoEmergenciaLocal` apaga o contato de emergência do `SharedPreferences` via `DadoLocalDaPessoa.apagar()`.
+   - O `AndroidManifest.xml` não contém `android:usesCleartextTraffic="true"` e o `ProvedorDeTelemetriaMqtt` suporta conexão TLS (`porta 8883`) e credenciais de autenticação.

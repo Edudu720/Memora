@@ -102,3 +102,38 @@ A interface da `TelaDispositivoCuidado` possuía rótulos explícitos referencia
   - `'Wokwi Ativo'` / `'Usar Wokwi'` ➔ `'ESP32 Ativo'` / `'Usar ESP32'`
   - `'Reconectar ao Wokwi'` ➔ `'Reconectar ao ESP32'`
 - Manter intactos os requisitos do Design System Memora (piso de 16 sp, botões de decisão de 56 dp, zero literais visuais e suporte a 200% de escala de texto).
+
+---
+
+## R6 — Acionamento de Socorro via WhatsApp com Mensagem Pré-Pronta (`DispararSocorroEmergencia`)
+
+### Contexto
+No protótipo anterior, `DispararSocorroEmergencia` disparava `ACTION_DIAL` (`tel:`) e imediatamente em seguida `ACTION_SENDTO` (`smsto:`), fazendo com que a tela de SMS sobrepusesse o discador. No Brasil, o canal imediato de comunicação familiar é o **WhatsApp**.
+
+### Decisão
+1. **Abertura Direta da Conversa no WhatsApp (`whatsapp://send`)**:
+   - Normalizar os dígitos de `ContatoEmergencia.telefoneNumeros` adicionando automaticamente o código do país (`55`) quando o número possuir 10 ou 11 dígitos locais (ex.: `11999998888` ➔ `5511999998888`).
+   - Construir a URI `whatsapp://send?phone=55<numero>&text=<mensagem_codificada>` via `Uri.encodeComponent(mensagem)` e acionar `AndroidIntent(action: 'android.intent.action.VIEW', data: uri, package: 'com.whatsapp')`.
+2. **Cascata de Fallback Resiliente**:
+   - Caso o app nativo `com.whatsapp` não esteja instalado ou falhe ao abrir o esquema `whatsapp://`, tentar abrir `https://wa.me/55<numero>?text=<mensagem_codificada>` (`ACTION_VIEW` sem restrição de pacote) e, em último caso, acionar o SMS (`smsto:`) e o discador (`tel:`).
+3. **Visibilidade de Pacote no Android 11+ (`<queries>`)**:
+   - Manter `<package android:name="com.whatsapp"/>` e adicionar `<intent><action android:name="android.intent.action.VIEW"/><data android:scheme="whatsapp"/></intent>` no `AndroidManifest.xml`.
+
+---
+
+## R7 — Fechamento da Issue #43: Limpeza de Sessão, TLS MQTT e Remoção de `usesCleartextTraffic`
+
+### Contexto
+O relatório de pentest (Issue #43) apontou três pendências para o fechamento de segurança da Feature 005:
+1. `ContatoEmergencia` persistido em `SharedPreferences` não entrava na `LimpezaDeSessao` ao encerrar a sessão (`FR-026` / `FR-048`).
+2. `android:usesCleartextTraffic="true"` havia sido adicionado na tag `<application>` do `AndroidManifest.xml`, liberando HTTP sem cifra no aplicativo inteiro.
+3. `ProvedorDeTelemetriaMqtt` não suportava TLS (`porta 8883`) nem credenciais de autenticação (`usuario`/`senha`).
+
+### Decisão
+1. **`RepositorioContatoEmergenciaLocal implements DadoLocalDaPessoa`**:
+   - Implementar `Future<void> apagar() => removerContato()` e incluir `RepositorioContatoEmergenciaLocal(preferencias)` na lista `dadosLocais` de `LimpezaDeSessao` em `Composicao.resolver`.
+2. **Remoção de `android:usesCleartextTraffic="true"`**:
+   - Remover o atributo do `AndroidManifest.xml`. O pacote `mqtt_client` abre sockets TCP/TLS diretamente via `dart:io` (`Socket.connect` / `SecureSocket.connect`) e não passa pelo `NetworkSecurityConfig` HTTP do Android, mantendo a bancada de testes em `1883` funcional sem degradar a segurança HTTPS do aplicativo.
+3. **Suporte a TLS (`8883`) e Autenticação em `ProvedorDeTelemetriaMqtt` e no ESP32**:
+   - Adicionar parâmetros `usarTls`, `usuario` e `senha` ao `ProvedorDeTelemetriaMqtt` (com leitura via `--dart-define`: `MEMORA_MQTT_BROKER`, `MEMORA_MQTT_PORTA`, `MEMORA_MQTT_TLS`, `MEMORA_MQTT_TOPICO_BASE`, `MEMORA_MQTT_USUARIO`, `MEMORA_MQTT_SENHA`), habilitando `cliente.secure = true` e `SecurityContext.defaultContext` quando `usarTls || porta == 8883`.
+   - Adicionar constantes `MQTT_USER` e `MQTT_PASS` ao firmware do ESP32 (`firmware_wokwi.ino` e `codigo.md`).

@@ -55,13 +55,13 @@ Registro de uma ocorrência crítica de queda confirmada após queda livre (`>= 
 ---
 
 ### `ContatoEmergencia`
-Pessoa de confiança cadastrada para receber socorro imediato (chamada telefônica e mensagem SMS).
+Pessoa de confiança cadastrada para receber socorro imediato via **WhatsApp com mensagem pré-pronta** (e fallback para SMS/chamada telefônica).
 
 | Campo | Tipo | Descrição |
 |---|---|---|
 | `id` | `String` | Identificador do contato |
 | `nome` | `String` | Nome de tratamento da pessoa de confiança (ex.: `"Filha Mariana"`) |
-| `telefone` | `String` | Número de telefone com DDD (10 ou 11 dígitos nacionais; suporta remoção automática de `+55` em `telefoneNumeros`) |
+| `telefone` | `String` | Número de telefone com DDD (10 ou 11 dígitos nacionais; suporta remoção automática de `+55` em `telefoneNumeros` e adição automática do DDI `55` em `telefoneWhatsapp`) |
 | `parentesco` | `String` | Grau de parentesco ou relação (ex.: `"Filha"`, `"Vizinho"`, `"Cuidador"`) |
 | `ativo` | `bool` | Indica se o contato está ativo para acionamento |
 
@@ -71,14 +71,14 @@ Pessoa de confiança cadastrada para receber socorro imediato (chamada telefôni
 
 ### `StatusConexaoIot` (App)
 - `desconectado`: Sem conexão ativa com o broker MQTT ou simulador.
-- `conectando`: Handshake TCP/MQTT em andamento.
+- `conectando`: Handshake TCP/TLS/MQTT em andamento.
 - `conectado`: Inscrito nos tópicos `/telemetria` e `/alerta`.
 
 ### `StatusConfirmacaoQueda` (App)
 - `aguardandoConfirmacao`: Tela *"Você está bem?"* aberta com cronômetro regressivo de 45 segundos.
 - `canceladoPeloUsuario`: A pessoa idosa tocou em *"Estou bem"*; alarme encerrado e comando `CESSAR_ALARME` enviado ao ESP32.
-- `socorroAcionado`: A pessoa idosa tocou em *"Preciso de ajuda"*; discador e SMS disparados imediatamente.
-- `tempoExpirado`: O cronômetro de 45 segundos atingiu zero sem resposta; discador e SMS disparados automaticamente.
+- `socorroAcionado`: A pessoa idosa tocou em *"Preciso de ajuda"*; conversa do WhatsApp com mensagem pré-pronta disparada imediatamente.
+- `tempoExpirado`: O cronômetro de 45 segundos atingiu zero sem resposta; conversa do WhatsApp com mensagem pré-pronta disparada automaticamente.
 
 ### `ModoOperacaoIot` (App)
 - `simulado`: Geração interna de dados para testes offline e automatizados.
@@ -94,6 +94,7 @@ Pessoa de confiança cadastrada para receber socorro imediato (chamada telefôni
 
 ---
 
-## 3. Persistência Local
+## 3. Persistência Local e Ciclo de Limpeza de Sessão (`FR-021` / `FR-048`)
 
 - `ContatoEmergencia` é persistido em JSON via `SharedPreferences` (`RepositorioContatoEmergenciaLocal`).
+- `RepositorioContatoEmergenciaLocal` implementa `DadoLocalDaPessoa` (`apagar()` ➔ `removerContato()`) e é registrado em `LimpezaDeSessao.dadosLocais` (`Composicao.resolver`), garantindo remoção automática dos dados do contato em toda saída de conta.
