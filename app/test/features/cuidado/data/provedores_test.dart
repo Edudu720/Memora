@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
 import 'package:memora/features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
@@ -23,6 +24,7 @@ void main() {
 
       final TelemetriaIot telemetria = await provedor.streamTelemetria.first;
       expect(telemetria.bpm, inInclusiveRange(40, 180));
+      expect(telemetria.bpmValido, isTrue);
       expect(telemetria.emMovimento, isTrue);
 
       await provedor.desconectar();
@@ -31,7 +33,7 @@ void main() {
       provedor.descartar();
     });
 
-    test('simularQueda emite evento no streamQueda', () async {
+    test('simularQueda emite evento no streamQueda e aceita enviarComandoCessarAlarme', () async {
       final ProvedorDeTelemetriaSimulado provedor =
           ProvedorDeTelemetriaSimulado();
 
@@ -42,7 +44,22 @@ void main() {
       expect(quedaRecebida.bpmNoImpacto, 92);
       expect(quedaRecebida.tempoRestanteSegundos, 45);
 
+      await provedor.enviarComandoCessarAlarme();
       provedor.descartar();
+    });
+
+    test('processa contrato de alerta pós-impacto do ESP32 físico', () {
+      const String payloadAlerta =
+          '{"evento":"QUEDA_DETECTADA","bpm":76,"bpm_valido":true,"bpm_antes_da_queda":74,"aceleracao":2.95,"movimento_pos_impacto":2.8,"timestamp":95400}';
+      final EventoQueda queda = EventoQueda.fromJson(
+        jsonDecode(payloadAlerta) as Map<String, dynamic>,
+      );
+
+      expect(queda.bpmNoImpacto, 76);
+      expect(queda.bpmValido, isTrue);
+      expect(queda.bpmAntesDaQueda, 74);
+      expect(queda.aceleracaoNoImpacto, 2.95);
+      expect(queda.movimentoPosImpacto, 2.8);
     });
   });
 
@@ -76,4 +93,3 @@ void main() {
     });
   });
 }
-

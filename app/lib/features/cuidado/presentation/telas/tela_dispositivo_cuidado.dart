@@ -12,7 +12,7 @@ import '../widgets/medidor_bpm.dart';
 import 'dialogo_contato_emergencia.dart';
 import 'tela_verificacao_queda.dart';
 
-/// Tela dedicada à visualização e integração do Dispositivo de Cuidado (ESP32 / Wokwi).
+/// Tela dedicada à visualização e integração do Dispositivo de Cuidado (ESP32 Físico / Simulador).
 class TelaDispositivoCuidado extends StatefulWidget {
   /// Cria a tela do dispositivo de cuidado.
   const TelaDispositivoCuidado({
@@ -39,7 +39,7 @@ class TelaDispositivoCuidado extends StatefulWidget {
 class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
   late final TextEditingController _controladorBroker;
   late final TextEditingController _controladorTopico;
-  bool _painelWokwiAberto = false;
+  bool _painelConexaoAberto = false;
 
   @override
   void initState() {
@@ -177,7 +177,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                               ),
                               const SizedBox(height: MemoraEspacamento.xs),
                               Text(
-                                modoMqtt ? 'Wokwi / MQTT' : 'Simulador',
+                                modoMqtt ? 'Dispositivo ESP32 (MQTT)' : 'Simulador',
                                 style: MemoraTipografia.apoio.copyWith(
                                   color: cores.textoSuave,
                                 ),
@@ -218,7 +218,10 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                         const SizedBox(height: MemoraEspacamento.md),
 
                         // Medidor de BPM e Indicador de Movimento
-                        MedidorBpm(bpm: telemetria?.bpm ?? 0),
+                        MedidorBpm(
+                          bpm: telemetria?.bpm ?? 0,
+                          bpmValido: telemetria?.bpmValido ?? false,
+                        ),
                         const SizedBox(height: MemoraEspacamento.md),
                         IndicadorMovimento(
                           emMovimento: telemetria?.emMovimento ?? false,
@@ -299,7 +302,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
 
                         const SizedBox(height: MemoraEspacamento.md),
 
-                        // Seção de Testes e Simulação Wokwi
+                        // Seção de Conexão ESP32 & Testes
                         Container(
                           padding: const EdgeInsets.all(MemoraEspacamento.md),
                           decoration: BoxDecoration(
@@ -313,7 +316,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                               InkWell(
                                 onTap: () {
                                   setState(() {
-                                    _painelWokwiAberto = !_painelWokwiAberto;
+                                    _painelConexaoAberto = !_painelConexaoAberto;
                                   });
                                 },
                                 child: Row(
@@ -326,7 +329,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                     const SizedBox(width: MemoraEspacamento.sm),
                                     Expanded(
                                       child: Text(
-                                        'Integração Wokwi & Testes',
+                                        'Conexão ESP32 & Testes',
                                         style: MemoraTipografia.corpoForte.copyWith(
                                           color: cores.texto,
                                         ),
@@ -335,7 +338,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                     ),
                                     const SizedBox(width: MemoraEspacamento.sm),
                                     Icon(
-                                      _painelWokwiAberto
+                                      _painelConexaoAberto
                                           ? Icons.expand_less_rounded
                                           : Icons.expand_more_rounded,
                                       color: cores.textoSuave,
@@ -343,7 +346,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                   ],
                                 ),
                               ),
-                              if (_painelWokwiAberto) ...<Widget>[
+                              if (_painelConexaoAberto) ...<Widget>[
                                 const SizedBox(height: MemoraEspacamento.md),
                                 Row(
                                   children: <Widget>[
@@ -360,7 +363,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                     const SizedBox(width: MemoraEspacamento.sm),
                                     Expanded(
                                       child: BotaoSecundario(
-                                        rotulo: modoMqtt ? 'Wokwi Ativo' : 'Usar Wokwi',
+                                        rotulo: modoMqtt ? 'ESP32 Ativo' : 'Usar ESP32',
                                         aoTocar: () {
                                           widget.controlador.alternarModo(
                                             ModoOperacaoIot.mqtt,
@@ -387,7 +390,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                                   ),
                                   const SizedBox(height: MemoraEspacamento.sm),
                                   BotaoPrimario(
-                                    rotulo: 'Reconectar ao Wokwi',
+                                    rotulo: 'Reconectar ao ESP32',
                                     aoTocar: () {
                                       widget.controlador.alternarModo(
                                         ModoOperacaoIot.mqtt,

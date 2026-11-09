@@ -14,7 +14,7 @@ void main() {
   });
 
   group('TelaDispositivoCuidado', () {
-    testWidgets('exibe título, medidores e botões de conexão', (WidgetTester tester) async {
+    testWidgets('exibe título, medidores, orientação do sensor óptico e seção ESP32', (WidgetTester tester) async {
       final RepositorioContatoEmergenciaLocal repo = RepositorioContatoEmergenciaLocal();
       final ProvedorDeTelemetriaSimulado provedor = ProvedorDeTelemetriaSimulado();
       final ControladorDispositivoCuidado ctrl = ControladorDispositivoCuidado(
@@ -41,8 +41,10 @@ void main() {
 
       expect(find.text('Dispositivo de Cuidado'), findsOneWidget);
       expect(find.text('Frequência Cardíaca'), findsOneWidget);
+      expect(find.text('Posicione o dedo no sensor para medir'), findsOneWidget);
       expect(find.text('Estado de Movimento'), findsOneWidget);
       expect(find.text('Contato de Emergência'), findsOneWidget);
+      expect(find.text('Conexão ESP32 & Testes'), findsOneWidget);
 
       ctrl.dispose();
     });

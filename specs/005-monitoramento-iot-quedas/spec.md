@@ -60,9 +60,13 @@ Ao detectar uma queda potencial, o sistema prioriza a verificação direta e ime
 
 ### Session 2026-10-09
 
-- **Q: Como o dispositivo IoT (ou simulador Wokwi) deve transmitir a telemetria em tempo real para o ecossistema Memora?** → **A: MQTT direto via broker** (ex.: broker MQTT padrão configurável `broker.hivemq.com` ou broker local/privado). O ESP32 no Wokwi/físico publica leituras periódicas de BPM, status de movimento e evento de queda em tópicos dedicados, e o aplicativo Memora assina os eventos diretamente, garantindo latência inferior a 500 ms (FR-013, FR-019).
+- **Q: Como o dispositivo IoT (ou simulador Wokwi) deve transmitir a telemetria em tempo real para o ecossistema Memora?** → **A: MQTT direto via broker** (ex.: broker MQTT padrão configurável `broker.hivemq.com` ou broker local/privado). O ESP32 publica leituras periódicas de BPM, status de movimento e evento de queda em tópicos dedicados, e o aplicativo Memora assina os eventos diretamente, garantindo latência inferior a 500 ms (FR-013, FR-019).
 - **Q: Qual é o tempo de tolerância da contagem regressiva na tela de verificação ("Você está bem?") antes de disparar o alerta de emergência?** → **A: 45 segundos**. Tempo adequado para que uma pessoa idosa de 65+ anos ouça o alarme, pegue o celular e toque com calma em "Estou bem", prevenindo falso pânico sem retardar socorro em casos reais de imobilidade (FR-009, FR-010).
 - **Q: Por qual canal o alerta de emergência deve ser disparado para o contato cadastrado caso o idoso não responda ou peça ajuda?** → **A: Ligação telefônica direta (discador) + Notificação/Mensagem**. O aplicativo aciona imediatamente a chamada nativa do celular para o contato de emergência e prepara/dispara a mensagem de texto com o relatório da ocorrência (horário, identificação e aviso preventivo contra golpes) (FR-012, FR-020).
+
+### Session 2026-11-09 (Migração para Hardware ESP32 Físico)
+
+- **Q: Como o sistema evolui com a chegada do hardware ESP32 físico em substituição ao simulador Wokwi?** → **A: Hardware ESP32 DevKit com MPU6050/9250/9255 autocalibrado e Pulse Sensor óptico PPG no GPIO 34**. O protótipo físico não utiliza LEDs nem buzzer na placa (concentrando o alerta vibratório/visual no celular e usando `CESSAR_ALARME` para destravar o estado `QUEDA_DETECTADA` no ESP32), opera com máquina de 6 estados (incluindo janela de 3 segundos pós-impacto para descartar falsos positivos) e envia `bpm_valido`, `bpm_antes_da_queda` e `movimento_pos_impacto` nos payloads MQTT.
 
 ---
 
