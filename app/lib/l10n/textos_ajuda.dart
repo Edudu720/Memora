@@ -35,6 +35,13 @@ abstract final class TextosAjuda {
   static const String reverApresentacaoExplicacao =
       'Eu me apresento outra vez, em três telas';
 
+  /// Instrução da caixa de etapa na lista de assuntos (FR-002a, T125d).
+  static const String instrucaoAssuntos =
+      'Toque num assunto para abrir a explicação:';
+
+  /// Instrução da caixa de etapa para avançar ou voltar no assunto (FR-002a, T125d).
+  static const String instrucaoNavegacao = 'Escolha como continuar:';
+
   // ---------------------------------------------------------------------------
   // Navegação dentro de um assunto
   // ---------------------------------------------------------------------------

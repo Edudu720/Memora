@@ -175,6 +175,23 @@ aqui porque também são valores visuais que divergiram de uma intenção anteri
 
 ---
 
+## 6. Divergências do wireframe na Feature 004 (`004-redesenho-das-telas`, T107)
+
+Na implementação das 35 telas do wireframe do Arquivo X, as divergências abaixo foram introduzidas por requisitos de segurança (Princípios I e II) ou medições de acessibilidade (Princípio III):
+
+| Item do wireframe | Implementação na Feature 004 | Medição / Justificativa |
+|---|---|---|
+| **Passo a passo por cima do aplicativo real** (Figuras 21–24 e 29–36) | Passo a passo **inteiro dentro do Memora** (`TelaPassoAPasso` / `PassoIlustrado`), com captura marcada com o selo `"Exemplo"` (`FR-028`, `FR-029`) | Desenhar por cima de outro aplicativo exige `SYSTEM_ALERT_WINDOW`, a permissão mais explorada por trojans bancários no Brasil (Princípio II) |
+| **Aviso de segurança fixo ocupando o topo da conversa** | `AvisoCompacto` aberto até a 1ª pergunta e encolhido para escudo de `48 dp` depois dela (`FR-022`, `R5`) | **Medido**: o aviso fixo chegava a ocupar **~90%** da altura útil em `320×568` a `200%`; com o `AvisoCompacto`, a área útil da conversa + campo de texto mantém **≥ 50%** da altura disponível em `100%` e `150%` (`conversa_espaco_util_test.dart`) |
+| **Hub sem rolagem em qualquer escala** (Figura 9) | Hub inteiro sem rolar em `360×800` a `100%`; em escalas maiores ou aparelhos menores, a porta principal fica à vista sem rolar junto com a faixa `"Role para baixo para ver mais opções"` (`FR-017`, `T113`) | **Medido na T113**: em `360×800` a `150%`, o cabeçalho toma `200 px` e a 5ª porta termina `~170 px` abaixo da barra (`138 px` com respiro no piso); em `320×568` a `200%`, o cabeçalho toma `326 px` de `421 px` disponíveis (`hub_cabe_sem_rolar_test.dart`) |
+| **"Apps atuais" em grade** (Figura 20) | `"Meus aplicativos"` em **lista vertical**, com ícone à esquerda, nome ao lado e busca no topo (`FR-023`, revisão da `T044`) | Ícone à esquerda com o nome na mesma linha evita truncamento em `150%`/`200%` e permite leitura linear de relance |
+| **Logotipos oficiais em "Serviços sociais"** (Figura 28) | Pictogramas próprios do Design System para serviços sensíveis; logotipos de marca restritos a aplicativos cotidianos (`R7`, `FR-030`) | Evita que a pessoa se acostume a ver marcas de banco/governo dentro de outro aplicativo, reduzindo a superfície para páginas de phishing (Princípio II) |
+| **Link para `ajudamemora.com.br` na Ajuda** (Figura 14) | Removido; substituído pela saída direta para a conversa com a Memora (`R12`, `FR-037`) | O domínio citado no wireframe não pertence ao projeto; apontar para domínio não registrado exporia o usuário a registro malicioso por terceiros |
+| **Tela de Planos e campo de plano no Perfil** (Figuras 10 e 27) | Fora do aplicativo; validado por scanner estático (`sem_planos_test.dart`, `US9`, `FR-008`) | Monetização fora de escopo; exibir cobrança ou assinatura cria vetor para o golpe *"seu plano do Memora venceu"* |
+| **"Tela" e "Acessibilidade" juntas em Aparência** (Figuras 25 e 26) | Separadas em duas portas distintas em Ajustes (`Aparência` e `Acessibilidade`) + `Privacidade` e `Conta` (`FR-038`, `FR-039a`) | Acessibilidade é requisito central do produto, não preferência estética; em `Aparência`, a cor livre foi substituída por **6 paletas curadas** aprovadas em contraste (`validar_paleta.py`, `FR-039`) |
+
+---
+
 ## O que este arquivo não cobre
 
 - **Ilustrações e ícones do protótipo** não foram medidos individualmente. O que

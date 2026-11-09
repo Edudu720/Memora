@@ -79,24 +79,34 @@ class TelaAjuda extends StatelessWidget {
                 children: <Widget>[
                   const TextoMemora(TextosAjuda.convite),
                   const SizedBox(height: MemoraEspacamento.lg),
-                  for (final AssuntoDeAjuda assunto in assuntos) ...<Widget>[
-                    CartaoDePorta(
-                      key: chaveDoAssunto(assunto.id),
-                      nome: assunto.titulo,
-                      explicacao: assunto.explicacao,
-                      ilustracao: assunto.ilustracao,
-                      aoAbrir: () => aoAbrirAssunto(assunto),
+                  CaixaDeEtapa(
+                    instrucao: TextosAjuda.instrucaoAssuntos,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        for (int i = 0; i < assuntos.length; i++) ...<Widget>[
+                          CartaoDePorta(
+                            key: chaveDoAssunto(assuntos[i].id),
+                            nome: assuntos[i].titulo,
+                            explicacao: assuntos[i].explicacao,
+                            ilustracao: assuntos[i].ilustracao,
+                            aoAbrir: () => aoAbrirAssunto(assuntos[i]),
+                          ),
+                          if (i < assuntos.length - 1 ||
+                              aoVerApresentacao != null)
+                            const SizedBox(height: MemoraEspacamento.md),
+                        ],
+                        if (aoVerApresentacao != null)
+                          CartaoDePorta(
+                            key: chaveReverApresentacao,
+                            nome: TextosAjuda.reverApresentacao,
+                            explicacao: TextosAjuda.reverApresentacaoExplicacao,
+                            ilustracao: Ilustracao.memoraNeutra,
+                            aoAbrir: aoVerApresentacao,
+                          ),
+                      ],
                     ),
-                    const SizedBox(height: MemoraEspacamento.md),
-                  ],
-                  if (aoVerApresentacao != null)
-                    CartaoDePorta(
-                      key: chaveReverApresentacao,
-                      nome: TextosAjuda.reverApresentacao,
-                      explicacao: TextosAjuda.reverApresentacaoExplicacao,
-                      ilustracao: Ilustracao.memoraNeutra,
-                      aoAbrir: aoVerApresentacao,
-                    ),
+                  ),
                   const SizedBox(height: MemoraEspacamento.xl),
                 ],
               ),

@@ -82,6 +82,12 @@ abstract final class TextosGuias {
   /// Título de celebração no último passo.
   static const String parabens = 'Parabéns!';
 
+  /// Instrução da caixa de etapa para as ações de cada passo (FR-002a, T125c).
+  static const String instrucaoAcoesPasso = 'Escolha como continuar:';
+
+  /// Instrução da caixa de etapa na última etapa do guia (FR-002a, T125c).
+  static const String instrucaoConclusao = 'O que você quer fazer agora?';
+
   // WhatsApp (T071)
   /// Título do guia do WhatsApp.
   static const String tituloWhatsapp = 'Como mandar mensagem no WhatsApp';

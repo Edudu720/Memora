@@ -71,6 +71,14 @@ abstract final class TextosPerfil {
   /// Título da tela.
   static const String tituloEntrada = 'Quando você nasceu';
 
+  /// Instrução da caixa de preenchimento da data (FR-002a).
+  static const String instrucaoCamposData =
+      'Escreva o dia, o mês e o ano em que você nasceu.';
+
+  /// Instrução da caixa de ações da data (FR-002a).
+  static const String instrucaoAcoesData =
+      'Quando terminar de preencher, toque em guardar.';
+
   /// Rótulo do dia.
   static const String rotuloDia = 'Dia';
 

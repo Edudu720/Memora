@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_terciario.dart';
+import '../../../design_system/componentes/cartoes/caixa_de_etapa.dart';
 import '../../../design_system/componentes/cartoes/cartao_de_porta.dart';
 import '../../../design_system/componentes/ilustracao/ilustracao_memora.dart';
 import '../../../design_system/componentes/navegacao/cabecalho_de_tela.dart';
@@ -90,36 +91,44 @@ class TelaConfiguracoes extends StatelessWidget {
                 // Os desenhos de Acessibilidade, Privacidade e Conta ainda não
                 // existem (T011): cada porta usa o que já há, e a revisão de
                 // design troca quando os desenhos chegarem.
-                CartaoDePorta(
-                  key: chaveAparencia,
-                  nome: TextosConfiguracoes.portaAparencia,
-                  explicacao: TextosConfiguracoes.descricaoAparencia,
-                  ilustracao: Ilustracao.ajusteAparencia,
-                  aoAbrir: aoAbrirAparencia,
-                ),
-                const SizedBox(height: MemoraEspacamento.md),
-                CartaoDePorta(
-                  key: chaveAcessibilidade,
-                  nome: TextosConfiguracoes.portaAcessibilidade,
-                  explicacao: TextosConfiguracoes.descricaoAcessibilidade,
-                  ilustracao: Ilustracao.pessoaComCelular,
-                  aoAbrir: aoAbrirAcessibilidade,
-                ),
-                const SizedBox(height: MemoraEspacamento.md),
-                CartaoDePorta(
-                  key: chavePrivacidade,
-                  nome: TextosConfiguracoes.portaPrivacidade,
-                  explicacao: TextosConfiguracoes.descricaoPrivacidade,
-                  ilustracao: Ilustracao.portaRegistro,
-                  aoAbrir: aoAbrirPrivacidade,
-                ),
-                const SizedBox(height: MemoraEspacamento.md),
-                CartaoDePorta(
-                  key: chaveConta,
-                  nome: TextosConfiguracoes.portaConta,
-                  explicacao: TextosConfiguracoes.descricaoConta,
-                  ilustracao: Ilustracao.casalIdoso,
-                  aoAbrir: aoAbrirConta,
+                CaixaDeEtapa(
+                  instrucao: TextosConfiguracoes.instrucaoAjustes,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      CartaoDePorta(
+                        key: chaveAparencia,
+                        nome: TextosConfiguracoes.portaAparencia,
+                        explicacao: TextosConfiguracoes.descricaoAparencia,
+                        ilustracao: Ilustracao.ajusteAparencia,
+                        aoAbrir: aoAbrirAparencia,
+                      ),
+                      const SizedBox(height: MemoraEspacamento.md),
+                      CartaoDePorta(
+                        key: chaveAcessibilidade,
+                        nome: TextosConfiguracoes.portaAcessibilidade,
+                        explicacao: TextosConfiguracoes.descricaoAcessibilidade,
+                        ilustracao: Ilustracao.pessoaComCelular,
+                        aoAbrir: aoAbrirAcessibilidade,
+                      ),
+                      const SizedBox(height: MemoraEspacamento.md),
+                      CartaoDePorta(
+                        key: chavePrivacidade,
+                        nome: TextosConfiguracoes.portaPrivacidade,
+                        explicacao: TextosConfiguracoes.descricaoPrivacidade,
+                        ilustracao: Ilustracao.portaRegistro,
+                        aoAbrir: aoAbrirPrivacidade,
+                      ),
+                      const SizedBox(height: MemoraEspacamento.md),
+                      CartaoDePorta(
+                        key: chaveConta,
+                        nome: TextosConfiguracoes.portaConta,
+                        explicacao: TextosConfiguracoes.descricaoConta,
+                        ilustracao: Ilustracao.casalIdoso,
+                        aoAbrir: aoAbrirConta,
+                      ),
+                    ],
+                  ),
                 ),
                 if (aoAbrirGaleria != null) ...<Widget>[
                   const SizedBox(height: MemoraEspacamento.xl),

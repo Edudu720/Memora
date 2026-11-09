@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_secundario.dart';
+import '../../../design_system/componentes/cartoes/caixa_de_etapa.dart';
 import '../../../design_system/componentes/confirmacao/confirmacao_memora.dart';
 import '../../../design_system/componentes/feedback/carregando.dart';
 import '../../../design_system/componentes/feedback/estado_vazio.dart';
@@ -131,30 +132,35 @@ class _TelaContaState extends State<TelaConta> {
                   const SizedBox(height: MemoraEspacamento.xl),
                   _nuncaFaco(),
                   const SizedBox(height: MemoraEspacamento.xl),
-                  const TextoMemora.tituloSecao(TextosConfiguracoes.tituloSair),
-                  const SizedBox(height: MemoraEspacamento.md),
-                  SaidaComConfirmacao(
-                    chaveConfirmacao: TelaConta.chaveConfirmacao,
-                    aoConfirmar: _sair,
-                    botao: (VoidCallback aoTocar) => BotaoSecundario(
-                      key: TelaConta.chaveSair,
-                      rotulo: TextosAutenticacao.botaoSair,
-                      icone: Icons.logout,
-                      aoTocar: aoTocar,
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.tituloSair,
+                    child: SaidaComConfirmacao(
+                      chaveConfirmacao: TelaConta.chaveConfirmacao,
+                      aoConfirmar: _sair,
+                      botao: (VoidCallback aoTocar) => BotaoSecundario(
+                        key: TelaConta.chaveSair,
+                        rotulo: TextosAutenticacao.botaoSair,
+                        icone: Icons.logout,
+                        aoTocar: aoTocar,
+                      ),
                     ),
                   ),
                   // Longe do "Sair": a mais destrutiva das duas não fica
                   // adjacente à comum (FR-041, Princípio II).
                   const SizedBox(height: MemoraEspacamento.xxxl),
-                  const TextoMemora.tituloSecao(
-                    TextosConfiguracoes.tituloEsquecer,
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.tituloEsquecer,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const TextoMemora.apoio(
+                          TextosConfiguracoes.paraQueServeEsquecer,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        _esquecerOAparelho(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: MemoraEspacamento.sm),
-                  const TextoMemora.apoio(
-                    TextosConfiguracoes.paraQueServeEsquecer,
-                  ),
-                  const SizedBox(height: MemoraEspacamento.lg),
-                  _esquecerOAparelho(),
                 ],
               ),
             ),

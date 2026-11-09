@@ -68,6 +68,11 @@ void main() {
     ) async {
       await t.pumpWidget(app(ajuda()));
 
+      expect(
+        find.byType(CaixaDeEtapa),
+        findsOneWidget,
+        reason: 'FR-002a (T125d): assuntos em CaixaDeEtapa',
+      );
       final List<AssuntoDeAjuda> esperados = AssuntoDeAjuda.disponiveis(
         podeCompartilhar: false,
       );
@@ -158,6 +163,11 @@ void main() {
 
       expect(vistas, TextosAjuda.dicasDeSeguranca);
       expect(find.byType(BalaoDeFala), findsOneWidget);
+      expect(
+        find.byType(CaixaDeEtapa),
+        findsOneWidget,
+        reason: 'FR-002a (T125d): navegação do assunto em CaixaDeEtapa',
+      );
     });
 
     testWidgets('"Segurança" diz o que ninguém do Memora faz — FR-036a', (
@@ -509,6 +519,11 @@ void main() {
     ) async {
       await t.pumpWidget(app(guiada()));
 
+      expect(
+        find.byType(CaixaDeEtapa),
+        findsOneWidget,
+        reason: 'FR-002a (T125d): ações da ajuda guiada em CaixaDeEtapa',
+      );
       for (int i = 0; i < TextosAjuda.totalDeTelasDaConversa - 1; i++) {
         expect(
           find.byKey(AjudaGuiadaDaConversa.chaveDaTela(i)),
