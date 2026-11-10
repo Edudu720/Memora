@@ -103,24 +103,13 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 4. Facebook
+    // 4. Facebook (logo oficial fornecida)
     if (normalizada.contains('facebook')) {
-      return Container(
-        color: const Color(0xFF1877F2),
-        alignment: Alignment.bottomRight,
-        child: Transform.translate(
-          offset: Offset(tamanho * 0.04, tamanho * 0.05),
-          child: Text(
-            'f',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: tamanho * 0.90,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'sans-serif',
-              height: 1.0,
-            ),
-          ),
-        ),
+      return Image.asset(
+        'assets/ilustracoes/facebook_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
