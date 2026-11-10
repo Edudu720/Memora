@@ -153,7 +153,13 @@ class _TelaAssuntoState extends State<TelaAssunto> {
                     texto: _telas[_indice],
                   ),
                   const SizedBox(height: MemoraEspacamento.xl),
-                  ..._acoes(),
+                  CaixaDeEtapa(
+                    instrucao: TextosAjuda.instrucaoNavegacao,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: _acoes(),
+                    ),
+                  ),
                   const SizedBox(height: MemoraEspacamento.xl),
                 ],
               ),

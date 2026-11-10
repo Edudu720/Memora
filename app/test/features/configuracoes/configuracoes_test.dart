@@ -135,6 +135,11 @@ void main() {
         find.byType(CartaoDePorta),
       );
       expect(portas.where((CartaoDePorta p) => p.principal), isEmpty);
+      expect(
+        find.byType(CaixaDeEtapa),
+        findsOneWidget,
+        reason: 'FR-002a (T125a): Ajustes agrupa as portas em CaixaDeEtapa',
+      );
     });
   });
 

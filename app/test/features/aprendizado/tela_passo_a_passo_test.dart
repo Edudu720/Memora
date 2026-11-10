@@ -100,7 +100,8 @@ void main() {
         // 4. Rosto da Memora acompanhando a instrução (FR-003)
         expect(find.byType(MemoraPersonagem), findsOneWidget);
 
-        // 5. Botões de avançar ("Continuar") e ações obrigatórias
+        // 5. Botões de avançar ("Continuar") e ações obrigatórias em CaixaDeEtapa (FR-002a, T125c)
+        expect(find.byType(CaixaDeEtapa), findsOneWidget);
         expect(find.byKey(PassoIlustrado.chaveContinuar), findsOneWidget);
         expect(find.text(TextosGuias.continuar), findsOneWidget);
         expect(find.byKey(PassoIlustrado.chaveTelaDiferente), findsOneWidget);

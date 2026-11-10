@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_secundario.dart';
+import '../../../design_system/componentes/cartoes/caixa_de_etapa.dart';
 import '../../../design_system/componentes/confirmacao/confirmacao_memora.dart';
 import '../../../design_system/componentes/feedback/carregando.dart';
 import '../../../design_system/componentes/feedback/mensagem_erro.dart';
@@ -126,15 +127,19 @@ class _TelaPrivacidadeState extends State<TelaPrivacidade> {
                     TextosConfiguracoes.guardadoNuncaFica,
                   ),
                   const SizedBox(height: MemoraEspacamento.xxl),
-                  const TextoMemora.tituloSecao(
-                    TextosConfiguracoes.tituloApagarConversa,
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.tituloApagarConversa,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const TextoMemora.apoio(
+                          TextosConfiguracoes.explicacaoApagarConversa,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        _parteQueApaga(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: MemoraEspacamento.sm),
-                  const TextoMemora.apoio(
-                    TextosConfiguracoes.explicacaoApagarConversa,
-                  ),
-                  const SizedBox(height: MemoraEspacamento.lg),
-                  _parteQueApaga(),
                 ],
               ),
             ),

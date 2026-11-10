@@ -12,6 +12,10 @@ abstract final class TextosConfiguracoes {
   /// Título de Ajustes.
   static const String tituloAjustes = 'Ajustes';
 
+  /// Instrução da caixa de portas em Ajustes (FR-002a).
+  static const String instrucaoAjustes =
+      'Escolha o que você quer ajustar no Memora.';
+
   /// Porta de Aparência.
   static const String portaAparencia = 'Como o Memora fica';
 

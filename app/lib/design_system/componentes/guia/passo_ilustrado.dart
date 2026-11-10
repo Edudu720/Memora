@@ -11,6 +11,7 @@ import '../../tokens/raio.dart';
 import '../botoes/botao_primario.dart';
 import '../botoes/botao_secundario.dart';
 import '../botoes/botao_terciario.dart';
+import '../cartoes/caixa_de_etapa.dart';
 import '../ilustracao/ilustracao_memora.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
@@ -217,59 +218,71 @@ class PassoIlustrado extends StatelessWidget {
           const SizedBox(height: MemoraEspacamento.xl),
 
           // 5. Ações (Avançar/Concluir, Dúvidas, Minha tela está diferente, Voltar, Sair)
-          if (eUltimoPasso && aoPedirParaAbrir != null) ...<Widget>[
-            BotaoSecundario(
-              key: chavePedirParaAbrir,
-              rotulo: TextosGuias.pecaParaAbrir,
-              icone: Icons.chat_bubble_outline,
-              aoTocar: aoPedirParaAbrir,
+          CaixaDeEtapa(
+            instrucao: eUltimoPasso
+                ? TextosGuias.instrucaoConclusao
+                : TextosGuias.instrucaoAcoesPasso,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                if (eUltimoPasso && aoPedirParaAbrir != null) ...<Widget>[
+                  BotaoSecundario(
+                    key: chavePedirParaAbrir,
+                    rotulo: TextosGuias.pecaParaAbrir,
+                    icone: Icons.chat_bubble_outline,
+                    aoTocar: aoPedirParaAbrir,
+                  ),
+                  const SizedBox(height: MemoraEspacamento.md),
+                ],
+                if (eUltimoPasso && aoTirarDuvida != null) ...<Widget>[
+                  BotaoSecundario(
+                    key: chaveTirarDuvida,
+                    rotulo: TextosGuias.ficouComDuvida,
+                    icone: Icons.chat_bubble_outline,
+                    aoTocar: aoTirarDuvida,
+                  ),
+                  const SizedBox(height: MemoraEspacamento.md),
+                ],
+                BotaoPrimario(
+                  key: chaveContinuar,
+                  rotulo: eUltimoPasso
+                      ? TextosGuias.voltarAoHub
+                      : TextosGuias.continuar,
+                  icone: eUltimoPasso
+                      ? Icons.check_circle_outline
+                      : Icons.arrow_forward,
+                  aoTocar: aoContinuar,
+                ),
+                if (aoTelaDiferente != null) ...<Widget>[
+                  const SizedBox(height: MemoraEspacamento.md),
+                  BotaoSecundario(
+                    key: chaveTelaDiferente,
+                    rotulo: TextosGuias.telaDiferente,
+                    icone: Icons.help_outline,
+                    aoTocar: aoTelaDiferente,
+                  ),
+                ],
+                if (aoVoltar != null) ...<Widget>[
+                  const SizedBox(height: MemoraEspacamento.sm),
+                  BotaoTerciario(
+                    key: chaveVoltar,
+                    rotulo: TextosGuias.voltar,
+                    aoTocar: aoVoltar,
+                    larguraTotal: true,
+                  ),
+                ],
+                if (aoSair != null) ...<Widget>[
+                  const SizedBox(height: MemoraEspacamento.xs),
+                  BotaoTerciario(
+                    key: chaveSair,
+                    rotulo: TextosGuias.sairDoGuia,
+                    aoTocar: aoSair,
+                    larguraTotal: true,
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: MemoraEspacamento.md),
-          ],
-          if (eUltimoPasso && aoTirarDuvida != null) ...<Widget>[
-            BotaoSecundario(
-              key: chaveTirarDuvida,
-              rotulo: TextosGuias.ficouComDuvida,
-              icone: Icons.chat_bubble_outline,
-              aoTocar: aoTirarDuvida,
-            ),
-            const SizedBox(height: MemoraEspacamento.md),
-          ],
-          BotaoPrimario(
-            key: chaveContinuar,
-            rotulo: eUltimoPasso
-                ? TextosGuias.voltarAoHub
-                : TextosGuias.continuar,
-            icone: eUltimoPasso ? Icons.check_circle_outline : Icons.arrow_forward,
-            aoTocar: aoContinuar,
           ),
-          if (aoTelaDiferente != null) ...<Widget>[
-            const SizedBox(height: MemoraEspacamento.md),
-            BotaoSecundario(
-              key: chaveTelaDiferente,
-              rotulo: TextosGuias.telaDiferente,
-              icone: Icons.help_outline,
-              aoTocar: aoTelaDiferente,
-            ),
-          ],
-          if (aoVoltar != null) ...<Widget>[
-            const SizedBox(height: MemoraEspacamento.sm),
-            BotaoTerciario(
-              key: chaveVoltar,
-              rotulo: TextosGuias.voltar,
-              aoTocar: aoVoltar,
-              larguraTotal: true,
-            ),
-          ],
-          if (aoSair != null) ...<Widget>[
-            const SizedBox(height: MemoraEspacamento.xs),
-            BotaoTerciario(
-              key: chaveSair,
-              rotulo: TextosGuias.sairDoGuia,
-              aoTocar: aoSair,
-              larguraTotal: true,
-            ),
-          ],
         ],
       ),
     );

@@ -22,4 +22,6 @@ e ela precisa permitir alteração (recolorimos tudo com a paleta).
 | `estado_vazio.svg`, `estado_erro.svg`, `aplicativo_generico.svg` | Desenho original da equipe (feature 004, T011) | Própria | — |
 | `ajuste_aparencia.svg` | Desenho original da equipe, para o ajuste de aparência (feature 004, T011) | Própria | — |
 | `memora_perfil_robo.png`, `memora_ajuda_robo.png`, `memora_conclusao_robo.png`, `memora_alerta_robo.png`, `memora_dica_robo.png`, `memora_mini_robo.png` | Arte conceitual do robô Memora 3D da equipe (`Memora-Desing-Ideias/`, feature 004, T116b) | Própria | Recorte e enquadramento circular em alta resolução para medalhões e ícone |
+| `whatsapp_logo.png`, `telegram_logo.png` | Emblemas visuais para reconhecimento de aplicativos cotidianos no `IconeDoAplicativo` (feature 004, T116b / PR #63) | Uso educacional / identificação visual de catálogo (R7) | Recorte quadrado padronizado para o catálogo |
+
 

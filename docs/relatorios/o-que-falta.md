@@ -149,21 +149,21 @@ dos conflitos do caminho.
 - A spec continua `Draft`, como a da 004 estava; o analyze da 004 apontou o
   mesmo para a 003.
 
-### 004 — Redesenho das telas — 84 de 131 tarefas, contando as PRs abertas
+### 004 — Redesenho das telas — 135 de 138 tarefas concluídas
 
 | Fase | O quê | Situação |
 |---|---|---|
-| 1, 2 | Fundação | ✅ na `master` |
-| 3, 3b | **US2**: Início e Hub; o acabamento da T044 | ✅ na `master`. Falta a **T116** (revisão no celular, portão do merge) |
-| 4 | **US1**: apresentação | ✅ #45/#51. Faltam a **T117** (boas-vindas na altura toda e a tela de volta, que reativa o teste pulado), a **T127** (teste das duas boas-vindas), a T047 e a T052 |
-| 5 | **US3**: conversa com balões e o aviso que encolhe | ✅ #55 |
-| 6 | **US4**: guias e "Meus aplicativos" em **lista** | Fundação na #47/#53. Faltam o passo a passo (T065-T067), a lista (T069, T119), os guias (T070-T075, dependem das capturas) e a captura pendente (T120) |
-| 7 | **US5**: serviços sociais | Aberta (T076-T084, T124) |
-| 8 | **US6**: Ajuda | ✅ #56 |
-| 9 | **US7**: Ajustes | ✅ #46/#52. Falta a **T122** (paletas, pela metade) e a **T126** (a Conta sai quando a sessão expira) |
-| 10 | **US8**: Perfil | Aberta (T096, T097 — apaga a `TelaPerfil` antiga) |
-| 11 | **US9**: Planos fora | Aberta (T098) |
-| 12 | Polimento | Aberta: T099 (telas fora do wireframe, agora com a recuperação), T100-T108, **T125** (`CaixaDeEtapa` nas telas que faltam), T109 e T110 (atividade pelo leitor de tela, pelo teclado e dentro de diálogo) |
+| 1, 2 | Fundação e licenças de ilustrações (`T001`–`T033a`) | ✅ Concluída (`T011` fechada em `LICENCAS.md`) |
+| 3, 3b | **US2**: Início, Hub e acabamento pós-revisão (`T034`–`T044`, `T111`–`T116b`) | ✅ Concluída (`T035` consolidada conforme `FR-017`) |
+| 4 | **US1**: Apresentação, boas-vindas, tela de volta, cadastro e login (`T045`–`T052`, `T117`, `T127`) | ✅ Concluída |
+| 5 | **US3**: Conversa com balões, aviso compacto, negrito e digitação (`T053`–`T057`, `T129`–`T132`) | ✅ Concluída |
+| 6 | **US4**: Guias passo a passo, `CaixaDeEtapa` e "Meus aplicativos" em lista (`T058`–`T075`, `T119`, `T120`, `T125c`) | ✅ Concluída |
+| 7 | **US5**: Serviços sociais (`T076`–`T084`, `T124`) | ✅ Concluída |
+| 8 | **US6**: Ajuda, assuntos, ajuda guiada e `CaixaDeEtapa` (`T085`–`T090`, `T125d`) | ✅ Concluída |
+| 9 | **US7**: Ajustes (Aparência, Acessibilidade, Privacidade e Conta) com `CaixaDeEtapa` (`T091`–`T095`, `T121`, `T122`, `T125a`) | ✅ Concluída |
+| 10 | **US8**: Perfil e data de nascimento opcional com `CaixaDeEtapa` (`T096`, `T097`, `T123`, `T125b`) | ✅ Concluída |
+| 11 | **US9**: Planos fora (`T098`) | ✅ Concluída |
+| 12 | Polimento, `T099`, `CaixaDeEtapa` (`T125a`–`T125e`), álbum completo de 30 telas × 3 temas (`T101`), inventário e divergências (`T102`, `T107`) e verificação completa (`T103`) | ✅ Código, testes, álbum e documentação 100% concluídos. Restam apenas as 3 tarefas humanas/presenciais: `T104` (revisão de design do álbum pelos 3 integrantes), `T105` (teste com 5 pessoas 65+) e `T106` (revisões humanas de PR) |
 
 **Se o prazo apertar**, o corte menos danoso é reduzir guias, nunca telas: um
 item sem guia abre a conversa. O piso são os guias de TikTok, Gov.br, WhatsApp,
@@ -199,11 +199,10 @@ Instagram, YouTube e Meu INSS.
 
 | | Testes | Medido em |
 |---|---|---|
+| Aplicativo | **2279** (0 pulados) | `flutter test`, 2026-11-09, após fechamento técnico da Feature 004 (`feature/004-fechamento-tecnico` sobre `develop`) |
 | Aplicativo | **1600** + 1 pulado | `flutter test`, 2026-10-13, na branch `integracao/revisao-44-a-48` (da #44 à #54 mescladas) |
 | Aplicativo | **1681** + 1 pulado | `flutter test`, 2026-10-13, na #56 (sobre a #52) |
 | Backend | **413** | `mvnw clean test`, 2026-10-03, depois do Gemini (o backend não mudou desde então) |
 
-O teste pulado é o da T047, que a T117 reativa.
-
-Verificação completa: `flutter analyze`, `flutter test`, `validar_paleta.py`,
+Verificação completa: `flutter analyze` (0 avisos), `flutter test` (2279/2279), `validar_paleta.py`,
 `validar_tokens.py` e os dois `--autoteste` — ver a seção 6 do `CLAUDE.md`.

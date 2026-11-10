@@ -183,58 +183,78 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
         titulo: TextosPerfil.tituloEntrada,
         aoVoltar: () => Navigator.of(context).pop(),
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(MemoraEspacamento.lg),
-        children: <Widget>[
-          _campo(
-            chave: TelaDataDeNascimento.chaveDia,
-            rotulo: TextosPerfil.rotuloDia,
-            ajuda: TextosPerfil.ajudaDia,
-            controlador: _dia,
-            tamanho: 2,
-            erro: _erroDia(),
-          ),
-          const SizedBox(height: MemoraEspacamento.xl),
-          _campo(
-            chave: TelaDataDeNascimento.chaveMes,
-            rotulo: TextosPerfil.rotuloMes,
-            ajuda: TextosPerfil.ajudaMes,
-            controlador: _mes,
-            tamanho: 2,
-            erro: _erroMes(),
-          ),
-          const SizedBox(height: MemoraEspacamento.xl),
-          _campo(
-            chave: TelaDataDeNascimento.chaveAno,
-            rotulo: TextosPerfil.rotuloAno,
-            ajuda: TextosPerfil.ajudaAno,
-            controlador: _ano,
-            tamanho: 4,
-            erro: _erroAno(),
-          ),
-          if (_falhou) ...<Widget>[
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            CaixaDeEtapa(
+              instrucao: TextosPerfil.instrucaoCamposData,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  _campo(
+                    chave: TelaDataDeNascimento.chaveDia,
+                    rotulo: TextosPerfil.rotuloDia,
+                    ajuda: TextosPerfil.ajudaDia,
+                    controlador: _dia,
+                    tamanho: 2,
+                    erro: _erroDia(),
+                  ),
+                  const SizedBox(height: MemoraEspacamento.xl),
+                  _campo(
+                    chave: TelaDataDeNascimento.chaveMes,
+                    rotulo: TextosPerfil.rotuloMes,
+                    ajuda: TextosPerfil.ajudaMes,
+                    controlador: _mes,
+                    tamanho: 2,
+                    erro: _erroMes(),
+                  ),
+                  const SizedBox(height: MemoraEspacamento.xl),
+                  _campo(
+                    chave: TelaDataDeNascimento.chaveAno,
+                    rotulo: TextosPerfil.rotuloAno,
+                    ajuda: TextosPerfil.ajudaAno,
+                    controlador: _ano,
+                    tamanho: 4,
+                    erro: _erroAno(),
+                  ),
+                ],
+              ),
+            ),
+            if (_falhou) ...<Widget>[
+              const SizedBox(height: MemoraEspacamento.lg),
+              const TextoMemora(
+                TextosPerfil.erroAoGuardar,
+                key: TelaDataDeNascimento.chaveErroAoGuardar,
+                estilo: EstiloTexto.corpoForte,
+              ),
+            ],
             const SizedBox(height: MemoraEspacamento.lg),
-            const TextoMemora(
-              TextosPerfil.erroAoGuardar,
-              key: TelaDataDeNascimento.chaveErroAoGuardar,
-              estilo: EstiloTexto.corpoForte,
+            CaixaDeEtapa(
+              instrucao: TextosPerfil.instrucaoAcoesData,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  BotaoPrimario(
+                    key: TelaDataDeNascimento.chaveGuardar,
+                    rotulo: TextosPerfil.botaoGuardar,
+                    icone: Icons.check,
+                    carregando: _guardando,
+                    aoTocar: _guardando ? null : _guardar,
+                  ),
+                  const SizedBox(height: MemoraEspacamento.md),
+                  BotaoSecundario(
+                    key: TelaDataDeNascimento.chaveCancelar,
+                    rotulo: TextosPerfil.botaoCancelar,
+                    aoTocar:
+                        _guardando ? null : () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
             ),
           ],
-          const SizedBox(height: MemoraEspacamento.xxl),
-          BotaoPrimario(
-            key: TelaDataDeNascimento.chaveGuardar,
-            rotulo: TextosPerfil.botaoGuardar,
-            icone: Icons.check,
-            carregando: _guardando,
-            aoTocar: _guardando ? null : _guardar,
-          ),
-          const SizedBox(height: MemoraEspacamento.md),
-          BotaoSecundario(
-            key: TelaDataDeNascimento.chaveCancelar,
-            rotulo: TextosPerfil.botaoCancelar,
-            aoTocar: _guardando ? null : () => Navigator.of(context).pop(),
-          ),
-        ],
+        ),
       ),
     );
   }

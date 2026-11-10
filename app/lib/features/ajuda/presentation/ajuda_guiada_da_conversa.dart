@@ -98,24 +98,32 @@ class _AjudaGuiadaDaConversaState extends State<AjudaGuiadaDaConversa> {
                   const SizedBox(height: MemoraEspacamento.md),
                   ..._conteudo(),
                   const SizedBox(height: MemoraEspacamento.xl),
-                  if (_naUltima) ...<Widget>[
-                    BotaoPrimario(
-                      key: AjudaGuiadaDaConversa.chaveConversar,
-                      rotulo: TextosAjuda.guiadaConversar,
-                      aoTocar: widget.aoConversar,
+                  CaixaDeEtapa(
+                    instrucao: TextosAjuda.instrucaoNavegacao,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        if (_naUltima) ...<Widget>[
+                          BotaoPrimario(
+                            key: AjudaGuiadaDaConversa.chaveConversar,
+                            rotulo: TextosAjuda.guiadaConversar,
+                            aoTocar: widget.aoConversar,
+                          ),
+                          const SizedBox(height: MemoraEspacamento.md),
+                          BotaoSecundario(
+                            key: AjudaGuiadaDaConversa.chaveVoltar,
+                            rotulo: TextosAjuda.guiadaVoltar,
+                            aoTocar: widget.aoVoltar,
+                          ),
+                        ] else
+                          BotaoPrimario(
+                            key: AjudaGuiadaDaConversa.chaveContinuar,
+                            rotulo: TextosAjuda.guiadaContinuar,
+                            aoTocar: () => setState(() => _indice++),
+                          ),
+                      ],
                     ),
-                    const SizedBox(height: MemoraEspacamento.md),
-                    BotaoSecundario(
-                      key: AjudaGuiadaDaConversa.chaveVoltar,
-                      rotulo: TextosAjuda.guiadaVoltar,
-                      aoTocar: widget.aoVoltar,
-                    ),
-                  ] else
-                    BotaoPrimario(
-                      key: AjudaGuiadaDaConversa.chaveContinuar,
-                      rotulo: TextosAjuda.guiadaContinuar,
-                      aoTocar: () => setState(() => _indice++),
-                    ),
+                  ),
                   const SizedBox(height: MemoraEspacamento.xl),
                 ],
               ),

@@ -52,6 +52,7 @@ void main() {
 
       expect(find.byKey(PassoIlustrado.chaveSeloExemplo), findsOneWidget);
       expect(find.text(TextosGuias.exemplo), findsOneWidget);
+      expect(find.byType(CaixaDeEtapa), findsOneWidget);
     });
 
     testWidgets('IndicadorDePasso exibe texto Passo N de M e barra de progresso', (
