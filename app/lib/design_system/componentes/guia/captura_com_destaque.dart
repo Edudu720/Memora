@@ -230,6 +230,12 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
                     top: imagem.height * regiao.y,
                     width: imagem.width * regiao.largura,
                     height: imagem.height * regiao.altura,
+                    // Só bordas, nenhum preenchimento: o miolo do anel é o
+                    // botão que a pessoa precisa ver. Uma `BoxShadow` sem
+                    // desfoque pinta um retângulo CHEIO atrás da caixa — era
+                    // assim antes, e o destaque escondia o que destacava. O
+                    // halo claro, que segura o contraste sobre print escuro,
+                    // é uma segunda borda, por fora da cor primária.
                     child: Semantics(
                       label: TextosGuias.areaDestacada,
                       child: Container(
@@ -239,15 +245,20 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
                             MemoraRaio.padrao,
                           ),
                           border: Border.all(
-                            color: cores.primaria,
-                            width: MemoraDimensoes.bordaSelecao,
+                            color: cores.medalhao,
+                            width: MemoraDimensoes.bordaEnfase,
                           ),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: cores.medalhao,
-                              spreadRadius: MemoraDimensoes.bordaEnfase,
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                              MemoraRaio.padrao,
                             ),
-                          ],
+                            border: Border.all(
+                              color: cores.primaria,
+                              width: MemoraDimensoes.bordaSelecao,
+                            ),
+                          ),
                         ),
                       ),
                     ),

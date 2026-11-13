@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
@@ -234,5 +235,80 @@ void main() {
       expect(find.byKey(CapturaComDestaque.chaveDestaque), findsNothing);
       expect(avisos, <bool>[true]);
     });
+  });
+
+  // O anel tinha uma `BoxShadow` opaca sem desfoque: o Flutter a pinta como um
+  // retângulo cheio atrás da caixa, e o destaque escondia o botão que
+  // destacava. O portão olha o que a pessoa vê — os pixels do miolo do anel.
+  testWidgets('o miolo do anel mostra a imagem: o destaque não a cobre', (
+    WidgetTester t,
+  ) async {
+    const Color vermelho = Color(0xFFFF0000);
+    final Uint8List? bytes = await t.runAsync(() async {
+      final ui.PictureRecorder gravador = ui.PictureRecorder();
+      ui.Canvas(gravador).drawRect(
+        const Rect.fromLTWH(0, 0, 90, 200),
+        ui.Paint()..color = vermelho,
+      );
+      final ui.Image imagem = await gravador.endRecording().toImage(90, 200);
+      final ByteData? dados = await imagem.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      imagem.dispose();
+      return dados!.buffer.asUint8List();
+    });
+
+    final GlobalKey limite = GlobalKey();
+    await t.pumpWidget(
+      app(
+        RepaintBoundary(
+          key: limite,
+          child: CapturaComDestaque(
+            passo: passoCom(
+              const RegiaoRelativa(x: 0.2, y: 0.4, largura: 0.6, altura: 0.2),
+            ),
+            imagem: MemoryImage(bytes!),
+            proporcao: 90 / 200,
+          ),
+        ),
+      ),
+    );
+    // A decodificação é I/O de verdade: espera fora do relógio falso.
+    for (int i = 0; i < 5; i++) {
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await t.pump();
+    }
+
+    final RenderRepaintBoundary fronteira =
+        limite.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+    final Rect area = t.getRect(find.byKey(limite));
+    final Rect anel = t.getRect(find.byKey(CapturaComDestaque.chaveDestaque));
+    final Offset miolo = anel.center - area.topLeft;
+
+    final ByteData? pixels = await t.runAsync(() async {
+      final ui.Image quadro = await fronteira.toImage();
+      final ByteData? dados = await quadro.toByteData();
+      final ByteData resultado = ByteData(4)
+        ..setUint32(
+          0,
+          dados!.getUint32(
+            (miolo.dy.round() * quadro.width + miolo.dx.round()) * 4,
+          ),
+        );
+      quadro.dispose();
+      return resultado;
+    });
+
+    // RGBA: vermelho cheio, nada de verde nem de azul por cima.
+    final int r = pixels!.getUint8(0);
+    final int g = pixels.getUint8(1);
+    final int b = pixels.getUint8(2);
+    expect(
+      <int>[r, g, b],
+      <int>[255, 0, 0],
+      reason: 'No centro do anel aparece rgb($r, $g, $b), e não a imagem',
+    );
   });
 }
