@@ -381,28 +381,28 @@ abstract final class TextosGuias {
   static const String meuInssCaptura4 =
       'Demonstrativo detalhado do benefício no Meu INSS.';
 
-  // e-Título (T081; refeito em 2026-11-12 com as capturas reais, como um
-  // passeio pelas abas depois de entrar)
+  // e-Título (T081; refeito em 2026-11-12 com as capturas reais: entrar com a
+  // biometria e um passeio pelas abas)
   /// Título do guia do e-Título.
   static const String tituloETitulo = 'Como usar o e-Título';
   /// Passo 1 do e-Título.
   static const String eTituloPasso1 =
-      'Esta é a tela principal do e-Título: o seu título de eleitor no celular. Para saber onde você vota, toque em "Onde votar", embaixo, a segunda opção da esquerda.';
+      'Abra o e-Título e toque no botão laranja "Entrar com biometria", embaixo, para entrar com a sua digital.';
   /// Descrição da captura do passo 1 do e-Título.
   static const String eTituloCaptura1 =
-      'Tela principal do e-Título com um título de eleitor de exemplo: foto, nome, número, zona e seção. Embaixo, as opções e-Título, Onde votar, Notificações e Mais opções.';
+      'Tela de entrada do e-Título, com uma foto de exemplo, a opção Biometria ligada e o botão laranja Entrar com biometria embaixo.';
   /// Passo 2 do e-Título.
   static const String eTituloPasso2 =
-      'Aqui aparecem o lugar onde você vota, a seção e a zona. Para tirar uma dúvida, toque em "ChatVote", embaixo, no meio.';
+      'Pronto, você entrou. Este é o seu título de eleitor no celular. Para saber onde você vota, toque em "Onde votar", embaixo, a segunda opção da esquerda.';
   /// Descrição da captura do passo 2 do e-Título.
   static const String eTituloCaptura2 =
-      'Tela Onde votar do e-Título, com um mapa e um cartão com a seção, a zona e o local de votação de exemplo.';
+      'Tela principal do e-Título com um título de eleitor de exemplo: foto, nome, número, zona e seção. Embaixo, as opções e-Título, Onde votar, Notificações e Mais opções.';
   /// Passo 3 do e-Título.
   static const String eTituloPasso3 =
-      'No ChatVote você escreve a sua dúvida sobre as eleições, no campo de baixo. Para ver os avisos da Justiça Eleitoral, toque em "Notificações", embaixo, a segunda opção da direita.';
+      'Aqui aparecem o lugar onde você vota, a seção e a zona. Para ver os avisos da Justiça Eleitoral, toque em "Notificações", embaixo, a segunda opção da direita.';
   /// Descrição da captura do passo 3 do e-Título.
   static const String eTituloCaptura3 =
-      'Tela do ChatVote do e-Título, com a mensagem de boas-vindas e o campo para escrever a dúvida embaixo.';
+      'Tela Onde votar do e-Título, com um mapa e um cartão com a seção, a zona e uma escola de exemplo como local de votação.';
   /// Passo 4 do e-Título.
   static const String eTituloPasso4 =
       'Aqui chegam os avisos da Justiça Eleitoral. Para ver tudo o que o e-Título faz, toque em "Mais opções", embaixo, à direita.';
@@ -411,7 +411,7 @@ abstract final class TextosGuias {
       'Tela de Notificações do e-Título com quatro avisos da Justiça Eleitoral.';
   /// Passo 5 do e-Título.
   static const String eTituloPasso5 =
-      'Em "Mais opções" ficam as certidões, a justificativa de ausência e "Consultar Situação Eleitoral", que mostra se o seu título está em dia. Agora você já sabe andar pelo e-Título.';
+      'Em "Mais opções" ficam as certidões, a justificativa de ausência e "Consultar Situação Eleitoral", que mostra se o seu título está em dia. Agora você já sabe entrar e andar pelo e-Título.';
   /// Descrição da captura do passo 5 do e-Título.
   static const String eTituloCaptura5 =
       'Tela Mais opções do e-Título, com as certidões, a consulta da situação eleitoral, a justificativa de ausência e a impressão do título.';

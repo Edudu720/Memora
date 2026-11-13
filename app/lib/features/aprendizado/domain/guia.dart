@@ -164,11 +164,11 @@ final class CapturaDoGuia {
   static const CapturaDoGuia meuInss4 = CapturaDoGuia._('meu-inss', 4);
 
   // e-Título (T081)
-  /// Captura 1 do e-Título (o título de eleitor).
+  /// Captura 1 do e-Título (a entrada, com biometria).
   static const CapturaDoGuia eTitulo1 = CapturaDoGuia._('e-titulo', 1);
-  /// Captura 2 do e-Título (Onde votar).
+  /// Captura 2 do e-Título (o título de eleitor).
   static const CapturaDoGuia eTitulo2 = CapturaDoGuia._('e-titulo', 2);
-  /// Captura 3 do e-Título (ChatVote).
+  /// Captura 3 do e-Título (Onde votar).
   static const CapturaDoGuia eTitulo3 = CapturaDoGuia._('e-titulo', 3);
   /// Captura 4 do e-Título (Notificações).
   static const CapturaDoGuia eTitulo4 = CapturaDoGuia._('e-titulo', 4);

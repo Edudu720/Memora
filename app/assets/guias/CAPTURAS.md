@@ -30,7 +30,7 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 | tiktok | 2026-10-01 | 36.5.0 | Galaxy A14 | Equipe Memora |
 | gov-br | 2026-10-01 | 3.5.0 | Galaxy A14 | Equipe Memora |
 | meu-inss | 2026-10-01 | 4.18.0 | Galaxy A14 | Equipe Memora |
-| e-titulo | 2026-11-12 | a confirmar | a confirmar | Henrique Sandrini — passo 1 real; passos 2 a 5 pendentes (FR-028a), aguardando as versões sem marcação |
+| e-titulo | 2026-11-12 | 2026.10.27 | a confirmar | Henrique Sandrini |
 | serasa | 2026-10-01 | 10.12.0 | Galaxy A14 | Equipe Memora |
 | fgts | 2026-10-01 | 4.8.1 | Galaxy A14 | Equipe Memora |
 | poupatempo | 2026-10-01 | 5.2.0 | Galaxy A14 | Equipe Memora |
