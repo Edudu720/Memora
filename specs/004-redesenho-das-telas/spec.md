@@ -118,6 +118,14 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 - Q: A resposta da Memora pode ter negrito? → A: **Sim, só negrito** (`**assim**`), para destacar o nome de aplicativo ou botão. Nenhum asterisco aparece na tela nem chega ao leitor de tela (FR-020a).
 - Q: Como a espera e a resposta aparecem? → A: **Só o balão da Memora se formando**, sem a frase "Estou pensando..." embaixo do campo; e a resposta **vai aparecendo aos poucos**, letra a letra, como quem escreve. Com "reduzir movimento", aparece de uma vez (FR-020b).
 
+### Session 2026-11-12 — as capturas reais e o zoom (Henrique)
+
+- Q: Quais guias recebem captura real primeiro? → A: **FGTS, Meu INSS, e-Título, TikTok e Instagram.** As imagens vêm da equipe, numa pasta à parte, e entram pelo formato do contrato ([contracts/guias.md](contracts/guias.md)).
+- Q: A pessoa pode ampliar a captura? → A: **Sim.** Com a captura real, a imagem dentro da moldura fica estreita demais para quem enxerga pouco. Tocar nela, ou num botão visível logo abaixo, abre a imagem em tela cheia, **dentro do Memora** (FR-028b).
+- Q: Ampliar com dois dedos basta? → A: **Não.** O gesto de pinça é difícil para muitas pessoas idosas e não pode ser o único caminho (WCAG 2.2, critérios 2.5.1 e 2.5.7). Há botões **"Aproximar"** e **"Afastar"**, e aproximar leva direto ao destaque, para que ninguém precise arrastar a imagem até achar o ponto (FR-028b).
+- Q: A imagem ampliada continua marcada como exemplo? → A: **Sim, com o selo e com o destaque.** Uma captura do gov.br em tela cheia, sem marca, é o modelo de tela falsa que a FR-028 existe para evitar.
+- Q: O destaque acompanha a imagem? → A: **Sim, sempre sobre a imagem, e não sobre a moldura** (FR-028c). Era defeito latente: os desenhos provisórios tinham quase a proporção da moldura e escondiam o desalinhamento, que aparece com qualquer captura real.
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -605,6 +613,17 @@ assinatura ou pagamento, e não encontrar nenhuma.
   as capturas pendentes; a lista MUST chegar a zero antes da revisão de design final. É o aviso ao
   desenvolvimento que a revisão da T044 pediu, porque as capturas dependem da
   equipe.
+- **FR-028b**: A captura de cada passo MUST poder ser ampliada: tocar nela, ou
+  num botão visível logo abaixo dela, abre a imagem em tela cheia, dentro do
+  Memora. A ampliação MUST oferecer, além do gesto de dois dedos, botões de
+  **aproximar** e **afastar** — o primeiro leva ao destaque do passo — e um
+  botão de **fechar** sempre à vista, todos com alvo de 48 dp. A imagem
+  ampliada MUST continuar com o selo de exemplo e o destaque (FR-028), MUST ter
+  a descrição da captura para o leitor de tela (FR-045) e, com "reduzir
+  movimento", MUST NOT animar a aproximação.
+- **FR-028c**: O destaque do passo MUST cair sobre a região da **imagem** que
+  ele aponta, qualquer que seja a proporção da captura e o tamanho da tela —
+  na moldura e na ampliação.
 - **FR-029**: O passo a passo MUST acontecer inteiro dentro do Memora. O Memora
   MUST NOT pedir permissão para aparecer por cima de outro aplicativo.
 
