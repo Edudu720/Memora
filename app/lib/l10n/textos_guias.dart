@@ -381,33 +381,40 @@ abstract final class TextosGuias {
   static const String meuInssCaptura4 =
       'Demonstrativo detalhado do benefício no Meu INSS.';
 
-  // e-Título (T081)
+  // e-Título (T081; refeito em 2026-11-12 com as capturas reais, como um
+  // passeio pelas abas depois de entrar)
   /// Título do guia do e-Título.
-  static const String tituloETitulo = 'Como acessar seu título no e-Título';
+  static const String tituloETitulo = 'Como usar o e-Título';
   /// Passo 1 do e-Título.
   static const String eTituloPasso1 =
-      'Abra o aplicativo e toque no botão azul "Entrar", no meio da tela.';
+      'Esta é a tela principal do e-Título: o seu título de eleitor no celular. Para saber onde você vota, toque em "Onde votar", embaixo, a segunda opção da esquerda.';
   /// Descrição da captura do passo 1 do e-Título.
   static const String eTituloCaptura1 =
-      'Tela de boas-vindas do aplicativo oficial e-Título com botão Entrar.';
+      'Tela principal do e-Título com um título de eleitor de exemplo: foto, nome, número, zona e seção. Embaixo, as opções e-Título, Onde votar, Notificações e Mais opções.';
   /// Passo 2 do e-Título.
   static const String eTituloPasso2 =
-      'Digite os números do seu CPF ou Título de Eleitor no primeiro campo.';
+      'Aqui aparecem o lugar onde você vota, a seção e a zona. Para tirar uma dúvida, toque em "ChatVote", embaixo, no meio.';
   /// Descrição da captura do passo 2 do e-Título.
   static const String eTituloCaptura2 =
-      'Tela de identificação com campo de CPF ou Título de Eleitor.';
+      'Tela Onde votar do e-Título, com um mapa e um cartão com a seção, a zona e o local de votação de exemplo.';
   /// Passo 3 do e-Título.
   static const String eTituloPasso3 =
-      'Digite a sua senha cadastrada no e-Título. Lembre-se: digite apenas no aplicativo oficial.';
+      'No ChatVote você escreve a sua dúvida sobre as eleições, no campo de baixo. Para ver os avisos da Justiça Eleitoral, toque em "Notificações", embaixo, a segunda opção da direita.';
   /// Descrição da captura do passo 3 do e-Título.
   static const String eTituloCaptura3 =
-      'Tela de autenticação do e-Título com campo de senha vazio.';
+      'Tela do ChatVote do e-Título, com a mensagem de boas-vindas e o campo para escrever a dúvida embaixo.';
   /// Passo 4 do e-Título.
   static const String eTituloPasso4 =
-      'Veja o seu documento digital com sua foto e local de votação. Parabéns! Seu título está na palma da mão.';
+      'Aqui chegam os avisos da Justiça Eleitoral. Para ver tudo o que o e-Título faz, toque em "Mais opções", embaixo, à direita.';
   /// Descrição da captura do passo 4 do e-Título.
   static const String eTituloCaptura4 =
-      'Tela do título eleitoral digital exibindo dados eleitorais e QR Code de validação.';
+      'Tela de Notificações do e-Título com quatro avisos da Justiça Eleitoral.';
+  /// Passo 5 do e-Título.
+  static const String eTituloPasso5 =
+      'Em "Mais opções" ficam as certidões, a justificativa de ausência e "Consultar Situação Eleitoral", que mostra se o seu título está em dia. Agora você já sabe andar pelo e-Título.';
+  /// Descrição da captura do passo 5 do e-Título.
+  static const String eTituloCaptura5 =
+      'Tela Mais opções do e-Título, com as certidões, a consulta da situação eleitoral, a justificativa de ausência e a impressão do título.';
 
   // Serasa (T081)
   /// Título do guia do Serasa.
