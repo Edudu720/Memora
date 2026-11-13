@@ -33,6 +33,9 @@ class TelaPassoAPasso extends StatefulWidget {
   /// O guia a ser percorrido.
   final Guia guia;
 
+  /// Seção específica escolhida pelo usuário (para guias extensos, Feature 006).
+  final SecaoDoGuia? secao;
+
   /// Os dados do catálogo correspondentes ao serviço (se houver).
   final ServicoDoCatalogo? servico;
 
@@ -78,6 +81,7 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Cria a tela de passo a passo.
   const TelaPassoAPasso({
     required this.guia,
+    this.secao,
     this.servico,
     this.pacoteAndroid,
     this.consultaAplicativos,
@@ -169,7 +173,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
         ),
       );
     }
-    lista.addAll(widget.guia.passos);
+    lista.addAll(widget.secao?.passos ?? widget.guia.passos);
 
     if (!mounted || _descartado) return;
     setState(() {
@@ -189,10 +193,14 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
     final String? id = widget.idDaConta;
     if (prog == null || id == null || id.trim().isEmpty) return;
 
+    final String chaveProgresso = widget.secao != null
+        ? '${widget.guia.chave}:${widget.secao!.chave}'
+        : widget.guia.chave;
+
     try {
       await prog.registrarChegadaAoPasso(
         idDaConta: id,
-        chave: widget.guia.chave,
+        chave: chaveProgresso,
         numeroDoPasso: _posicao,
         totalDePassos: total,
       );
@@ -365,7 +373,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             CabecalhoDeTela(
-              titulo: widget.guia.titulo,
+              titulo: widget.secao?.titulo ?? widget.guia.titulo,
               aoVoltar: _retroceder,
             ),
             PassoIlustrado(
@@ -390,10 +398,13 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                           widget.aoConversarSobreDiferenca != null)
                   ? () {
                       if (widget.aoTirarDuvida != null) {
+                        final String nomeBase =
+                            widget.servico?.nomeExibido ?? widget.guia.titulo;
+                        final String contexto = widget.secao != null
+                            ? '$nomeBase (${widget.secao!.titulo})'
+                            : nomeBase;
                         widget.aoTirarDuvida!(
-                          TextosGuias.rascunhoDuvida(
-                            widget.servico?.nomeExibido ?? widget.guia.titulo,
-                          ),
+                          TextosGuias.rascunhoDuvida(contexto),
                         );
                       } else {
                         widget.aoConversarSobreDiferenca!();

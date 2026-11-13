@@ -284,39 +284,135 @@ abstract final class TextosGuias {
   static const String tiktokCaptura4 =
       'Resultados de busca no TikTok organizados em lista de vídeos.';
 
-  // Gov.br (T078)
+  // Gov.br (006-guias-servicos-sociais)
   /// Título do guia do Gov.br.
-  static const String tituloGovBr = 'Como acessar sua conta Gov.br';
-  /// Passo 1 do Gov.br.
+  static const String tituloGovBr = 'Como usar o portal e conta Gov.br';
+  /// Título da seção 1 do Gov.br.
+  static const String govBrSecao1Titulo = 'Entrar na conta Gov.br';
+  /// Subtítulo da seção 1 do Gov.br.
+  static const String govBrSecao1Subtitulo = 'Acesse com seu CPF e senha oficial';
+  /// Título da seção 2 do Gov.br.
+  static const String govBrSecao2Titulo = 'Minha Área e Documentos';
+  /// Subtítulo da seção 2 do Gov.br.
+  static const String govBrSecao2Subtitulo = 'Veja sua caixa postal, dados e carteira';
+  /// Título da seção 3 do Gov.br.
+  static const String govBrSecao3Titulo = 'Baixar Certidões e Agenda';
+  /// Subtítulo da seção 3 do Gov.br.
+  static const String govBrSecao3Subtitulo = 'Emita comprovantes de vacina, eleitor e CPF';
+  /// Título da seção 4 do Gov.br.
+  static const String govBrSecao4Titulo = 'Buscar Serviços e Perfis';
+  /// Subtítulo da seção 4 do Gov.br.
+  static const String govBrSecao4Subtitulo = 'Encontre benefícios por perfil ou categoria';
+  /// Título da seção 5 do Gov.br.
+  static const String govBrSecao5Titulo = 'Aplicativos Oficiais';
+  /// Subtítulo da seção 5 do Gov.br.
+  static const String govBrSecao5Subtitulo = 'Conheça o Meu INSS, SUS e Carteira Digital';
+  /// Título da seção 6 do Gov.br.
+  static const String govBrSecao6Titulo = 'Ouvidoria e Desempenho';
+  /// Subtítulo da seção 6 do Gov.br.
+  static const String govBrSecao6Subtitulo = 'Envie dúvidas, elogios ou acompanhe protocolos';
+
   static const String govBrPasso1 =
-      'Toque no botão azul "Entrar com gov.br", no meio da tela.';
-  /// Descrição da captura do passo 1 do Gov.br.
+      'Na tela inicial do Gov.br, toque no botão azul "Entrar com gov.br" no topo ou centro da tela.';
   static const String govBrCaptura1 =
-      'Tela inicial do aplicativo Gov.br com o botão Entrar com gov.br em destaque.';
-  /// Passo 2 do Gov.br.
+      'Página inicial do portal gov.br exibindo o botão azul Entrar com gov.br.';
   static const String govBrPasso2 =
-      'Toque na caixa branca e digite os 11 números do seu CPF, sem pontos nem traço.';
-  /// Descrição da captura do passo 2 do Gov.br.
+      'Toque na caixa branca de CPF e digite os 11 números do seu CPF, sem pontos nem traço.';
   static const String govBrCaptura2 =
-      'Tela de identificação do Gov.br com campo para digitação do CPF.';
-  /// Passo 3 do Gov.br.
+      'Tela Identifique-se no gov.br com campo para digitar o CPF e botão Continuar.';
   static const String govBrPasso3 =
-      'Toque no botão azul "Continuar", logo abaixo do campo de CPF.';
-  /// Descrição da captura do passo 3 do Gov.br.
+      'Digite a sua senha no campo protegido. Lembre-se: sua senha só deve ser digitada no site ou aplicativo oficial.';
   static const String govBrCaptura3 =
-      'Botão Continuar habilitado após a digitação do CPF.';
-  /// Passo 4 do Gov.br.
+      'Tela oficial de senha do gov.br com campo de senha protegido e opção de entrar.';
   static const String govBrPasso4 =
-      'Digite a sua senha no campo próprio. Lembre-se: sua senha só se digita no aplicativo oficial.';
-  /// Descrição da captura do passo 4 do Gov.br.
+      'Pronto! Você entrou na sua conta Gov.br. Aqui aparecem seus atalhos e o nível da sua conta (Bronze, Prata ou Ouro).';
   static const String govBrCaptura4 =
-      'Tela oficial do Gov.br com o campo de senha vazio.';
-  /// Passo 5 do Gov.br.
+      'Menu de atalhos da conta Gov.br autenticada exibindo selo de nível e opções rápidas.';
+
   static const String govBrPasso5 =
-      'Toque no botão "Entrar". Parabéns! Você aprendeu a acessar sua conta oficial do governo com segurança.';
-  /// Descrição da captura do passo 5 do Gov.br.
+      'Em "Minha área gov.br", você acompanha avisos importantes e acessa seus serviços pessoais.';
   static const String govBrCaptura5 =
-      'Tela principal logada do Gov.br exibindo a carteira de documentos e serviços.';
+      'Painel Minha área gov.br com cabeçalho de boas-vindas e cartões de serviços.';
+  static const String govBrPasso6 =
+      'Use os botões rápidos para abrir sua Caixa Postal do governo ou consultar documentos guardados.';
+  static const String govBrCaptura6 =
+      'Atalhos rápidos do Gov.br para Caixa Postal e Documentos.';
+  static const String govBrPasso7 =
+      'Toque em "Carteira de Documentos", "Dados Pessoais" ou "Segurança da Conta" para conferir suas informações.';
+  static const String govBrCaptura7 =
+      'Cartões de Carteira de Documentos, Dados Pessoais e Segurança da Conta no Gov.br.';
+  static const String govBrPasso8 =
+      'Role a página "Minha Conta" para ver todos os serviços disponíveis vinculados ao seu CPF.';
+  static const String govBrCaptura8 =
+      'Lista de serviços vinculados à conta pessoal dentro do portal Gov.br.';
+
+  static const String govBrPasso9 =
+      'Na seção "Agenda gov.br", você confere compromissos e prazos de serviços públicos agendados.';
+  static const String govBrCaptura9 =
+      'Tela da Agenda gov.br mostrando calendário e avisos de agendamentos.';
+  static const String govBrPasso10 =
+      'Em "Certidões", toque na opção desejada para emitir comprovantes de vacinação, SUS ou quitação eleitoral.';
+  static const String govBrCaptura10 =
+      'Lista de certidões oficiais disponíveis para emissão gratuita no Gov.br.';
+  static const String govBrPasso11 =
+      'Você também pode baixar certidões de antecedentes criminais e regularidade fiscal com apenas um toque.';
+  static const String govBrCaptura11 =
+      'Opções de certidão de antecedentes criminais e regularidade fiscal no Gov.br.';
+
+  static const String govBrPasso12 =
+      'Na página principal, veja os destaques do momento, como Bolsa Família e Imposto de Renda.';
+  static const String govBrCaptura12 =
+      'Destaques do portal gov.br com cartões de benefícios e serviços mais buscados.';
+  static const String govBrPasso13 =
+      'Toque no perfil que combina com você, como Agricultor ou Turista, para ver serviços filtrados.';
+  static const String govBrCaptura13 =
+      'Grade de perfis de cidadão no Gov.br incluindo Agricultor e Turista.';
+  static const String govBrPasso14 =
+      'Pessoas aposentadas ou empreendedoras também encontram atalhos diretos para os seus direitos e serviços.';
+  static const String govBrCaptura14 =
+      'Cartões de perfil Aposentado e Empreendedor na página inicial do Gov.br.';
+  static const String govBrPasso15 =
+      'Se preferir procurar por assunto, escolha uma categoria na lista alfabética de A até D.';
+  static const String govBrCaptura15 =
+      'Lista de categorias de serviços públicos organizadas em ordem alfabética de A a D.';
+  static const String govBrPasso16 =
+      'Continue descendo para explorar as categorias de E até T e encontrar qualquer serviço federal.';
+  static const String govBrCaptura16 =
+      'Continuação da lista de categorias de serviços públicos de E a T.';
+
+  static const String govBrPasso17 =
+      'O governo reúne seus aplicativos oficiais em uma página segura para você não baixar apps falsos.';
+  static const String govBrCaptura17 =
+      'Banner oficial de aplicativos móveis do governo federal no portal Gov.br.';
+  static const String govBrPasso18 =
+      'Na galeria de aplicativos, confira os ícones oficiais antes de instalar no seu celular.';
+  static const String govBrCaptura18 =
+      'Galeria de aplicativos oficiais do governo com ícones e descrições.';
+  static const String govBrPasso19 =
+      'Entre os mais acessados estão o Meu INSS e o Meu SUS Digital para cuidar da aposentadoria e saúde.';
+  static const String govBrCaptura19 =
+      'Seção de aplicativos mais acessados destacando Meu INSS e Meu SUS Digital.';
+  static const String govBrPasso20 =
+      'Veja também o atalho para o Cadastro Único, usado para manter benefícios sociais atualizados.';
+  static const String govBrCaptura20 =
+      'Cartões dos aplicativos Meu INSS e Cadastro Único na página oficial.';
+  static const String govBrPasso21 =
+      'Para quem trabalha ou tem pequeno negócio, há links para o app MEI e Carteira de Trabalho Digital.';
+  static const String govBrCaptura21 =
+      'Atalhos para os aplicativos oficiais MEI e Carteira de Trabalho Digital.';
+
+  static const String govBrPasso22 =
+      'Em "Desempenho dos Serviços", você acompanha avaliações e tempos médios de atendimento.';
+  static const String govBrCaptura22 =
+      'Painel de Desempenho dos Serviços públicos no portal Gov.br.';
+  static const String govBrPasso23 =
+      'Precisou falar com o governo? Na Ouvidoria (Fala.BR), escolha entre fazer uma solicitação ou denúncia.';
+  static const String govBrCaptura23 =
+      'Tela da Ouvidoria com botões de Denúncia e Solicitação.';
+  static const String govBrPasso24 =
+      'Você também pode registrar elogios, reclamações e acompanhar seu número de protocolo.';
+  static const String govBrCaptura24 =
+      'Opções de Elogio, Reclamação e acompanhamento de protocolo na Ouvidoria.';
 
   // Meu INSS (T079)
   /// Título do guia do Meu INSS.
@@ -374,33 +470,122 @@ abstract final class TextosGuias {
   static const String eTituloCaptura4 =
       'Tela do título eleitoral digital exibindo dados eleitorais e QR Code de validação.';
 
-  // Serasa (T081)
+  // Serasa (006-guias-servicos-sociais)
   /// Título do guia do Serasa.
   static const String tituloSerasa = 'Como consultar seu CPF no Serasa';
-  /// Passo 1 do Serasa.
+  /// Título da seção 1 do Serasa.
+  static const String serasaSecao1Titulo = 'Conhecer Início e Menu';
+  /// Subtítulo da seção 1 do Serasa.
+  static const String serasaSecao1Subtitulo = 'Navegue pela página inicial e menu de produtos';
+  /// Título da seção 2 do Serasa.
+  static const String serasaSecao2Titulo = 'Consultar Serasa Score';
+  /// Subtítulo da seção 2 do Serasa.
+  static const String serasaSecao2Subtitulo = 'Entenda sua pontuação e receba alertas';
+  /// Título da seção 3 do Serasa.
+  static const String serasaSecao3Titulo = 'Ver Dívidas e Acordos';
+  /// Subtítulo da seção 3 do Serasa.
+  static const String serasaSecao3Subtitulo = 'Confira se há pendências, ofertas e acordos';
+  /// Título da seção 4 do Serasa.
+  static const String serasaSecao4Titulo = 'Proteger seu CPF';
+  /// Subtítulo da seção 4 do Serasa.
+  static const String serasaSecao4Subtitulo = 'Acompanhe vazamentos e monitore seu documento';
+  /// Título da seção 5 do Serasa.
+  static const String serasaSecao5Titulo = 'Outros Serviços e Ajuda';
+  /// Subtítulo da seção 5 do Serasa.
+  static const String serasaSecao5Subtitulo = 'Valide boletos, veja extratos e tire dúvidas';
+
   static const String serasaPasso1 =
-      'Abra o aplicativo e toque no botão "Entrar", embaixo na tela.';
-  /// Descrição da captura do passo 1 do Serasa.
+      'Na página inicial do Serasa, toque em "Consultar CPF grátis" para acessar sua conta.';
   static const String serasaCaptura1 =
-      'Tela inicial do aplicativo Serasa com destaque para o botão de acesso.';
-  /// Passo 2 do Serasa.
+      'Página inicial do Serasa com botão Consultar CPF grátis em destaque.';
   static const String serasaPasso2 =
-      'Digite seu CPF e a senha da sua conta Serasa no campo protegido.';
-  /// Descrição da captura do passo 2 do Serasa.
+      'Em épocas de negociação, você verá o aviso do Feirão Serasa Limpa Nome logo na capa.';
   static const String serasaCaptura2 =
-      'Tela oficial de autenticação da Serasa com campo de senha vazio.';
-  /// Passo 3 do Serasa.
+      'Capa promocional do Feirão Serasa com informações de negociação de dívidas.';
   static const String serasaPasso3 =
-      'Toque em "Meu CPF" no menu inferior para consultar sua pontuação.';
-  /// Descrição da captura do passo 3 do Serasa.
+      'Toque no menu lateral para explorar todos os serviços e produtos disponíveis para o seu CPF.';
   static const String serasaCaptura3 =
-      'Tela principal do Serasa destacando o menu Meu CPF.';
-  /// Passo 4 do Serasa.
+      'Menu lateral do Serasa exibindo categorias de produtos e serviços.';
   static const String serasaPasso4 =
-      'Confira sua pontuação de score e pendências financeiras. Parabéns! Agora você acompanha sua situação financeira com segurança.';
-  /// Descrição da captura do passo 4 do Serasa.
+      'Após entrar com seus dados, você vê a tela inicial logada com opções para conectar suas contas.';
   static const String serasaCaptura4 =
-      'Painel do Serasa Score mostrando a pontuação e status de pendências.';
+      'Tela inicial autenticada do Serasa com painel resumido e conexões de conta.';
+
+  static const String serasaPasso5 =
+      'No painel principal, toque no cartão "Serasa Score" para ver sua pontuação atual de 0 a 1000.';
+  static const String serasaCaptura5 =
+      'Cartão do Serasa Score mostrando a pontuação e faixa de avaliação.';
+  static const String serasaPasso6 =
+      'Na tela "Seu Serasa Score", veja o que ajuda ou prejudica sua nota de crédito.';
+  static const String serasaCaptura6 =
+      'Página detalhada Seu Serasa Score com explicação dos fatores da pontuação.';
+  static const String serasaPasso7 =
+      'Role para baixo para acompanhar o histórico de variações na sua pontuação ao longo dos meses.';
+  static const String serasaCaptura7 =
+      'Gráfico de variações do Serasa Score ao longo do tempo.';
+  static const String serasaPasso8 =
+      'Ative os "Alertas do Score" para ser avisado quando alguma empresa consultar seu CPF.';
+  static const String serasaCaptura8 =
+      'Seção de Alertas do Score em tempo real no Serasa.';
+
+  static const String serasaPasso9 =
+      'Quando não há pendências no seu CPF, o Serasa mostra o aviso positivo: "Seu nome está limpo".';
+  static const String serasaCaptura9 =
+      'Cartão de situação financeira indicando Seu nome está limpo.';
+  static const String serasaPasso10 =
+      'Na aba "Minhas Dívidas", confira se existem ofertas de desconto ou propostas de acordo.';
+  static const String serasaCaptura10 =
+      'Aba Minhas Dívidas exibindo ofertas e acordos disponíveis.';
+  static const String serasaPasso11 =
+      'Você também pode filtrar e conferir seus acordos já quitados ou eventuais parcelas vencidas.';
+  static const String serasaCaptura11 =
+      'Lista de acordos quitados e vencidos na aba Minhas Dívidas.';
+  static const String serasaPasso12 =
+      'Pelo menu de serviços, acesse rapidamente as opções de Dívidas e Meus acordos.';
+  static const String serasaCaptura12 =
+      'Atalhos de serviços para Dívidas e Meus acordos no Serasa.';
+
+  static const String serasaPasso13 =
+      'Toque na aba "Meu CPF" para conferir os detalhes cadastrais e a proteção do seu documento.';
+  static const String serasaCaptura13 =
+      'Tela principal da aba Meu CPF com resumo cadastral.';
+  static const String serasaPasso14 =
+      'Acompanhe o resumo de saúde financeira e verifique se houve algum alerta de vazamento de dados.';
+  static const String serasaCaptura14 =
+      'Painel de saúde financeira e verificação de vazamentos de dados.';
+  static const String serasaPasso15 =
+      'Veja o selo de segurança da sua conta e acesse seus relatórios detalhados quando precisar.';
+  static const String serasaCaptura15 =
+      'Área com selo de segurança e opções de relatórios do CPF.';
+  static const String serasaPasso16 =
+      'O Serasa também oferece consulta de dados na Dark Web e consulta veicular para checar histórico de carros.';
+  static const String serasaCaptura16 =
+      'Cartões de Consulta Dark Web e Consulta Veicular no Serasa.';
+  static const String serasaPasso17 =
+      'Você pode gerenciar o monitoramento do seu CPF, CNPJ ou de terceiros autorizados.';
+  static const String serasaCaptura17 =
+      'Opções de monitoramento de CPF, CNPJ e Terceiros no Serasa.';
+
+  static const String serasaPasso18 =
+      'Na seção de crédito, conheça ofertas de empréstimos e cartões selecionadas para o seu perfil.';
+  static const String serasaCaptura18 =
+      'Vitrine de empréstimos e cartões de crédito disponíveis no Serasa.';
+  static const String serasaPasso19 =
+      'Confira opções para bloquear consultas indesejadas ao seu CPF e gerenciar seu Cadastro Positivo.';
+  static const String serasaCaptura19 =
+      'Ferramentas de bloqueio de consultas e informações do Cadastro Positivo.';
+  static const String serasaPasso20 =
+      'Acesse o Extrato Serasa ou use a função de Bloquear Score para reforçar sua proteção.';
+  static const String serasaCaptura20 =
+      'Opções de Extrato Serasa e Bloquear Score na área de serviços.';
+  static const String serasaPasso21 =
+      'Veja as configurações de proteção de dados e acompanhe o status de pedidos realizados.';
+  static const String serasaCaptura21 =
+      'Tela de proteção de dados e histórico de pedidos no Serasa.';
+  static const String serasaPasso22 =
+      'Precisa confirmar um pagamento? Use o "Validador de boleto" ou acesse a "Central de Ajuda" sempre que tiver dúvida.';
+  static const String serasaCaptura22 =
+      'Atalhos para o Validador de boleto e Central de Ajuda do Serasa.';
 
   // FGTS (T081)
   /// Título do guia do FGTS.
@@ -486,33 +671,51 @@ abstract final class TextosGuias {
   static const String carteiraDigitalCaptura4 =
       'Documento digital oficial aberto com dados legíveis e código de autenticidade.';
 
-  // Correios (T082)
+  // Correios (006-guias-servicos-sociais)
   /// Título do guia dos Correios.
-  static const String tituloCorreios = 'Como rastrear encomendas nos Correios';
-  /// Passo 1 dos Correios.
+  static const String tituloCorreios = 'Como rastrear e usar os Correios';
+  /// Título da seção 1 dos Correios.
+  static const String correiosSecao1Titulo = 'Rastrear Encomenda';
+  /// Subtítulo da seção 1 dos Correios.
+  static const String correiosSecao1Subtitulo = 'Acompanhe o caminho da sua entrega passo a passo';
+  /// Título da seção 2 dos Correios.
+  static const String correiosSecao2Titulo = 'Calcular Frete e Meu Correios';
+  /// Subtítulo da seção 2 dos Correios.
+  static const String correiosSecao2Subtitulo = 'Consulte preços, prazos e entre na sua conta';
+
   static const String correiosPasso1 =
-      'Toque na barra "Rastrear encomendas", no topo da tela inicial.';
-  /// Descrição da captura do passo 1 dos Correios.
+      'Na página inicial dos Correios, você encontra os atalhos principais para encomendas e serviços.';
   static const String correiosCaptura1 =
-      'Tela principal do aplicativo Correios destacando o campo de rastreamento.';
-  /// Passo 2 dos Correios.
+      'Portal inicial dos Correios exibindo menu principal e área de serviços.';
   static const String correiosPasso2 =
-      'Digite o código da sua encomenda de 13 letras e números.';
-  /// Descrição da captura do passo 2 dos Correios.
+      'Toque no campo "Acompanhe seu Objeto" e digite o código de rastreamento de 13 letras e números.';
   static const String correiosCaptura2 =
-      'Teclado ativo digitando código de rastreamento no padrão dos Correios.';
-  /// Passo 3 dos Correios.
+      'Campo Acompanhe seu Objeto destacado no portal dos Correios.';
   static const String correiosPasso3 =
-      'Caso queira receber alertas, entre com seu login e senha do idCorreios.';
-  /// Descrição da captura do passo 3 dos Correios.
+      'Preencha o código de verificação de segurança exibido na imagem e toque na lupa para consultar.';
   static const String correiosCaptura3 =
-      'Tela opcional de acesso idCorreios com campo de senha vazio.';
-  /// Passo 4 dos Correios.
+      'Tela de rastreamento dos Correios com campo de código do objeto e verificação visual.';
   static const String correiosPasso4 =
-      'Veja onde seu pacote está e a previsão de entrega. Parabéns! Agora você sabe rastrear qualquer entrega dos Correios.';
-  /// Descrição da captura do passo 4 dos Correios.
+      'Veja a linha do tempo da sua entrega com cada cidade por onde o pacote passou até chegar em casa.';
   static const String correiosCaptura4 =
-      'Histórico de rastreamento com cidades por onde o pacote passou e data prevista.';
+      'Histórico completo de rastreamento mostrando linha do tempo e status da entrega.';
+
+  static const String correiosPasso5 =
+      'No menu superior, acesse as opções "Enviar", "Receber" e "Atendimento" conforme o que precisar.';
+  static const String correiosCaptura5 =
+      'Menu de navegação dos Correios com seções Enviar, Receber e Atendimento.';
+  static const String correiosPasso6 =
+      'Para saber quanto custa enviar uma caixa ou carta, informe o CEP de origem, destino e o tamanho no calculador de frete.';
+  static const String correiosCaptura6 =
+      'Tela de cálculo de preços e prazos por CEP nos Correios.';
+  static const String correiosPasso7 =
+      'Pelo menu também é possível localizar a agência dos Correios mais próxima da sua casa.';
+  static const String correiosCaptura7 =
+      'Menu dos Correios destacando opções de Rastreamento e Busca de Agências.';
+  static const String correiosPasso8 =
+      'Caso queira salvar seus envios e receber avisos, entre no "Meu Correios" com seu usuário e senha.';
+  static const String correiosCaptura8 =
+      'Tela de login do Meu Correios com campo protegido de usuário e senha.';
 
   // Carteira de Trabalho Digital (T082)
   /// Título do guia da Carteira de Trabalho Digital.

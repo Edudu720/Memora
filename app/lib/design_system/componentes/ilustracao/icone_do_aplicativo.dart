@@ -214,16 +214,13 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 8. Gov.br (Azul Marinho Oficial)
+    // 8. Gov.br (logo oficial fornecida)
     if (normalizada.contains('gov')) {
-      return Container(
-        color: const Color(0xFF002776),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.account_balance_rounded,
-          color: Colors.white,
-          size: tamanho * 0.62,
-        ),
+      return Image.asset(
+        'assets/ilustracoes/gov_br_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
@@ -253,16 +250,13 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 11. Serasa (Magenta Serasa)
+    // 11. Serasa (logo oficial fornecida)
     if (normalizada.contains('serasa')) {
-      return Container(
-        color: const Color(0xFFE6007E),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.verified_user_rounded,
-          color: Colors.white,
-          size: tamanho * 0.62,
-        ),
+      return Image.asset(
+        'assets/ilustracoes/serasa_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
@@ -330,16 +324,13 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 16. Correios (Amarelo Correios)
+    // 16. Correios (logo oficial fornecida)
     if (normalizada.contains('correios')) {
-      return Container(
-        color: const Color(0xFFFFCC00),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.markunread_mailbox_rounded,
-          color: const Color(0xFF004184),
-          size: tamanho * 0.64,
-        ),
+      return Image.asset(
+        'assets/ilustracoes/correios_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 

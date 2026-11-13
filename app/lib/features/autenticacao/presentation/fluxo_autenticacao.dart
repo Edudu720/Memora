@@ -50,6 +50,7 @@ import '../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
 import '../../aprendizado/presentation/tela_passo_a_passo.dart';
+import '../../aprendizado/presentation/tela_seletor_de_secao.dart';
 import '../../../services/seguranca/sessao_perdida.dart';
 
 /// Liga as telas das User Stories 1 e 2.
@@ -759,15 +760,56 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   }
 
   /// Abre o guia de aprendizado passo a passo (FR-027).
+  ///
+  /// Quando o guia possui seções temáticas ([Guia.temSecoes]), exibe primeiro
+  /// [TelaSeletorDeSecao] para a pessoa escolher o assunto desejado.
   void _abrirGuia({
     required Guia guia,
     required ServicoDoCatalogo servico,
     required RepositorioAssistente assistente,
   }) {
+    if (guia.temSecoes) {
+      _empilhar(
+        _rota(
+          builder: (BuildContext contexto) => TelaSeletorDeSecao(
+            guia: guia,
+            servico: servico,
+            progresso: widget.progresso,
+            idDaConta: _pessoa?.id,
+            aoEscolherSecao: (SecaoDoGuia secao) => _abrirPassoAPasso(
+              guia: guia,
+              secao: secao,
+              servico: servico,
+              assistente: assistente,
+            ),
+            aoConversar: () => _abrirConversa(
+              assistente,
+              rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+            ),
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+        ),
+      );
+      return;
+    }
+    _abrirPassoAPasso(
+      guia: guia,
+      servico: servico,
+      assistente: assistente,
+    );
+  }
+
+  void _abrirPassoAPasso({
+    required Guia guia,
+    required ServicoDoCatalogo servico,
+    required RepositorioAssistente assistente,
+    SecaoDoGuia? secao,
+  }) {
     _empilhar(
       _rota(
         builder: (BuildContext contexto) => TelaPassoAPasso(
           guia: guia,
+          secao: secao,
           servico: servico,
           repositorioAssistente: assistente,
           progresso: widget.progresso,

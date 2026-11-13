@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
+import 'package:flutter/widgets.dart' show IconData;
 
 /// Uma captura de tela embarcada, e o caminho dela (T061, R6).
 ///
@@ -27,7 +28,10 @@ final class CapturaDoGuia {
   /// O número do passo, a partir de 1.
   final int numero;
 
-  const CapturaDoGuia._(this.chave, this.numero);
+  /// Extensão do arquivo de captura ('png' por padrão, ou 'jpg' para capturas otimizadas).
+  final String extensao;
+
+  const CapturaDoGuia._(this.chave, this.numero, [this.extensao = 'png']);
 
   /// Só para o teste montar de propósito um guia errado e provar que o portão
   /// o pega. Usar isto em `lib/` é avisado pelo `flutter analyze`.
@@ -36,7 +40,7 @@ final class CapturaDoGuia {
     : this._(chave, numero);
 
   /// O caminho do asset, relativo à raiz do aplicativo.
-  String get caminho => 'assets/guias/$chave/passo_$numero.png';
+  String get caminho => 'assets/guias/$chave/passo_$numero.$extensao';
 
   /// Captura para orientar a baixar na loja oficial (revisão da #47).
   static const CapturaDoGuia lojaOficial = CapturaDoGuia._('loja', 1);
@@ -111,17 +115,55 @@ final class CapturaDoGuia {
   /// Captura 4 do TikTok.
   static const CapturaDoGuia tiktok4 = CapturaDoGuia._('tiktok', 4);
 
-  // Gov.br (T078)
+  // Gov.br (T078 + Feature 006 Seções)
   /// Captura 1 do Gov.br.
-  static const CapturaDoGuia govBr1 = CapturaDoGuia._('gov-br', 1);
+  static const CapturaDoGuia govBr1 = CapturaDoGuia._('gov-br', 1, 'jpg');
   /// Captura 2 do Gov.br.
-  static const CapturaDoGuia govBr2 = CapturaDoGuia._('gov-br', 2);
-  /// Captura 3 do Gov.br.
-  static const CapturaDoGuia govBr3 = CapturaDoGuia._('gov-br', 3);
-  /// Captura 4 do Gov.br (com campo de senha vazio).
-  static const CapturaDoGuia govBr4 = CapturaDoGuia._('gov-br', 4);
+  static const CapturaDoGuia govBr2 = CapturaDoGuia._('gov-br', 2, 'jpg');
+  /// Captura 3 do Gov.br (com campo de senha vazio).
+  static const CapturaDoGuia govBr3 = CapturaDoGuia._('gov-br', 3, 'jpg');
+  /// Captura 4 do Gov.br.
+  static const CapturaDoGuia govBr4 = CapturaDoGuia._('gov-br', 4, 'jpg');
   /// Captura 5 do Gov.br.
-  static const CapturaDoGuia govBr5 = CapturaDoGuia._('gov-br', 5);
+  static const CapturaDoGuia govBr5 = CapturaDoGuia._('gov-br', 5, 'jpg');
+  /// Captura 6 do Gov.br.
+  static const CapturaDoGuia govBr6 = CapturaDoGuia._('gov-br', 6, 'jpg');
+  /// Captura 7 do Gov.br.
+  static const CapturaDoGuia govBr7 = CapturaDoGuia._('gov-br', 7, 'jpg');
+  /// Captura 8 do Gov.br.
+  static const CapturaDoGuia govBr8 = CapturaDoGuia._('gov-br', 8, 'jpg');
+  /// Captura 9 do Gov.br.
+  static const CapturaDoGuia govBr9 = CapturaDoGuia._('gov-br', 9, 'jpg');
+  /// Captura 10 do Gov.br.
+  static const CapturaDoGuia govBr10 = CapturaDoGuia._('gov-br', 10, 'jpg');
+  /// Captura 11 do Gov.br.
+  static const CapturaDoGuia govBr11 = CapturaDoGuia._('gov-br', 11, 'jpg');
+  /// Captura 12 do Gov.br.
+  static const CapturaDoGuia govBr12 = CapturaDoGuia._('gov-br', 12, 'jpg');
+  /// Captura 13 do Gov.br.
+  static const CapturaDoGuia govBr13 = CapturaDoGuia._('gov-br', 13, 'jpg');
+  /// Captura 14 do Gov.br.
+  static const CapturaDoGuia govBr14 = CapturaDoGuia._('gov-br', 14, 'jpg');
+  /// Captura 15 do Gov.br.
+  static const CapturaDoGuia govBr15 = CapturaDoGuia._('gov-br', 15, 'jpg');
+  /// Captura 16 do Gov.br.
+  static const CapturaDoGuia govBr16 = CapturaDoGuia._('gov-br', 16, 'jpg');
+  /// Captura 17 do Gov.br.
+  static const CapturaDoGuia govBr17 = CapturaDoGuia._('gov-br', 17, 'jpg');
+  /// Captura 18 do Gov.br.
+  static const CapturaDoGuia govBr18 = CapturaDoGuia._('gov-br', 18, 'jpg');
+  /// Captura 19 do Gov.br.
+  static const CapturaDoGuia govBr19 = CapturaDoGuia._('gov-br', 19, 'jpg');
+  /// Captura 20 do Gov.br.
+  static const CapturaDoGuia govBr20 = CapturaDoGuia._('gov-br', 20, 'jpg');
+  /// Captura 21 do Gov.br.
+  static const CapturaDoGuia govBr21 = CapturaDoGuia._('gov-br', 21, 'jpg');
+  /// Captura 22 do Gov.br.
+  static const CapturaDoGuia govBr22 = CapturaDoGuia._('gov-br', 22, 'jpg');
+  /// Captura 23 do Gov.br.
+  static const CapturaDoGuia govBr23 = CapturaDoGuia._('gov-br', 23, 'jpg');
+  /// Captura 24 do Gov.br.
+  static const CapturaDoGuia govBr24 = CapturaDoGuia._('gov-br', 24, 'jpg');
 
   // Meu INSS (T079)
   /// Captura 1 do Meu INSS.
@@ -143,15 +185,51 @@ final class CapturaDoGuia {
   /// Captura 4 do e-Título.
   static const CapturaDoGuia eTitulo4 = CapturaDoGuia._('e-titulo', 4);
 
-  // Serasa (T081)
+  // Serasa (T081 + Feature 006 Seções)
   /// Captura 1 do Serasa.
-  static const CapturaDoGuia serasa1 = CapturaDoGuia._('serasa', 1);
-  /// Captura 2 do Serasa (com campo de senha oficial vazio).
-  static const CapturaDoGuia serasa2 = CapturaDoGuia._('serasa', 2);
+  static const CapturaDoGuia serasa1 = CapturaDoGuia._('serasa', 1, 'jpg');
+  /// Captura 2 do Serasa.
+  static const CapturaDoGuia serasa2 = CapturaDoGuia._('serasa', 2, 'jpg');
   /// Captura 3 do Serasa.
-  static const CapturaDoGuia serasa3 = CapturaDoGuia._('serasa', 3);
+  static const CapturaDoGuia serasa3 = CapturaDoGuia._('serasa', 3, 'jpg');
   /// Captura 4 do Serasa.
-  static const CapturaDoGuia serasa4 = CapturaDoGuia._('serasa', 4);
+  static const CapturaDoGuia serasa4 = CapturaDoGuia._('serasa', 4, 'jpg');
+  /// Captura 5 do Serasa.
+  static const CapturaDoGuia serasa5 = CapturaDoGuia._('serasa', 5, 'jpg');
+  /// Captura 6 do Serasa.
+  static const CapturaDoGuia serasa6 = CapturaDoGuia._('serasa', 6, 'jpg');
+  /// Captura 7 do Serasa.
+  static const CapturaDoGuia serasa7 = CapturaDoGuia._('serasa', 7, 'jpg');
+  /// Captura 8 do Serasa.
+  static const CapturaDoGuia serasa8 = CapturaDoGuia._('serasa', 8, 'jpg');
+  /// Captura 9 do Serasa.
+  static const CapturaDoGuia serasa9 = CapturaDoGuia._('serasa', 9, 'jpg');
+  /// Captura 10 do Serasa.
+  static const CapturaDoGuia serasa10 = CapturaDoGuia._('serasa', 10, 'jpg');
+  /// Captura 11 do Serasa.
+  static const CapturaDoGuia serasa11 = CapturaDoGuia._('serasa', 11, 'jpg');
+  /// Captura 12 do Serasa.
+  static const CapturaDoGuia serasa12 = CapturaDoGuia._('serasa', 12, 'jpg');
+  /// Captura 13 do Serasa.
+  static const CapturaDoGuia serasa13 = CapturaDoGuia._('serasa', 13, 'jpg');
+  /// Captura 14 do Serasa.
+  static const CapturaDoGuia serasa14 = CapturaDoGuia._('serasa', 14, 'jpg');
+  /// Captura 15 do Serasa.
+  static const CapturaDoGuia serasa15 = CapturaDoGuia._('serasa', 15, 'jpg');
+  /// Captura 16 do Serasa.
+  static const CapturaDoGuia serasa16 = CapturaDoGuia._('serasa', 16, 'jpg');
+  /// Captura 17 do Serasa.
+  static const CapturaDoGuia serasa17 = CapturaDoGuia._('serasa', 17, 'jpg');
+  /// Captura 18 do Serasa.
+  static const CapturaDoGuia serasa18 = CapturaDoGuia._('serasa', 18, 'jpg');
+  /// Captura 19 do Serasa.
+  static const CapturaDoGuia serasa19 = CapturaDoGuia._('serasa', 19, 'jpg');
+  /// Captura 20 do Serasa.
+  static const CapturaDoGuia serasa20 = CapturaDoGuia._('serasa', 20, 'jpg');
+  /// Captura 21 do Serasa.
+  static const CapturaDoGuia serasa21 = CapturaDoGuia._('serasa', 21, 'jpg');
+  /// Captura 22 do Serasa.
+  static const CapturaDoGuia serasa22 = CapturaDoGuia._('serasa', 22, 'jpg');
 
   // FGTS (T081)
   /// Captura 1 do FGTS.
@@ -183,15 +261,23 @@ final class CapturaDoGuia {
   /// Captura 4 da Carteira Digital.
   static const CapturaDoGuia carteiraDigital4 = CapturaDoGuia._('carteira-digital', 4);
 
-  // Correios (T082)
+  // Correios (T082 + Feature 006 Seções)
   /// Captura 1 dos Correios.
-  static const CapturaDoGuia correios1 = CapturaDoGuia._('correios', 1);
-  /// Captura 2 dos Correios (com campo de senha oficial vazio).
-  static const CapturaDoGuia correios2 = CapturaDoGuia._('correios', 2);
+  static const CapturaDoGuia correios1 = CapturaDoGuia._('correios', 1, 'jpg');
+  /// Captura 2 dos Correios.
+  static const CapturaDoGuia correios2 = CapturaDoGuia._('correios', 2, 'jpg');
   /// Captura 3 dos Correios.
-  static const CapturaDoGuia correios3 = CapturaDoGuia._('correios', 3);
+  static const CapturaDoGuia correios3 = CapturaDoGuia._('correios', 3, 'jpg');
   /// Captura 4 dos Correios.
-  static const CapturaDoGuia correios4 = CapturaDoGuia._('correios', 4);
+  static const CapturaDoGuia correios4 = CapturaDoGuia._('correios', 4, 'jpg');
+  /// Captura 5 dos Correios.
+  static const CapturaDoGuia correios5 = CapturaDoGuia._('correios', 5, 'jpg');
+  /// Captura 6 dos Correios.
+  static const CapturaDoGuia correios6 = CapturaDoGuia._('correios', 6, 'jpg');
+  /// Captura 7 dos Correios.
+  static const CapturaDoGuia correios7 = CapturaDoGuia._('correios', 7, 'jpg');
+  /// Captura 8 dos Correios (com campo de senha oficial vazio).
+  static const CapturaDoGuia correios8 = CapturaDoGuia._('correios', 8, 'jpg');
 
   // Carteira de Trabalho Digital (T082)
   /// Captura 1 da Carteira de Trabalho Digital.
@@ -210,10 +296,13 @@ final class CapturaDoGuia {
 
   @override
   bool operator ==(Object other) =>
-      other is CapturaDoGuia && other.chave == chave && other.numero == numero;
+      other is CapturaDoGuia &&
+      other.chave == chave &&
+      other.numero == numero &&
+      other.extensao == extensao;
 
   @override
-  int get hashCode => Object.hash(chave, numero);
+  int get hashCode => Object.hash(chave, numero, extensao);
 
   @override
   String toString() => 'CapturaDoGuia($caminho)';
@@ -296,6 +385,41 @@ class Passo {
   });
 }
 
+/// Uma seção temática dentro de um guia extenso (ex.: "Baixar Certidões" no Gov.br).
+///
+/// Permite que a pessoa idosa escolha exatamente o assunto que deseja aprender
+/// sem precisar percorrer dezenas de telas seguidas (Feature 006).
+@immutable
+class SecaoDoGuia {
+  /// Chave única da seção dentro do guia (ex.: `'entrar-conta'`).
+  final String chave;
+
+  /// Título curto e literal exibido no cartão de escolha.
+  final String titulo;
+
+  /// Uma linha explicando o que a pessoa vai aprender nesta seção.
+  final String subtitulo;
+
+  /// Ícone que acompanha o título (nunca isolado — Constituição III).
+  final IconData icone;
+
+  /// Itens específicos para ter em mãos antes de iniciar esta seção.
+  final List<String> precisaTerEmMaos;
+
+  /// Passos da seção (entre [Guia.minimoDePassos] e [Guia.maximoDePassos]).
+  final List<Passo> passos;
+
+  /// Cria uma seção temática de um guia.
+  const SecaoDoGuia({
+    required this.chave,
+    required this.titulo,
+    required this.subtitulo,
+    required this.icone,
+    required this.passos,
+    this.precisaTerEmMaos = const <String>[],
+  });
+}
+
 /// O caminho de aprendizado de um item do catálogo.
 ///
 /// É **conteúdo escrito pela equipe**, compilado no aplicativo: não é dado da
@@ -321,8 +445,11 @@ class Guia {
   /// (FR-032); pode ser vazio para cotidiano.
   final List<String> precisaTerEmMaos;
 
-  /// Os passos, em ordem.
+  /// Os passos, em ordem (usados quando [secoes] estiver vazio).
   final List<Passo> passos;
+
+  /// Seções temáticas opcionais para serviços extensos (ex.: Gov.br, Serasa, Correios).
+  final List<SecaoDoGuia> secoes;
 
   /// Quando as capturas foram feitas (R6): diz à revisão quando refazer.
   final DateTime capturadoEm;
@@ -330,13 +457,22 @@ class Guia {
   /// A versão do aplicativo do outro lado, como aparece na loja.
   final String versaoCapturada;
 
+  /// Se o guia possui seções temáticas para escolha prévia.
+  bool get temSecoes => secoes.isNotEmpty;
+
+  /// Todos os passos do guia (diretos ou agrupados nas seções).
+  List<Passo> get todosOsPassos => secoes.isEmpty
+      ? passos
+      : <Passo>[for (final SecaoDoGuia secao in secoes) ...secao.passos];
+
   /// Cria um guia.
   const Guia({
     required this.chave,
     required this.titulo,
-    required this.passos,
     required this.capturadoEm,
     required this.versaoCapturada,
+    this.passos = const <Passo>[],
+    this.secoes = const <SecaoDoGuia>[],
     this.precisaTerEmMaos = const <String>[],
   });
 }
