@@ -363,9 +363,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       expect(
         soltas,
         isEmpty,
-        reason: 'Sem passo que as use:
-${soltas.join('
-')}',
+        reason: 'Sem passo que as use: ${soltas.join(', ')}',
       );
     });
   });
