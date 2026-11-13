@@ -17,7 +17,7 @@ de **produção** do conteúdo, que é trabalho da equipe e não do código.
 
 1. **Conta de teste**, criada para isso. Nenhum nome, rosto, foto, número ou
    e-mail de pessoa real em nenhuma captura (FR-028).
-2. **Aparelho de referência único** para todas as capturas, em 3x, para o
+2. **Aparelho de referência único** para todas as capturas — o **Samsung Galaxy S20 FE** —, em 3x, para o
    destaque relativo cair no mesmo lugar em todos os guias.
 3. **Sem o destaque desenhado na imagem.** O destaque, o selo "Exemplo" e a
    moldura são do aplicativo (R6). Captura com círculo vermelho pintado é
