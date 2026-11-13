@@ -47,13 +47,13 @@ final class CapturaDoGuia {
 
   // WhatsApp (T071)
   /// Captura 1 do WhatsApp.
-  static const CapturaDoGuia whatsapp1 = CapturaDoGuia._('whatsapp', 1);
+  static const CapturaDoGuia whatsapp1 = CapturaDoGuia._('whatsapp', 1, 'jpg');
   /// Captura 2 do WhatsApp.
-  static const CapturaDoGuia whatsapp2 = CapturaDoGuia._('whatsapp', 2);
+  static const CapturaDoGuia whatsapp2 = CapturaDoGuia._('whatsapp', 2, 'jpg');
   /// Captura 3 do WhatsApp.
-  static const CapturaDoGuia whatsapp3 = CapturaDoGuia._('whatsapp', 3);
+  static const CapturaDoGuia whatsapp3 = CapturaDoGuia._('whatsapp', 3, 'jpg');
   /// Captura 4 do WhatsApp.
-  static const CapturaDoGuia whatsapp4 = CapturaDoGuia._('whatsapp', 4);
+  static const CapturaDoGuia whatsapp4 = CapturaDoGuia._('whatsapp', 4, 'jpg');
 
   // Instagram (T071)
   /// Captura 1 do Instagram.
@@ -77,13 +77,25 @@ final class CapturaDoGuia {
 
   // Facebook (T072)
   /// Captura 1 do Facebook.
-  static const CapturaDoGuia facebook1 = CapturaDoGuia._('facebook', 1);
+  static const CapturaDoGuia facebook1 = CapturaDoGuia._('facebook', 1, 'jpg');
   /// Captura 2 do Facebook.
-  static const CapturaDoGuia facebook2 = CapturaDoGuia._('facebook', 2);
+  static const CapturaDoGuia facebook2 = CapturaDoGuia._('facebook', 2, 'jpg');
   /// Captura 3 do Facebook.
-  static const CapturaDoGuia facebook3 = CapturaDoGuia._('facebook', 3);
+  static const CapturaDoGuia facebook3 = CapturaDoGuia._('facebook', 3, 'jpg');
   /// Captura 4 do Facebook.
-  static const CapturaDoGuia facebook4 = CapturaDoGuia._('facebook', 4);
+  static const CapturaDoGuia facebook4 = CapturaDoGuia._('facebook', 4, 'jpg');
+  /// Captura 5 do Facebook.
+  static const CapturaDoGuia facebook5 = CapturaDoGuia._('facebook', 5, 'jpg');
+  /// Captura 6 do Facebook.
+  static const CapturaDoGuia facebook6 = CapturaDoGuia._('facebook', 6, 'jpg');
+  /// Captura 7 do Facebook.
+  static const CapturaDoGuia facebook7 = CapturaDoGuia._('facebook', 7, 'jpg');
+  /// Captura 8 do Facebook.
+  static const CapturaDoGuia facebook8 = CapturaDoGuia._('facebook', 8, 'jpg');
+  /// Captura 9 do Facebook.
+  static const CapturaDoGuia facebook9 = CapturaDoGuia._('facebook', 9, 'jpg');
+  /// Captura 10 do Facebook.
+  static const CapturaDoGuia facebook10 = CapturaDoGuia._('facebook', 10, 'jpg');
 
   // Google Fotos (T072)
   /// Captura 1 do Google Fotos.
@@ -97,13 +109,21 @@ final class CapturaDoGuia {
 
   // Telegram (T072)
   /// Captura 1 do Telegram.
-  static const CapturaDoGuia telegram1 = CapturaDoGuia._('telegram', 1);
+  static const CapturaDoGuia telegram1 = CapturaDoGuia._('telegram', 1, 'jpg');
   /// Captura 2 do Telegram.
-  static const CapturaDoGuia telegram2 = CapturaDoGuia._('telegram', 2);
+  static const CapturaDoGuia telegram2 = CapturaDoGuia._('telegram', 2, 'jpg');
   /// Captura 3 do Telegram.
-  static const CapturaDoGuia telegram3 = CapturaDoGuia._('telegram', 3);
+  static const CapturaDoGuia telegram3 = CapturaDoGuia._('telegram', 3, 'jpg');
   /// Captura 4 do Telegram.
-  static const CapturaDoGuia telegram4 = CapturaDoGuia._('telegram', 4);
+  static const CapturaDoGuia telegram4 = CapturaDoGuia._('telegram', 4, 'jpg');
+  /// Captura 5 do Telegram.
+  static const CapturaDoGuia telegram5 = CapturaDoGuia._('telegram', 5, 'jpg');
+  /// Captura 6 do Telegram.
+  static const CapturaDoGuia telegram6 = CapturaDoGuia._('telegram', 6, 'jpg');
+  /// Captura 7 do Telegram.
+  static const CapturaDoGuia telegram7 = CapturaDoGuia._('telegram', 7, 'jpg');
+  /// Captura 8 do Telegram.
+  static const CapturaDoGuia telegram8 = CapturaDoGuia._('telegram', 8, 'jpg');
 
   // TikTok (T070)
   /// Captura 1 do TikTok.

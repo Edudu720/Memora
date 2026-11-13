@@ -389,21 +389,7 @@ class _MolduraDeCelular extends StatelessWidget {
                     height: constraints.maxHeight * passo.destaque.altura,
                     child: Semantics(
                       label: 'Área destacada na tela para tocar',
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                          border: Border.all(
-                            color: cores.primaria,
-                            width: MemoraDimensoes.bordaSelecao,
-                          ),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: cores.medalhao,
-                              spreadRadius: MemoraDimensoes.bordaEnfase,
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: const SizedBox.expand(),
                     ),
                   ),
                 ],
