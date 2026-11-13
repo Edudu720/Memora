@@ -123,6 +123,29 @@ abstract final class TextosGuias {
   /// Instrução da caixa de etapa na última etapa do guia (FR-002a, T125c).
   static const String instrucaoConclusao = 'O que você quer fazer agora?';
 
+  // Seletor de seção dos guias extensos (FR-028d, T137)
+
+  /// Pergunta da Memora no topo do seletor de seção. O nome do serviço vai em
+  /// negrito (`**x**`, o balão sabe desenhar).
+  static String perguntaDaSecao(String servico) =>
+      'O que você quer aprender no **$servico**? Escolha uma das opções abaixo:';
+
+  /// Quantos passos tem a seção: "1 passo", "5 passos".
+  static String quantidadeDePassos(int quantidade) =>
+      '$quantidade ${quantidade == 1 ? 'passo' : 'passos'}';
+
+  /// Marca da seção cujo último passo a pessoa já alcançou.
+  static String secaoJaAprendida(String contagem) =>
+      '$contagem · Já aprendeu';
+
+  /// Leitura do cartão de seção pelo leitor de tela.
+  static String secaoDescrita(String titulo, String subtitulo, String meta) =>
+      '$titulo. $subtitulo. $meta.';
+
+  /// Saída do seletor para quem não achou o assunto: leva à conversa.
+  static const String naoAcheiOQueProcuro =
+      'Não achei o que procuro — perguntar à Memora';
+
   // WhatsApp (T071)
   /// Título do guia do WhatsApp.
   static const String tituloWhatsapp = 'Como mandar mensagem no WhatsApp';

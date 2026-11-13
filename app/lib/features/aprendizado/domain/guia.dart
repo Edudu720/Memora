@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
+import 'package:flutter/widgets.dart' show IconData;
 
 /// O formato do arquivo de uma captura (clarificação de 2026-11-12).
 ///
@@ -333,6 +334,43 @@ class Passo {
   });
 }
 
+/// Uma seção temática dentro de um guia extenso (FR-028d, T137).
+///
+/// Um guia de serviço grande (Gov.br, Serasa, Correios...) não cabe em 3 a 7
+/// passos seguidos: a pessoa escolhe o assunto e percorre só a seção. Modelo
+/// vindo da PR #67 (Eduardo).
+@immutable
+class SecaoDoGuia {
+  /// Chave única da seção dentro do guia (ex.: `'entrar-conta'`). Compõe a
+  /// chave do progresso: `<guia>:<seção>`.
+  final String chave;
+
+  /// Título curto e literal exibido no cartão de escolha.
+  final String titulo;
+
+  /// Uma linha explicando o que a pessoa vai aprender nesta seção.
+  final String subtitulo;
+
+  /// Ícone que acompanha o título (nunca isolado — Constituição III).
+  final IconData icone;
+
+  /// Itens específicos para ter em mãos antes desta seção.
+  final List<String> precisaTerEmMaos;
+
+  /// Passos da seção (entre [Guia.minimoDePassos] e [Guia.maximoDePassos]).
+  final List<Passo> passos;
+
+  /// Cria uma seção temática de um guia.
+  const SecaoDoGuia({
+    required this.chave,
+    required this.titulo,
+    required this.subtitulo,
+    required this.icone,
+    required this.passos,
+    this.precisaTerEmMaos = const <String>[],
+  });
+}
+
 /// O caminho de aprendizado de um item do catálogo.
 ///
 /// É **conteúdo escrito pela equipe**, compilado no aplicativo: não é dado da
@@ -358,8 +396,12 @@ class Guia {
   /// (FR-032); pode ser vazio para cotidiano.
   final List<String> precisaTerEmMaos;
 
-  /// Os passos, em ordem.
+  /// Os passos, em ordem (usados quando [secoes] está vazio).
   final List<Passo> passos;
+
+  /// Seções temáticas, para o guia extenso (FR-028d). Quando existem, os
+  /// [passos] ficam vazios e cada seção traz os seus.
+  final List<SecaoDoGuia> secoes;
 
   /// Quando as capturas foram feitas (R6): diz à revisão quando refazer.
   final DateTime capturadoEm;
@@ -367,13 +409,22 @@ class Guia {
   /// A versão do aplicativo do outro lado, como aparece na loja.
   final String versaoCapturada;
 
+  /// O guia tem seções para escolher antes do passo a passo?
+  bool get temSecoes => secoes.isNotEmpty;
+
+  /// Todos os passos do guia: os diretos, ou os de todas as seções em ordem.
+  List<Passo> get todosOsPassos => secoes.isEmpty
+      ? passos
+      : <Passo>[for (final SecaoDoGuia secao in secoes) ...secao.passos];
+
   /// Cria um guia.
   const Guia({
     required this.chave,
     required this.titulo,
-    required this.passos,
     required this.capturadoEm,
     required this.versaoCapturada,
+    this.passos = const <Passo>[],
+    this.secoes = const <SecaoDoGuia>[],
     this.precisaTerEmMaos = const <String>[],
   });
 }

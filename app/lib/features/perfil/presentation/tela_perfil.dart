@@ -94,7 +94,10 @@ class _TelaPerfilState extends State<TelaPerfil> {
       return;
     }
 
-    final String? chave = await prog.aplicativoMaisAprendido(id);
+    final String? bruta = await prog.aplicativoMaisAprendido(id);
+    // O progresso de um guia em seções é por `<guia>:<seção>` (FR-028d): o
+    // nome que se mostra é o do guia.
+    final String? chave = bruta?.split(':').first;
     if (!mounted) return;
 
     String? nomeExibido;

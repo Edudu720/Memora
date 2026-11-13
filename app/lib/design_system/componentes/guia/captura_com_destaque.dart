@@ -238,7 +238,7 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
                     // é uma segunda borda, por fora da cor primária.
                     child: Semantics(
                       label: TextosGuias.areaDestacada,
-                      child: Container(
+                      child: DecoratedBox(
                         key: widget.chaveDoAnel,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(

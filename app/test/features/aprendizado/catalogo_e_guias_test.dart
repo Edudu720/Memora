@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/aprendizado/data/guias/guias.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
@@ -351,7 +352,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
         final Directory pasta = Directory('assets/guias/${g.chave}');
         if (!pasta.existsSync()) continue;
         final Set<String> usadas = <String>{
-          for (final Passo p in g.passos) p.captura.caminho,
+          for (final Passo p in g.todosOsPassos) p.captura.caminho,
         };
         for (final FileSystemEntity e in pasta.listSync()) {
           final String nome = e.uri.pathSegments.last;
@@ -394,14 +395,27 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       temCampoDeSenha: senha,
     );
 
+    SecaoDoGuia secao(String chave, int passos, {String titulo = 'Seção'}) =>
+        SecaoDoGuia(
+          chave: chave,
+          titulo: titulo,
+          subtitulo: 'O que se aprende nesta seção.',
+          icone: Icons.info_outline,
+          passos: List<Passo>.generate(passos, (int _) => passo()),
+        );
+
     Guia guia({
       String chave = 'exemplo',
       List<Passo>? passos,
+      List<SecaoDoGuia>? secoes,
       List<String> emMaos = const <String>[],
     }) => Guia(
       chave: chave,
       titulo: 'Aprender a usar o exemplo',
-      passos: passos ?? <Passo>[passo(), passo(), passo()],
+      passos: secoes != null
+          ? const <Passo>[]
+          : (passos ?? <Passo>[passo(), passo(), passo()]),
+      secoes: secoes ?? const <SecaoDoGuia>[],
       capturadoEm: DateTime(2026, 10),
       versaoCapturada: '1.0',
       precisaTerEmMaos: emMaos,
@@ -446,6 +460,114 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
         problemas(guia(passos: List<Passo>.generate(7, (int _) => passo()))),
         isEmpty,
       );
+    });
+
+    group('guia em seções (FR-028d, T137)', () {
+      test('seções de 3 a 7 passos são aceitas', () {
+        expect(
+          problemas(
+            guia(secoes: <SecaoDoGuia>[secao('a', 3), secao('b', 7)]),
+          ),
+          isEmpty,
+        );
+      });
+
+      test('uma seção com 8 passos reprova, mesmo com o guia somando mais', () {
+        expect(
+          problemas(
+            guia(secoes: <SecaoDoGuia>[secao('a', 4), secao('b', 8)]),
+          ),
+          contains(contains('seção "b" tem 8 passos')),
+        );
+      });
+
+      test('uma seção com 2 passos reprova', () {
+        expect(
+          problemas(
+            guia(secoes: <SecaoDoGuia>[secao('a', 4), secao('b', 2)]),
+          ),
+          contains(contains('seção "b" tem 2 passos')),
+        );
+      });
+
+      test('o total de passos do guia NÃO é limitado: só a seção é', () {
+        // 3 seções de 7 = 21 passos, e nenhum problema.
+        expect(
+          problemas(
+            guia(
+              secoes: <SecaoDoGuia>[
+                secao('a', 7),
+                secao('b', 7),
+                secao('c', 7),
+              ],
+            ),
+          ),
+          isEmpty,
+        );
+      });
+
+      test('seção sem título reprova', () {
+        expect(
+          problemas(
+            guia(secoes: <SecaoDoGuia>[secao('a', 3, titulo: '  ')]),
+          ),
+          contains(contains('sem título')),
+        );
+      });
+
+      test('chave de seção repetida reprova (ela compõe o progresso)', () {
+        expect(
+          problemas(
+            guia(secoes: <SecaoDoGuia>[secao('a', 3), secao('a', 3)]),
+          ),
+          contains(contains('repetida')),
+        );
+      });
+
+      test('guia com seções e passos soltos reprova', () {
+        final Guia misto = Guia(
+          chave: 'exemplo',
+          titulo: 'Aprender a usar o exemplo',
+          passos: <Passo>[passo(), passo(), passo()],
+          secoes: <SecaoDoGuia>[secao('a', 3)],
+          capturadoEm: DateTime(2026, 10),
+          versaoCapturada: '1.0',
+        );
+        expect(problemas(misto), contains(contains('passos soltos')));
+      });
+
+      test('os passos de todas as seções entram nas conferências', () {
+        // Descrição em branco no passo de uma seção reprova.
+        final SecaoDoGuia comPassoRuim = SecaoDoGuia(
+          chave: 'a',
+          titulo: 'Seção',
+          subtitulo: 'Subtítulo.',
+          icone: Icons.info_outline,
+          passos: <Passo>[passo(), passo(descricao: ''), passo()],
+        );
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('b', 3), comPassoRuim])),
+          contains(contains('descrição')),
+        );
+        // E a captura pendente de uma seção entra na lista de pendentes.
+        expect(
+          capturasPendentesDoGuia(
+            guia(secoes: <SecaoDoGuia>[secao('a', 3), secao('b', 3)]),
+            capturaExiste: (CapturaDoGuia _) => false,
+          ),
+          hasLength(6),
+        );
+      });
+
+      test('todosOsPassos junta os passos das seções, na ordem', () {
+        final Guia g = guia(
+          secoes: <SecaoDoGuia>[secao('a', 3), secao('b', 4)],
+        );
+        expect(g.temSecoes, isTrue);
+        expect(g.todosOsPassos, hasLength(7));
+        expect(guia().temSecoes, isFalse);
+        expect(guia().todosOsPassos, hasLength(3));
+      });
     });
 
     test('captura sem descrição reprova, inclusive só de espaços', () {
@@ -600,8 +722,9 @@ List<String> capturasPendentesDoGuia(
 }) {
   final String quem = 'Guia "${guia.chave}"';
   final List<String> pendentes = <String>[];
-  for (int i = 0; i < guia.passos.length; i++) {
-    final Passo p = guia.passos[i];
+  final List<Passo> todos = guia.todosOsPassos;
+  for (int i = 0; i < todos.length; i++) {
+    final Passo p = todos[i];
     if (!capturaExiste(p.captura)) {
       pendentes.add(
         '$quem, passo ${i + 1}: ${p.captura.caminho} pendente.',
@@ -624,16 +747,45 @@ List<String> problemasDoGuia(
     problemas.add('$quem não tem item no catálogo (nas migrations).');
   }
 
-  final int passos = guia.passos.length;
-  if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
-    problemas.add(
-      '$quem tem $passos passos; precisa de ${Guia.minimoDePassos} a '
-      '${Guia.maximoDePassos}.',
-    );
+  // Guia em seções (FR-028d): a regra de 3 a 7 passos vale POR SEÇÃO, e é o
+  // que permite um guia extenso sem cansar quem lê. O guia que traz seções
+  // não traz passos soltos (seriam ignorados pela tela).
+  if (guia.temSecoes) {
+    if (guia.passos.isNotEmpty) {
+      problemas.add('$quem tem seções e também passos soltos.');
+    }
+    final Set<String> vistas = <String>{};
+    for (final SecaoDoGuia secao in guia.secoes) {
+      final int passos = secao.passos.length;
+      if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
+        problemas.add(
+          '$quem, seção "${secao.chave}" tem $passos passos; precisa de '
+          '${Guia.minimoDePassos} a ${Guia.maximoDePassos}.',
+        );
+      }
+      if (secao.titulo.trim().isEmpty) {
+        problemas.add('$quem, seção "${secao.chave}": sem título.');
+      }
+      if (!vistas.add(secao.chave)) {
+        problemas.add(
+          '$quem, seção "${secao.chave}" repetida (a chave compõe o '
+          'progresso).',
+        );
+      }
+    }
+  } else {
+    final int passos = guia.passos.length;
+    if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
+      problemas.add(
+        '$quem tem $passos passos; precisa de ${Guia.minimoDePassos} a '
+        '${Guia.maximoDePassos}.',
+      );
+    }
   }
 
-  for (int i = 0; i < guia.passos.length; i++) {
-    final Passo p = guia.passos[i];
+  final List<Passo> todos = guia.todosOsPassos;
+  for (int i = 0; i < todos.length; i++) {
+    final Passo p = todos[i];
     if (p.descricaoDaCaptura.trim().isEmpty) {
       problemas.add('$quem, passo ${i + 1}: captura sem descrição (FR-045).');
     }
