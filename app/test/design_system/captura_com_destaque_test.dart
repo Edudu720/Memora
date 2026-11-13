@@ -68,10 +68,7 @@ void main() {
       ) async {
         await t.pumpWidget(
           app(
-            CapturaComDestaque(
-              passo: passoCom(regiao),
-              proporcao: proporcao,
-            ),
+            CapturaComDestaque(passo: passoCom(regiao), proporcao: proporcao),
           ),
         );
 

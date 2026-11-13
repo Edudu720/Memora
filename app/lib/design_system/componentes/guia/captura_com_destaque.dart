@@ -235,7 +235,9 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
                       child: Container(
                         key: widget.chaveDoAnel,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+                          borderRadius: BorderRadius.circular(
+                            MemoraRaio.padrao,
+                          ),
                           border: Border.all(
                             color: cores.primaria,
                             width: MemoraDimensoes.bordaSelecao,

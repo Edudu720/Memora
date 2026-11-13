@@ -92,12 +92,13 @@ class CapturaAmpliada extends StatefulWidget {
       PageRouteBuilder<void>(
         transitionDuration: transicao,
         reverseTransitionDuration: transicao,
-        pageBuilder: (BuildContext _, Animation<double> _, Animation<double> _) =>
-            CapturaAmpliada(
-              passo: passo,
-              imagem: imagem,
-              proporcao: proporcao,
-            ),
+        pageBuilder:
+            (BuildContext _, Animation<double> _, Animation<double> _) =>
+                CapturaAmpliada(
+                  passo: passo,
+                  imagem: imagem,
+                  proporcao: proporcao,
+                ),
         transitionsBuilder:
             (
               BuildContext _,
@@ -181,10 +182,7 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
     final RenderObject? anel = _chaveDoAnel.currentContext?.findRenderObject();
     final RenderObject? cena = _chaveDaCena.currentContext?.findRenderObject();
     if (anel is RenderBox && cena is RenderBox && anel.hasSize) {
-      return anel.localToGlobal(
-        anel.size.center(Offset.zero),
-        ancestor: cena,
-      );
+      return anel.localToGlobal(anel.size.center(Offset.zero), ancestor: cena);
     }
     return _janela.center(Offset.zero);
   }

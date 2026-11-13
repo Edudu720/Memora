@@ -40,9 +40,7 @@ void main() {
         data: MediaQuery.of(context).copyWith(disableAnimations: semAnimacao),
         child: filho!,
       ),
-      home: Scaffold(
-        body: PassoIlustrado(passo: p, posicao: 1, total: 3),
-      ),
+      home: Scaffold(body: PassoIlustrado(passo: p, posicao: 1, total: 3)),
     );
   }
 
@@ -183,10 +181,7 @@ void main() {
       await t.pumpWidget(appComPasso());
       await abrirPeloBotao(t);
 
-      expect(
-        find.bySemanticsLabel(passo.descricaoDaCaptura),
-        findsOneWidget,
-      );
+      expect(find.bySemanticsLabel(passo.descricaoDaCaptura), findsOneWidget);
       expect(find.bySemanticsLabel(TextosGuias.aproximar), findsOneWidget);
       expect(find.bySemanticsLabel(TextosGuias.afastar), findsOneWidget);
       expect(find.bySemanticsLabel(TextosGuias.fecharImagem), findsOneWidget);
@@ -301,9 +296,9 @@ void main() {
       await t.pumpAndSettle();
 
       expect(escala(t), closeTo(2, 1e-6), reason: 'tocar nao muda a escala');
-      final Offset cenaNoMeio = controle(t).toScene(
-        janela.center - janela.topLeft,
-      );
+      final Offset cenaNoMeio = controle(
+        t,
+      ).toScene(janela.center - janela.topLeft);
       expect(cenaNoMeio.dx, closeTo(cenaAntes.dx, 1));
       expect(cenaNoMeio.dy, closeTo(cenaAntes.dy, 1));
     });
@@ -314,8 +309,10 @@ void main() {
       await t.pumpWidget(appComPasso());
       await abrirPeloBotao(t);
 
-      await t.tapAt(t.getCenter(find.byKey(CapturaAmpliada.chaveVisor)) +
-          const Offset(30, 30));
+      await t.tapAt(
+        t.getCenter(find.byKey(CapturaAmpliada.chaveVisor)) +
+            const Offset(30, 30),
+      );
       await t.pumpAndSettle();
 
       expect(controle(t).value, Matrix4.identity());
