@@ -7,5 +7,6 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         CanalDeAplicativos.registrar(flutterEngine.dartExecutor, packageManager)
+        CanalDoAbridor.registrar(flutterEngine.dartExecutor, applicationContext)
     }
 }
