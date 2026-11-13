@@ -4,7 +4,45 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-21 — **a assistente real chega à `master` e é
+**Última sessão**: 2026-11-12 — **capturas reais nos tutoriais, zoom e o
+abridor de aplicativos**, pelo Henrique. Tudo na branch local
+**`feature/004-prints-e-zoom`** (saiu da **`develop`**, que está à frente da
+`master`), **sem push e sem PR**. **Ninguém revisou ainda.**
+
+> 🖼️ **O que entrou** (clarificação de 2026-11-12 na spec da 004, T133-T136):
+> - **A Memora nunca abria aplicativo nenhum** (T136): o abridor mandava
+>   `action_main`, que o `android_intent_plus` não traduz, e conferia com
+>   `MATCH_DEFAULT_ONLY`. Hoje é o canal nativo `memora/abridor`
+>   (`CanalDoAbridor.kt`, `getLaunchIntentForPackage`). **Falta abrir TikTok e
+>   Instagram no S20 FE** — não foi conferido em aparelho.
+> - **Zoom da captura** (FR-028b, T134): `CapturaAmpliada`, com botões
+>   Aproximar/Afastar além da pinça (WCAG 2.5.1/2.5.7), selo "Exemplo" e
+>   destaque na imagem ampliada, anúncio ao leitor de tela por degrau.
+> - **O destaque cai sobre a imagem** (FR-028c, T133): `CapturaComDestaque`.
+>   Antes era posicionado sobre a moldura e desalinhava com print real.
+> - **Capturas em WebP**, PNG só na imagem que borrar no zoom
+>   (`FormatoDaCaptura`, decisão do Henrique). Portão novo: imagem na pasta de
+>   um guia sem passo que a use. Aparelho de referência: **Galaxy S20 FE**.
+> - **e-Título pronto** com 6 capturas reais (entrar com biometria, título,
+>   Onde votar, ChatVote, Notificações, Mais opções).
+>
+> **Próximo (T135)**: FGTS, Meu INSS, TikTok e Instagram. As imagens chegam em
+> `Documents\ProgramingProjects\Imagens Memora\<Sistema>\` (WebP ou JPEG; JPEG
+> vira WebP sem perda). Para cada uma: conferir dado pessoal e marcação pintada
+> (o contrato recusa), medir o destaque desenhando sobre a imagem, corrigir a
+> linha no `CAPTURAS.md` — as dos outros guias ainda dizem "Galaxy A14", e
+> **os `passo_N` deles são desenhos provisórios, não prints**. Depois: o
+> passo "baixe na loja oficial" não aparece no fluxo real (o `TelaPassoAPasso`
+> não recebe `consultaAplicativos` nem `pacoteAndroid`) e a captura `loja` não
+> existe. **Em seguida, a spec do redesign final do Memora.** 2391 testes.
+>
+> ⚠️ A PR **#66** (Facebook, do Eduardo) segue aberta e fora do contrato (nomes
+> `.jpeg`, destaque pintado). A imagem
+> `apps/WhatsApp/Gemini_Generated_Image_8iuf6u8iuf6u8iuf.jfif`, já na
+> `master`, tem nomes que parecem de pessoas reais (FR-028). O bump 1.0.0+2
+> do APK da `master` está num `git stash`.
+
+Sessão anterior: 2026-10-21 — **a assistente real chega à `master` e é
 testada no celular**, pelo Henrique. Entrou **direto na `master`, sem PR**, a
 pedido dele. **Ninguém revisou ainda.**
 
