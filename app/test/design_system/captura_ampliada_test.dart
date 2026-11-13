@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
@@ -188,25 +189,50 @@ void main() {
       semantica.dispose();
     });
 
-    testWidgets('a ampliação atual é escrita e anunciada (região viva)', (
-      WidgetTester t,
-    ) async {
-      final SemanticsHandle semantica = t.ensureSemantics();
-      await t.pumpWidget(appComPasso());
-      await abrirPeloBotao(t);
+    testWidgets(
+      'a ampliação é anunciada uma vez por degrau, e nada a escreve sobre a imagem',
+      (WidgetTester t) async {
+        final List<String> anuncios = <String>[];
+        t.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(
+          SystemChannels.accessibility,
+          (dynamic mensagem) async {
+            final Map<dynamic, dynamic> m = mensagem as Map<dynamic, dynamic>;
+            if (m['type'] == 'announce') {
+              anuncios.add(
+                (m['data'] as Map<dynamic, dynamic>)['message'] as String,
+              );
+            }
+            return null;
+          },
+        );
+        addTearDown(
+          () => t.binding.defaultBinaryMessenger
+              .setMockDecodedMessageHandler<dynamic>(
+                SystemChannels.accessibility,
+                null,
+              ),
+        );
 
-      expect(find.text('Imagem inteira'), findsOneWidget);
+        // COM animação: uma região viva presa ao controlador falaria cada
+        // quadro do caminho ("1,3", "1,6"...). O portão exige um anúncio só.
+        await t.pumpWidget(appComPasso());
+        await abrirPeloBotao(t);
+        expect(anuncios, isEmpty, reason: 'abrir não é mudar a ampliação');
 
-      await t.tap(find.byKey(CapturaAmpliada.chaveAproximar));
-      await t.pumpAndSettle();
+        await t.tap(find.byKey(CapturaAmpliada.chaveAproximar));
+        await t.pumpAndSettle();
+        expect(anuncios, <String>['Ampliada 2 vezes']);
 
-      expect(find.text('Ampliada 2 vezes'), findsOneWidget);
-      expect(
-        t.getSemantics(find.byKey(CapturaAmpliada.chaveAmpliacaoAtual)),
-        isSemantics(label: 'Ampliada 2 vezes', isLiveRegion: true),
-      );
-      semantica.dispose();
-    });
+        await t.tap(find.byKey(CapturaAmpliada.chaveAfastar));
+        await t.pumpAndSettle();
+        expect(anuncios, <String>['Ampliada 2 vezes', 'Imagem inteira']);
+
+        // Uma legenda sobre a imagem cobriria a barra de navegação dos prints,
+        // onde mora boa parte dos destaques.
+        expect(naAmpliacao(find.textContaining('Ampliada')), findsNothing);
+        expect(naAmpliacao(find.text('Imagem inteira')), findsNothing);
+      },
+    );
   });
 
   group('aproximar e afastar', () {

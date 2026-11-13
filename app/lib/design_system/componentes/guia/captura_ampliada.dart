@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../../../features/aprendizado/domain/guia.dart';
 import '../../../l10n/textos_guias.dart';
@@ -8,7 +9,6 @@ import '../../tokens/espacamento.dart';
 import '../../tokens/movimento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
-import '../texto/texto_memora.dart';
 import 'captura_com_destaque.dart';
 import 'selo_exemplo.dart';
 
@@ -30,6 +30,15 @@ import 'selo_exemplo.dart';
 /// O anel do destaque, sim — é a [CapturaComDestaque] inteira que escala, e o
 /// anel cai sobre a região da imagem em qualquer ampliação (FR-028c).
 ///
+/// ## Quanto está ampliado: anunciado, não escrito sobre a imagem
+///
+/// Uma legenda sobre a imagem cobriria a parte de baixo dela — onde ficam as
+/// barras de navegação dos aplicativos, e portanto muitos destaques —, e mais
+/// ainda com texto a 200%. Quem enxerga vê a imagem crescer; quem usa leitor
+/// de tela ouve "Ampliada 2 vezes" **uma vez por degrau**, ao tocar no botão
+/// ou ao soltar os dedos. Uma região viva atualizada pelo controlador falaria
+/// cada quadro da animação ("1,3", "1,6"...).
+///
 /// ## Abre na pilha da casca
 ///
 /// [abrir] usa o `Navigator` mais próximo, o da pilha da casca: a inatividade
@@ -47,9 +56,6 @@ class CapturaAmpliada extends StatefulWidget {
 
   /// Chave do selo "Exemplo" da ampliação.
   static const Key chaveSelo = Key('ampliada.selo_exemplo');
-
-  /// Chave do texto que diz quanto a imagem está ampliada.
-  static const Key chaveAmpliacaoAtual = Key('ampliada.ampliacao_atual');
 
   /// Chave do `InteractiveViewer`.
   static const Key chaveVisor = Key('ampliada.visor');
@@ -187,6 +193,15 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
     return _janela.center(Offset.zero);
   }
 
+  /// Diz ao leitor de tela quanto a imagem está ampliada. Ver o cabeçalho.
+  void _anunciar(double escala) {
+    SemanticsService.sendAnnouncement(
+      View.of(context),
+      TextosGuias.ampliadaVezes(escala),
+      Directionality.of(context),
+    );
+  }
+
   void _aproximar() {
     final double proxima = ((_escala + _tolerancia).floor() + 1).toDouble();
     final double nova = proxima.clamp(
@@ -194,6 +209,7 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
       CapturaAmpliada.escalaMaxima,
     );
     _irPara(_matrizCentradaEm(nova, _centroDoDestaque()));
+    _anunciar(nova);
   }
 
   void _afastar() {
@@ -205,6 +221,7 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
     // Em 1x é a imagem inteira, sem translação.
     final Offset meio = _controle.toScene(_janela.center(Offset.zero));
     _irPara(_matrizCentradaEm(nova, meio));
+    _anunciar(nova);
   }
 
   /// Um toque simples na imagem ampliada a centraliza naquele ponto.
@@ -254,6 +271,9 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                               transformationController: _controle,
                               minScale: CapturaAmpliada.escalaMinima,
                               maxScale: CapturaAmpliada.escalaMaxima,
+                              // Ao soltar os dedos, não a cada quadro da pinça.
+                              onInteractionEnd: (ScaleEndDetails _) =>
+                                  _anunciar(_escala),
                               child: GestureDetector(
                                 key: _chaveDaCena,
                                 // A cena inteira recebe o toque, inclusive as
@@ -277,17 +297,6 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                         top: MemoraEspacamento.sm,
                         right: MemoraEspacamento.sm,
                         child: SeloExemplo(key: CapturaAmpliada.chaveSelo),
-                      ),
-                      Positioned(
-                        left: MemoraEspacamento.sm,
-                        right: MemoraEspacamento.sm,
-                        bottom: MemoraEspacamento.sm,
-                        // Não rouba o toque da imagem; o leitor de tela o lê.
-                        child: IgnorePointer(
-                          child: Align(
-                            child: _LegendaDaAmpliacao(controle: _controle),
-                          ),
-                        ),
                       ),
                     ],
                   ),
@@ -330,47 +339,6 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Quanto a imagem está ampliada, escrito sobre a imagem e anunciado pelo
-/// leitor de tela a cada mudança.
-class _LegendaDaAmpliacao extends StatelessWidget {
-  final TransformationController controle;
-
-  const _LegendaDaAmpliacao({required this.controle});
-
-  @override
-  Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-
-    return ListenableBuilder(
-      listenable: controle,
-      builder: (BuildContext _, Widget? _) {
-        // `liveRegion`: o TalkBack lê a mudança sem a pessoa procurar.
-        return Semantics(
-          liveRegion: true,
-          container: true,
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: MemoraEspacamento.md,
-              vertical: MemoraEspacamento.xs,
-            ),
-            decoration: BoxDecoration(
-              color: cores.superficie,
-              borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-              border: Border.all(color: cores.borda),
-            ),
-            child: TextoMemora(
-              TextosGuias.ampliadaVezes(controle.value.getMaxScaleOnAxis()),
-              estilo: EstiloTexto.corpoForte,
-              alinhamento: TextAlign.center,
-              key: CapturaAmpliada.chaveAmpliacaoAtual,
-            ),
-          ),
-        );
-      },
     );
   }
 }
