@@ -147,7 +147,7 @@ app/
 ├── assets/
 │   ├── fontes/atkinson_hyperlegible_next/   # .ttf + OFL.txt          (novo)
 │   ├── ilustracoes/                         # + Memora, portas, assuntos; LICENCAS.md
-│   └── guias/<chave>/passo_N.png            # capturas, 3x            (novo)
+│   └── guias/<chave>/passo_N.webp           # capturas (WebP; PNG na exceção)
 ├── android/app/src/main/
 │   ├── AndroidManifest.xml                  # <queries> + 6 pacotes
 │   └── kotlin/br/fatec/memora/

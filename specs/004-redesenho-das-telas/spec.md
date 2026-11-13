@@ -124,6 +124,7 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 - Q: A pessoa pode ampliar a captura? → A: **Sim.** Com a captura real, a imagem dentro da moldura fica estreita demais para quem enxerga pouco. Tocar nela, ou num botão visível logo abaixo, abre a imagem em tela cheia, **dentro do Memora** (FR-028b).
 - Q: Ampliar com dois dedos basta? → A: **Não.** O gesto de pinça é difícil para muitas pessoas idosas e não pode ser o único caminho (WCAG 2.2, critérios 2.5.1 e 2.5.7). Há botões **"Aproximar"** e **"Afastar"**, e aproximar leva direto ao destaque, para que ninguém precise arrastar a imagem até achar o ponto (FR-028b).
 - Q: A imagem ampliada continua marcada como exemplo? → A: **Sim, com o selo e com o destaque.** Uma captura do gov.br em tela cheia, sem marca, é o modelo de tela falsa que a FR-028 existe para evitar.
+- Q: Em que formato ficam as capturas? → A: **WebP**, que é como a equipe as produz e o que cabe no teto de 8 MB. **PNG só na captura cujo texto perder nitidez ao ampliar** em WebP — decisão do Henrique, por imagem, e não para o guia inteiro ([contracts/guias.md](contracts/guias.md), regra 5).
 - Q: O destaque acompanha a imagem? → A: **Sim, sempre sobre a imagem, e não sobre a moldura** (FR-028c). Era defeito latente: os desenhos provisórios tinham quase a proporção da moldura e escondiam o desalinhamento, que aparece com qualquer captura real.
 
 ---

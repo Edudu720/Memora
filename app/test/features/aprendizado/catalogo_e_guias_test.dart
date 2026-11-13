@@ -341,6 +341,33 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
             '${(tamanhoTotalEmBytes / (1024 * 1024)).toStringAsFixed(2)} MB.',
       );
     });
+
+    // Trocar uma captura de WebP para PNG (ou o contrário) deixa o arquivo
+    // antigo na pasta: ninguém o mostra, e ele pesa no teto de 8 MB. Também
+    // pega o print solto com nome fora do contrato (ex.: `01_feed.jpeg`).
+    test('nenhuma imagem em assets/guias/<chave>/ fica sem passo que a use', () {
+      final List<String> soltas = <String>[];
+      for (final Guia g in todosOsGuias) {
+        final Directory pasta = Directory('assets/guias/${g.chave}');
+        if (!pasta.existsSync()) continue;
+        final Set<String> usadas = <String>{
+          for (final Passo p in g.passos) p.captura.caminho,
+        };
+        for (final FileSystemEntity e in pasta.listSync()) {
+          final String nome = e.uri.pathSegments.last;
+          if (e is! File || nome.startsWith('.')) continue;
+          final String caminho = 'assets/guias/${g.chave}/$nome';
+          if (!usadas.contains(caminho)) soltas.add(caminho);
+        }
+      }
+      expect(
+        soltas,
+        isEmpty,
+        reason: 'Sem passo que as use:
+${soltas.join('
+')}',
+      );
+    });
   });
 
   // O registro está vazio, então os testes acima passam sem examinar nenhum
@@ -464,6 +491,21 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       );
     });
 
+    test('a captura é WebP por padrão, e PNG só quando a constante diz', () {
+      expect(
+        const CapturaDoGuia.paraTeste('tiktok', 2).caminho,
+        'assets/guias/tiktok/passo_2.webp',
+      );
+      expect(
+        const CapturaDoGuia.paraTeste(
+          'tiktok',
+          2,
+          formato: FormatoDaCaptura.png,
+        ).caminho,
+        'assets/guias/tiktok/passo_2.png',
+      );
+    });
+
     test('captura ausente entra na lista de pendentes em vez de reprovar (FR-028a)', () {
       final List<String> pendentes = capturasPendentesDoGuia(
         guia(),
@@ -471,7 +513,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       );
       expect(
         pendentes,
-        contains(contains('assets/guias/exemplo/passo_1.png')),
+        contains(contains('assets/guias/exemplo/passo_1.webp')),
       );
       expect(problemas(guia(), arquivoExiste: false), isEmpty);
     });

@@ -1,5 +1,22 @@
 import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
 
+/// O formato do arquivo de uma captura (clarificação de 2026-11-12).
+///
+/// **WebP é o padrão**: os prints chegam da equipe nesse formato, e ele cabe no
+/// teto de `assets/guias/` onde o PNG de um print de celular não cabe. **PNG é
+/// a exceção, por captura**: quando o WebP perder nitidez no texto ao ampliar
+/// (FR-028b), aquela imagem — e só ela — volta a PNG.
+enum FormatoDaCaptura {
+  /// O padrão.
+  webp,
+
+  /// Para a captura cujo texto borra no zoom em WebP.
+  png;
+
+  /// A extensão do arquivo, sem o ponto.
+  String get extensao => name;
+}
+
 /// Uma captura de tela embarcada, e o caminho dela (T061, R6).
 ///
 /// ## Por que não é uma `String`
@@ -7,10 +24,11 @@ import 'package:flutter/foundation.dart' show immutable, visibleForTesting;
 /// Um passo que aponta para uma imagem que não existe tem de **não compilar**.
 /// Por isso as capturas são constantes nomeadas desta classe — `Passo.captura`
 /// só aceita uma [CapturaDoGuia] —, e o caminho se monta a partir da chave do
-/// guia e do número do passo, no formato fixo do contrato
-/// (`assets/guias/<chave>/passo_<N>.png`). Errar o nome de uma constante é erro
-/// de compilação; apontar uma constante para arquivo que a equipe esqueceu de
-/// pôr em `assets/` reprova em `catalogo_e_guias_test.dart`.
+/// guia, do número do passo e do [formato], no formato fixo do contrato
+/// (`assets/guias/<chave>/passo_<N>.webp`, ou `.png` na exceção). Errar o nome
+/// de uma constante é erro de compilação; apontar uma constante para arquivo
+/// que a equipe esqueceu de pôr em `assets/` — ou com a extensão trocada —
+/// reprova em `catalogo_e_guias_test.dart`.
 ///
 /// ## Por que não é um `enum`
 ///
@@ -27,16 +45,28 @@ final class CapturaDoGuia {
   /// O número do passo, a partir de 1.
   final int numero;
 
-  const CapturaDoGuia._(this.chave, this.numero);
+  /// O formato do arquivo. Para pôr uma captura em PNG, passe
+  /// `FormatoDaCaptura.png` como terceiro argumento da constante dela.
+  final FormatoDaCaptura formato;
+
+  const CapturaDoGuia._(
+    this.chave,
+    this.numero, [
+    this.formato = FormatoDaCaptura.webp,
+  ]);
 
   /// Só para o teste montar de propósito um guia errado e provar que o portão
   /// o pega. Usar isto em `lib/` é avisado pelo `flutter analyze`.
   @visibleForTesting
-  const CapturaDoGuia.paraTeste(String chave, int numero)
-    : this._(chave, numero);
+  const CapturaDoGuia.paraTeste(
+    String chave,
+    int numero, {
+    FormatoDaCaptura formato = FormatoDaCaptura.webp,
+  }) : this._(chave, numero, formato);
 
   /// O caminho do asset, relativo à raiz do aplicativo.
-  String get caminho => 'assets/guias/$chave/passo_$numero.png';
+  String get caminho =>
+      'assets/guias/$chave/passo_$numero.${formato.extensao}';
 
   /// Captura para orientar a baixar na loja oficial (revisão da #47).
   static const CapturaDoGuia lojaOficial = CapturaDoGuia._('loja', 1);
@@ -210,10 +240,13 @@ final class CapturaDoGuia {
 
   @override
   bool operator ==(Object other) =>
-      other is CapturaDoGuia && other.chave == chave && other.numero == numero;
+      other is CapturaDoGuia &&
+      other.chave == chave &&
+      other.numero == numero &&
+      other.formato == formato;
 
   @override
-  int get hashCode => Object.hash(chave, numero);
+  int get hashCode => Object.hash(chave, numero, formato);
 
   @override
   String toString() => 'CapturaDoGuia($caminho)';

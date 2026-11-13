@@ -15,7 +15,7 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 3. **Sem destaque pintado na imagem.** O anel, o selo "Exemplo" e a moldura são
    desenhados pelo aplicativo. Captura com círculo vermelho é recusada.
 4. **Serviço sensível**: a tela de senha é capturada com o campo **vazio**.
-5. **Tamanho**: PNG otimizado; o total de `assets/guias/` não passa de 8 MB.
+5. **Formato e tamanho**: **WebP** (sem perda, ou com qualidade 90 ou mais); **PNG só na captura cujo texto borra ao ampliar** em WebP, declarada na constante dela (`FormatoDaCaptura.png`). O total de `assets/guias/` não passa de 8 MB, e nenhuma imagem fica na pasta sem passo que a use.
 
 ## Registro
 

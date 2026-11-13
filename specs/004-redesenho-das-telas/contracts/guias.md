@@ -10,7 +10,7 @@ de **produção** do conteúdo, que é trabalho da equipe e não do código.
 |---|---|
 | Estrutura do guia | `app/lib/features/aprendizado/data/guias/<chave>.dart` |
 | Textos | `app/lib/l10n/textos_guias.dart` |
-| Capturas | `app/assets/guias/<chave>/passo_<N>.png` |
+| Capturas | `app/assets/guias/<chave>/passo_<N>.webp` (ou `.png`, na exceção da regra 5) |
 | Registro das capturas | `app/assets/guias/CAPTURAS.md` — chave, data, versão do aplicativo, aparelho |
 
 ## Regras de captura
@@ -23,7 +23,7 @@ de **produção** do conteúdo, que é trabalho da equipe e não do código.
    moldura são do aplicativo (R6). Captura com círculo vermelho pintado é
    recusada na revisão.
 4. **Serviço sensível**: a captura da tela de senha mostra o campo **vazio**.
-5. **Tamanho**: PNG otimizado; o total de `assets/guias/` não passa de 8 MB.
+5. **Formato e tamanho**: **WebP** (sem perda, ou com qualidade 90 ou mais); **PNG só na captura cujo texto borra ao ampliar** em WebP, declarada na constante dela (`FormatoDaCaptura.png`). O total de `assets/guias/` não passa de 8 MB, e nenhuma imagem fica na pasta sem passo que a use.
 
 ## Regras de texto
 
