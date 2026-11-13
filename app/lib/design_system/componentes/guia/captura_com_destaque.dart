@@ -91,6 +91,7 @@ class CapturaComDestaque extends StatefulWidget {
 
 class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
   ImageStream? _fluxo;
+  ImageProvider? _resolvido;
   late final ImageStreamListener _ouvinte = ImageStreamListener(
     _aoChegarImagem,
     onError: _aoFalhar,
@@ -122,18 +123,22 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
   }
 
   void _resolver() {
-    final ImageStream novo = _provedor.resolve(
-      createLocalImageConfiguration(context),
-    );
-    if (novo.key == _fluxo?.key) return;
+    final ImageProvider provedor = _provedor;
+    // Só resolve de novo quando a imagem MUDA. Resolver a cada reconstrução
+    // não serve: depois de uma falha o cache esquece a imagem, o próximo
+    // `resolve` dá outro fluxo, e uma captura que não existe seria buscada e
+    // reprovada sem parar.
+    if (provedor == _resolvido) return;
+    _resolvido = provedor;
+
     _fluxo?.removeListener(_ouvinte);
-    _fluxo = novo;
+    _fluxo = provedor.resolve(createLocalImageConfiguration(context));
     _proporcaoLida = null;
     if (_falhou) {
       _falhou = false;
       _avisarPendente(false);
     }
-    novo.addListener(_ouvinte);
+    _fluxo!.addListener(_ouvinte);
   }
 
   void _aoChegarImagem(ImageInfo info, bool sincrono) {

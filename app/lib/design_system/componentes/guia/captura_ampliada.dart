@@ -227,9 +227,15 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _TopoDaAmpliacao(
-                controle: _controle,
-                aoFechar: () => Navigator.of(context).pop(),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: BotaoSecundario(
+                  key: CapturaAmpliada.chaveFechar,
+                  rotulo: TextosGuias.fecharImagem,
+                  icone: Icons.close,
+                  larguraTotal: false,
+                  aoTocar: () => Navigator.of(context).pop(),
+                ),
               ),
               const SizedBox(height: MemoraEspacamento.md),
               Expanded(
@@ -252,6 +258,9 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                               maxScale: CapturaAmpliada.escalaMaxima,
                               child: GestureDetector(
                                 key: _chaveDaCena,
+                                // A cena inteira recebe o toque, inclusive as
+                                // faixas ao lado de uma imagem estreita.
+                                behavior: HitTestBehavior.opaque,
                                 onTapUp: (TapUpDetails d) =>
                                     _centralizarEm(d.localPosition),
                                 child: CapturaComDestaque(
@@ -271,40 +280,49 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                         right: MemoraEspacamento.sm,
                         child: SeloExemplo(key: CapturaAmpliada.chaveSelo),
                       ),
+                      Positioned(
+                        left: MemoraEspacamento.sm,
+                        right: MemoraEspacamento.sm,
+                        bottom: MemoraEspacamento.sm,
+                        // Não rouba o toque da imagem; o leitor de tela o lê.
+                        child: IgnorePointer(
+                          child: Align(
+                            child: _LegendaDaAmpliacao(controle: _controle),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: MemoraEspacamento.md),
+              // Um embaixo do outro, na largura toda: lado a lado, o rótulo
+              // quebraria em aparelho estreito e com texto ampliado.
               ListenableBuilder(
                 listenable: _controle,
                 builder: (BuildContext _, Widget? _) {
                   final double escala = _escala;
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      Expanded(
-                        child: BotaoSecundario(
-                          key: CapturaAmpliada.chaveAfastar,
-                          rotulo: TextosGuias.afastar,
-                          icone: Icons.remove,
-                          aoTocar:
-                              escala > CapturaAmpliada.escalaMinima + _tolerancia
-                              ? _afastar
-                              : null,
-                        ),
+                      BotaoSecundario(
+                        key: CapturaAmpliada.chaveAproximar,
+                        rotulo: TextosGuias.aproximar,
+                        icone: Icons.add,
+                        aoTocar:
+                            escala < CapturaAmpliada.escalaMaxima - _tolerancia
+                            ? _aproximar
+                            : null,
                       ),
-                      const SizedBox(width: MemoraEspacamento.md),
-                      Expanded(
-                        child: BotaoSecundario(
-                          key: CapturaAmpliada.chaveAproximar,
-                          rotulo: TextosGuias.aproximar,
-                          icone: Icons.add,
-                          aoTocar:
-                              escala < CapturaAmpliada.escalaMaxima - _tolerancia
-                              ? _aproximar
-                              : null,
-                        ),
+                      const SizedBox(height: MemoraEspacamento.sm),
+                      BotaoSecundario(
+                        key: CapturaAmpliada.chaveAfastar,
+                        rotulo: TextosGuias.afastar,
+                        icone: Icons.remove,
+                        aoTocar:
+                            escala > CapturaAmpliada.escalaMinima + _tolerancia
+                            ? _afastar
+                            : null,
                       ),
                     ],
                   );
@@ -318,45 +336,43 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
   }
 }
 
-/// O topo: o "Fechar", sempre à vista, e quanto a imagem está ampliada.
-class _TopoDaAmpliacao extends StatelessWidget {
+/// Quanto a imagem está ampliada, escrito sobre a imagem e anunciado pelo
+/// leitor de tela a cada mudança.
+class _LegendaDaAmpliacao extends StatelessWidget {
   final TransformationController controle;
-  final VoidCallback aoFechar;
 
-  const _TopoDaAmpliacao({required this.controle, required this.aoFechar});
+  const _LegendaDaAmpliacao({required this.controle});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        BotaoSecundario(
-          key: CapturaAmpliada.chaveFechar,
-          rotulo: TextosGuias.fecharImagem,
-          icone: Icons.close,
-          larguraTotal: false,
-          aoTocar: aoFechar,
-        ),
-        const SizedBox(width: MemoraEspacamento.md),
-        Flexible(
-          child: ListenableBuilder(
-            listenable: controle,
-            builder: (BuildContext _, Widget? _) {
-              // `liveRegion`: o TalkBack lê a mudança sem a pessoa procurar.
-              return Semantics(
-                liveRegion: true,
-                container: true,
-                child: TextoMemora(
-                  TextosGuias.ampliadaVezes(
-                    controle.value.getMaxScaleOnAxis(),
-                  ),
-                  estilo: EstiloTexto.corpoForte,
-                  key: CapturaAmpliada.chaveAmpliacaoAtual,
-                ),
-              );
-            },
+    final MemoraCores cores = context.memora.cores;
+
+    return ListenableBuilder(
+      listenable: controle,
+      builder: (BuildContext _, Widget? _) {
+        // `liveRegion`: o TalkBack lê a mudança sem a pessoa procurar.
+        return Semantics(
+          liveRegion: true,
+          container: true,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: MemoraEspacamento.md,
+              vertical: MemoraEspacamento.xs,
+            ),
+            decoration: BoxDecoration(
+              color: cores.superficie,
+              borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+              border: Border.all(color: cores.borda),
+            ),
+            child: TextoMemora(
+              TextosGuias.ampliadaVezes(controle.value.getMaxScaleOnAxis()),
+              estilo: EstiloTexto.corpoForte,
+              alinhamento: TextAlign.center,
+              key: CapturaAmpliada.chaveAmpliacaoAtual,
+            ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

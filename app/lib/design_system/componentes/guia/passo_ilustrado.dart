@@ -320,11 +320,17 @@ class _CapturaDoPasso extends StatefulWidget {
 class _EstadoDaCapturaDoPasso extends State<_CapturaDoPasso> {
   bool _pendente = false;
 
+  /// Mantém o estado da moldura quando ela troca de lugar na árvore (com a
+  /// captura pendente ela deixa de ser um botão). Sem isto a captura seria
+  /// buscada de novo — e reprovada de novo — a cada troca.
+  final GlobalKey _chaveDaMoldura = GlobalKey(debugLabel: 'moldura do passo');
+
   void _ampliar() => CapturaAmpliada.abrir(context, passo: widget.passo);
 
   @override
   Widget build(BuildContext context) {
     final Widget moldura = _MolduraDeCelular(
+      key: _chaveDaMoldura,
       passo: widget.passo,
       aoMudarPendente: (bool pendente) {
         if (pendente != _pendente) setState(() => _pendente = pendente);
@@ -372,6 +378,7 @@ class _MolduraDeCelular extends StatelessWidget {
   const _MolduraDeCelular({
     required this.passo,
     required this.aoMudarPendente,
+    super.key,
   });
 
   @override
