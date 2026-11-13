@@ -36,7 +36,7 @@ class TelaSeletorDeSecao extends StatefulWidget {
   /// Chamado ao escolher uma seção para iniciar o passo a passo.
   final void Function(SecaoDoGuia secao) aoEscolherSecao;
 
-  /// Chamado ao tocar em "Não achei o que procuro — perguntar à Memora".
+  /// Chamado ao tocar em "Perguntar à Memora", para quem não achou o assunto.
   final VoidCallback? aoConversar;
 
   /// Chamado ao tocar em "Voltar".

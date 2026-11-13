@@ -6,6 +6,7 @@ import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
+import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
@@ -194,6 +195,18 @@ void main() {
       via: null,
     ),
     (
+      // Guia extenso (FR-028d): o serviço leva primeiro à escolha do assunto,
+      // ainda dentro dos três toques. Escolher a seção já é o conteúdo do guia.
+      parte: 'um guia em seções (FGTS leva à escolha do assunto)',
+      toques: <Finder>[
+        doHub,
+        deServicos,
+        find.byKey(TelaCatalogo.chaveDoItem('FGTS')),
+      ],
+      chegada: find.byType(TelaSeletorDeSecao),
+      via: null,
+    ),
+    (
       parte: 'ajustes',
       toques: <Finder>[naBarra(DestinoDaCasca.ajustes)],
       chegada: find.byType(TelaConfiguracoes),
@@ -298,6 +311,15 @@ void main() {
     for (final Caminho c in caminhos) {
       await recomecar(t);
       for (final Finder alvo in c.toques) {
+        // Lista preguiçosa só constrói o que está na tela: o item mais abaixo
+        // (o FGTS é o quinto serviço) precisa de rolagem, que não é toque.
+        if (alvo.evaluate().isEmpty) {
+          await t.scrollUntilVisible(
+            alvo,
+            120,
+            scrollable: find.byType(Scrollable).hitTestable().first,
+          );
+        }
         // Sem este aviso, um alvo que não existe vira "No element" e ninguém
         // sabe de qual caminho.
         expect(

@@ -197,6 +197,22 @@ final class CapturaDoGuia {
   static const CapturaDoGuia fgts3 = CapturaDoGuia._('fgts', 3);
   /// Captura 4 do FGTS.
   static const CapturaDoGuia fgts4 = CapturaDoGuia._('fgts', 4);
+  /// Captura 5 do FGTS.
+  static const CapturaDoGuia fgts5 = CapturaDoGuia._('fgts', 5);
+  /// Captura 6 do FGTS.
+  static const CapturaDoGuia fgts6 = CapturaDoGuia._('fgts', 6);
+  /// Captura 7 do FGTS.
+  static const CapturaDoGuia fgts7 = CapturaDoGuia._('fgts', 7);
+  /// Captura 8 do FGTS.
+  static const CapturaDoGuia fgts8 = CapturaDoGuia._('fgts', 8);
+  /// Captura 9 do FGTS.
+  static const CapturaDoGuia fgts9 = CapturaDoGuia._('fgts', 9);
+  /// Captura 10 do FGTS.
+  static const CapturaDoGuia fgts10 = CapturaDoGuia._('fgts', 10);
+  /// Captura 11 do FGTS.
+  static const CapturaDoGuia fgts11 = CapturaDoGuia._('fgts', 11);
+  /// Captura 12 do FGTS.
+  static const CapturaDoGuia fgts12 = CapturaDoGuia._('fgts', 12);
 
   // Poupatempo (T081)
   /// Captura 1 do Poupatempo.

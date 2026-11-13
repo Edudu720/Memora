@@ -143,8 +143,10 @@ abstract final class TextosGuias {
       '$titulo. $subtitulo. $meta.';
 
   /// Saída do seletor para quem não achou o assunto: leva à conversa.
-  static const String naoAcheiOQueProcuro =
-      'Não achei o que procuro — perguntar à Memora';
+  ///
+  /// Curto de propósito: o "não achei" já está na pergunta da Memora, logo
+  /// acima, e o rótulo longo ocupava meia tela no aparelho pequeno a 200%.
+  static const String naoAcheiOQueProcuro = 'Perguntar à Memora';
 
   // WhatsApp (T071)
   /// Título do guia do WhatsApp.
@@ -473,33 +475,116 @@ abstract final class TextosGuias {
   static const String serasaCaptura4 =
       'Painel do Serasa Score mostrando a pontuação e status de pendências.';
 
-  // FGTS (T081)
+  // FGTS (T081; refeito na T138 com as capturas reais, em quatro seções)
   /// Título do guia do FGTS.
-  static const String tituloFgts = 'Como consultar o saldo do FGTS';
-  /// Passo 1 do FGTS.
-  static const String fgtsPasso1 =
-      'Toque no botão laranja "Entrar no aplicativo", no meio da tela.';
-  /// Descrição da captura do passo 1 do FGTS.
+  static const String tituloFgts = 'Como usar o aplicativo do FGTS';
+
+  /// Seção "Entrar no aplicativo" do FGTS.
+  static const String fgtsSecaoEntrar = 'Entrar no aplicativo';
+  /// O que se aprende na seção "Entrar no aplicativo".
+  static const String fgtsSecaoEntrarSubtitulo =
+      'O primeiro acesso, com o seu CPF';
+  /// Seção "Ver o saldo e pedir um saque" do FGTS.
+  static const String fgtsSecaoSaque = 'Ver o saldo e pedir um saque';
+  /// O que se aprende na seção "Ver o saldo e pedir um saque".
+  static const String fgtsSecaoSaqueSubtitulo =
+      'Quanto você tem e onde pedir o saque';
+  /// Seção "Conta bancária para receber" do FGTS.
+  static const String fgtsSecaoConta = 'Conta bancária para receber';
+  /// O que se aprende na seção "Conta bancária para receber".
+  static const String fgtsSecaoContaSubtitulo =
+      'A conta que recebe o dinheiro do seu FGTS';
+  /// Seção "Saque-Aniversário" do FGTS.
+  static const String fgtsSecaoAniversario = 'Saque-Aniversário';
+  /// O que se aprende na seção "Saque-Aniversário".
+  static const String fgtsSecaoAniversarioSubtitulo =
+      'O que é e o que muda se você optar';
+
+  /// Entrar, passo 1.
+  static const String fgtsEntrar1 =
+      'Abra o aplicativo do FGTS e toque no botão laranja "Entrar no aplicativo", embaixo.';
+  /// Entrar, passo 2.
+  static const String fgtsEntrar2 =
+      'Toque no campo "CPF", digite os números do seu CPF e toque em "Próximo", logo abaixo. Na tela seguinte, a Caixa pede a sua senha: ela só se digita ali, no aplicativo oficial.';
+  /// Entrar, passo 3.
+  static const String fgtsEntrar3 =
+      'Leia os termos com calma. Depois, marque "Li e aceito os termos e condições", embaixo, e toque em "Continuar".';
+  /// Entrar, passo 4.
+  static const String fgtsEntrar4 =
+      'O aplicativo pergunta como você quer ser chamado. Se quiser, escreva no campo; se não, toque em "Pular", embaixo.';
+  /// Entrar, passo 5.
+  static const String fgtsEntrar5 =
+      'Para receber os avisos do FGTS, toque em "Ativar notificações". Se preferir não receber, toque em "Agora não". Pronto: você já sabe entrar no aplicativo do FGTS.';
+
+  /// Saldo e saque, passo 1.
+  static const String fgtsSaque1 =
+      'Esta é a página principal. Para ver quanto você tem, toque em "Toque para exibir o saldo", no alto. Quem estiver perto também vê: olhe o saldo num lugar tranquilo.';
+  /// Saldo e saque, passo 2.
+  static const String fgtsSaque2 =
+      'Para pedir um saque, toque em "Saques", embaixo, a segunda opção da esquerda.';
+  /// Saldo e saque, passo 3.
+  static const String fgtsSaque3 =
+      'Toque em "Solicitar saque", a primeira opção da lista.';
+  /// Saldo e saque, passo 4.
+  static const String fgtsSaque4 =
+      'Escolha o motivo do seu saque, como doença grave ou calamidade pública: cada um diz as condições e os documentos. Agora você sabe ver o saldo e onde pedir um saque.';
+
+  /// Conta bancária, passo 1.
+  static const String fgtsConta1 =
+      'Para cuidar da conta que recebe o dinheiro do FGTS, toque em "Meus dados", embaixo, a segunda opção da direita.';
+  /// Conta bancária, passo 2.
+  static const String fgtsConta2 =
+      'Toque em "Conta bancária", a terceira opção da lista.';
+  /// Conta bancária, passo 3.
+  static const String fgtsConta3 =
+      'Aqui aparece a conta cadastrada, e "Alterar conta bancária" troca a conta. Se alguém ligar pedindo para você trocar a conta, é golpe: só você troca, aqui, no aplicativo oficial. Agora você sabe onde fica a sua conta.';
+
+  /// Saque-Aniversário, passo 1.
+  static const String fgtsAniversario1 =
+      'Para conhecer o Saque-Aniversário, toque em "Mais", embaixo, à direita.';
+  /// Saque-Aniversário, passo 2.
+  static const String fgtsAniversario2 =
+      'Toque em "Sistemática de saque", a segunda opção da lista.';
+  /// Saque-Aniversário, passo 3.
+  static const String fgtsAniversario3 =
+      'Antes de decidir, leia com calma "O que muda se eu fizer a opção?". Quem opta pelo Saque-Aniversário e perde o emprego recebe só a multa, e não o saldo todo. Agora você sabe onde fica e o que muda.';
+
+  /// Descrição da captura 1 do FGTS.
   static const String fgtsCaptura1 =
-      'Tela de boas-vindas do FGTS da Caixa com o botão Entrar no aplicativo.';
-  /// Passo 2 do FGTS.
-  static const String fgtsPasso2 =
-      'Digite o seu CPF e toque em "Próximo" para avançar.';
-  /// Descrição da captura do passo 2 do FGTS.
+      'Tela de boas-vindas do aplicativo do FGTS, com o botão laranja Entrar no aplicativo.';
+  /// Descrição da captura 2 do FGTS.
   static const String fgtsCaptura2 =
-      'Tela de identificação por CPF do aplicativo FGTS.';
-  /// Passo 3 do FGTS.
-  static const String fgtsPasso3 =
-      'Digite sua senha numérica da Caixa no teclado seguro do aplicativo oficial.';
-  /// Descrição da captura do passo 3 do FGTS.
+      'Tela de entrada da Caixa com o campo CPF vazio e o botão Próximo.';
+  /// Descrição da captura 3 do FGTS.
   static const String fgtsCaptura3 =
-      'Tela de senha da Caixa Econômica Federal com campos de senha vazios.';
-  /// Passo 4 do FGTS.
-  static const String fgtsPasso4 =
-      'Veja na tela o saldo total de suas contas de FGTS. Parabéns! Você já sabe conferir seus depósitos trabalhistas.';
-  /// Descrição da captura do passo 4 do FGTS.
+      'Termos e condições do aplicativo do FGTS, com a opção Li e aceito os termos e o botão Continuar, embaixo.';
+  /// Descrição da captura 4 do FGTS.
   static const String fgtsCaptura4 =
-      'Extrato do FGTS exibindo valores e empresas trabalhadas.';
+      'Tela Vamos começar, que pergunta como você quer ser chamado, com os botões Cadastrar nome e continuar e Pular.';
+  /// Descrição da captura 5 do FGTS.
+  static const String fgtsCaptura5 =
+      'Tela Fique por dentro de tudo, com os botões Ativar notificações e Agora não.';
+  /// Descrição da captura 6 do FGTS.
+  static const String fgtsCaptura6 =
+      'Página principal do FGTS, com o saldo escondido, os atalhos e, embaixo, as opções Principal, Saques, Meus dados e Mais.';
+  /// Descrição da captura 7 do FGTS.
+  static const String fgtsCaptura7 =
+      'Tela Saques, com as opções Solicitar saque e Acompanhar saques.';
+  /// Descrição da captura 8 do FGTS.
+  static const String fgtsCaptura8 =
+      'Tela Selecione o motivo do saque, com doença grave, falecimento do trabalhador, calamidade pública e aposentadoria.';
+  /// Descrição da captura 9 do FGTS.
+  static const String fgtsCaptura9 =
+      'Tela Meus dados, com Perfil, Notificações do FGTS, Conta bancária e Termos e condições.';
+  /// Descrição da captura 10 do FGTS.
+  static const String fgtsCaptura10 =
+      'Tela Minha conta bancária de exemplo, sem dados de conta, com os botões Alterar conta bancária e Excluir conta bancária.';
+  /// Descrição da captura 11 do FGTS.
+  static const String fgtsCaptura11 =
+      'Tela Mais, com Informações úteis, Sistemática de saque, Empréstimos contratados e outras opções.';
+  /// Descrição da captura 12 do FGTS.
+  static const String fgtsCaptura12 =
+      'Tela Optar pelo Saque-Aniversário, com a explicação e o quadro O que muda se eu fizer a opção.';
 
   // Poupatempo (T081)
   /// Título do guia do Poupatempo.
