@@ -170,10 +170,12 @@ final class CapturaDoGuia {
   static const CapturaDoGuia eTitulo2 = CapturaDoGuia._('e-titulo', 2);
   /// Captura 3 do e-Título (Onde votar).
   static const CapturaDoGuia eTitulo3 = CapturaDoGuia._('e-titulo', 3);
-  /// Captura 4 do e-Título (Notificações).
+  /// Captura 4 do e-Título (ChatVote).
   static const CapturaDoGuia eTitulo4 = CapturaDoGuia._('e-titulo', 4);
-  /// Captura 5 do e-Título (Mais opções).
+  /// Captura 5 do e-Título (Notificações).
   static const CapturaDoGuia eTitulo5 = CapturaDoGuia._('e-titulo', 5);
+  /// Captura 6 do e-Título (Mais opções).
+  static const CapturaDoGuia eTitulo6 = CapturaDoGuia._('e-titulo', 6);
 
   // Serasa (T081)
   /// Captura 1 do Serasa.

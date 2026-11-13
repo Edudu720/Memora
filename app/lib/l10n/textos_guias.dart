@@ -399,21 +399,27 @@ abstract final class TextosGuias {
       'Tela principal do e-Título com um título de eleitor de exemplo: foto, nome, número, zona e seção. Embaixo, as opções e-Título, Onde votar, Notificações e Mais opções.';
   /// Passo 3 do e-Título.
   static const String eTituloPasso3 =
-      'Aqui aparecem o lugar onde você vota, a seção e a zona. Para ver os avisos da Justiça Eleitoral, toque em "Notificações", embaixo, a segunda opção da direita.';
+      'Aqui aparecem o lugar onde você vota, a seção e a zona. Para tirar uma dúvida sobre as eleições, toque em "ChatVote", embaixo, no meio.';
   /// Descrição da captura do passo 3 do e-Título.
   static const String eTituloCaptura3 =
       'Tela Onde votar do e-Título, com um mapa e um cartão com a seção, a zona e uma escola de exemplo como local de votação.';
   /// Passo 4 do e-Título.
   static const String eTituloPasso4 =
-      'Aqui chegam os avisos da Justiça Eleitoral. Para ver tudo o que o e-Título faz, toque em "Mais opções", embaixo, à direita.';
+      'No ChatVote você escreve a sua dúvida no campo de baixo e toca na seta amarela para enviar. Para ver os avisos da Justiça Eleitoral, toque em "Notificações", embaixo, a segunda opção da direita.';
   /// Descrição da captura do passo 4 do e-Título.
   static const String eTituloCaptura4 =
-      'Tela de Notificações do e-Título com quatro avisos da Justiça Eleitoral.';
+      'Tela do ChatVote do e-Título, com a mensagem de boas-vindas, o campo Digite a sua mensagem e o botão amarelo de enviar embaixo.';
   /// Passo 5 do e-Título.
   static const String eTituloPasso5 =
-      'Em "Mais opções" ficam as certidões, a justificativa de ausência e "Consultar Situação Eleitoral", que mostra se o seu título está em dia. Agora você já sabe entrar e andar pelo e-Título.';
+      'Aqui chegam os avisos da Justiça Eleitoral. Para ver tudo o que o e-Título faz, toque em "Mais opções", embaixo, à direita.';
   /// Descrição da captura do passo 5 do e-Título.
   static const String eTituloCaptura5 =
+      'Tela de Notificações do e-Título com quatro avisos da Justiça Eleitoral.';
+  /// Passo 6 do e-Título.
+  static const String eTituloPasso6 =
+      'Em "Mais opções" ficam as certidões, a justificativa de ausência e "Consultar Situação Eleitoral", que mostra se o seu título está em dia. Agora você já sabe entrar e andar pelo e-Título.';
+  /// Descrição da captura do passo 6 do e-Título.
+  static const String eTituloCaptura6 =
       'Tela Mais opções do e-Título, com as certidões, a consulta da situação eleitoral, a justificativa de ausência e a impressão do título.';
 
   // Serasa (T081)

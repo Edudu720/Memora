@@ -35,24 +35,31 @@ final Guia guiaETitulo = Guia(
     ),
     Passo(
       captura: CapturaDoGuia.eTitulo3,
-      // A aba "Notificações", embaixo.
-      destaque: RegiaoRelativa(x: 0.61, y: 0.935, largura: 0.17, altura: 0.06),
+      // A aba "ChatVote", embaixo, no meio.
+      destaque: RegiaoRelativa(x: 0.42, y: 0.935, largura: 0.16, altura: 0.06),
       texto: TextosGuias.eTituloPasso3,
       descricaoDaCaptura: TextosGuias.eTituloCaptura3,
     ),
     Passo(
       captura: CapturaDoGuia.eTitulo4,
-      // A aba "Mais opções", embaixo, à direita.
-      destaque: RegiaoRelativa(x: 0.80, y: 0.935, largura: 0.19, altura: 0.06),
+      // A aba "Notificações", embaixo.
+      destaque: RegiaoRelativa(x: 0.61, y: 0.935, largura: 0.17, altura: 0.06),
       texto: TextosGuias.eTituloPasso4,
       descricaoDaCaptura: TextosGuias.eTituloCaptura4,
     ),
     Passo(
       captura: CapturaDoGuia.eTitulo5,
-      // "Consultar Situação Eleitoral".
-      destaque: RegiaoRelativa(x: 0.03, y: 0.43, largura: 0.94, altura: 0.085),
+      // A aba "Mais opções", embaixo, à direita.
+      destaque: RegiaoRelativa(x: 0.80, y: 0.935, largura: 0.19, altura: 0.06),
       texto: TextosGuias.eTituloPasso5,
       descricaoDaCaptura: TextosGuias.eTituloCaptura5,
+    ),
+    Passo(
+      captura: CapturaDoGuia.eTitulo6,
+      // "Consultar Situação Eleitoral".
+      destaque: RegiaoRelativa(x: 0.03, y: 0.43, largura: 0.94, altura: 0.085),
+      texto: TextosGuias.eTituloPasso6,
+      descricaoDaCaptura: TextosGuias.eTituloCaptura6,
     ),
   ],
 );
