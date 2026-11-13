@@ -1,4 +1,7 @@
-import 'package:android_intent_plus/android_intent.dart';
+import 'package:flutter/services.dart';
+
+import '../../../services/aplicativos/consulta_de_aplicativos.dart'
+    show pareceUmPacote;
 
 /// Abre outro aplicativo no aparelho (T054).
 ///
@@ -32,28 +35,37 @@ abstract interface class AbridorDeAplicativo {
   Future<bool> abrir(String identificadorAndroid);
 }
 
-/// Implementação sobre `android_intent_plus`.
-class AbridorDeAplicativoAndroid implements AbridorDeAplicativo {
-  /// Cria o abridor.
-  const AbridorDeAplicativoAndroid();
+/// Implementação sobre o canal de plataforma `memora/abridor` (T136).
+///
+/// Quem abre é o Android, por `getLaunchIntentForPackage`, em Kotlin. O
+/// `android_intent_plus` não serve: ele não traduz `action_main`, e a atividade
+/// de entrada dos aplicativos não declara `CATEGORY_DEFAULT`, então a conferência
+/// dele recusava tudo — a Memora confirmava com a pessoa e depois não abria
+/// nada. É um canal separado do `memora/aplicativos` porque aquele é só leitura
+/// por contrato.
+///
+/// Nenhum erro chega à tela: tudo que não for um `true` do canal é `false`.
+class AbridorDeAplicativoPorCanal implements AbridorDeAplicativo {
+  /// O nome do canal, igual ao registrado em `MainActivity.kt`.
+  static const String nomeDoCanal = 'memora/abridor';
+
+  final MethodChannel _canal;
+
+  /// Cria o abridor. [canal] só muda no teste.
+  const AbridorDeAplicativoPorCanal({
+    MethodChannel canal = const MethodChannel(nomeDoCanal),
+  }) : _canal = canal;
 
   @override
   Future<bool> abrir(String identificadorAndroid) async {
+    // O que não parece pacote nem chega ao canal.
+    if (!pareceUmPacote(identificadorAndroid)) return false;
     try {
-      final AndroidIntent intent = AndroidIntent(
-        action: 'action_main',
-        package: identificadorAndroid,
-      );
-
-      // Pergunta antes de lançar: `launch` numa intent que ninguém resolve
-      // estoura, e o estouro chegaria à pessoa como tela de erro. Aqui ele
-      // vira um "não consegui" na voz da Memora.
-      final bool? podeResolver = await intent.canResolveActivity();
-      if (podeResolver != true) return false;
-
-      await intent.launch();
-      return true;
-    } on Exception {
+      return await _canal.invokeMethod<bool>('abrir', identificadorAndroid) ??
+          false;
+    } catch (_) {
+      // PlatformException, MissingPluginException ou tipo inesperado: para a
+      // pessoa é só "não consegui abrir".
       return false;
     }
   }
