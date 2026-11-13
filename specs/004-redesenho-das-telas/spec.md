@@ -129,6 +129,11 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 
 ---
 
+### Session 2026-11-13 — guias extensos em seções (Henrique)
+
+- Q: O FGTS tem 13 telas, e um guia tem no máximo 7 passos. Como fica? → A: **O guia se divide em seções**, cada uma com 3 a 7 passos, e a pessoa escolhe primeiro o assunto (FR-028d). É o modelo da PR #67 do Eduardo (`SecaoDoGuia`, `TelaSeletorDeSecao`), trazido para esta feature sem as imagens dela, que ainda estão em revisão. O limite de 7 continua valendo, por seção: o que cansa é a trilha seguida, não o serviço inteiro.
+- Q: Como o FGTS se divide? → A: **Quatro seções**: entrar no aplicativo; ver o saldo e pedir um saque; conta bancária para receber; Saque-Aniversário. A tela "Você sabia?" fica de fora, porque não segue de nenhuma das outras.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - O primeiro contato: do convite à primeira conversa (Priority: P1)
@@ -625,6 +630,13 @@ assinatura ou pagamento, e não encontrar nenhuma.
 - **FR-028c**: O destaque do passo MUST cair sobre a região da **imagem** que
   ele aponta, qualquer que seja a proporção da captura e o tamanho da tela —
   na moldura e na ampliação.
+- **FR-028d**: Um guia que passaria de 7 passos MUST ser dividido em
+  **seções**, cada uma com 3 a 7 passos, e cada uma termina como um guia
+  termina (parabéns e o que a pessoa já sabe fazer). Antes do passo a passo, a
+  Memora pergunta o que a pessoa quer aprender naquele serviço, e cada seção é
+  uma escolha com título, uma linha dizendo o que se aprende e a quantidade de
+  passos, com alvo de 48 dp. A lista termina com a saída para perguntar à
+  Memora, para quem não achou o assunto. Guia curto continua sem seções.
 - **FR-029**: O passo a passo MUST acontecer inteiro dentro do Memora. O Memora
   MUST NOT pedir permissão para aparecer por cima de outro aplicativo.
 
