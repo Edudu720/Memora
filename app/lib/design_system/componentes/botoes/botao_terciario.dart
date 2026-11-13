@@ -21,11 +21,15 @@ class BotaoTerciario extends StatelessWidget {
   /// Ocupa toda a largura disponível.
   final bool larguraTotal;
 
+  /// Ícone opcional, antes do rótulo. O rótulo continua obrigatório.
+  final IconData? icone;
+
   /// Cria um botão de ação terciária.
   const BotaoTerciario({
     required this.rotulo,
     this.aoTocar,
     this.larguraTotal = false,
+    this.icone,
     super.key,
   });
 
@@ -36,6 +40,7 @@ class BotaoTerciario extends StatelessWidget {
       estilo: EstiloBotao.terciario,
       alturaMinima: MemoraDimensoes.alvoMinimo,
       aoTocar: aoTocar,
+      icone: icone,
       larguraTotal: larguraTotal,
     );
   }

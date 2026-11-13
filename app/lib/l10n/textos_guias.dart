@@ -25,6 +25,41 @@ abstract final class TextosGuias {
   static const String capturaFalhou =
       'Não foi possível carregar a imagem de exemplo.';
 
+  /// Leitor de tela: o anel de destaque sobre a captura.
+  static const String areaDestacada = 'Área destacada na tela para tocar';
+
+  /// Leitor de tela: o selo "Exemplo".
+  static const String seloExemploDescrito =
+      'Ilustração demonstrativa de exemplo';
+
+  /// Botão visível logo abaixo da captura (FR-028b).
+  static const String verImagemMaior = 'Ver a imagem maior';
+
+  /// Dica do leitor de tela para a captura que se pode tocar (FR-028b).
+  static const String dicaAmpliar = 'Toque duas vezes para ver a imagem maior';
+
+  /// Botão que aumenta a imagem na ampliação (FR-028b).
+  static const String aproximar = 'Aproximar';
+
+  /// Botão que diminui a imagem na ampliação (FR-028b).
+  static const String afastar = 'Afastar';
+
+  /// Botão que fecha a ampliação (FR-028b).
+  static const String fecharImagem = 'Fechar';
+
+  /// Quanto a imagem está ampliada; também é o aviso do leitor de tela.
+  ///
+  /// [vezes] é 1 para a imagem inteira. Número com decimais quando a pessoa
+  /// ampliou com os dois dedos e parou entre dois degraus.
+  static String ampliadaVezes(double vezes) {
+    if (vezes < 1.05) return 'Imagem inteira';
+    final bool inteiro = (vezes - vezes.round()).abs() < 0.05;
+    final String numero = inteiro
+        ? vezes.round().toString()
+        : vezes.toStringAsFixed(1).replaceAll('.', ',');
+    return 'Ampliada $numero vezes';
+  }
+
   /// Título do aviso quando a etapa tem campo de senha (FR-032).
   static const String tituloAvisoSenha = 'Atenção com a sua senha';
 

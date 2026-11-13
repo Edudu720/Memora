@@ -15,7 +15,10 @@ import '../cartoes/caixa_de_etapa.dart';
 import '../ilustracao/ilustracao_memora.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
+import 'captura_ampliada.dart';
+import 'captura_com_destaque.dart';
 import 'indicador_de_passo.dart';
+import 'selo_exemplo.dart';
 
 /// Uma tela do passo a passo visual e interativo (T065, FR-026, FR-028).
 ///
@@ -26,7 +29,13 @@ class PassoIlustrado extends StatelessWidget {
   static const Key chaveSeloExemplo = Key('passo.selo_exemplo');
 
   /// Chave do anel de destaque sobre a captura.
-  static const Key chaveDestaque = Key('passo.destaque');
+  static const Key chaveDestaque = CapturaComDestaque.chaveDestaque;
+
+  /// Chave da captura quando ela pode ser tocada para ampliar (FR-028b).
+  static const Key chaveCapturaTocavel = Key('passo.captura_tocavel');
+
+  /// Chave do botão "Ver a imagem maior" (FR-028b).
+  static const Key chaveVerImagemMaior = Key('passo.ver_imagem_maior');
 
   /// Chave do aviso permanente de senha (quando presente).
   static const Key chaveAvisoSenha = Key('passo.aviso_senha');
@@ -108,8 +117,9 @@ class PassoIlustrado extends StatelessWidget {
           IndicadorDePasso(posicao: posicao, total: total),
           const SizedBox(height: MemoraEspacamento.lg),
 
-          // 2. Moldura de celular com a captura, selo "Exemplo" e anel de destaque
-          _MolduraDeCelular(passo: passo),
+          // 2. Moldura de celular com a captura, selo "Exemplo", anel de destaque
+          //    e o botão que amplia a imagem (FR-028b)
+          _CapturaDoPasso(passo: passo),
           const SizedBox(height: MemoraEspacamento.lg),
 
           // 3. Aviso obrigatório se a etapa envolver senha (FR-032, FR-049)
@@ -292,11 +302,77 @@ class PassoIlustrado extends StatelessWidget {
   }
 }
 
+/// A captura do passo: a moldura, o toque que a amplia e o botão logo abaixo
+/// (FR-028b).
+///
+/// É um `State` porque precisa saber se a captura **existe**: quando ela
+/// falta (FR-028a) não há o que ampliar, e oferecer a ampliação de um aviso
+/// seria uma ação que não leva a nada.
+class _CapturaDoPasso extends StatefulWidget {
+  final Passo passo;
+
+  const _CapturaDoPasso({required this.passo});
+
+  @override
+  State<_CapturaDoPasso> createState() => _EstadoDaCapturaDoPasso();
+}
+
+class _EstadoDaCapturaDoPasso extends State<_CapturaDoPasso> {
+  bool _pendente = false;
+
+  void _ampliar() => CapturaAmpliada.abrir(context, passo: widget.passo);
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget moldura = _MolduraDeCelular(
+      passo: widget.passo,
+      aoMudarPendente: (bool pendente) {
+        if (pendente != _pendente) setState(() => _pendente = pendente);
+      },
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        if (_pendente)
+          moldura
+        else
+          // `onTap` na própria Semantics: sem ele o TalkBack anuncia o botão e
+          // o duplo toque não ativa nada.
+          Semantics(
+            key: PassoIlustrado.chaveCapturaTocavel,
+            button: true,
+            label:
+                '${widget.passo.descricaoDaCaptura}. ${TextosGuias.areaDestacada}',
+            hint: TextosGuias.dicaAmpliar,
+            onTap: _ampliar,
+            excludeSemantics: true,
+            child: GestureDetector(onTap: _ampliar, child: moldura),
+          ),
+        if (!_pendente) ...<Widget>[
+          const SizedBox(height: MemoraEspacamento.sm),
+          BotaoTerciario(
+            key: PassoIlustrado.chaveVerImagemMaior,
+            rotulo: TextosGuias.verImagemMaior,
+            icone: Icons.zoom_in,
+            larguraTotal: true,
+            aoTocar: _ampliar,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 /// Moldura que simula a tela do celular com imagem, selo de exemplo e anel de foco.
 class _MolduraDeCelular extends StatelessWidget {
   final Passo passo;
+  final ValueChanged<bool> aoMudarPendente;
 
-  const _MolduraDeCelular({required this.passo});
+  const _MolduraDeCelular({
+    required this.passo,
+    required this.aoMudarPendente,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -326,124 +402,54 @@ class _MolduraDeCelular extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          // A imagem capturada (ou placeholder)
-          LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
-              return Stack(
-                children: <Widget>[
-                  SizedBox(
-                    width: constraints.maxWidth,
-                    height: constraints.maxHeight,
-                    child: Image.asset(
-                      passo.captura.caminho,
-                      fit: BoxFit.contain,
-                      semanticLabel: passo.descricaoDaCaptura,
-                      frameBuilder: (
-                        BuildContext context,
-                        Widget child,
-                        int? frame,
-                        bool wasSynchronouslyLoaded,
-                      ) {
-                        return child;
-                      },
-                      errorBuilder: (
-                        BuildContext context,
-                        Object error,
-                        StackTrace? stackTrace,
-                      ) {
-                        return Center(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(MemoraEspacamento.md),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                const IlustracaoMemora(
-                                  Ilustracao.estadoVazio,
-                                  altura: 48,
-                                ),
-                                const SizedBox(height: MemoraEspacamento.sm),
-                                TextoMemora(
-                                  TextosGuias.capturaPendente,
-                                  estilo: EstiloTexto.corpoForte,
-                                  alinhamento: TextAlign.center,
-                                ),
-                                const SizedBox(height: MemoraEspacamento.xs),
-                                TextoMemora.apoio(
-                                  passo.descricaoDaCaptura,
-                                  alinhamento: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  // Anel de destaque sobre a região relativa
-                  Positioned(
-                    key: PassoIlustrado.chaveDestaque,
-                    left: constraints.maxWidth * passo.destaque.x,
-                    top: constraints.maxHeight * passo.destaque.y,
-                    width: constraints.maxWidth * passo.destaque.largura,
-                    height: constraints.maxHeight * passo.destaque.altura,
-                    child: Semantics(
-                      label: 'Área destacada na tela para tocar',
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                          border: Border.all(
-                            color: cores.primaria,
-                            width: MemoraDimensoes.bordaSelecao,
-                          ),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: cores.medalhao,
-                              spreadRadius: MemoraDimensoes.bordaEnfase,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+          // A imagem na proporção dela, com o anel sobre a imagem (FR-028c).
+          CapturaComDestaque(
+            passo: passo,
+            aoMudarPendente: aoMudarPendente,
+            pendente: (BuildContext _) => _AvisoDeCapturaPendente(passo: passo),
           ),
 
           // Selo visual permanente "Exemplo" no topo direito
-          Positioned(
+          const Positioned(
             key: PassoIlustrado.chaveSeloExemplo,
             top: MemoraEspacamento.sm,
             right: MemoraEspacamento.sm,
-            child: Semantics(
-              container: true,
-              label: 'Ilustração demonstrativa de exemplo',
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: MemoraEspacamento.sm,
-                  vertical: MemoraEspacamento.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                  border: Border.all(color: cores.borda),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.cartao * 2,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: TextoMemora.apoio(
-                  TextosGuias.exemplo,
-                  cor: cores.texto,
-                ),
-              ),
-            ),
+            child: SeloExemplo(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// O aviso que ocupa o lugar de uma captura que ainda não existe (FR-028a).
+class _AvisoDeCapturaPendente extends StatelessWidget {
+  final Passo passo;
+
+  const _AvisoDeCapturaPendente({required this.passo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(MemoraEspacamento.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const IlustracaoMemora(Ilustracao.estadoVazio, altura: 48),
+            const SizedBox(height: MemoraEspacamento.sm),
+            TextoMemora(
+              TextosGuias.capturaPendente,
+              estilo: EstiloTexto.corpoForte,
+              alinhamento: TextAlign.center,
+            ),
+            const SizedBox(height: MemoraEspacamento.xs),
+            TextoMemora.apoio(
+              passo.descricaoDaCaptura,
+              alinhamento: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
