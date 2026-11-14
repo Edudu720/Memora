@@ -49,6 +49,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
 
   bool _opcaoMarcada = true;
   int _abaAtiva = 0;
+  int _filtroAtivo = 0;
   String _ultimoToque = 'nenhum';
 
   @override
@@ -325,15 +326,24 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
             'nenhum campo dentro dela.'),
       ),
 
-      const _Secao('A Memora e as ilustrações','O rosto dela, em quatro '
-          'expressões, e as ilustrações coloridas sempre sobre o medalhão '
-          'claro — nos três temas.'),
+      const _Secao(
+        'A Memora e as ilustrações',
+        'O rosto dela em seis expressões PNG oficiais, e as ilustrações '
+            'coloridas sempre sobre o medalhão claro — nos três temas.',
+      ),
       Wrap(
         spacing: MemoraEspacamento.md,
         runSpacing: MemoraEspacamento.md,
         children: <Widget>[
           for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
-            MemoraPersonagem(expressao: e),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                MemoraPersonagem(expressao: e),
+                const SizedBox(height: MemoraEspacamento.xs),
+                TextoMemora.apoio(e.name),
+              ],
+            ),
         ],
       ),
       const SizedBox(height: MemoraEspacamento.lg),
@@ -537,6 +547,117 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
         indiceAtivo: _abaAtiva,
         aoSelecionar: (int i) => setState(() => _abaAtiva = i),
+      ),
+
+      const _Secao(
+        'Blocos Memora 2.0',
+        'PainelHeroi e BadgeDeStatus são passivos (002/FR-012); CartaoHeroi, '
+            'TileAcaoRapida e ChipFiltro são acionáveis com pista explícita.',
+      ),
+      PainelHeroi(
+        titulo: 'Frequência cardíaca',
+        valorDestaque: '74 bpm',
+        subtitulo: 'Última leitura hoje às 10:15',
+        badgeStatus: const BadgeDeStatus(
+          rotulo: 'Relógio conectado',
+          icone: Icons.watch_rounded,
+          tom: TomBadgeStatus.positivo,
+        ),
+        visualEsquerda: MemoraPersonagem(
+          expressao: ExpressaoDaMemora.neutra,
+          tamanho: MemoraDimensoes.alvoDecisao,
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      CartaoHeroi(
+        titulo: 'Conversar com a Memora',
+        subtitulo: 'Tire dúvidas com calma, passo a passo',
+        rotuloAcao: 'Começar conversa',
+        icone: Icons.chat_bubble_outline_rounded,
+        visualEsquerda: const MemoraPersonagem(
+          expressao: ExpressaoDaMemora.falando,
+          tamanho: MemoraDimensoes.alvoDecisao,
+        ),
+        aoTocar: () => _tocou('heroi'),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      if (_escala >= MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+        TileAcaoRapida(
+          icone: Icons.apps_rounded,
+          titulo: 'Aplicativos',
+          subtitulo: 'Guias práticos',
+          variacao: VarianteBadge.primario,
+          pistaAcao: 'Explorar',
+          aoTocar: () => _tocou('tile_primario'),
+        ),
+        const SizedBox(height: MemoraEspacamento.md),
+        TileAcaoRapida(
+          icone: Icons.favorite_outline_rounded,
+          titulo: 'Cuidado',
+          subtitulo: 'Relógio e avisos',
+          variacao: VarianteBadge.saude,
+          pistaAcao: 'Ver saúde',
+          aoTocar: () => _tocou('tile_saude'),
+        ),
+      ] else
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: TileAcaoRapida(
+                icone: Icons.apps_rounded,
+                titulo: 'Aplicativos',
+                subtitulo: 'Guias práticos',
+                variacao: VarianteBadge.primario,
+                pistaAcao: 'Explorar',
+                aoTocar: () => _tocou('tile_primario'),
+              ),
+            ),
+            const SizedBox(width: MemoraEspacamento.md),
+            Expanded(
+              child: TileAcaoRapida(
+                icone: Icons.favorite_outline_rounded,
+                titulo: 'Cuidado',
+                subtitulo: 'Relógio e avisos',
+                variacao: VarianteBadge.saude,
+                pistaAcao: 'Ver saúde',
+                aoTocar: () => _tocou('tile_saude'),
+              ),
+            ),
+          ],
+        ),
+      const SizedBox(height: MemoraEspacamento.md),
+      Wrap(
+        spacing: MemoraEspacamento.sm,
+        runSpacing: MemoraEspacamento.sm,
+        children: <Widget>[
+          ChipFiltro(
+            rotulo: 'Todos',
+            selecionado: _filtroAtivo == 0,
+            aoTocar: () => setState(() => _filtroAtivo = 0),
+          ),
+          ChipFiltro(
+            rotulo: 'Saúde',
+            icone: Icons.health_and_safety_outlined,
+            selecionado: _filtroAtivo == 1,
+            aoTocar: () => setState(() => _filtroAtivo = 1),
+          ),
+        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const LinhaDeLista(
+        titulo: 'Dado informativo sem ação',
+        subtitulo: 'Sem seta e sem resposta ao toque',
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      LinhaDeLista(
+        titulo: 'Item de lista navegável',
+        subtitulo: 'Exibe seta e semântica de botão',
+        direita: const BadgeDeStatus(
+          rotulo: 'Novo',
+          tom: TomBadgeStatus.informativo,
+        ),
+        aoTocar: () => _tocou('linha'),
       ),
 
       const SizedBox(height: MemoraEspacamento.xxl),

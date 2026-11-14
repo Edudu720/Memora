@@ -156,20 +156,8 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
   }
 
   List<Widget> _pedirCodigo(ControladorRecuperacao c, MemoraCores cores) => <Widget>[
-        Container(
+        Cartao(
           padding: const EdgeInsets.all(MemoraEspacamento.md),
-          decoration: BoxDecoration(
-            color: cores.superficie,
-            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-            border: Border.all(color: cores.borda),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: MemoraElevacao.sombra,
-                blurRadius: MemoraElevacao.cartao,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
           child: const Row(
             children: <Widget>[
               MemoraPersonagem(
@@ -272,7 +260,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
             width: MemoraDimensoes.ilustracaoCabecalho,
             height: MemoraDimensoes.ilustracaoCabecalho,
             decoration: BoxDecoration(
-              color: cores.sucesso.withValues(alpha: 0.12),
+              color: cores.saudeSuave,
               shape: BoxShape.circle,
             ),
             child: const Center(
@@ -283,21 +271,9 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
           ),
         ),
         const SizedBox(height: MemoraEspacamento.lg),
-        Container(
-          padding: const EdgeInsets.all(MemoraEspacamento.lg),
-          decoration: BoxDecoration(
-            color: cores.superficie,
-            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-            border: Border.all(color: cores.borda),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: MemoraElevacao.sombra,
-                blurRadius: MemoraElevacao.cartao,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const TextoMemora(
+        const Cartao(
+          padding: EdgeInsets.all(MemoraEspacamento.lg),
+          child: TextoMemora(
             TextosAutenticacao.avisoSessoesEncerradas,
             alinhamento: TextAlign.center,
           ),

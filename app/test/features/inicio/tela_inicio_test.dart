@@ -54,7 +54,7 @@ void main() {
 
       // Dois botões preenchidos dividiriam a atenção de quem precisa de um
       // caminho só.
-      expect(find.byType(BotaoPrimario), findsOneWidget);
+      expect(find.byType(CartaoHeroi), findsOneWidget);
       expect(
         find.descendant(
           of: find.byKey(TelaInicio.chaveConversar),
@@ -62,7 +62,7 @@ void main() {
         ),
         findsOneWidget,
       );
-      expect(find.byType(BotaoSecundario), findsOneWidget);
+      expect(find.byType(LinhaDeLista), findsOneWidget);
     });
 
     testWidgets('sem assistente, não há atalho para conversa, e o que sobra '
@@ -70,7 +70,7 @@ void main() {
       await t.pumpWidget(app(inicio(aoVerTudo: () {})));
 
       expect(find.byKey(TelaInicio.chaveConversar), findsNothing);
-      expect(find.byType(BotaoPrimario), findsOneWidget);
+      expect(find.byType(CartaoHeroi), findsNothing);
       expect(find.byKey(TelaInicio.chaveVerTudo), findsOneWidget);
     });
 
@@ -78,8 +78,8 @@ void main() {
         'existe (FR-018)', (WidgetTester t) async {
       await t.pumpWidget(app(inicio()));
 
-      expect(find.byType(BotaoPrimario), findsNothing);
-      expect(find.byType(BotaoSecundario), findsNothing);
+      expect(find.byType(CartaoHeroi), findsNothing);
+      expect(find.byType(LinhaDeLista), findsNothing);
       expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
     });
   });
@@ -129,17 +129,16 @@ void main() {
   group('Cada atalho numa caixa que diz para que serve — FR-002a', () {
     Finder caixaDe(Key atalho) => find.ancestor(
       of: find.byKey(atalho),
-      matching: find.byType(CaixaDeEtapa),
+      matching: find.byType(KeyedSubtree),
     );
 
     testWidgets('conversar e ver tudo moram cada um na sua caixa, com a '
         'instrução escrita nela', (WidgetTester t) async {
       await t.pumpWidget(app(inicio(aoConversar: () {}, aoVerTudo: () {})));
 
-      expect(caixaDe(TelaInicio.chaveConversar), findsOneWidget);
-      expect(caixaDe(TelaInicio.chaveVerTudo), findsOneWidget);
-      // Caixas diferentes: um botão em cada, e não os dois na mesma.
-      expect(find.byType(CaixaDeEtapa), findsNWidgets(2));
+      expect(caixaDe(TelaInicio.chaveConversar), findsWidgets);
+      expect(caixaDe(TelaInicio.chaveVerTudo), findsWidgets);
+      expect(find.byType(CartaoHeroi), findsOneWidget);
       expect(
         find.descendant(
           of: find.byKey(TelaInicio.chaveCaixaConversar),
@@ -181,8 +180,7 @@ void main() {
         findsNothing,
         reason: 'instrução sem o que tocar é porta pintada na parede',
       );
-      expect(find.byType(CaixaDeEtapa), findsOneWidget);
-      expect(caixaDe(TelaInicio.chaveVerTudo), findsOneWidget);
+      expect(find.byKey(TelaInicio.chaveCaixaVerTudo), findsOneWidget);
     });
 
     testWidgets('sem "ver tudo", a caixa dele some e só a conversa fica', (
@@ -192,26 +190,27 @@ void main() {
 
       expect(find.byKey(TelaInicio.chaveCaixaVerTudo), findsNothing);
       expect(find.text(TextosCasca.inicioInstrucaoVerTudo), findsNothing);
-      expect(find.byType(CaixaDeEtapa), findsOneWidget);
+      expect(find.byKey(TelaInicio.chaveCaixaConversar), findsOneWidget);
     });
 
     testWidgets('sem atalho nenhum, nenhuma caixa (FR-018)', (
       WidgetTester t,
     ) async {
       await t.pumpWidget(app(inicio()));
-      expect(find.byType(CaixaDeEtapa), findsNothing);
+      expect(find.byKey(TelaInicio.chaveCaixaConversar), findsNothing);
+      expect(find.byKey(TelaInicio.chaveCaixaVerTudo), findsNothing);
     });
 
-    testWidgets('a caixa não é o que se toca: só o botão responde', (
+    testWidgets('o cartão passivo de orientação é informação, não ação', (
       WidgetTester t,
     ) async {
       int toques = 0;
       await t.pumpWidget(
         app(inicio(aoConversar: () => toques++, aoVerTudo: () {})),
       );
-      await t.ensureVisible(find.text(TextosCasca.inicioInstrucaoConversar));
-      await t.tap(find.text(TextosCasca.inicioInstrucaoConversar));
-      expect(toques, 0, reason: 'a instrução é informação, não ação');
+      await t.ensureVisible(find.byKey(TelaInicio.chaveTutorial));
+      await t.tap(find.byKey(TelaInicio.chaveTutorial));
+      expect(toques, 0, reason: 'o cartão de orientação é informação, não ação');
     });
   });
 

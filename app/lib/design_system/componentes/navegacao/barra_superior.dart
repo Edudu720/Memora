@@ -4,7 +4,11 @@ import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
+import '../../tokens/raio.dart';
+import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
+import '../toque/superficie_tocavel.dart';
+import 'cabecalho_de_tela.dart';
 
 /// Barra superior do Memora.
 ///
@@ -21,72 +25,107 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
   /// Ação opcional à direita da barra.
   final Widget? acao;
 
+  /// Expressão opcional da Memora exibida no canto direito (ex.: `mini`).
+  final ExpressaoDaMemora? memora;
+
   /// Cria a barra superior.
   const BarraSuperior({
     required this.titulo,
     this.aoVoltar,
     this.acao,
+    this.memora,
     super.key,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(MemoraDimensoes.alvoDecisao);
+  Size get preferredSize =>
+      const Size.fromHeight(MemoraDimensoes.alvoDecisao);
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final bool mostrarFigura =
+        memora != null &&
+        MediaQuery.textScalerOf(context).scale(1) <
+            CabecalhoDeTela.ampliacaoQueTiraAFigura;
 
     return Material(
       color: cores.fundo,
       child: SafeArea(
         bottom: false,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: MemoraDimensoes.alvoDecisao,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: MemoraEspacamento.md,
+            vertical: MemoraEspacamento.xs,
           ),
-          child: Row(
-            children: <Widget>[
-              if (aoVoltar != null)
-                Semantics(
-                  button: true,
-                  label: 'Voltar',
-                  onTap: aoVoltar,
-                  child: ExcludeSemantics(
-                    child: InkWell(
-                      onTap: aoVoltar,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          minWidth: MemoraDimensoes.alvoMinimo,
-                          minHeight: MemoraDimensoes.alvoMinimo,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: MemoraDimensoes.alvoDecisao,
+            ),
+            child: Row(
+              children: <Widget>[
+                if (aoVoltar != null) ...<Widget>[
+                  SuperficieTocavel(
+                    key: CabecalhoDeTela.chaveVoltar,
+                    rotulo: 'Voltar',
+                    aoTocar: aoVoltar,
+                    fundo: cores.superficieSutil,
+                    borda: ehAltoContraste ? cores.borda : cores.bordaSutil,
+                    larguraBorda: ehAltoContraste
+                        ? MemoraDimensoes.bordaEnfase
+                        : MemoraDimensoes.espessuraBordaSutil,
+                    raio: BorderRadius.circular(MemoraRaio.pilula),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minWidth: MemoraDimensoes.alvoMinimo,
+                        minHeight: MemoraDimensoes.alvoMinimo,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: MemoraEspacamento.md,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: MemoraEspacamento.md,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Icon(Icons.arrow_back, color: cores.primaria),
-                              const SizedBox(width: MemoraEspacamento.xs),
-                              // Palavra escrita: seta sozinha é ambígua.
-                              TextoMemora('Voltar', cor: cores.primaria),
-                            ],
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Icon(
+                              Icons.arrow_back,
+                              color: cores.primaria,
+                              size: MemoraDimensoes.iconePadrao,
+                            ),
+                            const SizedBox(width: MemoraEspacamento.xs),
+                            // Palavra escrita: seta sozinha é ambígua.
+                            TextoMemora(
+                              'Voltar',
+                              estilo: EstiloTexto.corpoForte,
+                              cor: cores.primaria,
+                            ),
+                          ],
                         ),
                       ),
                     ),
                   ),
-                ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: MemoraEspacamento.md,
+                  const SizedBox(width: MemoraEspacamento.sm),
+                ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: MemoraEspacamento.xs,
+                    ),
+                    child: TextoMemora.tituloSecao(titulo, maxLinhas: 2),
                   ),
-                  child: TextoMemora.tituloSecao(titulo, maxLinhas: 2),
                 ),
-              ),
-              ?acao,
-            ],
+                if (mostrarFigura) ...<Widget>[
+                  const SizedBox(width: MemoraEspacamento.sm),
+                  MemoraPersonagem(
+                    expressao: memora!,
+                    tamanho: MemoraDimensoes.alvoMinimo,
+                  ),
+                ],
+                ?acao,
+              ],
+            ),
           ),
         ),
       ),

@@ -27,6 +27,7 @@ import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/aceite_do_aviso.dart';
 import '../../assistente/data/conversa_local.dart';
+import '../../assistente/data/leitor_de_voz_nativo.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
 import '../../assistente/presentation/telas/tela_catalogo.dart';
@@ -854,6 +855,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             widget.conversaLocal(),
             aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
             abridor: widget.abridor,
+            leitorDeVoz: LeitorDeVozSpeechToText(),
             rascunhoInicial: rascunho,
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
@@ -1040,6 +1042,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             aoAbrirRegistro: widget.assistente == null
                 ? null
                 : () => _abrirRegistro(widget.assistente!),
+            aoAbrirCuidado: _abrirDispositivoCuidado,
+            aoAbrirAjuda: widget.assistente == null
+                ? null
+                : () => _abrirAjuda(widget.assistente!),
           ),
           DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',

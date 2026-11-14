@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
+import '../../tokens/dimensoes.dart';
 import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
@@ -58,7 +59,13 @@ class CaixaDeEtapa extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final Color corDaBorda = ehAltoContraste ? cores.borda : cores.bordaSutil;
+    final double larguraBorda = ehAltoContraste
+        ? MemoraDimensoes.bordaEnfase
+        : MemoraDimensoes.espessuraBordaSutil;
 
     return Semantics(
       // Um grupo só, com a frase e o conteúdo como nós **separados**, lidos
@@ -69,19 +76,13 @@ class CaixaDeEtapa extends StatelessWidget {
       explicitChildNodes: true,
       child: Container(
         width: double.infinity,
-        // Recorta a faixa da frase nos cantos arredondados da caixa.
+        // Recorta a faixa tonal da frase nos cantos arredondados da caixa.
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           color: cores.superficie,
           borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-          border: Border.all(color: cores.borda),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: MemoraElevacao.sombra,
-              blurRadius: MemoraElevacao.cartao * 2,
-              offset: const Offset(0, MemoraElevacao.cartao),
-            ),
-          ],
+          border: Border.all(color: corDaBorda, width: larguraBorda),
+          boxShadow: MemoraElevacao.listaSombrasCartao(cores),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,8 +94,10 @@ class CaixaDeEtapa extends StatelessWidget {
                 horizontal: MemoraEspacamento.lg,
               ),
               decoration: BoxDecoration(
-                color: cores.superficieAlt,
-                border: Border(bottom: BorderSide(color: cores.borda)),
+                color: cores.superficieSutil,
+                border: Border(
+                  bottom: BorderSide(color: corDaBorda, width: larguraBorda),
+                ),
               ),
               child: Semantics(
                 container: true,

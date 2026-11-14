@@ -26,6 +26,10 @@ abstract final class MemoraDimensoes {
   /// (research.md, R7).
   static const double escalaTextoMax = 2.0;
 
+  /// Limiar de ampliação a partir do qual visuais decorativos laterais cedem
+  /// lugar à largura total do texto (regra 7 da R2).
+  static const double escalaTextoAlta = 1.75;
+
   /// Piso da escala de texto.
   static const double escalaTextoMin = 1.0;
 
@@ -205,4 +209,27 @@ abstract final class MemoraDimensoes {
 
   /// Altura da pílula do destino ativo.
   static const double alturaDaPilulaDeNavegacao = 32;
+
+  // ---------------------------------------------------------------------------
+  // Padrão visual 2.0 (feature 007)
+  // ---------------------------------------------------------------------------
+
+  /// 48 dp — container quadrado arredondado dos ícones em `TileAcaoRapida` e
+  /// `LinhaDeLista`.
+  static const double badgeAtalhoRapido = 48.0;
+
+  /// 1.0 dp — espessura de divisores leves e separadores de barra.
+  static const double espessuraBordaSutil = 1.0;
+
+  /// 3.0 dp — barra indicadora superior da aba ativa em `NavegacaoInferior`.
+  static const double indicadorAtivoBarra = 3.0;
+
+  /// Escala de fonte a partir da qual grades 2x2 colapsam para uma coluna.
+  static const double escalaColapsoGrade = 1.5;
+
+  /// Largura mínima interna (dp) para exibir grade em duas colunas.
+  ///
+  /// Telas de `320 dp` (`272 dp` úteis) colapsam para uma coluna; telas a partir
+  /// de `360 dp` (`>= 300 dp` úteis) mantêm a grade 2x2 em `1.0x`.
+  static const double larguraMinimaGrade = 300;
 }

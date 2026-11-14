@@ -67,7 +67,7 @@ class TelaEntregaDoAparelho extends StatelessWidget {
                   width: MemoraDimensoes.ilustracaoCabecalho,
                   height: MemoraDimensoes.ilustracaoCabecalho,
                   decoration: BoxDecoration(
-                    color: cores.primaria.withValues(alpha: 0.1),
+                    color: cores.destaque,
                     shape: BoxShape.circle,
                   ),
                   child: const Center(
@@ -83,21 +83,9 @@ class TelaEntregaDoAparelho extends StatelessWidget {
                 alinhamento: TextAlign.center,
               ),
               const SizedBox(height: MemoraEspacamento.lg),
-              Container(
-                padding: const EdgeInsets.all(MemoraEspacamento.lg),
-                decoration: BoxDecoration(
-                  color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-                  border: Border.all(color: cores.borda),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.cartao,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const Column(
+              const Cartao(
+                padding: EdgeInsets.all(MemoraEspacamento.lg),
+                child: Column(
                   children: <Widget>[
                     TextoMemora(
                       TextosAutenticacao.pedidoEntregaDoAparelho,

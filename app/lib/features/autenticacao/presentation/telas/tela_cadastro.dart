@@ -120,9 +120,24 @@ class _TelaCadastroState extends State<TelaCadastro> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const TextoMemora(
-                    'Vou te pedir só o necessário. Nada de CPF, banco ou '
-                    'documento — eu nunca preciso disso 😊',
+                  Cartao(
+                    padding: const EdgeInsets.all(MemoraEspacamento.md),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        const MemoraPersonagem(
+                          expressao: ExpressaoDaMemora.neutra,
+                          tamanho: MemoraDimensoes.alvoDecisao,
+                        ),
+                        const SizedBox(width: MemoraEspacamento.md),
+                        const Expanded(
+                          child: TextoMemora(
+                            'Vou te pedir só o necessário. Nada de CPF, banco ou '
+                            'documento — eu nunca preciso disso 😊',
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: MemoraEspacamento.lg),
 

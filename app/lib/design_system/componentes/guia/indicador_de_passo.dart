@@ -8,10 +8,10 @@ import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../texto/texto_memora.dart';
 
-/// Indicador textual e visual da etapa atual num guia passo a passo (T065).
+/// Indicador textual e visual da etapa atual num guia passo a passo (`T053`, `T065`).
 ///
-/// "Passo 2 de 4", **sempre em texto**, acompanhado da barra de progresso como
-/// reforço visual acessível.
+/// "Passo 2 de 4", **sempre em texto**, acompanhado da barra de progresso
+/// limpa com trilho em `superficieSutil` e contorno reservado ao Alto Contraste.
 class IndicadorDePasso extends StatelessWidget {
   /// Posição atual da etapa (iniciando em 1).
   final int posicao;
@@ -32,7 +32,9 @@ class IndicadorDePasso extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
     final double fracao = (posicao / total).clamp(0.0, 1.0);
 
     return Semantics(
@@ -54,18 +56,24 @@ class IndicadorDePasso extends StatelessWidget {
             child: Container(
               height: MemoraDimensoes.alturaIndicadorDePasso,
               width: double.infinity,
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: cores.destaque,
-                borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                border: Border.all(color: cores.borda),
+                color: ehAltoContraste ? cores.superficie : cores.superficieSutil,
+                borderRadius: BorderRadius.circular(MemoraRaio.pilula),
+                border: ehAltoContraste
+                    ? Border.all(
+                        color: cores.borda,
+                        width: MemoraDimensoes.espessuraBorda,
+                      )
+                    : null,
               ),
               child: FractionallySizedBox(
                 alignment: Alignment.centerLeft,
                 widthFactor: fracao,
-                child: Container(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: cores.primaria,
-                    borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+                    borderRadius: BorderRadius.circular(MemoraRaio.pilula),
                   ),
                 ),
               ),

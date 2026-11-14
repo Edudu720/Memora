@@ -80,10 +80,10 @@ void main() {
         final Finder porta = find.byKey(TelaAjuda.chaveDoAssunto(a.id));
         await t.ensureVisible(porta);
         expect(porta, findsOneWidget, reason: a.titulo);
-        final CartaoDePorta cartao = t.widget<CartaoDePorta>(porta);
-        expect(cartao.nome, a.titulo);
-        expect(cartao.explicacao, a.explicacao);
-        expect(cartao.ilustracao, a.ilustracao, reason: 'FR-004: ${a.titulo}');
+        final LinhaDeLista linha = t.widget<LinhaDeLista>(porta);
+        expect(linha.titulo, a.titulo);
+        expect(linha.subtitulo, a.explicacao);
+        expect(linha.aoTocar, isNotNull, reason: 'FR-004: ${a.titulo}');
       }
     });
 

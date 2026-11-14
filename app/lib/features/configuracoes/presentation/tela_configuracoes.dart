@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_terciario.dart';
 import '../../../design_system/componentes/cartoes/caixa_de_etapa.dart';
-import '../../../design_system/componentes/cartoes/cartao_de_porta.dart';
+import '../../../design_system/componentes/cartoes/cartao.dart';
 import '../../../design_system/componentes/ilustracao/ilustracao_memora.dart';
+import '../../../design_system/componentes/informacao/linha_de_lista.dart';
 import '../../../design_system/componentes/navegacao/cabecalho_de_tela.dart';
 import '../../../design_system/temas/memora_theme_extension.dart';
+import '../../../design_system/tokens/cores.dart';
+import '../../../design_system/tokens/dimensoes.dart';
 import '../../../design_system/tokens/espacamento.dart';
+import '../../../design_system/tokens/raio.dart';
 import '../../../l10n/textos_configuracoes.dart';
 
 /// A raiz do destino Ajustes (US7, FR-038): as quatro portas.
@@ -73,77 +77,127 @@ class TelaConfiguracoes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool ocultarVisuais = escala >= MemoraDimensoes.escalaTextoAlta;
+
     return Scaffold(
-      backgroundColor: context.memora.cores.fundo,
-      body: ListView(
-        children: <Widget>[
-          const CabecalhoDeTela(
-            titulo: TextosConfiguracoes.tituloAjustes,
-            ilustracao: Ilustracao.ajusteAparencia,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: MemoraEspacamento.lg,
+      backgroundColor: cores.fundo,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const CabecalhoDeTela(
+              titulo: TextosConfiguracoes.tituloAjustes,
+              ilustracao: Ilustracao.ajusteAparencia,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                // Os desenhos de Acessibilidade, Privacidade e Conta ainda não
-                // existem (T011): cada porta usa o que já há, e a revisão de
-                // design troca quando os desenhos chegarem.
-                CaixaDeEtapa(
-                  instrucao: TextosConfiguracoes.instrucaoAjustes,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      CartaoDePorta(
-                        key: chaveAparencia,
-                        nome: TextosConfiguracoes.portaAparencia,
-                        explicacao: TextosConfiguracoes.descricaoAparencia,
-                        ilustracao: Ilustracao.ajusteAparencia,
-                        aoAbrir: aoAbrirAparencia,
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MemoraEspacamento.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.instrucaoAjustes,
+                    child: Cartao(
+                      padding: EdgeInsets.zero,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            LinhaDeLista(
+                              key: chaveAparencia,
+                              titulo: TextosConfiguracoes.portaAparencia,
+                              subtitulo: TextosConfiguracoes.descricaoAparencia,
+                              esquerda: ocultarVisuais
+                                  ? null
+                                  : _badge(
+                                      cores.destaque,
+                                      cores.primaria,
+                                      Icons.palette_outlined,
+                                    ),
+                              aoTocar: aoAbrirAparencia,
+                              mostrarDivisorInferior: true,
+                            ),
+                            LinhaDeLista(
+                              key: chaveAcessibilidade,
+                              titulo: TextosConfiguracoes.portaAcessibilidade,
+                              subtitulo:
+                                  TextosConfiguracoes.descricaoAcessibilidade,
+                              esquerda: ocultarVisuais
+                                  ? null
+                                  : _badge(
+                                      cores.destaque,
+                                      cores.primaria,
+                                      Icons.accessibility_new,
+                                    ),
+                              aoTocar: aoAbrirAcessibilidade,
+                              mostrarDivisorInferior: true,
+                            ),
+                            LinhaDeLista(
+                              key: chavePrivacidade,
+                              titulo: TextosConfiguracoes.portaPrivacidade,
+                              subtitulo:
+                                  TextosConfiguracoes.descricaoPrivacidade,
+                              esquerda: ocultarVisuais
+                                  ? null
+                                  : _badge(
+                                      cores.saudeSuave,
+                                      cores.sucessoTexto,
+                                      Icons.lock_outline,
+                                    ),
+                              aoTocar: aoAbrirPrivacidade,
+                              mostrarDivisorInferior: true,
+                            ),
+                            LinhaDeLista(
+                              key: chaveConta,
+                              titulo: TextosConfiguracoes.portaConta,
+                              subtitulo: TextosConfiguracoes.descricaoConta,
+                              esquerda: ocultarVisuais
+                                  ? null
+                                  : _badge(
+                                      cores.superficieSutil,
+                                      cores.texto,
+                                      Icons.person_outline,
+                                    ),
+                              aoTocar: aoAbrirConta,
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: MemoraEspacamento.md),
-                      CartaoDePorta(
-                        key: chaveAcessibilidade,
-                        nome: TextosConfiguracoes.portaAcessibilidade,
-                        explicacao: TextosConfiguracoes.descricaoAcessibilidade,
-                        ilustracao: Ilustracao.pessoaComCelular,
-                        aoAbrir: aoAbrirAcessibilidade,
-                      ),
-                      const SizedBox(height: MemoraEspacamento.md),
-                      CartaoDePorta(
-                        key: chavePrivacidade,
-                        nome: TextosConfiguracoes.portaPrivacidade,
-                        explicacao: TextosConfiguracoes.descricaoPrivacidade,
-                        ilustracao: Ilustracao.portaRegistro,
-                        aoAbrir: aoAbrirPrivacidade,
-                      ),
-                      const SizedBox(height: MemoraEspacamento.md),
-                      CartaoDePorta(
-                        key: chaveConta,
-                        nome: TextosConfiguracoes.portaConta,
-                        explicacao: TextosConfiguracoes.descricaoConta,
-                        ilustracao: Ilustracao.casalIdoso,
-                        aoAbrir: aoAbrirConta,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                if (aoAbrirGaleria != null) ...<Widget>[
+                  if (aoAbrirGaleria != null) ...<Widget>[
+                    const SizedBox(height: MemoraEspacamento.xl),
+                    BotaoTerciario(
+                      key: chaveGaleria,
+                      rotulo: TextosConfiguracoes.galeria,
+                      aoTocar: aoAbrirGaleria,
+                    ),
+                  ],
                   const SizedBox(height: MemoraEspacamento.xl),
-                  BotaoTerciario(
-                    key: chaveGaleria,
-                    rotulo: TextosConfiguracoes.galeria,
-                    aoTocar: aoAbrirGaleria,
-                  ),
                 ],
-                const SizedBox(height: MemoraEspacamento.xl),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _badge(Color fundo, Color corIcone, IconData icone) {
+    return Container(
+      width: MemoraDimensoes.badgeAtalhoRapido,
+      height: MemoraDimensoes.badgeAtalhoRapido,
+      decoration: BoxDecoration(
+        color: fundo,
+        borderRadius: BorderRadius.circular(MemoraRaio.badge),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icone, size: MemoraDimensoes.iconePadrao, color: corIcone),
     );
   }
 }

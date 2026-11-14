@@ -6,6 +6,7 @@ import '../../domain/assistente.dart';
 import '../controladores/controlador_conversa.dart';
 
 /// A conversa com a Memora (T038, US2; redesenhada na T055, US3 da 004).
+/// A conversa com a Memora (T042, Feature 007).
 ///
 /// ## O aviso antigolpe fica no topo, e não sai — mas encolhe (FR-022, T118)
 ///
@@ -57,12 +58,34 @@ import '../controladores/controlador_conversa.dart';
 /// A barra inferior sai com o teclado — quem cuida disso é a casca. Aqui, a
 /// lista rola de novo ao fim quando a altura muda, para a última mensagem não
 /// ficar atrás do campo.
+/// Fluxo estruturado em três momentos:
+/// 1. Antes do aceite (`precisaDoAceite`), apresenta `_ExplicacaoDoAceite` com
+///    as chaves e garantias da FR-051 sem liberar o campo de envio.
+/// 2. Após o aceite e sem histórico, recebe com `ExpressaoDaMemora.falando`,
+///    convite editorial e grade 2x2 responsiva de sugestões de pergunta.
+/// 3. Na conversa ativa, mantém `AvisoCompacto` permanente no topo, balões
+///    limpos e barra inferior elevada com campo de texto, ditado por voz
+///    opcional no rascunho (FR-013) e botão manual `"Perguntar"`.
 class TelaConversa extends StatefulWidget {
   /// Chave do campo de mensagem.
   static const Key chaveCampo = Key('conversa.campo');
 
   /// Chave do botão de enviar.
   static const Key chaveEnviar = Key('conversa.enviar');
+
+  /// Chave do botão acessível de ditado por voz ("Falar" / "Parar").
+  static const Key chaveMicrofone = Key('conversa.microfone');
+
+  /// Chave do diálogo prévio que explica a permissão de microfone.
+  static const Key chaveDialogoPermissaoVoz = Key(
+    'conversa.dialogo_permissao_voz',
+  );
+
+  /// Chave da faixa de estado ou fallback amigável do ditado por voz.
+  static const Key chaveStatusVoz = Key('conversa.status_voz');
+
+  /// Chave da grade de sugestões iniciais de pergunta.
+  static const Key chaveSugestoes = Key('conversa.sugestoes');
 
   /// Chave do aviso antigolpe.
   static const Key chaveAviso = Key('conversa.aviso_antigolpe');
@@ -98,6 +121,7 @@ class TelaConversa extends StatefulWidget {
   final ControladorConversa controlador;
 
   /// Volta ao Hub.
+  /// Volta ao Hub ou Início.
   final VoidCallback? aoVoltar;
 
   /// Cria a tela de conversa.
@@ -164,12 +188,14 @@ class _TelaConversaState extends State<TelaConversa>
     }
 
     final ControladorConversa c = widget.controlador;
+    final bool zerouConversa = _ultimoTotalMensagens > 0 && c.mensagens.isEmpty;
     if (c.jaPerguntou &&
         c.mensagens.length > _ultimoTotalMensagens &&
         c.mensagens.last.autor == AutorDaMensagem.memora) {
       _emEscrita = c.mensagens.length - 1;
     }
-    final bool precisaRolar = c.mensagens.length != _ultimoTotalMensagens ||
+    final bool precisaRolar =
+        c.mensagens.length != _ultimoTotalMensagens ||
         c.respondendo != _ultimoRespondendo ||
         c.trechoEmCurso != _ultimoTrecho ||
         c.acaoOferecida != null;
@@ -177,9 +203,19 @@ class _TelaConversaState extends State<TelaConversa>
     _ultimoRespondendo = c.respondendo;
     _ultimoTrecho = c.trechoEmCurso;
 
-    if (precisaRolar) {
+    if (zerouConversa && !c.respondendo && c.mensagemDeErro == null) {
+      _rolarParaOInicio();
+    } else if (precisaRolar) {
       _rolarParaOFim();
     }
+  }
+
+  void _rolarParaOInicio() {
+    if (!_rolagem.hasClients) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_rolagem.hasClients) return;
+      _rolagem.jumpTo(0);
+    });
   }
 
   void _rolarParaOFim() {
@@ -213,6 +249,37 @@ class _TelaConversaState extends State<TelaConversa>
 
   /// A chave da fala que está sendo escrita: ela amarra o texto que chega à
   /// mensagem final, na posição `indice` da conversa.
+  void _acionarMicrofone(BuildContext context, ControladorConversa c) {
+    if (c.respondendo) return;
+    if (c.ouvindoVoz) {
+      c.pararDitado();
+      return;
+    }
+    if (!c.precisaExplicarPermissaoVoz) {
+      c.iniciarDitado();
+      return;
+    }
+    c.prepararPedidoPermissaoVoz();
+    DialogoMemora.mostrar(
+      context,
+      dialogo: DialogoMemora(
+        key: TelaConversa.chaveDialogoPermissaoVoz,
+        titulo: TextosAssistente.tituloPermissaoVoz,
+        mensagem: TextosAssistente.explicacaoPermissaoVoz,
+        rotuloConfirmar: TextosAssistente.botaoConfirmarPermissaoVoz,
+        aoConfirmar: () {
+          Navigator.of(context).pop();
+          c.iniciarDitado();
+        },
+        rotuloFechar: TextosAssistente.botaoRecusarPermissaoVoz,
+        aoFechar: () {
+          Navigator.of(context).pop();
+          c.cancelarPedidoPermissaoVoz();
+        },
+      ),
+    );
+  }
+
   Key _chaveDaEscrita(int indice) => ValueKey<String>('conversa.fala.$indice');
 
   /// A fala `indice` da conversa.
@@ -222,7 +289,8 @@ class _TelaConversaState extends State<TelaConversa>
     // Só a fala que acabou de chegar, e só enquanto é a última: ao mandar a
     // próxima pergunta, ela aparece inteira. `!respondendo` evita que a mesma
     // chave exista em dois balões ao mesmo tempo.
-    final bool escrevendo = daMemora &&
+    final bool escrevendo =
+        daMemora &&
         indice == _emEscrita &&
         indice == c.mensagens.length - 1 &&
         !c.respondendo;
@@ -238,7 +306,9 @@ class _TelaConversaState extends State<TelaConversa>
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
 
     return ListenableBuilder(
       listenable: widget.controlador,
@@ -254,6 +324,7 @@ class _TelaConversaState extends State<TelaConversa>
         // `MediaQuery` que entrega ao corpo, e de dentro dele nunca o veríamos.
         final bool tecladoAberto =
             MediaQueryData.fromView(View.of(context)).viewInsets.bottom > 0;
+        final double escala = MediaQuery.textScalerOf(context).scale(1);
 
         return Scaffold(
           backgroundColor: cores.fundo,
@@ -303,7 +374,21 @@ class _TelaConversaState extends State<TelaConversa>
                 // utilizável". Na prática a lista ganha bem mais, porque
                 // depois da primeira mensagem o aviso é uma linha.
                 final double altura = restricoes.maxHeight;
-                const double respiro = MemoraEspacamento.md * 2;
+                final double folgaVerticalAviso = c.precisaDoAceite
+                    ? 0
+                    : MemoraEspacamento.md;
+                final double folgaAceiteCompacto =
+                    c.precisaDoAceite &&
+                        escala >= MemoraDimensoes.escalaColapsoGrade
+                    ? MemoraEspacamento.lg
+                    : 0;
+                final double tetoAviso =
+                    altura * MemoraDimensoes.tetoDoAvisoAberto -
+                    folgaVerticalAviso * 2 -
+                    folgaAceiteCompacto;
+                final bool listaCompacta =
+                    c.precisaDoAceite &&
+                    escala >= MemoraDimensoes.escalaColapsoGrade;
 
                 return Column(
                   children: <Widget>[
@@ -312,15 +397,16 @@ class _TelaConversaState extends State<TelaConversa>
                     // para devolver o espaço à conversa.
                     Padding(
                       padding: avisoAberto
-                          ? const EdgeInsets.all(MemoraEspacamento.md)
+                          ? EdgeInsets.symmetric(
+                              horizontal: MemoraEspacamento.md,
+                              vertical: folgaVerticalAviso,
+                            )
                           : const EdgeInsets.symmetric(
                               horizontal: MemoraEspacamento.md,
                             ),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxHeight:
-                              altura * MemoraDimensoes.tetoDoAvisoAberto -
-                              respiro,
+                          maxHeight: tetoAviso > 0 ? tetoAviso : 0,
                         ),
                         // As duas chaves marcam a MESMA caixa: o aviso do golpe
                         // e o de privacidade não têm como se separar, e um não
@@ -349,8 +435,11 @@ class _TelaConversaState extends State<TelaConversa>
                     Expanded(
                       child: ListView(
                         controller: _rolagem,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: MemoraEspacamento.lg,
+                        cacheExtent: MediaQuery.sizeOf(context).height,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: listaCompacta
+                              ? MemoraEspacamento.md
+                              : MemoraEspacamento.lg,
                         ),
                         children: <Widget>[
                           // Antes da primeira mensagem, a explicação toma o
@@ -372,11 +461,14 @@ class _TelaConversaState extends State<TelaConversa>
                                 texto: TextosAssistente.convite,
                               ),
                               const SizedBox(height: MemoraEspacamento.md),
+                              _GradeSugestoesConversa(
+                                escala: escala,
+                                aoEscolherSugestao: c.escrever,
+                              ),
+                              const SizedBox(height: MemoraEspacamento.md),
                             ],
 
-                            for (int i = 0;
-                                i < c.mensagens.length;
-                                i++) ...<Widget>[
+                            for (int i = 0; i < c.mensagens.length; i++) ...<Widget>[
                               _fala(c, i),
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
@@ -444,29 +536,47 @@ class _TelaConversaState extends State<TelaConversa>
                     // aceite não termina, o campo aparece — e o botão de enviar
                     // fica desabilitado, porque quem barra é o controlador
                     // (`podeEnviar`), e não esta tela.
+                    // A área inteira de escrever: campo e botão em uma única
+                    // faixa elevada (FR-013, 002/FR-012). Quando o teclado não
+                    // cabe, rola suavemente.
                     if (!c.precisaDoAceite)
-                      Padding(
-                        padding: const EdgeInsets.all(MemoraEspacamento.md),
-                        // Mesma regra do aviso, e pelo mesmo motivo (T070): o
-                        // rótulo e a ajuda do `CampoTexto` crescem junto com o
-                        // texto, e sozinhos empurravam o botão de enviar para
-                        // fora da tela em 200%. Acima do teto, rolar esta faixa
-                        // alcança o botão — mesma linguagem de interação que a
-                        // lista de mensagens já usa.
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxHeight:
-                                altura *
-                                    (tecladoAberto
-                                        ? MemoraDimensoes.tetoDoCampoComTeclado
-                                        : MemoraDimensoes
-                                              .tetoDoCampoDaConversa) -
-                                respiro,
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight:
+                              altura *
+                              (tecladoAberto
+                                  ? MemoraDimensoes.tetoDoCampoComTeclado
+                                  : MemoraDimensoes.tetoDoCampoDaConversa),
+                        ),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: cores.superficieBarra,
+                            border: Border(
+                              top: BorderSide(
+                                color: ehAltoContraste
+                                    ? cores.borda
+                                    : cores.bordaSutil,
+                                width: ehAltoContraste
+                                    ? MemoraDimensoes.bordaEnfase
+                                    : MemoraDimensoes.espessuraBordaSutil,
+                              ),
+                            ),
+                            boxShadow: MemoraElevacao.listaSombrasCartao(cores),
                           ),
                           child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(MemoraEspacamento.md),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: <Widget>[
+                                if (c.ouvindoVoz || c.avisoVoz != null) ...<Widget>[
+                                  _FaixaEstadoVoz(
+                                    ouvindo: c.ouvindoVoz,
+                                    mensagem: c.ouvindoVoz
+                                        ? TextosAssistente.avisoOuvindoVoz
+                                        : c.avisoVoz!,
+                                  ),
+                                  const SizedBox(height: MemoraEspacamento.sm),
+                                ],
                                 CampoTexto(
                                   key: TelaConversa.chaveCampo,
                                   rotulo: TextosAssistente.rotuloMensagem,
@@ -480,11 +590,54 @@ class _TelaConversaState extends State<TelaConversa>
                                 // lugar, desabilitado (`podeEnviar` é falso): a
                                 // espera aparece só no balão dela, e a faixa
                                 // não muda de altura (FR-020b).
-                                BotaoPrimario(
-                                  key: TelaConversa.chaveEnviar,
-                                  rotulo: TextosAssistente.botaoEnviar,
-                                  icone: Icons.send,
-                                  aoTocar: c.podeEnviar ? c.enviar : null,
+                                LayoutBuilder(
+                                  builder: (
+                                    BuildContext context,
+                                    BoxConstraints box,
+                                  ) {
+                                    final bool emLinha =
+                                        box.maxWidth >=
+                                            MemoraDimensoes.larguraMinimaGrade &&
+                                        escala <
+                                            MemoraDimensoes.escalaColapsoGrade;
+
+                                    final Widget botaoMicrofone = _BotaoMicrofone(
+                                      key: TelaConversa.chaveMicrofone,
+                                      ouvindo: c.ouvindoVoz,
+                                      habilitado: !c.respondendo,
+                                      aoTocar: () =>
+                                          _acionarMicrofone(context, c),
+                                    );
+                                    final Widget botaoEnviar = BotaoPrimario(
+                                      key: TelaConversa.chaveEnviar,
+                                      rotulo: TextosAssistente.botaoEnviar,
+                                      icone: Icons.send,
+                                      aoTocar: c.podeEnviar ? c.enviar : null,
+                                    );
+
+                                    if (emLinha) {
+                                      return Row(
+                                        children: <Widget>[
+                                          botaoMicrofone,
+                                          const SizedBox(
+                                            width: MemoraEspacamento.sm,
+                                          ),
+                                          Expanded(child: botaoEnviar),
+                                        ],
+                                      );
+                                    }
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: <Widget>[
+                                        botaoEnviar,
+                                        const SizedBox(
+                                          height: MemoraEspacamento.sm,
+                                        ),
+                                        botaoMicrofone,
+                                      ],
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -502,12 +655,257 @@ class _TelaConversaState extends State<TelaConversa>
   }
 }
 
+class _GradeSugestoesConversa extends StatelessWidget {
+  final double escala;
+  final ValueChanged<String> aoEscolherSugestao;
+
+  const _GradeSugestoesConversa({
+    required this.escala,
+    required this.aoEscolherSugestao,
+  });
+
+  static const List<({String titulo, IconData icone})> _itens =
+      <({String titulo, IconData icone})>[
+        (
+          titulo: TextosAssistente.sugestaoLetraMaior,
+          icone: Icons.format_size_rounded,
+        ),
+        (
+          titulo: TextosAssistente.sugestaoFotos,
+          icone: Icons.photo_library_outlined,
+        ),
+        (
+          titulo: TextosAssistente.sugestaoGolpe,
+          icone: Icons.shield_outlined,
+        ),
+        (
+          titulo: TextosAssistente.sugestaoWhatsapp,
+          icone: Icons.chat_outlined,
+        ),
+      ];
+
+  @override
+  Widget build(BuildContext context) {
+    final bool ocultarOrnamento = escala >= MemoraDimensoes.escalaTextoAlta;
+
+    return KeyedSubtree(
+      key: TelaConversa.chaveSugestoes,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              if (!ocultarOrnamento) ...<Widget>[
+                const MemoraPersonagem(
+                  expressao: ExpressaoDaMemora.falando,
+                  tamanho: MemoraDimensoes.pisoDeIlustracao,
+                ),
+                const SizedBox(width: MemoraEspacamento.sm),
+              ],
+              const Expanded(
+                child: TextoMemora(
+                  TextosAssistente.tituloSugestoesConversa,
+                  estilo: EstiloTexto.corpoForte,
+                  cabecalho: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: MemoraEspacamento.sm),
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints box) {
+              final bool emDuasColunas =
+                  box.maxWidth >= MemoraDimensoes.larguraMinimaGrade &&
+                  escala < MemoraDimensoes.escalaColapsoGrade;
+
+              if (!emDuasColunas) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    for (int i = 0; i < _itens.length; i++) ...<Widget>[
+                      if (i > 0) const SizedBox(height: MemoraEspacamento.sm),
+                      TileAcaoRapida(
+                        titulo: _itens[i].titulo,
+                        icone: _itens[i].icone,
+                        aoTocar: () => aoEscolherSugestao(_itens[i].titulo),
+                      ),
+                    ],
+                  ],
+                );
+              }
+
+              final List<Widget> linhas = <Widget>[];
+              for (int i = 0; i < _itens.length; i += 2) {
+                if (i > 0) linhas.add(const SizedBox(height: MemoraEspacamento.sm));
+                linhas.add(
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Expanded(
+                        child: TileAcaoRapida(
+                          titulo: _itens[i].titulo,
+                          icone: _itens[i].icone,
+                          aoTocar: () => aoEscolherSugestao(_itens[i].titulo),
+                        ),
+                      ),
+                      const SizedBox(width: MemoraEspacamento.sm),
+                      Expanded(
+                        child: TileAcaoRapida(
+                          titulo: _itens[i + 1].titulo,
+                          icone: _itens[i + 1].icone,
+                          aoTocar: () =>
+                              aoEscolherSugestao(_itens[i + 1].titulo),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: linhas,
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FaixaEstadoVoz extends StatelessWidget {
+  final bool ouvindo;
+  final String mensagem;
+
+  const _FaixaEstadoVoz({required this.ouvindo, required this.mensagem});
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+
+    return Semantics(
+      liveRegion: true,
+      readOnly: true,
+      child: Cartao(
+        key: TelaConversa.chaveStatusVoz,
+        comBorda: true,
+        padding: const EdgeInsets.symmetric(
+          horizontal: MemoraEspacamento.md,
+          vertical: MemoraEspacamento.xs,
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              ouvindo ? Icons.graphic_eq_rounded : Icons.info_outline_rounded,
+              size: MemoraDimensoes.iconePadrao,
+              color: ehAltoContraste ? cores.texto : cores.primaria,
+            ),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Expanded(child: TextoMemora.apoio(mensagem)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BotaoMicrofone extends StatelessWidget {
+  final bool ouvindo;
+  final bool habilitado;
+  final VoidCallback aoTocar;
+
+  const _BotaoMicrofone({
+    required this.ouvindo,
+    required this.habilitado,
+    required this.aoTocar,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+
+    final String rotuloCurto = ouvindo
+        ? TextosAssistente.botaoPararDitado
+        : TextosAssistente.botaoFalar;
+    final String rotuloSemantico = ouvindo
+        ? '$rotuloCurto, ${TextosAssistente.dicaPararDitado}'
+        : '$rotuloCurto, ${TextosAssistente.dicaFalar}';
+
+    final Color fundo = ouvindo
+        ? cores.perigo
+        : (ehAltoContraste ? cores.superficie : cores.superficieSutil);
+    final Color conteudoCor = ouvindo ? cores.sobrePerigo : cores.primaria;
+    final Color corBorda = ehAltoContraste
+        ? cores.borda
+        : (ouvindo ? cores.perigo : cores.primaria);
+    final BorderRadius raioPilula = BorderRadius.circular(MemoraRaio.pilula);
+
+    return Semantics(
+      button: true,
+      enabled: habilitado,
+      label: rotuloSemantico,
+      onTap: habilitado ? aoTocar : null,
+      excludeSemantics: true,
+      child: Material(
+        color: fundo,
+        shape: RoundedRectangleBorder(
+          borderRadius: raioPilula,
+          side: BorderSide(
+            color: corBorda,
+            width: MemoraDimensoes.bordaEnfase,
+          ),
+        ),
+        child: InkWell(
+          borderRadius: raioPilula,
+          onTap: habilitado ? aoTocar : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: MemoraDimensoes.alvoDecisao,
+              minHeight: MemoraDimensoes.alvoDecisao,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MemoraEspacamento.md,
+                vertical: MemoraEspacamento.sm,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    ouvindo ? Icons.stop_circle_rounded : Icons.mic_rounded,
+                    size: MemoraDimensoes.iconePadrao,
+                    color: conteudoCor,
+                  ),
+                  const SizedBox(width: MemoraEspacamento.xs),
+                  TextoMemora(
+                    rotuloCurto,
+                    estilo: EstiloTexto.corpoForte,
+                    cor: conteudoCor,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A explicação que antecede a primeira mensagem (FR-051).
 ///
 /// Uma caixa de etapa: a frase que diz o que está acontecendo, o texto, e os
 /// dois botões. O primário **aceita**; o secundário volta, e quem recusa
 /// continua com o restante do Memora — Hub, catálogos e registro —, só sem a
 /// conversa. Nenhum dos dois pode ser tratado como erro da pessoa.
+/// Preserva o texto completo de privacidade e os botões de aceite e recusa,
+/// garantindo que o título permaneça visível sem exigir rolagem prévia.
 class _ExplicacaoDoAceite extends StatelessWidget {
   final VoidCallback aoAceitar;
   final VoidCallback aoRecusar;
@@ -516,12 +914,37 @@ class _ExplicacaoDoAceite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CaixaDeEtapa(
+    final MemoraTheme tema = context.memora;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+
+    return Cartao(
       key: TelaConversa.chaveAceite,
-      instrucao: TextosAssistente.tituloAceite,
+      comBorda: ehAltoContraste,
+      padding: EdgeInsets.all(
+        escala >= MemoraDimensoes.escalaTextoAlta
+            ? MemoraEspacamento.sm
+            : MemoraEspacamento.lg,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          const TextoMemora(
+            TextosAssistente.tituloAceite,
+            estilo: EstiloTexto.tituloSecao,
+            cabecalho: true,
+          ),
+          const SizedBox(height: MemoraEspacamento.md),
+          if (escala < MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: MemoraPersonagem(
+                expressao: ExpressaoDaMemora.dica,
+                tamanho: MemoraDimensoes.pisoDeIlustracao,
+              ),
+            ),
+            const SizedBox(height: MemoraEspacamento.sm),
+          ],
           const TextoMemora(TextosAssistente.corpoDoAceite),
           const SizedBox(height: MemoraEspacamento.lg),
           BotaoPrimario(

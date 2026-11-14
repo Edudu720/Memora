@@ -6,7 +6,7 @@ import '../../domain/guia.dart';
 /// Guia de aprendizado dos Correios organizado em seções (006-guias-servicos-sociais).
 final Guia guiaCorreios = Guia(
   chave: 'correios',
-  titulo: TextosGuias.tituloCorreios,
+  titulo: TextosGuias.tituloCorreios,6
   versaoCapturada: '2026.11',
   capturadoEm: DateTime(2026, 11),
   precisaTerEmMaos: const <String>[

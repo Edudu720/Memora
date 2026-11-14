@@ -83,15 +83,19 @@ class _AjudaGuiadaDaConversaState extends State<AjudaGuiadaDaConversa> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  Semantics(
-                    label: TextosAjuda.passoDescrito(
-                      TextosAjuda.tituloConversa,
-                      _indice + 1,
-                      _total,
-                    ),
-                    child: ExcludeSemantics(
-                      child: TextoMemora.apoio(
-                        TextosAjuda.passo(_indice + 1, _total),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Semantics(
+                      label: TextosAjuda.passoDescrito(
+                        TextosAjuda.tituloConversa,
+                        _indice + 1,
+                        _total,
+                      ),
+                      child: ExcludeSemantics(
+                        child: BadgeDeStatus(
+                          rotulo: TextosAjuda.passo(_indice + 1, _total),
+                          tom: TomBadgeStatus.informativo,
+                        ),
                       ),
                     ),
                   ),
@@ -147,7 +151,19 @@ class _AjudaGuiadaDaConversaState extends State<AjudaGuiadaDaConversa> {
       1 => const <Widget>[
         BalaoDeFala(autor: AutorDoBalao.memora, texto: TextosAjuda.guiadaOQueE),
         espaco,
-        TextoMemora.apoio(TextosAjuda.guiadaSoExemplo),
+        Cartao(
+          padding: EdgeInsets.all(MemoraEspacamento.md),
+          child: Row(
+            children: <Widget>[
+              MemoraPersonagem(
+                expressao: ExpressaoDaMemora.dica,
+                tamanho: MemoraDimensoes.alvoMinimo,
+              ),
+              SizedBox(width: MemoraEspacamento.sm),
+              Expanded(child: TextoMemora.apoio(TextosAjuda.guiadaSoExemplo)),
+            ],
+          ),
+        ),
         espaco,
         BalaoDeFala(
           autor: AutorDoBalao.pessoa,
@@ -168,7 +184,19 @@ class _AjudaGuiadaDaConversaState extends State<AjudaGuiadaDaConversa> {
       3 => const <Widget>[
         BalaoDeFala(autor: AutorDoBalao.memora, texto: TextosAjuda.guiadaAbrir),
         espaco,
-        TextoMemora.apoio(TextosAjuda.guiadaSoExemplo),
+        Cartao(
+          padding: EdgeInsets.all(MemoraEspacamento.md),
+          child: Row(
+            children: <Widget>[
+              MemoraPersonagem(
+                expressao: ExpressaoDaMemora.dica,
+                tamanho: MemoraDimensoes.alvoMinimo,
+              ),
+              SizedBox(width: MemoraEspacamento.sm),
+              Expanded(child: TextoMemora.apoio(TextosAjuda.guiadaSoExemplo)),
+            ],
+          ),
+        ),
         espaco,
         BalaoDeFala(
           autor: AutorDoBalao.memora,

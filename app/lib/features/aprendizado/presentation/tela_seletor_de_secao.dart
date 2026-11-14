@@ -5,11 +5,11 @@ import '../../assistente/domain/assistente.dart';
 import '../data/progresso_de_aprendizado.dart';
 import '../domain/guia.dart';
 
-/// Tela de escolha de assunto para guias extensos (Feature 006).
+/// Tela de escolha de assunto para guias extensos (`T052`, Feature 006).
 ///
-/// Evita que a pessoa idosa precise percorrer dezenas de telas seguidas (como
-/// no Gov.br ou Serasa) para chegar ao ponto desejado. Exibe as seções em
-/// cartões amplos (>= 48 dp), com ícone + título + subtítulo + contagem de passos.
+/// Exibe cabeçalho acolhedor do aplicativo/serviço com [BadgeDeStatus] de
+/// progresso e [ExpressaoDaMemora.dica], seguido pela lista de módulos em
+/// [LinhaDeLista] com badges circulares numerados.
 class TelaSeletorDeSecao extends StatefulWidget {
   /// Chave da lista de seções, para os testes.
   static const Key chaveLista = Key('seletor_secao.lista');
@@ -91,7 +91,18 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
+    final int totalSecoes = widget.guia.secoes.length;
+    final int totalConcluidas = _concluidas.length;
+    final bool todasConcluidas = totalSecoes > 0 && totalConcluidas == totalSecoes;
+
+    final String rotuloProgresso = totalConcluidas > 0
+        ? '$totalConcluidas de $totalSecoes assuntos aprendidos'
+        : '$totalSecoes assuntos para aprender';
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -110,22 +121,87 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    BalaoDeFala(
-                      autor: AutorDoBalao.memora,
-                      texto:
-                          'O que você quer aprender no **$_nomeServico**? Escolha uma das opções abaixo:',
+                    // Cabeçalho editorial do aplicativo/serviço com progresso e dica
+                    Cartao(
+                      padding: const EdgeInsets.all(MemoraEspacamento.md),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              if (escala <
+                                  MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+                                IconeDoAplicativo(
+                                  chave: widget.guia.chave,
+                                  nome: _nomeServico,
+                                  tamanho: MemoraDimensoes.alvoDecisao,
+                                ),
+                                const SizedBox(width: MemoraEspacamento.md),
+                              ],
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    TextoMemora(
+                                      _nomeServico,
+                                      estilo: EstiloTexto.tituloSecao,
+                                    ),
+                                    const SizedBox(height: MemoraEspacamento.xs),
+                                    BadgeDeStatus(
+                                      rotulo: rotuloProgresso,
+                                      icone: todasConcluidas
+                                          ? Icons.check_circle_outline
+                                          : Icons.menu_book_outlined,
+                                      tom: todasConcluidas
+                                          ? TomBadgeStatus.positivo
+                                          : TomBadgeStatus.informativo,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: MemoraEspacamento.md),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              if (escala <
+                                  MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+                                const MemoraPersonagem(
+                                  expressao: ExpressaoDaMemora.dica,
+                                  tamanho: MemoraDimensoes.alvoMinimo,
+                                ),
+                                const SizedBox(width: MemoraEspacamento.md),
+                              ],
+                              Expanded(
+                                child: TextoMemora(
+                                  'O que você quer aprender no $_nomeServico? Escolha um assunto abaixo:',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: MemoraEspacamento.lg),
-                    for (final SecaoDoGuia secao in widget.guia.secoes) ...<Widget>[
-                      _CartaoSecao(
-                        secao: secao,
-                        concluida: _concluidas.contains(secao.chave),
-                        aoTocar: () => widget.aoEscolherSecao(secao),
+
+                    for (int i = 0;
+                        i < widget.guia.secoes.length;
+                        i++) ...<Widget>[
+                      _buildModuloLinha(
+                        context: context,
+                        cores: cores,
+                        ehAltoContraste: ehAltoContraste,
+                        compacto: compacto,
+                        indice: i,
+                        secao: widget.guia.secoes[i],
                       ),
-                      const SizedBox(height: MemoraEspacamento.md),
-                    ],
-                    if (widget.aoConversar != null) ...<Widget>[
                       const SizedBox(height: MemoraEspacamento.sm),
+                    ],
+
+                    if (widget.aoConversar != null) ...<Widget>[
+                      const SizedBox(height: MemoraEspacamento.md),
                       BotaoSecundario(
                         key: TelaSeletorDeSecao.chaveConversar,
                         rotulo: 'Não achei o que procuro — perguntar à Memora',
@@ -143,111 +219,57 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
       ),
     );
   }
-}
 
-class _CartaoSecao extends StatelessWidget {
-  final SecaoDoGuia secao;
-  final bool concluida;
-  final VoidCallback aoTocar;
-
-  const _CartaoSecao({
-    required this.secao,
-    required this.concluida,
-    required this.aoTocar,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+  Widget _buildModuloLinha({
+    required BuildContext context,
+    required MemoraCores cores,
+    required bool ehAltoContraste,
+    required bool compacto,
+    required int indice,
+    required SecaoDoGuia secao,
+  }) {
+    final bool concluida = _concluidas.contains(secao.chave);
     final int qtd = secao.passos.length;
     final String contagem = '$qtd ${qtd == 1 ? 'passo' : 'passos'}';
-    final String textoMeta = concluida ? '$contagem · Já aprendeu' : contagem;
+    final String subtitulo = concluida && compacto
+        ? '${secao.subtitulo} · $contagem · Já aprendeu'
+        : (compacto
+              ? '${secao.subtitulo} · $contagem'
+              : (concluida
+                    ? '${secao.subtitulo} · Já aprendeu'
+                    : secao.subtitulo));
 
-    return Semantics(
-      button: true,
-      label: '${secao.titulo}. ${secao.subtitulo}. $textoMeta.',
-      child: ExcludeSemantics(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: MemoraDimensoes.alvoDecisao,
-          ),
-          child: Material(
-            key: TelaSeletorDeSecao.chaveDaSecao(secao.chave),
-            color: cores.superficie,
-            elevation: MemoraElevacao.cartao,
-            shadowColor: MemoraElevacao.sombra,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-              side: BorderSide(
-                color: concluida ? cores.sucesso : cores.primaria,
-                width: MemoraDimensoes.espessuraBorda,
-              ),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-              onTap: aoTocar,
-              child: Padding(
-                padding: const EdgeInsets.all(MemoraEspacamento.md),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      padding: const EdgeInsets.all(MemoraEspacamento.sm),
-                      decoration: BoxDecoration(
-                        color: cores.destaque,
-                        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                      ),
-                      child: Icon(
-                        secao.icone,
-                        size: MemoraDimensoes.iconeDestaque,
-                        color: cores.primaria,
-                      ),
-                    ),
-                    const SizedBox(width: MemoraEspacamento.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          TextoMemora(
-                            secao.titulo,
-                            estilo: EstiloTexto.tituloSecao,
-                          ),
-                          const SizedBox(height: MemoraEspacamento.xs),
-                          TextoMemora(
-                            secao.subtitulo,
-                            estilo: EstiloTexto.corpo,
-                            cor: cores.textoSuave,
-                          ),
-                          const SizedBox(height: MemoraEspacamento.xs),
-                          Row(
-                            children: <Widget>[
-                              if (concluida) ...<Widget>[
-                                Icon(
-                                  Icons.check_circle,
-                                  size: MemoraDimensoes.iconePequeno,
-                                  color: cores.sucesso,
-                                ),
-                                const SizedBox(width: MemoraEspacamento.xs),
-                              ],
-                              Flexible(
-                                child: TextoMemora(
-                                  textoMeta,
-                                  estilo: EstiloTexto.apoio,
-                                  cor: concluida ? cores.sucesso : cores.primaria,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+    return LinhaDeLista(
+      key: TelaSeletorDeSecao.chaveDaSecao(secao.chave),
+      esquerda: Container(
+        width: MemoraDimensoes.alvoMinimo,
+        height: MemoraDimensoes.alvoMinimo,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: concluida ? cores.saudeSuave : cores.destaque,
+          shape: BoxShape.circle,
+          border: ehAltoContraste
+              ? Border.all(
+                  color: cores.borda,
+                  width: MemoraDimensoes.bordaEnfase,
+                )
+              : null,
+        ),
+        child: TextoMemora(
+          '${indice + 1}',
+          estilo: EstiloTexto.corpoForte,
+          cor: concluida ? cores.sucessoTexto : cores.primaria,
         ),
       ),
+      titulo: secao.titulo,
+      subtitulo: subtitulo,
+      direita: compacto
+          ? null
+          : TextoMemora.apoio(
+              contagem,
+              cor: concluida ? cores.sucessoTexto : cores.primaria,
+            ),
+      aoTocar: () => widget.aoEscolherSecao(secao),
     );
   }
 }

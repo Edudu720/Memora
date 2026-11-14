@@ -6,6 +6,7 @@ import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
+import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
@@ -184,13 +185,13 @@ void main() {
       via: null,
     ),
     (
-      parte: 'um serviço social do catálogo (leva ao passo a passo)',
+      parte: 'um serviço social do catálogo (leva às áreas do guia)',
       toques: <Finder>[
         doHub,
         deServicos,
         find.byKey(TelaCatalogo.chaveDoItem('Gov.br')),
       ],
-      chegada: find.byType(TelaPassoAPasso),
+      chegada: find.byType(TelaSeletorDeSecao),
       via: null,
     ),
     (

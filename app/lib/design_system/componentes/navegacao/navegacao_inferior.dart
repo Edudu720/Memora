@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../texto/texto_memora.dart';
@@ -55,25 +56,41 @@ class NavegacaoInferior extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final Color corDivisor = ehAltoContraste ? cores.borda : cores.bordaSutil;
+    final double larguraDivisor = ehAltoContraste
+        ? MemoraDimensoes.bordaEnfase
+        : MemoraDimensoes.espessuraBordaSutil;
 
-    return Material(
-      color: cores.superficieAlt,
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: <Widget>[
-            for (int i = 0; i < itens.length; i++)
-              Expanded(
-                child: _Item(
-                  item: itens[i],
-                  ativo: i == indiceAtivo,
-                  posicao: i + 1,
-                  total: itens.length,
-                  aoTocar: () => aoSelecionar(i),
+    return Container(
+      padding: EdgeInsets.only(top: larguraDivisor),
+      decoration: BoxDecoration(
+        color: cores.superficieBarra,
+        boxShadow: MemoraElevacao.listaSombrasBarra(cores),
+        border: Border(
+          top: BorderSide(color: corDivisor, width: larguraDivisor),
+        ),
+      ),
+      child: Material(
+        color: cores.superficieBarra,
+        child: SafeArea(
+          top: false,
+          child: Row(
+            children: <Widget>[
+              for (int i = 0; i < itens.length; i++)
+                Expanded(
+                  child: _Item(
+                    item: itens[i],
+                    ativo: i == indiceAtivo,
+                    posicao: i + 1,
+                    total: itens.length,
+                    aoTocar: () => aoSelecionar(i),
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -124,7 +141,7 @@ class _Item extends StatelessWidget {
             children: <Widget>[
               Container(
                 key: ativo ? NavegacaoInferior.chaveDoTraco(posicao) : null,
-                height: MemoraDimensoes.bordaSelecao,
+                height: MemoraDimensoes.indicadorAtivoBarra,
                 width: MemoraDimensoes.larguraDaPilulaDeNavegacao,
                 decoration: BoxDecoration(
                   color: ativo ? cores.primaria : Colors.transparent,

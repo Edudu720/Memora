@@ -156,35 +156,36 @@ class _TelaLoginState extends State<TelaLogin> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      // Top Hero Mascot Banner inspirado no design-1.jpg
+                      // Top Hero Mascot Banner alinhado ao DS 2.0
                       if (cabeMascote)
-                        Container(
-                    margin: const EdgeInsets.only(bottom: MemoraEspacamento.md),
-                    padding: const EdgeInsets.all(MemoraEspacamento.md),
-                    decoration: BoxDecoration(
-                      color: cores.superficie,
-                      borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-                      border: Border.all(color: cores.borda),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        const Center(
-                          child: MemoraPersonagem(),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: MemoraEspacamento.md,
+                          ),
+                          child: Cartao(
+                            padding: const EdgeInsets.all(MemoraEspacamento.md),
+                            child: const Column(
+                              children: <Widget>[
+                                Center(
+                                  child: MemoraPersonagem(
+                                    expressao: ExpressaoDaMemora.neutra,
+                                  ),
+                                ),
+                                SizedBox(height: MemoraEspacamento.sm),
+                                TextoMemora(
+                                  'Memora',
+                                  estilo: EstiloTexto.destaque,
+                                  alinhamento: TextAlign.center,
+                                ),
+                                SizedBox(height: MemoraEspacamento.xs),
+                                TextoMemora.apoio(
+                                  'Seu assistente digital para usar o celular com facilidade',
+                                  alinhamento: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: MemoraEspacamento.sm),
-                        const TextoMemora(
-                          'Memora',
-                          estilo: EstiloTexto.destaque,
-                          alinhamento: TextAlign.center,
-                        ),
-                        const SizedBox(height: MemoraEspacamento.xs),
-                        const TextoMemora.apoio(
-                          'Seu assistente digital para usar o celular com facilidade',
-                          alinhamento: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
                   CaixaDeEtapa(
                     instrucao: TextosAutenticacao.tituloLogin,
                     child: Column(

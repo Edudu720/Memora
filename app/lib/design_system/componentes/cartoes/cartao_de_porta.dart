@@ -144,7 +144,7 @@ class CartaoDePorta extends StatelessWidget {
     final MemoraCores cores = context.memora.cores;
     final bool habilitada = aoAbrir != null;
     final Color fundo = !habilitada
-        ? cores.superficieAlt
+        ? cores.superficieSutil
         : (principal ? cores.primaria : cores.destaque);
     final Color texto = !habilitada
         ? cores.textoSuave
@@ -172,9 +172,8 @@ class CartaoDePorta extends StatelessWidget {
           // O respiro da direita é **geométrico**, e não de gosto: com o raio de
           // 40 da forma, um texto a 8 dp do topo precisa estar a 16 dp da
           // borda direita para a primeira linha não sair da curva (o teste
-          // "O texto fica dentro da forma" prova). Sem a seta, a coluna de
-          // texto vai até a borda, e é este recuo que a mantém dentro. Com o
-          // respiro vertical maior a curva cede mais, e 16 sobra.
+          // "O texto fica dentro da forma" prova). Sem texto na curva direita,
+          // o conteúdo mantém folga em todas as combinações de escala.
           padding: EdgeInsets.fromLTRB(
             MemoraEspacamento.sm,
             respiro,
@@ -211,6 +210,14 @@ class CartaoDePorta extends StatelessWidget {
                   ],
                 ),
               ),
+              if (habilitada) ...<Widget>[
+                const SizedBox(width: MemoraEspacamento.sm),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: MemoraDimensoes.iconePadrao,
+                  color: texto,
+                ),
+              ],
             ],
           ),
         ),

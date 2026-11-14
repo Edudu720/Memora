@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_terciario.dart';
@@ -148,10 +149,10 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
                 color: cores.perigo,
               ),
               const SizedBox(width: MemoraEspacamento.sm),
-              Expanded(child: TextoMemora(widget.resumo)),
+              Expanded(child: TextoMemora.apoio(widget.resumo)),
               const SizedBox(width: MemoraEspacamento.sm),
               Icon(
-                Icons.expand_more,
+                Icons.expand_more_rounded,
                 size: MemoraDimensoes.iconePadrao,
                 color: cores.texto,
               ),
@@ -230,7 +231,10 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final bool modoPilula = !_aberto && widget.fechadoEmUmaLinha;
     // O que SOBRA da tela, e não a tela: a altura não diminui com o teclado,
     // e num 360x640 com o teclado aberto metade da tela era quase toda a área
     // útil (revisão da #38). O aviso vive dentro de lista que rola, onde a
@@ -250,21 +254,28 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     return Container(
       width: double.infinity,
       constraints: _aberto ? BoxConstraints(maxHeight: teto) : null,
-      padding: EdgeInsets.all(
-        _aberto || !widget.fechadoEmUmaLinha
-            ? MemoraEspacamento.md
-            : MemoraEspacamento.sm,
-      ),
+      padding: modoPilula
+          ? const EdgeInsets.symmetric(
+              horizontal: MemoraEspacamento.md,
+              vertical: MemoraEspacamento.xs,
+            )
+          : const EdgeInsets.all(MemoraEspacamento.md),
       decoration: BoxDecoration(
-        color: cores.superficieAlt,
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-        // A borda separa o bloco sem recorrer a preenchimento forte.
-        border: Border.all(
-          color: cores.perigo,
-          width: MemoraDimensoes.bordaEnfase,
+        color: cores.superficie,
+        borderRadius: BorderRadius.circular(
+          modoPilula ? MemoraRaio.pilula : MemoraRaio.cartaoMedio,
         ),
+        // A borda em perigo (ou enfática no alto contraste) garante
+        // reconhecimento imediato sem recorrer a preenchimento pesado.
+        border: Border.all(
+          color: ehAltoContraste ? cores.borda : cores.perigo,
+          width: ehAltoContraste
+              ? MemoraDimensoes.bordaEnfase
+              : MemoraDimensoes.espessuraBordaSutil,
+        ),
+        boxShadow: MemoraElevacao.listaSombrasCartao(cores),
       ),
-      child: !_aberto && widget.fechadoEmUmaLinha
+      child: modoPilula
           ? _linha(cores)
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,

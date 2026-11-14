@@ -81,7 +81,8 @@ class _TelaPerfilState extends State<TelaPerfil> {
   @override
   void didUpdateWidget(TelaPerfil antiga) {
     super.didUpdateWidget(antiga);
-    if (antiga.idDaConta != widget.idDaConta || antiga.progresso != widget.progresso) {
+    if (antiga.idDaConta != widget.idDaConta ||
+        antiga.progresso != widget.progresso) {
       _carregarMaisAprendido();
     }
   }
@@ -99,7 +100,8 @@ class _TelaPerfilState extends State<TelaPerfil> {
 
     String? nomeExibido;
     if (chave != null) {
-      for (final ServicoDoCatalogo s in RepositorioAssistenteSimulado.catalogoDaDemonstracao) {
+      for (final ServicoDoCatalogo s
+          in RepositorioAssistenteSimulado.catalogoDaDemonstracao) {
         if (s.chave == chave) {
           nomeExibido = s.nomeExibido;
           break;
@@ -124,6 +126,12 @@ class _TelaPerfilState extends State<TelaPerfil> {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final double larguraUtil =
+        MediaQuery.sizeOf(context).width - 2 * MemoraEspacamento.lg;
+    final bool compacto =
+        escala >= MemoraDimensoes.escalaColapsoGrade ||
+        larguraUtil < MemoraDimensoes.larguraMinimaGrade;
 
     final String textoMaisAprendido = _maisAprendidoNome != null
         ? _maisAprendidoNome!
@@ -132,63 +140,74 @@ class _TelaPerfilState extends State<TelaPerfil> {
     return Scaffold(
       backgroundColor: cores.fundo,
       body: SafeArea(
-        child: ListView(
+        child: SingleChildScrollView(
           key: TelaPerfil.chaveLista,
           padding: const EdgeInsets.all(MemoraEspacamento.lg),
-          children: <Widget>[
-            // Cabeçalho com o desenho acolhedor da Memora (FR-042)
-            Row(
-              children: <Widget>[
-                const Expanded(
-                  child: TextoMemora.tituloTela(TextosPerfil.tituloPerfil),
-                ),
-                MemoraPersonagem(
-                  key: TelaPerfil.chaveDesenho,
-                  tamanho: MemoraDimensoes.ilustracaoHeroi,
-                ),
-              ],
-            ),
-            const SizedBox(height: MemoraEspacamento.xl),
-
-            // Informações da pessoa e da conta (sem parecer botão, FR-012 da 002)
-            FutureBuilder<String?>(
-              future: widget.canal,
-              builder: (BuildContext _, AsyncSnapshot<String?> snapshotCanal) {
-                return ListaInformacao(
-                  campos: <CampoInformacao>[
-                    CampoInformacao(
-                      key: TelaPerfil.chaveNome,
-                      rotulo: TextosPerfil.rotuloNome,
-                      valor: widget.nome,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Cabeçalho editorial com a Memora neutra (FR-042)
+              Cartao(
+                padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                child: Row(
+                  children: <Widget>[
+                    const Expanded(
+                      child: TextoMemora.tituloTela(TextosPerfil.tituloPerfil),
                     ),
-                    if (snapshotCanal.data != null)
-                      CampoInformacao(
-                        key: TelaPerfil.chaveCanal,
-                        rotulo: TextosPerfil.rotuloCanal,
-                        valor: snapshotCanal.data!,
-                      ),
-                    CampoInformacao(
-                      key: TelaPerfil.chaveMaisAprendido,
-                      rotulo: TextosPerfil.rotuloMaisAprendido,
-                      valor: _carregouMaisAprendido
-                          ? textoMaisAprendido
-                          : '...',
+                    const SizedBox(width: MemoraEspacamento.md),
+                    MemoraPersonagem(
+                      key: TelaPerfil.chaveDesenho,
+                      expressao: ExpressaoDaMemora.neutra,
+                      tamanho: compacto
+                          ? MemoraDimensoes.ilustracaoCabecalho
+                          : MemoraDimensoes.ilustracaoHeroi,
                     ),
                   ],
-                );
-              },
-            ),
-            const SizedBox(height: MemoraEspacamento.xl),
-
-            // Seção de Idade (opcional, só neste aparelho, FR-042c)
-            if (widget.dataDeNascimento != null &&
-                widget.idDaConta != null &&
-                widget.idDaConta!.trim().isNotEmpty)
-              SecaoIdade(
-                armazenamento: widget.dataDeNascimento!,
-                idDaConta: widget.idDaConta!,
+                ),
               ),
-          ],
+              const SizedBox(height: MemoraEspacamento.xl),
+
+              // Informações da pessoa e da conta (sem parecer botão, FR-012 da 002)
+              FutureBuilder<String?>(
+                future: widget.canal,
+                builder:
+                    (BuildContext _, AsyncSnapshot<String?> snapshotCanal) {
+                      return ListaInformacao(
+                        campos: <CampoInformacao>[
+                          CampoInformacao(
+                            key: TelaPerfil.chaveNome,
+                            rotulo: TextosPerfil.rotuloNome,
+                            valor: widget.nome,
+                          ),
+                          if (snapshotCanal.data != null)
+                            CampoInformacao(
+                              key: TelaPerfil.chaveCanal,
+                              rotulo: TextosPerfil.rotuloCanal,
+                              valor: snapshotCanal.data!,
+                            ),
+                          CampoInformacao(
+                            key: TelaPerfil.chaveMaisAprendido,
+                            rotulo: TextosPerfil.rotuloMaisAprendido,
+                            valor: _carregouMaisAprendido
+                                ? textoMaisAprendido
+                                : '...',
+                          ),
+                        ],
+                      );
+                    },
+              ),
+              const SizedBox(height: MemoraEspacamento.xl),
+
+              // Seção de Idade (opcional, só neste aparelho, FR-042c)
+              if (widget.dataDeNascimento != null &&
+                  widget.idDaConta != null &&
+                  widget.idDaConta!.trim().isNotEmpty)
+                SecaoIdade(
+                  armazenamento: widget.dataDeNascimento!,
+                  idDaConta: widget.idDaConta!,
+                ),
+            ],
+          ),
         ),
       ),
     );

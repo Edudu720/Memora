@@ -182,8 +182,7 @@ void main() {
           find.byKey(TelaHub.chaveDaPorta('Conversar com a Memora')),
         ),
         isSemantics(
-          label: 'Conversar com a Memora',
-          hint: 'Me pergunte o que quiser',
+          label: 'Conversar com a Memora. Me pergunte o que quiser. Começar',
           isButton: true,
           isEnabled: true,
           hasEnabledState: true,

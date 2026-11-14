@@ -63,18 +63,25 @@ class AvisoAntigolpe extends StatelessWidget {
           padding: const EdgeInsets.all(MemoraEspacamento.lg),
           decoration: BoxDecoration(
             color: cores.superficieAlt,
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
             // A borda é o que separa este bloco do resto da tela sem recorrer a
             // preenchimento forte, que o leria como botão.
             border: Border.all(
               color: cores.perigo,
               width: MemoraDimensoes.bordaEnfase,
             ),
+            boxShadow: MemoraElevacao.listaSombrasCartao(cores),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              const BadgeDeStatus(
+                rotulo: 'Cuidado com golpes',
+                icone: Icons.shield_outlined,
+                tom: TomBadgeStatus.atencao,
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -86,7 +93,7 @@ class AvisoAntigolpe extends StatelessWidget {
                     tamanho: MemoraDimensoes.pisoDeIlustracao,
                   ),
                   const SizedBox(width: MemoraEspacamento.sm),
-                  Expanded(
+                  const Expanded(
                     child: TextoMemora(
                       TextosAutenticacao.tituloAvisoAntigolpe,
                       estilo: EstiloTexto.corpoForte,

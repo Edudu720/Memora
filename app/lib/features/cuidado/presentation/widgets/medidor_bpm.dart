@@ -1,100 +1,122 @@
 import 'package:flutter/material.dart';
-import '../../../../design_system/design_system.dart';
 
-/// Exibe a frequência cardíaca medida em BPM de forma clara e acessível.
+import '../../../../design_system/design_system.dart';
+import '../../../../l10n/textos_cuidado.dart';
+
+/// Cartão informativo com a frequência cardíaca medida pelo dispositivo IoT.
 class MedidorBpm extends StatelessWidget {
-  /// Cria o medidor de frequência cardíaca em BPM.
+  /// Cria o medidor de BPM estritamente informativo (`002/FR-012`).
   const MedidorBpm({
     required this.bpm,
-    this.bpmValido = true,
+    this.bpmValido = false,
     super.key,
   });
 
-  /// Frequência cardíaca atual em batimentos por minuto.
+  /// Último batimento cardíaco recebido em batimentos por minuto.
   final int bpm;
 
-  /// Indica se a leitura atual do sensor óptico PPG é válida.
+  /// Indica se há leitura óptica válida no momento (dedo no sensor).
   final bool bpmValido;
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-    final bool leituraAtiva = bpmValido && bpm > 0;
-    final String textoBpm = leituraAtiva ? '$bpm' : '--';
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final String valorExibido = bpmValido ? '$bpm' : '--';
+    final String estadoTexto = bpmValido
+        ? TextosCuidado.bpmMedicaoAtiva
+        : TextosCuidado.bpmAguardandoDedo;
 
-    return Container(
-      padding: const EdgeInsets.all(MemoraEspacamento.md),
-      decoration: BoxDecoration(
-        color: cores.superficie,
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-        border: Border.all(color: cores.borda),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Semantics(
+      container: true,
+      readOnly: true,
+      label:
+          '${TextosCuidado.tituloFrequenciaCardiaca}: $valorExibido ${TextosCuidado.unidadeBpm}. $estadoTexto',
+      child: ExcludeSemantics(
+        child: Cartao(
+          comBorda: ehAltoContraste,
+          padding: const EdgeInsets.all(MemoraEspacamento.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(
-                Icons.favorite_rounded,
-                color: cores.perigo,
-                size: MemoraDimensoes.iconeDestaque,
-              ),
-              const SizedBox(width: MemoraEspacamento.sm),
-              Flexible(
-                child: Text(
-                  'Frequência Cardíaca',
-                  style: MemoraTipografia.apoio.copyWith(
-                    color: cores.textoSuave,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    width: MemoraDimensoes.badgeAtalhoRapido,
+                    height: MemoraDimensoes.badgeAtalhoRapido,
+                    decoration: BoxDecoration(
+                      color: ehAltoContraste
+                          ? cores.superficieSutil
+                          : cores.saudeSuave,
+                      borderRadius: BorderRadius.circular(MemoraRaio.badge),
+                      border: ehAltoContraste
+                          ? Border.all(
+                              color: cores.borda,
+                              width: MemoraDimensoes.espessuraBordaSutil,
+                            )
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.favorite_rounded,
+                      color: bpmValido ? cores.perigo : cores.sucessoTexto,
+                      size: MemoraDimensoes.iconePadrao,
+                    ),
                   ),
-                  textScaler: escalaTextoLimitada(context),
-                ),
+                  const SizedBox(width: MemoraEspacamento.sm),
+                  Expanded(
+                    child: TextoMemora(
+                      TextosCuidado.tituloFrequenciaCardiaca,
+                      estilo: EstiloTexto.corpoForte,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              BadgeDeStatus(
+                rotulo: bpmValido
+                    ? TextosCuidado.statusLeituraAtiva
+                    : TextosCuidado.statusAguardandoSensor,
+                icone: bpmValido
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.sensors_rounded,
+                tom: bpmValido
+                    ? TomBadgeStatus.positivo
+                    : TomBadgeStatus.neutro,
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: MemoraEspacamento.xs,
+                children: <Widget>[
+                  Text(
+                    valorExibido,
+                    textScaler: escalaTextoLimitada(context),
+                    style: MemoraTipografia.destaque.copyWith(
+                      color: bpmValido ? cores.texto : cores.textoSuave,
+                      fontFeatures: const <FontFeature>[
+                        FontFeature.tabularFigures(),
+                      ],
+                    ),
+                  ),
+                  TextoMemora.apoio(
+                    TextosCuidado.unidadeBpm,
+                    cor: cores.textoSuave,
+                  ),
+                ],
+              ),
+              const SizedBox(height: MemoraEspacamento.xs),
+              TextoMemora.apoio(
+                estadoTexto,
+                cor: bpmValido ? cores.texto : cores.textoSuave,
               ),
             ],
           ),
-          const SizedBox(height: MemoraEspacamento.sm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: <Widget>[
-              Text(
-                textoBpm,
-                style: MemoraTipografia.destaque.copyWith(
-                  color: cores.texto,
-                  fontWeight: FontWeight.bold,
-                ),
-                textScaler: escalaTextoLimitada(context),
-              ),
-              const SizedBox(width: MemoraEspacamento.xs),
-              Text(
-                'BPM',
-                style: MemoraTipografia.corpo.copyWith(
-                  color: cores.textoSuave,
-                  fontWeight: FontWeight.bold,
-                ),
-                textScaler: escalaTextoLimitada(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: MemoraEspacamento.xs),
-          Text(
-            _classificacaoBpm(leituraAtiva ? bpm : 0),
-            style: MemoraTipografia.apoio.copyWith(
-              color: cores.textoSuave,
-            ),
-            textAlign: TextAlign.center,
-            textScaler: escalaTextoLimitada(context),
-          ),
-        ],
+        ),
       ),
     );
-  }
-
-  static String _classificacaoBpm(int valor) {
-    if (valor <= 0) return 'Posicione o dedo no sensor para medir';
-    if (valor < 60) return 'Ritmo calmo em repouso';
-    if (valor <= 100) return 'Ritmo normal e estável';
-    return 'Ritmo elevado';
   }
 }

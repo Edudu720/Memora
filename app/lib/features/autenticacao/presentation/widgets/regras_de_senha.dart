@@ -24,42 +24,78 @@ class RegrasDeSenha extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final bool todasAtendidas = atendidas.every((bool x) => x);
 
     return Semantics(
       label: 'O que sua senha precisa ter',
       child: ExcludeSemantics(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const TextoMemora.apoio('Sua senha precisa:'),
-            const SizedBox(height: MemoraEspacamento.sm),
-            for (int i = 0; i < RegraDeSenha.todas.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: MemoraEspacamento.xs),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Icon(
-                      atendidas[i]
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      size: MemoraDimensoes.iconePadrao,
-                      color: atendidas[i] ? cores.sucesso : cores.textoSuave,
-                    ),
-                    const SizedBox(width: MemoraEspacamento.sm),
-                    Expanded(
-                      child: TextoMemora(
-                        RegraDeSenha.todas[i].descricao,
-                        estilo: EstiloTexto.apoio,
-                        cor: atendidas[i] ? cores.sucesso : cores.textoSuave,
-                      ),
-                    ),
-                  ],
-                ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(MemoraEspacamento.md),
+          decoration: BoxDecoration(
+            color: cores.superficieSutil,
+            borderRadius: BorderRadius.circular(MemoraRaio.cartaoMedio),
+            border: ehAltoContraste
+                ? Border.all(
+                    color: cores.borda,
+                    width: MemoraDimensoes.bordaEnfase,
+                  )
+                : Border.all(
+                    color: cores.bordaSutil,
+                    width: MemoraDimensoes.espessuraBordaSutil,
+                  ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Wrap(
+                spacing: MemoraEspacamento.sm,
+                runSpacing: MemoraEspacamento.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  const TextoMemora.apoio('Sua senha precisa:'),
+                  BadgeDeStatus(
+                    rotulo: todasAtendidas ? 'Pronta' : 'Obrigatório',
+                    icone: todasAtendidas ? Icons.check : null,
+                    tom: todasAtendidas
+                        ? TomBadgeStatus.positivo
+                        : TomBadgeStatus.neutro,
+                  ),
+                ],
               ),
-          ],
+              const SizedBox(height: MemoraEspacamento.sm),
+              for (int i = 0; i < RegraDeSenha.todas.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: MemoraEspacamento.xs),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Icon(
+                        atendidas[i]
+                            ? Icons.check_circle
+                            : Icons.radio_button_unchecked,
+                        size: MemoraDimensoes.iconePadrao,
+                        color: atendidas[i] ? cores.sucesso : cores.textoSuave,
+                      ),
+                      const SizedBox(width: MemoraEspacamento.sm),
+                      Expanded(
+                        child: TextoMemora(
+                          RegraDeSenha.todas[i].descricao,
+                          estilo: EstiloTexto.apoio,
+                          cor: atendidas[i]
+                              ? cores.sucessoTexto
+                              : cores.textoSuave,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

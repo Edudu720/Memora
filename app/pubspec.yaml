@@ -74,6 +74,10 @@ dependencies:
   # Dispositivo de Cuidado (ESP32 / Wokwi) (FR-013).
   mqtt_client: ^10.3.3
 
+  # Ditado de voz opcional na conversa, preenchendo somente o rascunho antes
+  # de a pessoa confirmar o envio manualmente (FR-013, Feature 007).
+  speech_to_text: ^7.3.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
