@@ -31,6 +31,10 @@ seções e a revisão da #69**, pelo Henrique, na mesma branch
 > arquivos** (spec 006 e dois scripts); capturas JPEG com círculos pintados.
 > Merge de teste com a nossa branch: **8 conflitos, todos nos guias**. A
 > **#68** (Du3101) são imagens em `apps/` e fixa o Flutter do CI em 3.47.7.
+> ✅ **Validado no S20 FE em 2026-11-14** (APK 1.0.0+3, release apontando para o
+> Render, em `C:\memora-tmppk`): a Memora **abre** TikTok e Instagram, e as
+> seções, o zoom e o destaque funcionam. A `develop` continua com o abridor
+> quebrado até esta branch entrar.
 > Entrar numa seção custa o **4º toque** (SC-006 diz 3): lido como "chegar ao
 > guia em 3"; se a equipe discordar, a SC-006 precisa ser revista. 2444 testes.
 
