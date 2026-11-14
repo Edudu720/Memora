@@ -6,6 +6,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Acesso à trilha de auditoria (T014).
@@ -44,4 +47,16 @@ public interface RepositorioEventoAutenticacao extends JpaRepository<EventoAuten
      */
     long countByOrigemHashAndTipoAndOcorridoEmAfter(
             String origemHash, TipoDeEvento tipo, Instant desde);
+
+    /**
+     * Remove todos os eventos vinculados a uma conta que está sendo expurgada
+     * por abandono em {@code PENDENTE_VERIFICACAO} (T065b).
+     *
+     * <p>A constraint {@code fk_evento_pessoa} não possui {@code ON DELETE CASCADE}
+     * e o gatilho {@code tg_evento_somente_insercao} bloqueia apenas {@code UPDATE},
+     * permitindo {@code DELETE} explícito durante o expurgo de conta nunca ativada.
+     */
+    @Modifying
+    @Query("DELETE FROM EventoAutenticacao e WHERE e.pessoaId = :pessoaId")
+    void deletarPorPessoaId(@Param("pessoaId") UUID pessoaId);
 }

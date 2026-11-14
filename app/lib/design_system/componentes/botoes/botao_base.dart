@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
-import '../../tokens/movimento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
-import '../../temas/memora_theme_extension.dart';
 import '../texto/texto_memora.dart';
+import '../toque/superficie_tocavel.dart';
 
 /// Variação visual de um botão do Memora.
 ///
@@ -104,11 +104,8 @@ class BotaoBase extends StatelessWidget {
     };
   }
 
-  BoxBorder? _borda(MemoraCores c) => switch (estilo) {
-        EstiloBotao.secundario =>
-          Border.all(
-              color: _habilitado ? c.primaria : c.borda,
-              width: MemoraDimensoes.bordaEnfase),
+  Color? _corDaBorda(MemoraCores c) => switch (estilo) {
+        EstiloBotao.secundario => _habilitado ? c.primaria : c.borda,
         _ => null,
       };
 
@@ -153,46 +150,28 @@ class BotaoBase extends StatelessWidget {
       ],
     );
 
-    // Sem esta ação, o TalkBack anuncia "botão" mas o duplo-toque não ativa
-    // nada: o InkWell fica dentro do ExcludeSemantics e não é alcançado.
-    return Semantics(
-      button: true,
-      enabled: _habilitado,
-      label: rotulo,
-      onTap: _habilitado ? aoTocar : null,
-      child: ExcludeSemantics(
-        child: AnimatedContainer(
-          duration: MemoraMovimento.efetiva(
-            MemoraMovimento.rapido,
-            reduzirMovimento: MediaQuery.disableAnimationsOf(context),
+    // Delega foco, toque, escala (MemoraMovimento.escalaPressionado), anel de
+    // foco externo (MemoraDimensoes.bordaSelecao com strokeAlignOutside) e
+    // semântica de botão à SuperficieTocavel (Feature 006 / FR-001..FR-003).
+    return SuperficieTocavel(
+      rotulo: rotulo,
+      aoTocar: _habilitado ? aoTocar : null,
+      fundo: fundo,
+      borda: _corDaBorda(cores),
+      raio: BorderRadius.circular(MemoraRaio.pilula),
+      child: ConstrainedBox(
+        // Altura MÍNIMA, nunca fixa: o botão cresce com o texto ampliado
+        // até 200% sem cortar conteúdo (FR-026).
+        constraints: BoxConstraints(
+          minHeight: alturaMinima,
+          minWidth: larguraTotal ? double.infinity : MemoraDimensoes.alvoMinimo,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: MemoraEspacamento.xl,
+            vertical: MemoraEspacamento.md,
           ),
-          // Altura MÍNIMA, nunca fixa: o botão cresce com o texto ampliado
-          // até 200% sem cortar conteúdo (FR-026).
-          constraints: BoxConstraints(
-            minHeight: alturaMinima,
-            minWidth: MemoraDimensoes.alvoMinimo,
-          ),
-          width: larguraTotal ? double.infinity : null,
-          decoration: BoxDecoration(
-            color: fundo,
-            border: _borda(cores),
-            borderRadius: BorderRadius.circular(MemoraRaio.pilula),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(MemoraRaio.pilula),
-            child: InkWell(
-              onTap: _habilitado ? aoTocar : null,
-              borderRadius: BorderRadius.circular(MemoraRaio.pilula),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: MemoraEspacamento.xl,
-                  vertical: MemoraEspacamento.md,
-                ),
-                child: miolo,
-              ),
-            ),
-          ),
+          child: miolo,
         ),
       ),
     );
