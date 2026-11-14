@@ -91,6 +91,18 @@ final class CapturaDoGuia {
   static const CapturaDoGuia instagram3 = CapturaDoGuia._('instagram', 3);
   /// Captura 4 do Instagram.
   static const CapturaDoGuia instagram4 = CapturaDoGuia._('instagram', 4);
+  /// Captura 5 do Instagram.
+  static const CapturaDoGuia instagram5 = CapturaDoGuia._('instagram', 5);
+  /// Captura 6 do Instagram.
+  static const CapturaDoGuia instagram6 = CapturaDoGuia._('instagram', 6);
+  /// Captura 7 do Instagram.
+  static const CapturaDoGuia instagram7 = CapturaDoGuia._('instagram', 7);
+  /// Captura 8 do Instagram.
+  static const CapturaDoGuia instagram8 = CapturaDoGuia._('instagram', 8);
+  /// Captura 9 do Instagram.
+  static const CapturaDoGuia instagram9 = CapturaDoGuia._('instagram', 9);
+  /// Captura 10 do Instagram.
+  static const CapturaDoGuia instagram10 = CapturaDoGuia._('instagram', 10);
 
   // YouTube (T071)
   /// Captura 1 do YouTube.

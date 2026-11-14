@@ -176,33 +176,120 @@ abstract final class TextosGuias {
   static const String whatsappCaptura4 =
       'Mensagem enviada na conversa com botão de envio à direita.';
 
-  // Instagram (T071)
+  // Instagram (T071; refeito na T135 com imagens recriadas por IA, em cinco
+  // seções — ver a linha do Instagram no CAPTURAS.md)
   /// Título do guia do Instagram.
-  static const String tituloInstagram = 'Como ver fotos e vídeos no Instagram';
-  /// Passo 1 do Instagram.
-  static const String instagramPasso1 =
-      'Toque no ícone de casinha, embaixo, à esquerda, para ir à tela inicial.';
-  /// Descrição da captura do passo 1 do Instagram.
+  static const String tituloInstagram = 'Como usar o Instagram';
+
+  /// Seção "Ver fotos e vídeos" do Instagram.
+  static const String instagramSecaoVer = 'Ver fotos e vídeos';
+  /// O que se aprende na seção "Ver fotos e vídeos".
+  static const String instagramSecaoVerSubtitulo =
+      'Curtir as fotos dos amigos e assistir aos Reels';
+  /// Seção "Publicar um story" do Instagram.
+  static const String instagramSecaoStory = 'Publicar um story';
+  /// O que se aprende na seção "Publicar um story".
+  static const String instagramSecaoStorySubtitulo =
+      'Mostrar uma foto aos amigos por um dia';
+  /// Seção "Avisos e mensagens" do Instagram.
+  static const String instagramSecaoAvisos = 'Avisos e mensagens';
+  /// O que se aprende na seção "Avisos e mensagens".
+  static const String instagramSecaoAvisosSubtitulo =
+      'Quem curtiu, quem quer seguir você e as conversas';
+  /// Seção "Procurar pessoas" do Instagram.
+  static const String instagramSecaoProcurar = 'Procurar pessoas';
+  /// O que se aprende na seção "Procurar pessoas".
+  static const String instagramSecaoProcurarSubtitulo =
+      'Achar amigos, família e assuntos';
+  /// Seção "Deixar a conta privada" do Instagram.
+  static const String instagramSecaoPrivada = 'Deixar a conta privada';
+  /// O que se aprende na seção "Deixar a conta privada".
+  static const String instagramSecaoPrivadaSubtitulo =
+      'Só quem você aceita vê as suas fotos';
+
+  /// Ver, passo 1.
+  static const String instagramVer1 =
+      'Estas são as fotos dos seus amigos. Para curtir uma, toque no coração, embaixo da foto, à esquerda.';
+  /// Ver, passo 2.
+  static const String instagramVer2 =
+      'Para ver vídeos curtos, toque no segundo ícone de baixo, o dos Reels.';
+  /// Ver, passo 3.
+  static const String instagramVer3 =
+      'Para ver o próximo vídeo, deslize o dedo para cima. Para curtir, toque no coração, à direita. Agora você sabe ver fotos e vídeos.';
+
+  /// Story, passo 1.
+  static const String instagramStory1 =
+      'Toque na sua foto, no alto, à esquerda, onde está escrito "Seu story" e tem o sinal de mais.';
+  /// Story, passo 2.
+  static const String instagramStory2 =
+      'Escolha a foto que quer mostrar: toque nela, em "Recentes".';
+  /// Story, passo 3.
+  static const String instagramStory3 =
+      'Para todos os seus seguidores verem, toque em "Seu story", embaixo, à esquerda. A foto fica no ar por um dia. Agora você sabe publicar um story.';
+
+  /// Avisos, passo 1.
+  static const String instagramAvisos1 =
+      'Para ver quem curtiu ou começou a seguir você, toque no coração, no alto, à direita.';
+  /// Avisos, passo 2.
+  static const String instagramAvisos2 =
+      'Antes de tocar em "Seguir", confira se você conhece mesmo essa pessoa. Golpistas criam perfis com a foto e o nome de parentes.';
+  /// Avisos, passo 3.
+  static const String instagramAvisos3 =
+      'Para ver as suas conversas, volte ao início e toque no aviãozinho de papel, embaixo, no meio.';
+  /// Avisos, passo 4.
+  static const String instagramAvisos4 =
+      'Toque na conversa que você quer ler. Se alguém pedir dinheiro ou código por mensagem, ligue para a pessoa antes de fazer qualquer coisa. Agora você sabe ver avisos e mensagens.';
+
+  /// Procurar, passo 1.
+  static const String instagramProcurar1 =
+      'Para procurar alguém, toque na lupa, embaixo, a segunda opção da direita.';
+  /// Procurar, passo 2.
+  static const String instagramProcurar2 =
+      'Toque na barra de pesquisa, no alto, e escreva o nome da pessoa ou do assunto.';
+  /// Procurar, passo 3.
+  static const String instagramProcurar3 =
+      'As pesquisas que você já fez aparecem aqui: toque num nome para abrir o perfil. Agora você sabe procurar pessoas.';
+
+  /// Privada, passo 1.
+  static const String instagramPrivada1 =
+      'Toque na sua foto, embaixo, à direita, para abrir o seu perfil.';
+  /// Privada, passo 2.
+  static const String instagramPrivada2 =
+      'No seu perfil, toque nas três linhas, no alto, à direita.';
+  /// Privada, passo 3.
+  static const String instagramPrivada3 =
+      'Desça até "Privacidade da conta" e toque nela para deixar a conta privada. Assim, só quem você aceita vê as suas fotos, e um golpista não consegue copiá-las.';
+
+  /// Descrição da captura 1 do Instagram.
   static const String instagramCaptura1 =
-      'Tela inicial do Instagram com o ícone de casinha selecionado embaixo à esquerda.';
-  /// Passo 2 do Instagram.
-  static const String instagramPasso2 =
-      'Arraste o dedo de baixo para cima no meio da tela para ver as fotos e vídeos postados.';
-  /// Descrição da captura do passo 2 do Instagram.
+      'Início do Instagram com uma conta de exemplo: os stories no alto, uma foto com os botões de curtir, comentar e enviar, e embaixo as opções Início, Reels, Mensagens, Pesquisar e Perfil.';
+  /// Descrição da captura 2 do Instagram.
   static const String instagramCaptura2 =
-      'Linha do tempo do Instagram com fotos e vídeos de amigos e perfis.';
-  /// Passo 3 do Instagram.
-  static const String instagramPasso3 =
-      'Toque no desenho de coraçãozinho, logo abaixo da foto, para curtir o que você gostou.';
-  /// Descrição da captura do passo 3 do Instagram.
+      'Um Reel de exemplo de receita de bolo, com os botões de curtir, comentar e compartilhar à direita.';
+  /// Descrição da captura 3 do Instagram.
   static const String instagramCaptura3 =
-      'Publicação no Instagram com o ícone de coração para curtir abaixo da foto.';
-  /// Passo 4 do Instagram.
-  static const String instagramPasso4 =
-      'Para ver os vídeos curtos, toque no ícone de vídeo, embaixo, no meio. Parabéns! Agora você já sabe acompanhar o Instagram.';
-  /// Descrição da captura do passo 4 do Instagram.
+      'Tela Adicionar ao story, com as fotos recentes do celular para escolher.';
+  /// Descrição da captura 4 do Instagram.
   static const String instagramCaptura4 =
-      'Aba de vídeos Reels com botão de reprodução no meio da barra inferior.';
+      'Tela de edição do story, com os botões Seu story e Amigos próximos embaixo.';
+  /// Descrição da captura 5 do Instagram.
+  static const String instagramCaptura5 =
+      'Tela de Notificações com curtidas e sugestões de perfis para seguir.';
+  /// Descrição da captura 6 do Instagram.
+  static const String instagramCaptura6 =
+      'Tela de Mensagens com a lista de conversas de exemplo.';
+  /// Descrição da captura 7 do Instagram.
+  static const String instagramCaptura7 =
+      'Tela de pesquisa, com a barra Pesquisar no alto e fotos sugeridas.';
+  /// Descrição da captura 8 do Instagram.
+  static const String instagramCaptura8 =
+      'Pesquisas recentes, com nomes de perfis de exemplo.';
+  /// Descrição da captura 9 do Instagram.
+  static const String instagramCaptura9 =
+      'Perfil de exemplo, com o menu de três linhas no alto, à direita, e a lista Criar aberta embaixo.';
+  /// Descrição da captura 10 do Instagram.
+  static const String instagramCaptura10 =
+      'Configurações e atividade, com a opção Privacidade da conta embaixo, marcada como Público.';
 
   // YouTube (T071)
   /// Título do guia do YouTube.

@@ -22,7 +22,7 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 | Chave | Capturado em | Versão do aplicativo | Aparelho | Quem capturou |
 |---|---|---|---|---|
 | whatsapp | 2026-10-01 | 2.24.19 | Galaxy A14 | Equipe Memora |
-| instagram | 2026-10-01 | 350.0.0 | Galaxy A14 | Equipe Memora |
+| instagram | 2026-11-13 | a confirmar | Galaxy S20 FE, **recriadas por IA** com conta e pessoas fictícias; só a captura 10 (Configurações) é print. Conferir no aparelho se a interface bate | Henrique Sandrini |
 | youtube | 2026-10-01 | 19.38.0 | Galaxy A14 | Equipe Memora |
 | facebook | 2026-10-01 | 480.0.0 | Galaxy A14 | Equipe Memora |
 | google-fotos | 2026-10-01 | 6.95.0 | Galaxy A14 | Equipe Memora |
