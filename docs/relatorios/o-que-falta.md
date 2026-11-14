@@ -150,6 +150,7 @@ Estes itens não se resolvem programando. Se ficarem para o fim, o Memora chega
 - **As tags acentuadas do `openapi.yaml`** geram nomes sem acento no cliente
   gerado (`sesso_api.dart`).
 - **O springdoc** continua fora do `pom.xml`.
+- ~~**Versões do Flutter no CI sem pino**~~ → ✅ **Pinada em `3.47.7` em `.github/workflows/verificacao.yml` na Feature 006** (evitando quebra de análise estática pelo `stable 3.50.0+`).
 - **A soma do Surefire** em classes com `@Nested` exige contar `<testcase` nos
   XMLs para obter o número exato de casos.
 

@@ -79,9 +79,8 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
                 cadastrarCom("Dona Maria", EMAIL, SENHA_INICIAL, true)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idAbandonada = UUID.fromString(corpoDe(abandonada).get("pessoa_id").asText());
-        UUID canalAbandonado =
-                UUID.fromString(corpoDe(abandonada).get("canal").get("id").asText());
+        UUID idAbandonada = pessoaIdDe(abandonada);
+        UUID canalAbandonado = canalIdDe(abandonada);
         String tokenAbandonado = corpoDe(abandonada).get("token_acesso").asText();
 
         // Emite código de verificação para garantir que codigo_verificacao também é limpo em cascata
@@ -95,7 +94,7 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
                 cadastrarCom("Dona Maria", EMAIL, SENHA_NOVA, false)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idNova = UUID.fromString(corpoDe(novoCadastro).get("pessoa_id").asText());
+        UUID idNova = pessoaIdDe(novoCadastro);
 
         assertThat(idNova).isNotEqualTo(idAbandonada);
         assertThat(pessoas.findById(idAbandonada)).isEmpty();
@@ -114,7 +113,7 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
                 cadastrarCom("Dona Maria", EMAIL, SENHA_INICIAL, true)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idOriginal = UUID.fromString(corpoDe(pendenteRecente).get("pessoa_id").asText());
+        UUID idOriginal = pessoaIdDe(pendenteRecente);
 
         retroagirCriacao(idOriginal, Duration.ofHours(23));
 
@@ -134,7 +133,7 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
                 cadastrarCom("Dona Maria", EMAIL, SENHA_INICIAL, false)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idAtiva = UUID.fromString(corpoDe(contaAtiva).get("pessoa_id").asText());
+        UUID idAtiva = pessoaIdDe(contaAtiva);
 
         retroagirCriacao(idAtiva, Duration.ofHours(72));
 
@@ -154,8 +153,8 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
                 cadastrarCom("Expirada", "expirada@gmail.com", SENHA_INICIAL, true)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idExpirada = UUID.fromString(corpoDe(expirada).get("pessoa_id").asText());
-        UUID canalExpirado = UUID.fromString(corpoDe(expirada).get("canal").get("id").asText());
+        UUID idExpirada = pessoaIdDe(expirada);
+        UUID canalExpirado = canalIdDe(expirada);
         String tokenExpirado = corpoDe(expirada).get("token_acesso").asText();
         pedirCodigo(tokenExpirado, canalExpirado).andExpect(status().isAccepted());
         retroagirCriacao(idExpirada, Duration.ofHours(26));
@@ -164,14 +163,14 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
                 cadastrarCom("Recente", "recente@gmail.com", SENHA_INICIAL, true)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idRecente = UUID.fromString(corpoDe(recente).get("pessoa_id").asText());
+        UUID idRecente = pessoaIdDe(recente);
         retroagirCriacao(idRecente, Duration.ofHours(4));
 
         MvcResult ativa =
                 cadastrarCom("Ativa", "ativa@gmail.com", SENHA_INICIAL, false)
                         .andExpect(status().isCreated())
                         .andReturn();
-        UUID idAtiva = UUID.fromString(corpoDe(ativa).get("pessoa_id").asText());
+        UUID idAtiva = pessoaIdDe(ativa);
         retroagirCriacao(idAtiva, Duration.ofHours(48));
 
         int expurgadas = servicoDeExpurgo.expurgarContasPendentesVencidas();
@@ -227,6 +226,15 @@ class ExpurgoDeContaPendenteTest extends TesteComBanco {
 
     private JsonNode corpoDe(MvcResult resultado) throws Exception {
         return json.readTree(resultado.getResponse().getContentAsString());
+    }
+
+    private UUID pessoaIdDe(MvcResult resultado) throws Exception {
+        return UUID.fromString(corpoDe(resultado).get("pessoa").get("id").asText());
+    }
+
+    private UUID canalIdDe(MvcResult resultado) throws Exception {
+        return UUID.fromString(
+                corpoDe(resultado).get("pessoa").get("canais").get(0).get("id").asText());
     }
 
     @TestConfiguration
