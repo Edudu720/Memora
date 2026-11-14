@@ -4,10 +4,39 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-11-12 — **capturas reais nos tutoriais, zoom e o
+**Última sessão**: 2026-11-13 — **FGTS e Instagram nos tutoriais, guias em
+seções e a revisão da #69**, pelo Henrique, na mesma branch
+**`feature/004-prints-e-zoom`** (os commits de hoje **não têm push**).
+
+> 📚 **Guias extensos viram seções** (FR-028d, clarify de 2026-11-13, T137):
+> o modelo `SecaoDoGuia` + `TelaSeletorDeSecao` veio da PR #67 do Eduardo,
+> **sem as imagens dela**, e cada seção tem 3 a 7 passos. **FGTS** (T138, 4
+> seções, 12 prints do S20 FE, v5.11.0) e **Instagram** (5 seções, imagens
+> **recriadas por IA** com conta fictícia — só a captura 10 é print; a de
+> story com o rosto da Elis Regina ficou de fora) estão prontos. Capturas
+> grandes vão em **WebP qualidade 92**, reduzidas a 1080 px: sem perda, o
+> FGTS sozinho ocupava 2,9 MB. `assets/guias/` está em **3,7 MB** de 8.
+> **Faltam Meu INSS e TikTok.** Para medir destaque: grade relativa sobre a
+> imagem, **sem faixa de legenda em cima** (ela deslocou as medidas uma vez).
+>
+> 🔴 **O destaque escondia o botão que destacava**: a `BoxShadow` opaca do
+> anel pinta um retângulo cheio. Corrigido (halo vira segunda borda), com
+> portão por pixel em `captura_com_destaque_test.dart`.
+>
+> ⚠️ **PR #69 (redesenho 007, Eduardo) — comentário de revisão publicado.**
+> Ela empilha os commits da #67 (fechada sem merge) e traz: ditado por voz
+> com `speech_to_text` **sem `onDevice: true`** (o áudio vai ao Google, contra
+> a decisão de 2026-10-03); o **CPF e o nome completo do Eduardo em 8
+> arquivos** (spec 006 e dois scripts); capturas JPEG com círculos pintados.
+> Merge de teste com a nossa branch: **8 conflitos, todos nos guias**. A
+> **#68** (Du3101) são imagens em `apps/` e fixa o Flutter do CI em 3.47.7.
+> Entrar numa seção custa o **4º toque** (SC-006 diz 3): lido como "chegar ao
+> guia em 3"; se a equipe discordar, a SC-006 precisa ser revista. 2444 testes.
+
+Sessão anterior: 2026-11-12 — **capturas reais nos tutoriais, zoom e o
 abridor de aplicativos**, pelo Henrique. Tudo na branch local
 **`feature/004-prints-e-zoom`** (saiu da **`develop`**, que está à frente da
-`master`), **sem push e sem PR**. **Ninguém revisou ainda.**
+`master`). **Ninguém revisou ainda.**
 
 > 🖼️ **O que entrou** (clarificação de 2026-11-12 na spec da 004, T133-T136):
 > - **A Memora nunca abria aplicativo nenhum** (T136): o abridor mandava
