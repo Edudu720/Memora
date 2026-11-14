@@ -132,6 +132,8 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 ### Session 2026-11-13 — guias extensos em seções (Henrique)
 
 - Q: O FGTS tem 13 telas, e um guia tem no máximo 7 passos. Como fica? → A: **O guia se divide em seções**, cada uma com 3 a 7 passos, e a pessoa escolhe primeiro o assunto (FR-028d). É o modelo da PR #67 do Eduardo (`SecaoDoGuia`, `TelaSeletorDeSecao`), trazido para esta feature sem as imagens dela, que ainda estão em revisão. O limite de 7 continua valendo, por seção: o que cansa é a trilha seguida, não o serviço inteiro.
+- Q: Os dados pessoais de uma captura podem ser trocados por dados fictícios gerados por IA? → A: **Sim.** A interface continua a do aparelho de referência; só nomes, fotos e conteúdo da pessoa viram fictícios (FR-028). É assim que vieram as do Instagram.
+- Q: Capa de música publicada, com o rosto do artista, conta como "rosto de pessoa real" da FR-028? → A: **Não.** É obra publicada, e não dado pessoal de quem capturou nem de terceiro na conta. Decisão do Henrique, para o story do Instagram.
 - Q: Como o FGTS se divide? → A: **Quatro seções**: entrar no aplicativo; ver o saldo e pedir um saque; conta bancária para receber; Saque-Aniversário. A tela "Você sabia?" fica de fora, porque não segue de nenhuma das outras.
 
 ## User Scenarios & Testing *(mandatory)*

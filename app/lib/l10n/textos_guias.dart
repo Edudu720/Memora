@@ -185,7 +185,7 @@ abstract final class TextosGuias {
   static const String instagramSecaoVer = 'Ver fotos e vídeos';
   /// O que se aprende na seção "Ver fotos e vídeos".
   static const String instagramSecaoVerSubtitulo =
-      'Curtir as fotos dos amigos e assistir aos Reels';
+      'Curtir as fotos, ver os stories e os Reels';
   /// Seção "Publicar um story" do Instagram.
   static const String instagramSecaoStory = 'Publicar um story';
   /// O que se aprende na seção "Publicar um story".
@@ -210,6 +210,12 @@ abstract final class TextosGuias {
   /// Ver, passo 1.
   static const String instagramVer1 =
       'Estas são as fotos dos seus amigos. Para curtir uma, toque no coração, embaixo da foto, à esquerda.';
+  /// Ver, o story (1 de 2).
+  static const String instagramVerStory1 =
+      'As bolinhas no alto são os stories: fotos e vídeos que os amigos mostram por um dia. Toque numa delas para ver.';
+  /// Ver, o story (2 de 2).
+  static const String instagramVerStory2 =
+      'O story passa sozinho. Para responder, toque em "Enviar mensagem", embaixo. Para sair, deslize o dedo para baixo.';
   /// Ver, passo 2.
   static const String instagramVer2 =
       'Para ver vídeos curtos, toque no segundo ícone de baixo, o dos Reels.';
@@ -290,6 +296,9 @@ abstract final class TextosGuias {
   /// Descrição da captura 10 do Instagram.
   static const String instagramCaptura10 =
       'Configurações e atividade, com a opção Privacidade da conta embaixo, marcada como Público.';
+  /// Descrição da captura 11 do Instagram.
+  static const String instagramCaptura11 =
+      'Um story de exemplo de um amigo cuidando do jardim, com a capa de uma música e o campo Enviar mensagem embaixo.';
 
   // YouTube (T071)
   /// Título do guia do YouTube.

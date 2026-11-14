@@ -9,12 +9,11 @@ import '../../domain/guia.dart';
 /// aplicativo (captura 1), que aparece em cada uma destacando um botão
 /// diferente.
 ///
-/// **As imagens foram recriadas por IA** a partir das telas do Galaxy S20 FE,
-/// com uma conta e pessoas fictícias — nenhuma pessoa real aparece (FR-028).
-/// Só a captura 10 (Configurações) é print do aparelho. Uma imagem de story
-/// ficou de fora por trazer o rosto de uma cantora real na capa da música.
-/// O `CAPTURAS.md` registra isso, para a revisão conferir no aparelho se a
-/// interface recriada bate com a de verdade.
+/// **As imagens são prints do Galaxy S20 FE com os dados pessoais trocados**:
+/// a interface é a do aparelho, e a IA só substituiu nomes, fotos e
+/// conteúdo por uma conta e pessoas fictícias (FR-028). A capa de música do
+/// story (captura 11) é obra publicada, não dado pessoal (clarify de
+/// 2026-11-13).
 final Guia guiaInstagram = Guia(
   chave: 'instagram',
   titulo: TextosGuias.tituloInstagram,
@@ -33,6 +32,20 @@ final Guia guiaInstagram = Guia(
           destaque: RegiaoRelativa(x: 0.01, y: 0.89, largura: 0.30, altura: 0.05),
           texto: TextosGuias.instagramVer1,
           descricaoDaCaptura: TextosGuias.instagramCaptura1,
+        ),
+        Passo(
+          captura: CapturaDoGuia.instagram1,
+          // O story de um amigo, no alto.
+          destaque: RegiaoRelativa(x: 0.27, y: 0.08, largura: 0.24, altura: 0.155),
+          texto: TextosGuias.instagramVerStory1,
+          descricaoDaCaptura: TextosGuias.instagramCaptura1,
+        ),
+        Passo(
+          captura: CapturaDoGuia.instagram11,
+          // "Enviar mensagem", embaixo.
+          destaque: RegiaoRelativa(x: 0.01, y: 0.92, largura: 0.66, altura: 0.065),
+          texto: TextosGuias.instagramVerStory2,
+          descricaoDaCaptura: TextosGuias.instagramCaptura11,
         ),
         Passo(
           captura: CapturaDoGuia.instagram1,

@@ -103,6 +103,8 @@ final class CapturaDoGuia {
   static const CapturaDoGuia instagram9 = CapturaDoGuia._('instagram', 9);
   /// Captura 10 do Instagram.
   static const CapturaDoGuia instagram10 = CapturaDoGuia._('instagram', 10);
+  /// Captura 11 do Instagram (um story).
+  static const CapturaDoGuia instagram11 = CapturaDoGuia._('instagram', 11);
 
   // YouTube (T071)
   /// Captura 1 do YouTube.

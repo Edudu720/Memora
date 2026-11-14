@@ -11,9 +11,10 @@ seções e a revisão da #69**, pelo Henrique, na mesma branch
 > 📚 **Guias extensos viram seções** (FR-028d, clarify de 2026-11-13, T137):
 > o modelo `SecaoDoGuia` + `TelaSeletorDeSecao` veio da PR #67 do Eduardo,
 > **sem as imagens dela**, e cada seção tem 3 a 7 passos. **FGTS** (T138, 4
-> seções, 12 prints do S20 FE, v5.11.0) e **Instagram** (5 seções, imagens
-> **recriadas por IA** com conta fictícia — só a captura 10 é print; a de
-> story com o rosto da Elis Regina ficou de fora) estão prontos. Capturas
+> seções, 12 prints do S20 FE, v5.11.0) e **Instagram** (5 seções, 18
+> passos; **prints do S20 FE com os dados pessoais trocados por fictícios
+> gerados por IA** — a interface é a original; a capa de música do story é
+> obra publicada, não dado pessoal, decisão registrada na spec) estão prontos. Capturas
 > grandes vão em **WebP qualidade 92**, reduzidas a 1080 px: sem perda, o
 > FGTS sozinho ocupava 2,9 MB. `assets/guias/` está em **3,7 MB** de 8.
 > **Faltam Meu INSS e TikTok.** Para medir destaque: grade relativa sobre a
