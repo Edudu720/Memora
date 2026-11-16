@@ -136,14 +136,20 @@ class _TelaAssuntoState extends State<TelaAssunto> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (total > 1) ...<Widget>[
-                    Semantics(
-                      label: TextosAjuda.passoDescrito(
-                        assunto.titulo,
-                        _indice + 1,
-                        total,
-                      ),
-                      child: ExcludeSemantics(
-                        child: TextoMemora.apoio(contador),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Semantics(
+                        label: TextosAjuda.passoDescrito(
+                          assunto.titulo,
+                          _indice + 1,
+                          total,
+                        ),
+                        child: ExcludeSemantics(
+                          child: BadgeDeStatus(
+                            rotulo: contador,
+                            tom: TomBadgeStatus.informativo,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: MemoraEspacamento.md),

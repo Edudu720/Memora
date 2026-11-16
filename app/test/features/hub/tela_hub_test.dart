@@ -49,7 +49,9 @@ void main() {
   }
 
   group('H1 — o Hub não mostra porta que não abre', () {
-    testWidgets('toda porta exibida leva a algum lugar', (WidgetTester t) async {
+    testWidgets('toda porta exibida leva a algum lugar', (
+      WidgetTester t,
+    ) async {
       late BuildContext contexto;
 
       PortaDoHub queAbre(String rotulo) => porta(
@@ -114,7 +116,11 @@ void main() {
       await FluxoDentroDaConta.irAoHub(t);
 
       final List<Key> portas = <Key>[
-        for (final Widget w in t.widgetList(find.byType(CartaoDePorta)))
+        for (final Widget w in t.widgetList(
+          find.byWidgetPredicate(
+            (Widget widget) => widget is CartaoHeroi || widget is CartaoDePorta,
+          ),
+        ))
           w.key!,
       ];
       expect(portas, isNotEmpty, reason: 'o Hub do aplicativo está vazio');
@@ -142,11 +148,7 @@ void main() {
     testWidgets('cada porta tem nome escrito, desenho e explicação', (
       WidgetTester t,
     ) async {
-      await t.pumpWidget(
-        hubCom(<PortaDoHub>[
-          porta('Conversar'),
-        ]),
-      );
+      await t.pumpWidget(hubCom(<PortaDoHub>[porta('Conversar')]));
 
       expect(find.text('Conversar'), findsOneWidget);
       expect(find.text('descrição de Conversar'), findsOneWidget);
@@ -171,10 +173,7 @@ void main() {
         ]),
       );
 
-      final int principais = t
-          .widgetList<CartaoDePorta>(find.byType(CartaoDePorta))
-          .where((CartaoDePorta c) => c.principal)
-          .length;
+      final int principais = find.byType(CartaoHeroi).evaluate().length;
       // Duas ações de mesmo peso dividem a atenção de quem precisa de um
       // caminho só — a regra que a US1 da feature 001 estabeleceu.
       expect(principais, lessThanOrEqualTo(1));
@@ -187,11 +186,7 @@ void main() {
       await fluxo.montar(t);
       await FluxoDentroDaConta.irAoHub(t);
 
-      final List<CartaoDePorta> principais = t
-          .widgetList<CartaoDePorta>(find.byType(CartaoDePorta))
-          .where((CartaoDePorta c) => c.principal)
-          .toList();
-      expect(principais, hasLength(1));
+      expect(find.byType(CartaoHeroi), findsOneWidget);
     });
   });
 
@@ -224,7 +219,7 @@ void main() {
 
       expect(
         find.descendant(
-          of: find.byType(CabecalhoDeTela),
+          of: find.byType(BarraSuperior),
           matching: find.byKey(CabecalhoDeTela.chaveVoltar),
         ),
         findsOneWidget,

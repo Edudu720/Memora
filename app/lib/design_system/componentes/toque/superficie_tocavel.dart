@@ -47,8 +47,14 @@ class SuperficieTocavel extends StatefulWidget {
   /// Ação. Nula, a superfície fica desabilitada.
   final VoidCallback? aoTocar;
 
-  /// Cor de fundo.
+  /// Cor de fundo (ignorada quando [gradiente] é informado).
   final Color fundo;
+
+  /// Gradiente opcional para superfícies herói com foco e pressão consistentes.
+  final Gradient? gradiente;
+
+  /// Sombras personalizadas em repouso.
+  final List<BoxShadow>? sombras;
 
   /// Arredondamento.
   final BorderRadius raio;
@@ -66,8 +72,11 @@ class SuperficieTocavel extends StatefulWidget {
   /// Cor da sombra.
   final Color corDaSombra;
 
-  /// Contorno de [MemoraDimensoes.bordaEnfase] nesta cor. Nulo, sem contorno.
+  /// Contorno desta cor com [larguraBorda]. Nulo, sem contorno.
   final Color? borda;
+
+  /// Espessura do contorno [borda].
+  final double larguraBorda;
 
   /// Para o leitor de tela: é o item escolhido de um grupo (o destino ativo
   /// da barra inferior). Nulo, a superfície não faz parte de grupo nenhum.
@@ -82,6 +91,8 @@ class SuperficieTocavel extends StatefulWidget {
     required this.fundo,
     required this.raio,
     required this.child,
+    this.gradiente,
+    this.sombras,
     this.aoTocar,
     this.dica,
     this.sombra = false,
@@ -89,6 +100,7 @@ class SuperficieTocavel extends StatefulWidget {
     this.elevacaoPressionada = MemoraElevacao.plana,
     this.corDaSombra = MemoraElevacao.sombra,
     this.borda,
+    this.larguraBorda = MemoraDimensoes.bordaEnfase,
     this.selecionada,
     super.key,
   });
@@ -134,28 +146,33 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
               reduzirMovimento: reduzir,
             ),
             decoration: BoxDecoration(
-              color: _pressionada && widget.fundo.a == 0
-                  ? cores.destaque
-                  : widget.fundo,
+              color: widget.gradiente != null
+                  ? null
+                  : (_pressionada && widget.fundo.a == 0
+                        ? cores.destaque
+                        : widget.fundo),
+              gradient: widget.gradiente,
               borderRadius: widget.raio,
               border: widget.borda == null
                   ? null
                   : Border.all(
                       color: widget.borda!,
-                      width: MemoraDimensoes.bordaEnfase,
+                      width: widget.larguraBorda,
                     ),
               // Com `elevacaoPressionada` > 0 a lista continua com um item e o
               // `AnimatedContainer` interpola desfoque e deslocamento: a
               // sombra *encolhe*, em vez de sumir de uma vez.
-              boxShadow: widget.sombra && elevacaoAgora > MemoraElevacao.plana
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color: widget.corDaSombra,
-                        blurRadius: elevacaoAgora * 4,
-                        offset: Offset(0, elevacaoAgora),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  widget.sombras ??
+                  (widget.sombra && elevacaoAgora > MemoraElevacao.plana
+                      ? <BoxShadow>[
+                          BoxShadow(
+                            color: widget.corDaSombra,
+                            blurRadius: elevacaoAgora * 4,
+                            offset: Offset(0, elevacaoAgora),
+                          ),
+                        ]
+                      : null),
             ),
             foregroundDecoration: _focada
                 ? BoxDecoration(

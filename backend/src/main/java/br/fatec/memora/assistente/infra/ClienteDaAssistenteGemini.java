@@ -344,6 +344,10 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
         try (BufferedReader leitor =
                 new BufferedReader(new InputStreamReader(corpo, StandardCharsets.UTF_8))) {
             while (true) {
+                if (Thread.currentThread().isInterrupted()) {
+                    fecharSemFalhar(corpo);
+                    throw new AssistenteIndisponivel(Motivo.REDE, "cliente_desconectou");
+                }
                 // O prazo recomeca a cada linha: o que se vigia e o silencio.
                 ScheduledFuture<?> guarda =
                         vigia.schedule(

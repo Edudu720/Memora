@@ -8,7 +8,11 @@ import '../../assistente/domain/assistente.dart';
 import '../data/progresso_de_aprendizado.dart';
 import '../domain/guia.dart';
 
-/// A tela que guia a pessoa passo a passo por um aplicativo ou serviço (T066, US4, FR-026, FR-027).
+/// A tela que guia a pessoa passo a passo por um aplicativo ou serviço (`T054`, `T066`, `US4`).
+///
+/// Integra [CabecalhoDeTela], [PassoIlustrado] protagonista com tipografia
+/// editorial e barra fixa inferior em `cores.superficieBarra` com ações rápidas
+/// `"Anterior"` e `"Próximo"`.
 ///
 /// ## Princípios aplicados
 ///
@@ -52,7 +56,7 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Repositório da assistente, usado para conferir a origem se não fornecida.
   final RepositorioAssistente? repositorioAssistente;
 
-  /// Armazenamento do progresso local no aparelho (FR-042a/b).
+  /// Armazenamento do progresso local no aparelho (`FR-042a/b`).
   final ProgressoDeAprendizado? progresso;
 
   /// Identificador da conta conectada.
@@ -64,10 +68,10 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Chamado ao tocar em "Voltar ao Hub" na etapa de parabéns.
   final VoidCallback? aoVoltarAoHub;
 
-  /// Chamado ao tocar em "Sair do passo a passo" (FR-026).
+  /// Chamado ao tocar em "Sair do passo a passo" (`FR-026`).
   final VoidCallback? aoSair;
 
-  /// Chamado ao tocar em "Peça à Memora para abrir" (FR-027).
+  /// Chamado ao tocar em "Peça à Memora para abrir" (`FR-027`).
   final void Function(String pedido)? aoPedirParaAbrir;
 
   /// Chamado para ir à conversa ao relatar tela diferente.
@@ -76,7 +80,7 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Chamado ao tocar em "Ficou com alguma dúvida? Pode perguntar" no último passo.
   final void Function(String duvida)? aoTirarDuvida;
 
-  /// Estado inicial fixado para testes de estado (FR-006).
+  /// Estado inicial fixado para testes de estado (`FR-006`).
   final String? estadoDeTeste;
 
   /// Cria a tela de passo a passo.
@@ -216,7 +220,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
       setState(() => _posicao++);
       _registrarSeUltimo();
     } else {
-      // Último passo: voltar ao hub
+      // Último passo: voltar ao início
       _voltarAoHub();
     }
   }
@@ -288,7 +292,11 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
 
     // Suporte aos estados de tela da FR-006 (para testes de acessibilidade e segurança)
     if (widget.estadoDeTeste == 'carregando' || _inicializando) {
@@ -368,6 +376,18 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
     final Passo passoAtual = _passos[indiceAtual];
     final bool eUltimo = _posicao == _passos.length;
 
+    final Widget botaoAnterior = BotaoSecundario(
+      rotulo: 'Anterior',
+      icone: compacto ? null : Icons.arrow_back,
+      aoTocar: _posicao > 1 ? _retroceder : null,
+    );
+
+    final Widget botaoProximo = BotaoPrimario(
+      rotulo: 'Próximo',
+      icone: compacto ? null : Icons.arrow_forward,
+      aoTocar: _avancar,
+    );
+
     return Scaffold(
       backgroundColor: cores.fundo,
       body: SingleChildScrollView(
@@ -416,6 +436,36 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                   : null,
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: cores.superficieBarra,
+          border: Border(
+            top: BorderSide(
+              color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+              width: ehAltoContraste
+                  ? MemoraDimensoes.bordaEnfase
+                  : MemoraDimensoes.espessuraBordaSutil,
+            ),
+          ),
+          boxShadow: MemoraElevacao.listaSombrasBarra(cores),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: MemoraEspacamento.lg,
+              vertical: MemoraEspacamento.sm,
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(child: botaoAnterior),
+                const SizedBox(width: MemoraEspacamento.sm),
+                Expanded(child: botaoProximo),
+              ],
+            ),
+          ),
         ),
       ),
     );

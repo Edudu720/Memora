@@ -42,7 +42,12 @@ class TelaBoasVindas extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool ocultarVisuais = escala >= MemoraDimensoes.escalaTextoAlta;
+    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -60,7 +65,9 @@ class TelaBoasVindas extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: alturaMinima),
                 child: Cartao(
-                  padding: const EdgeInsets.all(MemoraEspacamento.xl),
+                  padding: EdgeInsets.all(
+                    compacto ? MemoraEspacamento.lg : MemoraEspacamento.xl,
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,14 +76,17 @@ class TelaBoasVindas extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          // Cabeçalho: o casal à esquerda, a apresentação à direita.
+                          // Cabeçalho editorial: Memora neutra acenando + apresentação.
                           Row(
                             children: <Widget>[
-                              const IlustracaoMemora(
-                                Ilustracao.casalIdoso,
-                                altura: 84,
-                              ),
-                              const SizedBox(width: MemoraEspacamento.md),
+                              if (!ocultarVisuais) ...<Widget>[
+                                MemoraPersonagem(
+                                  tamanho: compacto
+                                      ? MemoraDimensoes.alvoDecisao
+                                      : MemoraDimensoes.ilustracaoCabecalho,
+                                ),
+                                const SizedBox(width: MemoraEspacamento.md),
+                              ],
                               const Expanded(
                                 child: TextoComDestaque(
                                   TextosAutenticacao.apresentacao,
@@ -86,36 +96,76 @@ class TelaBoasVindas extends StatelessWidget {
                             ],
                           ),
 
-                          const SizedBox(height: MemoraEspacamento.xxl),
-
-                          // O que a pessoa vai aprender, com a ilustração ao lado.
+                          const SizedBox(height: MemoraEspacamento.md),
+                          // Indicadores editoriais em pílula sem uso de literais visuais.
                           Row(
                             children: <Widget>[
-                              const Expanded(
-                                child: TextoComDestaque(
-                                  TextosAutenticacao.oQueVouEnsinar,
+                              Expanded(
+                                flex: 2,
+                                child: Container(
+                                  height: MemoraDimensoes.alturaIndicadorDePasso,
+                                  decoration: BoxDecoration(
+                                    color: cores.primaria,
+                                    borderRadius: BorderRadius.circular(
+                                      MemoraRaio.pilula,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(width: MemoraEspacamento.md),
-                              const IlustracaoMemora(
-                                Ilustracao.pessoaComCelular,
-                                altura: 132,
+                              const SizedBox(width: MemoraEspacamento.sm),
+                              Expanded(
+                                child: Container(
+                                  height: MemoraDimensoes.alturaIndicadorDePasso,
+                                  decoration: BoxDecoration(
+                                    color: cores.destaque,
+                                    borderRadius: BorderRadius.circular(
+                                      MemoraRaio.pilula,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: MemoraEspacamento.lg),
-                          // A linha que sobe. Recebe a cor do tema porque é desenhada
-                          // com `currentColor`: sem ela, sumiria no tema escuro.
-                          IlustracaoMemora(
-                            Ilustracao.linhaJornada,
-                            // Altura obrigatória: largura infinita sem altura definida
-                            // faz o SVG receber restrição infinita e o layout estoura.
-                            altura: 40,
-                            largura: double.infinity,
-                            fit: BoxFit.fill,
-                            cor: cores.textoSuave,
+                          const SizedBox(height: MemoraEspacamento.xl),
+
+                          // Bloco de destaque com a Memora na expressão dica.
+                          Container(
+                            padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                            decoration: BoxDecoration(
+                              color: cores.superficieSutil,
+                              borderRadius: BorderRadius.circular(
+                                MemoraRaio.cartaoMedio,
+                              ),
+                              border: ehAltoContraste
+                                  ? Border.all(
+                                      color: cores.borda,
+                                      width: MemoraDimensoes.bordaEnfase,
+                                    )
+                                  : Border.all(
+                                      color: cores.bordaSutil,
+                                    ),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                const Expanded(
+                                  child: TextoComDestaque(
+                                    TextosAutenticacao.oQueVouEnsinar,
+                                  ),
+                                ),
+                                if (!ocultarVisuais) ...<Widget>[
+                                  const SizedBox(width: MemoraEspacamento.md),
+                                  MemoraPersonagem(
+                                    expressao: ExpressaoDaMemora.dica,
+                                    tamanho: compacto
+                                        ? MemoraDimensoes.alvoDecisao
+                                        : MemoraDimensoes.ilustracaoCabecalho,
+                                  ),
+                                ],
+                              ],
+                            ),
                           ),
+
                           const SizedBox(height: MemoraEspacamento.lg),
 
                           const TextoComDestaque(TextosAutenticacao.promessa),

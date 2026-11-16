@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
+  <!--
+    Ajuste "Como eu vejo o Memora": a letra grande e a paleta.
+
+    Desenho original da equipe (feature 004, T011), no estilo da Memora: formas
+    planas e arredondadas, sem contorno, cores da marca. Sem fundo: quem desenha
+    o medalhao e o IlustracaoMemora.
+  -->
+  <rect x="10" y="22" width="68" height="76" rx="14" fill="#1040F8"/>
+  <path d="M24 82 L38 40 H48 L62 82 H52 L49 72 H37 L34 82 Z M39.5 63 H46.5 L43 51 Z" fill="#FFFFFF"/>
+  <circle cx="84" cy="74" r="28" fill="#FFC83D"/>
+  <circle cx="74" cy="64" r="6" fill="#1040F8"/>
+  <circle cx="92" cy="60" r="6" fill="#FF9FB2"/>
+  <circle cx="98" cy="78" r="6" fill="#5B80FF"/>
+  <path d="M74 92 C70 86 78 80 84 84 C88 87 86 94 80 96 Z" fill="#FFFFFF"/>
+</svg>

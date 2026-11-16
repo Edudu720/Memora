@@ -135,4 +135,27 @@ void main() {
       );
     });
   });
+
+  group('Botão que mudou de lugar — T090', () {
+    test('orienta com calma e sem culpa quando a pessoa não acha o botão', () async {
+      for (final String pedido in <String>[
+        'não achei o botão',
+        'nao achei o botao aqui',
+        'não achei o botão no whatsapp, acho que mudou de lugar',
+      ]) {
+        final RespostaDaAssistente resposta = await perguntar(pedido);
+
+        expect(resposta, isA<AssistenteRespondeu>());
+        final AssistenteRespondeu ok = resposta as AssistenteRespondeu;
+        expect(
+          ok.acao,
+          isNull,
+          reason: 'Não deve pular direto para abrir o app quando o botão mudou',
+        );
+        expect(ok.texto.toLowerCase(), contains('sem problemas'));
+        expect(ok.texto.toLowerCase(), contains('não foi erro seu'));
+        expect(ok.texto.toLowerCase(), contains('atualiz'));
+      }
+    });
+  });
 }

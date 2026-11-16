@@ -118,58 +118,62 @@ class _SecaoIdadeState extends State<SecaoIdade> {
 
     final DataDeNascimento? data = _data;
     if (data == null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          const TextoMemora.apoio(
-            TextosPerfil.convite,
-            key: SecaoIdade.chaveConvite,
-          ),
-          const SizedBox(height: MemoraEspacamento.md),
-          BotaoSecundario(
-            key: SecaoIdade.chaveInformar,
-            rotulo: TextosPerfil.botaoInformar,
-            icone: Icons.cake_outlined,
-            aoTocar: _abrirEntrada,
-          ),
-        ],
+      return Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const TextoMemora.apoio(
+              TextosPerfil.convite,
+              key: SecaoIdade.chaveConvite,
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            BotaoSecundario(
+              key: SecaoIdade.chaveInformar,
+              rotulo: TextosPerfil.botaoInformar,
+              icone: Icons.cake_outlined,
+              aoTocar: _abrirEntrada,
+            ),
+          ],
+        ),
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        CampoInformacao(
-          key: SecaoIdade.chaveIdade,
-          rotulo: TextosPerfil.rotuloIdade,
-          valor: TextosPerfil.idade(data.idadeEm(widget.agora())),
-        ),
-        const SizedBox(height: MemoraEspacamento.md),
-        if (_confirmandoRetirada)
-          ConfirmacaoMemora(
-            key: SecaoIdade.chaveConfirmacao,
-            pergunta: TextosPerfil.perguntaTirar,
-            aviso: TextosPerfil.avisoTirar,
-            rotuloConfirmar: TextosPerfil.botaoConfirmarTirar,
-            rotuloRecusar: TextosPerfil.botaoManter,
-            aoConfirmar: _tirar,
-            aoRecusar: () => setState(() => _confirmandoRetirada = false),
-          )
-        else ...<Widget>[
-          BotaoSecundario(
-            key: SecaoIdade.chaveInformar,
-            rotulo: TextosPerfil.botaoMudar,
-            icone: Icons.edit_outlined,
-            aoTocar: _abrirEntrada,
+    return Cartao(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          CampoInformacao(
+            key: SecaoIdade.chaveIdade,
+            rotulo: TextosPerfil.rotuloIdade,
+            valor: TextosPerfil.idade(data.idadeEm(widget.agora())),
           ),
-          const SizedBox(height: MemoraEspacamento.sm),
-          BotaoTerciario(
-            key: SecaoIdade.chaveTirar,
-            rotulo: TextosPerfil.botaoTirar,
-            aoTocar: () => setState(() => _confirmandoRetirada = true),
-          ),
+          const SizedBox(height: MemoraEspacamento.md),
+          if (_confirmandoRetirada)
+            ConfirmacaoMemora(
+              key: SecaoIdade.chaveConfirmacao,
+              pergunta: TextosPerfil.perguntaTirar,
+              aviso: TextosPerfil.avisoTirar,
+              rotuloConfirmar: TextosPerfil.botaoConfirmarTirar,
+              rotuloRecusar: TextosPerfil.botaoManter,
+              aoConfirmar: _tirar,
+              aoRecusar: () => setState(() => _confirmandoRetirada = false),
+            )
+          else ...<Widget>[
+            BotaoSecundario(
+              key: SecaoIdade.chaveInformar,
+              rotulo: TextosPerfil.botaoMudar,
+              icone: Icons.edit_outlined,
+              aoTocar: _abrirEntrada,
+            ),
+            const SizedBox(height: MemoraEspacamento.sm),
+            BotaoTerciario(
+              key: SecaoIdade.chaveTirar,
+              rotulo: TextosPerfil.botaoTirar,
+              aoTocar: () => setState(() => _confirmandoRetirada = true),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

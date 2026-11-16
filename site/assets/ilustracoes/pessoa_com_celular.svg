@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 260" width="160" height="260" role="img">
+  <!--
+    Pessoa idosa olhando o proprio celular — meio da tela de boas-vindas.
+
+    Ela esta **usando** o aparelho, nao sendo ajudada por ninguem. E a
+    ilustracao da promessa do produto: o Principio VII diz ensinar, nunca
+    substituir, e uma figura com alguem operando o celular no lugar dela
+    contaria a historia errada logo na primeira tela.
+  -->
+  <!-- calca -->
+  <path d="M52 178 h56 l6 78 h-24 l-10 -52 -10 52 h-24 Z" fill="#D9C4A0"/>
+  <!-- xadrez da calca -->
+  <g stroke="#BFA87F" stroke-width="2" opacity="0.9">
+    <path d="M54 194 h58"/>
+    <path d="M56 212 h56"/>
+    <path d="M58 230 h54"/>
+    <path d="M70 178 v78"/>
+    <path d="M90 178 v78"/>
+  </g>
+  <!-- sapatos -->
+  <rect x="36" y="250" width="28" height="10" rx="5" fill="#4A4F5C"/>
+  <rect x="96" y="250" width="28" height="10" rx="5" fill="#4A4F5C"/>
+
+  <!-- camisa -->
+  <path d="M46 104 C46 86 60 76 80 76 C100 76 114 86 114 104 L114 182 H46 Z" fill="#A8CDEA"/>
+  <!-- suspensorios -->
+  <path d="M66 80 L64 182" stroke="#5B6478" stroke-width="7" fill="none"/>
+  <path d="M94 80 L96 182" stroke="#5B6478" stroke-width="7" fill="none"/>
+  <!-- cinto -->
+  <rect x="46" y="172" width="68" height="12" fill="#5B6478"/>
+
+  <!-- bracos, dobrados para segurar o aparelho a frente -->
+  <path d="M50 108 C36 126 38 148 54 156" stroke="#A8CDEA" stroke-width="16"
+        fill="none" stroke-linecap="round"/>
+  <path d="M110 108 C124 126 122 148 106 156" stroke="#A8CDEA" stroke-width="16"
+        fill="none" stroke-linecap="round"/>
+
+  <!-- celular, na frente das maos -->
+  <rect x="62" y="128" width="36" height="54" rx="6" fill="#2F3542"/>
+  <rect x="66" y="134" width="28" height="42" rx="3" fill="#7FB2E5"/>
+
+  <!-- maos -->
+  <circle cx="60" cy="156" r="10" fill="#EDBE95"/>
+  <circle cx="100" cy="156" r="10" fill="#EDBE95"/>
+
+  <!-- pescoco -->
+  <rect x="70" y="64" width="20" height="20" rx="9" fill="#E0A87E"/>
+  <!-- rosto -->
+  <ellipse cx="80" cy="40" rx="30" ry="33" fill="#EDBE95"/>
+  <!-- cabelo branco -->
+  <path d="M50 38 C48 10 64 2 80 2 C96 2 112 10 110 38
+           C107 26 100 20 80 20 C60 20 53 26 50 38 Z" fill="#E4E6EC"/>
+  <!-- oculos -->
+  <g fill="none" stroke="#3E4A5B" stroke-width="3">
+    <circle cx="69" cy="42" r="10"/>
+    <circle cx="93" cy="42" r="10"/>
+    <path d="M79 42 h4"/>
+  </g>
+  <!-- olhos, baixos: ela esta olhando para o aparelho -->
+  <circle cx="69" cy="45" r="3.2" fill="#3E4A5B"/>
+  <circle cx="93" cy="45" r="3.2" fill="#3E4A5B"/>
+  <!-- sorriso -->
+  <path d="M72 58 q8 7 16 0" fill="none" stroke="#B9764F" stroke-width="3" stroke-linecap="round"/>
+</svg>

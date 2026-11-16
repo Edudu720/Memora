@@ -4,9 +4,9 @@ import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
-import '../../tokens/movimento.dart';
 import '../../tokens/raio.dart';
 import '../texto/texto_memora.dart';
+import '../toque/superficie_tocavel.dart';
 
 /// Uma opção dentro de um grupo de escolha única.
 ///
@@ -15,6 +15,9 @@ import '../texto/texto_memora.dart';
 /// A FR-014 é explícita: quem não distingue matizes precisa perceber a escolha
 /// por outro canal. Aqui a opção selecionada ganha **três** sinais simultâneos:
 /// ícone de confirmação, borda mais grossa e fundo destacado.
+///
+/// Delega toque e foco a [SuperficieTocavel], exibindo anel externo no foco
+/// e escala de pressão além da variação de cor (Princípio III).
 ///
 /// Expõe semântica de escolha em grupo exclusivo, para que o leitor de tela
 /// anuncie "selecionado" e "1 de 4".
@@ -31,18 +34,27 @@ class OpcaoSelecionavel extends StatelessWidget {
   /// Acionada ao tocar.
   final VoidCallback aoSelecionar;
 
+  /// Elemento visual opcional exibido antes do texto (ex.: miniatura de avatar).
+  final Widget? lider;
+
   /// Cria uma opção selecionável.
   const OpcaoSelecionavel({
     required this.rotulo,
     required this.selecionada,
     required this.aoSelecionar,
     this.descricao,
+    this.lider,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
+    final Icon indicadorEstado = Icon(
+      selecionada ? Icons.check_circle : Icons.circle_outlined,
+      color: selecionada ? cores.primaria : cores.borda,
+      size: MemoraDimensoes.iconeDestaque,
+    );
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
@@ -51,60 +63,52 @@ class OpcaoSelecionavel extends StatelessWidget {
       hint: descricao,
       onTap: aoSelecionar,
       child: ExcludeSemantics(
-        child: AnimatedContainer(
-          duration: MemoraMovimento.efetiva(
-            MemoraMovimento.rapido,
-            reduzirMovimento: MediaQuery.disableAnimationsOf(context),
-          ),
-          constraints: const BoxConstraints(
-            minHeight: MemoraDimensoes.alvoDecisao,
-          ),
-          decoration: BoxDecoration(
-            color: selecionada ? cores.superficieAlt : cores.superficie,
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-            border: Border.all(
-              color: selecionada ? cores.primaria : cores.borda,
-              width: selecionada ? 3 : 1,
+        child: SuperficieTocavel(
+          rotulo: rotulo,
+          dica: descricao,
+          selecionada: selecionada,
+          aoTocar: aoSelecionar,
+          fundo: selecionada ? cores.superficieAlt : cores.superficie,
+          borda: selecionada ? cores.primaria : cores.borda,
+          raio: BorderRadius.circular(MemoraRaio.padrao),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: MemoraDimensoes.alvoDecisao,
             ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-            child: InkWell(
-              onTap: aoSelecionar,
-              borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-              child: Padding(
-                padding: const EdgeInsets.all(MemoraEspacamento.lg),
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      selecionada
-                          ? Icons.check_circle
-                          : Icons.circle_outlined,
-                      color: selecionada ? cores.primaria : cores.borda,
-                      size: MemoraDimensoes.iconeDestaque,
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(MemoraEspacamento.lg),
+              child: Row(
+                children: <Widget>[
+                  if (lider != null) ...<Widget>[
+                    lider!,
+                    const SizedBox(width: MemoraEspacamento.md),
+                  ] else ...<Widget>[
+                    indicadorEstado,
                     const SizedBox(width: MemoraEspacamento.lg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          TextoMemora(
-                            rotulo,
-                            estilo: selecionada
-                                ? EstiloTexto.corpoForte
-                                : EstiloTexto.corpo,
-                          ),
-                          if (descricao != null) ...<Widget>[
-                            const SizedBox(height: MemoraEspacamento.xs),
-                            TextoMemora.apoio(descricao!),
-                          ],
-                        ],
-                      ),
-                    ),
                   ],
-                ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TextoMemora(
+                          rotulo,
+                          estilo: selecionada
+                              ? EstiloTexto.corpoForte
+                              : EstiloTexto.corpo,
+                        ),
+                        if (descricao != null) ...<Widget>[
+                          const SizedBox(height: MemoraEspacamento.xs),
+                          TextoMemora.apoio(descricao!),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (lider != null) ...<Widget>[
+                    const SizedBox(width: MemoraEspacamento.sm),
+                    indicadorEstado,
+                  ],
+                ],
               ),
             ),
           ),

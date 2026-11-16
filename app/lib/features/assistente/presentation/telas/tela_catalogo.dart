@@ -8,26 +8,12 @@ import '../../../aprendizado/domain/busca.dart';
 import '../../../aprendizado/domain/guia.dart';
 import '../../domain/assistente.dart';
 
-/// As duas portas de serviços do Hub, numa tela só (T045, T069, FR-023).
+/// Catálogo unificado de aplicativos e serviços sociais (`T050`, `FR-023`).
 ///
-/// ## Por que uma tela, e não duas
-///
-/// *Serviços do dia a dia* e *Meus aplicativos* mostram a mesma coisa com uma
-/// regra diferente. Duas telas quase iguais divergem na primeira melhoria feita
-/// em uma delas — e a melhoria que a outra não recebe costuma ser exatamente a
-/// que importa.
-///
-/// ## Busca no topo (FR-023)
-///
-/// O catálogo inclui uma busca tolerante por trecho, sem acento e sem caixa alta
-/// (T068), permitindo localizar o aplicativo ou serviço de forma ágil.
-///
-/// ## Cada item diz o que esperar, antes do toque
-///
-/// A FR-045 exige que a pessoa saiba se a Memora **ensina** ou **ensina e
-/// abre** antes de entrar. Se o item tiver guia de aprendizado embarcado, o toque
-/// abre o passo a passo; caso contrário, abre a conversa com a pergunta inicial
-/// (contracts/catalogo.md).
+/// Apresenta busca limpa no topo, filtro segmentado (`Apps do celular` e
+/// `Serviços sociais`), logo oficial em badge suave, `BadgeDeStatus` não
+/// clicável informando o que a Memora pode fazer e ações explícitas sem
+/// confundir cartão informativo com botão (`002/FR-012`).
 class TelaCatalogo extends StatefulWidget {
   /// Chave da lista.
   static const Key chaveLista = Key('catalogo.lista');
@@ -41,7 +27,7 @@ class TelaCatalogo extends StatefulWidget {
   /// De onde vêm os serviços.
   final RepositorioAssistente repositorio;
 
-  /// Qual categoria exibir.
+  /// Categoria exibida ao abrir a tela.
   final CategoriaDoServico categoria;
 
   /// Abre a conversa já perguntando sobre um serviço.
@@ -53,10 +39,10 @@ class TelaCatalogo extends StatefulWidget {
   /// Consulta de plataforma dos aplicativos instalados (se disponível).
   final ConsultaDeAplicativos? consultaAplicativos;
 
-  /// Volta ao Hub.
+  /// Volta ao início.
   final VoidCallback? aoVoltar;
 
-  /// Estado de teste forçado (FR-006).
+  /// Estado de teste forçado (`FR-006`).
   final String? estadoDeTeste;
 
   /// Cria a tela de catálogo.
@@ -76,21 +62,27 @@ class TelaCatalogo extends StatefulWidget {
 }
 
 class _TelaCatalogoState extends State<TelaCatalogo> {
-  List<ServicoDoCatalogo>? _servicos;
+  List<ServicoDoCatalogo>? _todosServicos;
+  Map<String, bool> _instalacaoPorChave = const <String, bool>{};
+  late CategoriaDoServico _categoriaAtiva;
   bool _falhou = false;
   String _busca = '';
 
   @override
   void initState() {
     super.initState();
+    _categoriaAtiva = widget.categoria;
     _carregar();
   }
 
   @override
   void didUpdateWidget(covariant TelaCatalogo antigo) {
     super.didUpdateWidget(antigo);
-    if (antigo.categoria != widget.categoria ||
-        antigo.repositorio != widget.repositorio) {
+    if (antigo.categoria != widget.categoria) {
+      _categoriaAtiva = widget.categoria;
+    }
+    if (antigo.repositorio != widget.repositorio ||
+        antigo.consultaAplicativos != widget.consultaAplicativos) {
       _carregar();
     }
   }
@@ -98,11 +90,11 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
   Future<void> _carregar() async {
     try {
       final List<ServicoDoCatalogo> todos = await widget.repositorio.catalogo();
+      final Map<String, bool> instalacoes = await _consultarInstalacoes(todos);
       if (!mounted) return;
       setState(() {
-        _servicos = todos
-            .where((ServicoDoCatalogo s) => s.categoria == widget.categoria)
-            .toList();
+        _todosServicos = todos;
+        _instalacaoPorChave = instalacoes;
         _falhou = false;
       });
     } on Exception {
@@ -111,12 +103,45 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
     }
   }
 
-  String get _titulo => switch (widget.categoria) {
+  Future<Map<String, bool>> _consultarInstalacoes(
+    List<ServicoDoCatalogo> todos,
+  ) async {
+    final ConsultaDeAplicativos? consulta = widget.consultaAplicativos;
+    if (consulta == null) return const <String, bool>{};
+
+    final Map<String, bool> resultado = <String, bool>{};
+    await Future.wait(<Future<void>>[
+      for (final ServicoDoCatalogo servico in todos)
+        if (servico.categoria == CategoriaDoServico.cotidiano &&
+            servico.memoraPodeAbrir &&
+            (servico.identificadorAndroid?.trim().isNotEmpty ?? false))
+          () async {
+            try {
+              resultado[servico.chave] = await consulta.estaInstalado(
+                servico.identificadorAndroid!.trim(),
+              );
+            } catch (_) {
+              resultado[servico.chave] = false;
+            }
+          }(),
+    ]);
+    return resultado;
+  }
+
+  String get _titulo => switch (_categoriaAtiva) {
         CategoriaDoServico.sensivel => TextosAssistente.portaServicos,
         CategoriaDoServico.cotidiano => TextosAssistente.portaAplicativos,
       };
 
-  void _aoTocar(ServicoDoCatalogo servico) {
+  List<ServicoDoCatalogo> get _servicosDaCategoria {
+    final List<ServicoDoCatalogo>? todos = _todosServicos;
+    if (todos == null) return const <ServicoDoCatalogo>[];
+    return todos
+        .where((ServicoDoCatalogo s) => s.categoria == _categoriaAtiva)
+        .toList();
+  }
+
+  void _acionarPadrao(ServicoDoCatalogo servico) {
     final Guia? guia = guiaDe(servico.chave);
     if (guia != null && widget.aoAbrirGuia != null) {
       widget.aoAbrirGuia!(guia, servico);
@@ -130,7 +155,8 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
     final MemoraCores cores = context.memora.cores;
 
     // Estados de tela — FR-006
-    if (widget.estadoDeTeste == 'carregando' || (_servicos == null && !_falhou)) {
+    if (widget.estadoDeTeste == 'carregando' ||
+        (_todosServicos == null && !_falhou)) {
       return Scaffold(
         backgroundColor: cores.fundo,
         appBar: BarraSuperior(titulo: _titulo, aoVoltar: widget.aoVoltar),
@@ -153,7 +179,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
       );
     }
 
-    final List<ServicoDoCatalogo> servicos = _servicos!;
+    final List<ServicoDoCatalogo> servicos = _servicosDaCategoria;
     if (widget.estadoDeTeste == 'vazio' || servicos.isEmpty) {
       return Scaffold(
         backgroundColor: cores.fundo,
@@ -175,145 +201,206 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
       appBar: BarraSuperior(titulo: _titulo, aoVoltar: widget.aoVoltar),
       body: SafeArea(
         top: false,
-        child: ListView(
+        child: SingleChildScrollView(
           key: TelaCatalogo.chaveLista,
           padding: const EdgeInsets.all(MemoraEspacamento.lg),
-          children: <Widget>[
-            // Para os serviços sensíveis, a explicação vem ANTES da lista.
-            if (widget.categoria == CategoriaDoServico.sensivel) ...<Widget>[
-              const TextoMemora(
-                TextosAssistente.porqueNaoAbroServicoSensivel,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              // Busca limpa no topo (FR-023)
+              CampoTexto(
+                key: TelaCatalogo.chaveBusca,
+                rotulo: TextosAssistente.rotuloBuscaAplicativos,
+                textoAjuda: TextosAssistente.ajudaBuscaAplicativos,
+                aoMudar: (String valor) => setState(() => _busca = valor),
               ),
-              const SizedBox(height: MemoraEspacamento.xl),
-            ],
+              const SizedBox(height: MemoraEspacamento.md),
 
-            // Busca no topo (FR-023)
-            CampoTexto(
-              key: TelaCatalogo.chaveBusca,
-              rotulo: TextosAssistente.rotuloBuscaAplicativos,
-              textoAjuda: TextosAssistente.ajudaBuscaAplicativos,
-              aoMudar: (String valor) => setState(() => _busca = valor),
-            ),
-            const SizedBox(height: MemoraEspacamento.lg),
+              // Filtro segmentado por tipo de serviço
+              Wrap(
+                spacing: MemoraEspacamento.sm,
+                runSpacing: MemoraEspacamento.sm,
+                children: <Widget>[
+                  ChipFiltro(
+                    rotulo: 'Apps do celular',
+                    icone: Icons.apps_rounded,
+                    selecionado: _categoriaAtiva == CategoriaDoServico.cotidiano,
+                    aoTocar: () => setState(
+                      () => _categoriaAtiva = CategoriaDoServico.cotidiano,
+                    ),
+                  ),
+                  ChipFiltro(
+                    rotulo: 'Serviços sociais',
+                    icone: Icons.shield_outlined,
+                    selecionado: _categoriaAtiva == CategoriaDoServico.sensivel,
+                    aoTocar: () => setState(
+                      () => _categoriaAtiva = CategoriaDoServico.sensivel,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: MemoraEspacamento.lg),
 
-            if (exibidos.isEmpty)
-              const EstadoVazio(
-                titulo: 'Nenhum aplicativo encontrado',
-                explicacao: 'Tente buscar com outras palavras ou apague a busca.',
-                icone: Icons.search_off,
-              )
-            else
-              for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[
-                _ItemDoCatalogo(
-                  servico: servico,
-                  aoTocar: () => _aoTocar(servico),
-                  habilitado: widget.aoEscolher != null || widget.aoAbrirGuia != null,
+              // Para os serviços sensíveis, a explicação vem ANTES da lista (FR-042).
+              if (_categoriaAtiva == CategoriaDoServico.sensivel) ...<Widget>[
+                Cartao(
+                  padding: const EdgeInsets.all(MemoraEspacamento.md),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const <Widget>[
+                      MemoraPersonagem(
+                        expressao: ExpressaoDaMemora.dica,
+                        tamanho: MemoraDimensoes.alvoMinimo,
+                      ),
+                      SizedBox(width: MemoraEspacamento.md),
+                      Expanded(
+                        child: TextoMemora(
+                          TextosAssistente.porqueNaoAbroServicoSensivel,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: MemoraEspacamento.md),
+                const SizedBox(height: MemoraEspacamento.lg),
               ],
-          ],
+
+              if (exibidos.isEmpty)
+                const EstadoVazio(
+                  titulo: 'Nenhum aplicativo encontrado',
+                  explicacao:
+                      'Tente buscar com outras palavras ou apague a busca.',
+                  icone: Icons.search_off,
+                )
+              else
+                for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[
+                  _ItemDoCatalogo(
+                    servico: servico,
+                    temGuia: guiaDe(servico.chave) != null,
+                    instalado: _instalacaoPorChave[servico.chave] ?? true,
+                    habilitado:
+                        widget.aoEscolher != null || widget.aoAbrirGuia != null,
+                    aoAcionarPadrao: () => _acionarPadrao(servico),
+                    aoPedirAbrir: widget.aoEscolher != null
+                        ? () => widget.aoEscolher!(servico)
+                        : null,
+                  ),
+                  const SizedBox(height: MemoraEspacamento.md),
+                ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Um serviço na lista, apresentado em cartão com ícone reconhecível do aplicativo (R7).
+/// Cartão horizontal informativo com ações explícitas de ensinar ou abrir.
 class _ItemDoCatalogo extends StatelessWidget {
   final ServicoDoCatalogo servico;
-  final VoidCallback aoTocar;
+  final bool temGuia;
+  final bool instalado;
   final bool habilitado;
+  final VoidCallback aoAcionarPadrao;
+  final VoidCallback? aoPedirAbrir;
 
   const _ItemDoCatalogo({
     required this.servico,
-    required this.aoTocar,
+    required this.temGuia,
+    required this.instalado,
     required this.habilitado,
+    required this.aoAcionarPadrao,
+    this.aoPedirAbrir,
   });
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final bool podeAbrir = instalado &&
+        servico.categoria == CategoriaDoServico.cotidiano &&
+        servico.memoraPodeAbrir &&
+        aoPedirAbrir != null;
+    final bool marcadoComoNaoInstalado = !instalado &&
+        servico.categoria == CategoriaDoServico.cotidiano &&
+        servico.memoraPodeAbrir;
 
-    return Semantics(
-      button: true,
-      enabled: habilitado,
-      label: '${servico.nomeExibido}. ${servico.descricaoCurta}. ${servico.categoria.oQueAMemoraFaz}',
-      child: Material(
-        key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
-        color: cores.superficie,
-        elevation: MemoraElevacao.cartao,
-        shadowColor: MemoraElevacao.sombra,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-          side: BorderSide(
-            color: cores.borda.withValues(alpha: 0.35),
-          ),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-          onTap: habilitado ? aoTocar : null,
-          child: Padding(
-            padding: const EdgeInsets.all(MemoraEspacamento.md),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Ícone reconhecível do aplicativo (WhatsApp, Facebook, etc.)
-                IconeDoAplicativo(
+    return Cartao(
+      padding: const EdgeInsets.all(MemoraEspacamento.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                padding: const EdgeInsets.all(MemoraEspacamento.xs),
+                decoration: BoxDecoration(
+                  color: cores.superficieSutil,
+                  borderRadius: BorderRadius.circular(MemoraRaio.cartaoMedio),
+                  border: ehAltoContraste
+                      ? Border.all(
+                          color: cores.borda,
+                        )
+                      : null,
+                ),
+                child: IconeDoAplicativo(
                   chave: servico.chave,
                   nome: servico.nomeExibido,
                 ),
-                const SizedBox(width: MemoraEspacamento.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: TextoMemora(
-                              servico.nomeExibido,
-                              estilo: EstiloTexto.destaque,
-                            ),
-                          ),
-                          Icon(
-                            servico.memoraPodeAbrir
-                                ? Icons.open_in_new_rounded
-                                : Icons.arrow_forward_ios_rounded,
-                            size: MemoraDimensoes.iconePequeno,
-                            color: cores.primaria,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: MemoraEspacamento.xs),
-                      TextoMemora.apoio(servico.descricaoCurta),
-                      const SizedBox(height: MemoraEspacamento.sm),
-                      // Rótulo de permissão e aprendizado (FR-045)
-                      Row(
-                        children: <Widget>[
-                          Icon(
-                            servico.memoraPodeAbrir
-                                ? Icons.check_circle_outline
-                                : Icons.school_outlined,
-                            size: MemoraDimensoes.iconePequeno,
-                            color: servico.memoraPodeAbrir
-                                ? cores.sucesso
-                                : cores.textoSuave,
-                          ),
-                          const SizedBox(width: MemoraEspacamento.xs),
-                          Expanded(
-                            child: TextoMemora.apoio(
-                              servico.categoria.oQueAMemoraFaz,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              ),
+              const SizedBox(width: MemoraEspacamento.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    TextoMemora(
+                      servico.nomeExibido,
+                      estilo: EstiloTexto.tituloSecao,
+                    ),
+                    const SizedBox(height: MemoraEspacamento.xs),
+                    TextoMemora.apoio(servico.descricaoCurta),
+                    const SizedBox(height: MemoraEspacamento.sm),
+                    BadgeDeStatus(
+                      rotulo: marcadoComoNaoInstalado
+                          ? TextosAssistente.soEnsinaNaoInstalado
+                          : servico.categoria.oQueAMemoraFaz,
+                      icone: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
+                          ? Icons.check_circle_outline
+                          : Icons.school_outlined,
+                      tom: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
+                          ? TomBadgeStatus.positivo
+                          : TomBadgeStatus.informativo,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ),
+          const SizedBox(height: MemoraEspacamento.md),
+          if (temGuia) ...<Widget>[
+            BotaoSecundario(
+              key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
+              rotulo: 'Ensinar passo a passo',
+              icone: Icons.menu_book_outlined,
+              aoTocar: habilitado ? aoAcionarPadrao : null,
+            ),
+            if (podeAbrir) ...<Widget>[
+              const SizedBox(height: MemoraEspacamento.sm),
+              BotaoPrimario(
+                rotulo: 'Pedir para a Memora abrir',
+                icone: Icons.open_in_new_rounded,
+                aoTocar: aoPedirAbrir,
+              ),
+            ],
+          ] else
+            BotaoSecundario(
+              key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
+              rotulo: 'Perguntar na conversa',
+              icone: Icons.chat_bubble_outline,
+              aoTocar: habilitado ? aoAcionarPadrao : null,
+            ),
+        ],
       ),
     );
   }

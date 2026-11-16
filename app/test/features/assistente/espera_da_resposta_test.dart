@@ -25,18 +25,23 @@ class _RepositorioControlado implements RepositorioAssistente {
   final List<Completer<RespostaDaAssistente>> pendentes =
       <Completer<RespostaDaAssistente>>[];
   void Function(String trecho)? aoReceberTrecho;
+  int cancelamentos = 0;
 
   @override
   Future<RespostaDaAssistente> conversar({
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) {
     mensagens.add(mensagem);
     this.aoReceberTrecho = aoReceberTrecho;
     final Completer<RespostaDaAssistente> resposta =
         Completer<RespostaDaAssistente>();
     pendentes.add(resposta);
+    aoCriarCancelamento?.call(() {
+      cancelamentos++;
+    });
     return resposta.future;
   }
 
@@ -295,5 +300,24 @@ void main() {
     expect(controlador.trechoEmCurso, isEmpty);
     expect(controlador.respondendo, isFalse);
     expect(controlador.estado, EstadoConversa.aguardando);
+    expect(repositorio.cancelamentos, 1);
+  });
+
+  testWidgets('quando passa de 30 s sem palavra, cancela a requisição SSE em voo (T096)',
+      (WidgetTester t) async {
+    await preparar();
+    unawaited(controlador.enviar());
+
+    await t.pump(const Duration(seconds: 29));
+    expect(repositorio.cancelamentos, 0);
+
+    await t.pump(const Duration(seconds: 1));
+    expect(repositorio.cancelamentos, 1);
+    expect(controlador.estado, EstadoConversa.comErro);
+    expect(controlador.mensagemDeErro, TextosAssistente.semRespostaDaConversa);
+
+    repositorio.encerrar();
+    await t.pump();
+    controlador.dispose();
   });
 }

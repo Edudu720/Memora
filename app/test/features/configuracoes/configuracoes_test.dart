@@ -78,7 +78,7 @@ void main() {
         'privacidade',
         'conta',
       ]);
-      expect(find.byType(CartaoDePorta), findsNWidgets(4));
+      expect(find.byType(LinhaDeLista), findsNWidgets(4));
     });
 
     testWidgets('não há "Notificações" nem "Idiomas": só aparecem quando '
@@ -131,14 +131,15 @@ void main() {
         'caminho só (FR-002)', (WidgetTester t) async {
       await t.pumpWidget(app(ajustes()));
 
-      final Iterable<CartaoDePorta> portas = t.widgetList<CartaoDePorta>(
-        find.byType(CartaoDePorta),
+      final Iterable<LinhaDeLista> linhas = t.widgetList<LinhaDeLista>(
+        find.byType(LinhaDeLista),
       );
-      expect(portas.where((CartaoDePorta p) => p.principal), isEmpty);
+      expect(linhas.where((LinhaDeLista l) => l.aoTocar == null), isEmpty);
+      expect(find.byType(CartaoHeroi), findsNothing);
       expect(
         find.byType(CaixaDeEtapa),
         findsOneWidget,
-        reason: 'FR-002a (T125a): Ajustes agrupa as portas em CaixaDeEtapa',
+        reason: 'FR-002a (T125a): Ajustes agrupa as linhas em CaixaDeEtapa',
       );
     });
   });
@@ -914,7 +915,7 @@ void main() {
       await FluxoDentroDaConta.irPara(t, DestinoDaCasca.ajustes);
 
       expect(find.byType(TelaConfiguracoes), findsOneWidget);
-      expect(find.byType(CartaoDePorta), findsNWidgets(4));
+      expect(find.byType(LinhaDeLista), findsNWidgets(4));
     });
 
     testWidgets('Conta mostra o canal que o aparelho lembra (R10)', (

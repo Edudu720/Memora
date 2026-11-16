@@ -381,7 +381,10 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 ### Requisitos Funcionais — Histórico da conversa
 
 - **FR-047**: A conversa MUST ser guardada **apenas no aparelho**. O conteúdo
-  MUST NOT ser mantido no servidor.
+  MUST NOT ser mantido no servidor — inclusive quando uma sugestão do modelo é
+  recusada durante a conversa (`ACAO_RECUSADA`), a trilha grava o evento sem
+  armazenar o texto cru enviado no chat (a única exceção de resumo restrito
+  pertence às ações executadas na FR-023).
 - **FR-048**: Ao sair da conta, a conversa guardada MUST ser apagada do aparelho,
   junto com o restante dos dados pessoais (FR-026 da feature 001).
 - **FR-049**: A pessoa MUST conseguir retomar um passo a passo interrompido, ou

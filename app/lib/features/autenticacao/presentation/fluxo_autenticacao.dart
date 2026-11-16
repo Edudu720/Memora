@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../services/acessibilidade/memora_binding_atividade.dart';
+import '../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../../../l10n/textos_configuracoes.dart';
@@ -27,6 +28,8 @@ import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/aceite_do_aviso.dart';
 import '../../assistente/data/conversa_local.dart';
+import '../../assistente/data/leitor_de_voz_nativo.dart';
+import '../../assistente/domain/leitor_de_voz.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
 import '../../assistente/presentation/telas/tela_catalogo.dart';
@@ -34,6 +37,8 @@ import '../../assistente/presentation/telas/tela_conversa.dart';
 import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
+import '../../perfil/data/foto_de_perfil_local.dart';
+import '../../perfil/data/seletor_de_imagem.dart';
 import '../../casca/casca_interna.dart';
 import '../../perfil/presentation/tela_perfil.dart';
 import '../../configuracoes/presentation/tela_configuracoes.dart';
@@ -46,6 +51,10 @@ import 'telas/tela_recuperacao.dart';
 import '../../cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
 import '../../cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
 import '../../cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
+import '../../localizador/data/repositorios/repositorio_localizador_simulado.dart';
+import '../../localizador/domain/repositorios/repositorio_localizador.dart';
+import '../../localizador/presentation/controladores/controlador_localizador.dart';
+import '../../localizador/presentation/telas/tela_localizador.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
@@ -84,6 +93,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// não existe, e sem repositório não há o que listar.
   final RepositorioAssistente? assistente;
 
+  /// Onde o Localizador consulta serviços próximos (FR-006).
+  ///
+  /// Opcional em testes isolados de widget; em produção a `Composicao` entrega
+  /// [RepositorioLocalizadorApi] quando `usaServidorReal` estiver ativo.
+  final RepositorioLocalizador? localizador;
+
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   ///
   /// Opcional porque o teste de widget que só exercita telas não precisa
@@ -97,6 +112,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// testes. Em produção a `Composicao` exige a guarda real e o `main.dart` a
   /// repassa aqui.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
+  /// Onde o Perfil guarda a foto ou avatar escolhido, por conta (FR-006, 011).
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+
+  /// Seletor de foto de galeria/câmera (injetável em testes).
+  final SeletorDeImagemDoAparelho? seletorDeFoto;
 
   /// Quais contas já viram a apresentação inicial (FR-013, T050).
   ///
@@ -117,6 +138,12 @@ class FluxoAutenticacao extends StatefulWidget {
   ///
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
   final AbridorDeAplicativo? abridor;
+
+  /// Consulta quais aplicativos estão instalados no aparelho (T089, FR-046).
+  ///
+  /// Opcional: quando ausente (por exemplo, em testes sem consulta), os
+  /// itens que sabem abrir mantêm o rótulo padrão sem bloquear testes antigos.
+  final ConsultaDeAplicativos? consultaAplicativos;
 
   /// Quem manda o endereço oficial de download para fora do aplicativo (T089).
   ///
@@ -151,7 +178,9 @@ class FluxoAutenticacao extends StatefulWidget {
   const FluxoAutenticacao({
     required this.repositorio,
     this.assistente,
+    this.localizador,
     this.abridor,
+    this.consultaAplicativos,
     this.conversaLocal = ConversaLocal.new,
     this.aceiteDoAviso,
     this.sessaoPerdida,
@@ -161,6 +190,8 @@ class FluxoAutenticacao extends StatefulWidget {
     super.key,
     this.limpeza,
     this.dataDeNascimento,
+    this.fotoDePerfil,
+    this.seletorDeFoto,
     this.apresentacaoVista,
     this.compartilhador,
     this.progresso,
@@ -239,6 +270,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   late final ArmazenamentoDaDataDeNascimento _datas =
       widget.dataDeNascimento ?? DataDeNascimentoEmMemoria();
+
+  late final ArmazenamentoDeFotoDePerfil _fotos =
+      widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
 
   /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
   /// abre vai para a pilha do destino à vista, por [_empilhar].
@@ -620,7 +654,27 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         ilustracao: Ilustracao.portaServicos,
         aoAbrir: _abrirDispositivoCuidado,
       ),
+      PortaDoHub(
+        rotulo: 'Localizador de Serviços',
+        descricao: 'Postos de saúde e farmácias próximas',
+        ilustracao: Ilustracao.portaServicos,
+        aoAbrir: _abrirLocalizadorServicos,
+      ),
     ];
+  }
+
+  /// Abre o Localizador de Serviços Essenciais (Feature 009 / 010).
+  void _abrirLocalizadorServicos() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaLocalizador(
+          controlador: ControladorLocalizador(
+            repositorio: widget.localizador ?? RepositorioLocalizadorSimulado(),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
@@ -730,6 +784,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
+          consultaAplicativos: widget.consultaAplicativos,
           // Se o item tiver guia de passo a passo embarcado, abre o guia;
           // caso contrário, vai para a conversa já perguntando (T069, FR-027).
           aoAbrirGuia: (Guia guia, ServicoDoCatalogo servico) => _abrirGuia(
@@ -846,13 +901,22 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => _DonaDaConversa(
           aoAbrir: _conversasAbertas.add,
           aoFechar: _conversasAbertas.remove,
-          criar: () => ControladorConversa(
-            assistente,
-            widget.conversaLocal(),
-            aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
-            abridor: widget.abridor,
-            rascunhoInicial: rascunho,
-          ),
+          criar: () {
+            late final ControladorConversa controlador;
+            controlador = ControladorConversa(
+              assistente,
+              widget.conversaLocal(),
+              aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
+              abridor: widget.abridor,
+              consultaAplicativos: widget.consultaAplicativos,
+              leitorDeVoz: LeitorDeVozSpeechToText(
+                aoMudarEstado: (ResultadoDitado r) =>
+                    controlador.aplicarEstadoDitadoExterno(r),
+              ),
+              rascunhoInicial: rascunho,
+            );
+            return controlador;
+          },
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
       ),
@@ -1037,12 +1101,18 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             aoAbrirRegistro: widget.assistente == null
                 ? null
                 : () => _abrirRegistro(widget.assistente!),
+            aoAbrirCuidado: _abrirDispositivoCuidado,
+            aoAbrirAjuda: widget.assistente == null
+                ? null
+                : () => _abrirAjuda(widget.assistente!),
           ),
           DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',
             canal: _canal,
             progresso: widget.progresso,
             dataDeNascimento: _datas,
+            fotoDePerfil: _fotos,
+            seletorDeFoto: widget.seletorDeFoto,
             idDaConta: _pessoa?.id,
           ),
         },

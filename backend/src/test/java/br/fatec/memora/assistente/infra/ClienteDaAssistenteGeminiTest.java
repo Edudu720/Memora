@@ -669,5 +669,18 @@ class ClienteDaAssistenteGeminiTest {
                                             Duration.ofSeconds(1)))
                     .isInstanceOf(IllegalStateException.class);
         }
+
+        @Test
+        @DisplayName("interrupcao da thread aborta a leitura do fluxo do provedor (T096)")
+        void interrupcaoAbortaFluxo() {
+            roteiro = troca -> fluxo(troca, evento(parteDeTexto("Oi")));
+            Thread.currentThread().interrupt();
+            try {
+                assertThatThrownBy(() -> conversar(pedido("Oi"), new ArrayList<>()))
+                        .isInstanceOf(AssistenteIndisponivel.class);
+            } finally {
+                Thread.interrupted();
+            }
+        }
     }
 }

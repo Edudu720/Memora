@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../l10n/textos_assistente.dart';
+import '../../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../data/abridor_de_aplicativo.dart';
 import '../../data/aceite_do_aviso.dart';
 import '../../data/conversa_local.dart';
 import '../../domain/assistente.dart';
+import '../../domain/leitor_de_voz.dart';
 
 /// Estado da tela de conversa.
 enum EstadoConversa {
@@ -53,6 +55,8 @@ class ControladorConversa extends ChangeNotifier {
   final ConversaLocal _local;
   final AceiteDoAviso _aceite;
   final AbridorDeAplicativo? _abridor;
+  final ConsultaDeAplicativos? _consultaAplicativos;
+  final LeitorDeVoz? _leitorDeVoz;
 
   /// Cria o controlador.
   ///
@@ -64,6 +68,9 @@ class ControladorConversa extends ChangeNotifier {
   /// nada. É o mesmo raciocínio da porta do Hub — funcionalidade que não existe
   /// não deve ser oferecida.
   ///
+  /// [leitorDeVoz] é opcional: quando informado, habilita o ditado por voz que
+  /// preenche exclusivamente o [rascunho] antes do envio manual (FR-013).
+  ///
   /// [rascunhoInicial] abre a conversa com uma pergunta já escrita — é como o
   /// catálogo leva a pessoa até aqui (T077). Fica no campo, e **não** é
   /// enviada: quem envia é a pessoa.
@@ -72,9 +79,13 @@ class ControladorConversa extends ChangeNotifier {
     this._local, {
     required AceiteDoAviso aceite,
     AbridorDeAplicativo? abridor,
+    ConsultaDeAplicativos? consultaAplicativos,
+    LeitorDeVoz? leitorDeVoz,
     String rascunhoInicial = '',
   }) : _aceite = aceite,
        _abridor = abridor,
+       _consultaAplicativos = consultaAplicativos,
+       _leitorDeVoz = leitorDeVoz,
        _rascunho = rascunhoInicial;
 
   /// Quantas mensagens viajam ao serviço a cada turno (FR-056).
@@ -101,6 +112,7 @@ class ControladorConversa extends ChangeNotifier {
   /// recebe duas respostas para uma pergunta.
   int _envio = 0;
   Timer? _cronometro;
+  void Function()? _cancelarRequisicaoAtual;
   bool _descartado = false;
 
   /// A pessoa já aceitou o aviso de privacidade (FR-051)? Falso até lido.
@@ -113,6 +125,26 @@ class ControladorConversa extends ChangeNotifier {
   String _rascunho;
   String _trechoEmCurso = '';
   String _ultimoPedido = '';
+  EstadoDitado _estadoDitado = EstadoDitado.ocioso;
+  String? _avisoVoz;
+  bool _jaExplicouPermissaoVoz = false;
+  String _baseRascunhoDitado = '';
+
+  /// Estado atual do ditado por voz no campo de mensagem (FR-013).
+  EstadoDitado get estadoDitado => _estadoDitado;
+
+  /// Verdadeiro enquanto o microfone estiver aberto ouvindo a fala.
+  bool get ouvindoVoz => _estadoDitado == EstadoDitado.ouvindo;
+
+  /// Verdadeiro durante a explicação/solicitação da permissão do microfone.
+  bool get aguardandoPermissaoVoz =>
+      _estadoDitado == EstadoDitado.aguardandoPermissao;
+
+  /// Mensagem amigável para indisponibilidade ou erro momentâneo de voz.
+  String? get avisoVoz => _avisoVoz;
+
+  /// Se ainda é necessário explicar a permissão antes de pedir acesso ao SO.
+  bool get precisaExplicarPermissaoVoz => !_jaExplicouPermissaoVoz;
 
   /// Se a pessoa já recusou a execução de uma ação nesta conversa (T083, FR-016).
   bool get recusouExecucao => _recusouExecucao;
@@ -227,9 +259,110 @@ class ControladorConversa extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sinaliza a exibição do diálogo explicativo antes do pedido de permissão.
+  void prepararPedidoPermissaoVoz() {
+    if (!_aceitou || respondendo) return;
+    _estadoDitado = EstadoDitado.aguardandoPermissao;
+    _avisoVoz = null;
+    notifyListeners();
+  }
+
+  /// Cancela o diálogo explicativo de permissão sem acionar o microfone.
+  void cancelarPedidoPermissaoVoz() {
+    if (_estadoDitado == EstadoDitado.aguardandoPermissao) {
+      _estadoDitado = EstadoDitado.ocioso;
+      notifyListeners();
+    }
+  }
+
+  /// Inicia o ditado por voz preenchendo somente o [rascunho] (FR-013).
+  Future<void> iniciarDitado() async {
+    if (!_aceitou || respondendo) return;
+
+    _jaExplicouPermissaoVoz = true;
+    final LeitorDeVoz? leitor = _leitorDeVoz;
+    if (leitor == null) {
+      _estadoDitado = EstadoDitado.indisponivel;
+      _avisoVoz = TextosAssistente.vozIndisponivel;
+      notifyListeners();
+      return;
+    }
+
+    _baseRascunhoDitado = _rascunho.trim();
+    _estadoDitado = EstadoDitado.aguardandoPermissao;
+    _avisoVoz = null;
+    notifyListeners();
+
+    final ResultadoDitado resultado = await leitor.iniciarEscuta(
+      aoReconhecer: (String parcial) {
+        if (_descartado || !_aceitou || respondendo) return;
+        final String limpo = parcial.trim();
+        final String combinado = _baseRascunhoDitado.isEmpty
+            ? limpo
+            : (limpo.isEmpty
+                  ? _baseRascunhoDitado
+                  : '$_baseRascunhoDitado $limpo');
+        escrever(combinado);
+      },
+    );
+
+    if (_descartado) return;
+    _estadoDitado = resultado.estado;
+    if (resultado.estado == EstadoDitado.indisponivel) {
+      _avisoVoz = resultado.mensagem ?? TextosAssistente.vozIndisponivel;
+    } else if (resultado.estado == EstadoDitado.erro) {
+      _avisoVoz = resultado.mensagem ?? TextosAssistente.vozErro;
+    } else {
+      _avisoVoz = null;
+    }
+    notifyListeners();
+  }
+
+  /// Encerra a escuta em andamento mantendo o texto já preenchido no campo.
+  Future<void> pararDitado() async {
+    await _leitorDeVoz?.pararEscuta();
+    if (_descartado) return;
+    _estadoDitado = EstadoDitado.ocioso;
+    notifyListeners();
+  }
+
+  /// Atualiza o estado do ditado a partir de eventos assíncronos do motor nativo,
+  /// preservando o texto parcial já transcrito no rascunho (FR-005).
+  void aplicarEstadoDitadoExterno(ResultadoDitado resultado) {
+    if (_descartado) return;
+    if (resultado.estado == EstadoDitado.ocioso &&
+        (_estadoDitado == EstadoDitado.indisponivel ||
+            _estadoDitado == EstadoDitado.erro)) {
+      return;
+    }
+    _estadoDitado = resultado.estado;
+    if (resultado.estado == EstadoDitado.indisponivel) {
+      _avisoVoz = resultado.mensagem ?? TextosAssistente.vozOfflineIndisponivel;
+    } else if (resultado.estado == EstadoDitado.erro) {
+      _avisoVoz = resultado.mensagem ?? TextosAssistente.vozErro;
+    }
+    notifyListeners();
+  }
+
+  /// Alterna entre iniciar e encerrar o ditado por voz.
+  Future<void> alternarDitado() async {
+    if (!_aceitou || respondendo) return;
+    if (ouvindoVoz) {
+      await pararDitado();
+    } else {
+      await iniciarDitado();
+    }
+  }
+
   /// Envia a mensagem.
   Future<void> enviar() async {
     if (!podeEnviar) return;
+
+    if (ouvindoVoz) {
+      unawaited(_leitorDeVoz?.pararEscuta());
+    }
+    _estadoDitado = EstadoDitado.ocioso;
+    _avisoVoz = null;
 
     final String pergunta = _rascunho.trim();
     _ultimoPedido = pergunta;
@@ -249,9 +382,13 @@ class ControladorConversa extends ChangeNotifier {
     notifyListeners();
 
     _cronometro?.cancel();
+    _cancelarRequisicaoAtual?.call();
+    _cancelarRequisicaoAtual = null;
     _cronometro = Timer(esperaMaxima, () {
       if (esteEnvio != _envio) return;
       _envio++;
+      _cancelarRequisicaoAtual?.call();
+      _cancelarRequisicaoAtual = null;
       _trechoEmCurso = '';
       _devolverPergunta(fala);
       _falha = FalhaDaAssistente.semConexao;
@@ -271,9 +408,17 @@ class ControladorConversa extends ChangeNotifier {
         _trechoEmCurso += trecho;
         notifyListeners();
       },
+      aoCriarCancelamento: (void Function() cancelar) {
+        if (esteEnvio == _envio && !_descartado) {
+          _cancelarRequisicaoAtual = cancelar;
+        } else {
+          cancelar();
+        }
+      },
     );
 
     if (esteEnvio != _envio) return; // chegou depois do corte
+    _cancelarRequisicaoAtual = null;
     _cronometro?.cancel();
     _trechoEmCurso = '';
 
@@ -289,9 +434,36 @@ class ControladorConversa extends ChangeNotifier {
             momento: DateTime.now(),
           ),
         );
+        // Antes de oferecer abrir, confirma se o app está instalado (T089, FR-046).
+        AcaoAutorizada? acaoConfirmavel = _recusouExecucao ? null : acao;
+        if (acaoConfirmavel != null &&
+            _consultaAplicativos != null &&
+            acaoConfirmavel.identificadorAndroid.trim().isNotEmpty) {
+          bool instalado = false;
+          try {
+            instalado = await _consultaAplicativos.estaInstalado(
+              acaoConfirmavel.identificadorAndroid,
+            );
+          } catch (_) {
+            instalado = false;
+          }
+          if (esteEnvio != _envio || _descartado) return;
+          if (!instalado) {
+            acaoConfirmavel = null;
+            _mensagens.add(
+              MensagemDaConversa(
+                autor: AutorDaMensagem.memora,
+                texto: TextosAssistente.naoInstaladoAntesDeAbrir(
+                  acao!.nomeExibido,
+                ),
+                momento: DateTime.now(),
+              ),
+            );
+          }
+        }
         // Vem do servidor, ou não vem. Este controlador nunca a cria.
         // Se a pessoa já recusou a execução nesta conversa, a oferta não se repete (FR-016, T083).
-        _acaoOferecida = _recusouExecucao ? null : acao;
+        _acaoOferecida = acaoConfirmavel;
         _estado = EstadoConversa.aguardando;
         await _local.guardar(_mensagens);
 
@@ -457,6 +629,9 @@ class ControladorConversa extends ChangeNotifier {
     _descartado = true;
     _envio++;
     _cronometro?.cancel();
+    _cancelarRequisicaoAtual?.call();
+    _cancelarRequisicaoAtual = null;
+    _leitorDeVoz?.dispose();
     super.dispose();
   }
 
@@ -467,6 +642,13 @@ class ControladorConversa extends ChangeNotifier {
     // aparelho (FR-040, FR-048).
     _envio++;
     _cronometro?.cancel();
+    _cancelarRequisicaoAtual?.call();
+    _cancelarRequisicaoAtual = null;
+    if (ouvindoVoz) {
+      unawaited(_leitorDeVoz?.pararEscuta());
+    }
+    _estadoDitado = EstadoDitado.ocioso;
+    _avisoVoz = null;
     _trechoEmCurso = '';
     _mensagens.clear();
     _acaoOferecida = null;

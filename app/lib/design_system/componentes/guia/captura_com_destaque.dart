@@ -33,6 +33,14 @@ import '../../tokens/raio.dart';
 /// 1080×2400). Errar para mais estreito ou mais largo só dura o instante até a
 /// imagem chegar, e 9/20 é o que menos "salta" quando ela chega.
 ///
+/// ## Captura com a marcação já pintada (legado da #71)
+///
+/// A captura em `FormatoDaCaptura.jpg` já traz o círculo pintado na imagem.
+/// Desenhar o anel por cima seria um segundo círculo, em outro lugar, e o
+/// leitor de tela anunciaria uma área que a pessoa vê duas vezes. Nesse caso o
+/// anel **não é desenhado nem anunciado**; a região continua existindo como
+/// caixa invisível, só para o zoom da ampliação saber aonde ir.
+///
 /// ## Captura que não existe
 ///
 /// Quando o arquivo falta, o componente mostra [pendente] (FR-028a) e avisa
@@ -201,6 +209,7 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
 
         final Size imagem = _tamanhoDaImagem(caixa, proporcao);
         final RegiaoRelativa regiao = widget.passo.destaque;
+        final bool pintada = widget.passo.captura.formato.temMarcacaoPintada;
 
         return SizedBox.fromSize(
           size: caixa,
@@ -218,51 +227,64 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
                       // distorce, e o retângulo do widget é o pintado.
                       fit: BoxFit.fill,
                       semanticLabel: widget.passo.descricaoDaCaptura,
-                      errorBuilder:
-                          (BuildContext _, Object erro, StackTrace? pilha) =>
-                              const SizedBox.shrink(),
+                      errorBuilder: (
+                        BuildContext _,
+                        Object erro,
+                        StackTrace? pilha,
+                      ) => const SizedBox.shrink(),
                     ),
                   ),
-                  // O anel, em coordenadas da IMAGEM (FR-028c).
-                  Positioned(
-                    key: CapturaComDestaque.chaveDestaque,
-                    left: imagem.width * regiao.x,
-                    top: imagem.height * regiao.y,
-                    width: imagem.width * regiao.largura,
-                    height: imagem.height * regiao.altura,
-                    // Só bordas, nenhum preenchimento: o miolo do anel é o
-                    // botão que a pessoa precisa ver. Uma `BoxShadow` sem
-                    // desfoque pinta um retângulo CHEIO atrás da caixa — era
-                    // assim antes, e o destaque escondia o que destacava. O
-                    // halo claro, que segura o contraste sobre print escuro,
-                    // é uma segunda borda, por fora da cor primária.
-                    child: Semantics(
-                      label: TextosGuias.areaDestacada,
-                      child: DecoratedBox(
-                        key: widget.chaveDoAnel,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                            MemoraRaio.padrao,
-                          ),
-                          border: Border.all(
-                            color: cores.medalhao,
-                            width: MemoraDimensoes.bordaEnfase,
-                          ),
-                        ),
+                  // O anel, em coordenadas da IMAGEM (FR-028c). Na captura
+                  // legada, que já traz a marcação pintada, só a caixa
+                  // invisível: o zoom precisa dela, o olho não.
+                  if (pintada)
+                    Positioned(
+                      left: imagem.width * regiao.x,
+                      top: imagem.height * regiao.y,
+                      width: imagem.width * regiao.largura,
+                      height: imagem.height * regiao.altura,
+                      child: SizedBox.expand(key: widget.chaveDoAnel),
+                    )
+                  else
+                    Positioned(
+                      key: CapturaComDestaque.chaveDestaque,
+                      left: imagem.width * regiao.x,
+                      top: imagem.height * regiao.y,
+                      width: imagem.width * regiao.largura,
+                      height: imagem.height * regiao.altura,
+                      // Só bordas, nenhum preenchimento: o miolo do anel é o
+                      // botão que a pessoa precisa ver. Uma `BoxShadow` sem
+                      // desfoque pinta um retângulo CHEIO atrás da caixa — era
+                      // assim antes, e o destaque escondia o que destacava. O
+                      // halo claro, que segura o contraste sobre print escuro,
+                      // é uma segunda borda, por fora da cor primária.
+                      child: Semantics(
+                        label: TextosGuias.areaDestacada,
                         child: DecoratedBox(
+                          key: widget.chaveDoAnel,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(
                               MemoraRaio.padrao,
                             ),
                             border: Border.all(
-                              color: cores.primaria,
-                              width: MemoraDimensoes.bordaSelecao,
+                              color: cores.medalhao,
+                              width: MemoraDimensoes.bordaEnfase,
+                            ),
+                          ),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(
+                                MemoraRaio.padrao,
+                              ),
+                              border: Border.all(
+                                color: cores.primaria,
+                                width: MemoraDimensoes.bordaSelecao,
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
