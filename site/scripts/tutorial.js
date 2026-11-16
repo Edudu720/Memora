@@ -10,10 +10,12 @@
   var CHAVES_ARMAZENAMENTO = {
     escala: 'memora.tutorial.escala_fonte',
     tema: 'memora.tutorial.modo_visual',
+    movimento: 'memora.tutorial.reduzir_movimento',
   };
 
   var ESCALAS_VALIDAS = ['padrao', 'grande', 'muito-grande'];
   var TEMAS_VALIDOS = ['claro', 'escuro', 'alto-contraste'];
+  var MOVIMENTOS_VALIDOS = ['normal', 'reduzido'];
 
   var ROTULOS_ESCALA = {
     padrao: 'Letra normal',
@@ -27,6 +29,11 @@
     'alto-contraste': 'Alto contraste',
   };
 
+  var ROTULOS_MOVIMENTO = {
+    normal: 'Movimento normal',
+    reduzido: 'Movimento reduzido',
+  };
+
   function normalizarEscala(valor) {
     return ESCALAS_VALIDAS.indexOf(valor) !== -1 ? valor : 'padrao';
   }
@@ -35,10 +42,32 @@
     return TEMAS_VALIDOS.indexOf(valor) !== -1 ? valor : 'claro';
   }
 
-  function criarRepositorioPreferencias(storage) {
+  function normalizarMovimento(valor) {
+    return MOVIMENTOS_VALIDOS.indexOf(valor) !== -1 ? valor : 'normal';
+  }
+
+  function movimentoValidoOuNulo(valor) {
+    return MOVIMENTOS_VALIDOS.indexOf(valor) !== -1 ? valor : null;
+  }
+
+  function resolverMovimentoSistema(win) {
+    try {
+      return Boolean(
+        win &&
+          typeof win.matchMedia === 'function' &&
+          win.matchMedia('(prefers-reduced-motion: reduce)').matches
+      );
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function criarRepositorioPreferencias(storage, opcoes) {
+    var movimentoSistemaReduzido = Boolean(opcoes && opcoes.movimentoSistemaReduzido);
     var memoria = {
       escala: 'padrao',
       tema: 'claro',
+      movimento: null,
     };
 
     function lerChave(chave, padrao) {
@@ -69,9 +98,22 @@
       carregar: function () {
         memoria.escala = normalizarEscala(lerChave(CHAVES_ARMAZENAMENTO.escala, memoria.escala));
         memoria.tema = normalizarTema(lerChave(CHAVES_ARMAZENAMENTO.tema, memoria.tema));
+        var movimentoSalvo = movimentoValidoOuNulo(
+          lerChave(CHAVES_ARMAZENAMENTO.movimento, memoria.movimento)
+        );
+        if (movimentoSalvo !== null) {
+          memoria.movimento = movimentoSalvo;
+        }
+        var movimentoEfetivo =
+          movimentoSalvo !== null
+            ? movimentoSalvo
+            : movimentoSistemaReduzido
+              ? 'reduzido'
+              : 'normal';
         return {
           escala: memoria.escala,
           tema: memoria.tema,
+          movimento: movimentoEfetivo,
         };
       },
       salvarEscala: function (valor) {
@@ -84,6 +126,12 @@
         var normalizado = normalizarTema(valor);
         memoria.tema = normalizado;
         gravarChave(CHAVES_ARMAZENAMENTO.tema, normalizado);
+        return normalizado;
+      },
+      salvarMovimento: function (valor) {
+        var normalizado = normalizarMovimento(valor);
+        memoria.movimento = normalizado;
+        gravarChave(CHAVES_ARMAZENAMENTO.movimento, normalizado);
         return normalizado;
       },
     };
@@ -224,6 +272,7 @@
     var anuncio = document.getElementById('anuncio-acessibilidade');
     var botoesEscala = document.querySelectorAll('[data-acao-escala]');
     var botoesTema = document.querySelectorAll('[data-acao-tema]');
+    var botaoMovimento = document.querySelector('[data-acao-movimento]');
     var botoesOuvir = document.querySelectorAll('[data-botao-ouvir]');
     var linksSumario = document.querySelectorAll('[data-link-capitulo]');
     var detalhesDuvidas = document.querySelectorAll('.duvida-item');
@@ -235,7 +284,9 @@
       storageSeguro = null;
     }
 
-    var repositorio = criarRepositorioPreferencias(storageSeguro);
+    var repositorio = criarRepositorioPreferencias(storageSeguro, {
+      movimentoSistemaReduzido: resolverMovimentoSistema(globalObj),
+    });
 
     function anunciar(mensagem) {
       if (anuncio && mensagem) {
@@ -261,9 +312,23 @@
       }
     }
 
+    function aplicarMovimento(movimento, salvarEscolha, anunciarMudanca) {
+      var finalMovimento = salvarEscolha
+        ? repositorio.salvarMovimento(movimento)
+        : normalizarMovimento(movimento);
+      raiz.setAttribute('data-movimento', finalMovimento);
+      if (botaoMovimento) {
+        botaoMovimento.setAttribute('aria-pressed', finalMovimento === 'reduzido' ? 'true' : 'false');
+      }
+      if (anunciarMudanca) {
+        anunciar('Configuração de tela alterada para ' + ROTULOS_MOVIMENTO[finalMovimento] + '.');
+      }
+    }
+
     var iniciais = repositorio.carregar();
     aplicarEscala(iniciais.escala, false);
     aplicarTema(iniciais.tema, false);
+    aplicarMovimento(iniciais.movimento, false, false);
 
     for (var i = 0; i < botoesEscala.length; i += 1) {
       botoesEscala[i].addEventListener('click', function () {
@@ -274,6 +339,14 @@
     for (var j = 0; j < botoesTema.length; j += 1) {
       botoesTema[j].addEventListener('click', function () {
         aplicarTema(this.getAttribute('data-acao-tema'), true);
+      });
+    }
+
+    if (botaoMovimento) {
+      botaoMovimento.addEventListener('click', function () {
+        var atual = raiz.getAttribute('data-movimento') === 'reduzido' ? 'reduzido' : 'normal';
+        var proximo = atual === 'reduzido' ? 'normal' : 'reduzido';
+        aplicarMovimento(proximo, true, true);
       });
     }
 
@@ -333,7 +406,13 @@
       linksSumario[s].addEventListener('click', function () {
         var destino = (this.getAttribute('href') || '').replace(/^#/, '');
         if (destino) {
-          marcarCapituloAtivo(destino);
+          var movimentoReduzido = raiz.getAttribute('data-movimento') === 'reduzido';
+          executarNavegacaoComTransicao(
+            function () {
+              marcarCapituloAtivo(destino);
+            },
+            { document: document, movimentoReduzido: movimentoReduzido }
+          );
         }
       });
     }
@@ -363,12 +442,31 @@
     };
   }
 
+  function executarNavegacaoComTransicao(acao, opcoes) {
+    var doc = opcoes && opcoes.document ? opcoes.document : null;
+    var reduzido = Boolean(opcoes && opcoes.movimentoReduzido);
+    if (!reduzido && doc && typeof doc.startViewTransition === 'function') {
+      try {
+        doc.startViewTransition(acao);
+        return true;
+      } catch (_) {
+        // Fallback para navegador sem suporte completo.
+      }
+    }
+    acao();
+    return false;
+  }
+
   var api = {
     CHAVES_ARMAZENAMENTO: CHAVES_ARMAZENAMENTO,
     ESCALAS_VALIDAS: ESCALAS_VALIDAS,
     TEMAS_VALIDOS: TEMAS_VALIDOS,
+    MOVIMENTOS_VALIDOS: MOVIMENTOS_VALIDOS,
     normalizarEscala: normalizarEscala,
     normalizarTema: normalizarTema,
+    normalizarMovimento: normalizarMovimento,
+    resolverMovimentoSistema: resolverMovimentoSistema,
+    executarNavegacaoComTransicao: executarNavegacaoComTransicao,
     criarRepositorioPreferencias: criarRepositorioPreferencias,
     extrairTextoEducativo: extrairTextoEducativo,
     criarControladorDeVoz: criarControladorDeVoz,

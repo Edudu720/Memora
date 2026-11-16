@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-tema="claro" data-escala="padrao">
+<html lang="pt-BR" data-tema="claro" data-escala="padrao" data-movimento="normal">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memora — Guia Acolhedor de Uso para Pessoas Idosas</title>
+  <title>Guia do Memora — passo a passo, no seu ritmo</title>
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/main.css">
   <script src="scripts/tutorial.js" defer></script>
@@ -44,6 +44,13 @@
               <button type="button" class="botao-controle" data-acao-tema="claro" aria-pressed="true">Fundo claro</button>
               <button type="button" class="botao-controle" data-acao-tema="escuro" aria-pressed="false">Fundo escuro</button>
               <button type="button" class="botao-controle" data-acao-tema="alto-contraste" aria-pressed="false">Alto contraste</button>
+            </div>
+          </div>
+
+          <div class="grupo-controle" role="group" aria-label="Movimento na página">
+            <span class="grupo-legenda">Movimento na página</span>
+            <div class="linha-botoes">
+              <button type="button" class="botao-controle" data-acao-movimento aria-pressed="false">Reduzir movimento</button>
             </div>
           </div>
         </div>
@@ -188,9 +195,18 @@
               Toque em qualquer um dos três botões de baixo para mudar de tela sem pressa.
             </div>
             <div class="mini-tela-barra-inferior">
-              <div class="mini-destino">⚙️<span>Ajustes</span></div>
-              <div class="mini-destino mini-destino-ativo">🏠<span>Início</span></div>
-              <div class="mini-destino">👤<span>Meu perfil</span></div>
+              <div class="mini-destino">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.74 0-1.25.4-1.51 1z"></path></svg>
+                <span>Ajustes</span>
+              </div>
+              <div class="mini-destino mini-destino-ativo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"></path></svg>
+                <span>Início</span>
+              </div>
+              <div class="mini-destino">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg>
+                <span>Meu perfil</span>
+              </div>
             </div>
           </div>
           <figcaption class="mini-tela-legenda">
@@ -246,7 +262,7 @@
             <strong>Você perguntou:</strong> “Como mando um áudio no WhatsApp para minha filha?”
           </div>
           <div class="mini-tela-balao">
-            <strong>A Memora respondeu:</strong> Vamos juntos. Primeiro abra a conversa com sua filha. Depois, segure o desenho do microfone no canto de baixo enquanto fala e solte ao terminar.
+            <strong>A Memora respondeu:</strong> Vamos juntos abrir a conversa com sua filha. Depois, segure o desenho do microfone no canto de baixo enquanto fala e solte ao terminar.
           </div>
         </div>
         <figcaption class="mini-tela-legenda">
@@ -351,7 +367,7 @@
           <div class="mini-tela-moldura">
             <p class="mini-tela-titulo">Escolher foto de perfil</p>
             <div class="mini-tela-balao">
-              🔒 O Memora só vê a foto que você escolher, e ela fica guardada só neste aparelho.
+              O Memora só vê a foto que você escolher, e ela fica guardada só neste aparelho.
             </div>
             <div class="mini-botao-simulado mini-botao-secundario">Escolher da galeria</div>
             <div class="mini-botao-simulado mini-botao-secundario">Tirar foto agora</div>
@@ -378,7 +394,7 @@
         <div data-leitura-conteudo>
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/casal_idoso.svg" alt="Casal idoso sorrindo com tranquilidade">
+              <img src="assets/ilustracoes/casal_idoso.svg" alt="Duas pessoas sorrindo com tranquilidade">
             </span>
             <h3>Proteção discreta no dia a dia</h3>
           </div>
@@ -399,8 +415,8 @@
             <div class="mini-tela-balao">
               Percebemos um movimento brusco. Toque em uma das opções abaixo:
             </div>
-            <div class="mini-botao-simulado mini-botao-sucesso">✓ Estou bem</div>
-            <div class="mini-botao-simulado mini-botao-perigo">⚠ Preciso de ajuda</div>
+            <div class="mini-botao-simulado mini-botao-sucesso">Estou bem</div>
+            <div class="mini-botao-simulado mini-botao-perigo">Preciso de ajuda</div>
           </div>
           <figcaption class="mini-tela-legenda">
             Se foi apenas um movimento comum, basta tocar em “Estou bem” para silenciar tudo na hora.
@@ -489,7 +505,7 @@
             <span class="duvida-indicador">Ver resposta</span>
           </summary>
           <p class="duvida-resposta">
-            Não se preocupe. Ações importantes dentro do aplicativo — como apagar a foto de perfil, limpar conversas ou sair do aparelho — sempre pedem uma confirmação clara em tela antes de acontecer. Se você tocar em “Não” ou cancelar, nada muda.
+            Ações importantes — como apagar a foto, limpar conversas ou sair — sempre pedem confirmação na tela antes de acontecer. Se você tocar em “Não” ou cancelar, nada muda.
           </p>
         </details>
 
@@ -499,7 +515,7 @@
             <span class="duvida-indicador">Ver resposta</span>
           </summary>
           <p class="duvida-resposta">
-            De jeito nenhum. O aplicativo continua funcionando normalmente sem usar câmera nem suas fotos. Se preferir, você pode escolher na hora um dos avatares ilustrados da Memora ou deixar apenas as iniciais do seu nome.
+            O aplicativo continua funcionando normalmente sem usar câmera nem suas fotos. Se preferir, escolha na hora um dos avatares ilustrados da Memora ou deixe apenas as suas iniciais.
           </p>
         </details>
 
@@ -542,7 +558,7 @@
           <h3>Para familiares e cuidadores que apoiam os primeiros passos</h3>
         </div>
         <p class="texto-leitura">
-          Se você está ajudando alguém da família a configurar o Memora pela primeira vez, deixe a pessoa segurar e tocar na tela enquanto você acompanha ao lado. Use a Frase Secreta com palavras que façam sentido para ela, configure junto o contato de emergência e mostre que ela pode mudar o tamanho das letras sempre que quiser. O objetivo é dar autonomia, nunca substituir a pessoa.
+          Deixe a pessoa segurar o celular e tocar na tela enquanto você acompanha ao lado. Escolham juntos a Frase Secreta e lembre que o objetivo é dar autonomia, nunca substituir quem usa.
         </p>
       </article>
     </section>
@@ -558,7 +574,7 @@
   </footer>
 
   <div class="atalho-topo-fixo">
-    <a class="botao-topo" href="#topo" aria-label="Voltar para o início da página">↑ Topo</a>
+    <a class="botao-topo" href="#topo" aria-label="Topo — voltar para o início da página"><span aria-hidden="true">↑</span> Topo</a>
   </div>
 </body>
 </html>

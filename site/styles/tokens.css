@@ -101,3 +101,25 @@
   --tamanho-titulo-h2: clamp(2rem, 4vw, 2.75rem);
   --tamanho-titulo-h3: clamp(1.65rem, 3vw, 2.1rem);
 }
+
+/* Melhoria progressiva S09: light-dark() apenas para Claro/Escuro.
+   Alto contraste permanece isolado com >= 7,0:1 fora de light-dark(). */
+@supports (color: light-dark(#000, #fff)) {
+  :root:not([data-tema]),
+  :root[data-tema="claro"],
+  :root[data-tema="escuro"] {
+    --fundo: light-dark(#F8F8F8, #101216);
+    --superficie: light-dark(#FFFFFF, #1B1E24);
+    --superficie-alt: light-dark(#D8D8D8, #2A2E36);
+    --destaque: light-dark(#E3EAFF, #22305A);
+    --medalhao: light-dark(#E3EAFF, #DCE5FF);
+    --primaria: light-dark(#1040F8, #9CB8FF);
+    --sobre-primaria: light-dark(#FFFFFF, #06132E);
+    --texto: light-dark(#111111, #F2F4F8);
+    --texto-suave: light-dark(#4A4A4A, #C2C7D0);
+    --borda: light-dark(#6B6B6B, #8A909C);
+    --sucesso: light-dark(#186A2E, #7CD69A);
+    --perigo: light-dark(#B3231F, #FF9B95);
+    --sobre-perigo: light-dark(#FFFFFF, #3A0705);
+  }
+}

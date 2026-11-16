@@ -17,6 +17,11 @@ test('normaliza escalas e temas desconhecidos para padroes seguros', () => {
   assert.equal(tutorial.normalizarTema('alto-contraste'), 'alto-contraste');
   assert.equal(tutorial.normalizarTema('neon'), 'claro');
   assert.equal(tutorial.normalizarTema(undefined), 'claro');
+
+  assert.equal(tutorial.normalizarMovimento('normal'), 'normal');
+  assert.equal(tutorial.normalizarMovimento('reduzido'), 'reduzido');
+  assert.equal(tutorial.normalizarMovimento('invalido'), 'normal');
+  assert.equal(tutorial.normalizarMovimento(null), 'normal');
 });
 
 test('repositorio de preferencias persiste no storage e degrada sem erro se storage estiver bloqueado', () => {
@@ -31,11 +36,16 @@ test('repositorio de preferencias persiste no storage e degrada sem erro se stor
   };
 
   const repo = tutorial.criarRepositorioPreferencias(storageSimulado);
-  assert.deepEqual(repo.carregar(), { escala: 'padrao', tema: 'claro' });
+  assert.deepEqual(repo.carregar(), { escala: 'padrao', tema: 'claro', movimento: 'normal' });
 
   repo.salvarEscala('muito-grande');
   repo.salvarTema('alto-contraste');
-  assert.deepEqual(repo.carregar(), { escala: 'muito-grande', tema: 'alto-contraste' });
+  repo.salvarMovimento('reduzido');
+  assert.deepEqual(repo.carregar(), {
+    escala: 'muito-grande',
+    tema: 'alto-contraste',
+    movimento: 'reduzido',
+  });
 
   const storageBloqueado = {
     getItem() {
@@ -47,9 +57,40 @@ test('repositorio de preferencias persiste no storage e degrada sem erro se stor
   };
 
   const repoSemStorage = tutorial.criarRepositorioPreferencias(storageBloqueado);
-  assert.deepEqual(repoSemStorage.carregar(), { escala: 'padrao', tema: 'claro' });
+  assert.deepEqual(repoSemStorage.carregar(), {
+    escala: 'padrao',
+    tema: 'claro',
+    movimento: 'normal',
+  });
   assert.equal(repoSemStorage.salvarEscala('grande'), 'grande');
   assert.equal(repoSemStorage.salvarTema('escuro'), 'escuro');
+  assert.equal(repoSemStorage.salvarMovimento('reduzido'), 'reduzido');
+});
+
+test('reduzir movimento segue prefers-reduced-motion quando nao ha escolha salva e aceita alternancia manual', () => {
+  const dados = new Map();
+  const storageSimulado = {
+    getItem(k) {
+      return dados.has(k) ? dados.get(k) : null;
+    },
+    setItem(k, v) {
+      dados.set(k, String(v));
+    },
+  };
+
+  // Sem preferencia salva + sistema com movimento reduzido -> inicia reduzido
+  const repoSistema = tutorial.criarRepositorioPreferencias(storageSimulado, {
+    movimentoSistemaReduzido: true,
+  });
+  assert.equal(repoSistema.carregar().movimento, 'reduzido');
+
+  // Escolha manual da pessoa para voltar ao normal prevalece sobre o sistema
+  assert.equal(repoSistema.salvarMovimento('normal'), 'normal');
+  assert.equal(repoSistema.carregar().movimento, 'normal');
+
+  assert.equal(tutorial.resolverMovimentoSistema({ matchMedia: () => ({ matches: true }) }), true);
+  assert.equal(tutorial.resolverMovimentoSistema({ matchMedia: () => ({ matches: false }) }), false);
+  assert.equal(tutorial.resolverMovimentoSistema(null), false);
 });
 
 test('controlador de voz fica oculto quando navegador nao suporta speechSynthesis', () => {
@@ -139,4 +180,36 @@ test('extrai exclusivamente conteudo educativo de leitura sem texto de controles
     'Boas-vindas ao Memora. Eu mostro o caminho e voce faz.'
   );
   assert.equal(tutorial.extrairTextoEducativo(null), '');
+});
+
+test('transicao entre capitulos usa startViewTransition quando permitido e desliga sob movimento reduzido', () => {
+  let transicoes = 0;
+  let executou = 0;
+
+  const docComSuporte = {
+    startViewTransition(fn) {
+      transicoes += 1;
+      fn();
+    },
+  };
+
+  assert.equal(
+    tutorial.executarNavegacaoComTransicao(() => { executou += 1; }, {
+      document: docComSuporte,
+      movimentoReduzido: false,
+    }),
+    true
+  );
+  assert.equal(transicoes, 1);
+  assert.equal(executou, 1);
+
+  assert.equal(
+    tutorial.executarNavegacaoComTransicao(() => { executou += 1; }, {
+      document: docComSuporte,
+      movimentoReduzido: true,
+    }),
+    false
+  );
+  assert.equal(transicoes, 1);
+  assert.equal(executou, 2);
 });

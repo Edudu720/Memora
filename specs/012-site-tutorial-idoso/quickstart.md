@@ -1,47 +1,59 @@
-# Quickstart de Validação: Site Tutorial do Memora (`012-site-tutorial-idoso`)
+# Quickstart de Validação: Site Tutorial do Memora (`012`) — Rodada 2
 
-**Branch**: `feature/012-site-tutorial-idoso` | **Date**: 2026-11-16 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/012-site-tutorial-idoso/spec.md)
+**Branch**: `redesign/S01-S10-S11-site-base` | **Date**: 2026-11-16 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/012-site-tutorial-idoso/spec.md)
 
-Este guia descreve como abrir, inspecionar e validar o site estático de tutorial após a implementação, sem alterar nem depender do aplicativo Android (`app/`) ou do servidor (`backend/`).
+Este guia descreve como regenerar os ativos da Memora para o site (`S02`), executar localmente e validar todos os portões automatizados e manuais do site estático.
 
 ---
 
 ## 1. Pré-requisitos
 
-- **Navegador moderno** (Chrome, Edge ou Firefox no Windows/macOS/Android) — funciona tanto abrindo diretamente o arquivo `site/index.html` quanto por servidor estático local.
-- **Python 3.11+** (para o validador estrutural, anti-engenharia social e WCAG 2.2) e **Node.js 20+** (para testes unitários da lógica cliente de preferências e voz).
+- **Navegador moderno** (Chrome, Edge ou Firefox no Windows/macOS/Android) — funciona abrindo `site/index.html` diretamente ou via servidor HTTP estático.
+- **Python 3.12+** (`site/tests/validar_site.py` e validadores do Design System).
+- **Node.js 20+** (`node --test site/tests/tutorial.test.mjs`).
+- **Dart 3.13+ / Flutter 3.47.7** (somente quando for preciso rodar o exportador `S02` após alterações nos pintores ou na lista de dicas do app).
+- **Playwright + axe-core (apenas dev/CI, `S12`)** para auditoria automática de acessibilidade, contraste dinâmico, layout a `200%` e orçamento em celular lento simulado.
 
 ---
 
-## 2. Como Executar Localmente (PC e Celular)
+## 2. Exportar a Memora e as Dicas do Aplicativo (`S02`, após `T083`/`T086`)
 
-### Modo arquivo local (offline puro)
-Abra diretamente no navegador: `site/index.html`.
+Sempre que os pintores em `app/lib/design_system/componentes/ilustracao/memora_animada/` ou a lista fixa de dicas da anfitriã mudarem no aplicativo:
 
-### Modo servidor estático local (recomendado para testar no emulador/celular da rede)
-Na raiz do repositório:
+```powershell
+cd app
+dart run tool/exportar_memora_site.dart
+```
+
+Resultado esperado: atualização determinística de `site/assets/memora/*.svg` (grupos nomeados por parte) e `site/assets/memora/memora.json` (poses, paletas e lista de dicas).
+
+---
+
+## 3. Como Executar Localmente (PC e Celular)
 
 ```powershell
 python -m http.server 8080 --directory site
 ```
 
-Acesse `http://localhost:8080` no navegador do computador (e utilize o modo responsivo DevTools em `320×568`, `390×844`, `768×1024` e `1280×800`).
+Acesse `http://localhost:8080` e teste em `320×568`, `390×844`, `768×1024` e `1280×800`.
 
 ---
 
-## 3. Portões Automatizados Esperados
+## 4. Portões Automatizados (`S11`, `S12`, `S13`)
 
-1. **Validador estrutural, offline, anti-phishing e contraste WCAG 2.2**:
+1. **Validador estático, WCAG 2.2, `memora-ux` e orçamento JS**:
    ```powershell
    python site/tests/validar_site.py
    ```
-   - Verifica ausência de `<form>`, `<input>` sensíveis, links externos `http(s)://`, dependências de rede externas, `alt` em todas as imagens, presença dos arquivos em `site/assets/ilustracoes/`, hierarquia de títulos e razão de contraste WCAG 2.2 AA/AAA em `site/styles/tokens.css`.
-2. **Testes lógicos em Node.js (`node --test`)**:
+   - Confere semântica HTML, título/textos pela `memora-ux` (`<= 2` frases curtas, zero emoji, zero termos proibidos), ausência de formulários/links externos/CDNs, remoção das 7 imagens antigas da Memora, contraste WCAG 2.2 AA/AAA e teto de JavaScript `<= 100 KB`.
+2. **Testes unitários em Node.js (`node --test`)**:
    ```powershell
    node --test site/tests/tutorial.test.mjs
    ```
-   - Valida troca de escala (`padrao`, `grande`, `muito-grande`), troca de tema (`claro`, `escuro`, `alto-contraste`), fallback limpo sem `localStorage` e exclusividade de leitura em voz alta (um capítulo por vez + ocultação quando `speechSynthesis` não existe).
-3. **Não regressão dos portões já existentes no repositório**:
+   - Valida escala, tema, controle **"Reduzir movimento"** (preferência do sistema vs alternância manual), rotação e pausa da anfitriã (`20 s`, `"Outra dica da Memora"`), ciclo de `<memora-personagem>` e sincronismo `onboundary` + fallback.
+3. **Auditoria dev/CI com Playwright + axe-core (`S12`)**:
+   - Roda automaticamente no job `site` de `.github/workflows/verificacao.yml` (ou localmente na pasta de testes e2e), validando ausência de violações `axe-core`, zero rolagem lateral em `320×568` com fonte `200%`, e orçamento de animação/desempenho com CPU reduzida simulada.
+4. **Portões existentes do repositório**:
    ```powershell
    python specs/002-design-system/ferramentas/validar_paleta.py
    python specs/002-design-system/ferramentas/validar_tokens.py
@@ -49,10 +61,11 @@ Acesse `http://localhost:8080` no navegador do computador (e utilize o modo resp
 
 ---
 
-## 4. Checklist Rápido de Conferência Visual e Manual
+## 5. Checklist Rápido de Conferência Manual
 
-- [ ] **PC (`1280×800`)**: abertura acolhedora com ilustração da Memora, sumário legível no topo, cartões bem espaçados em grade confortável, mini-telas visuais claras e retorno rápido ao topo.
-- [ ] **Celular estreito (`320×568`) a `100%` e `200%` (`Letra muito grande`)**: coluna única fluida, **zero** rolagem horizontal (`scrollWidth <= clientWidth`), botões amplos (`>= 48×48 px`) e sem texto cortado.
-- [ ] **Temas visuais**: `Fundo claro`, `Fundo escuro` e `Alto contraste` alternam imediatamente preservando leitura nítida nas mini-telas e medalhões das ilustrações.
-- [ ] **Leitura em voz alta**: botão `"Ouvir este trecho"` lê em português brasileiro, troca para `"Parar leitura"` e interrompe automaticamente ao iniciar outro trecho.
-- [ ] **Teclado e leitor de tela**: pressionar `Tab` revela `"Ir direto para o conteúdo principal"`, foco é sempre visível e todos os `<details>` das Dúvidas Frequentes abrem com `Enter`/`Espaço`.
+- [ ] **`<title>` e textos (`S11`)**: aba sem `"Pessoas Idosas"` e todos os blocos visíveis curtos (`<= 2` frases) e sem emojis.
+- [ ] **Anfitriã e `<memora-personagem>` (`S03`–`S05`)**: personagem vetorial 2.5D visível com respiração/piscar suaves, dica alternando em `20 s` e parando imediatamente ao tocar em **"Outra dica da Memora"**.
+- [ ] **Leitura em voz alta (`S06`)**: **"Ouvir este trecho"** anima a boca durante a fala e volta ao repouso ao concluir ou ao trocar de capítulo.
+- [ ] **Conforto `"Reduzir movimento"` (`S10`)**: inicia marcado se o sistema pedir `prefers-reduced-motion: reduce`, permite alternar manualmente e congela personagem, dicas automáticas e transições CSS.
+- [ ] **Modos visuais (`S09`)**: `Fundo claro`, `Fundo escuro` e `Alto contraste` mantêm contraste integral inclusive em navegadores sem suporte a `light-dark()`.
+- [ ] **Celular estreito (`320×568`) a `200%`**: `scrollWidth <= clientWidth`, botões `>= 48×48 px` e foco visível ao navegar com `Tab`.

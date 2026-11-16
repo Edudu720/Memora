@@ -42,7 +42,7 @@ bem.
 
 ## Tarefas
 
-- [ ] **S01** — `/speckit-clarify` da spec 012: registrar a Memora animada, o
+- [X] **S01** — `/speckit-clarify` da spec 012: registrar a Memora animada, o
   botão "reduzir movimento", a regra de biblioteca copiada para dentro e as
   escolhas técnicas acima.
 - [ ] **S02** — **Exportador da Memora** (ferramenta em Dart): roda os
@@ -68,22 +68,22 @@ bem.
 - [ ] **S06** — **A Memora fala junto com o "Ouvir"**: o site já lê os
   capítulos em voz alta; a boca dela acompanha a leitura pelos eventos de
   fronteira de palavra da síntese de voz. Depende da S03.
-- [ ] **S07** — Ícones das "portas" e das pessoas: trocar pela mesma família
+- [X] **S07** — Ícones das "portas" e das pessoas: trocar pela mesma família
   arredondada do aplicativo (SVG copiado para dentro), com resposta ao toque e
   ao foco.
-- [ ] **S08** — Movimento da página: transição suave ao pular de capítulo
+- [X] **S08** — Movimento da página: transição suave ao pular de capítulo
   pelo sumário e capítulo surgindo com a rolagem, com `@supports` e desligado
   com "reduzir movimento". Depende da S10.
-- [ ] **S09** — CSS moderno: tokens com `light-dark()`, consultas de
+- [X] **S09** — CSS moderno: tokens com `light-dark()`, consultas de
   contêiner nos cartões, `text-wrap: pretty`; o contraste continua validado
   pelo `validar_site.py`.
-- [ ] **S10** — Botão **"Reduzir movimento"** no painel de conforto, guardado
+- [X] **S10** — Botão **"Reduzir movimento"** no painel de conforto, guardado
   como já são o tamanho da letra e o tema.
-- [ ] **S11** — Texto pela memora-ux: o título da aba sem "Pessoas Idosas"
+- [X] **S11** — Texto pela memora-ux: o título da aba sem "Pessoas Idosas"
   (sugestão: "Guia do Memora — passo a passo, no seu ritmo") e duas frases por
   bloco, com o mesmo portão de texto do aplicativo dentro do
   `validar_site.py`.
-- [ ] **S12** — Qualidade no CI: um job para o site (hoje o `validar_site.py`
+- [X] **S12** — Qualidade no CI: um job para o site (hoje o `validar_site.py`
   e o `tutorial.test.mjs` não rodam no CI), mais Playwright com axe-core para
   acessibilidade e uma meta de desempenho simulando celular lento. Tudo só em
   desenvolvimento; nada disso vai para o site publicado.

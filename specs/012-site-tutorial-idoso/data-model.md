@@ -1,8 +1,8 @@
-# Data Model: Site Tutorial Acolhedor do Memora (`012-site-tutorial-idoso`)
+# Data Model: Site Tutorial Acolhedor do Memora (`012`) — Rodada 2
 
-**Branch**: `feature/012-site-tutorial-idoso` | **Date**: 2026-11-16 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/012-site-tutorial-idoso/spec.md)
+**Branch**: `redesign/S01-S10-S11-site-base` | **Date**: 2026-11-16 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/012-site-tutorial-idoso/spec.md)
 
-Não há banco de dados, servidor nem persistência de dados pessoais. Este modelo documenta a estrutura semântica dos conteúdos da página e o estado local efêmero de preferências de leitura.
+Não há banco de dados, servidor nem persistência de dados pessoais. Este modelo documenta as preferências locais de conforto, os metadados exportados da Memora (`S02`) e os estados efêmeros da anfitriã, do personagem e da síntese de voz.
 
 ---
 
@@ -12,37 +12,55 @@ Armazenada opcionalmente em `localStorage` sob chaves isoladas não sensíveis (
 
 | Campo | Chave Local | Valores Permitidos | Padrão Inicial | Regra de Validação |
 | :--- | :--- | :--- | :--- | :--- |
-| `tamanhoFonte` | `memora.tutorial.escala_fonte` | `'padrao'` \| `'grande'` \| `'muito-grande'` | `'padrao'` | Valor fora da enumeração volta silenciosamente para `'padrao'`. Equivalências visuais: `1.125rem` (`18px`), `1.45rem` (`~23px`) e `2.0rem` (`32px`, `200%` sobre `16px`). |
-| `modoVisual` | `memora.tutorial.modo_visual` | `'claro'` \| `'escuro'` \| `'alto-contraste'` | `'claro'` | Valor fora da enumeração volta para `'claro'`. Refletido no atributo `data-tema` da raiz do documento (`<html>`). |
+| `tamanhoFonte` | `memora.tutorial.escala_fonte` | `'padrao'` \| `'grande'` \| `'muito-grande'` | `'padrao'` | Valor fora da enumeração volta silenciosamente para `'padrao'`. Refletido em `data-escala` no `<html>`. Equivalências: `1.125rem` (`18px`), `1.45rem` (`~23px`) e `2.0rem` (`32px`, `200%` sobre `16px`). |
+| `modoVisual` | `memora.tutorial.modo_visual` | `'claro'` \| `'escuro'` \| `'alto-contraste'` | `'claro'` | Valor fora da enumeração volta para `'claro'`. Refletido em `data-tema` no `<html>`. |
+| `reduzirMovimento` | `memora.tutorial.reduzir_movimento` | `'normal'` \| `'reduzido'` | Sistema (`prefers-reduced-motion: reduce` → `'reduzido'`, senão `'normal'`) | Sem valor salvo em `localStorage`, segue o sistema operacional. Após alternância manual no painel, o valor salvo prevalece. Refletido em `data-movimento` no `<html>`. |
 
 **Nota de privacidade**: Nenhum dado de identificação, nome, CPF, telefone, senha ou histórico de navegação pessoal é gravado ou transmitido.
 
 ---
 
-## 2. Estado de Leitura em Voz Alta (`EstadoLeituraEmVoz`)
+## 2. Pacote Exportado da Memora (`DadosExportadosDaMemora`, `S02`)
+
+Gerado em build pelo exportador Dart em `site/assets/memora/` (`memora.json`, SVGs `<expressao>.svg` e módulo local `memora-dados.js` para uso direto via `file://` sem depender de `fetch`):
+
+| Campo / Artefato | Tipo / Estrutura | Origem Única | Regras |
+| :--- | :--- | :--- | :--- |
+| `<expressao>.svg` e `memora-dados.js` | SVG estático com grupos `<g id="...">` nomeados (`sombra`, `corpo`, `painel-peito`, `antena`, `cabeca`, `visor`, `rosto`, `olhos`, `boca`, `braco-esquerdo`, `braco-direito`, `escudo`, `livro`) + módulo JS local com o mesmo pacote inline | `PintorDaMemora` + `poses.dart` | 8 expressões: `neutra`, `falando`, `pensando`, `comemorando`, `preocupada`, `acenando`, `dica`, `mini`; funcionamento idêntico sob `file://` e `http(s)://`, com fallback limpo para texto puro se o carregamento falhar. |
+| `paletas` | Mapa `{ claro, escuro, alto-contraste }` -> tokens hexadecimais da Memora | Tokens oficiais do Design System (`cores.dart`) | Mantém contraste mínimo `>= 3:1` em todos os 3 modos visuais. |
+| `poses` | Mapa por expressão com transformações/visibilidade das partes | `poses.dart` | Usado pelo `<memora-personagem>` para respiração, piscar, aceno, fala e comemoração. |
+| `dicasDaAnfitria` | Lista ordenada de strings (blocos curtos `<= 2` frases) | Lista fixa da `T086` (`textos_anfitria.dart`) | Fonte única imutável em runtime; revisada por PR; zero geração dinâmica pela IA. |
+
+---
+
+## 3. Estado da Anfitriã do Site (`EstadoDaAnfitria`, `S05`, `FR-015`)
+
+Gerenciado em memória na sessão da página:
+
+| Campo | Tipo | Valores / Estado | Regras de Transição |
+| :--- | :--- | :--- | :--- |
+| `indiceAtual` | `number` | `0 .. dicasDaAnfitria.length - 1` | Inicializado em `0`. Avança circularmente (`(indice + 1) % total`) ao vencer o temporizador ou ao clicar em **"Outra dica da Memora"**. |
+| `rotacaoAutomaticaAtiva` | `boolean` | `true` \| `false` | Inicia `true` apenas se `reduzirMovimento === 'normal'` e sem leitor de tela/foco contínuo bloqueando. Muda para `false` permanentemente na sessão após qualquer acionamento manual de **"Outra dica da Memora"** (`WCAG 2.2.2`), ou sempre que `reduzirMovimento` mudar para `'reduzido'`. |
+| `intervaloMs` | `number` | `20000` | Intervalo fixo de `20 s` entre trocas automáticas quando ativo. |
+
+---
+
+## 4. Estado de Leitura em Voz Alta e Sincronismo (`EstadoLeituraEmVoz`, `S06`, `FR-013`)
 
 Gerenciado exclusivamente em memória durante a sessão aberta na página:
 
 | Campo | Tipo | Valores / Estado | Regras de Transição |
 | :--- | :--- | :--- | :--- |
 | `suportado` | `boolean` | `'speechSynthesis' in window` | Se `false`, todos os botões `"Ouvir este trecho"` permanecem com atributo `hidden`. |
-| `secaoAtivaId` | `string \| null` | ID da seção em leitura ou `null` | Apenas uma seção pode estar ativa por vez. Iniciar nova seção chama `speechSynthesis.cancel()` antes de iniciar a nova fala e atualiza o rótulo anterior de volta para `"Ouvir este trecho"`. |
-| `estado` | `'ocioso' \| 'lendo'` | `'ocioso'` inicialmente | Botão ativo alterna `aria-pressed="true"` e texto visível para `"Parar leitura"`. Ao concluir naturalmente (`onend`) ou dar erro (`onerror`), retorna silenciosamente para `'ocioso'` sem pop-ups alarmistas. |
+| `secaoAtivaId` | `string \| null` | ID da seção em leitura ou `null` | Apenas uma seção pode estar ativa por vez. Iniciar nova seção chama `speechSynthesis.cancel()` antes de iniciar a nova fala. |
+| `estado` | `'ocioso' \| 'lendo'` | `'ocioso'` inicialmente | Alterna `aria-pressed="true"` e rótulo `"Parar leitura"`. Propaga `falando="true"` para o `<memora-personagem>` associado entre `onstart` e `onend`/`onerror`. |
+| `modoSincroniaBoca` | `'boundary' \| 'pulso' \| 'parada'` | `'parada'` quando ocioso ou movimento reduzido | Usa pulsos diretos de `onboundary` quando o navegador emite eventos; se passarem alguns instantes de `onstart` sem `onboundary`, alterna para `'pulso'` rítmico calmo até `onend`. Sob `reduzirMovimento === 'reduzido'`, permanece `'parada'`. |
 
 ---
 
-## 3. Catálogo Estrutural de Capítulos do Tutorial (`CapituloDoTutorial`)
+## 5. Catálogo Estrutural de Capítulos do Tutorial (`CapituloDoTutorial`)
 
-Cada capítulo da página única contínua segue contrato uniforme para navegação no sumário (`FR-005`), acessibilidade (`AC-005`) e leitura em voz alta (`FR-013`):
-
-| ID da Âncora | Rótulo no Sumário | Objetivo Pedagógico | Elementos Visuais Associados |
-| :--- | :--- | :--- | :--- |
-| `#boas-vindas` | Início e Propósito | Apresentar o Memora, tirar o medo de errar e exibir o lema *"Eu mostro o caminho e você faz..."*. | Ilustração `memora_falando.svg` em medalhão + cartão de compromisso de respeito. |
-| `#primeiros-passos` | Primeiros Passos | Explicar Frase Secreta, Modo Assistido familiar e saída segura em 2 confirmações. | Mini-tela ilustrativa da Frase Secreta e apoio em dois passos (`pessoa_com_celular.svg`). |
-| `#navegacao-3-toques` | Os 3 Botões Principais | Explicar a barra inferior simples (`Ajustes`, `Início` e `Meu perfil`) e a regra de até 3 toques. | Mini-tela ilustrativa da barra inferior com os 3 botões legendados em português. |
-| `#conversa-e-historico` | Conversar e Histórico | Ensinar como tirar dúvidas com a Memora sem jargões e conferir *"O que eu fiz por você"*. | Ilustração `porta_conversa.svg` + `porta_registro.svg` + exemplo visual de diálogo educativo. |
-| `#aplicativos-e-servicos` | Aplicativos do Dia a Dia | Mostrar como abrir WhatsApp, Telefone, Fotos, Gov.br e Saúde com aviso amigável prévio. | Ilustrações `porta_aplicativos.svg` + `porta_servicos.svg` + exemplo da tela de aviso antes de sair do app. |
-| `#ajustes-e-foto` | Ajustes e Foto de Perfil | Ensinar a mudar tamanho de letra/cores em Ajustes e colocar foto/avatar guardado só no aparelho em Meu perfil. | Ilustrações `ajuste_aparencia.svg` + `memora_perfil_robo.png` + mini-tela das 3 opções de retrato. |
-| `#pulseira-cuidado` | Pulseira de Cuidado | Explicar de forma acolhedora o acompanhamento de batimentos e a checagem de queda em 45s (`Estou bem` / `Preciso de ajuda`). | Ilustração `casal_idoso.svg` / `memora_ajuda_robo.png` + mini-tela calma com os dois botões grandes. |
-| `#protecao-golpes` | Proteção contra Golpes | Destacar o que o Memora NUNCA faz e orientar reação calma diante de ligações ou links suspeitos. | Ilustração `memora_alerta_robo.png` + quadro de alerta claro em `perigo` e escudo de garantia. |
-| `#duvidas-frequentes` | Dúvidas Frequentes | Responder de forma paciente e tranquilizadora às dúvidas mais comuns do dia a dia (incluindo câmera negada e modo offline). | Blocos expansíveis nativos (`<details>`/`<summary>`) + dica rápida para familiares/cuidadores. |
+Mantém os 9 capítulos semânticos (`#boas-vindas` até `#duvidas-frequentes`), atualizando seus ativos e textos para a Rodada 2:
+- **Personagem**: substitui as 7 imagens antigas de PNG/SVG da Memora pelo componente `<memora-personagem>` (`S03`, `S04`, `S05`).
+- **Ícones de portas e pessoas**: substituídos por ícones arredondados vetoriais consistentes com o aplicativo (`S07`).
+- **Blocos textuais**: todos os títulos, parágrafos, passos e FAQ limitados a no máximo **2 frases curtas** pela `memora-ux`, sem termos proibidos nem emojis (`S11`).
