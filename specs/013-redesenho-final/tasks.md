@@ -235,7 +235,7 @@ acenando → fluxo de entrada, sem pulo.
 > premissas abaixo foram conferidos no código. Antes de começar, a branch
 > precisa ter recebido a `develop` (T080).
 
-- [ ] T080 Trazer a `develop` para a `feature/013-redesenho-final` **depois** que a `feature/004-prints-e-zoom` (com os guias integrados ao modelo da 004) entrar nela; rodar os quatro portões. Conflito esperado em `validar_paleta.py` (os pares da Memora daqui × os tokens da 007): somar os dois **(rev. 16/11)**
+- [X] T080 Trazer a `develop` para a `feature/013-redesenho-final` **depois** que a `feature/004-prints-e-zoom` (com os guias integrados ao modelo da 004) entrar nela; rodar os quatro portões. Conflito esperado em `validar_paleta.py` (os pares da Memora daqui × os tokens da 007): somar os dois **(rev. 16/11)**
 
 ## Phase 9: Integração com a 007
 
