@@ -83,6 +83,12 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   privacidade) e um modelo 3D da Memora que a equipe não tem; o 2.5D com luz,
   brilho, sombra de contato e giro de cabeça entrega a sensação de volume sem
   dependência nova (FR-048 a FR-058).
+- Pedido do Henrique ao ver a abertura no celular (2026-11-16, noite): a tela
+  de carregamento passa a mostrar a **anfitriã** (o desenho aprimorado da
+  FR-048) **segurando a barra de carregamento**, em vez da Memora comum só
+  acenando; o aceno de antes durava pouco demais. A Memora parada da abertura
+  nativa do Android (o instante antes do aplicativo) **fica como está** por
+  ora (FR-036, FR-037; T092).
 - Consequências que a constituição impõe ao pedido: a dica que troca sozinha
   precisa poder parar (WCAG 2.2.2, FR-052/053); o toque na anfitriã vira uma
   **ação** ("outra dica") e por isso ganha rótulo e área de toque (FR-055),
