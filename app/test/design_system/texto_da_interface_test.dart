@@ -176,9 +176,15 @@ List<String> palavrasProibidasEm(String texto) {
   return achadas;
 }
 
+/// A propriedade Unicode dos pictogramas. Fica numa constante porque o lint
+/// `valid_regexps` lê o literal como se o modo Unicode estivesse desligado e
+/// acusa `\p{...}` de inválido — um falso positivo: com `unicode: true` a
+/// expressão é válida, e o autoteste acima prova que ela acha cada emoji.
+const String _pictograma = r'\p{Extended_Pictographic}';
+
 /// Verdadeiro se houver emoji (pictograma) no texto.
 bool temEmoji(String texto) =>
-    RegExp(r'\p{Extended_Pictographic}', unicode: true).hasMatch(texto);
+    RegExp(_pictograma, unicode: true).hasMatch(texto);
 
 /// Extrai `static const String nome = <literais>;` de um arquivo de texto,
 /// juntando literais concatenados e desfazendo o escape das aspas.
