@@ -114,6 +114,9 @@ class CamadaBraco extends CamadaDaMemora {
         ).createShader(caixa),
       fator: 0.9,
     );
+    if (ctx.detalhada) {
+      ctx.luzNaBorda(canvas, braco, caixa, espessura: 0.028, forca: 0.8);
+    }
   }
 
   /// O dedo: uma cápsula arredondada que sai do alto da mão fechada.
@@ -187,7 +190,11 @@ class CamadaBraco extends CamadaDaMemora {
     canvas.drawCircle(
       mao.translate(-ctx.l(0.018), -ctx.l(0.022)),
       ctx.l(0.011),
-      ctx.cheio(ctx.cores.visor.withValues(alpha: 0.55)),
+      ctx.cheio(
+        ctx.detalhada
+            ? ctx.cores.brilho.withValues(alpha: 0.9)
+            : ctx.cores.visor.withValues(alpha: 0.55),
+      ),
     );
   }
 }

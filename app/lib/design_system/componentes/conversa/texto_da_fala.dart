@@ -45,12 +45,18 @@ class TextoDaFala extends StatefulWidget {
   /// rolar atrás do texto que cresce.
   final VoidCallback? aoAvancar;
 
+  /// Chamado quando a última letra entra na tela e a escrita para — o sinal
+  /// de que a Memora "parou de falar" (a boca da anfitriã, FR-051). Não é
+  /// chamado quando o texto já nasce inteiro (sem escrever aos poucos).
+  final VoidCallback? aoTerminar;
+
   /// Cria o texto.
   const TextoDaFala(
     this.texto, {
     this.aosPoucos = false,
     this.emAndamento = false,
     this.aoAvancar,
+    this.aoTerminar,
     super.key,
   });
 
@@ -136,6 +142,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
     if (porLetra <= 0) {
       setState(() => _reveladas = _total.toDouble());
       _relogio.stop();
+      widget.aoTerminar?.call();
       return;
     }
 
@@ -148,8 +155,10 @@ class _TextoDaFalaState extends State<TextoDaFala>
     setState(() {
       _reveladas = math.min(_total.toDouble(), _reveladas + segundos * ritmo);
     });
-    if (_reveladas >= _total) _relogio.stop();
+    final bool terminou = _reveladas >= _total;
+    if (terminou) _relogio.stop();
     widget.aoAvancar?.call();
+    if (terminou) widget.aoTerminar?.call();
   }
 
   @override

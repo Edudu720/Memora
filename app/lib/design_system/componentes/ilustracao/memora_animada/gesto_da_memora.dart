@@ -12,4 +12,8 @@ enum GestoDaMemora {
 
   /// Salta com os braços para cima, uma vez. Fim de um passo a passo.
   comemoracao,
+
+  /// Um pulinho leve, sem mudar de expressão: encolhe, salta esticada e pousa
+  /// (feature 013, T087). É o gesto da anfitriã; a comemoração é o grande.
+  pulinho,
 }

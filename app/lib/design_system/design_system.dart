@@ -34,6 +34,7 @@ export 'componentes/ilustracao/avatar_memora.dart';
 export 'componentes/ilustracao/icone_do_aplicativo.dart';
 export 'componentes/ilustracao/ilustracao_memora.dart';
 export 'componentes/ilustracao/medalhao_de_ilustracao.dart';
+export 'componentes/ilustracao/memora_anfitria.dart';
 export 'componentes/ilustracao/memora_animada/gesto_da_memora.dart';
 export 'componentes/ilustracao/memora_animada/memora_animada.dart';
 export 'componentes/ilustracao/memora_animada/poses.dart';

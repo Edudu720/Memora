@@ -443,6 +443,13 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
       ),
 
+      const _Secao('MemoraAnfitria', 'A Memora do Início (T089): mais '
+          'detalhada, se mexe sozinha e conta dicas num balão, com a boca '
+          'mexendo enquanto o texto aparece. A dica troca a cada 20 s, menos '
+          'com leitor de tela, com "reduzir movimento" ou depois de um toque. '
+          'Tocar nela mostra a próxima e nunca leva a lugar nenhum.'),
+      Center(child: MemoraAnfitria()),
+
       const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
           'cartão. No máximo uma principal por tela. A desabilitada só existe '
           'aqui: porta que não abre não é mostrada (FR-018).'),

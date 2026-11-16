@@ -78,6 +78,15 @@ class CoresDaMemora {
   /// A sombra que a Memora faz no chão.
   final Color sombraChao;
 
+  /// O brilho especular da anfitriã (T087): o ponto de luz forte no vidro e
+  /// na quina da cabeça. Vem do visor da paleta, clareado.
+  final Color brilho;
+
+  /// A luz de contorno da anfitriã (T087): o fio de luz que desenha a borda
+  /// do lado oposto à luz principal e a destaca do fundo. Mistura da luz do
+  /// corpo com o visor da paleta.
+  final Color luzDeContorno;
+
   /// Cria um conjunto de cores da Memora.
   const CoresDaMemora({
     required this.corpo,
@@ -95,6 +104,8 @@ class CoresDaMemora {
     required this.livro,
     required this.livroPagina,
     required this.sombraChao,
+    required this.brilho,
+    required this.luzDeContorno,
   });
 
   // ---- o que é fixo, em todas as paletas ----
@@ -107,6 +118,7 @@ class CoresDaMemora {
   static const Color _livroPagina = Color(0xFFE8EEF8);
   static const Color _olho = Color(0xFF0E1F53);
 
+  static const Color _branco = Color(0xFFFFFFFF);
   static const Color _sombraNoClaro = Color(0x520D1C50);
   static const Color _sombraNoEscuro = Color(0x8C000000);
 
@@ -175,6 +187,8 @@ class CoresDaMemora {
     livro: _livro,
     livroPagina: _livroPagina,
     sombraChao: Color(0x00000000),
+    brilho: Color(0xFFF8FAFF),
+    luzDeContorno: Color(0xFF9DB8FF),
   );
 
   /// As cores da Memora para um tema e uma paleta.
@@ -205,6 +219,8 @@ class CoresDaMemora {
       livro: _livro,
       livroPagina: _livroPagina,
       sombraChao: escuro ? _sombraNoEscuro : _sombraNoClaro,
+      brilho: Color.lerp(p.visor, _branco, 0.55)!,
+      luzDeContorno: Color.lerp(p.luz, p.visor, 0.5)!,
     );
   }
 

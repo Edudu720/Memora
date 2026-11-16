@@ -22,6 +22,14 @@ abstract final class MemoraMovimento {
   /// A Memora comemora o fim de um passo a passo (FR-003).
   static const Duration comemoracao = Duration(milliseconds: 1000);
 
+  /// A anfitriã dá um pulinho (feature 013, T087): mais curto que a comemoração.
+  static const Duration pulinho = Duration(milliseconds: 900);
+
+  /// Tempo entre uma dica da anfitriã e a próxima, quando ela troca sozinha
+  /// (FR-052). Mais lento que isto o Início parece parado; mais depressa, a
+  /// pessoa não termina de ler.
+  static const Duration trocaDeDica = Duration(seconds: 20);
+
   /// Quanto leva para a Memora ir de uma expressão a outra.
   static const Duration trocaDeExpressao = Duration(milliseconds: 360);
 
