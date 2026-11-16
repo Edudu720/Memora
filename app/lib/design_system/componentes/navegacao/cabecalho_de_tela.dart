@@ -88,40 +88,47 @@ class CabecalhoDeTela extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MemoraCores cores = context.memora.cores;
     final double? figura = _tamanhoDaFigura(context);
 
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          MemoraEspacamento.lg,
-          MemoraEspacamento.sm,
-          MemoraEspacamento.lg,
-          MemoraEspacamento.lg,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (aoVoltar != null) ...<Widget>[
-              _Voltar(aoVoltar: aoVoltar!),
-              const SizedBox(height: MemoraEspacamento.sm),
-            ],
-            Row(
-              children: <Widget>[
-                Expanded(child: TextoMemora.tituloTela(titulo)),
-                if (figura != null) ...<Widget>[
-                  const SizedBox(width: MemoraEspacamento.md),
-                  KeyedSubtree(
-                    key: chaveFigura,
-                    child: memora != null
-                        ? MemoraPersonagem(expressao: memora!, tamanho: figura)
-                        : MedalhaoDeIlustracao(ilustracao!, tamanho: figura),
-                  ),
-                ],
+    return DecoratedBox(
+      decoration: BoxDecoration(color: cores.fundo),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            MemoraEspacamento.lg,
+            MemoraEspacamento.sm,
+            MemoraEspacamento.lg,
+            MemoraEspacamento.lg,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if (aoVoltar != null) ...<Widget>[
+                _Voltar(aoVoltar: aoVoltar!),
+                const SizedBox(height: MemoraEspacamento.sm),
               ],
-            ),
-          ],
+              Row(
+                children: <Widget>[
+                  Expanded(child: TextoMemora.tituloTela(titulo)),
+                  if (figura != null) ...<Widget>[
+                    const SizedBox(width: MemoraEspacamento.md),
+                    KeyedSubtree(
+                      key: chaveFigura,
+                      child: memora != null
+                          ? MemoraPersonagem(expressao: memora!, tamanho: figura)
+                          : MedalhaoDeIlustracao(
+                              ilustracao!,
+                              tamanho: figura,
+                            ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -135,12 +142,19 @@ class _Voltar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+
     return SuperficieTocavel(
       key: CabecalhoDeTela.chaveVoltar,
       rotulo: 'Voltar',
       aoTocar: aoVoltar,
-      fundo: cores.fundo,
+      fundo: cores.superficieSutil,
+      borda: ehAltoContraste ? cores.borda : cores.bordaSutil,
+      larguraBorda: ehAltoContraste
+          ? MemoraDimensoes.bordaEnfase
+          : MemoraDimensoes.espessuraBordaSutil,
       raio: BorderRadius.circular(MemoraRaio.pilula),
       child: ConstrainedBox(
         constraints: const BoxConstraints(
@@ -148,7 +162,7 @@ class _Voltar extends StatelessWidget {
           minHeight: MemoraDimensoes.alvoMinimo,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MemoraEspacamento.sm),
+          padding: const EdgeInsets.symmetric(horizontal: MemoraEspacamento.md),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

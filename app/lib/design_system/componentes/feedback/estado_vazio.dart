@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../temas/memora_theme_extension.dart';
-import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
 import '../../tokens/espacamento.dart';
 import '../botoes/botao_primario.dart';
+import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
 
 /// Exibido quando não há nada para mostrar.
@@ -19,7 +18,8 @@ class EstadoVazio extends StatelessWidget {
   /// O que houve e o que fazer agora.
   final String explicacao;
 
-  /// Ícone ilustrativo.
+  /// Ícone opcional (mantido para compatibilidade; a composição padrão destaca
+  /// a Memora falando).
   final IconData icone;
 
   /// Rótulo da ação sugerida. Quando nulo, o botão não aparece.
@@ -40,7 +40,9 @@ class EstadoVazio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final bool mostrarMascote =
+        MediaQuery.textScalerOf(context).scale(1) <
+        MemoraDimensoes.escalaTextoAlta;
 
     return Padding(
       padding: const EdgeInsets.all(MemoraEspacamento.xl),
@@ -48,10 +50,14 @@ class EstadoVazio extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Icon(icone,
-              size: MemoraDimensoes.iconeEstadoVazio,
-              color: cores.textoSuave),
-          const SizedBox(height: MemoraEspacamento.lg),
+          if (mostrarMascote) ...<Widget>[
+            const Center(
+              child: MemoraPersonagem(
+                expressao: ExpressaoDaMemora.falando,
+              ),
+            ),
+            const SizedBox(height: MemoraEspacamento.lg),
+          ],
           TextoMemora.tituloSecao(titulo, alinhamento: TextAlign.center),
           const SizedBox(height: MemoraEspacamento.sm),
           TextoMemora(explicacao, alinhamento: TextAlign.center),

@@ -118,4 +118,31 @@ abstract final class TextosCasca {
   /// que há mais portas depois da última lida.
   static const String hubHaMaisLeitor =
       'Há mais portas abaixo. Deslize para baixo para ver.';
+
+  /// Rótulo do botão de ação principal do cartão herói no Início e no Hub.
+  static const String acaoComecarConversa = 'Começar';
+
+  /// Título da seção de atalhos rápidos do Início.
+  static const String tituloAtalhosInicio = 'Atalhos rápidos';
+
+  /// Balão de boas-vindas curto da Memora no topo do Início.
+  static const String balaoInicio = 'Como posso te ajudar hoje?';
+
+  /// Rótulo do atalho de cuidado na grade do Início.
+  static const String atalhoCuidado = 'Cuidado';
+
+  /// Descrição curta do atalho de cuidado na grade do Início.
+  static const String atalhoCuidadoSubtitulo = 'Batimentos e queda';
+
+  /// Rótulo curto para aplicativos na grade do Início.
+  static const String atalhoAplicativosSubtitulo = 'Eu abro para você';
+
+  /// Rótulo curto para serviços na grade do Início.
+  static const String atalhoServicosSubtitulo = 'Eu só te ensino';
+
+  /// Rótulo curto para ajuda na grade do Início.
+  static const String atalhoAjudaSubtitulo = 'Dúvidas e apoio';
+
+  /// Rótulo curto para registro na grade do Início.
+  static const String atalhoRegistroSubtitulo = 'O que já abrimos';
 }

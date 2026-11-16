@@ -17,15 +17,21 @@ enum ExpressaoDaMemora {
   comemorando(Ilustracao.memoraComemorando, 'memora_conclusao_robo.png'),
 
   /// Preocupada / Alerta: ao lado dos avisos de segurança (com escudo).
-  preocupada(Ilustracao.memoraPreocupada, 'memora_alerta_robo.png');
+  preocupada(Ilustracao.memoraPreocupada, 'memora_alerta_robo.png'),
 
-  const ExpressaoDaMemora(this.ilustracao, [this.imagemPng]);
+  /// Dica: explicação rápida, sugestões e orientação passo a passo (com lâmpada).
+  dica(null, 'memora_dica_robo.png'),
 
-  /// O desenho desta expressão em SVG.
-  final Ilustracao ilustracao;
+  /// Mini: emblema compacto para cabeçalhos estreitos e resposta inline.
+  mini(null, 'memora_mini_robo.png');
 
-  /// Imagem em alta resolução, se disponível.
-  final String? imagemPng;
+  const ExpressaoDaMemora(this.ilustracao, this.imagemPng);
+
+  /// O desenho desta expressão em SVG legado (presente nas quatro originais).
+  final Ilustracao? ilustracao;
+
+  /// Imagem PNG oficial em alta resolução em `assets/ilustracoes/`.
+  final String imagemPng;
 }
 
 /// O rosto da Memora (FR-003 da feature 004).
@@ -71,21 +77,14 @@ class MemoraPersonagem extends StatelessWidget {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final int cachePx = (tamanho * 2.5).clamp(48, 512).round();
-    final Widget imagem = expressao.imagemPng != null
-        ? Image.asset(
-            'assets/ilustracoes/${expressao.imagemPng}',
-            width: tamanho,
-            height: tamanho,
-            fit: BoxFit.contain,
-            cacheWidth: cachePx,
-            cacheHeight: cachePx,
-          )
-        : IlustracaoMemora(
-            expressao.ilustracao,
-            altura: tamanho,
-            largura: tamanho,
-            descricao: descricao,
-          );
+    final Widget imagem = Image.asset(
+      'assets/ilustracoes/${expressao.imagemPng}',
+      width: tamanho,
+      height: tamanho,
+      fit: BoxFit.contain,
+      cacheWidth: cachePx,
+      cacheHeight: cachePx,
+    );
 
     final Widget conteudo = SizedBox.square(
       dimension: tamanho,

@@ -1,80 +1,70 @@
 import 'package:flutter/material.dart';
-import '../../../../design_system/design_system.dart';
 
-/// Exibe o cronômetro regressivo da verificação de queda (iniciando em 45 s).
+import '../../../../design_system/design_system.dart';
+import '../../../../l10n/textos_cuidado.dart';
+
+/// Destaque regressivo que mostra quanto tempo resta antes de chamar ajuda.
 class CronometroRegressivoQueda extends StatelessWidget {
   /// Cria o cronômetro regressivo de verificação de queda.
   const CronometroRegressivoQueda({
     required this.segundosRestantes,
-    this.totalSegundos = 45,
     super.key,
   });
 
-  /// Quantidade de segundos restantes até o acionamento automático.
+  /// Quantidade de segundos restantes até o disparo automático.
   final int segundosRestantes;
-
-  /// Duração total da janela de verificação em segundos.
-  final int totalSegundos;
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final String textoSegundos = '$segundosRestantes segundos';
 
-    final double progresso = (segundosRestantes / totalSegundos).clamp(0.0, 1.0);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: MemoraEspacamento.md,
-        vertical: MemoraEspacamento.sm,
-      ),
-      decoration: BoxDecoration(
-        color: cores.perigo.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-        border: Border.all(color: cores.perigo.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: MemoraEspacamento.sm,
+    return Semantics(
+      liveRegion: true,
+      readOnly: true,
+      label: '${TextosCuidado.prefixoCronometroQueda}: $textoSegundos',
+      child: ExcludeSemantics(
+        child: Container(
+          padding: const EdgeInsets.all(MemoraEspacamento.lg),
+          decoration: BoxDecoration(
+            color: cores.superficie,
+            borderRadius: BorderRadius.circular(MemoraRaio.cartaoDestaque),
+            border: Border.all(
+              color: ehAltoContraste ? cores.borda : cores.perigo,
+              width: MemoraDimensoes.bordaEnfase,
+            ),
+            boxShadow: MemoraElevacao.listaSombrasCartao(cores),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(
-                Icons.timer_outlined,
-                color: cores.perigo,
-                size: MemoraDimensoes.iconeDestaque,
+              const BadgeDeStatus(
+                rotulo: TextosCuidado.badgeContagemQueda,
+                icone: Icons.timer_outlined,
+                tom: TomBadgeStatus.atencao,
               ),
+              const SizedBox(height: MemoraEspacamento.md),
               Text(
-                '$segundosRestantes segundos',
-                style: MemoraTipografia.tituloSecao.copyWith(
-                  color: cores.perigo,
-                  fontWeight: FontWeight.bold,
-                ),
+                textoSegundos,
+                textAlign: TextAlign.center,
                 textScaler: escalaTextoLimitada(context),
+                style: MemoraTipografia.destaque.copyWith(
+                  color: ehAltoContraste ? cores.texto : cores.perigo,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: MemoraEspacamento.xs),
+              TextoMemora.apoio(
+                TextosCuidado.apoioCronometroQueda,
+                cor: cores.textoSuave,
               ),
             ],
           ),
-          const SizedBox(height: MemoraEspacamento.xs),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-            child: LinearProgressIndicator(
-              value: progresso,
-              backgroundColor: cores.borda,
-              valueColor: AlwaysStoppedAnimation<Color>(cores.perigo),
-              minHeight: MemoraDimensoes.separacaoAlvo,
-            ),
-          ),
-          const SizedBox(height: MemoraEspacamento.xs),
-          Text(
-            'Se você não responder, avisaremos seu contato de emergência.',
-            textAlign: TextAlign.center,
-            style: MemoraTipografia.apoio.copyWith(
-              color: cores.texto,
-            ),
-            textScaler: escalaTextoLimitada(context),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -19,6 +19,10 @@ import '../../features/aprendizado/data/progresso_de_aprendizado.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../../features/apresentacao/data/apresentacao_vista.dart';
 import '../../features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import '../../features/localizador/data/fontes/fonte_localizador_api.dart';
+import '../../features/localizador/data/repositorios/repositorio_localizador_api.dart';
+import '../../features/localizador/data/repositorios/repositorio_localizador_simulado.dart';
+import '../../features/localizador/domain/repositorios/repositorio_localizador.dart';
 import '../../features/perfil/data/data_de_nascimento_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 import '../seguranca/sessao_perdida.dart';
@@ -58,6 +62,10 @@ class Composicao {
   /// A assistente: real quando há servidor, simulada quando não.
   final RepositorioAssistente assistente;
 
+  /// O Localizador de Serviços: conectado à API quando há servidor real,
+  /// ou exemplos seguros de demonstração offline quando não há.
+  final RepositorioLocalizador? localizador;
+
   /// Se a pessoa já aceitou o aviso de privacidade da conversa (FR-051).
   ///
   /// É o **mesmo objeto** que a [limpeza] apaga na saída: criar um aqui e outro
@@ -93,6 +101,7 @@ class Composicao {
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
+    this.localizador,
     required this.aceiteDoAviso,
     required this.limpeza,
     this.dataDeNascimento,
@@ -145,6 +154,7 @@ class Composicao {
     final SessaoPerdida sessaoPerdida = SessaoPerdida();
     final RepositorioAutenticacao autenticacao;
     final RepositorioAssistente assistente;
+    final RepositorioLocalizador localizador;
 
     if (ambiente.usaServidorReal) {
       // [dioDeTeste] existe para o teste trocar o transporte e provar a
@@ -154,21 +164,26 @@ class Composicao {
       );
       final RepositorioAutenticacaoApi autenticacaoReal =
           RepositorioAutenticacaoApi(cliente: cliente, cofre: cofre);
+      final ChamadaComRenovacao chamadas = ChamadaComRenovacao(
+        cliente: cliente,
+        cofre: cofre,
+        renovar: autenticacaoReal.renovarSessao,
+        sessaoPerdida: sessaoPerdida,
+      );
       autenticacao = autenticacaoReal;
       assistente = RepositorioAssistenteApi(
         cliente: cliente,
-        chamadas: ChamadaComRenovacao(
-          cliente: cliente,
-          cofre: cofre,
-          renovar: autenticacaoReal.renovarSessao,
-          sessaoPerdida: sessaoPerdida,
-        ),
+        chamadas: chamadas,
+      );
+      localizador = RepositorioLocalizadorApi(
+        fonte: FonteLocalizadorApi(cliente.dio, chamadas: chamadas),
       );
     } else {
       autenticacao = RepositorioAutenticacaoSimulado(
         preferencias: preferencias,
       );
       assistente = RepositorioAssistenteSimulado();
+      localizador = RepositorioLocalizadorSimulado();
     }
 
     return Composicao(
@@ -179,6 +194,7 @@ class Composicao {
       // o `main.dart` o liga. Ele NÃO entra em `dadosLocais` — não é da pessoa.
       // Envolve a assistente escolhida acima, real ou simulada.
       assistente: guardarCatalogo ? CatalogoGuardado(assistente) : assistente,
+      localizador: localizador,
       aceiteDoAviso: aceiteDoAviso,
       sessaoPerdida: sessaoPerdida,
       dataDeNascimento: datas,

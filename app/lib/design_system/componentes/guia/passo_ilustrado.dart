@@ -12,15 +12,18 @@ import '../botoes/botao_primario.dart';
 import '../botoes/botao_secundario.dart';
 import '../botoes/botao_terciario.dart';
 import '../cartoes/caixa_de_etapa.dart';
+import '../cartoes/cartao.dart';
 import '../ilustracao/ilustracao_memora.dart';
 import '../ilustracao/memora_personagem.dart';
+import '../informacao/badge_de_status.dart';
 import '../texto/texto_memora.dart';
 import 'indicador_de_passo.dart';
 
-/// Uma tela do passo a passo visual e interativo (T065, FR-026, FR-028).
+/// Uma tela do passo a passo visual e interativo (`T053`, `T065`, `FR-026`, `FR-028`).
 ///
-/// Desenha a moldura de celular, a captura, o selo "Exemplo" no canto superior,
-/// o anel de destaque na região relativa correspondente e as instruções da Memora.
+/// Desenha a moldura de celular limpa com sombra difusa (`MemoraRaio.cartao`),
+/// o selo `"Exemplo"` em [BadgeDeStatus], o anel de destaque na região relativa
+/// correspondente e as instruções editoriais da Memora.
 class PassoIlustrado extends StatelessWidget {
   /// Chave do selo visual "Exemplo".
   static const Key chaveSeloExemplo = Key('passo.selo_exemplo');
@@ -122,18 +125,12 @@ class PassoIlustrado extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
                   border: Border.all(
                     color: cores.perigo,
                     width: MemoraDimensoes.bordaEnfase,
                   ),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.porta,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                  boxShadow: MemoraElevacao.listaSombrasCartao(cores),
                 ),
                 padding: const EdgeInsets.all(MemoraEspacamento.md),
                 child: Row(
@@ -168,21 +165,9 @@ class PassoIlustrado extends StatelessWidget {
             const SizedBox(height: MemoraEspacamento.md),
           ],
 
-          // 4. Caixa da instrução da Memora (informação acolhedora)
-          Container(
+          // 4. Cartão editorial da instrução da Memora (informação acolhedora)
+          Cartao(
             padding: const EdgeInsets.all(MemoraEspacamento.md),
-            decoration: BoxDecoration(
-              color: cores.superficie,
-              borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-              border: Border.all(color: cores.borda),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: MemoraElevacao.sombra,
-                  blurRadius: MemoraElevacao.cartao * 4,
-                  offset: const Offset(0, MemoraElevacao.cartao),
-                ),
-              ],
-            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -292,7 +277,7 @@ class PassoIlustrado extends StatelessWidget {
   }
 }
 
-/// Moldura que simula a tela do celular com imagem, selo de exemplo e anel de foco.
+/// Moldura limpa que apresenta a captura do passo, selo "Exemplo" e destaque relativo.
 class _MolduraDeCelular extends StatelessWidget {
   final Passo passo;
 
@@ -300,7 +285,9 @@ class _MolduraDeCelular extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
 
     return Container(
       constraints: const BoxConstraints(
@@ -308,19 +295,15 @@ class _MolduraDeCelular extends StatelessWidget {
         maxHeight: MemoraDimensoes.alturaMaximaMolduraPasso,
       ),
       decoration: BoxDecoration(
-        color: cores.superficieAlt,
+        color: cores.superficie,
         borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-        border: Border.all(
-          color: cores.borda,
-          width: MemoraDimensoes.bordaEnfase,
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: MemoraElevacao.sombra,
-            blurRadius: MemoraElevacao.porta * 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: ehAltoContraste
+            ? Border.all(
+                color: cores.borda,
+                width: MemoraDimensoes.bordaEnfase,
+              )
+            : null,
+        boxShadow: MemoraElevacao.listaSombrasCartao(cores),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -359,7 +342,7 @@ class _MolduraDeCelular extends StatelessWidget {
                               children: <Widget>[
                                 const IlustracaoMemora(
                                   Ilustracao.estadoVazio,
-                                  altura: 48,
+                                  altura: MemoraDimensoes.alvoMinimo,
                                 ),
                                 const SizedBox(height: MemoraEspacamento.sm),
                                 TextoMemora(
@@ -389,21 +372,7 @@ class _MolduraDeCelular extends StatelessWidget {
                     height: constraints.maxHeight * passo.destaque.altura,
                     child: Semantics(
                       label: 'Área destacada na tela para tocar',
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                          border: Border.all(
-                            color: cores.primaria,
-                            width: MemoraDimensoes.bordaSelecao,
-                          ),
-                          boxShadow: <BoxShadow>[
-                            BoxShadow(
-                              color: cores.medalhao,
-                              spreadRadius: MemoraDimensoes.bordaEnfase,
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: const SizedBox.expand(),
                     ),
                   ),
                 ],
@@ -419,27 +388,10 @@ class _MolduraDeCelular extends StatelessWidget {
             child: Semantics(
               container: true,
               label: 'Ilustração demonstrativa de exemplo',
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: MemoraEspacamento.sm,
-                  vertical: MemoraEspacamento.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                  border: Border.all(color: cores.borda),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.cartao * 2,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: TextoMemora.apoio(
-                  TextosGuias.exemplo,
-                  cor: cores.texto,
-                ),
+              child: const BadgeDeStatus(
+                rotulo: TextosGuias.exemplo,
+                icone: Icons.photo_library_outlined,
+                tom: TomBadgeStatus.neutro,
               ),
             ),
           ),

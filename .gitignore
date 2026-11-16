@@ -20,6 +20,7 @@ __pycache__/
 *.apk
 *.zip
 
-# Sensitive user backups
+# Sensitive user backups and external design mockups
 apps/.originais/
+Memora-Desing-Ideias/
 

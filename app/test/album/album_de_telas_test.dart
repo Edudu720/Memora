@@ -26,9 +26,19 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_primeira_en
 import 'package:memora/features/autenticacao/presentation/telas/tela_recuperacao.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/configuracoes/presentation/tela_configuracoes.dart';
+import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
+import 'package:memora/features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import 'package:memora/features/cuidado/domain/casos_de_uso/disparar_socorro_emergencia.dart';
+import 'package:memora/features/cuidado/domain/entidades/contato_emergencia.dart';
+import 'package:memora/features/cuidado/domain/entidades/evento_queda.dart';
+import 'package:memora/features/cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
+import 'package:memora/features/cuidado/presentation/controladores/controlador_verificacao_queda.dart';
+import 'package:memora/features/cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
+import 'package:memora/features/cuidado/presentation/telas/tela_verificacao_queda.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/perfil/presentation/secao_idade.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/autenticacao/dubles_autenticacao.dart';
 import '../features/autenticacao/fluxo_dentro_da_conta.dart';
@@ -136,7 +146,7 @@ void main() {
 
   for (final MemoraTemaId tema in MemoraTemaId.values) {
     testWidgets(
-      'renderiza e salva as 30 telas do álbum no tema ${tema.name} (T101)',
+      'renderiza e salva as 32 telas do álbum no tema ${tema.name} (T101)',
       (WidgetTester t) async {
         final List<File> gravados = <File>[];
         final RepositorioAutenticacaoSimulado repoAuth =
@@ -484,7 +494,72 @@ void main() {
           await salvar(t, chave, tema, '30_data_de_nascimento.png'),
         );
 
-        expect(gravados.length, 30);
+        // ---------------------------------------------------------------------
+        // 6. Cuidado & Alerta de Queda (Feature 005/007)
+        // ---------------------------------------------------------------------
+        SharedPreferences.setMockInitialValues(<String, Object>{});
+        final ProvedorDeTelemetriaSimulado provedorCuidado =
+            ProvedorDeTelemetriaSimulado();
+        final ControladorDispositivoCuidado ctrlCuidado =
+            ControladorDispositivoCuidado(
+          repositorioContato: RepositorioContatoEmergenciaLocal(),
+          provedorInicial: provedorCuidado,
+        );
+        await ctrlCuidado.salvarContato(
+          const ContatoEmergencia(
+            id: 'contato-1',
+            nome: 'Maria Filha',
+            telefone: '11999990000',
+            parentesco: 'Filha',
+          ),
+        );
+        final Future<void> conexaoFutura = ctrlCuidado.conectar();
+        await t.pump(const Duration(milliseconds: 350));
+        await conexaoFutura;
+        await t.pump(const Duration(milliseconds: 600));
+        gravados.add(
+          await fotografarTelaIsolada(
+            t,
+            tema: tema,
+            nomeArquivo: '31_cuidado.png',
+            tela: TelaDispositivoCuidado(
+              controlador: ctrlCuidado,
+              aoVoltar: () {},
+              nomePessoaIdosa: 'Ana',
+            ),
+          ),
+        );
+        await ctrlCuidado.desconectar();
+        ctrlCuidado.dispose();
+
+        final ProvedorDeTelemetriaSimulado provedorQueda =
+            ProvedorDeTelemetriaSimulado();
+        final ControladorVerificacaoQueda ctrlQueda =
+            ControladorVerificacaoQueda(
+          evento: EventoQueda.novo(bpm: 98, aceleracao: 3.1),
+          provedor: provedorQueda,
+          casoDeUsoSocorro: const DispararSocorroEmergencia(),
+          nomePessoaIdosa: 'Ana',
+          contatoEmergencia: const ContatoEmergencia(
+            id: 'contato-1',
+            nome: 'Maria Filha',
+            telefone: '11999990000',
+            parentesco: 'Filha',
+          ),
+        );
+        gravados.add(
+          await fotografarTelaIsolada(
+            t,
+            tema: tema,
+            nomeArquivo: '32_alerta_queda.png',
+            tela: TelaVerificacaoQueda(controlador: ctrlQueda),
+          ),
+        );
+        ctrlQueda.dispose();
+        provedorQueda.descartar();
+        await t.pumpWidget(const SizedBox.shrink());
+
+        expect(gravados.length, 32);
         for (final File f in gravados) {
           expect(f.existsSync(), isTrue, reason: '${f.path} não foi gravado');
           expect(

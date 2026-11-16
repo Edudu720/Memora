@@ -121,12 +121,12 @@ void main() {
           reason: 'ícone atual sobre a pílula',
         );
         expect(
-          contraste(c.primaria, c.superficieAlt),
+          contraste(c.primaria, c.superficieBarra),
           greaterThanOrEqualTo(3),
           reason: 'ícone atual sobre a barra',
         );
         expect(
-          contraste(c.texto, c.superficieAlt),
+          contraste(c.texto, c.superficieBarra),
           greaterThanOrEqualTo(3),
           reason: 'ícone inativo sobre a barra',
         );
@@ -140,7 +140,7 @@ void main() {
               )
               .first,
         );
-        expect(barra.color, c.superficieAlt);
+        expect(barra.color, c.superficieBarra);
       });
     }
   });

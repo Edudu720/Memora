@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../../design_system/design_system.dart';
+import '../../../../l10n/textos_cuidado.dart';
 import '../controladores/controlador_verificacao_queda.dart';
 import '../widgets/cronometro_regressivo_queda.dart';
 
@@ -20,7 +22,11 @@ class TelaVerificacaoQueda extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool mostrarMascote = escala < MemoraDimensoes.escalaTextoAlta;
 
     return AnimatedBuilder(
       animation: controlador,
@@ -37,82 +43,70 @@ class TelaVerificacaoQueda extends StatelessWidget {
                   ),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - MemoraEspacamento.lg,
+                      minHeight: constraints.maxHeight > MemoraEspacamento.lg
+                          ? constraints.maxHeight - MemoraEspacamento.lg
+                          : 0,
                     ),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        // Topo: Identificação e Alerta
-                        Column(
-                          children: <Widget>[
-                            const SizedBox(height: MemoraEspacamento.md),
-                            Container(
-                              padding: const EdgeInsets.all(MemoraEspacamento.md),
-                              decoration: BoxDecoration(
-                                color: cores.perigo.withValues(alpha: 0.15),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.warning_amber_rounded,
-                                color: cores.perigo,
-                                size: MemoraDimensoes.iconeEstadoVazio,
-                              ),
-                            ),
-                            const SizedBox(height: MemoraEspacamento.md),
-                            Text(
-                              'Você está bem?',
-                              textAlign: TextAlign.center,
-                              style: MemoraTipografia.destaque.copyWith(
-                                color: cores.texto,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textScaler: escalaTextoLimitada(context),
-                            ),
-                            const SizedBox(height: MemoraEspacamento.sm),
-                            Text(
-                              'O sensor detectou um movimento brusco que pode ser uma queda.',
-                              textAlign: TextAlign.center,
-                              style: MemoraTipografia.corpo.copyWith(
-                                color: cores.textoSuave,
-                              ),
-                              textScaler: escalaTextoLimitada(context),
-                            ),
-                            const SizedBox(height: MemoraEspacamento.lg),
-                            CronometroRegressivoQueda(
-                              segundosRestantes: controlador.segundosRestantes,
-                            ),
-                          ],
-                        ),
-
-                        // Ações principais: Dois botões grandes e separados
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: MemoraEspacamento.lg),
+                        Cartao(
+                          comBorda: ehAltoContraste,
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              BotaoPrimario(
-                                rotulo: 'Estou bem',
-                                icone: Icons.check_circle_outline_rounded,
-                                aoTocar: controlador.responderEstouBem,
-                              ),
-                              const SizedBox(height: MemoraEspacamento.md),
-                              BotaoPerigo(
-                                rotulo: 'Preciso de ajuda',
-                                icone: Icons.warning_amber_rounded,
-                                aoTocar: controlador.responderPrecisoDeAjuda,
-                              ),
-                              const SizedBox(height: MemoraEspacamento.md),
-                              // Aviso Antigolpe (Princípio II da Constituição)
-                              Text(
-                                'Aviso de segurança: O Memora nunca solicita senhas, transferências bancárias ou PIX em alertas.',
-                                textAlign: TextAlign.center,
-                                style: MemoraTipografia.apoio.copyWith(
-                                  color: cores.textoSuave,
+                              if (mostrarMascote) ...<Widget>[
+                                const MemoraPersonagem(
+                                  expressao: ExpressaoDaMemora.preocupada,
                                 ),
-                                textScaler: escalaTextoLimitada(context),
+                                const SizedBox(height: MemoraEspacamento.md),
+                              ],
+                              const BadgeDeStatus(
+                                rotulo: TextosCuidado.badgeAtencaoQueda,
+                                icone: Icons.warning_amber_rounded,
+                                tom: TomBadgeStatus.atencao,
+                              ),
+                              const SizedBox(height: MemoraEspacamento.md),
+                              const TextoMemora(
+                                TextosCuidado.tituloVerificacaoQueda,
+                                estilo: EstiloTexto.destaque,
+                                alinhamento: TextAlign.center,
+                                cabecalho: true,
+                              ),
+                              const SizedBox(height: MemoraEspacamento.sm),
+                              TextoMemora(
+                                TextosCuidado.subtituloVerificacaoQueda,
+                                alinhamento: TextAlign.center,
+                                cor: cores.textoSuave,
+                              ),
+                              const SizedBox(height: MemoraEspacamento.lg),
+                              CronometroRegressivoQueda(
+                                segundosRestantes:
+                                    controlador.segundosRestantes,
                               ),
                             ],
+                          ),
+                        ),
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        BotaoPrimario(
+                          rotulo: TextosCuidado.botaoEstouBem,
+                          icone: Icons.check_circle_outline_rounded,
+                          aoTocar: controlador.responderEstouBem,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.xl),
+                        BotaoPerigo(
+                          rotulo: TextosCuidado.botaoPrecisoDeAjuda,
+                          icone: Icons.warning_amber_rounded,
+                          aoTocar: controlador.responderPrecisoDeAjuda,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        Cartao(
+                          comBorda: true,
+                          padding: const EdgeInsets.all(MemoraEspacamento.md),
+                          child: TextoMemora.apoio(
+                            TextosCuidado.avisoAntigolpeQueda,
+                            cor: cores.textoSuave,
                           ),
                         ),
                       ],
