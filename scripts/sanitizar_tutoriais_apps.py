@@ -1260,13 +1260,459 @@ def process_youtube():
     save_jpg(crop_system_bars(im, y_top, y_bot), dst / "07_menu_mais.jpg")
 
 
+# ==============================================================================
+# INSS - Meu INSS (apps/.originais/INSS -> apps/INSS)
+# ==============================================================================
+
+def _inss_replace_greeting(im: Image.Image):
+    """Substitui 'Olá, Eduardo' por 'Olá, Usuário' nas telas iniciais do Meu INSS."""
+    d = ImageDraw.Draw(im)
+    d.rectangle((16, 155, 360, 205), fill=(255, 255, 255))
+    d.text((22, 162), "Olá, Usuário", font=load_font(28, bold=False), fill=(51, 51, 51))
+
+
+def process_inss():
+    src = ORIG_DIR / "INSS"
+    dst = APPS_DIR / "INSS"
+    dst.mkdir(parents=True, exist_ok=True)
+    y_top, y_bot = 62, 1316
+
+    simple_map = {
+        "ea36e99f-9022-44cd-86fb-68bc5b641f60.jpg": "01_boas_vindas.jpg",
+        "e18926f0-6bba-454a-8d93-c355f00d1bb6.jpg": "02_politica_privacidade.jpg",
+        "22ccd558-8d7e-4938-a707-a1965dbecdcb.jpg": "03_entrar_gov_br.jpg",
+        "f782ce5e-fd9c-4737-b005-4e1f5b760d27.jpg": "04_autorizar_compartilhamento.jpg",
+        "8be98718-9b86-4c6a-9c2d-56a2dcd0064b.jpg": "05_acesso_biometria.jpg",
+        "01a48965-7ca3-44df-b0c7-7d84d2232385.jpg": "06_notificacao_celular.jpg",
+        "fdf634c7-9b17-4415-be57-0d8c2cd4815b.jpg": "09_menu_lateral.jpg",
+        "dab1df5b-5391-432a-8b51-e443a413c7d8.jpg": "10_buscar_servico.jpg",
+        "2badb4d5-4b4f-492d-8b19-34ee4cffdb99.jpg": "11_notificacoes.jpg",
+        "4fd7f826-b123-48b3-95c3-ae1d57cadffd.jpg": "13_extratos_e_comprovantes.jpg",
+        "fc528b54-a04a-4eca-805a-1daa92f79465.jpg": "15_beneficio_afastamento_protetivo.jpg",
+        "e9ff9cb7-a451-4f46-9616-c7836a6ef595.jpg": "16_beneficios_por_incapacidade.jpg",
+        "c2b877dd-4cc6-4cdb-8153-0daef6834485.jpg": "17_novo_pedido.jpg",
+        "19f297c8-0833-472a-86cf-fca0ccb78618.jpg": "18_mais_servicos.jpg",
+        "83b92e1e-68a1-4f1b-aead-470785b74e78.jpg": "19_ajuda.jpg",
+    }
+    for orig_name, out_name in simple_map.items():
+        im = Image.open(src / orig_name).convert("RGB")
+        save_jpg(crop_system_bars(im, y_top, y_bot), dst / out_name)
+
+    # 07 - Início: substitui saudação com nome pessoal
+    im7 = Image.open(src / "fb0fd233-04e1-48ee-9dae-47407eaf53a7.jpg").convert("RGB")
+    _inss_replace_greeting(im7)
+    save_jpg(crop_system_bars(im7, y_top, y_bot), dst / "07_inicio.jpg")
+
+    # 08 - Chat Helô aberto sobre o Início: substitui saudação com nome pessoal
+    im8 = Image.open(src / "c9f6c347-2e73-46e0-9b93-d9a2daf1a38b.jpg").convert("RGB")
+    _inss_replace_greeting(im8)
+    save_jpg(crop_system_bars(im8, y_top, y_bot), dst / "08_chat_helo.jpg")
+
+    # 12 - Meu Perfil: substitui Nome Completo e CPF real
+    im12 = Image.open(src / "ebc01ab3-c2c0-4e38-a5f5-fe07f593a2d5.jpg").convert("RGB")
+    d12 = ImageDraw.Draw(im12)
+    bg_prof = im12.getpixel((20, 160))
+    d12.rectangle((36, 162, 460, 224), fill=bg_prof)
+    d12.text((44, 166), "Nome do Usuário", font=load_font(20, bold=True), fill=(35, 35, 35))
+    d12.text((44, 197), "CPF ***.***.***-**", font=load_font(18), fill=(80, 80, 80))
+    save_jpg(crop_system_bars(im12, y_top, y_bot), dst / "12_meu_perfil.jpg")
+
+    # 14 - Extrato de Contribuições (CNIS): substitui empregadores, CNPJs e datas
+    im14 = Image.open(src / "f29f3632-1c20-48a5-9de2-c03eaf552858.jpg").convert("RGB")
+    d14 = ImageDraw.Draw(im14)
+    blue_cnis = (19, 81, 180)
+    gray_cnis = (75, 75, 75)
+    # Card 1 (preserva seta azul em x >= 530)
+    d14.rectangle((38, 456, 525, 590), fill=(255, 255, 255))
+    d14.text((44, 461), "EMPRESA EXEMPLO 1 LTDA", font=load_font(22, bold=False), fill=blue_cnis)
+    d14.text((332, 465), "(CNPJ: 00.000.000)", font=load_font(17), fill=gray_cnis)
+    d14.text((44, 520), "Data de início", font=load_font(21, bold=True), fill=(20, 20, 20))
+    d14.text((286, 520), "Data de fim", font=load_font(21, bold=True), fill=(20, 20, 20))
+    d14.text((44, 556), "01/01/2024", font=load_font(22), fill=(55, 55, 55))
+    d14.text((286, 556), "-", font=load_font(22), fill=(55, 55, 55))
+
+    # Card 2 (preserva seta azul em x >= 530)
+    d14.rectangle((38, 634, 525, 838), fill=(255, 255, 255))
+    d14.text((44, 639), "EMPRESA EXEMPLO 2 COMÉRCIO E", font=load_font(22, bold=False), fill=blue_cnis)
+    d14.text((44, 675), "SERVIÇOS LTDA", font=load_font(22, bold=False), fill=blue_cnis)
+    d14.text((226, 679), "(CNPJ: 00.000.001)", font=load_font(17), fill=gray_cnis)
+    d14.text((44, 766), "Data de início", font=load_font(21, bold=True), fill=(20, 20, 20))
+    d14.text((286, 766), "Data de fim", font=load_font(21, bold=True), fill=(20, 20, 20))
+    d14.text((44, 802), "01/01/2021", font=load_font(22), fill=(55, 55, 55))
+    d14.text((286, 802), "31/12/2023", font=load_font(22), fill=(55, 55, 55))
+    save_jpg(crop_system_bars(im14, y_top, y_bot), dst / "14_extrato_contribuicoes_cnis.jpg")
+
+
+# ==============================================================================
+# TIKTOK (apps/.originais/TikTok -> apps/TikTok)
+# ==============================================================================
+
+def _tt_draw_right_action_bar(
+    im: Image.Image,
+    avatar_letter: str,
+    avatar_bg: tuple[int, int, int],
+    likes: str,
+    comments: str,
+    saves: str,
+    shares: str,
+):
+    """Desenha a coluna lateral direita de ações do TikTok (avatar, curtir, comentar, salvar, compartilhar e disco)."""
+    d = ImageDraw.Draw(im)
+    cx = 588
+
+    # Avatar do criador + botão '+' vermelho
+    av = make_initial_badge(62, avatar_letter, bg_color=avatar_bg)
+    im.paste(av, (cx - 31, 718), av)
+    d.ellipse((cx - 31, 718, cx + 31, 780), outline=(255, 255, 255), width=2)
+    d.ellipse((cx - 12, 768, cx + 12, 792), fill=(254, 44, 85))
+    d.line([(cx - 5, 780), (cx + 5, 780)], fill=(255, 255, 255), width=3)
+    d.line([(cx, 775), (cx, 785)], fill=(255, 255, 255), width=3)
+
+    f_cnt = load_font(16, bold=True)
+
+    # Coração (Curtir)
+    hy = 832
+    d.ellipse((cx - 18, hy - 14, cx + 1, hy + 5), fill=(255, 255, 255))
+    d.ellipse((cx - 1, hy - 14, cx + 18, hy + 5), fill=(255, 255, 255))
+    d.polygon([(cx - 18, hy - 2), (cx + 18, hy - 2), (cx, hy + 18)], fill=(255, 255, 255))
+    d.text((cx, hy + 30), likes, font=f_cnt, fill=(255, 255, 255), anchor="mm")
+
+    # Balão de comentário
+    cy_c = 924
+    d.ellipse((cx - 19, cy_c - 16, cx + 19, cy_c + 14), fill=(255, 255, 255))
+    d.polygon([(cx - 8, cy_c + 10), (cx - 16, cy_c + 20), (cx + 2, cy_c + 13)], fill=(255, 255, 255))
+    for dx in (-8, 0, 8):
+        d.ellipse((cx + dx - 2, cy_c - 3, cx + dx + 2, cy_c + 1), fill=(40, 40, 45))
+    d.text((cx, cy_c + 32), comments, font=f_cnt, fill=(255, 255, 255), anchor="mm")
+
+    # Bandeirinha (Salvar)
+    sy = 1018
+    d.polygon(
+        [(cx - 14, sy - 16), (cx + 14, sy - 16), (cx + 14, sy + 16), (cx, sy + 6), (cx - 14, sy + 16)],
+        fill=(255, 255, 255),
+    )
+    d.text((cx, sy + 30), saves, font=f_cnt, fill=(255, 255, 255), anchor="mm")
+
+    # Seta (Compartilhar)
+    shy = 1110
+    d.polygon([(cx + 2, shy - 16), (cx + 20, shy - 2), (cx + 2, shy + 12)], fill=(255, 255, 255))
+    d.arc((cx - 18, shy - 6, cx + 10, shy + 22), 180, 280, fill=(255, 255, 255), width=8)
+    d.text((cx, shy + 28), shares, font=f_cnt, fill=(255, 255, 255), anchor="mm")
+
+    # Disco de áudio giratório na base direita
+    dy = 1200
+    d.ellipse((cx - 26, dy - 26, cx + 26, dy + 26), fill=(32, 32, 36), outline=(75, 75, 82), width=3)
+    d.ellipse((cx - 14, dy - 14, cx + 14, dy + 14), fill=avatar_bg)
+    d.ellipse((cx - 4, dy - 4, cx + 4, dy + 4), fill=(245, 245, 245))
+
+
+def _tt_draw_top_feed_tabs(im: Image.Image):
+    """Desenha a barra superior limpa do feed ('Dicas | Novela | Seguindo | Loja | Para você') sem cidade real."""
+    d = ImageDraw.Draw(im)
+    f_tab = load_font(20, bold=True)
+    tabs = [
+        (36, " Explorar", (215, 220, 228)),
+        (135, "Dicas", (215, 220, 228)),
+        (225, "Novela", (215, 220, 228)),
+        (326, "Seguindo", (215, 220, 228)),
+        (414, "Loja", (215, 220, 228)),
+        (506, "Para você", (255, 255, 255)),
+    ]
+    for tx, tlabel, tcol in tabs:
+        d.text((tx, 108), tlabel, font=f_tab, fill=tcol, anchor="mm")
+    # Indicador ativo sob "Para você"
+    d.rounded_rectangle((482, 128, 530, 132), radius=2, fill=(255, 255, 255))
+    # Lupa à direita
+    d.ellipse((582, 92, 608, 118), outline=(255, 255, 255), width=3)
+    d.line([(604, 114), (615, 125)], fill=(255, 255, 255), width=3)
+
+
+def _tt_apply_vertical_gradients(im: Image.Image, y0: int, y1: int):
+    """Aplica sombreado suave no topo e na base do vídeo vertical para legibilidade dos textos brancos."""
+    w = im.width
+    top_h = 120
+    top_ov = Image.new("RGBA", (w, top_h), (0, 0, 0, 0))
+    td = ImageDraw.Draw(top_ov)
+    for yy in range(top_h):
+        td.line([(0, yy), (w, yy)], fill=(8, 10, 14, int(165 * (1.0 - yy / top_h))))
+    base_top = im.crop((0, y0, w, y0 + top_h)).convert("RGBA")
+    im.paste(Image.alpha_composite(base_top, top_ov).convert("RGB"), (0, y0))
+
+    bot_h = 260
+    bot_ov = Image.new("RGBA", (w, bot_h), (0, 0, 0, 0))
+    bd = ImageDraw.Draw(bot_ov)
+    for yy in range(bot_h):
+        bd.line([(0, yy), (w, yy)], fill=(8, 10, 14, int(205 * (yy / bot_h))))
+    base_bot = im.crop((0, y1 - bot_h, w, y1)).convert("RGBA")
+    im.paste(Image.alpha_composite(base_bot, bot_ov).convert("RGB"), (0, y1 - bot_h))
+
+
+def process_tiktok():
+    src = ORIG_DIR / "TikTok"
+    dst = APPS_DIR / "TikTok"
+    dst.mkdir(parents=True, exist_ok=True)
+    y_top, y_bot = 62, 1318
+
+    # 1. 01_inicio_para_voce.jpg (f60dff19)
+    im1 = Image.open(src / "f60dff19-cd83-41a3-8f1b-383484f5211f.jpg").convert("RGB")
+    art1 = draw_illustration("gardening_tips", 636, 1250 - 62)
+    im1.paste(art1, (0, 62))
+    _tt_apply_vertical_gradients(im1, 62, 1250)
+    _tt_draw_top_feed_tabs(im1)
+    _tt_draw_right_action_bar(
+        im1,
+        avatar_letter="M",
+        avatar_bg=(42, 138, 86),
+        likes="18,4 mil",
+        comments="342",
+        saves="2.150",
+        shares="980",
+    )
+    d1 = ImageDraw.Draw(im1)
+    # Banner central do vídeo educativo
+    d1.rounded_rectangle((88, 220, 548, 326), radius=20, fill=(18, 52, 34))
+    d1.text((318, 255), "Dica de Jardinagem em Casa", font=load_font(26, bold=True), fill=(255, 255, 255), anchor="mm")
+    d1.text((318, 294), "Como regar suas plantas no verão", font=load_font(19), fill=(205, 240, 215), anchor="mm")
+    # Legenda inferior do criador
+    d1.text((20, 1126), "dicas.memora", font=load_font(22, bold=True), fill=(255, 255, 255))
+    d1.text(
+        (20, 1164),
+        "3 cuidados simples para manter suas flores sempre bonitas",
+        font=load_font(18),
+        fill=(242, 242, 242),
+    )
+    d1.text(
+        (20, 1192),
+        "dentro de casa #jardim #plantas #dicas #bemestar",
+        font=load_font(18, bold=True),
+        fill=(255, 255, 255),
+    )
+    save_jpg(crop_system_bars(im1, y_top, y_bot), dst / "01_inicio_para_voce.jpg")
+
+    # 2. 02_amigos.jpg (b07551aa)
+    im2 = Image.open(src / "b07551aa-4336-4cb1-88dd-6bbb750b4852.jpg").convert("RGB")
+    d2 = ImageDraw.Draw(im2)
+    # Substitui foto de perfil no canto superior esquerdo (22..62, 94..132)
+    d2.rectangle((18, 88, 68, 136), fill=(0, 0, 0))
+    av_top = make_avatar(38, bg_color=(52, 118, 204), fg_color=(255, 255, 255))
+    im2.paste(av_top, (22, 92), av_top)
+    d2.ellipse((46, 116, 62, 132), fill=(32, 184, 246))
+    d2.line([(50, 124), (58, 124)], fill=(255, 255, 255), width=2)
+    d2.line([(54, 120), (54, 128)], fill=(255, 255, 255), width=2)
+
+    # Substitui o vídeo inteiro (y=138..1254) por vídeo acolhedor de receita caseira
+    art2 = draw_illustration("recipe_kitchen", 636, 1254 - 138)
+    im2.paste(art2, (0, 138))
+    _tt_apply_vertical_gradients(im2, 138, 1254)
+    _tt_draw_right_action_bar(
+        im2,
+        avatar_letter="R",
+        avatar_bg=(196, 88, 52),
+        likes="142",
+        comments="18",
+        saves="45",
+        shares="24",
+    )
+    d2.rounded_rectangle((96, 230, 540, 336), radius=20, fill=(78, 36, 22))
+    d2.text((318, 265), "Receita da Família", font=load_font(26, bold=True), fill=(255, 255, 255), anchor="mm")
+    d2.text((318, 304), "Bolo de fubá cremoso para o café", font=load_font(19), fill=(255, 228, 196), anchor="mm")
+
+    d2.text((20, 1126), "receitas.familia · 10-15", font=load_font(22, bold=True), fill=(255, 255, 255))
+    d2.text(
+        (20, 1164),
+        "Aquele bolo quentinho para acompanhar o café da tarde",
+        font=load_font(18),
+        fill=(242, 242, 242),
+    )
+    d2.text(
+        (20, 1192),
+        "com quem a gente gosta #receitas #cafe #familia",
+        font=load_font(18, bold=True),
+        fill=(255, 255, 255),
+    )
+    save_jpg(crop_system_bars(im2, y_top, y_bot), dst / "02_amigos.jpg")
+
+    # 3. 03_criar_camera.jpg (d49a57fa)
+    im3 = Image.open(src / "d49a57fa-d866-4a8e-8a8d-6ae3625e3218.jpg").convert("RGB")
+    # Preserva ícones brancos do topo-esquerdo e da barra lateral direita (y>=200, onde o fundo original é escuro)
+    top_cam_icons = im3.crop((24, 126, 72, 180))
+    right_cam_icons = im3.crop((568, 200, 624, 620))
+
+    # Visor da câmera (y=96..1240) substituído por cena limpa de flores no jardim
+    cam_scene = draw_illustration("garden_flowers", 636, 1240 - 96)
+    _paste_rounded(im3, cam_scene, (0, 96), radius=28)
+    _tt_apply_vertical_gradients(im3, 96, 1240)
+
+    _composite_bright_icons(im3, top_cam_icons, (24, 126), luma_thresh=190)
+    _composite_bright_icons(im3, right_cam_icons, (568, 200), luma_thresh=190)
+
+    d3 = ImageDraw.Draw(im3)
+    # Ícone de virar câmera no topo-direito (x=596, y=156) desenhado limpo sem o brilho do monitor original
+    d3.arc((579, 139, 613, 173), 200, 340, fill=(255, 255, 255), width=3)
+    d3.polygon([(608, 141), (616, 149), (605, 151)], fill=(255, 255, 255))
+    d3.arc((579, 139, 613, 173), 20, 160, fill=(255, 255, 255), width=3)
+    d3.polygon([(584, 171), (576, 163), (587, 161)], fill=(255, 255, 255))
+    # Pílula superior "Adicionar som"
+    d3.rounded_rectangle((204, 122, 432, 184), radius=30, fill=(38, 46, 52))
+    d3.ellipse((231, 156, 241, 165), fill=(255, 255, 255))
+    d3.line([(240, 160), (240, 142), (249, 145)], fill=(255, 255, 255), width=3)
+    d3.text((330, 153), "Adicionar som", font=load_font(19, bold=True), fill=(255, 255, 255), anchor="mm")
+
+    # Seletor de modo acima do disparador: 10 min | 60 s | 15 s | [FOTO] | TEXTO
+    f_mode = load_font(18, bold=True)
+    d3.text((72, 1036), "10 min", font=f_mode, fill=(240, 240, 240), anchor="mm")
+    d3.text((160, 1036), "60 s", font=f_mode, fill=(240, 240, 240), anchor="mm")
+    d3.text((236, 1036), "15 s", font=f_mode, fill=(240, 240, 240), anchor="mm")
+    d3.rounded_rectangle((277, 1016, 358, 1056), radius=20, fill=(255, 255, 255))
+    d3.text((318, 1036), "FOTO", font=f_mode, fill=(20, 20, 20), anchor="mm")
+    d3.text((414, 1036), "TEXTO", font=f_mode, fill=(240, 240, 240), anchor="mm")
+
+    # Botão disparador central e círculos de filtro limpos à direita
+    d3.ellipse((257, 1079, 379, 1201), outline=(255, 255, 255), width=6)
+    d3.ellipse((268, 1090, 368, 1190), fill=(245, 245, 245))
+
+    filter_scenes = [(434, "sunset_beach"), (538, "mountain_lake"), (630, "coffee_book")]
+    for fcx, fsc in filter_scenes:
+        ftile = draw_illustration(fsc, 78, 78)
+        fmask = Image.new("L", (156, 156), 0)
+        ImageDraw.Draw(fmask).ellipse((0, 0, 155, 155), fill=255)
+        im3.paste(ftile, (fcx - 39, 1101), fmask.resize((78, 78), Image.Resampling.LANCZOS))
+        d3.ellipse((fcx - 39, 1101, fcx + 39, 1179), outline=(255, 255, 255), width=2)
+
+    save_jpg(crop_system_bars(im3, y_top, y_bot), dst / "03_criar_camera.jpg")
+
+    # 4. 04_loja.jpg (b1dd7013)
+    im4 = Image.open(src / "b1dd7013-8179-4a14-ab69-5cb8565d6e02.jpg").convert("RGB")
+    d4 = ImageDraw.Draw(im4)
+    # Substitui a aba de localização "Campinas" por "Dicas"
+    d4.rectangle((104, 96, 204, 134), fill=(255, 255, 255))
+    d4.text((154, 114), "Dicas", font=load_font(21, bold=False), fill=(95, 95, 95), anchor="mm")
+
+    # Substitui o card esquerdo com rosto de pessoa real (x=11..312, y=792..1198) por ilustração de produto
+    prod_tile = draw_illustration("coffee_book", 301, 406)
+    _paste_rounded(im4, prod_tile, (11, 792), radius=14)
+    # Badge superior esquerdo de curtidas e rodapé da loja genérica
+    d4.rounded_rectangle((20, 804, 116, 836), radius=8, fill=(45, 35, 38))
+    d4.rounded_rectangle((24, 808, 48, 832), radius=6, fill=(254, 44, 85))
+    d4.text((80, 820), "12.1K", font=load_font(15, bold=True), fill=(255, 255, 255), anchor="mm")
+    av_shop = make_initial_badge(28, "C", bg_color=(196, 118, 62))
+    im4.paste(av_shop, (20, 1156), av_shop)
+    d4.text((56, 1170), "casa.conforto", font=load_font(17, bold=True), fill=(255, 255, 255), anchor="lm")
+
+    # Substitui também a miniatura e descrição abaixo do card esquerdo (y=1206..1254)
+    d4.rectangle((11, 1204, 312, 1254), fill=(255, 255, 255))
+    mini_tile = draw_illustration("coffee_book", 68, 44)
+    _paste_rounded(im4, mini_tile, (22, 1210), radius=6)
+    d4.text((96, 1212), "Kit xícara de cerâmica e", font=load_font(16), fill=(30, 30, 30))
+    d4.text((96, 1234), "apoio de leitura para casa", font=load_font(16), fill=(30, 30, 30))
+    save_jpg(crop_system_bars(im4, y_top, y_bot), dst / "04_loja.jpg")
+
+    # 5. 05_mensagens.jpg (94d8ae60)
+    im5 = Image.open(src / "94d8ae60-819f-4a94-b54f-2f71b1bcd73d.jpg").convert("RGB")
+    d5 = ImageDraw.Draw(im5)
+    # Limpa toda a faixa de stories 1, 2 e 3 (x=16..436, y=142..334), preservando "+ Widget" em x>=444
+    d5.rectangle((16, 142, 436, 334), fill=(255, 255, 255))
+
+    # Story 1: Criar (avatar do usuário + balão "O que você está pensando..." + botão '+' azul)
+    av_s1 = make_avatar(108, bg_color=(52, 118, 204), fg_color=(255, 255, 255))
+    im5.paste(av_s1, (25, 190), av_s1)
+    d5.rounded_rectangle((22, 145, 142, 232), radius=18, fill=(255, 255, 255), outline=(232, 232, 236), width=2)
+    f_bub = load_font(15)
+    d5.text((82, 165), "O que", font=f_bub, fill=(95, 95, 95), anchor="mm")
+    d5.text((82, 187), "você está", font=f_bub, fill=(95, 95, 95), anchor="mm")
+    d5.text((82, 209), "pensando...", font=f_bub, fill=(95, 95, 95), anchor="mm")
+    d5.ellipse((106, 266, 140, 300), fill=(32, 184, 246), outline=(255, 255, 255), width=3)
+    d5.line([(116, 283), (130, 283)], fill=(255, 255, 255), width=3)
+    d5.line([(123, 276), (123, 290)], fill=(255, 255, 255), width=3)
+    d5.text((80, 320), "Criar", font=load_font(16, bold=True), fill=(25, 25, 25), anchor="mm")
+
+    # Story 2: Anos atrás (paisagem suave + cadeado + ponto vermelho)
+    s2_tile = draw_illustration("sunset_beach", 108, 108)
+    s2_mask = Image.new("L", (216, 216), 0)
+    ImageDraw.Draw(s2_mask).ellipse((0, 0, 215, 215), fill=255)
+    im5.paste(s2_tile, (168, 190), s2_mask.resize((108, 108), Image.Resampling.LANCZOS))
+    d5.rounded_rectangle((208, 236, 236, 260), radius=4, outline=(255, 255, 255), width=3)
+    d5.arc((213, 222, 231, 242), 180, 360, fill=(255, 255, 255), width=3)
+    d5.ellipse((248, 266, 282, 300), fill=(254, 44, 85), outline=(255, 255, 255), width=3)
+    d5.text((222, 320), "Anos atrás", font=load_font(16, bold=True), fill=(25, 25, 25), anchor="mm")
+
+    # Story 3: Contato 1 (anel colorido + avatar ilustrado + pílula de adicionar)
+    d5.ellipse((299, 181, 425, 307), outline=(34, 202, 196), width=4)
+    av_s3 = draw_generic_person_avatar(108, 1)
+    im5.paste(av_s3, (308, 190), av_s3)
+    d5.rounded_rectangle((334, 272, 390, 308), radius=16, fill=(255, 255, 255), outline=(235, 235, 235), width=1)
+    d5.ellipse((358, 280, 368, 290), fill=(25, 25, 25))
+    d5.arc((353, 290, 373, 304), 180, 360, fill=(25, 25, 25), width=3)
+    d5.text((362, 320), "Contato 1", font=load_font(16, bold=True), fill=(25, 25, 25), anchor="mm")
+
+    # Linha "Atividade e novos seguidores": remove nome real no subtítulo
+    d5.rectangle((116, 626, 560, 668), fill=(255, 255, 255))
+    d5.text(
+        (118, 632),
+        "Você tem novas sugestões de conexões...",
+        font=load_font(18, bold=True),
+        fill=(25, 25, 25),
+    )
+
+    # Linhas de conversas pessoais -> Contato 1, Contato 2, Contato 3
+    msg_rows = [
+        (685, 770, 0, "Contato 1", "Compartilhei esta publicação co... · 13 de set.", True),
+        (988, 1074, 2, "Contato 2", "Compartilhei esta publicação co... · 28 de mai.", False),
+        (1090, 1176, 3, "Contato 3", "compartilhou um vídeo · 30 de dez.", False),
+    ]
+    for ry0, ry1, av_idx, rname, rsub, online in msg_rows:
+        d5.rectangle((18, ry0, 565, ry1), fill=(255, 255, 255))
+        av_r = draw_generic_person_avatar(80, av_idx)
+        im5.paste(av_r, (21, ry0 + 2), av_r)
+        if online:
+            d5.ellipse((76, ry0 + 58, 100, ry0 + 82), fill=(46, 204, 113), outline=(255, 255, 255), width=3)
+        d5.text((118, ry0 + 10), rname, font=load_font(20, bold=False), fill=(20, 20, 20))
+        d5.text((118, ry0 + 44), rsub, font=load_font(18, bold=False), fill=(120, 120, 125))
+
+    save_jpg(crop_system_bars(im5, y_top, y_bot), dst / "05_mensagens.jpg")
+
+    # 6. 06_perfil.jpg (cfad1dea)
+    im6 = Image.open(src / "cfad1dea-bfc5-4610-8e3f-c37af149a96e.jpg").convert("RGB")
+    d6 = ImageDraw.Draw(im6)
+    # Nome e @handle genéricos
+    d6.rectangle((18, 168, 430, 244), fill=(255, 255, 255))
+    d6.text((22, 168), "Usuário Exemplo", font=load_font(33, bold=True), fill=(18, 18, 18))
+    d6.polygon([(298, 185), (314, 185), (306, 195)], fill=(25, 25, 25))
+    d6.text((22, 214), "@usuario.exemplo", font=load_font(18), fill=(120, 120, 125))
+
+    # Bio genérica
+    d6.rectangle((18, 336, 520, 368), fill=(255, 255, 255))
+    d6.text(
+        (22, 338),
+        "Compartilhando receitas, dicas e bons momentos.",
+        font=load_font(18),
+        fill=(35, 35, 35),
+    )
+
+    # Avatar grande à direita + balão de nota + botão '+' azul
+    d6.rectangle((472, 148, 622, 316), fill=(255, 255, 255))
+    av_prof = make_avatar(128, bg_color=(52, 118, 204), fg_color=(255, 255, 255))
+    im6.paste(av_prof, (480, 178), av_prof)
+    d6.rounded_rectangle((494, 150, 594, 212), radius=16, fill=(255, 255, 255), outline=(230, 230, 235), width=2)
+    d6.text((544, 181), "Bom dia!", font=load_font(16, bold=True), fill=(85, 85, 90), anchor="mm")
+    d6.ellipse((576, 272, 612, 308), fill=(32, 184, 246), outline=(255, 255, 255), width=3)
+    d6.line([(586, 290), (602, 290)], fill=(255, 255, 255), width=3)
+    d6.line([(594, 282), (594, 298)], fill=(255, 255, 255), width=3)
+    save_jpg(crop_system_bars(im6, y_top, y_bot), dst / "06_perfil.jpg")
+
+
 def main():
     process_clt()
     process_cnh()
     process_poupatempo()
     process_google_fotos()
     process_youtube()
-    print("Gerado: CLT (10), CNH (10), Poupatempo (10), GoogleFotos (4), YouTube (7) -> total 41.")
+    process_inss()
+    process_tiktok()
+    print(
+        "Gerado: CLT (10), CNH (10), Poupatempo (10), GoogleFotos (4), "
+        "YouTube (7), INSS (19), TikTok (6) -> total 66."
+    )
 
 
 if __name__ == "__main__":
