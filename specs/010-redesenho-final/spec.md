@@ -51,6 +51,16 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   passos que passarem de duas frases são reescritos ou divididos (FR-022).
 - Q: A apresentação diz que a Memora só fala dentro do aplicativo? → A: Sim,
   incluir (FR-035).
+- Pedido do Henrique durante o plano: ao abrir o aplicativo, uma tela de
+  carregamento com a Memora acenando (FR-036 a FR-039). Ela é animada em vetor,
+  como o resto da Memora, e não um GIF — que seria imagem solta e não
+  respeitaria "reduzir movimento".
+- Pedido do Henrique: no Início, a Memora em 2.5D cobre a parte superior da
+  tela (FR-040, FR-041).
+- Pedido do Henrique: a tela da conversa mais limpa, para preservar a
+  interface (FR-042, FR-043).
+- Pedido do Henrique: a barra inferior (Ajustes, Início, Meu perfil) refeita no
+  padrão estético do resto (FR-044 a FR-047).
 - Q (resolvida sem pergunta, pela decisão de 2026-10-03): o ditado por voz pode
   usar reconhecimento fora do aparelho? → A: Não; só no aparelho, senão o
   ditado fica indisponível (FR-034).
@@ -167,9 +177,9 @@ pela memora-ux; nenhum título, botão, rótulo ou aviso tem emoji.
 
 ### User Story 4 — A conversa com a Memora, limpa e sólida (Priority: P2)
 
-A tela de conversa fica limpa: balões bem espaçados, a Memora animada ao lado
-das respostas dela, ícones vetoriais que respondem ao toque, nenhuma imagem
-solta. A Memora pode usar um emoji de vez em quando, nunca mais de um por
+A tela de conversa fica limpa: só o essencial, balões bem espaçados, a Memora
+pequena no topo — falando enquanto a resposta aparece —, ícones vetoriais que
+respondem ao toque, nenhuma imagem solta. A Memora pode usar um emoji de vez em quando, nunca mais de um por
 mensagem e nunca no lugar de uma palavra.
 
 **Why this priority**: A conversa é a tela mais usada e a que o Henrique citou
@@ -242,7 +252,51 @@ conferir cada tela contra a lista de checagem da memora-ux.
 
 ---
 
+### User Story 7 — A Memora recebe a pessoa e mora no topo do Início (Priority: P1)
+
+Ao abrir o aplicativo, a primeira coisa que a pessoa vê é a Memora acenando,
+enquanto o Memora termina de carregar. Ao chegar no Início, a Memora em 2.5D
+ocupa a parte de cima da tela, grande e presente, com a saudação; os atalhos
+ficam logo abaixo. A barra inferior, com Ajustes, Início e Meu perfil, tem o
+mesmo acabamento do resto: ícones da mesma família, o item ativo bem marcado e
+uma resposta suave ao toque.
+
+**Why this priority**: É a primeira impressão e a tela mais vista. O Henrique
+pediu os três pontos nominalmente.
+
+**Independent Test**: Abrir o aplicativo a frio: aparece a Memora acenando até
+o aplicativo estar pronto, e em seguida o Início com a Memora no topo. Trocar
+de destino na barra inferior: o item ativo muda com movimento e o rótulo
+continua escrito.
+
+**Acceptance Scenarios**:
+
+1. **Given** o aplicativo fechado, **When** a pessoa o abre, **Then** vê a
+   Memora acenando, sem texto técnico nem barra de progresso numérica, até o
+   aplicativo estar pronto.
+2. **Given** o aplicativo pronto antes de o aceno terminar, **When** o aceno
+   completa, **Then** a tela de carregamento sai com uma transição suave — sem
+   esperar além de um aceno completo.
+3. **Given** "reduzir movimento" ligado, **When** o aplicativo abre, **Then** a
+   Memora aparece parada, acenando em pose fixa.
+4. **Given** o Início em 100% de letra, **When** abre, **Then** a Memora em 2.5D
+   ocupa a parte superior da tela, com a saudação, e os atalhos ficam abaixo
+   sem rolagem no aparelho de referência.
+5. **Given** o Início com letra a 200%, **When** abre, **Then** a Memora
+   encolhe para dar lugar ao texto, e nenhuma ação some.
+6. **Given** a barra inferior, **When** a pessoa toca noutro destino, **Then** o
+   indicador do item ativo desliza até ele, o ícone responde ao toque, e ícone
+   e rótulo continuam juntos.
+
+---
+
 ### Edge Cases
+
+- **Carregamento demorado** (aparelho lento): a Memora continua acenando de
+  forma calma (sem acelerar nem piscar), e se passar de alguns segundos uma
+  frase curta diz que está quase pronto.
+- **Falha ao carregar**: a tela de carregamento não prende a pessoa; ela sai
+  para a tela de erro com a Memora, como qualquer outro erro.
 
 - **"Reduzir movimento" ligado ou animações desligadas pelo sistema**: nenhuma
   informação, aviso ou confirmação pode depender de animação; tudo aparece
@@ -348,8 +402,9 @@ conferir cada tela contra a lista de checagem da memora-ux.
   nenhum emoji MUST substituir uma palavra ou carregar informação.
 - **FR-024**: Se uma resposta da IA chegar com mais de um emoji, o aplicativo
   MUST exibir no máximo o primeiro.
-- **FR-025**: A Memora animada MUST aparecer ao lado das respostas dela sem
-  repetir-se a cada balão (FR-006): uma presença na tela, não uma por mensagem.
+- **FR-025**: A Memora animada MUST aparecer uma vez na conversa, pequena e no
+  topo (FR-042), e reagir às respostas dela (falando enquanto a resposta
+  aparece) sem se repetir a cada balão (FR-006).
 - **FR-026**: O aviso antigolpe da conversa MUST manter o comportamento atual:
   encolhe, não some, e não é dispensável.
 
@@ -382,6 +437,39 @@ conferir cada tela contra a lista de checagem da memora-ux.
 - **FR-035**: A apresentação MUST dizer, em uma frase, que a Memora só fala com
   a pessoa **dentro do aplicativo** — nunca por mensagem, ligação ou rede
   social.
+
+**Abertura, Início, conversa e barra inferior (US7 e US4)**
+
+- **FR-036**: Ao abrir o aplicativo, MUST aparecer uma tela de carregamento com
+  a Memora acenando, animada (não imagem solta), sobre o fundo do tema.
+- **FR-037**: O primeiro instante da abertura, controlado pelo sistema antes de
+  o aplicativo existir, MUST mostrar a Memora parada no mesmo fundo, para que a
+  passagem para o aceno seja contínua.
+- **FR-038**: A tela de carregamento MUST durar o tempo de carregar e no máximo
+  o de um aceno completo além disso; ela MUST NOT ser prolongada de propósito.
+  Se o carregamento passar de 4 segundos, MUST aparecer uma frase curta dizendo
+  que está quase pronto.
+- **FR-039**: Com "reduzir movimento" ligado, a Memora da tela de carregamento
+  MUST aparecer parada, em pose de aceno.
+- **FR-040**: No Início, a Memora em 2.5D MUST ocupar a parte superior da tela
+  (cerca de um terço da altura, com letra a 100%), junto da saudação.
+- **FR-041**: Com letra ampliada, a área da Memora no Início MUST encolher antes
+  de qualquer texto ser cortado ou de qualquer ação sair do alcance; o Início
+  MUST continuar passando nas matrizes de acessibilidade.
+- **FR-042**: Na conversa, a Memora MUST aparecer pequena, no topo da tela, e
+  MUST NOT ocupar o espaço das mensagens; as respostas dela não levam o rosto
+  dela ao lado de cada balão.
+- **FR-043**: A conversa MUST mostrar só o essencial: cabeçalho, aviso
+  antigolpe compacto, mensagens e o campo de escrever. Sugestões aparecem só
+  antes da primeira mensagem; nenhum elemento decorativo além da Memora.
+- **FR-044**: A barra inferior MUST manter os 3 destinos (Ajustes, Início, Meu
+  perfil), com ícone e rótulo escrito juntos, alvo ≥ 48 dp.
+- **FR-045**: Os ícones da barra inferior MUST ser da mesma família vetorial do
+  resto do aplicativo (FR-027).
+- **FR-046**: O item ativo MUST ter um indicador que desliza até o destino
+  tocado; com "reduzir movimento", o indicador muda de lugar sem deslizar.
+- **FR-047**: A barra inferior MUST ter o mesmo acabamento dos demais blocos
+  (superfície, sombra, cantos) e resposta visual ao toque em cada item.
 
 ### Key Entities
 
@@ -428,6 +516,9 @@ conferir cada tela contra a lista de checagem da memora-ux.
   e 002), ao menos 4 de 5 conseguem dizer onde estão e como voltar depois de
   três trocas de tela, e nenhuma relata desconforto com as animações.
 - **SC-008**: Em 50 respostas seguidas da IA, nenhuma exibe mais de um emoji.
+- **SC-009**: No aparelho de teste, a tela de carregamento não acrescenta mais
+  que um aceno completo (cerca de 1,5 s) ao tempo que o aplicativo já leva para
+  abrir.
 
 ---
 
