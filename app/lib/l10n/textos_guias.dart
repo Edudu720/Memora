@@ -138,6 +138,11 @@ abstract final class TextosGuias {
   static String secaoJaAprendida(String contagem) =>
       '$contagem · Já aprendeu';
 
+  /// O progresso no cabeçalho do seletor: "2 de 4 assuntos aprendidos".
+  static String progressoDasSecoes(int aprendidas, int total) => aprendidas > 0
+      ? '$aprendidas de $total assuntos aprendidos'
+      : '$total assuntos para aprender';
+
   /// Leitura do cartão de seção pelo leitor de tela.
   static String secaoDescrita(String titulo, String subtitulo, String meta) =>
       '$titulo. $subtitulo. $meta.';
@@ -150,31 +155,49 @@ abstract final class TextosGuias {
 
   // WhatsApp (T071)
   /// Título do guia do WhatsApp.
-  static const String tituloWhatsapp = 'Como mandar mensagem no WhatsApp';
+  static const String tituloWhatsapp = 'Como usar o WhatsApp';
   /// Passo 1 do WhatsApp.
   static const String whatsappPasso1 =
-      'Toque no botão verde de nova conversa, embaixo, à direita da tela.';
+      'Tela inicial do WhatsApp:\n'
+      '1) Barra de busca para procurar conversas ou contatos.\n'
+      '2) Ícones no alto: câmera rápida e menu de 3 pontinhos.\n'
+      '3) Menu aberto com opções como Novo grupo e Configurações.\n'
+      '4) Botão verde (+) embaixo à direita para iniciar nova conversa.\n'
+      '5) Abas embaixo: Conversas, Atualizações, Comunidades e Ligações.';
   /// Descrição da captura do passo 1 do WhatsApp.
   static const String whatsappCaptura1 =
-      'Tela principal do WhatsApp mostrando conversas e o botão verde de mensagem no canto inferior direito.';
+      'Tela principal do WhatsApp com cinco regiões numeradas: busca, câmera e menu, opções abertas, botão de nova conversa e abas inferiores.';
   /// Passo 2 do WhatsApp.
   static const String whatsappPasso2 =
-      'Toque no nome do contato com quem você quer conversar, no alto da lista.';
+      'Menu dos 3 pontinhos:\n'
+      '1) Novo grupo e Nova comunidade para falar com várias pessoas juntas.\n'
+      '2) Listas de transmissão e Dispositivos conectados (WhatsApp Web no computador).\n'
+      '3) Mensagens Favoritas e opção Marcar tudo como lido.\n'
+      '4) Carteira financeira e Configurações do aplicativo.';
   /// Descrição da captura do passo 2 do WhatsApp.
   static const String whatsappCaptura2 =
-      'Lista de contatos do WhatsApp com nomes e fotos.';
+      'Menu de opções do WhatsApp com quatro blocos numerados explicando grupos, transmissão, favoritas e configurações.';
   /// Passo 3 do WhatsApp.
   static const String whatsappPasso3 =
-      'Toque na barra branca de mensagem, embaixo, e digite o seu recado.';
+      'Configurações do WhatsApp (parte 1):\n'
+      '1) No alto à direita: lupa para buscar ajuste, código QR e editar nome.\n'
+      '2) Transferências e Cobranças recorrentes.\n'
+      '3) Dispositivos conectados para conferir computadores ligados à sua conta.\n'
+      '4) Conta e Privacidade para proteger foto, recado e bloqueios.\n'
+      '5) Listas, Conversas (cópia de segurança) e Aparência (tamanho de letra e tema).';
   /// Descrição da captura do passo 3 do WhatsApp.
   static const String whatsappCaptura3 =
-      'Tela de conversa do WhatsApp com o teclado aberto e a barra de digitação embaixo.';
+      'Tela de Configurações do WhatsApp com cinco áreas numeradas: topo, carteira financeira, dispositivos, privacidade e aparência.';
   /// Passo 4 do WhatsApp.
   static const String whatsappPasso4 =
-      'Toque no botão verde com uma setinha, embaixo, à direita, para enviar. Muito bem! Você enviou a sua mensagem.';
+      'Configurações do WhatsApp (parte 2):\n'
+      '1) Listas de transmissão e Notificações (toque e som das mensagens).\n'
+      '2) Armazenamento e dados para liberar espaço e controlar uso de internet.\n'
+      '3) Controle parental e Acessibilidade (aumentar contraste e reduzir animações).\n'
+      '4) Idioma do app, Ajuda e feedback e Convidar amigos.';
   /// Descrição da captura do passo 4 do WhatsApp.
   static const String whatsappCaptura4 =
-      'Mensagem enviada na conversa com botão de envio à direita.';
+      'Segunda metade das Configurações do WhatsApp com quatro blocos numerados sobre notificações, espaço, acessibilidade e ajuda.';
 
   // Instagram (T071; refeito na T135 com imagens recriadas por IA, em cinco
   // seções — ver a linha do Instagram no CAPTURAS.md)
@@ -330,31 +353,118 @@ abstract final class TextosGuias {
 
   // Facebook (T072)
   /// Título do guia do Facebook.
-  static const String tituloFacebook = 'Como ver publicações no Facebook';
+  static const String tituloFacebook = 'Como usar o Facebook passo a passo';
+  /// Título da seção 1 do Facebook.
+  static const String facebookSecao1Titulo = 'Feed, Vídeos e Marketplace';
+  /// Subtítulo da seção 1 do Facebook.
+  static const String facebookSecao1Subtitulo =
+      'Veja publicações, assista aos Reels e explore anúncios';
+  /// Título da seção 2 do Facebook.
+  static const String facebookSecao2Titulo = 'Amigos, Notificações e Menu';
+  /// Subtítulo da seção 2 do Facebook.
+  static const String facebookSecao2Subtitulo =
+      'Gerencie pedidos de amizade, avisos e configurações';
+  /// Título da seção 3 do Facebook.
+  static const String facebookSecao3Titulo = 'Seu Perfil e Informações';
+  /// Subtítulo da seção 3 do Facebook.
+  static const String facebookSecao3Subtitulo =
+      'Personalize foto, apresentação e dados pessoais';
+
   /// Passo 1 do Facebook.
   static const String facebookPasso1 =
-      'Toque no ícone de casinha, no alto, à esquerda, para ver o feed de notícias.';
+      'Tela inicial (Feed) do Facebook:\n'
+      '1) No alto à direita: criar publicação (+), lupa de pesquisa e Messenger.\n'
+      '2) Abas principais: Início, Vídeos (Reels), Amigos, Marketplace, Notificações e Perfil.\n'
+      '3) Campo "No que você está pensando?" para escrever um texto ou postar foto.\n'
+      '4) Cartão "Criar story" para postar foto curta que dura 24 horas.';
   /// Descrição da captura do passo 1 do Facebook.
   static const String facebookCaptura1 =
-      'Tela principal do Facebook com o ícone da casinha azul no topo.';
+      'Tela inicial do Facebook com quatro regiões numeradas: ações do topo, barra de abas, criação de post e Stories.';
   /// Passo 2 do Facebook.
   static const String facebookPasso2 =
-      'Deslize o dedo de baixo para cima no meio da tela para ver as mensagens dos seus amigos.';
+      'Vídeos curtos (Reels):\n'
+      '1) Barra no topo indicando a aba de vídeos selecionada.\n'
+      '2) Título Reels com lupa de busca e atalho para mensagens.\n'
+      '3) Botões à direita: Curtir (mãozinha), Comentar, Compartilhar e Salvar vídeo.\n'
+      '4) Nome da página embaixo com botão "Seguir" para ver novos vídeos dela.';
   /// Descrição da captura do passo 2 do Facebook.
   static const String facebookCaptura2 =
-      'Publicações recentes de amigos e páginas com fotos e textos no Facebook.';
+      'Tela de vídeo Reels no Facebook com quatro áreas numeradas mostrando curtida, comentários e botão Seguir.';
   /// Passo 3 do Facebook.
   static const String facebookPasso3 =
-      'Toque no botão \'Curtir\' com a mãozinha, embaixo da publicação que gostar.';
+      'Marketplace (compra e venda):\n'
+      '1) Lupa para buscar produtos por nome e botão de opções.\n'
+      '2) Filtros "Vender", "Explorar", "Local" (sua cidade) e pino do mapa.\n'
+      '3) Grade de anúncios com foto, preço e título — toque para ver detalhes e combinar com o vendedor.';
   /// Descrição da captura do passo 3 do Facebook.
   static const String facebookCaptura3 =
-      'Publicação com botões de curtir, comentar e compartilhar embaixo.';
+      'Tela do Marketplace no Facebook com três regiões numeradas para pesquisa, filtros locais e anúncios.';
   /// Passo 4 do Facebook.
   static const String facebookPasso4 =
-      'Para ver seus amigos e avisos, toque no sino no alto, à direita. Pronto! Agora você sabe navegar no Facebook.';
+      'Amigos e Pedidos de Amizade:\n'
+      '1) Aba de bonequinhos no topo selecionada em azul.\n'
+      '2) Botões "Sugestões" (conhecer pessoas) e "Seus amigos" (sua lista atual).\n'
+      '3) Nos pedidos recebidos, toque em "Confirmar" para aceitar ou "Excluir" para recusar.';
   /// Descrição da captura do passo 4 do Facebook.
   static const String facebookCaptura4 =
-      'Barra superior do Facebook destacando o ícone de sino de notificações.';
+      'Tela Amigos no Facebook com três marcações numeradas para aba ativa, sugestões e botões Confirmar e Excluir.';
+  /// Passo 5 do Facebook.
+  static const String facebookPasso5 =
+      'Notificações (avisos):\n'
+      '1) Ícone de sininho no topo para abrir seus avisos recentes.\n'
+      '2) Lupa à direita para procurar um aviso específico.\n'
+      '3) Lista de avisos: toque em qualquer linha para abrir a publicação.\n'
+      '4) Três pontinhos (...) ao lado do aviso para silenciar ou remover se não quiser ver.';
+  /// Descrição da captura do passo 5 do Facebook.
+  static const String facebookCaptura5 =
+      'Tela de Notificações do Facebook com quatro pontos numerados destacando sino, pesquisa, aviso e opções.';
+  /// Passo 6 do Facebook.
+  static const String facebookPasso6 =
+      'Menu de Atalhos do Facebook:\n'
+      '1) Cartão no topo para abrir seu próprio perfil ou criar uma página.\n'
+      '2) Atalhos rápidos para Salvos, Lembranças e Marketplace.\n'
+      '3) Botão "Ver mais", "Ajuda e suporte" e "Configurações e privacidade".';
+  /// Descrição da captura do passo 6 do Facebook.
+  static const String facebookCaptura6 =
+      'Menu lateral do Facebook com três blocos numerados: cartão de perfil, atalhos e área de ajuda e configurações.';
+  /// Passo 7 do Facebook.
+  static const String facebookPasso7 =
+      'Configurações e Privacidade:\n'
+      '1) Toque em "Configurações" para ajustar nome, senha e segurança.\n'
+      '2) "Central de Privacidade" e "Solicitações de dispositivos" (acessos ativos).\n'
+      '3) "Sua atividade de anúncios", "Pedidos e cobranças" e "Histórico de links".\n'
+      '4) Área "Atualizações" com novidades e recursos extras do aplicativo.';
+  /// Descrição da captura do passo 7 do Facebook.
+  static const String facebookCaptura7 =
+      'Menu expandido de Configurações e Privacidade do Facebook com quatro regiões numeradas.';
+  /// Passo 8 do Facebook.
+  static const String facebookPasso8 =
+      'Sua Página de Perfil:\n'
+      '1) Botões no alto: editar perfil (lápis), buscar no perfil e mais opções (...).\n'
+      '2) Ícone de câmera na foto redonda para escolher ou trocar sua foto de perfil.\n'
+      '3) Botões "Adicionar ao story" e "Editar perfil".\n'
+      '4) Cartão "Atualizar seu perfil" para completar seus interesses com facilidade.';
+  /// Descrição da captura do passo 8 do Facebook.
+  static const String facebookCaptura8 =
+      'Tela de Perfil do Facebook com quatro áreas numeradas mostrando foto, botões principais e cartão de atualização.';
+  /// Passo 9 do Facebook.
+  static const String facebookPasso9 =
+      'Editar Perfil (apresentação e dados):\n'
+      '1) Câmera sobre a foto para trocar retrato ou imagem de capa.\n'
+      '2) "Apresentação" para escrever uma frase sobre você ("Sobre você").\n'
+      '3) "Dados pessoais": toque no lápis à direita para escolher quem pode ver sua cidade ou aniversário.';
+  /// Descrição da captura do passo 9 do Facebook.
+  static const String facebookCaptura9 =
+      'Tela Editar Perfil do Facebook com três áreas numeradas: foto, apresentação e dados pessoais.';
+  /// Passo 10 do Facebook.
+  static const String facebookPasso10 =
+      'Editar Perfil (trabalho e interesses):\n'
+      '1) Trabalho e Educação para registrar onde trabalhou ou estudou.\n'
+      '2) Hobbies e Interesses (músicas, programas de TV, filmes e jogos).\n'
+      '3) Viagem e Links caso queira mostrar lugares ou sites favoritos.';
+  /// Descrição da captura do passo 10 do Facebook.
+  static const String facebookCaptura10 =
+      'Segunda parte de Editar Perfil do Facebook com três blocos numerados sobre trabalho, interesses e viagens.';
 
   // Google Fotos (T072)
   /// Título do guia do Google Fotos.
@@ -386,31 +496,95 @@ abstract final class TextosGuias {
 
   // Telegram (T072)
   /// Título do guia do Telegram.
-  static const String tituloTelegram = 'Como conversar no Telegram';
+  static const String tituloTelegram = 'Como usar o Telegram passo a passo';
+  /// Título da seção 1 do Telegram.
+  static const String telegramSecao1Titulo = 'Conversas e Contatos';
+  /// Subtítulo da seção 1 do Telegram.
+  static const String telegramSecao1Subtitulo =
+      'Busque chats, inicie mensagens e salve novos contatos';
+  /// Título da seção 2 do Telegram.
+  static const String telegramSecao2Titulo = 'Perfil e Configurações';
+  /// Subtítulo da seção 2 do Telegram.
+  static const String telegramSecao2Subtitulo =
+      'Ajuste foto, privacidade, idioma e ajuda no aplicativo';
+
   /// Passo 1 do Telegram.
   static const String telegramPasso1 =
-      'Toque no ícone azul com lápis, embaixo, à direita, para iniciar uma conversa.';
+      'Tela inicial de Chats do Telegram:\n'
+      '1) Barra "Buscar Chats" no topo para localizar conversas, pessoas ou canais.\n'
+      '2) Faixa de aviso (como aniversário) que você pode fechar no X.\n'
+      '3) Botões à direita: câmera rápida e lápis azul para iniciar nova conversa.\n'
+      '4) Abas inferiores: Chats, Contatos, Configurações e Perfil.';
   /// Descrição da captura do passo 1 do Telegram.
   static const String telegramCaptura1 =
-      'Tela inicial do Telegram com a lista de canais e o botão redondo de lápis embaixo à direita.';
+      'Tela principal do Telegram com quatro regiões numeradas: busca, aviso, botões de ação e abas inferiores.';
   /// Passo 2 do Telegram.
   static const String telegramPasso2 =
-      'Toque no contato ou grupo com quem você quer falar na lista.';
+      'Aba Contatos:\n'
+      '1) Lupa no canto superior direito para pesquisar contatos salvos.\n'
+      '2) Botão azul "+ Novo Contato" no centro quando a lista ainda estiver vazia.\n'
+      '3) Aba "Contatos" destacada em azul na barra inferior.';
   /// Descrição da captura do passo 2 do Telegram.
   static const String telegramCaptura2 =
-      'Lista de contatos do Telegram com fotos de perfil e nomes.';
+      'Aba Contatos do Telegram com três marcações numeradas: pesquisa, botão Novo Contato e aba ativa.';
   /// Passo 3 do Telegram.
   static const String telegramPasso3 =
-      'Escreva o seu texto na barra embaixo da tela onde diz \'Mensagem\'.';
+      'Tela Nova Mensagem:\n'
+      '1) Barra superior com seta de voltar, título "Nova Mensagem" e lupa.\n'
+      '2) Atalhos para criar "Novo Grupo" (conversa em grupo) ou "Novo Canal".\n'
+      '3) Botão "+ Novo Contato" para cadastrar um número antes de conversar.';
   /// Descrição da captura do passo 3 do Telegram.
   static const String telegramCaptura3 =
-      'Tela de chat com a barra de texto e ícones de anexo e microfone.';
+      'Tela Nova Mensagem do Telegram com três áreas numeradas: topo, opções de grupo e canal e Novo Contato.';
   /// Passo 4 do Telegram.
   static const String telegramPasso4 =
-      'Toque no aviãozinho azul, embaixo, à direita, para enviar. Parabéns! Você já pode trocar mensagens pelo Telegram.';
+      'Cadastro de Novo Contato:\n'
+      '1) Digite o Nome (obrigatório) e o Sobrenome (opcional).\n'
+      '2) Informe o número de telefone com DDD (o Brasil já vem com +55).\n'
+      '3) Opção para manter "Sincronizar com o celular" ligado.\n'
+      '4) Botão azul "Criar Contato" para salvar e começar a conversar.';
   /// Descrição da captura do passo 4 do Telegram.
   static const String telegramCaptura4 =
-      'Conversa do Telegram com balão de mensagem e botão de envio com avião de papel.';
+      'Formulário Novo Contato do Telegram com quatro passos numerados de preenchimento até Criar Contato.';
+  /// Passo 5 do Telegram.
+  static const String telegramPasso5 =
+      'Seu Perfil no Telegram:\n'
+      '1) No topo à direita: código QR para compartilhar seu perfil e menu de 3 pontinhos.\n'
+      '2) Atalhos rápidos: "Definir Foto", "Editar Informações" e "Configurações".\n'
+      '3) Cartão com o seu número de telefone cadastrado.\n'
+      '4) Botão azul "Adicione um post" se quiser publicar uma foto no perfil.';
+  /// Descrição da captura do passo 5 do Telegram.
+  static const String telegramCaptura5 =
+      'Tela Perfil do Telegram com quatro áreas numeradas destacando ações do topo, foto, telefone e postagem.';
+  /// Passo 6 do Telegram.
+  static const String telegramPasso6 =
+      'Configurações (topo da tela):\n'
+      '1) Ícone de câmera na foto para trocar sua imagem de perfil.\n'
+      '2) Aviso de segurança: confirme em "Sim" se o seu número continua sendo este.\n'
+      '3) Atalhos para "Conta" (nome de usuário/bio) e "Configurações de Chat".\n'
+      '4) Acesso direto para "Privacidade e Segurança" e "Notificações".';
+  /// Descrição da captura do passo 6 do Telegram.
+  static const String telegramCaptura6 =
+      'Topo das Configurações do Telegram com quatro pontos numerados sobre foto, confirmação de número, conta e privacidade.';
+  /// Passo 7 do Telegram.
+  static const String telegramPasso7 =
+      'Configurações (privacidade, dados e idioma):\n'
+      '1) Barra superior com botão QR, lupa de busca e menu.\n'
+      '2) Configurações de Chat, Privacidade e Segurança e Notificações.\n'
+      '3) Dados e Armazenamento (limpar arquivos) e Pastas de Chat.\n'
+      '4) Dispositivos conectados, Economia de Energia e Idioma.';
+  /// Descrição da captura do passo 7 do Telegram.
+  static const String telegramCaptura7 =
+      'Lista intermediária de Configurações do Telegram dividida em quatro blocos numerados.';
+  /// Passo 8 do Telegram.
+  static const String telegramPasso8 =
+      'Configurações (recursos e Ajuda):\n'
+      '1) Recursos opcionais pagos (versão paga com estrela, Estrelas e Presente) — você não precisa pagar nada para usar o Telegram.\n'
+      '2) Seção Ajuda com "Fazer uma Pergunta" ao suporte oficial.\n'
+      '3) Perguntas Frequentes, Recursos do Telegram e Política de Privacidade.';
+  /// Descrição da captura do passo 8 do Telegram.
+  static const String telegramCaptura8 =
+      'Parte inferior das Configurações do Telegram com três blocos numerados explicando recursos extras e Ajuda.';
 
   // TikTok (T070)
   /// Título do guia do TikTok.
@@ -440,39 +614,253 @@ abstract final class TextosGuias {
   static const String tiktokCaptura4 =
       'Resultados de busca no TikTok organizados em lista de vídeos.';
 
-  // Gov.br (T078)
+  // Gov.br (006-guias-servicos-sociais)
   /// Título do guia do Gov.br.
-  static const String tituloGovBr = 'Como acessar sua conta Gov.br';
+  static const String tituloGovBr = 'Como usar o portal e conta Gov.br';
+  /// Título da seção 1 do Gov.br.
+  static const String govBrSecao1Titulo = 'Entrar na conta Gov.br';
+  /// Subtítulo da seção 1 do Gov.br.
+  static const String govBrSecao1Subtitulo = 'Acesse com seu CPF e senha oficial';
+  /// Título da seção 2 do Gov.br.
+  static const String govBrSecao2Titulo = 'Minha Área e Documentos';
+  /// Subtítulo da seção 2 do Gov.br.
+  static const String govBrSecao2Subtitulo = 'Veja sua caixa postal, dados e carteira';
+  /// Título da seção 3 do Gov.br.
+  static const String govBrSecao3Titulo = 'Baixar Certidões e Agenda';
+  /// Subtítulo da seção 3 do Gov.br.
+  static const String govBrSecao3Subtitulo = 'Emita comprovantes de vacina, eleitor e CPF';
+  /// Título da seção 4 do Gov.br.
+  static const String govBrSecao4Titulo = 'Buscar Serviços e Perfis';
+  /// Subtítulo da seção 4 do Gov.br.
+  static const String govBrSecao4Subtitulo = 'Encontre benefícios por perfil ou categoria';
+  /// Título da seção 5 do Gov.br.
+  static const String govBrSecao5Titulo = 'Aplicativos Oficiais';
+  /// Subtítulo da seção 5 do Gov.br.
+  static const String govBrSecao5Subtitulo = 'Conheça o Meu INSS, SUS e Carteira Digital';
+  /// Título da seção 6 do Gov.br.
+  static const String govBrSecao6Titulo = 'Ouvidoria e Desempenho';
+  /// Subtítulo da seção 6 do Gov.br.
+  static const String govBrSecao6Subtitulo = 'Envie dúvidas, elogios ou acompanhe protocolos';
+
   /// Passo 1 do Gov.br.
   static const String govBrPasso1 =
-      'Toque no botão azul "Entrar com gov.br", no meio da tela.';
+      'Página inicial do portal Gov.br:\n'
+      '1) Menu "Atalhos gov.br" no alto.\n'
+      '2) Botão azul "Entrar" no alto à direita para acessar sua conta.\n'
+      '3) Barra "O que você procura?" para pesquisar serviços digitando ou pelo microfone.\n'
+      '4) Lista "Mais Acessados" com os serviços mais procurados do momento.';
   /// Descrição da captura do passo 1 do Gov.br.
   static const String govBrCaptura1 =
-      'Tela inicial do aplicativo Gov.br com o botão Entrar com gov.br em destaque.';
+      'Página inicial do portal gov.br com quatro áreas numeradas: atalhos, botão Entrar, pesquisa e Mais Acessados.';
   /// Passo 2 do Gov.br.
   static const String govBrPasso2 =
-      'Toque na caixa branca e digite os 11 números do seu CPF, sem pontos nem traço.';
+      'Tela de identificação pelo CPF:\n'
+      '1) Caixa branca "Digite seu CPF": informe os 11 números sem pontos nem traço.\n'
+      '2) Botão azul "Continuar" para seguir para a senha.\n'
+      '3) Outras formas de entrar: pelo seu banco credenciado, app gov.br ou certificado digital.';
   /// Descrição da captura do passo 2 do Gov.br.
   static const String govBrCaptura2 =
-      'Tela de identificação do Gov.br com campo para digitação do CPF.';
+      'Tela Identifique-se no gov.br com três marcações numeradas: campo de CPF, Continuar e opções alternativas.';
   /// Passo 3 do Gov.br.
   static const String govBrPasso3 =
-      'Toque no botão azul "Continuar", logo abaixo do campo de CPF.';
+      'Tela para digitar sua senha:\n'
+      '1) Campo "Digite sua senha atual" — toque no olhinho amarelo à direita se quiser conferir o que digitou.\n'
+      '2) Botão azul "Entrar" para concluir o acesso.\n'
+      '3) Opções "Cancelar" e "Esqueci minha senha" caso não se lembre da senha.';
   /// Descrição da captura do passo 3 do Gov.br.
   static const String govBrCaptura3 =
-      'Botão Continuar habilitado após a digitação do CPF.';
+      'Tela oficial de senha do gov.br com três regiões numeradas: senha com ícone de olho, botão Entrar e recuperação.';
   /// Passo 4 do Gov.br.
   static const String govBrPasso4 =
-      'Digite a sua senha no campo próprio. Lembre-se: sua senha só se digita no aplicativo oficial.';
+      'Menu da sua conta autenticada:\n'
+      '1) Selo mostrando o nível da sua conta (Bronze, Prata ou Ouro).\n'
+      '2) Botão "Minha área gov.br" para abrir seu painel pessoal.\n'
+      '3) Lista com Dados Pessoais, Segurança da Conta, Procurações, Privacidade, Ajuda e Sair.';
   /// Descrição da captura do passo 4 do Gov.br.
   static const String govBrCaptura4 =
-      'Tela oficial do Gov.br com o campo de senha vazio.';
+      'Menu da conta Gov.br logada com três áreas numeradas: nível da conta, Minha área e configurações pessoais.';
+
   /// Passo 5 do Gov.br.
   static const String govBrPasso5 =
-      'Toque no botão "Entrar". Parabéns! Você aprendeu a acessar sua conta oficial do governo com segurança.';
+      'Painel "Minha área gov.br":\n'
+      '1) Botão "AUMENTAR NÍVEL" para passar de Bronze para Prata ou Ouro e liberar mais serviços.\n'
+      '2) Atalhos rápidos para "Caixa postal" (avisos oficiais) e "Carteira de documentos".\n'
+      '3) Acesso direto a "Baixar certidões", "Gerenciar dados de contato" e "Assinar documentos".';
   /// Descrição da captura do passo 5 do Gov.br.
   static const String govBrCaptura5 =
-      'Tela principal logada do Gov.br exibindo a carteira de documentos e serviços.';
+      'Painel Minha área gov.br com três marcações numeradas: aumentar nível, documentos e certidões.';
+  /// Passo 6 do Gov.br.
+  static const String govBrPasso6 =
+      'Painel "Serviços gov.br":\n'
+      '1) Barra lateral esquerda com ícones para Início, Agenda, Certidões, Sistemas e Aplicativos.\n'
+      '2) Cartões "Agenda gov.br" e "Assinar documentos digitalmente".\n'
+      '3) Cartões "Baixar certidões" e "Caixa Postal" para ver mensagens oficiais.';
+  /// Descrição da captura do passo 6 do Gov.br.
+  static const String govBrCaptura6 =
+      'Painel Olá do Gov.br com três regiões numeradas destacando menu lateral e cartões de serviços.';
+  /// Passo 7 do Gov.br.
+  static const String govBrPasso7 =
+      'Mais cartões em "Serviços gov.br":\n'
+      '1) "Carteira de Documentos" (CNH, RG) e "Dados Pessoais".\n'
+      '2) "Gerenciar dados de contato" (e-mail e telefone) e "Govinho" (crianças até 6 anos).\n'
+      '3) "Notificações", "Privacidade", "Procurações Eletrônicas" e "Segurança da conta".';
+  /// Descrição da captura do passo 7 do Gov.br.
+  static const String govBrCaptura7 =
+      'Grade de serviços do Gov.br com três blocos numerados para documentos, contatos e segurança.';
+  /// Passo 8 do Gov.br.
+  static const String govBrPasso8 =
+      'Lista completa em "Minha conta":\n'
+      '1) Atalhos para Carteira de documentos, certidões, validação eletrônica e serviços solicitados.\n'
+      '2) Links para "Agenda GOV.BR", "Notificações" e "Ajuda da conta gov.br".\n'
+      '3) Bloco "Minha conta" para conferir Dados Pessoais, Segurança, Procurações e Privacidade.';
+  /// Descrição da captura do passo 8 do Gov.br.
+  static const String govBrCaptura8 =
+      'Lista Minha conta no Gov.br com três marcações numeradas organizando documentos, avisos e configurações.';
+
+  /// Passo 9 do Gov.br.
+  static const String govBrPasso9 =
+      'Tela da "Agenda gov.br":\n'
+      '1) Setas (< e >) para mudar de mês e ver datas importantes.\n'
+      '2) Cartões com prazos e compromissos destacados em verde ("Atualizado").\n'
+      '3) Botão "Ver Agenda" embaixo para consultar todos os agendamentos.';
+  /// Descrição da captura do passo 9 do Gov.br.
+  static const String govBrCaptura9 =
+      'Tela Agenda gov.br com três regiões numeradas para navegação de mês, prazos e agenda completa.';
+  /// Passo 10 do Gov.br.
+  static const String govBrPasso10 =
+      'Tela de "Certidões" (parte 1):\n'
+      '1) "Cartão Nacional de Saúde" e "Carteira Nacional de Vacinação".\n'
+      '2) "Certidão de Pessoa com Deficiência" e "Certificado de Cadastro Único".\n'
+      '3) "Certidão de Quitação Eleitoral" e "Certidão de Antecedentes Criminais".';
+  /// Descrição da captura do passo 10 do Gov.br.
+  static const String govBrCaptura10 =
+      'Primeira parte das Certidões no Gov.br com três pares numerados de documentos gratuitos.';
+  /// Passo 11 do Gov.br.
+  static const String govBrPasso11 =
+      'Tela de "Certidões" (parte 2):\n'
+      '1) "Consultar CNPJ" e "Comprovante de Situação Cadastral no CPF".\n'
+      '2) Certidões de "Regularidade Fiscal" para empresas e cidadãos.\n'
+      '3) "Certidão de Contas Julgadas" com emissão gratuita pelo portal.';
+  /// Descrição da captura do passo 11 do Gov.br.
+  static const String govBrCaptura11 =
+      'Segunda parte das Certidões no Gov.br com três blocos numerados para CPF, CNPJ e regularidade fiscal.';
+
+  /// Passo 12 do Gov.br.
+  static const String govBrPasso12 =
+      'Destaques do portal Gov.br:\n'
+      '1) Barra "DESTAQUE" com os serviços federais mais procurados.\n'
+      '2) "Entregar Meu Imposto de Renda (DIRPF)" e "Renegociação de Dívidas - Famílias".\n'
+      '3) "Celular Seguro" (para bloquear aparelho roubado) e "Bolsa Família (PBF)".';
+  /// Descrição da captura do passo 12 do Gov.br.
+  static const String govBrCaptura12 =
+      'Destaques do portal gov.br com três áreas numeradas: título, imposto e programas sociais.';
+  /// Passo 13 do Gov.br.
+  static const String govBrPasso13 =
+      'Serviços Digitais por Perfil (parte 1):\n'
+      '1) Perfil "Agricultor" para acesso a programas e crédito rural.\n'
+      '2) Perfil "Turista" com informações úteis de viagem e documentação.\n'
+      '3) Botão "Todos os Perfis" caso queira ver a lista completa.';
+  /// Descrição da captura do passo 13 do Gov.br.
+  static const String govBrCaptura13 =
+      'Perfis Agricultor e Turista no Gov.br com três pontos numerados.';
+  /// Passo 14 do Gov.br.
+  static const String govBrPasso14 =
+      'Serviços Digitais por Perfil (parte 2):\n'
+      '1) Perfil "Aposentado" com atalhos diretos para benefícios e INSS.\n'
+      '2) Perfil "Empreendedor" para quem tem MEI ou pequeno negócio.\n'
+      '3) Botão "Todos os Perfis" para abrir todos os públicos disponíveis.';
+  /// Descrição da captura do passo 14 do Gov.br.
+  static const String govBrCaptura14 =
+      'Perfis Aposentado e Empreendedor no Gov.br com três marcações numeradas.';
+  /// Passo 15 do Gov.br.
+  static const String govBrPasso15 =
+      'Navegue por Categoria (letras A até E):\n'
+      '1) Título "Navegue por categoria" para buscar assuntos por área.\n'
+      '2) Agricultura e Pecuária, Assistência Social, Ciência e Comunicações.\n'
+      '3) Cultura, Artes, Defesa Civil e Educação.';
+  /// Descrição da captura do passo 15 do Gov.br.
+  static const String govBrCaptura15 =
+      'Categorias de A a E no portal Gov.br organizadas em três blocos numerados.';
+  /// Passo 16 do Gov.br.
+  static const String govBrPasso16 =
+      'Navegue por Categoria (letras E até T):\n'
+      '1) Educação e Pesquisa, Empresa/Comércio e Energia.\n'
+      '2) Finanças, Impostos, Justiça, Segurança e Meio Ambiente.\n'
+      '3) Saúde, Trabalho, Previdência e Infraestrutura.';
+  /// Descrição da captura do passo 16 do Gov.br.
+  static const String govBrCaptura16 =
+      'Categorias de E a T no portal Gov.br divididas em três áreas numeradas.';
+
+  /// Passo 17 do Gov.br.
+  static const String govBrPasso17 =
+      'Página de Aplicativos Móveis Oficiais:\n'
+      '1) Aviso do governo explicando os aplicativos oficiais para evitar apps falsos.\n'
+      '2) Cartão do aplicativo principal "gov.br" — toque para ver onde baixar com segurança.';
+  /// Descrição da captura do passo 17 do Gov.br.
+  static const String govBrCaptura17 =
+      'Banner dos aplicativos móveis oficiais no Gov.br com duas áreas numeradas.';
+  /// Passo 18 do Gov.br.
+  static const String govBrPasso18 =
+      'Galeria de Aplicativos Oficiais:\n'
+      '1) Barra no alto com "Atalhos gov.br" e botão "Entrar".\n'
+      '2) Botões "Filtrar" e "Ordenar" para localizar o aplicativo que você precisa.\n'
+      '3) Cartão oficial (como Carteira Digital de Trânsito) com selo verificado.';
+  /// Descrição da captura do passo 18 do Gov.br.
+  static const String govBrCaptura18 =
+      'Galeria de Aplicativos do Gov.br com três regiões numeradas para navegação, filtros e cartão do app.';
+  /// Passo 19 do Gov.br.
+  static const String govBrPasso19 =
+      'Aplicativos mais acessados:\n'
+      '1) "gov.br" e "Carteira Digital de Trânsito" (CNH no celular).\n'
+      '2) "Meu INSS" (aposentadoria) e "Carteira de Trabalho Digital".\n'
+      '3) "Cadastro Único" e "Meu SUS Digital" (vacinas e exames).\n'
+      '4) "MEI", "Jornada do Estudante" e botão "Ver aplicativos".';
+  /// Descrição da captura do passo 19 do Gov.br.
+  static const String govBrCaptura19 =
+      'Seção Aplicativos mais acessados no Gov.br com quatro linhas numeradas.';
+  /// Passo 20 do Gov.br.
+  static const String govBrPasso20 =
+      'Atalhos para Benefícios Sociais:\n'
+      '1) Aplicativo oficial "MEU INSS - Central de Serviços" para aposentadoria, pensão e perícia.\n'
+      '2) Aplicativo oficial "CADASTRO ÚNICO" para acompanhar benefícios sociais da família.';
+  /// Descrição da captura do passo 20 do Gov.br.
+  static const String govBrCaptura20 =
+      'Cartões dos aplicativos oficiais Meu INSS e Cadastro Único destacados em duas áreas numeradas.';
+  /// Passo 21 do Gov.br.
+  static const String govBrPasso21 =
+      'Atalhos para Trabalho e Negócio:\n'
+      '1) Aplicativo oficial "MEI" da Receita Federal para guias e notas fiscais.\n'
+      '2) Aplicativo "CARTEIRA DE TRABALHO DIGITAL" do Ministério do Trabalho.';
+  /// Descrição da captura do passo 21 do Gov.br.
+  static const String govBrCaptura21 =
+      'Cartões dos aplicativos oficiais MEI e Carteira de Trabalho Digital em duas áreas numeradas.';
+
+  /// Passo 22 do Gov.br.
+  static const String govBrPasso22 =
+      'Painel "Desempenho dos Serviços":\n'
+      '1) Título da seção de transparência do portal.\n'
+      '2) Quantidade total de serviços disponíveis no portal Gov.br.\n'
+      '3) Porcentagem de Serviços Digitais (94%) e Avaliações positivas da população.';
+  /// Descrição da captura do passo 22 do Gov.br.
+  static const String govBrCaptura22 =
+      'Painel Desempenho dos Serviços no Gov.br com três indicadores numerados.';
+  /// Passo 23 do Gov.br.
+  static const String govBrPasso23 =
+      'Ouvidoria e Acesso à Informação (parte 1):\n'
+      '1) Cartão "DENÚNCIA" para comunicar irregularidades com segurança.\n'
+      '2) Cartão "SOLICITAÇÃO" para pedir atendimentos ou informações públicas.';
+  /// Descrição da captura do passo 23 do Gov.br.
+  static const String govBrCaptura23 =
+      'Tela da Ouvidoria Gov.br com dois cartões numerados para Denúncia e Solicitação.';
+  /// Passo 24 do Gov.br.
+  static const String govBrPasso24 =
+      'Ouvidoria e Acesso à Informação (parte 2):\n'
+      '1) Cartão "ELOGIO" para agradecer ou avaliar positivamente um atendimento.\n'
+      '2) Cartão "RECLAMAÇÕES" para relatar problemas com algum serviço.\n'
+      '3) Botão "Protocolo GOV.BR" para acompanhar o andamento da sua resposta.';
+  /// Descrição da captura do passo 24 do Gov.br.
+  static const String govBrCaptura24 =
+      'Opções da Ouvidoria Gov.br com três marcações numeradas para Elogio, Reclamações e Protocolo.';
 
   // Meu INSS (T079)
   /// Título do guia do Meu INSS.
@@ -543,33 +931,236 @@ abstract final class TextosGuias {
   static const String eTituloCaptura6 =
       'Tela Mais opções do e-Título, com as certidões, a consulta da situação eleitoral, a justificativa de ausência e a impressão do título.';
 
-  // Serasa (T081)
+  // Serasa (006-guias-servicos-sociais)
   /// Título do guia do Serasa.
   static const String tituloSerasa = 'Como consultar seu CPF no Serasa';
+  /// Título da seção 1 do Serasa.
+  static const String serasaSecao1Titulo = 'Conhecer Início e Menu';
+  /// Subtítulo da seção 1 do Serasa.
+  static const String serasaSecao1Subtitulo = 'Navegue pela página inicial e menu de produtos';
+  /// Título da seção 2 do Serasa.
+  static const String serasaSecao2Titulo = 'Consultar Serasa Score';
+  /// Subtítulo da seção 2 do Serasa.
+  static const String serasaSecao2Subtitulo = 'Entenda sua pontuação e receba alertas';
+  /// Título da seção 3 do Serasa.
+  static const String serasaSecao3Titulo = 'Ver Dívidas e Acordos';
+  /// Subtítulo da seção 3 do Serasa.
+  static const String serasaSecao3Subtitulo = 'Confira se há pendências, ofertas e acordos';
+  /// Título da seção 4 do Serasa.
+  static const String serasaSecao4Titulo = 'Proteger seu CPF';
+  /// Subtítulo da seção 4 do Serasa.
+  static const String serasaSecao4Subtitulo = 'Acompanhe vazamentos e monitore seu documento';
+  /// Título da seção 5 do Serasa.
+  static const String serasaSecao5Titulo = 'Outros Serviços e Ajuda';
+  /// Subtítulo da seção 5 do Serasa.
+  static const String serasaSecao5Subtitulo = 'Valide boletos, veja extratos e tire dúvidas';
+
   /// Passo 1 do Serasa.
   static const String serasaPasso1 =
-      'Abra o aplicativo e toque no botão "Entrar", embaixo na tela.';
+      'Página inicial do Serasa:\n'
+      '1) Botão "Menu" no alto à esquerda para abrir todas as áreas.\n'
+      '2) Botão "Entrar" no alto à direita para acessar sua conta.\n'
+      '3) Botão rosa "Consultar CPF grátis" no rodapé para começar.';
   /// Descrição da captura do passo 1 do Serasa.
   static const String serasaCaptura1 =
-      'Tela inicial do aplicativo Serasa com destaque para o botão de acesso.';
+      'Página inicial do Serasa com três regiões numeradas: Menu, Entrar e Consultar CPF grátis.';
   /// Passo 2 do Serasa.
   static const String serasaPasso2 =
-      'Digite seu CPF e a senha da sua conta Serasa no campo protegido.';
+      'Capa com aviso do Feirão Serasa:\n'
+      '1) Faixa do aplicativo oficial Serasa (você pode fechar no X ou baixar na loja).\n'
+      '2) Aviso de campanhas do Feirão para negociar dívidas com desconto.\n'
+      '3) Botão rosa "Consultar CPF grátis" para entrar ou criar sua conta.';
   /// Descrição da captura do passo 2 do Serasa.
   static const String serasaCaptura2 =
-      'Tela oficial de autenticação da Serasa com campo de senha vazio.';
+      'Capa promocional do Serasa com três áreas numeradas destacando aplicativo oficial, Feirão e acesso gratuito.';
   /// Passo 3 do Serasa.
   static const String serasaPasso3 =
-      'Toque em "Meu CPF" no menu inferior para consultar sua pontuação.';
+      'Menu lateral do Serasa:\n'
+      '1) Botão X para fechar o menu quando terminar.\n'
+      '2) Abas "Cadastrar" e "Entrar" para criar ou acessar seu cadastro.\n'
+      '3) Atalhos para "Serasa Blog", "Canal de Denúncias" e "Central de Ajuda".\n'
+      '4) Lista de Produtos: Crédito, Área Paga Opcional, Limpa Nome e Score.';
   /// Descrição da captura do passo 3 do Serasa.
   static const String serasaCaptura3 =
-      'Tela principal do Serasa destacando o menu Meu CPF.';
+      'Menu lateral do Serasa com quatro blocos numerados explicando cadastro, ajuda e produtos.';
   /// Passo 4 do Serasa.
   static const String serasaPasso4 =
-      'Confira sua pontuação de score e pendências financeiras. Parabéns! Agora você acompanha sua situação financeira com segurança.';
+      'Tela inicial após entrar na conta:\n'
+      '1) Ícones de conquistas e seu perfil no canto superior direito.\n'
+      '2) Botão rosa "Conectar contas" para melhorar a análise do seu Score.\n'
+      '3) Atalhos rápidos: Pedir cartão, Consultas ao meu CPF e Pedir empréstimo.\n'
+      '4) Barra inferior fixa: Início, Finanças, Meu CPF, Dívidas e Serviços.';
   /// Descrição da captura do passo 4 do Serasa.
   static const String serasaCaptura4 =
-      'Painel do Serasa Score mostrando a pontuação e status de pendências.';
+      'Tela inicial autenticada do Serasa com quatro áreas numeradas de navegação e atalhos.';
+
+  /// Passo 5 do Serasa.
+  static const String serasaPasso5 =
+      'Cartão do Serasa Score na tela inicial:\n'
+      '1) Sua pontuação de 0 a 1000 e faixa de avaliação ("Bom", "Regular" ou "Excelente").\n'
+      '2) Opção "Conecte suas contas" para enriquecer seu histórico.\n'
+      '3) Indicador se o seu "Serasa Score" está liberado ou bloqueado para empresas consultarem.';
+  /// Descrição da captura do passo 5 do Serasa.
+  static const String serasaCaptura5 =
+      'Cartão Serasa Score com três marcações numeradas mostrando pontuação, conexão de contas e status de visualização.';
+  /// Passo 6 do Serasa.
+  static const String serasaPasso6 =
+      'Detalhes em "Seu Serasa Score":\n'
+      '1) Pontuação detalhada, variação recente e o motivo principal da sua nota.\n'
+      '2) Botão rosa "Ir para Minhas Contas" para gerenciar dados vinculados.\n'
+      '3) Aba "Finanças" destacada na barra inferior.';
+  /// Descrição da captura do passo 6 do Serasa.
+  static const String serasaCaptura6 =
+      'Página Seu Serasa Score com três regiões numeradas explicando nota, contas e aba Finanças.';
+  /// Passo 7 do Serasa.
+  static const String serasaPasso7 =
+      'Acompanhamento de variações do Score:\n'
+      '1) Oferta opcional paga do Serasa (você não precisa contratar nada para consultar grátis).\n'
+      '2) "Variações na pontuação": toque para ver o histórico dos meses anteriores.\n'
+      '3) "Contas conectadas" para revisar instituições financeiras ligadas.';
+  /// Descrição da captura do passo 7 do Serasa.
+  static const String serasaCaptura7 =
+      'Tela intermediária do Serasa Score com três blocos numerados sobre oferta opcional paga, histórico e contas.';
+  /// Passo 8 do Serasa.
+  static const String serasaPasso8 =
+      'Alertas e Monitoramento de Score:\n'
+      '1) Botão rosa "Receber alertas do Score" para ser avisado quando a nota mudar.\n'
+      '2) Atalhos para "Empresas em seu nome" e "Consulta de Identidade".\n'
+      '3) Atalhos para "Consultas em seu nome" e "Vazamento de dados".';
+  /// Descrição da captura do passo 8 do Serasa.
+  static const String serasaCaptura8 =
+      'Opções de monitoramento do Serasa com três regiões numeradas para alertas, CNPJ e vazamentos.';
+
+  /// Passo 9 do Serasa.
+  static const String serasaPasso9 =
+      'Situação do nome e monitoramento:\n'
+      '1) Cartão "Seu nome está limpo" indicando nenhuma dívida registrada e botão "Ver meu CPF".\n'
+      '2) Área "Monitoramento de dados" para acompanhar quem consultou seu CPF.\n'
+      '3) Aba "Dívidas" no rodapé para consultar acordos.';
+  /// Descrição da captura do passo 9 do Serasa.
+  static const String serasaCaptura9 =
+      'Painel Seu nome está limpo com três áreas numeradas para status limpo, monitoramento e aba Dívidas.';
+  /// Passo 10 do Serasa.
+  static const String serasaPasso10 =
+      'Aba "Minhas Dívidas":\n'
+      '1) Abas superiores para alternar entre "Ofertas" e "Acordos".\n'
+      '2) Filtros rápidos: "Em andamento", "Quitados" e "Vencidos".\n'
+      '3) Área "Em andamento pela Serasa" onde ficam boletos e parcelas de acordos ativos.';
+  /// Descrição da captura do passo 10 do Serasa.
+  static const String serasaCaptura10 =
+      'Tela Minhas Dívidas no Serasa com três regiões numeradas de abas, filtros e acordos.';
+  /// Passo 11 do Serasa.
+  static const String serasaPasso11 =
+      'Situação de acordos na lista:\n'
+      '1) "Acordos com a empresa parceira": acordos tratados fora da Serasa.\n'
+      '2) "Acordos já quitados": histórico dos acordos que você já terminou de pagar.\n'
+      '3) "Acordos vencidos ou cancelados": parcelas atrasadas ou canceladas.';
+  /// Descrição da captura do passo 11 do Serasa.
+  static const String serasaCaptura11 =
+      'Lista detalhada de acordos no Serasa com três blocos numerados por status.';
+  /// Passo 12 do Serasa.
+  static const String serasaPasso12 =
+      'Atalhos de Dívidas na aba Serviços:\n'
+      '1) "Dívidas negativadas" para conferir pendências em seu CPF.\n'
+      '2) "Meus acordos" para emitir segundas vias de boletos.\n'
+      '3) "Propostas e ofertas" com condições de negociação.\n'
+      '4) Aba "Serviços" selecionada embaixo à direita.';
+  /// Descrição da captura do passo 12 do Serasa.
+  static const String serasaCaptura12 =
+      'Aba Serviços do Serasa com quatro marcações numeradas para pendências, acordos e ofertas.';
+
+  /// Passo 13 do Serasa.
+  static const String serasaPasso13 =
+      'Topo da aba "Meu CPF":\n'
+      '1) Título "Meu CPF" com resumo do seu documento.\n'
+      '2) Banner opcional de recurso pago do Serasa (você pode apenas rolar para ver os serviços grátis).\n'
+      '3) Cartão com atalho para consulta veicular.\n'
+      '4) Aba central "Meu CPF" ativa na barra inferior.';
+  /// Descrição da captura do passo 13 do Serasa.
+  static const String serasaCaptura13 =
+      'Topo da aba Meu CPF com quatro áreas numeradas para título, proteção, consulta e barra inferior.';
+  /// Passo 14 do Serasa.
+  static const String serasaPasso14 =
+      'Saúde financeira gratuita:\n'
+      '1) Selo "Gratuito" indicando que estes serviços não têm custo.\n'
+      '2) "Dívidas e pendências" e "Extrato Serasa" (comprovante da situação do seu CPF).\n'
+      '3) "Vazamento de dados" e "Documentos extraviados" (registre alerta caso perca RG ou CPF).';
+  /// Descrição da captura do passo 14 do Serasa.
+  static const String serasaCaptura14 =
+      'Seção Saúde financeira gratuita do Serasa com três blocos numerados.';
+  /// Passo 15 do Serasa.
+  static const String serasaPasso15 =
+      'Selo de segurança e Serasa Recomenda:\n'
+      '1) Área "Seu selo atual" mostrando o nível de proteção da sua conta.\n'
+      '2) Bloco "Serviços" com opções pagas sob demanda, como "Serasa Recomenda" ("Solicitar análise").';
+  /// Descrição da captura do passo 15 do Serasa.
+  static const String serasaCaptura15 =
+      'Tela com selo de segurança e serviços sob demanda no Serasa divididos em duas regiões numeradas.';
+  /// Passo 16 do Serasa.
+  static const String serasaPasso16 =
+      'Consultas de Dark Web, Carro e Assistência:\n'
+      '1) "Saiba quem te consultou e se seu CPF vazou" (relatório Dark Web).\n'
+      '2) "Serviços de assistência disponíveis 24h".\n'
+      '3) "Extrato Veicular" para consultar débitos e multas de carros antes de comprar.';
+  /// Descrição da captura do passo 16 do Serasa.
+  static const String serasaCaptura16 =
+      'Cartões de consultas especiais do Serasa com três regiões numeradas.';
+  /// Passo 17 do Serasa.
+  static const String serasaPasso17 =
+      'Educação financeira e Consulta Terceiros:\n'
+      '1) "Organize seus gastos sem complicação" (parceiro Organizze).\n'
+      '2) "Cursos de educação financeira" para aprender a controlar o orçamento.\n'
+      '3) "Consulta Terceiros Básica" para verificar um CPF ou CNPJ autorizado.';
+  /// Descrição da captura do passo 17 do Serasa.
+  static const String serasaCaptura17 =
+      'Serviços adicionais do Serasa com três blocos numerados: organização, cursos e consulta terceiros.';
+
+  /// Passo 18 do Serasa.
+  static const String serasaPasso18 =
+      'Área de Crédito e Empréstimos:\n'
+      '1) Cartão "Empréstimos e Cartões" para simular opções no seu perfil.\n'
+      '2) Bloco "Mais soluções financeiras" com atalho para "Empréstimo fácil".';
+  /// Descrição da captura do passo 18 do Serasa.
+  static const String serasaCaptura18 =
+      'Área de crédito do Serasa com duas marcações numeradas para empréstimos e cartões.';
+  /// Passo 19 do Serasa.
+  static const String serasaPasso19 =
+      'Bloqueio de consultas e Cadastro Positivo:\n'
+      '1) "Bloqueio de consultas" para evitar que terceiros vejam seu Score sem aviso.\n'
+      '2) "Cadastro Positivo" para consultar seu histórico de contas pagas em dia.\n'
+      '3) Cartões "Soluções escolhidas para você" na parte inferior.';
+  /// Descrição da captura do passo 19 do Serasa.
+  static const String serasaCaptura19 =
+      'Opções de bloqueio de consultas e Cadastro Positivo no Serasa com três áreas numeradas.';
+  /// Passo 20 do Serasa.
+  static const String serasaPasso20 =
+      'Menu de Serviços — documentos e Score:\n'
+      '1) "Pendências CPF/CNPJ" para checar obrigações financeiras.\n'
+      '2) "Extrato Serasa" com histórico completo.\n'
+      '3) "Bloquear Score" (função paga opcional).\n'
+      '4) "Variações do Score" para rever sua evolução.';
+  /// Descrição da captura do passo 20 do Serasa.
+  static const String serasaCaptura20 =
+      'Lista de Serviços no Serasa com quatro regiões numeradas para pendências, extrato e Score.';
+  /// Passo 21 do Serasa.
+  static const String serasaPasso21 =
+      'Proteção de dados e Pedidos:\n'
+      '1) "Proteção de dados" para configurar privacidade da conta.\n'
+      '2) "Cadastro Positivo" para revisar dados compartilhados.\n'
+      '3) "Cartões e empréstimos" na área de Crédito.\n'
+      '4) "Acompanhar meus pedidos" caso tenha solicitado cartão ou análise.';
+  /// Descrição da captura do passo 21 do Serasa.
+  static const String serasaCaptura21 =
+      'Tela de Proteção de dados e pedidos no Serasa com quatro blocos numerados.';
+  /// Passo 22 do Serasa.
+  static const String serasaPasso22 =
+      'Validador de boleto e Central de Ajuda:\n'
+      '1) Atalhos para "Meu perfil", "Conectar contas" e "Histórico de cartões".\n'
+      '2) "Validador de boleto": confira antes de pagar se o código do boleto é verdadeiro.\n'
+      '3) "Atualização cadastral" e "Central de Ajuda" para tirar dúvidas com segurança.';
+  /// Descrição da captura do passo 22 do Serasa.
+  static const String serasaCaptura22 =
+      'Opções finais de Serviços do Serasa com três regiões numeradas destacando Validador de boleto e Ajuda.';
 
   // FGTS (T081; refeito na T138 com as capturas reais, em quatro seções)
   /// Título do guia do FGTS.
@@ -738,33 +1329,92 @@ abstract final class TextosGuias {
   static const String carteiraDigitalCaptura4 =
       'Documento digital oficial aberto com dados legíveis e código de autenticidade.';
 
-  // Correios (T082)
+  // Correios (006-guias-servicos-sociais)
   /// Título do guia dos Correios.
-  static const String tituloCorreios = 'Como rastrear encomendas nos Correios';
+  static const String tituloCorreios = 'Como rastrear e usar os Correios';
+  /// Título da seção 1 dos Correios.
+  static const String correiosSecao1Titulo = 'Rastrear Encomenda';
+  /// Subtítulo da seção 1 dos Correios.
+  static const String correiosSecao1Subtitulo = 'Acompanhe o caminho da sua entrega passo a passo';
+  /// Título da seção 2 dos Correios.
+  static const String correiosSecao2Titulo = 'Calcular Frete e Meu Correios';
+  /// Subtítulo da seção 2 dos Correios.
+  static const String correiosSecao2Subtitulo = 'Consulte preços, prazos e entre na sua conta';
+
   /// Passo 1 dos Correios.
   static const String correiosPasso1 =
-      'Toque na barra "Rastrear encomendas", no topo da tela inicial.';
+      'Página inicial dos Correios:\n'
+      '1) Botão de menu (três tracinhos) no alto à esquerda.\n'
+      '2) Botões "Entrar" e lupa de pesquisa no alto à direita.\n'
+      '3) Área "Acompanhe seu Objeto" para rastrear suas encomendas.';
   /// Descrição da captura do passo 1 dos Correios.
   static const String correiosCaptura1 =
-      'Tela principal do aplicativo Correios destacando o campo de rastreamento.';
+      'Portal inicial dos Correios com três áreas numeradas: menu, entrar e Acompanhe seu Objeto.';
   /// Passo 2 dos Correios.
   static const String correiosPasso2 =
-      'Digite o código da sua encomenda de 13 letras e números.';
+      'Digitando o código do pacote:\n'
+      '1) Toque na caixa branca e digite o código de 13 letras/números ou o seu CPF.\n'
+      '2) Toque na lupa azul à direita da caixa para pesquisar.\n'
+      '3) Atalhos rápidos abaixo: Preços e Prazos, Comprar, Aplicativo Correios e Busca CEP.';
   /// Descrição da captura do passo 2 dos Correios.
   static const String correiosCaptura2 =
-      'Teclado ativo digitando código de rastreamento no padrão dos Correios.';
+      'Campo Acompanhe seu Objeto dos Correios com três marcações numeradas e teclado visível.';
   /// Passo 3 dos Correios.
   static const String correiosPasso3 =
-      'Caso queira receber alertas, entre com seu login e senha do idCorreios.';
+      'Tela de verificação de rastreamento:\n'
+      '1) Campo no alto mostrando o código do objeto ou CPF informado.\n'
+      '2) Imagem com letras e números de segurança (use o som ou setas para trocar se estiver difícil).\n'
+      '3) Caixa "Digite o texto contido na imagem" para copiar as letras.\n'
+      '4) Botão azul "Consultar" para ver o andamento.';
   /// Descrição da captura do passo 3 dos Correios.
   static const String correiosCaptura3 =
-      'Tela opcional de acesso idCorreios com campo de senha vazio.';
+      'Formulário de rastreamento dos Correios com quatro passos numerados até o botão Consultar.';
   /// Passo 4 dos Correios.
   static const String correiosPasso4 =
-      'Veja onde seu pacote está e a previsão de entrega. Parabéns! Agora você sabe rastrear qualquer entrega dos Correios.';
+      'Linha do tempo da sua entrega:\n'
+      '1) Cabeçalho com o código de rastreio e data da última atualização.\n'
+      '2) Primeira linha no topo com a etapa mais recente (por exemplo: "Seu pacote foi entregue").\n'
+      '3) Lista abaixo mostrando todo o caminho por onde a encomenda passou até chegar.';
   /// Descrição da captura do passo 4 dos Correios.
   static const String correiosCaptura4 =
-      'Histórico de rastreamento com cidades por onde o pacote passou e data prevista.';
+      'Linha do tempo de rastreamento dos Correios com três regiões numeradas.';
+
+  /// Passo 5 dos Correios.
+  static const String correiosPasso5 =
+      'Menu principal dos Correios:\n'
+      '1) Opções "Enviar", "Receber" e "Comprar" para postagens e serviços.\n'
+      '2) "Logística", "Atendimento" e "Acesso à Informação".\n'
+      '3) Campo "Acompanhe seu Objeto" logo abaixo do menu.';
+  /// Descrição da captura do passo 5 dos Correios.
+  static const String correiosCaptura5 =
+      'Menu aberto do portal dos Correios com três áreas numeradas.';
+  /// Passo 6 dos Correios.
+  static const String correiosPasso6 =
+      'Simulador de Preços e Prazos (frete):\n'
+      '1) Informe o CEP de "Origem" (quem envia) e de "Destino" (quem recebe).\n'
+      '2) Preencha as medidas da caixa em centímetros: Altura, Largura e Comprimento.\n'
+      '3) Toque no botão azul "Calcular Frete" para ver valor e prazo de entrega.';
+  /// Descrição da captura do passo 6 dos Correios.
+  static const String correiosCaptura6 =
+      'Tela de cálculo de frete dos Correios com três passos numerados.';
+  /// Passo 7 dos Correios.
+  static const String correiosPasso7 =
+      'Menu lateral do Rastreamento:\n'
+      '1) "Rastreamento" e botão "Entrar" no topo amarelo.\n'
+      '2) "Rastreamento em outros países", "Perguntas frequentes" e "Busca Agências" (achar agência perto de casa).\n'
+      '3) "Central de Atendimento", Prazos de Guarda e Restrição de Entrega por CEP.';
+  /// Descrição da captura do passo 7 dos Correios.
+  static const String correiosCaptura7 =
+      'Menu do Rastreamento dos Correios dividido em três blocos numerados.';
+  /// Passo 8 dos Correios.
+  static const String correiosPasso8 =
+      'Login no "Meu Correios":\n'
+      '1) Leia o lembrete: no campo Usuário, digite seu CPF ou CNPJ usando apenas números.\n'
+      '2) Botão azul "Entrar" após preencher seus dados.\n'
+      '3) Opções "Esqueci minha senha", "Cadastrar" (criar conta) e "Fale conosco".';
+  /// Descrição da captura do passo 8 dos Correios.
+  static const String correiosCaptura8 =
+      'Tela de login do Meu Correios com três áreas numeradas.';
 
   // Carteira de Trabalho Digital (T082)
   /// Título do guia da Carteira de Trabalho Digital.

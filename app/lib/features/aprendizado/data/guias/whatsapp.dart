@@ -5,8 +5,8 @@ import '../../domain/guia.dart';
 final Guia guiaWhatsapp = Guia(
   chave: 'whatsapp',
   titulo: TextosGuias.tituloWhatsapp,
-  capturadoEm: DateTime(2026, 10),
-  versaoCapturada: '2.24.19',
+  capturadoEm: DateTime(2026, 11),
+  versaoCapturada: '2026.11',
   passos: const <Passo>[
     Passo(
       captura: CapturaDoGuia.whatsapp1,

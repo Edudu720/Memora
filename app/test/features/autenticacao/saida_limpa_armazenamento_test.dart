@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/autenticacao/data/ultimo_acesso_local.dart';
 import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
+import 'package:memora/features/perfil/data/foto_de_perfil_local.dart';
+import 'package:memora/features/perfil/domain/retrato_de_perfil.dart';
 import 'package:memora/l10n/textos_autenticacao.dart';
 import 'package:memora/services/seguranca/cofre_de_credenciais.dart';
 import 'package:memora/services/seguranca/limpeza_de_sessao.dart';
@@ -64,6 +68,27 @@ void main() {
 
       expect(await ultimoAcesso.identificador(), isNull);
       expect(await cofre.refreshToken(), isNull);
+    });
+
+    test('foto de perfil fica na saída comum e some com esquecerTudo (FR-009)',
+        () async {
+      final FotoDePerfilEmMemoria fotos = FotoDePerfilEmMemoria();
+      await fotos.salvarFoto('conta-1', Uint8List.fromList(<int>[1, 2, 3]));
+      await fotos.salvarAvatar('conta-2', AvatarIlustrado.casalIdoso);
+
+      final LimpezaDeSessao limpezaComFoto = LimpezaDeSessao(
+        cofre: cofre,
+        ultimoAcesso: ultimoAcesso,
+        dadosDoAparelho: <DadoLocalDoAparelho>[fotos],
+      );
+
+      await limpezaComFoto.executar();
+      expect(await fotos.ler('conta-1'), isA<FotoPropriaDePerfil>());
+      expect(await fotos.ler('conta-2'), isA<AvatarIlustradoDePerfil>());
+
+      await limpezaComFoto.executar(esquecerTudo: true);
+      expect(await fotos.ler('conta-1'), isNull);
+      expect(await fotos.ler('conta-2'), isNull);
     });
   });
 

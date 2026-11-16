@@ -98,6 +98,60 @@ void main() {
             'tocar, e precisa acertar para receber o retorno.',
       );
     });
+
+    testWidgets('CartaoHeroi, TileAcaoRapida, ChipFiltro e LinhaDeLista atendem área mínima', (
+      WidgetTester tester,
+    ) async {
+      final SemanticsHandle handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _comTema(
+          SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                CartaoHeroi(
+                  titulo: 'Conversar',
+                  rotuloAcao: 'Começar',
+                  aoTocar: () {},
+                ),
+                TileAcaoRapida(
+                  icone: Icons.apps_rounded,
+                  titulo: 'Aplicativos',
+                  aoTocar: () {},
+                ),
+                ChipFiltro(
+                  rotulo: 'Todos',
+                  selecionado: false,
+                  aoTocar: () {},
+                ),
+                LinhaDeLista(
+                  titulo: 'Configuração',
+                  aoTocar: () {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      expect(
+        tester.getSize(find.byType(CartaoHeroi)).height,
+        greaterThanOrEqualTo(MemoraDimensoes.alvoDecisao),
+      );
+      expect(
+        tester.getSize(find.byType(TileAcaoRapida)).height,
+        greaterThanOrEqualTo(MemoraDimensoes.alvoDecisao),
+      );
+      expect(
+        tester.getSize(find.byType(ChipFiltro)).height,
+        greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+      );
+      expect(
+        tester.getSize(find.byType(LinhaDeLista)).height,
+        greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+      );
+      handle.dispose();
+    });
   });
 
   group('Redução de movimento — FR-027', () {

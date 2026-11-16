@@ -1,78 +1,113 @@
 import 'package:flutter/material.dart';
-import '../../../../design_system/design_system.dart';
 
-/// Exibe o status de movimentação da pessoa de forma amigável e acolhedora.
+import '../../../../design_system/design_system.dart';
+import '../../../../l10n/textos_cuidado.dart';
+
+/// Cartão informativo com o estado de movimentação captado pelo acelerômetro.
 class IndicadorMovimento extends StatelessWidget {
-  /// Cria o indicador visual de estado de movimento.
+  /// Cria o indicador de movimento estritamente informativo (`002/FR-012`).
   const IndicadorMovimento({
     required this.emMovimento,
     required this.nivelMovimento,
     super.key,
   });
 
-  /// Indica se a pessoa está em movimento ativo.
+  /// Indica se há movimentação ativa registrada no momento.
   final bool emMovimento;
 
-  /// Valor numérico do nível de movimento.
+  /// Intensidade atual do movimento calculada pelo sensor.
   final double nivelMovimento;
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final String resumoMovimento = emMovimento
+        ? TextosCuidado.movimentoEmAtividade
+        : TextosCuidado.movimentoEmRepouso;
+    final String nivelFormatado = nivelMovimento.toStringAsFixed(1);
 
-    final Color corStatus = emMovimento ? cores.sucesso : cores.primaria;
-    final IconData iconeStatus =
-        emMovimento ? Icons.directions_walk_rounded : Icons.self_improvement_rounded;
-    final String rotuloStatus =
-        emMovimento ? 'Em movimento ativo' : 'Em repouso tranquilo';
-
-    return Container(
-      padding: const EdgeInsets.all(MemoraEspacamento.md),
-      decoration: BoxDecoration(
-        color: cores.superficie,
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-        border: Border.all(color: cores.borda),
-      ),
-      child: Row(
-        children: <Widget>[
-          Container(
-            padding: const EdgeInsets.all(MemoraEspacamento.sm),
-            decoration: BoxDecoration(
-              color: corStatus.withValues(alpha: 0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              iconeStatus,
-              color: corStatus,
-              size: MemoraDimensoes.iconeDestaque,
-            ),
-          ),
-          const SizedBox(width: MemoraEspacamento.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  'Estado de Movimento',
-                  style: MemoraTipografia.apoio.copyWith(
-                    color: cores.textoSuave,
+    return Semantics(
+      container: true,
+      readOnly: true,
+      label:
+          '${TextosCuidado.tituloEstadoMovimento}: $resumoMovimento. ${TextosCuidado.rotuloNivelMovimento}: $nivelFormatado.',
+      child: ExcludeSemantics(
+        child: Cartao(
+          comBorda: ehAltoContraste,
+          padding: const EdgeInsets.all(MemoraEspacamento.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Container(
+                    width: MemoraDimensoes.badgeAtalhoRapido,
+                    height: MemoraDimensoes.badgeAtalhoRapido,
+                    decoration: BoxDecoration(
+                      color: ehAltoContraste
+                          ? cores.superficieSutil
+                          : (emMovimento
+                              ? cores.destaque
+                              : cores.superficieSutil),
+                      borderRadius: BorderRadius.circular(MemoraRaio.badge),
+                      border: ehAltoContraste
+                          ? Border.all(
+                              color: cores.borda,
+                            )
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      emMovimento
+                          ? Icons.directions_walk_rounded
+                          : Icons.accessibility_new_rounded,
+                      color: emMovimento ? cores.primaria : cores.textoSuave,
+                      size: MemoraDimensoes.iconePadrao,
+                    ),
                   ),
-                  textScaler: escalaTextoLimitada(context),
-                ),
-                const SizedBox(height: MemoraEspacamento.xs),
-                Text(
-                  rotuloStatus,
-                  style: MemoraTipografia.corpo.copyWith(
-                    color: cores.texto,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: MemoraEspacamento.sm),
+                  Expanded(
+                    child: TextoMemora(
+                      TextosCuidado.tituloEstadoMovimento,
+                      estilo: EstiloTexto.corpoForte,
+                    ),
                   ),
-                  textScaler: escalaTextoLimitada(context),
+                ],
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              BadgeDeStatus(
+                rotulo: emMovimento
+                    ? TextosCuidado.badgeEmMovimento
+                    : TextosCuidado.badgeEmRepouso,
+                icone: emMovimento
+                    ? Icons.directions_run_rounded
+                    : Icons.pause_circle_outline_rounded,
+                tom: emMovimento
+                    ? TomBadgeStatus.informativo
+                    : TomBadgeStatus.neutro,
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+              Text(
+                nivelFormatado,
+                textScaler: escalaTextoLimitada(context),
+                style: MemoraTipografia.destaque.copyWith(
+                  color: cores.texto,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: MemoraEspacamento.xs),
+              TextoMemora.apoio(
+                resumoMovimento,
+                cor: cores.textoSuave,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

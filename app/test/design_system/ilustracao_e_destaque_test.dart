@@ -222,19 +222,70 @@ void main() {
       }
     });
 
-    test('cada expressão da Memora usa um desenho da Memora', () {
-      final Set<Ilustracao> usadas = <Ilustracao>{
-        for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
-          e.ilustracao,
-      };
+    test('cada expressão da Memora usa uma imagem PNG oficial exclusiva e '
+        'registrada em LICENCAS.md', () {
       expect(
-        usadas.length,
-        ExpressaoDaMemora.values.length,
-        reason: 'duas expressões com o mesmo desenho',
+        ExpressaoDaMemora.values,
+        containsAll(<ExpressaoDaMemora>[
+          ExpressaoDaMemora.neutra,
+          ExpressaoDaMemora.falando,
+          ExpressaoDaMemora.comemorando,
+          ExpressaoDaMemora.preocupada,
+          ExpressaoDaMemora.dica,
+          ExpressaoDaMemora.mini,
+        ]),
       );
-      for (final Ilustracao i in usadas) {
-        expect(i.name, startsWith('memora'));
+
+      final String licencas = File(
+        'assets/ilustracoes/LICENCAS.md',
+      ).readAsStringSync();
+      final Set<String> usadas = <String>{};
+
+      for (final ExpressaoDaMemora e in ExpressaoDaMemora.values) {
+        final String caminho = 'assets/ilustracoes/${e.imagemPng}';
+        expect(
+          File(caminho).existsSync(),
+          isTrue,
+          reason: 'asset PNG ausente para ${e.name}: $caminho',
+        );
+        expect(
+          licencas,
+          contains('`${e.imagemPng}`'),
+          reason: '${e.imagemPng} não tem linha em assets/ilustracoes/LICENCAS.md',
+        );
+        expect(
+          usadas.add(e.imagemPng),
+          isTrue,
+          reason: 'duas expressões com o mesmo PNG: ${e.imagemPng}',
+        );
       }
+
+      for (final ExpressaoDaMemora e in <ExpressaoDaMemora>[
+        ExpressaoDaMemora.neutra,
+        ExpressaoDaMemora.falando,
+        ExpressaoDaMemora.comemorando,
+        ExpressaoDaMemora.preocupada,
+      ]) {
+        expect(e.ilustracao, isNotNull);
+        expect(e.ilustracao!.name, startsWith('memora'));
+      }
+    });
+
+    testWidgets('MemoraPersonagem renderiza todas as 6 expressões sem erro', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(
+        _app(
+          Wrap(
+            children: <Widget>[
+              for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
+                MemoraPersonagem(expressao: e),
+            ],
+          ),
+        ),
+      );
+      expect(find.byType(MemoraPersonagem), findsNWidgets(6));
+      expect(t.takeException(), isNull);
     });
 
     for (final MemoraTheme tema in MemoraTheme.todos) {

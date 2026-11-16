@@ -23,7 +23,7 @@ double contraste(Color a, Color b) {
   return (claro + 0.05) / (escuro + 0.05);
 }
 
-/// Um par a verificar. [minimoGrafico] marca pares de borda e ícone, que
+/// Um par a verificar. [grafico] marca pares de borda e ícone, que
 /// exigem 3:1 em vez do mínimo de texto do tema.
 class _Par {
   final String nome;
@@ -34,7 +34,7 @@ class _Par {
   const _Par(this.nome, this.frente, this.fundo, {this.grafico = false});
 }
 
-/// Os mesmos 22 pares por tema verificados em
+/// Os mesmos 34 pares por combinação verificados em
 /// `specs/002-design-system/ferramentas/validar_paleta.py`.
 const List<_Par> _pares = <_Par>[
   _Par('texto sobre fundo', _texto, _fundo),
@@ -42,9 +42,6 @@ const List<_Par> _pares = <_Par>[
   _Par('texto sobre superficieAlt', _texto, _superficieAlt),
   _Par('textoSuave sobre fundo', _textoSuave, _fundo),
   _Par('textoSuave sobre superficie', _textoSuave, _superficie),
-  // Estado desabilitado dos botões: rótulo suave sobre superfície
-  // secundária. Substituiu o uso de opacidade, que derrubava o
-  // contraste do rótulo para 2,79:1.
   _Par('textoSuave sobre superficieAlt', _textoSuave, _superficieAlt),
   _Par('primaria sobre fundo', _primaria, _fundo),
   _Par('primaria sobre superficie', _primaria, _superficie),
@@ -57,19 +54,47 @@ const List<_Par> _pares = <_Par>[
   _Par('borda sobre fundo', _borda, _fundo, grafico: true),
   _Par('borda sobre superficie', _borda, _superficie, grafico: true),
   _Par('primaria sobre superficieAlt', _primaria, _superficieAlt, grafico: true),
-  // Feature 004: o tom suave da primaria. Nunca e o unico sinal de estado;
-  // o que se verifica e o que se escreve por cima dele.
   _Par('texto sobre destaque', _texto, _destaque),
   _Par('textoSuave sobre destaque', _textoSuave, _destaque),
   _Par('primaria sobre destaque', _primaria, _destaque),
-  // Revisao da #38: pares que a interface ja usava sem validacao.
   _Par('primaria (texto) sobre superficieAlt', _primaria, _superficieAlt),
   _Par('perigo sobre superficieAlt', _perigo, _superficieAlt, grafico: true),
+  // Tokens 2.0 (Feature 007)
+  _Par('texto sobre superficieSutil', _texto, _superficieSutil),
+  _Par('textoSuave sobre superficieSutil', _textoSuave, _superficieSutil),
+  _Par('primaria sobre superficieSutil', _primaria, _superficieSutil),
+  _Par('texto sobre superficieBarra', _texto, _superficieBarra),
+  _Par('textoSuave sobre superficieBarra', _textoSuave, _superficieBarra),
+  _Par('primaria sobre superficieBarra', _primaria, _superficieBarra),
+  _Par(
+    'sobreGradienteHeroi sobre gradienteHeroiInicio',
+    _sobreGradienteHeroi,
+    _gradienteHeroiInicio,
+  ),
+  _Par(
+    'sobreGradienteHeroi sobre gradienteHeroiFim',
+    _sobreGradienteHeroi,
+    _gradienteHeroiFim,
+  ),
+  _Par(
+    'sobreGradienteSaude sobre gradienteSaudeInicio',
+    _sobreGradienteSaude,
+    _gradienteSaudeInicio,
+  ),
+  _Par(
+    'sobreGradienteSaude sobre gradienteSaudeFim',
+    _sobreGradienteSaude,
+    _gradienteSaudeFim,
+  ),
+  _Par('sucessoTexto sobre superficie', _sucessoTexto, _superficie),
+  _Par('sucessoTexto sobre saudeSuave', _sucessoTexto, _saudeSuave),
 ];
 
 Color _fundo(MemoraCores c) => c.fundo;
 Color _superficie(MemoraCores c) => c.superficie;
 Color _superficieAlt(MemoraCores c) => c.superficieAlt;
+Color _superficieSutil(MemoraCores c) => c.superficieSutil;
+Color _superficieBarra(MemoraCores c) => c.superficieBarra;
 Color _destaque(MemoraCores c) => c.destaque;
 Color _primaria(MemoraCores c) => c.primaria;
 Color _sobrePrimaria(MemoraCores c) => c.sobrePrimaria;
@@ -79,35 +104,81 @@ Color _borda(MemoraCores c) => c.borda;
 Color _sucesso(MemoraCores c) => c.sucesso;
 Color _perigo(MemoraCores c) => c.perigo;
 Color _sobrePerigo(MemoraCores c) => c.sobrePerigo;
+Color _gradienteHeroiInicio(MemoraCores c) => c.gradienteHeroiInicio;
+Color _gradienteHeroiFim(MemoraCores c) => c.gradienteHeroiFim;
+Color _sobreGradienteHeroi(MemoraCores c) => c.sobreGradienteHeroi;
+Color _gradienteSaudeInicio(MemoraCores c) => c.gradienteSaudeInicio;
+Color _gradienteSaudeFim(MemoraCores c) => c.gradienteSaudeFim;
+Color _sobreGradienteSaude(MemoraCores c) => c.sobreGradienteSaude;
+Color _saudeSuave(MemoraCores c) => c.saudeSuave;
+Color _sucessoTexto(MemoraCores c) => c.sucessoTexto;
 
 void main() {
-  group('Contraste WCAG 2.2 — SC-001 e SC-007', () {
+  group('Contraste WCAG 2.2 — SC-001, SC-007 e 007/FR-012', () {
     for (final MemoraTheme tema in MemoraTheme.todos) {
-      group('tema ${tema.id.name}', () {
-        for (final _Par par in _pares) {
-          final double exigido =
-              par.grafico ? 3.0 : tema.contrasteMinimoTexto;
+      if (tema.id == MemoraTemaId.altoContraste) {
+        group('tema ${tema.id.name}', () {
+          for (final _Par par in _pares) {
+            final double exigido =
+                par.grafico ? 3.0 : tema.contrasteMinimoTexto;
 
-          test('${par.nome} >= $exigido:1', () {
-            final double razao =
-                contraste(par.frente(tema.cores), par.fundo(tema.cores));
+            test('${par.nome} >= $exigido:1', () {
+              final double razao =
+                  contraste(par.frente(tema.cores), par.fundo(tema.cores));
 
+              expect(
+                razao,
+                greaterThanOrEqualTo(exigido),
+                reason: 'Tema ${tema.id.name}: "${par.nome}" mede '
+                    '${razao.toStringAsFixed(2)}:1, abaixo de $exigido:1.',
+              );
+            });
+          }
+
+          test('bordaSutil no Alto Contraste >= 3.0:1', () {
             expect(
-              razao,
-              greaterThanOrEqualTo(exigido),
-              reason: 'Tema ${tema.id.name}: "${par.nome}" mede '
-                  '${razao.toStringAsFixed(2)}:1, abaixo do mínimo de '
-                  '$exigido:1. Rode '
-                  'specs/002-design-system/ferramentas/validar_paleta.py '
-                  'e ajuste o token antes de prosseguir.',
+              contraste(tema.cores.bordaSutil, tema.cores.fundo),
+              greaterThanOrEqualTo(3.0),
+            );
+            expect(
+              contraste(tema.cores.bordaSutil, tema.cores.superficie),
+              greaterThanOrEqualTo(3.0),
             );
           });
+        });
+      } else {
+        for (final String nomePaleta in MemoraCores.paletas.keys) {
+          final MemoraTheme derivado = tema.comPaleta(nomePaleta);
+          group('tema ${tema.id.name} — paleta $nomePaleta', () {
+            for (final _Par par in _pares) {
+              final double exigido =
+                  par.grafico ? 3.0 : derivado.contrasteMinimoTexto;
+
+              test('${par.nome} >= $exigido:1', () {
+                final double razao = contraste(
+                  par.frente(derivado.cores),
+                  par.fundo(derivado.cores),
+                );
+
+                expect(
+                  razao,
+                  greaterThanOrEqualTo(exigido),
+                  reason:
+                      'Tema ${tema.id.name} ($nomePaleta): "${par.nome}" mede '
+                      '${razao.toStringAsFixed(2)}:1, abaixo de $exigido:1. '
+                      'Rode validar_paleta.py e ajuste o token.',
+                );
+              });
+            }
+          });
         }
-      });
+      }
     }
 
-    test('o validador cobre exatamente 66 pares', () {
-      expect(_pares.length * MemoraTheme.todos.length, 66);
+    test('o validador cobre todas as 13 combinacoes × 34 pares', () {
+      const int combinacoes = 6 * 2 + 1;
+      expect(_pares.length, 34);
+      expect(_pares.length * combinacoes, 442);
     });
   });
 

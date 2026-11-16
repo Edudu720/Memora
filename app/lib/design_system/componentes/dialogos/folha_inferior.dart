@@ -47,6 +47,9 @@ class FolhaInferior extends StatelessWidget {
     final MemoraCores cores = context.memora.cores;
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.88,
+      ),
       decoration: BoxDecoration(
         color: cores.superficie,
         borderRadius: const BorderRadius.vertical(
@@ -56,21 +59,23 @@ class FolhaInferior extends StatelessWidget {
       padding: const EdgeInsets.all(MemoraEspacamento.xl),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextoMemora.tituloSecao(titulo),
-            const SizedBox(height: MemoraEspacamento.lg),
-            child,
-            const SizedBox(height: MemoraEspacamento.xl),
-            // Saída escrita: arrastar para baixo não pode ser o único caminho.
-            BotaoSecundario(
-              rotulo: 'Fechar',
-              icone: Icons.close,
-              aoTocar: aoFechar ?? () => Navigator.of(context).pop(),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextoMemora.tituloSecao(titulo),
+              const SizedBox(height: MemoraEspacamento.lg),
+              child,
+              const SizedBox(height: MemoraEspacamento.xl),
+              // Saída escrita: arrastar para baixo não pode ser o único caminho.
+              BotaoSecundario(
+                rotulo: 'Fechar',
+                icone: Icons.close,
+                aoTocar: aoFechar ?? () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
         ),
       ),
     );

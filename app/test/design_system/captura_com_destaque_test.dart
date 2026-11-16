@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
+import 'package:memora/l10n/textos_guias.dart';
 
 /// T133 — o destaque cai sobre a **imagem**, não sobre a caixa (FR-028c).
 ///
@@ -310,5 +311,71 @@ void main() {
       <int>[255, 0, 0],
       reason: 'No centro do anel aparece rgb($r, $g, $b), e não a imagem',
     );
+  });
+
+  // Legado da #71: o JPG já traz o círculo pintado. Um segundo anel, desenhado
+  // pelo app em outro lugar, seria um erro que a pessoa vê.
+  group('captura JPG legada, com a marcação já pintada', () {
+    const RegiaoRelativa regiao = RegiaoRelativa(
+      x: 0.1,
+      y: 0.2,
+      largura: 0.4,
+      altura: 0.2,
+    );
+
+    Passo passoLegado() => const Passo(
+      // ignore: invalid_use_of_visible_for_testing_member
+      captura: CapturaDoGuia.paraTeste(
+        'whatsapp',
+        1,
+        formato: FormatoDaCaptura.jpg,
+      ),
+      destaque: regiao,
+      texto: 'Toque no ícone.',
+      descricaoDaCaptura: 'Tela de teste.',
+    );
+
+    testWidgets('o app não desenha o anel nem o anuncia', (
+      WidgetTester t,
+    ) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      await t.pumpWidget(
+        app(CapturaComDestaque(passo: passoLegado(), proporcao: 9 / 20)),
+      );
+
+      expect(find.byKey(CapturaComDestaque.chaveImagem), findsOneWidget);
+      expect(find.byKey(CapturaComDestaque.chaveDestaque), findsNothing);
+      expect(find.bySemanticsLabel(TextosGuias.areaDestacada), findsNothing);
+      h.dispose();
+    });
+
+    testWidgets('a região continua medível, para o zoom saber aonde ir', (
+      WidgetTester t,
+    ) async {
+      const Key chaveDoAnel = Key('teste.anel');
+      await t.pumpWidget(
+        app(
+          CapturaComDestaque(
+            passo: passoLegado(),
+            proporcao: 9 / 20,
+            chaveDoAnel: chaveDoAnel,
+          ),
+        ),
+      );
+
+      final Rect imagem = t.getRect(find.byKey(CapturaComDestaque.chaveImagem));
+      final Rect caixaDaRegiao = t.getRect(find.byKey(chaveDoAnel));
+      expect(caixaDaRegiao.left, closeTo(imagem.left + imagem.width * 0.1, 1));
+      expect(caixaDaRegiao.top, closeTo(imagem.top + imagem.height * 0.2, 1));
+    });
+
+    testWidgets('a captura WebP continua com o anel desenhado (o portão '
+        'do outro lado)', (WidgetTester t) async {
+      await t.pumpWidget(
+        app(CapturaComDestaque(passo: passoCom(regiao), proporcao: 9 / 20)),
+      );
+
+      expect(find.byKey(CapturaComDestaque.chaveDestaque), findsOneWidget);
+    });
   });
 }

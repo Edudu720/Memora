@@ -96,6 +96,11 @@ void main() {
       expect(find.text(TextosGuias.quantidadeDePassos(3)), findsOneWidget);
       expect(find.text(TextosGuias.quantidadeDePassos(5)), findsOneWidget);
 
+      // O cabeçalho do redesenho 007 empurra a lista: rola até o cartão (a
+      // janela de teste tem 600 px de altura).
+      await t.ensureVisible(
+        find.byKey(TelaSeletorDeSecao.chaveDaSecao('certidoes')),
+      );
       await t.tap(find.byKey(TelaSeletorDeSecao.chaveDaSecao('certidoes')));
       await t.pumpAndSettle();
       expect(escolhida?.chave, 'certidoes');

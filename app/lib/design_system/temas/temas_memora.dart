@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../tokens/cores.dart';
+import '../tokens/dimensoes.dart';
+import '../tokens/elevacao.dart';
 import '../tokens/raio.dart';
 import '../tokens/tipografia.dart';
 import 'memora_theme_extension.dart';
@@ -16,12 +18,16 @@ abstract final class TemasMemora {
   static final ThemeData escuro = _construir(MemoraTheme.escuro, Brightness.dark);
 
   /// Tema de alto contraste, para baixa visão severa.
-  static final ThemeData altoContraste =
-      _construir(MemoraTheme.altoContraste, Brightness.dark);
+  static final ThemeData altoContraste = _construir(
+    MemoraTheme.altoContraste,
+    Brightness.dark,
+  );
 
-  /// Retorna o tema correspondente ao identificador, opcionalmente com uma [paleta] (FR-039, R15).
+  /// Retorna o tema correspondente ao identificador, opcionalmente com uma
+  /// [paleta] (FR-039, R15).
   static ThemeData porId(MemoraTemaId id, {String? paleta}) {
-    final String? paletaNormalizada = (paleta == null || paleta == 'azul') ? null : paleta;
+    final String? paletaNormalizada =
+        (paleta == null || paleta == 'azul') ? null : paleta;
     if (paletaNormalizada == null) {
       return switch (id) {
         MemoraTemaId.claro => claro,
@@ -47,8 +53,6 @@ abstract final class TemasMemora {
 
     return ThemeData(
       useMaterial3: true,
-      // Os componentes do Material (diálogo, campo, folha) herdam a família
-      // daqui; os nossos já a recebem pelos estilos de MemoraTipografia.
       fontFamily: MemoraTipografia.familia,
       brightness: brilho,
       scaffoldBackgroundColor: c.fundo,
@@ -63,7 +67,7 @@ abstract final class TemasMemora {
         surface: c.superficie,
         onSurface: c.texto,
         outline: c.borda,
-        surfaceContainerHighest: c.superficieAlt,
+        surfaceContainerHighest: c.superficieSutil,
       ),
       textTheme: TextTheme(
         displayLarge: MemoraTipografia.destaque.copyWith(color: c.texto),
@@ -74,11 +78,24 @@ abstract final class TemasMemora {
         bodySmall: MemoraTipografia.apoio.copyWith(color: c.textoSuave),
         labelLarge: MemoraTipografia.rotuloBotao.copyWith(color: c.texto),
       ),
-      dividerTheme: DividerThemeData(color: c.borda),
+      dividerTheme: DividerThemeData(
+        color: c.bordaSutil,
+        thickness: MemoraDimensoes.espessuraBordaSutil,
+        space: MemoraDimensoes.espessuraBordaSutil,
+      ),
       cardTheme: CardThemeData(
         color: c.superficie,
+        elevation: MemoraElevacao.plana,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: c.superficie,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(MemoraRaio.cartao),
+          ),
         ),
       ),
       extensions: <ThemeExtension<dynamic>>[memora],

@@ -10,6 +10,7 @@ import 'features/assistente/data/aceite_do_aviso.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
 import 'features/perfil/data/data_de_nascimento_local.dart';
+import 'features/perfil/data/foto_de_perfil_local.dart';
 import 'services/acessibilidade/memora_binding_atividade.dart';
 import 'services/ambiente/ambiente.dart';
 import 'services/ambiente/composicao.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
   final UltimoAcessoLocal ultimoAcesso = UltimoAcessoLocal(preferencias);
   final DataDeNascimentoLocal dataDeNascimento =
       DataDeNascimentoLocal(preferencias);
+  final FotoDePerfilLocal fotoDePerfil = FotoDePerfilLocal(preferencias);
   final ApresentacaoVistaLocal apresentacaoVista =
       ApresentacaoVistaLocal(preferencias);
   final AceiteDoAvisoLocal aceiteDoAviso = AceiteDoAvisoLocal(preferencias);
@@ -39,6 +41,7 @@ Future<void> main() async {
     cofre: CofreSeguroDoSistema(),
     ultimoAcesso: ultimoAcesso,
     dataDeNascimento: dataDeNascimento,
+    fotoDePerfil: fotoDePerfil,
     apresentacaoVista: apresentacaoVista,
     preferencias: preferencias,
     guardarCatalogo: true,
@@ -109,9 +112,11 @@ class AplicativoMemora extends StatelessWidget {
               ultimoAcesso: ultimoAcesso,
               limpeza: composicao.limpeza,
               dataDeNascimento: composicao.dataDeNascimento,
+              fotoDePerfil: composicao.fotoDePerfil,
               apresentacaoVista: composicao.apresentacaoVista,
               sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
+              localizador: composicao.localizador,
               aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoPorCanal(),
             ),

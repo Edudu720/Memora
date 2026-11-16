@@ -8,9 +8,14 @@ import '../domain/guia.dart';
 
 /// Tela de escolha de assunto para guias extensos (FR-028d, T137).
 ///
-/// Modelo vindo da PR #67 (Eduardo). Evita que a pessoa idosa precise percorrer dezenas de telas seguidas (como
-/// no Gov.br ou Serasa) para chegar ao ponto desejado. Exibe as seções em
-/// cartões amplos (>= 48 dp), com ícone + título + subtítulo + contagem de passos.
+/// Modelo vindo da PR #67 (Eduardo). Evita que a pessoa idosa precise percorrer
+/// dezenas de telas seguidas (como no Gov.br ou Serasa) para chegar ao ponto
+/// desejado. Exibe as seções em cartões amplos (>= 48 dp), com ícone + título +
+/// subtítulo + contagem de passos.
+///
+/// O visual segue o redesenho 007: cabeçalho em [Cartao] com o ícone do
+/// aplicativo e o [BadgeDeStatus] de progresso, e cartões de seção com borda
+/// sutil e sombra de cartão (a mesma de [LinhaDeLista]).
 class TelaSeletorDeSecao extends StatefulWidget {
   /// Chave da lista de seções, para os testes.
   static const Key chaveLista = Key('seletor_secao.lista');
@@ -93,6 +98,10 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final int total = widget.guia.secoes.length;
+    final int feitas = _concluidas.length;
+    final bool todasFeitas = total > 0 && feitas == total;
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -108,6 +117,48 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
+                    // O aplicativo e quanto dele a pessoa já aprendeu (007).
+                    Cartao(
+                      padding: const EdgeInsets.all(MemoraEspacamento.md),
+                      child: Row(
+                        children: <Widget>[
+                          if (escala <
+                              MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+                            IconeDoAplicativo(
+                              chave: widget.guia.chave,
+                              nome: _nomeServico,
+                              tamanho: MemoraDimensoes.alvoDecisao,
+                            ),
+                            const SizedBox(width: MemoraEspacamento.md),
+                          ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                TextoMemora(
+                                  _nomeServico,
+                                  estilo: EstiloTexto.tituloSecao,
+                                ),
+                                const SizedBox(height: MemoraEspacamento.xs),
+                                BadgeDeStatus(
+                                  rotulo: TextosGuias.progressoDasSecoes(
+                                    feitas,
+                                    total,
+                                  ),
+                                  icone: todasFeitas
+                                      ? Icons.check_circle_outline
+                                      : Icons.menu_book_outlined,
+                                  tom: todasFeitas
+                                      ? TomBadgeStatus.positivo
+                                      : TomBadgeStatus.informativo,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: MemoraEspacamento.md),
                     BalaoDeFala(
                       autor: AutorDoBalao.memora,
                       texto: TextosGuias.perguntaDaSecao(_nomeServico),
@@ -163,94 +214,60 @@ class _CartaoSecao extends StatelessWidget {
         ? TextosGuias.secaoJaAprendida(contagem)
         : contagem;
 
-    return Semantics(
-      button: true,
-      label: TextosGuias.secaoDescrita(
+    final MemoraTheme tema = context.memora;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final Color corMeta = concluida ? cores.sucessoTexto : cores.primaria;
+
+    // A linha de lista do redesenho 007 já é o botão do leitor de tela, com
+    // `onTap` na própria Semantics (sem ele o TalkBack anuncia o botão e o
+    // duplo toque não faz nada), foco e pressão visíveis por mais de um sinal.
+    return LinhaDeLista(
+      key: TelaSeletorDeSecao.chaveDaSecao(secao.chave),
+      rotuloDoLeitor: TextosGuias.secaoDescrita(
         secao.titulo,
         secao.subtitulo,
         textoMeta,
       ),
-      // Sem `onTap` aqui o TalkBack anuncia o botão e o duplo toque não faz nada.
-      onTap: aoTocar,
-      child: ExcludeSemantics(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: MemoraDimensoes.alvoDecisao,
-          ),
-          child: Material(
-            key: TelaSeletorDeSecao.chaveDaSecao(secao.chave),
-            color: cores.superficie,
-            elevation: MemoraElevacao.cartao,
-            shadowColor: MemoraElevacao.sombra,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-              side: BorderSide(
-                color: concluida ? cores.sucesso : cores.primaria,
-              ),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-              onTap: aoTocar,
-              child: Padding(
-                padding: const EdgeInsets.all(MemoraEspacamento.md),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      padding: const EdgeInsets.all(MemoraEspacamento.sm),
-                      decoration: BoxDecoration(
-                        color: cores.destaque,
-                        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                      ),
-                      child: Icon(
-                        secao.icone,
-                        size: MemoraDimensoes.iconeDestaque,
-                        color: cores.primaria,
-                      ),
-                    ),
-                    const SizedBox(width: MemoraEspacamento.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          TextoMemora(
-                            secao.titulo,
-                            estilo: EstiloTexto.tituloSecao,
-                          ),
-                          const SizedBox(height: MemoraEspacamento.xs),
-                          TextoMemora(secao.subtitulo, cor: cores.textoSuave),
-                          const SizedBox(height: MemoraEspacamento.xs),
-                          Row(
-                            children: <Widget>[
-                              if (concluida) ...<Widget>[
-                                Icon(
-                                  Icons.check_circle,
-                                  size: MemoraDimensoes.iconePequeno,
-                                  color: cores.sucesso,
-                                ),
-                                const SizedBox(width: MemoraEspacamento.xs),
-                              ],
-                              Flexible(
-                                child: TextoMemora(
-                                  textoMeta,
-                                  estilo: EstiloTexto.apoio,
-                                  cor: concluida
-                                      ? cores.sucesso
-                                      : cores.primaria,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+      esquerda: Container(
+        padding: const EdgeInsets.all(MemoraEspacamento.sm),
+        decoration: BoxDecoration(
+          color: concluida ? cores.saudeSuave : cores.destaque,
+          borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+          border: ehAltoContraste
+              ? Border.all(
+                  color: cores.borda,
+                  width: MemoraDimensoes.bordaEnfase,
+                )
+              : null,
+        ),
+        child: Icon(
+          secao.icone,
+          size: MemoraDimensoes.iconeDestaque,
+          color: corMeta,
         ),
       ),
+      titulo: secao.titulo,
+      subtitulo: secao.subtitulo,
+      rodape: Row(
+        children: <Widget>[
+          if (concluida) ...<Widget>[
+            Icon(
+              Icons.check_circle,
+              size: MemoraDimensoes.iconePequeno,
+              color: corMeta,
+            ),
+            const SizedBox(width: MemoraEspacamento.xs),
+          ],
+          Flexible(
+            child: TextoMemora(
+              textoMeta,
+              estilo: EstiloTexto.apoio,
+              cor: corMeta,
+            ),
+          ),
+        ],
+      ),
+      aoTocar: aoTocar,
     );
   }
 }
