@@ -110,7 +110,7 @@ servidor não manda mais emoji em mensagem de tela.
 `textos_apresentacao`, `textos_autenticacao`, `textos_configuracoes` e
 `textos_perfil`; o teste do backend passa.
 
-- [ ] T028 [US3] `app/test/design_system/texto_da_interface_test.dart`: varredura lexical (R6) — mais de 2 frases, palavras/frases proibidas da memora-ux, emoji fora da fala da IA — sobre a **lista de arquivos da Fase A** (a lista cresce na T068); provar quebrando com um bloco de 3 frases, um "idoso" e um emoji
+- [X] T028 [US3] `app/test/design_system/texto_da_interface_test.dart`: varredura lexical (R6) — mais de 2 frases, palavras/frases proibidas da memora-ux, emoji fora da fala da IA — sobre a **lista de arquivos da Fase A** (a lista cresce na T068); provar quebrando com um bloco de 3 frases, um "idoso" e um emoji
 - [ ] T029 [US3] Rodar o portão e listar os blocos reprovados em `textos_ajuda.dart`, `textos_apresentacao.dart`, `textos_autenticacao.dart`, `textos_configuracoes.dart` e `textos_perfil.dart`
 - [ ] T030 [P] [US3] Reescrever os reprovados de `textos_autenticacao.dart` e `textos_perfil.dart` (duas frases, voz da Memora; excedente vira etapa ou "Saber mais"; o necessário para decidir continua visível — FR-017)
 - [ ] T031 [P] [US3] Reescrever os reprovados de `textos_ajuda.dart`, `textos_apresentacao.dart` e `textos_configuracoes.dart` (mesmas regras)
