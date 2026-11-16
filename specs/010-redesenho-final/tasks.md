@@ -34,11 +34,11 @@ desfazer (CLAUDE.md, seção 8). Cada tarefa de teste diz o que quebrar.
 
 ## Phase 2: Fundação (bloqueia as histórias da Fase A)
 
-- [ ] T003 [P] Criar `app/lib/design_system/tokens/cores_da_memora.dart` com os tokens da Memora (`memoraCorpo`, `memoraCorpoSombra`, `memoraVisor`, `memoraOlho`, `memoraDetalhe`, `memoraEscudo`, `memoraSombraChao`) nos temas claro, escuro e alto contraste, exposto pela `ThemeExtension` (R1, R12: arquivo separado até a #71 entrar)
-- [ ] T004 Acrescentar os pares da Memora ao `specs/002-design-system/ferramentas/validar_paleta.py` (contorno ≥ 3:1 com o fundo, nos 3 temas) e provar quebrando com uma cor de corpo igual ao fundo (FR-007)
-- [ ] T005 [P] Acrescentar a `app/lib/design_system/tokens/movimento.dart` as durações de gesto (`aceno`, `piscada`, `comemoracao`) e de transição de tela, todas consumidas via `MemoraMovimento.efetiva` (V9)
-- [ ] T006 [P] Criar `DirecaoDaTransicao` e `GestoDaMemora` (data-model.md) em `app/lib/design_system/navegacao/` e `app/lib/design_system/componentes/ilustracao/memora_animada/`
-- [ ] T007 Criar o leitor único de "reduzir movimento" (preferência do aplicativo **ou** do sistema) que a Memora, a rota e a troca de destino vão usar, em `app/lib/design_system/preferencias/`, reaproveitando o que `escopo_aparencia.dart` já expõe
+- [X] T003 [P] Criar `app/lib/design_system/tokens/cores_da_memora.dart` com os tokens da Memora (`memoraCorpo`, `memoraCorpoSombra`, `memoraVisor`, `memoraOlho`, `memoraDetalhe`, `memoraEscudo`, `memoraSombraChao`) nos temas claro, escuro e alto contraste, exposto pela `ThemeExtension` (R1, R12: arquivo separado até a #71 entrar)
+- [X] T004 Acrescentar os pares da Memora ao `specs/002-design-system/ferramentas/validar_paleta.py` (contorno ≥ 3:1 com o fundo, nos 3 temas) e provar quebrando com uma cor de corpo igual ao fundo (FR-007)
+- [X] T005 [P] Acrescentar a `app/lib/design_system/tokens/movimento.dart` as durações de gesto (`aceno`, `piscada`, `comemoracao`) e de transição de tela, todas consumidas via `MemoraMovimento.efetiva` (V9)
+- [X] T006 [P] Criar `DirecaoDaTransicao` e `GestoDaMemora` (data-model.md) em `app/lib/design_system/navegacao/` e `app/lib/design_system/componentes/ilustracao/memora_animada/`
+- [X] T007 Criar o leitor único de "reduzir movimento" (preferência do aplicativo **ou** do sistema) que a Memora, a rota e a troca de destino vão usar, em `app/lib/design_system/preferencias/`, reaproveitando o que `escopo_aparencia.dart` já expõe
 
 **Checkpoint**: tokens, durações e o leitor de movimento prontos.
 
@@ -55,19 +55,19 @@ nos 3 temas, animando; com "reduzir movimento", parada.
 
 ### Testes da US1 (escrever antes e ver falhar)
 
-- [ ] T008 [P] [US1] `app/test/design_system/memora_animada_test.dart`: cada `ExpressaoDaMemora` monta sem exceção nos 3 temas e na matriz de tamanhos; quebrar trocando uma pose por `null`
-- [ ] T009 [P] [US1] No mesmo arquivo: a Memora não aparece na árvore de semântica, nem com toque (V3, FR-005/005b); quebrar tirando o `ExcludeSemantics`
-- [ ] T010 [P] [US1] No mesmo arquivo: com "reduzir movimento", nenhum `Ticker` ativo e toque não gera gesto (V2, FR-004/005d); quebrar ignorando a preferência
-- [ ] T011 [P] [US1] No mesmo arquivo: toque dispara aceno/piscada alternados, toques durante o gesto são ignorados, nada navega (V4, FR-005a); quebrar acumulando gestos
+- [X] T008 [P] [US1] `app/test/design_system/memora_animada_test.dart`: cada `ExpressaoDaMemora` monta sem exceção nos 3 temas e na matriz de tamanhos; quebrar trocando uma pose por `null`
+- [X] T009 [P] [US1] No mesmo arquivo: a Memora não aparece na árvore de semântica, nem com toque (V3, FR-005/005b); quebrar tirando o `ExcludeSemantics`
+- [X] T010 [P] [US1] No mesmo arquivo: com "reduzir movimento", nenhum `Ticker` ativo e toque não gera gesto (V2, FR-004/005d); quebrar ignorando a preferência
+- [X] T011 [P] [US1] No mesmo arquivo: toque dispara aceno/piscada alternados, toques durante o gesto são ignorados, nada navega (V4, FR-005a); quebrar acumulando gestos
 
 ### Implementação da US1
 
-- [ ] T012 [US1] Definir as poses (`neutra`, `falando`, `pensando`, `comemorando`, `preocupada`, `acenando`, `dica`, `mini`) em `memora_animada/poses.dart`: valores-alvo de olhos, braços, cabeça, escudo e inclinação (data-model.md)
-- [ ] T013 [P] [US1] Pintores das camadas em `memora_animada/pintores/` — sombra no chão, corpo, cabeça, visor, olhos, antena, braços, escudo — com gradientes de luz de cima à esquerda e cores só de `cores_da_memora.dart`, a partir da folha de expressões de `Memora-Desing-Ideias/` (R1)
-- [ ] T014 [US1] `memora_animada/memora_animada.dart`: monta as camadas, interpola entre poses, ciclo de "respiração" e de fala (`falando`), leve perspectiva e paralaxe; camada de repintura própria e relógio parado fora da tela (R11, contrato)
-- [ ] T015 [US1] Gestos de toque (aceno/piscada alternados), com a máquina de estados `ocioso → emGesto → ocioso` (FR-005a, data-model.md)
-- [ ] T016 [US1] Gesto único `comemoracao` e entrada animada por expressão (FR-003)
-- [ ] T017 [US1] Pôr a `MemoraAnimada` na `GaleriaMemora` em todas as expressões e gestos, e no teste de completude da galeria (V10 da 002)
+- [X] T012 [US1] Definir as poses (`neutra`, `falando`, `pensando`, `comemorando`, `preocupada`, `acenando`, `dica`, `mini`) em `memora_animada/poses.dart`: valores-alvo de olhos, braços, cabeça, escudo e inclinação (data-model.md)
+- [X] T013 [P] [US1] Pintores das camadas em `memora_animada/pintores/` — sombra no chão, corpo, cabeça, visor, olhos, antena, braços, escudo — com gradientes de luz de cima à esquerda e cores só de `cores_da_memora.dart`, a partir da folha de expressões de `Memora-Desing-Ideias/` (R1)
+- [X] T014 [US1] `memora_animada/memora_animada.dart`: monta as camadas, interpola entre poses, ciclo de "respiração" e de fala (`falando`), leve perspectiva e paralaxe; camada de repintura própria e relógio parado fora da tela (R11, contrato)
+- [X] T015 [US1] Gestos de toque (aceno/piscada alternados), com a máquina de estados `ocioso → emGesto → ocioso` (FR-005a, data-model.md)
+- [X] T016 [US1] Gesto único `comemoracao` e entrada animada por expressão (FR-003)
+- [X] T017 [US1] Pôr a `MemoraAnimada` na `GaleriaMemora` em todas as expressões e gestos, e no teste de completude da galeria (V10 da 002)
 - [ ] T018 [US1] Conferência visual: gerar capturas da galeria nos 3 temas e **mostrar ao Henrique** antes de seguir para a Fase B (risco do plano: o desenho em código precisa ficar à altura da referência)
 
 **Checkpoint**: a Memora vetorial está pronta e aprovada na galeria.
