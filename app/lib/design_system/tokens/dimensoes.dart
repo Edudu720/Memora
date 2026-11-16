@@ -183,6 +183,14 @@ abstract final class MemoraDimensoes {
   /// o resto do texto rola dentro dele (R5).
   static const double tetoDoAvisoAberto = 0.5;
 
+  /// Dentro do aviso aberto, o botão de fechar não passa desta fração da altura
+  /// que o aviso tem; acima dela, o botão rola (feature 013).
+  ///
+  /// O botão fica fixo para a pessoa sempre achar a saída, mas pede a altura
+  /// natural dele — e a 200% num 320×568, dentro da casca, ela sozinha passava
+  /// do teto do aviso e a caixa estourava 39 px. O texto rola no resto.
+  static const double tetoDoBotaoDoAvisoAberto = 0.4;
+
   /// A faixa do campo de escrever da conversa, com o respiro dela, não passa
   /// desta fração da altura disponível; acima dela, a faixa rola (T055).
   ///

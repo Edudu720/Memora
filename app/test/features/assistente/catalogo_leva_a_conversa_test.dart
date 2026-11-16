@@ -83,6 +83,9 @@ Future<void> _tocar(WidgetTester t, Finder alvo) async {
   await t.pump();
   await t.tap(alvo);
   await _avancar(t);
+  // Toda troca de tela desliza por 400 ms (013): a tela nova começa fora da
+  // janela, e o toque seguinte cairia no vazio se não esperasse o deslize.
+  await t.pump(const Duration(milliseconds: 400));
 }
 
 Future<void> _preencher(WidgetTester t, Key chave, String valor) async {

@@ -60,12 +60,17 @@ class FluxoDentroDaConta {
     }
   }
 
-  /// Rola ate o alvo, toca e bombeia alguns quadros.
+  /// Rola ate o alvo, toca e espera a transicao que o toque possa ter aberto.
+  ///
+  /// Desde a 013 toda troca de tela e um deslizamento de 400 ms: a tela nova
+  /// comeca fora da janela, e um toque dado no meio do caminho cairia no vazio.
+  /// Quem toca esperando a tela seguinte precisa esperar o deslize acabar.
   static Future<void> tocar(WidgetTester t, Finder alvo) async {
     await t.ensureVisible(alvo);
     await t.pump();
     await t.tap(alvo);
     await avancar(t);
+    await esperarATransicao(t);
   }
 
   /// Monta o fluxo e deixa a pessoa no Início, a raiz do destino de mesmo nome.
@@ -195,7 +200,8 @@ class FluxoDentroDaConta {
     );
   }
 
-  /// Espera a transicao de uma rota (300 ms) terminar, sem `pumpAndSettle`:
+  /// Espera a transicao de uma rota (400 ms, `MemoraMovimento.transicaoDeTela`)
+  /// terminar, sem `pumpAndSettle`:
   /// uma tela com `Carregando` anima sem parar e ele nunca voltaria.
   ///
   /// Enquanto a transicao corre, a tela de baixo ainda esta na arvore e a

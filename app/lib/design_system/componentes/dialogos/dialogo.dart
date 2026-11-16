@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../preferencias/reducao_de_movimento.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamento.dart';
+import '../../tokens/movimento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_primario.dart';
 import '../botoes/botao_secundario.dart';
 import '../texto/texto_memora.dart';
 
 /// Diálogo modal do Memora.
+///
+/// Surge **por cima**, no centro: esmaece e cresce de 96% a 100%, sem mover a
+/// tela de trás (feature 013, FR-010). Com "reduzir movimento", já chega
+/// inteiro.
 ///
 /// Sempre oferece uma saída clara. Um modal sem saída visível deixa a pessoa
 /// presa numa tela que ela não sabe fechar — e o gesto de voltar do sistema
@@ -56,10 +62,22 @@ class DialogoMemora extends StatelessWidget {
     BuildContext context, {
     required DialogoMemora dialogo,
   }) {
+    final bool reduzir = context.reduzirMovimento;
     return showDialog<void>(
       context: context,
       useRootNavigator: false,
-      builder: (BuildContext _) => dialogo,
+      // Surge e some em `padrao`; com "reduzir movimento", de uma vez (FR-013).
+      animationStyle: AnimationStyle(
+        duration: MemoraMovimento.efetiva(
+          MemoraMovimento.padrao,
+          reduzirMovimento: reduzir,
+        ),
+        reverseDuration: MemoraMovimento.efetiva(
+          MemoraMovimento.padrao,
+          reduzirMovimento: reduzir,
+        ),
+      ),
+      builder: (BuildContext _) => _SurgeNoCentro(child: dialogo),
     );
   }
 
@@ -92,6 +110,31 @@ class DialogoMemora extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// O aumento leve de 96% a 100% do diálogo, junto do esmaecer que o Flutter já
+/// faz. Acompanha a animação da própria rota, então vale para entrar e sair.
+class _SurgeNoCentro extends StatelessWidget {
+  const _SurgeNoCentro({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final Animation<double>? animacao = ModalRoute.of(context)?.animation;
+    if (animacao == null) return child;
+    return ScaleTransition(
+      scale: animacao
+          .drive(CurveTween(curve: MemoraMovimento.curvaDeSobreposicao))
+          .drive(
+            Tween<double>(
+              begin: MemoraMovimento.escalaDoDialogoAoSurgir,
+              end: MemoraMovimento.escalaDoDialogoEmRepouso,
+            ),
+          ),
+      child: child,
     );
   }
 }

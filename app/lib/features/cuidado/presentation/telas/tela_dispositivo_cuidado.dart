@@ -86,8 +86,11 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
     );
 
     Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
+      // Uma pergunta que cobre tudo: sobe por cima, e a tela de trás fica
+      // onde está (FR-010).
+      RotaMemora<void>(
         fullscreenDialog: true,
+        direcao: DirecaoDaTransicao.sobrepor,
         builder: (BuildContext ctx) =>
             TelaVerificacaoQueda(controlador: ctrlQueda),
       ),
