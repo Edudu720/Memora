@@ -113,7 +113,7 @@ nos 3 temas, animando; com "reduzir movimento", parada.
 - [X] T017 [US1] Pôr a `MemoraAnimada` na `GaleriaMemora` em todas as expressões e gestos, e no teste de completude da galeria (V10 da 002)
 - [X] T018 [US1] Conferência visual: gerar capturas da galeria nos 3 temas e **mostrar ao Henrique** antes de seguir para a Fase B (risco do plano: o desenho em código precisa ficar à altura da referência). **Aprovada pelo Henrique em 2026-11-16**, depois do vídeo para a equipe, pedindo **mais animação** (T083) e a anfitriã do Início (fase 3b)
 
-- [ ] T083 [US1] **(2026-11-16)** Mais animação em todas as expressões (FR-003a): pequenos movimentos próprios de cada uma — olhar em volta, balançar a antena, piscar, ajeitar o corpo —, sem competir com o texto da tela; nenhum com "reduzir movimento". Teste: com a preferência, nenhum `Ticker` ativo; sem ela, cada expressão tem movimento além da respiração. Conferir no celular
+- [X] T083 [US1] **(2026-11-16)** Mais animação em todas as expressões (FR-003a): pequenos movimentos próprios de cada uma — olhar em volta, balançar a antena, piscar, ajeitar o corpo —, sem competir com o texto da tela; nenhum com "reduzir movimento". Teste: com a preferência, nenhum `Ticker` ativo; sem ela, cada expressão tem movimento além da respiração. Conferir no celular
 
 **Checkpoint**: a Memora vetorial está pronta e aprovada na galeria.
 
@@ -132,15 +132,15 @@ nada troca sozinho; com "reduzir movimento", parada.
 
 ### Testes da US8 (escrever antes e ver falhar)
 
-- [ ] T084 [P] [US8] `app/test/design_system/memora_anfitria_test.dart`: troca a dica aos 20 s (FR-052); **não** troca com leitor de tela, com "reduzir movimento", nem depois de um toque (FR-053); toque mostra a próxima (FR-054); semântica de botão "Outra dica da Memora" com área ≥ 48 dp (FR-055); toque nunca navega (FR-056); boca anima só enquanto o texto aparece (FR-051); nenhum `Ticker` com "reduzir movimento" (FR-057). Quebrar: troca automática ignorando o leitor de tela; tirar o rótulo
-- [ ] T085 [P] [US8] O portão de texto (`texto_da_interface_test.dart`) passa a cobrir o arquivo das dicas: duas frases, sem palavra proibida, sem emoji; e um teste confere que há pelo menos 3 dicas antigolpe (FR-050)
+- [X] T084 [P] [US8] `app/test/design_system/memora_anfitria_test.dart`: troca a dica aos 20 s (FR-052); **não** troca com leitor de tela, com "reduzir movimento", nem depois de um toque (FR-053); toque mostra a próxima (FR-054); semântica de botão "Outra dica da Memora" com área ≥ 48 dp (FR-055); toque nunca navega (FR-056); boca anima só enquanto o texto aparece (FR-051); nenhum `Ticker` com "reduzir movimento" (FR-057). Quebrar: troca automática ignorando o leitor de tela; tirar o rótulo
+- [X] T085 [P] [US8] O portão de texto (`texto_da_interface_test.dart`) passa a cobrir o arquivo das dicas: duas frases, sem palavra proibida, sem emoji; e um teste confere que há pelo menos 3 dicas antigolpe (FR-050)
 
 ### Implementação da US8
 
-- [ ] T086 [P] [US8] `app/lib/l10n/textos_anfitria.dart`: lista fixa de 12 a 16 dicas na voz da Memora (uso do celular, do Memora e lembretes antigolpe), no máximo duas frases cada, revistas na PR (FR-050)
-- [ ] T087 [US8] Desenho aprimorado da anfitriã (FR-048) sobre os pintores da `MemoraAnimada`: brilho especular, luz de contorno, sombra de contato, giro de cabeça com o rosto deslizando no visor, corpo que estica e encolhe no pulo; cores só de tokens; mais detalhe sem perder a mesma personagem
-- [ ] T088 [US8] Comportamento autônomo (FR-049): agenda de comportamentos que se alternam sem padrão óbvio (flutuar, olhar em volta, acenar de vez em quando, inclinar a cabeça, pulinho); parada fora da tela (FR-058); nada com "reduzir movimento"
-- [ ] T089 [US8] `app/lib/design_system/componentes/ilustracao/memora_anfitria.dart`: anfitriã + balão de dica + boca sincronizada com o texto (FR-051) + troca a cada 20 s com as regras de parada (FR-052, FR-053) + toque como ação acessível que faz um gesto e mostra a próxima (FR-054, FR-055); o leitor de tela anuncia a dica nova só quando a pessoa pediu
+- [X] T086 [P] [US8] `app/lib/l10n/textos_anfitria.dart`: lista fixa de 12 a 16 dicas na voz da Memora (uso do celular, do Memora e lembretes antigolpe), no máximo duas frases cada, revistas na PR (FR-050)
+- [X] T087 [US8] Desenho aprimorado da anfitriã (FR-048) sobre os pintores da `MemoraAnimada`: brilho especular, luz de contorno, sombra de contato, giro de cabeça com o rosto deslizando no visor, corpo que estica e encolhe no pulo; cores só de tokens; mais detalhe sem perder a mesma personagem
+- [X] T088 [US8] Comportamento autônomo (FR-049): agenda de comportamentos que se alternam sem padrão óbvio (flutuar, olhar em volta, acenar de vez em quando, inclinar a cabeça, pulinho); parada fora da tela (FR-058); nada com "reduzir movimento"
+- [X] T089 [US8] `app/lib/design_system/componentes/ilustracao/memora_anfitria.dart`: anfitriã + balão de dica + boca sincronizada com o texto (FR-051) + troca a cada 20 s com as regras de parada (FR-052, FR-053) + toque como ação acessível que faz um gesto e mostra a próxima (FR-054, FR-055); o leitor de tela anuncia a dica nova só quando a pessoa pediu
 - [ ] T090 [US8] Galeria e renders da anfitriã; **mostrar ao Henrique no celular** (APK "Memora (teste)") antes da T053 — mesmo portão da T018
 
 **Checkpoint**: a anfitriã aprovada; a T053 a coloca no Início.
@@ -157,18 +157,18 @@ direção certa; com "reduzir movimento", instantâneo.
 
 ### Testes da US2
 
-- [ ] T019 [P] [US2] `app/test/design_system/rota_memora_test.dart`: avançar entra pela direita, voltar pela esquerda, duração ≤ 500 ms, a tela que sai não recebe toque, o gesto de voltar faz a mesma animação (V6); quebrar deixando a tela de saída aceitar toque
-- [ ] T020 [P] [US2] No mesmo arquivo e em `app/test/design_system/dialogo_test.dart` e `folha_inferior_test.dart` (novos): com "reduzir movimento", troca instantânea; diálogo e folha não movem a tela de trás (V7, V9)
-- [ ] T021 [P] [US2] Em `app/test/features/casca/casca_interna_test.dart`: trocar de destino preserva a pilha de cada um e desliza pela posição relativa (V8); quebrar trocando por um `AnimatedSwitcher` que recria os filhos
+- [X] T019 [P] [US2] `app/test/design_system/rota_memora_test.dart`: avançar entra pela direita, voltar pela esquerda, duração ≤ 500 ms, a tela que sai não recebe toque, o gesto de voltar faz a mesma animação (V6); quebrar deixando a tela de saída aceitar toque
+- [X] T020 [P] [US2] No mesmo arquivo e em `app/test/design_system/dialogo_test.dart` e `folha_inferior_test.dart` (novos): com "reduzir movimento", troca instantânea; diálogo e folha não movem a tela de trás (V7, V9)
+- [X] T021 [P] [US2] Em `app/test/features/casca/casca_interna_test.dart`: trocar de destino preserva a pilha de cada um e desliza pela posição relativa (V8); quebrar trocando por um `AnimatedSwitcher` que recria os filhos
 
 ### Implementação da US2
 
-- [ ] T022 [US2] `app/lib/design_system/navegacao/rota_memora.dart`: `RotaMemora<T>` com deslizamento e paralaxe, duração por `MemoraMovimento.efetiva`, bloqueio de toque na tela de saída, e o `TransicaoMemora` para o tema (contrato; o registro no tema é a T049)
-- [ ] T023 [US2] `app/lib/design_system/navegacao/troca_de_destino.dart`: filhos vivos, deslizamento pela posição, fora da tela sem animar e sem foco (R3)
-- [ ] T024 [US2] `app/lib/features/casca/casca_interna.dart`: trocar o `IndexedStack` pela `TrocaDeDestino` e o `MaterialPageRoute` da raiz pela `RotaMemora`
-- [ ] T025 [P] [US2] `app/lib/design_system/componentes/dialogos/dialogo.dart` e `folha_inferior.dart`: transições de sobreposição (centro e de baixo) com `MemoraMovimento.efetiva` (R4)
-- [ ] T026 [P] [US2] Trocar os `MaterialPageRoute` de `tela_dispositivo_cuidado.dart`, `secao_idade.dart` e **`secao_foto_perfil.dart`** (pré-visualização da foto, #73) pela `RotaMemora` (o de `fluxo_autenticacao.dart` é a T050) **(rev. 16/11)**
-- [ ] T027 [US2] Rodar a suíte inteira: testes que dependiam do zoom do Android ou de `pumpAndSettle` com duração fixa são ajustados na mesma tarefa (não afrouxar asserção)
+- [X] T022 [US2] `app/lib/design_system/navegacao/rota_memora.dart`: `RotaMemora<T>` com deslizamento e paralaxe, duração por `MemoraMovimento.efetiva`, bloqueio de toque na tela de saída, e o `TransicaoMemora` para o tema (contrato; o registro no tema é a T049)
+- [X] T023 [US2] `app/lib/design_system/navegacao/troca_de_destino.dart`: filhos vivos, deslizamento pela posição, fora da tela sem animar e sem foco (R3)
+- [X] T024 [US2] `app/lib/features/casca/casca_interna.dart`: trocar o `IndexedStack` pela `TrocaDeDestino` e o `MaterialPageRoute` da raiz pela `RotaMemora`
+- [X] T025 [P] [US2] `app/lib/design_system/componentes/dialogos/dialogo.dart` e `folha_inferior.dart`: transições de sobreposição (centro e de baixo) com `MemoraMovimento.efetiva` (R4)
+- [X] T026 [P] [US2] Trocar os `MaterialPageRoute` de `tela_dispositivo_cuidado.dart`, `secao_idade.dart` e **`secao_foto_perfil.dart`** (pré-visualização da foto, #73) pela `RotaMemora` (o de `fluxo_autenticacao.dart` é a T050) **(rev. 16/11)**
+- [X] T027 [US2] Rodar a suíte inteira: testes que dependiam do zoom do Android ou de `pumpAndSettle` com duração fixa são ajustados na mesma tarefa (não afrouxar asserção)
 
 **Checkpoint**: navegação com direção onde a #71 não interfere.
 
@@ -241,14 +241,14 @@ acenando → fluxo de entrada, sem pulo.
 
 - [ ] T047 [US1] `memora_personagem.dart`: a `MemoraPersonagem` passa a montar uma `MemoraAnimada`, com a mesma assinatura e o mesmo enum (inclusive `dica` e `mini` da #71); o leitor de tela continua igual
 - [ ] T048 [US1] Mover os tokens de `cores_da_memora.dart` para o esquema de cores da #71 (`cores.dart`) e apagar o arquivo separado; `validar_paleta.py` continua passando. **(rev. 16/11)** O `MemoraTheme.comPaleta(nome)` recebe o nome da paleta mas não o guarda: guardar o nome no tema e trocar a descoberta da paleta "pela cor primária" (frágil) por ele
-- [ ] T049 [US2] Registrar a `TransicaoMemora` como transição de página padrão em `temas_memora.dart` (cobre toda rota de página que restar, inclusive as da #71)
-- [ ] T050 [US2] Trocar o `MaterialPageRoute` de `fluxo_autenticacao.dart` pela `RotaMemora`
+- [X] T049 [US2] Registrar a `TransicaoMemora` como transição de página padrão em `temas_memora.dart` (cobre toda rota de página que restar, inclusive as da #71)
+- [X] T050 [US2] Trocar o `MaterialPageRoute` de `fluxo_autenticacao.dart` pela `RotaMemora`
 - [ ] T051 [US1] Remover os PNGs da Memora de `app/assets/ilustracoes/` que não forem mais usados, e o registro deles no `pubspec.yaml` (o ícone do aplicativo continua); conferir que nenhum teste os carrega
 - [ ] T052 [US1] `memora_distancia_test.dart`: em cada tela em que a Memora aparece, a área dela fica a ≥ 8 dp de qualquer alvo de toque, na matriz de aparelhos (V5, FR-005c); quebrar encostando a Memora num botão
 
 ## Phase 10: User Story 7 — Início e barra inferior (P1) — parte B
 
-- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006). **(2026-11-16)** A Memora do topo é a **`MemoraAnfitria`** (fase 3b, T089), não a `MemoraAnimada` comum
+- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006). **(2026-11-16)** A anfitriã só segura a dica quando o toque é nela ou no balão: a T053 precisa passar a ela um sinal de atividade do Início, para a FR-052 valer para toques em qualquer lugar da tela. **(2026-11-16)** A Memora do topo é a **`MemoraAnfitria`** (fase 3b, T089), não a `MemoraAnimada` comum
 - [ ] T054 [US7] Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance; atualizar `inicio_ocupa_a_altura_test.dart` e a matriz (FR-041, V13); quebrar fixando a altura da Memora
 - [ ] T055 [P] [US7] `app/test/design_system/navegacao_inferior_test.dart` (novo): ícone + rótulo juntos, alvo ≥ 48 dp, indicador desliza até o destino tocado, sem deslizar com "reduzir movimento" (V15); quebrar tirando o rótulo
 - [ ] T056 [US7] `navegacao_inferior.dart`: barra refeita no acabamento da 007 (superfície, sombra, cantos), ícones arredondados da família única no lugar dos SVG de `assets/icones/navegacao/`, indicador deslizante e resposta ao toque (FR-044 a FR-047, R5)
@@ -280,6 +280,7 @@ acenando → fluxo de entrada, sem pulo.
 
 - [ ] T071 [P] [US6] Localizador (`tela_localizador.dart`) e os diálogos de permissão de localização, rota e ligação na linguagem da 013: Memora, transições, ícones, texto; sem mudar o comportamento da 009 (FR-031, FR-032)
 - [ ] T072 [P] [US6] Seletor de seções e passo a passo: Memora `comemorando` na conclusão (FR-003), transição de avançar/voltar entre passos com a `RotaMemora` ou equivalente
+- [ ] T091 [US2] **(2026-11-16, achado na T025)** Os `showDialog` crus de `dialogo_contato_emergencia.dart` (Cuidado — Henrique) e de `tela_localizador.dart` (Eduardo, junto da T071) passam a abrir pela transição de sobreposição do `Dialogo`: hoje ficam sem a animação nova e com 150 ms fixos mesmo com "reduzir movimento" (contra a FR-013). Se o conteúdo deles for mais rico que o do `DialogoMemora`, dar a ele um construtor de conteúdo livre
 - [ ] T081 [P] [US6] **(rev. 16/11)** Telas da foto de perfil (#73) — `SecaoFotoPerfil`, `TelaPreVisualizacaoFoto`, `RetratoDoPerfil` e os textos novos de `textos_perfil.dart` — na linguagem da 013 (transições, ícones, duas frases), sem mudar o comportamento da spec 011. No Perfil, o topo é o **retrato da pessoa** (decisão da integração das #71 e #73): a Memora não aparece ali
 - [ ] T073 [US6] Estados de carregando, vazio e erro de todas as telas com a Memora na expressão certa (FR-001)
 - [ ] T074 [US6] Percorrer o álbum inteiro contra a checagem da memora-ux (seção 5) e corrigir o que reprovar (V18, SC-001)
