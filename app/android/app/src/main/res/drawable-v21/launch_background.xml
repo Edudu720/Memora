@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="?android:colorBackground" />
+<!--
+    A abertura nativa, antes de o Flutter existir (feature 013, T038; FR-037).
 
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+    O fundo do tema do aparelho (claro ou escuro, em `values/colors.xml` e
+    `values-night/colors.xml`) e a Memora parada, acenando, no centro da
+    janela: do mesmo tamanho (160 dp) e no mesmo lugar do primeiro quadro da
+    AberturaMemora, para a passagem do sistema para o aceno ser continua.
+
+    No Android 12 ou mais novo quem manda e a abertura do sistema
+    (`values-v31/styles.xml`), com a mesma Memora e o mesmo fundo; este arquivo
+    vale do Android 5 ao 11.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/abertura_fundo" />
+    <item
+        android:drawable="@drawable/memora_abertura"
+        android:gravity="center" />
 </layer-list>

@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
+<!--
+    A abertura nativa, antes de o Flutter existir (feature 013, T038; FR-037).
+    Esta e a versao dos aparelhos mais antigos que o Android 5 (so o fundo: a
+    partir dali o `drawable-v21` traz a Memora tambem). O fundo e o do tema
+    claro ou escuro do aparelho, o mesmo da AberturaMemora.
+-->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@android:color/white" />
-
-    <!-- You can insert your own image assets here -->
-    <!-- <item>
-        <bitmap
-            android:gravity="center"
-            android:src="@mipmap/launch_image" />
-    </item> -->
+    <item android:drawable="@color/abertura_fundo" />
 </layer-list>

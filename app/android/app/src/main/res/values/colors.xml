@@ -3,4 +3,10 @@
     <!-- Fundo do icone adaptativo: o medalhao claro das ilustracoes
          (MemoraCores.claro.medalhao, 0xFFE3EAFF), onde o robo azul se destaca. -->
     <color name="ic_launcher_background">#E3EAFF</color>
+
+    <!-- Fundo da abertura (feature 013, T038): o fundo do tema claro
+         (MemoraCores.claro.fundo, 0xFFF4F6FA), o mesmo da AberturaMemora, para
+         a passagem da abertura nativa para o aceno ser continua. Se o token
+         mudar, este valor muda junto (ha o par escuro em values-night). -->
+    <color name="abertura_fundo">#F4F6FA</color>
 </resources>
