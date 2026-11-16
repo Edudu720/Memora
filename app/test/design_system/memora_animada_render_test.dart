@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 
-/// Fotografa a `MemoraAnimada` para **olhar** (T018 da feature 010).
+/// Fotografa a `MemoraAnimada` para **olhar** (T018 da feature 013).
 ///
 /// ## Para que serve
 ///

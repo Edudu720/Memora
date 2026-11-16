@@ -4,13 +4,17 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-11-15/16 — **a feature 010, o redesenho final**, pelo
-Henrique, na branch **`feature/010-redesenho-final`** (saiu da
+**Última sessão**: 2026-11-15/16 — **a feature 013, o redesenho final**, pelo
+Henrique, na branch **`feature/013-redesenho-final`** (saiu da
 `feature/004-prints-e-zoom` atualizada com a `develop`; **nada tem push**).
 
+> 🔢 **A feature era 010 e virou 013** em 2026-11-16: a #71 trouxe a
+> `specs/010-revisao-pr71-localizador` para a `develop`. Commits antigos dizem
+> "010"; a branch agora é `feature/013-redesenho-final`.
+>
 > 🎨 **O que existe**: a skill `.claude/skills/memora-ux/` (regras de UI/UX,
-> leitura obrigatória antes de mexer em tela) e `specs/010-redesenho-final/`
-> completa até o `tasks` (79 tarefas). A 010 **continua** a 007 do Eduardo
+> leitura obrigatória antes de mexer em tela) e `specs/013-redesenho-final/`
+> completa até o `tasks` (79 tarefas). A 013 **continua** a 007 do Eduardo
 > (PR #71): substitui só a Memora em PNG e restringe a voz ao aparelho. Fase
 > **A** (T001–T046) independe da #71; fase **B** (T047–T079) espera a #71
 > entrar na `develop` e, antes, as tarefas dela são revistas contra o código.
@@ -1866,7 +1870,7 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 
 - ❌ Mexer em tela sem ler antes a skill **`memora-ux`**
   (`.claude/skills/memora-ux/SKILL.md`): princípios, números, a Memora,
-  transições, voz do texto e o que nunca aparece na tela (feature 010)
+  transições, voz do texto e o que nunca aparece na tela (feature 013)
 - ❌ Escrever cor, espaçamento ou tamanho literal fora dos tokens
 - ❌ Criar componente dentro de `features/` quando ele serve a mais de uma tela
 - ❌ Editar cliente de API gerado à mão

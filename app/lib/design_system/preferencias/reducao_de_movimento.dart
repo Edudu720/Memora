@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-/// O ponto único para saber se o movimento deve ser reduzido (feature 010,
+/// O ponto único para saber se o movimento deve ser reduzido (feature 013,
 /// T007).
 ///
 /// A `AmpliacaoDeTexto` envolve o aplicativo inteiro e já soma a preferência

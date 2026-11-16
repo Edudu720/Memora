@@ -1,6 +1,6 @@
 # Feature Specification: Redesenho final — a Memora ganha corpo, movimento e voz
 
-**Feature Branch**: `feature/010-redesenho-final`
+**Feature Branch**: `feature/013-redesenho-final`
 
 **Created**: 2026-11-15
 
@@ -38,6 +38,10 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
 | — | **Acrescentado**: transições (US2), regras de texto (US3), ícones vetoriais interativos (US5), Localizador e telas novas na mesma linguagem (US6) | A 007 não trata de movimento, de texto nem das telas da 009 |
 
 ## Clarifications
+
+> **Renumerada de 010 para 013 em 2026-11-16**: a PR #71 trouxe para a
+> `develop` a `specs/010-revisao-pr71-localizador`, e 011 e 012 já eram a foto
+> de perfil e o site. Os commits anteriores a esta data dizem "010".
 
 ### Session 2026-11-15
 
@@ -524,7 +528,7 @@ continua escrito.
 
 ## Assumptions
 
-- **A 007 entra antes da implementação desta.** O plano e as tarefas da 010
+- **A 007 entra antes da implementação desta.** O plano e as tarefas da 013
   partem do Design System 2.0 da #71; se a #71 mudar, as tarefas são
   atualizadas (decisão do Henrique, 2026-11-15).
 - **A Memora já é um robô** (FR-009b da 004; expressões existentes em PNG). O

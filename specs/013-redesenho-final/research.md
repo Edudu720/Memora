@@ -1,4 +1,4 @@
-# Pesquisa — feature 010 (redesenho final)
+# Pesquisa — feature 013 (redesenho final)
 
 Cada decisão segue o formato Decisão / Por quê / Alternativas. As regras de UI
 vêm da skill `memora-ux`; aqui está só o **como**.

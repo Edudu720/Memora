@@ -1,12 +1,12 @@
 # Implementation Plan: Redesenho final — a Memora ganha corpo, movimento e voz
 
-**Branch**: `feature/010-redesenho-final` | **Date**: 2026-11-15 | **Spec**: [spec.md](spec.md)
+**Branch**: `feature/013-redesenho-final` | **Date**: 2026-11-15 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/010-redesenho-final/spec.md`
+**Input**: Feature specification from `specs/013-redesenho-final/spec.md`
 
 ## Summary
 
-A 010 continua a 007 (Design System 2.0, PR #71). Ela dá à Memora um corpo
+A 013 continua a 007 (Design System 2.0, PR #71). Ela dá à Memora um corpo
 vetorial em 2.5D, animado pelo próprio aplicativo; faz toda troca de tela
 deslizar com direção; põe a Memora acenando na abertura e no topo do Início;
 limpa a conversa; refaz a barra inferior; e prende o texto da interface em
@@ -54,7 +54,7 @@ seções da #71); 16 guias; 8 arquivos de texto em `l10n/`.
 
 *GATE: antes da pesquisa e de novo depois do desenho.*
 
-| Princípio | Como a 010 cumpre | Situação |
+| Princípio | Como a 013 cumpre | Situação |
 |---|---|---|
 | **I. Segurança** | Voz só no aparelho (FR-034); nenhum dado novo; animação nunca esconde aviso (FR-033) | ✅ |
 | **II. Engenharia social** | Tabela "como um golpista exploraria" na spec; FR-035 contra a Memora falsa no WhatsApp; toque não se desvia durante transição (FR-014) | ✅ |
@@ -73,7 +73,7 @@ Tracking.
 ### Documentation (this feature)
 
 ```text
-specs/010-redesenho-final/
+specs/013-redesenho-final/
 ├── spec.md
 ├── plan.md
 ├── research.md          # R1–R12

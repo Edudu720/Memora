@@ -1,4 +1,4 @@
-/// Para onde a tela nova vem (feature 010, FR-009 e data-model.md).
+/// Para onde a tela nova vem (feature 013, FR-009 e data-model.md).
 ///
 /// A direção conta à pessoa onde ela está: avançar vem da direita, voltar vem
 /// da esquerda, e o que sobe por cima (folha, diálogo) não move o que está

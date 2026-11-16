@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Portão do texto da interface (feature 010, T028; FR-016, FR-018, FR-020).
+/// Portão do texto da interface (feature 013, T028; FR-016, FR-018, FR-020).
 ///
 /// Todo texto que a pessoa lê segue a skill `memora-ux`:
 /// - **no máximo duas frases curtas por bloco** — o limite é de texto, não de

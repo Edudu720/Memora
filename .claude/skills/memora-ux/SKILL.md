@@ -73,7 +73,7 @@ WCAG não deixa cortar. O que mantém o bloco curto é a frase curta.
 - **Reage ao toque com um gesto** (aceno ou piscada) e mais nada: não abre,
   não fala, não navega. O gesto não existe para o leitor de tela, não acontece
   com "reduzir movimento", e a área dela fica a pelo menos 8 dp de qualquer
-  botão (clarify da 010, 2026-11-15).
+  botão (clarify da 013, 2026-11-15).
 - É **vetor com volume** (luz e sombra em camadas), animada pelo aplicativo —
   nunca imagem recortada.
 - Não aparece duas vezes na mesma tela (ponto levantado na T116).

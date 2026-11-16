@@ -11,7 +11,7 @@ import 'pintores/contexto_de_pintura.dart';
 import 'pintores/pintor_da_memora.dart';
 import 'poses.dart';
 
-/// A Memora em 2.5D, desenhada e animada pelo aplicativo (feature 010,
+/// A Memora em 2.5D, desenhada e animada pelo aplicativo (feature 013,
 /// FR-001 a FR-007).
 ///
 /// ## O que ela é

@@ -1,6 +1,6 @@
-# Roteiro de validação — feature 010
+# Roteiro de validação — feature 013
 
-Como provar que a 010 está pronta. Cada cenário aponta o requisito e onde ele
+Como provar que a 013 está pronta. Cada cenário aponta o requisito e onde ele
 roda. Os automatizados entram no CI; os manuais são no celular (S20 FE, APK de
 release) e fazem parte da revisão do Henrique (portão da T116 da 004).
 

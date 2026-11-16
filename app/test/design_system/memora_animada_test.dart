@@ -5,7 +5,7 @@ import 'package:memora/design_system/componentes/ilustracao/memora_animada/pinto
 import 'package:memora/design_system/componentes/ilustracao/memora_animada/pintores/pintor_da_memora.dart';
 import 'package:memora/design_system/design_system.dart';
 
-/// A `MemoraAnimada` (feature 010, V1 a V4): monta, é decorativa, respeita
+/// A `MemoraAnimada` (feature 013, V1 a V4): monta, é decorativa, respeita
 /// "reduzir movimento" e reage ao toque do jeito certo.
 ///
 /// ## Como se observa um gesto

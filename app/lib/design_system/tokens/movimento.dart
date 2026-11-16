@@ -13,7 +13,7 @@ abstract final class MemoraMovimento {
   /// Transições amplas, como abertura de folha inferior.
   static const Duration lento = Duration(milliseconds: 320);
 
-  /// A Memora acena (FR-005a, feature 010): um gesto curto, uma vez só.
+  /// A Memora acena (FR-005a, feature 013): um gesto curto, uma vez só.
   static const Duration aceno = Duration(milliseconds: 1200);
 
   /// A Memora pisca ao toque (FR-005a).

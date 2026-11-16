@@ -4,7 +4,7 @@ import 'package:flutter/painting.dart';
 import '../temas/memora_theme_extension.dart';
 import 'cores.dart';
 
-/// As cores do personagem Memora (feature 010, FR-001 e FR-007).
+/// As cores do personagem Memora (feature 013, FR-001 e FR-007).
 ///
 /// ## Por que um arquivo separado de `cores.dart`
 ///

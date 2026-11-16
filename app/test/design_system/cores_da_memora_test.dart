@@ -5,7 +5,7 @@ import 'package:memora/design_system/design_system.dart';
 
 import 'contraste_test.dart' show contraste;
 
-/// As cores da Memora (feature 010, FR-007): seguem a paleta, e a silhueta
+/// As cores da Memora (feature 013, FR-007): seguem a paleta, e a silhueta
 /// continua visível em cada paleta e tema.
 ///
 /// O portão principal dos números é `validar_paleta.py`; este arquivo

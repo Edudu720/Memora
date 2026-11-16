@@ -1,4 +1,4 @@
-# Contrato dos componentes — feature 010
+# Contrato dos componentes — feature 013
 
 Contrato de interface de cada componente novo do Design System. Os nomes são o
 que as telas vão chamar; os detalhes de desenho ficam para a implementação.

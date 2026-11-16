@@ -1,6 +1,6 @@
 # Tasks: Redesenho final — a Memora ganha corpo, movimento e voz
 
-**Input**: `specs/010-redesenho-final/` — spec.md, plan.md, research.md,
+**Input**: `specs/013-redesenho-final/` — spec.md, plan.md, research.md,
 data-model.md, contracts/componentes.md, quickstart.md
 **Regras de UI**: `.claude/skills/memora-ux/SKILL.md` — leia antes de qualquer
 tarefa de tela.
@@ -27,7 +27,7 @@ desfazer (CLAUDE.md, seção 8). Cada tarefa de teste diz o que quebrar.
 
 ## Phase 1: Setup
 
-- [X] T001 Conferir que a branch `feature/010-redesenho-final` está atualizada com a `develop` e que os quatro portões passam antes de começar (linha de base: 2448 testes em 2026-11-15)
+- [X] T001 Conferir que a branch `feature/013-redesenho-final` está atualizada com a `develop` e que os quatro portões passam antes de começar (linha de base: 2448 testes em 2026-11-15)
 - [X] T002 [P] Acrescentar a `memora-ux` ao CLAUDE.md (seção 3 ou 9) como leitura obrigatória antes de tarefa de tela
 
 ---
@@ -151,7 +151,7 @@ acenando → fluxo de entrada, sem pulo.
 
 - [ ] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé)
 - [ ] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5)
-- [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 010
+- [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013
 - [ ] T046 PR da Fase A para a `develop`, com a descrição dizendo que a Fase B espera a #71
 
 ---
@@ -203,7 +203,7 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 14: User Story 6 — Nenhuma tela fica de fora (P3)
 
-- [ ] T071 [P] [US6] Localizador (`tela_localizador.dart`) e os diálogos de permissão de localização, rota e ligação na linguagem da 010: Memora, transições, ícones, texto; sem mudar o comportamento da 009 (FR-031, FR-032)
+- [ ] T071 [P] [US6] Localizador (`tela_localizador.dart`) e os diálogos de permissão de localização, rota e ligação na linguagem da 013: Memora, transições, ícones, texto; sem mudar o comportamento da 009 (FR-031, FR-032)
 - [ ] T072 [P] [US6] Seletor de seções e passo a passo: Memora `comemorando` na conclusão (FR-003), transição de avançar/voltar entre passos com a `RotaMemora` ou equivalente
 - [ ] T073 [US6] Estados de carregando, vazio e erro de todas as telas com a Memora na expressão certa (FR-001)
 - [ ] T074 [US6] Percorrer o álbum inteiro contra a checagem da memora-ux (seção 5) e corrigir o que reprovar (V18, SC-001)

@@ -3,7 +3,7 @@ import 'package:flutter/painting.dart';
 import '../../../../tokens/cores_da_memora.dart';
 import '../poses.dart';
 
-/// Tudo o que uma camada precisa para se pintar neste quadro (feature 010).
+/// Tudo o que uma camada precisa para se pintar neste quadro (feature 013).
 ///
 /// As camadas desenham em **coordenadas do desenho**: 0 a 1 do lado do
 /// quadrado, com a origem no canto de cima à esquerda. [p] e [l] convertem

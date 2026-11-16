@@ -3,7 +3,7 @@ import 'dart:ui' show Offset, lerpDouble;
 
 import 'package:flutter/foundation.dart' show immutable;
 
-/// As poses da Memora (feature 010, FR-002 e data-model.md).
+/// As poses da Memora (feature 013, FR-002 e data-model.md).
 ///
 /// É um enum **próprio** do desenho, e não o `ExpressaoDaMemora` da
 /// `MemoraPersonagem`: esse enum só tem quatro valores e é reescrito pela

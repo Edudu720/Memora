@@ -1,5 +1,5 @@
 /// Uma animação curta e única da Memora, disparada por um evento
-/// (feature 010, data-model.md).
+/// (feature 013, data-model.md).
 ///
 /// Com "reduzir movimento" nenhum gesto acontece: a Memora fica na pose
 /// parada da expressão.

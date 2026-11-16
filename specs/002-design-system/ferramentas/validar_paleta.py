@@ -50,7 +50,7 @@ TEMAS = {
             "sucesso":          "#186A2E",
             "perigo":           "#B3231F",
             "sobre_perigo":     "#FFFFFF",
-            # A Memora (feature 010): segue a paleta, menos olhos e afins.
+            # A Memora (feature 013): segue a paleta, menos olhos e afins.
             "memora_corpo":     "#3565F3",  # referencia do Henrique
             "memora_contorno":  "#0D1C50",
             "memora_aro":       "#0D1C50",  # claro: o aro e o proprio contorno
@@ -74,7 +74,7 @@ TEMAS = {
             "sucesso":          "#7CD69A",
             "perigo":           "#FF9B95",
             "sobre_perigo":     "#3A0705",
-            # A Memora (feature 010): segue a paleta, menos olhos e afins.
+            # A Memora (feature 013): segue a paleta, menos olhos e afins.
             "memora_corpo":     "#3565F3",  # referencia do Henrique
             "memora_contorno":  "#0D1C50",
             "memora_aro":       "#9CB8FF",  # escuro: o aro e a primaria do tema
@@ -187,7 +187,7 @@ PALETAS = {
     },
 }
 
-# A Memora segue a paleta escolhida (feature 010, decisao do Henrique de
+# A Memora segue a paleta escolhida (feature 013, decisao do Henrique de
 # 2026-11-15): corpo, contorno e visor mudam; olhos, bochechas, antena e escudo
 # sao a identidade dela e ficam fixos. Os valores do corpo valem nos temas claro
 # e escuro; so o aro (a linha de fora, que garante a silhueta sobre fundo
@@ -243,7 +243,7 @@ PARES = [
     # validada como grafico), e a borda e o escudo do aviso usam perigo sobre ela.
     ("primaria",       "superficie_alt", "texto"),
     ("perigo",         "superficie_alt", "grafico"),
-    # feature 010: a Memora, em CADA paleta e tema. A silhueta (corpo e aro)
+    # feature 013: a Memora, em CADA paleta e tema. A silhueta (corpo e aro)
     # precisa de 3:1 com o fundo e com a superficie onde ela pode aparecer; o
     # contorno precisa de 3:1 com o corpo; os olhos, com o visor.
     ("memora_corpo",    "fundo",          "grafico"),
@@ -346,7 +346,7 @@ def autoteste():
     ruim_claro = {"claro": {"primaria": "#B8C7FF"}}   # ~1,6:1 sobre #F8F8F8
     ruim_escuro = {"escuro": {"primaria": "#2A3A6A"}}  # ~1,5:1 sobre #101216
     boa = {"claro": {"primaria": "#0B3BD0"}, "escuro": {"primaria": "#A8C0FF"}}
-    # feature 010: corpo da Memora igual ao fundo some a silhueta dela
+    # feature 013: corpo da Memora igual ao fundo some a silhueta dela
     ruim_memora = {"claro": {"memora_corpo": "#F8F8F8"}}
     paletas = {"ruim_claro": ruim_claro, "ruim_escuro": ruim_escuro,
                "ruim_memora": ruim_memora, "boa": boa}
