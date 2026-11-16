@@ -191,7 +191,13 @@ void main() {
       final List<String> linhas = arquivo.readAsLinesSync();
       for (int i = 0; i < linhas.length; i++) {
         final String linha = linhas[i].split('//').first;
-        if (!linha.contains('duration:')) continue;
+        // `duration:` dos widgets e a duração das rotas (`transitionDuration` e
+        // `reverseTransitionDuration`, feature 013): uma rota que dura o que
+        // quiser ignora "reduzir movimento" do mesmo jeito.
+        if (!linha.contains('duration:') &&
+            !RegExp(r'ransitionDuration').hasMatch(linha)) {
+          continue;
+        }
 
         // A chamada costuma quebrar em várias linhas; olha a linha e a
         // seguinte, que é onde `efetiva(` aparece no estilo daqui.

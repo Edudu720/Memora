@@ -1,3 +1,5 @@
+import 'package:flutter/animation.dart';
+
 /// Durações de animação do Memora.
 ///
 /// Toda animação é suprimida quando a pessoa ativa "reduzir movimento" no
@@ -33,6 +35,27 @@ abstract final class MemoraMovimento {
 
   /// Transição entre telas (SC-004: no máximo 500 ms).
   static const Duration transicaoDeTela = Duration(milliseconds: 400);
+
+  /// A curva de toda troca de tela e de destino (feature 013, R2).
+  ///
+  /// Suave nas duas pontas: a tela começa e termina devagar, sem batida.
+  static const Curve curvaDeTela = Curves.easeInOutCubic;
+
+  /// Quanto a tela de trás anda enquanto a nova a cobre, em fração da largura
+  /// (paralaxe, R2). Menos que a tela nova, para o olho ver que há um fundo.
+  static const double paralaxeDaTelaDeTras = 0.3;
+
+  /// A curva de quem surge por cima (diálogo e folha): chega depressa e
+  /// assenta devagar (feature 013, R4).
+  static const Curve curvaDeSobreposicao = Curves.easeOut;
+
+  /// De que tamanho o diálogo parte ao surgir, em fração do final: 96%
+  /// (feature 013, R4). Um aumento leve, que dá a ideia de chegar sem mover a
+  /// tela de trás.
+  static const double escalaDoDialogoAoSurgir = 0.96;
+
+  /// O diálogo parado, no tamanho dele.
+  static const double escalaDoDialogoEmRepouso = 1.0;
 
   /// Quanto uma superfície tocável encolhe enquanto o dedo está nela.
   ///

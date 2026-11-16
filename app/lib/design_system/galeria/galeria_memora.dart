@@ -70,6 +70,26 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
 
   void _tocou(String o) => setState(() => _ultimoToque = o);
 
+  /// A tela que a demonstração das transições abre.
+  Widget _telaDeExemploDaRota(BuildContext contexto) => Scaffold(
+    body: SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          BarraSuperior(
+            titulo: 'Uma tela de exemplo',
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(MemoraEspacamento.lg),
+            child: TextoMemora('Volte pelo botão ou pelo gesto do aparelho: a '
+                'animação é a mesma.'),
+          ),
+        ],
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     // A galeria troca o tema **só para dentro dela**. Trocar a preferência
@@ -609,6 +629,43 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
         indiceAtivo: _abaAtiva,
         aoSelecionar: (int i) => setState(() => _abaAtiva = i),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const _Secao(
+        'Transições',
+        'Avançar entra pela direita, voltar pela esquerda; a barra de '
+            'navegação acima troca de destino pelo lado em que está. Com "reduzir movimento", '
+            'tudo troca de uma vez.',
+      ),
+      SizedBox(
+        height: MemoraDimensoes.alvoDecisao * 2,
+        child: TrocaDeDestino(
+          indice: _abaAtiva,
+          filhos: <Widget>[
+            for (final String nome in <String>['Ajustes', 'Início', 'Meu perfil'])
+              ColoredBox(
+                color: context.memora.cores.superficieSutil,
+                child: Center(child: TextoMemora(nome)),
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir uma tela, vinda da direita',
+        aoTocar: () => Navigator.of(context).push(
+          RotaMemora<void>(builder: _telaDeExemploDaRota),
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir uma tela, vinda da esquerda',
+        aoTocar: () => Navigator.of(context).push(
+          RotaMemora<void>(
+            builder: _telaDeExemploDaRota,
+            direcao: DirecaoDaTransicao.voltar,
+          ),
+        ),
       ),
 
       const _Secao(

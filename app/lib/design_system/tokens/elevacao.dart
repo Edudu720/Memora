@@ -32,6 +32,11 @@ abstract final class MemoraElevacao {
   /// Sombra sutil voltada para cima nas barras inferiores elevadas — preto a 5%.
   static const Color sombraBarra = Color(0x0D000000);
 
+  /// O véu que escurece de leve a tela de trás enquanto outra a cobre
+  /// (feature 013, R2) — preto a 8%. Só dá profundidade ao deslizar; nenhuma
+  /// informação depende dele.
+  static const Color veuDaTelaDeTras = Color(0x14000000);
+
   /// A porta em repouso (feature 004, FR-016).
   static const double porta = 4;
 
