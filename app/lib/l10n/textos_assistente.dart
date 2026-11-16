@@ -93,6 +93,70 @@ class TextosAssistente {
   /// Rótulo do botão de enviar.
   static const String botaoEnviar = 'Perguntar';
 
+  /// Rótulo do botão para iniciar o ditado por voz no rascunho (FR-013).
+  static const String botaoFalar = 'Falar';
+
+  /// Rótulo do botão para encerrar o ditado por voz em andamento (FR-013).
+  static const String botaoPararDitado = 'Parar';
+
+  /// Rótulo semântico completo do botão de microfone parado.
+  static const String dicaFalar = 'Ditar pergunta usando a voz';
+
+  /// Rótulo semântico completo do botão de microfone ouvindo.
+  static const String dicaPararDitado = 'Parar ditado por voz';
+
+  /// Indicação visível e falada enquanto o microfone está capturando fala.
+  static const String avisoOuvindoVoz =
+      'Estou te ouvindo… fale a sua pergunta e toque em Parar quando terminar.';
+
+  /// Título do diálogo prévio que explica a permissão de microfone.
+  static const String tituloPermissaoVoz = 'Usar o microfone para escrever';
+
+  /// Explicação em português simples antes de pedir a permissão ao sistema.
+  static const String explicacaoPermissaoVoz =
+      'Para transformar o que você fala em texto aqui na caixa de pergunta, '
+      'precisamos ligar o microfone. Nada fica gravado e nada é enviado '
+      'sozinho: você confere o texto e só envia quando tocar em Perguntar.';
+
+  /// Botão que confirma a explicação e autoriza o pedido ao aparelho.
+  static const String botaoConfirmarPermissaoVoz = 'Entendi, usar microfone';
+
+  /// Botão que fecha a explicação sem ligar o microfone.
+  static const String botaoRecusarPermissaoVoz = 'Prefiro digitar';
+
+  /// Fallback amigável quando o ditado é negado ou não suportado.
+  static const String vozIndisponivel =
+      'O microfone não pôde ser usado agora. Sem problema: você pode '
+      'escrever a sua pergunta normalmente pelo teclado.';
+
+  /// Orientação acolhedora quando o pacote de voz offline em português falta
+  /// ou o aparelho recusa o reconhecimento estritamente local (FR-005).
+  static const String vozOfflineIndisponivel =
+      'O ditado por voz offline em português não está disponível neste '
+      'aparelho agora. Sem problema: você pode digitar sua pergunta '
+      'normalmente pelo teclado ou baixar o idioma português offline nas '
+      'configurações do celular.';
+
+  /// Mensagem amigável quando o reconhecimento falha momentaneamente.
+  static const String vozErro =
+      'Não consegui entender o que foi falado desta vez. Tente novamente ou '
+      'escreva pelo teclado.';
+
+  /// Título da grade 2x2 de sugestões na recepção da conversa.
+  static const String tituloSugestoesConversa = 'Exemplos do que perguntar';
+
+  /// Primeira sugestão rápida na recepção da conversa.
+  static const String sugestaoLetraMaior = 'Como aumento a letra?';
+
+  /// Segunda sugestão rápida na recepção da conversa.
+  static const String sugestaoFotos = 'Como ver fotos da família?';
+
+  /// Terceira sugestão rápida na recepção da conversa.
+  static const String sugestaoGolpe = 'Este aviso no celular é golpe?';
+
+  /// Quarta sugestão rápida na recepção da conversa.
+  static const String sugestaoWhatsapp = 'Como mandar áudio no WhatsApp?';
+
   /// Título do aviso permanente contra golpe (FR-033).
   static const String tituloAvisoAntigolpe = 'Eu nunca peço sua senha';
 

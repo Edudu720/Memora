@@ -27,6 +27,8 @@ import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/aceite_do_aviso.dart';
 import '../../assistente/data/conversa_local.dart';
+import '../../assistente/data/leitor_de_voz_nativo.dart';
+import '../../assistente/domain/leitor_de_voz.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
 import '../../assistente/presentation/telas/tela_catalogo.dart';
@@ -46,10 +48,15 @@ import 'telas/tela_recuperacao.dart';
 import '../../cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
 import '../../cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
 import '../../cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
+import '../../localizador/data/repositorios/repositorio_localizador_simulado.dart';
+import '../../localizador/domain/repositorios/repositorio_localizador.dart';
+import '../../localizador/presentation/controladores/controlador_localizador.dart';
+import '../../localizador/presentation/telas/tela_localizador.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
 import '../../aprendizado/presentation/tela_passo_a_passo.dart';
+import '../../aprendizado/presentation/tela_seletor_de_secao.dart';
 import '../../../services/seguranca/sessao_perdida.dart';
 
 /// Liga as telas das User Stories 1 e 2.
@@ -82,6 +89,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// no Hub — é a FR-003 de novo: porta que não abre nada é pior que porta que
   /// não existe, e sem repositório não há o que listar.
   final RepositorioAssistente? assistente;
+
+  /// Onde o Localizador consulta serviços próximos (FR-006).
+  ///
+  /// Opcional em testes isolados de widget; em produção a `Composicao` entrega
+  /// [RepositorioLocalizadorApi] quando `usaServidorReal` estiver ativo.
+  final RepositorioLocalizador? localizador;
 
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   ///
@@ -150,6 +163,7 @@ class FluxoAutenticacao extends StatefulWidget {
   const FluxoAutenticacao({
     required this.repositorio,
     this.assistente,
+    this.localizador,
     this.abridor,
     this.conversaLocal = ConversaLocal.new,
     this.aceiteDoAviso,
@@ -619,7 +633,27 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         ilustracao: Ilustracao.portaServicos,
         aoAbrir: _abrirDispositivoCuidado,
       ),
+      PortaDoHub(
+        rotulo: 'Localizador de Serviços',
+        descricao: 'Postos de saúde e farmácias próximas',
+        ilustracao: Ilustracao.portaServicos,
+        aoAbrir: _abrirLocalizadorServicos,
+      ),
     ];
+  }
+
+  /// Abre o Localizador de Serviços Essenciais (Feature 009 / 010).
+  void _abrirLocalizadorServicos() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => TelaLocalizador(
+          controlador: ControladorLocalizador(
+            repositorio: widget.localizador ?? RepositorioLocalizadorSimulado(),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
@@ -759,15 +793,56 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   }
 
   /// Abre o guia de aprendizado passo a passo (FR-027).
+  ///
+  /// Quando o guia possui seções temáticas ([Guia.temSecoes]), exibe primeiro
+  /// [TelaSeletorDeSecao] para a pessoa escolher o assunto desejado.
   void _abrirGuia({
     required Guia guia,
     required ServicoDoCatalogo servico,
     required RepositorioAssistente assistente,
   }) {
+    if (guia.temSecoes) {
+      _empilhar(
+        _rota(
+          builder: (BuildContext contexto) => TelaSeletorDeSecao(
+            guia: guia,
+            servico: servico,
+            progresso: widget.progresso,
+            idDaConta: _pessoa?.id,
+            aoEscolherSecao: (SecaoDoGuia secao) => _abrirPassoAPasso(
+              guia: guia,
+              secao: secao,
+              servico: servico,
+              assistente: assistente,
+            ),
+            aoConversar: () => _abrirConversa(
+              assistente,
+              rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+            ),
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+        ),
+      );
+      return;
+    }
+    _abrirPassoAPasso(
+      guia: guia,
+      servico: servico,
+      assistente: assistente,
+    );
+  }
+
+  void _abrirPassoAPasso({
+    required Guia guia,
+    required ServicoDoCatalogo servico,
+    required RepositorioAssistente assistente,
+    SecaoDoGuia? secao,
+  }) {
     _empilhar(
       _rota(
         builder: (BuildContext contexto) => TelaPassoAPasso(
           guia: guia,
+          secao: secao,
           servico: servico,
           repositorioAssistente: assistente,
           progresso: widget.progresso,
@@ -807,13 +882,21 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => _DonaDaConversa(
           aoAbrir: _conversasAbertas.add,
           aoFechar: _conversasAbertas.remove,
-          criar: () => ControladorConversa(
-            assistente,
-            widget.conversaLocal(),
-            aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
-            abridor: widget.abridor,
-            rascunhoInicial: rascunho,
-          ),
+          criar: () {
+            late final ControladorConversa controlador;
+            controlador = ControladorConversa(
+              assistente,
+              widget.conversaLocal(),
+              aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
+              abridor: widget.abridor,
+              leitorDeVoz: LeitorDeVozSpeechToText(
+                aoMudarEstado: (ResultadoDitado r) =>
+                    controlador.aplicarEstadoDitadoExterno(r),
+              ),
+              rascunhoInicial: rascunho,
+            );
+            return controlador;
+          },
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
       ),
@@ -998,6 +1081,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             aoAbrirRegistro: widget.assistente == null
                 ? null
                 : () => _abrirRegistro(widget.assistente!),
+            aoAbrirCuidado: _abrirDispositivoCuidado,
+            aoAbrirAjuda: widget.assistente == null
+                ? null
+                : () => _abrirAjuda(widget.assistente!),
           ),
           DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',

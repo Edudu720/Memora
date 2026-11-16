@@ -74,6 +74,19 @@ dependencies:
   # Dispositivo de Cuidado (ESP32 / Wokwi) (FR-013).
   mqtt_client: ^10.3.3
 
+  # Ditado de voz opcional na conversa, preenchendo somente o rascunho antes
+  # de a pessoa confirmar o envio manualmente (FR-013, Feature 007).
+  speech_to_text: ^7.3.0
+
+  # Localizador de Serviços Essenciais (Feature 009).
+  # Geolocalização para busca de estabelecimentos próximos com consentimento prévio.
+  geolocator: ^13.0.2
+  # Abertura de rotas e chamadas telefônicas após confirmação explícita em 2 etapas.
+  url_launcher: ^6.3.1
+  # Mapa acessível em alto contraste com OpenStreetMap.
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

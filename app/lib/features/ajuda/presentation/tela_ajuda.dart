@@ -56,8 +56,13 @@ class TelaAjuda extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool ocultarVisuais = escala >= MemoraDimensoes.escalaTextoAlta;
+
     return Scaffold(
-      backgroundColor: context.memora.cores.fundo,
+      backgroundColor: cores.fundo,
       // `SingleChildScrollView` e não `ListView`: a lista preguiçosa só constrói
       // o que está perto da janela, e o leitor de tela não alcançaria o que
       // fica abaixo sem rolar às cegas.
@@ -67,7 +72,6 @@ class TelaAjuda extends StatelessWidget {
           children: <Widget>[
             CabecalhoDeTela(
               titulo: TextosAjuda.titulo,
-              memora: ExpressaoDaMemora.falando,
               aoVoltar: aoVoltar,
             ),
             Padding(
@@ -77,34 +81,90 @@ class TelaAjuda extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const TextoMemora(TextosAjuda.convite),
+                  Cartao(
+                    padding: const EdgeInsets.all(MemoraEspacamento.md),
+                    child: Row(
+                      children: <Widget>[
+                        if (!ocultarVisuais) ...<Widget>[
+                          const MemoraPersonagem(
+                            expressao: ExpressaoDaMemora.falando,
+                            tamanho: MemoraDimensoes.alvoDecisao,
+                          ),
+                          const SizedBox(width: MemoraEspacamento.md),
+                        ],
+                        const Expanded(
+                          child: TextoMemora(TextosAjuda.convite),
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: MemoraEspacamento.lg),
                   CaixaDeEtapa(
                     instrucao: TextosAjuda.instrucaoAssuntos,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        for (int i = 0; i < assuntos.length; i++) ...<Widget>[
-                          CartaoDePorta(
-                            key: chaveDoAssunto(assuntos[i].id),
-                            nome: assuntos[i].titulo,
-                            explicacao: assuntos[i].explicacao,
-                            ilustracao: assuntos[i].ilustracao,
-                            aoAbrir: () => aoAbrirAssunto(assuntos[i]),
-                          ),
-                          if (i < assuntos.length - 1 ||
-                              aoVerApresentacao != null)
-                            const SizedBox(height: MemoraEspacamento.md),
-                        ],
-                        if (aoVerApresentacao != null)
-                          CartaoDePorta(
-                            key: chaveReverApresentacao,
-                            nome: TextosAjuda.reverApresentacao,
-                            explicacao: TextosAjuda.reverApresentacaoExplicacao,
-                            ilustracao: Ilustracao.memoraNeutra,
-                            aoAbrir: aoVerApresentacao,
-                          ),
-                      ],
+                    child: Cartao(
+                      padding: EdgeInsets.zero,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            for (int i = 0; i < assuntos.length; i++)
+                              LinhaDeLista(
+                                key: chaveDoAssunto(assuntos[i].id),
+                                titulo: assuntos[i].titulo,
+                                subtitulo: assuntos[i].explicacao,
+                                esquerda: ocultarVisuais
+                                    ? null
+                                    : Container(
+                                        width: MemoraDimensoes.badgeAtalhoRapido,
+                                        height:
+                                            MemoraDimensoes.badgeAtalhoRapido,
+                                        decoration: BoxDecoration(
+                                          color: cores.destaque,
+                                          borderRadius: BorderRadius.circular(
+                                            MemoraRaio.badge,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: IlustracaoMemora(
+                                          assuntos[i].ilustracao,
+                                          altura: MemoraDimensoes.iconeDestaque,
+                                        ),
+                                      ),
+                                aoTocar: () => aoAbrirAssunto(assuntos[i]),
+                                mostrarDivisorInferior:
+                                    i < assuntos.length - 1 ||
+                                    aoVerApresentacao != null,
+                              ),
+                            if (aoVerApresentacao != null)
+                              LinhaDeLista(
+                                key: chaveReverApresentacao,
+                                titulo: TextosAjuda.reverApresentacao,
+                                subtitulo:
+                                    TextosAjuda.reverApresentacaoExplicacao,
+                                esquerda: ocultarVisuais
+                                    ? null
+                                    : Container(
+                                        width: MemoraDimensoes.badgeAtalhoRapido,
+                                        height:
+                                            MemoraDimensoes.badgeAtalhoRapido,
+                                        decoration: BoxDecoration(
+                                          color: cores.destaque,
+                                          borderRadius: BorderRadius.circular(
+                                            MemoraRaio.badge,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: const MemoraPersonagem(
+                                          tamanho:
+                                              MemoraDimensoes.iconeDestaque,
+                                        ),
+                                      ),
+                                aoTocar: aoVerApresentacao,
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: MemoraEspacamento.xl),

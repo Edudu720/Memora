@@ -133,20 +133,22 @@ class BalaoDeFala extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-    final bool modoClaro = cores == MemoraCores.claro;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
     const Radius curvo = Radius.circular(MemoraRaio.balao);
     const Radius ponta = Radius.circular(MemoraRaio.balaoPonta);
 
     final Color corDeFundo = _daMemora
-        ? (modoClaro ? cores.destaque : cores.superficie)
-        : cores.superficieAlt;
+        ? cores.superficie
+        : cores.superficieSutil;
 
-    final Border borda = _daMemora
-        ? (modoClaro
-            ? Border.all(color: cores.destaque)
-            : Border.all(color: cores.borda))
-        : Border.all(color: cores.borda);
+    final Border borda = Border.all(
+      color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+      width: ehAltoContraste
+          ? MemoraDimensoes.bordaEnfase
+          : MemoraDimensoes.espessuraBordaSutil,
+    );
 
     final Widget balao = Flexible(
       child: Container(
@@ -166,13 +168,7 @@ class BalaoDeFala extends StatelessWidget {
             bottomLeft: curvo,
             bottomRight: curvo,
           ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: MemoraElevacao.sombra,
-              blurRadius: MemoraElevacao.porta,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: MemoraElevacao.listaSombrasCartao(cores),
         ),
         child: Semantics(
           // A fala inteira e sem marcas, nunca a parte que já apareceu: o
@@ -211,7 +207,7 @@ class BalaoDeFala extends StatelessWidget {
 
     final Widget rosto = _daMemora
         ? MemoraPersonagem(
-            expressao: ExpressaoDaMemora.falando,
+            expressao: ExpressaoDaMemora.mini,
             tamanho: MemoraDimensoes.pisoDeIlustracao,
           )
         : _RostoDaPessoa(cores: cores);

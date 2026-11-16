@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
+import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -150,12 +151,20 @@ void main() {
     );
   });
 
-  testWidgets('em "Serviços sociais", tocar em Gov.br (com guia) abre o passo a passo',
+  testWidgets('em "Serviços sociais", tocar em Gov.br (com guia) abre seletor de seções e depois passo a passo',
       (WidgetTester t) async {
     await _chegarAoHub(t);
 
     await _tocar(t, find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaServicos)));
     await _tocar(t, find.byKey(TelaCatalogo.chaveDoItem('Gov.br')));
+
+    expect(
+      find.byType(TelaSeletorDeSecao),
+      findsOneWidget,
+      reason: 'Guia extenso da Feature 006 abre primeiro o seletor de assuntos.',
+    );
+
+    await _tocar(t, find.byKey(TelaSeletorDeSecao.chaveDaSecao('entrar')));
 
     expect(
       find.byType(TelaPassoAPasso),

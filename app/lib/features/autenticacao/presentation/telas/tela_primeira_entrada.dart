@@ -59,7 +59,7 @@ class TelaPrimeiraEntrada extends StatelessWidget {
                   width: MemoraDimensoes.ilustracaoCabecalho,
                   height: MemoraDimensoes.ilustracaoCabecalho,
                   decoration: BoxDecoration(
-                    color: cores.sucesso.withValues(alpha: 0.12),
+                    color: cores.saudeSuave,
                     shape: BoxShape.circle,
                   ),
                   child: const Center(
@@ -77,21 +77,8 @@ class TelaPrimeiraEntrada extends StatelessWidget {
                 alinhamento: TextAlign.center,
               ),
               const SizedBox(height: MemoraEspacamento.lg),
-              Container(
-                padding: const EdgeInsets.all(MemoraEspacamento.lg),
-                decoration: BoxDecoration(
-                  color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-                  border: Border.all(color: cores.borda),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.cartao,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: const TextoMemora(
+              const Cartao(
+                child: TextoMemora(
                   TextosAutenticacao.convitePrimeiraEntrada,
                   alinhamento: TextAlign.center,
                 ),

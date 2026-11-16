@@ -6,6 +6,7 @@ import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
+import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
@@ -17,6 +18,7 @@ import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/features/configuracoes/presentation/tela_privacidade.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
+import 'package:memora/features/localizador/presentation/telas/tela_localizador.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
 import '../autenticacao/fluxo_dentro_da_conta.dart';
@@ -111,6 +113,9 @@ void main() {
   final Finder deCuidado = find.byKey(
     TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
   );
+  final Finder doLocalizador = find.byKey(
+    TelaHub.chaveDaPorta('Localizador de Serviços'),
+  );
   final Finder doHub = find.byKey(TelaInicio.chaveVerTudo);
 
   /// Todas as partes do aplicativo e o caminho até cada uma.
@@ -162,6 +167,12 @@ void main() {
       via: null,
     ),
     (
+      parte: 'localizador de serviços',
+      toques: <Finder>[doHub, doLocalizador],
+      chegada: find.byType(TelaLocalizador),
+      via: null,
+    ),
+    (
       // A US6 existe para isto: achar, pela Ajuda, como se proteger de um
       // golpe por telefone. Três toques a partir do Início.
       parte: 'dicas de segurança contra golpe (pela Ajuda)',
@@ -184,13 +195,13 @@ void main() {
       via: null,
     ),
     (
-      parte: 'um serviço social do catálogo (leva ao passo a passo)',
+      parte: 'um serviço social do catálogo (leva às áreas do guia)',
       toques: <Finder>[
         doHub,
         deServicos,
         find.byKey(TelaCatalogo.chaveDoItem('Gov.br')),
       ],
-      chegada: find.byType(TelaPassoAPasso),
+      chegada: find.byType(TelaSeletorDeSecao),
       via: null,
     ),
     (
@@ -344,6 +355,7 @@ void main() {
       TelaHub.chaveDaPorta(TextosAssistente.portaConversa),
       TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
       TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
+      TelaHub.chaveDaPorta('Localizador de Serviços'),
     };
     expect(
       daTela.difference(daTabela),

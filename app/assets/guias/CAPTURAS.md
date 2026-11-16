@@ -21,19 +21,19 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 
 | Chave | Capturado em | Versão do aplicativo | Aparelho | Quem capturou |
 |---|---|---|---|---|
-| whatsapp | 2026-10-01 | 2.24.19 | Galaxy A14 | Equipe Memora |
+| whatsapp | 2026-11-13 | 2026.11 | Android (JPG + Blur + Numerado) | Equipe Memora (4 capturas) |
 | instagram | 2026-10-01 | 350.0.0 | Galaxy A14 | Equipe Memora |
 | youtube | 2026-10-01 | 19.38.0 | Galaxy A14 | Equipe Memora |
-| facebook | 2026-10-01 | 480.0.0 | Galaxy A14 | Equipe Memora |
+| facebook | 2026-11-13 | 2026.11 | Android (JPG + Blur + Numerado) | Equipe Memora (10 capturas) |
 | google-fotos | 2026-10-01 | 6.95.0 | Galaxy A14 | Equipe Memora |
-| telegram | 2026-10-01 | 11.1.0 | Galaxy A14 | Equipe Memora |
+| telegram | 2026-11-13 | 2026.11 | Android (JPG + Blur + Numerado) | Equipe Memora (8 capturas) |
 | tiktok | 2026-10-01 | 36.5.0 | Galaxy A14 | Equipe Memora |
-| gov-br | 2026-10-01 | 3.5.0 | Galaxy A14 | Equipe Memora |
+| gov-br | 2026-11-13 | 2026.11 | Web/Android (JPG + Blur + Numerado) | Equipe Memora (24 capturas) |
 | meu-inss | 2026-10-01 | 4.18.0 | Galaxy A14 | Equipe Memora |
 | e-titulo | 2026-10-01 | 2.5.0 | Galaxy A14 | Equipe Memora |
-| serasa | 2026-10-01 | 10.12.0 | Galaxy A14 | Equipe Memora |
+| serasa | 2026-11-13 | 2026.11 | Web/Android (JPG + Blur + Numerado) | Equipe Memora (22 capturas) |
 | fgts | 2026-10-01 | 4.8.1 | Galaxy A14 | Equipe Memora |
 | poupatempo | 2026-10-01 | 5.2.0 | Galaxy A14 | Equipe Memora |
 | carteira-digital | 2026-10-01 | 3.1.2 | Galaxy A14 | Equipe Memora |
-| correios | 2026-10-01 | 4.1.0 | Galaxy A14 | Equipe Memora |
+| correios | 2026-11-13 | 2026.11 | Web/Android (JPG + Blur + Numerado) | Equipe Memora (8 capturas) |
 | carteira-de-trabalho | 2026-10-01 | 5.8.0 | Galaxy A14 | Equipe Memora |

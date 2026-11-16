@@ -72,22 +72,24 @@ class DialogoMemora extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(MemoraRaio.cartao),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(MemoraEspacamento.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextoMemora.tituloSecao(titulo),
-            const SizedBox(height: MemoraEspacamento.md),
-            TextoMemora(mensagem),
-            const SizedBox(height: MemoraEspacamento.xl),
-            BotaoPrimario(rotulo: rotuloConfirmar, aoTocar: aoConfirmar),
-            if (rotuloFechar != null) ...<Widget>[
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(MemoraEspacamento.xl),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextoMemora.tituloSecao(titulo),
               const SizedBox(height: MemoraEspacamento.md),
-              BotaoSecundario(rotulo: rotuloFechar!, aoTocar: aoFechar),
+              TextoMemora(mensagem),
+              const SizedBox(height: MemoraEspacamento.xl),
+              BotaoPrimario(rotulo: rotuloConfirmar, aoTocar: aoConfirmar),
+              if (rotuloFechar != null) ...<Widget>[
+                const SizedBox(height: MemoraEspacamento.md),
+                BotaoSecundario(rotulo: rotuloFechar!, aoTocar: aoFechar),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

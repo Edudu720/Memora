@@ -560,8 +560,9 @@ List<String> capturasPendentesDoGuia(
 }) {
   final String quem = 'Guia "${guia.chave}"';
   final List<String> pendentes = <String>[];
-  for (int i = 0; i < guia.passos.length; i++) {
-    final Passo p = guia.passos[i];
+  final List<Passo> todos = guia.todosOsPassos;
+  for (int i = 0; i < todos.length; i++) {
+    final Passo p = todos[i];
     if (!capturaExiste(p.captura)) {
       pendentes.add(
         '$quem, passo ${i + 1}: ${p.captura.caminho} pendente.',
@@ -584,16 +585,32 @@ List<String> problemasDoGuia(
     problemas.add('$quem não tem item no catálogo (nas migrations).');
   }
 
-  final int passos = guia.passos.length;
-  if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
-    problemas.add(
-      '$quem tem $passos passos; precisa de ${Guia.minimoDePassos} a '
-      '${Guia.maximoDePassos}.',
-    );
+  if (guia.temSecoes) {
+    for (final SecaoDoGuia secao in guia.secoes) {
+      final int passos = secao.passos.length;
+      if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
+        problemas.add(
+          '$quem, seção "${secao.chave}" tem $passos passos; precisa de '
+          '${Guia.minimoDePassos} a ${Guia.maximoDePassos}.',
+        );
+      }
+      if (secao.titulo.trim().isEmpty) {
+        problemas.add('$quem, seção "${secao.chave}": sem título.');
+      }
+    }
+  } else {
+    final int passos = guia.passos.length;
+    if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
+      problemas.add(
+        '$quem tem $passos passos; precisa de ${Guia.minimoDePassos} a '
+        '${Guia.maximoDePassos}.',
+      );
+    }
   }
 
-  for (int i = 0; i < guia.passos.length; i++) {
-    final Passo p = guia.passos[i];
+  final List<Passo> todos = guia.todosOsPassos;
+  for (int i = 0; i < todos.length; i++) {
+    final Passo p = todos[i];
     if (p.descricaoDaCaptura.trim().isEmpty) {
       problemas.add('$quem, passo ${i + 1}: captura sem descrição (FR-045).');
     }

@@ -154,20 +154,8 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               // Cartão acolhedor com a assistente Memora
-              Container(
+              Cartao(
                 padding: const EdgeInsets.all(MemoraEspacamento.md),
-                decoration: BoxDecoration(
-                  color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-                  border: Border.all(color: cores.borda),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.cartao,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
                 child: Row(
                   children: <Widget>[
                     const MemoraPersonagem(
