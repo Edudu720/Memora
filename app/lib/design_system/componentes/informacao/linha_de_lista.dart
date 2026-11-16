@@ -29,6 +29,15 @@ class LinhaDeLista extends StatelessWidget {
   /// Elemento opcional exibido antes da seta de navegação.
   final Widget? direita;
 
+  /// Complemento opcional abaixo do subtítulo (ex.: a contagem de passos e a
+  /// marca "Já aprendeu" de uma seção). Fica visível mesmo quando a ampliação
+  /// esconde o subtítulo.
+  final Widget? rodape;
+
+  /// O que o leitor de tela anuncia, quando precisa dizer mais que o título e
+  /// o subtítulo (ex.: o rodapé). Nulo, vale `titulo, subtitulo`.
+  final String? rotuloDoLeitor;
+
   /// Callback opcional. Se nulo, o item é estritamente informativo.
   final VoidCallback? aoTocar;
 
@@ -41,6 +50,8 @@ class LinhaDeLista extends StatelessWidget {
     this.esquerda,
     this.subtitulo,
     this.direita,
+    this.rodape,
+    this.rotuloDoLeitor,
     this.aoTocar,
     this.mostrarDivisorInferior = false,
     super.key,
@@ -60,9 +71,7 @@ class LinhaDeLista extends StatelessWidget {
     final Color corBorda = ehAltoContraste ? cores.borda : cores.bordaSutil;
 
     final Widget conteudo = ConstrainedBox(
-      constraints: const BoxConstraints(
-        minHeight: MemoraDimensoes.alvoMinimo,
-      ),
+      constraints: const BoxConstraints(minHeight: MemoraDimensoes.alvoMinimo),
       child: Padding(
         padding: EdgeInsets.symmetric(
           horizontal: compacto ? MemoraEspacamento.md : MemoraEspacamento.lg,
@@ -89,6 +98,10 @@ class LinhaDeLista extends StatelessWidget {
                       !(ocultarOrnamento && aoTocar != null)) ...<Widget>[
                     const SizedBox(height: MemoraEspacamento.xs),
                     TextoMemora.apoio(subtitulo!),
+                  ],
+                  if (rodape != null) ...<Widget>[
+                    const SizedBox(height: MemoraEspacamento.xs),
+                    rodape!,
                   ],
                 ],
               ),
@@ -133,7 +146,8 @@ class LinhaDeLista extends StatelessWidget {
       );
     }
 
-    final String rotulo = subtitulo == null ? titulo : '$titulo, $subtitulo';
+    final String rotulo =
+        rotuloDoLeitor ?? (subtitulo == null ? titulo : '$titulo, $subtitulo');
     return SuperficieTocavel(
       rotulo: rotulo,
       aoTocar: aoTocar,

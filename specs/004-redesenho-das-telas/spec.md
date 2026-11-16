@@ -118,7 +118,23 @@ veredito completo está em [revisao-de-design.md](revisao-de-design.md).
 - Q: A resposta da Memora pode ter negrito? → A: **Sim, só negrito** (`**assim**`), para destacar o nome de aplicativo ou botão. Nenhum asterisco aparece na tela nem chega ao leitor de tela (FR-020a).
 - Q: Como a espera e a resposta aparecem? → A: **Só o balão da Memora se formando**, sem a frase "Estou pensando..." embaixo do campo; e a resposta **vai aparecendo aos poucos**, letra a letra, como quem escreve. Com "reduzir movimento", aparece de uma vez (FR-020b).
 
+### Session 2026-11-12 — as capturas reais e o zoom (Henrique)
+
+- Q: Quais guias recebem captura real primeiro? → A: **FGTS, Meu INSS, e-Título, TikTok e Instagram.** As imagens vêm da equipe, numa pasta à parte, e entram pelo formato do contrato ([contracts/guias.md](contracts/guias.md)).
+- Q: A pessoa pode ampliar a captura? → A: **Sim.** Com a captura real, a imagem dentro da moldura fica estreita demais para quem enxerga pouco. Tocar nela, ou num botão visível logo abaixo, abre a imagem em tela cheia, **dentro do Memora** (FR-028b).
+- Q: Ampliar com dois dedos basta? → A: **Não.** O gesto de pinça é difícil para muitas pessoas idosas e não pode ser o único caminho (WCAG 2.2, critérios 2.5.1 e 2.5.7). Há botões **"Aproximar"** e **"Afastar"**, e aproximar leva direto ao destaque, para que ninguém precise arrastar a imagem até achar o ponto (FR-028b).
+- Q: A imagem ampliada continua marcada como exemplo? → A: **Sim, com o selo e com o destaque.** Uma captura do gov.br em tela cheia, sem marca, é o modelo de tela falsa que a FR-028 existe para evitar.
+- Q: Em que formato ficam as capturas? → A: **WebP**, que é como a equipe as produz e o que cabe no teto de 8 MB. **PNG só na captura cujo texto perder nitidez ao ampliar** em WebP — decisão do Henrique, por imagem, e não para o guia inteiro ([contracts/guias.md](contracts/guias.md), regra 5).
+- Q: O destaque acompanha a imagem? → A: **Sim, sempre sobre a imagem, e não sobre a moldura** (FR-028c). Era defeito latente: os desenhos provisórios tinham quase a proporção da moldura e escondiam o desalinhamento, que aparece com qualquer captura real.
+
 ---
+
+### Session 2026-11-13 — guias extensos em seções (Henrique)
+
+- Q: O FGTS tem 13 telas, e um guia tem no máximo 7 passos. Como fica? → A: **O guia se divide em seções**, cada uma com 3 a 7 passos, e a pessoa escolhe primeiro o assunto (FR-028d). É o modelo da PR #67 do Eduardo (`SecaoDoGuia`, `TelaSeletorDeSecao`), trazido para esta feature sem as imagens dela, que ainda estão em revisão. O limite de 7 continua valendo, por seção: o que cansa é a trilha seguida, não o serviço inteiro.
+- Q: Os dados pessoais de uma captura podem ser trocados por dados fictícios gerados por IA? → A: **Sim.** A interface continua a do aparelho de referência; só nomes, fotos e conteúdo da pessoa viram fictícios (FR-028). É assim que vieram as do Instagram.
+- Q: Capa de música publicada, com o rosto do artista, conta como "rosto de pessoa real" da FR-028? → A: **Não.** É obra publicada, e não dado pessoal de quem capturou nem de terceiro na conta. Decisão do Henrique, para o story do Instagram.
+- Q: Como o FGTS se divide? → A: **Quatro seções**: entrar no aplicativo; ver o saldo e pedir um saque; conta bancária para receber; Saque-Aniversário. A tela "Você sabia?" fica de fora, porque não segue de nenhuma das outras.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -605,6 +621,24 @@ assinatura ou pagamento, e não encontrar nenhuma.
   as capturas pendentes; a lista MUST chegar a zero antes da revisão de design final. É o aviso ao
   desenvolvimento que a revisão da T044 pediu, porque as capturas dependem da
   equipe.
+- **FR-028b**: A captura de cada passo MUST poder ser ampliada: tocar nela, ou
+  num botão visível logo abaixo dela, abre a imagem em tela cheia, dentro do
+  Memora. A ampliação MUST oferecer, além do gesto de dois dedos, botões de
+  **aproximar** e **afastar** — o primeiro leva ao destaque do passo — e um
+  botão de **fechar** sempre à vista, todos com alvo de 48 dp. A imagem
+  ampliada MUST continuar com o selo de exemplo e o destaque (FR-028), MUST ter
+  a descrição da captura para o leitor de tela (FR-045) e, com "reduzir
+  movimento", MUST NOT animar a aproximação.
+- **FR-028c**: O destaque do passo MUST cair sobre a região da **imagem** que
+  ele aponta, qualquer que seja a proporção da captura e o tamanho da tela —
+  na moldura e na ampliação.
+- **FR-028d**: Um guia que passaria de 7 passos MUST ser dividido em
+  **seções**, cada uma com 3 a 7 passos, e cada uma termina como um guia
+  termina (parabéns e o que a pessoa já sabe fazer). Antes do passo a passo, a
+  Memora pergunta o que a pessoa quer aprender naquele serviço, e cada seção é
+  uma escolha com título, uma linha dizendo o que se aprende e a quantidade de
+  passos, com alvo de 48 dp. A lista termina com a saída para perguntar à
+  Memora, para quem não achou o assunto. Guia curto continua sem seções.
 - **FR-029**: O passo a passo MUST acontecer inteiro dentro do Memora. O Memora
   MUST NOT pedir permissão para aparecer por cima de outro aplicativo.
 

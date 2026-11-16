@@ -816,8 +816,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   /// Abre o guia de aprendizado passo a passo (FR-027).
   ///
-  /// Quando o guia possui seções temáticas ([Guia.temSecoes]), exibe primeiro
-  /// [TelaSeletorDeSecao] para a pessoa escolher o assunto desejado.
+  /// Quando o guia tem seções ([Guia.temSecoes], FR-028d), a pessoa escolhe
+  /// o assunto em [TelaSeletorDeSecao] antes do passo a passo.
   void _abrirGuia({
     required Guia guia,
     required ServicoDoCatalogo servico,
@@ -847,13 +847,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       );
       return;
     }
-    _abrirPassoAPasso(
-      guia: guia,
-      servico: servico,
-      assistente: assistente,
-    );
+    _abrirPassoAPasso(guia: guia, servico: servico, assistente: assistente);
   }
 
+  /// O passo a passo de um guia inteiro, ou só da [secao] escolhida.
   void _abrirPassoAPasso({
     required Guia guia,
     required ServicoDoCatalogo servico,

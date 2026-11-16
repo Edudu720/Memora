@@ -4,7 +4,79 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-21 — **a assistente real chega à `master` e é
+**Última sessão**: 2026-11-13 — **FGTS e Instagram nos tutoriais, guias em
+seções e a revisão da #69**, pelo Henrique, na mesma branch
+**`feature/004-prints-e-zoom`** (os commits de hoje **não têm push**).
+
+> 📚 **Guias extensos viram seções** (FR-028d, clarify de 2026-11-13, T137):
+> o modelo `SecaoDoGuia` + `TelaSeletorDeSecao` veio da PR #67 do Eduardo,
+> **sem as imagens dela**, e cada seção tem 3 a 7 passos. **FGTS** (T138, 4
+> seções, 12 prints do S20 FE, v5.11.0) e **Instagram** (5 seções, 18
+> passos; **prints do S20 FE com os dados pessoais trocados por fictícios
+> gerados por IA** — a interface é a original; a capa de música do story é
+> obra publicada, não dado pessoal, decisão registrada na spec) estão prontos. Capturas
+> grandes vão em **WebP qualidade 92**, reduzidas a 1080 px: sem perda, o
+> FGTS sozinho ocupava 2,9 MB. `assets/guias/` está em **3,7 MB** de 8.
+> **Faltam Meu INSS e TikTok.** Para medir destaque: grade relativa sobre a
+> imagem, **sem faixa de legenda em cima** (ela deslocou as medidas uma vez).
+>
+> 🔴 **O destaque escondia o botão que destacava**: a `BoxShadow` opaca do
+> anel pinta um retângulo cheio. Corrigido (halo vira segunda borda), com
+> portão por pixel em `captura_com_destaque_test.dart`.
+>
+> ⚠️ **PR #69 (redesenho 007, Eduardo) — comentário de revisão publicado.**
+> Ela empilha os commits da #67 (fechada sem merge) e traz: ditado por voz
+> com `speech_to_text` **sem `onDevice: true`** (o áudio vai ao Google, contra
+> a decisão de 2026-10-03); o **CPF e o nome completo do Eduardo em 8
+> arquivos** (spec 006 e dois scripts); capturas JPEG com círculos pintados.
+> Merge de teste com a nossa branch: **8 conflitos, todos nos guias**. A
+> **#68** (Du3101) são imagens em `apps/` e fixa o Flutter do CI em 3.47.7.
+> ✅ **Validado no S20 FE em 2026-11-14** (APK 1.0.0+3, release apontando para o
+> Render, em `C:\memora-tmp\apk`): a Memora **abre** TikTok e Instagram, e as
+> seções, o zoom e o destaque funcionam. A `develop` continua com o abridor
+> quebrado até esta branch entrar.
+> Entrar numa seção custa o **4º toque** (SC-006 diz 3): lido como "chegar ao
+> guia em 3"; se a equipe discordar, a SC-006 precisa ser revista. 2444 testes.
+
+Sessão anterior: 2026-11-12 — **capturas reais nos tutoriais, zoom e o
+abridor de aplicativos**, pelo Henrique. Tudo na branch local
+**`feature/004-prints-e-zoom`** (saiu da **`develop`**, que está à frente da
+`master`). **Ninguém revisou ainda.**
+
+> 🖼️ **O que entrou** (clarificação de 2026-11-12 na spec da 004, T133-T136):
+> - **A Memora nunca abria aplicativo nenhum** (T136): o abridor mandava
+>   `action_main`, que o `android_intent_plus` não traduz, e conferia com
+>   `MATCH_DEFAULT_ONLY`. Hoje é o canal nativo `memora/abridor`
+>   (`CanalDoAbridor.kt`, `getLaunchIntentForPackage`). **Falta abrir TikTok e
+>   Instagram no S20 FE** — não foi conferido em aparelho.
+> - **Zoom da captura** (FR-028b, T134): `CapturaAmpliada`, com botões
+>   Aproximar/Afastar além da pinça (WCAG 2.5.1/2.5.7), selo "Exemplo" e
+>   destaque na imagem ampliada, anúncio ao leitor de tela por degrau.
+> - **O destaque cai sobre a imagem** (FR-028c, T133): `CapturaComDestaque`.
+>   Antes era posicionado sobre a moldura e desalinhava com print real.
+> - **Capturas em WebP**, PNG só na imagem que borrar no zoom
+>   (`FormatoDaCaptura`, decisão do Henrique). Portão novo: imagem na pasta de
+>   um guia sem passo que a use. Aparelho de referência: **Galaxy S20 FE**.
+> - **e-Título pronto** com 6 capturas reais (entrar com biometria, título,
+>   Onde votar, ChatVote, Notificações, Mais opções).
+>
+> **Próximo (T135)**: FGTS, Meu INSS, TikTok e Instagram. As imagens chegam em
+> `Documents\ProgramingProjects\Imagens Memora\<Sistema>\` (WebP ou JPEG; JPEG
+> vira WebP sem perda). Para cada uma: conferir dado pessoal e marcação pintada
+> (o contrato recusa), medir o destaque desenhando sobre a imagem, corrigir a
+> linha no `CAPTURAS.md` — as dos outros guias ainda dizem "Galaxy A14", e
+> **os `passo_N` deles são desenhos provisórios, não prints**. Depois: o
+> passo "baixe na loja oficial" não aparece no fluxo real (o `TelaPassoAPasso`
+> não recebe `consultaAplicativos` nem `pacoteAndroid`) e a captura `loja` não
+> existe. **Em seguida, a spec do redesign final do Memora.** 2391 testes.
+>
+> ⚠️ A PR **#66** (Facebook, do Eduardo) segue aberta e fora do contrato (nomes
+> `.jpeg`, destaque pintado). A imagem
+> `apps/WhatsApp/Gemini_Generated_Image_8iuf6u8iuf6u8iuf.jfif`, já na
+> `master`, tem nomes que parecem de pessoas reais (FR-028). O bump 1.0.0+2
+> do APK da `master` está num `git stash`.
+
+Sessão anterior: 2026-10-21 — **a assistente real chega à `master` e é
 testada no celular**, pelo Henrique. Entrou **direto na `master`, sem PR**, a
 pedido dele. **Ninguém revisou ainda.**
 

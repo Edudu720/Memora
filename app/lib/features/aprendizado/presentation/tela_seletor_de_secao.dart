@@ -3,13 +3,19 @@ import 'package:flutter/material.dart';
 import '../../../design_system/design_system.dart';
 import '../../assistente/domain/assistente.dart';
 import '../data/progresso_de_aprendizado.dart';
+import '../../../l10n/textos_guias.dart';
 import '../domain/guia.dart';
 
-/// Tela de escolha de assunto para guias extensos (`T052`, Feature 006).
+/// Tela de escolha de assunto para guias extensos (FR-028d, T137).
 ///
-/// Exibe cabeçalho acolhedor do aplicativo/serviço com [BadgeDeStatus] de
-/// progresso e [ExpressaoDaMemora.dica], seguido pela lista de módulos em
-/// [LinhaDeLista] com badges circulares numerados.
+/// Modelo vindo da PR #67 (Eduardo). Evita que a pessoa idosa precise percorrer
+/// dezenas de telas seguidas (como no Gov.br ou Serasa) para chegar ao ponto
+/// desejado. Exibe as seções em cartões amplos (>= 48 dp), com ícone + título +
+/// subtítulo + contagem de passos.
+///
+/// O visual segue o redesenho 007: cabeçalho em [Cartao] com o ícone do
+/// aplicativo e o [BadgeDeStatus] de progresso, e cartões de seção com borda
+/// sutil e sombra de cartão (a mesma de [LinhaDeLista]).
 class TelaSeletorDeSecao extends StatefulWidget {
   /// Chave da lista de seções, para os testes.
   static const Key chaveLista = Key('seletor_secao.lista');
@@ -35,7 +41,7 @@ class TelaSeletorDeSecao extends StatefulWidget {
   /// Chamado ao escolher uma seção para iniciar o passo a passo.
   final void Function(SecaoDoGuia secao) aoEscolherSecao;
 
-  /// Chamado ao tocar em "Não achei o que procuro — perguntar à Memora".
+  /// Chamado ao tocar em "Perguntar à Memora", para quem não achou o assunto.
   final VoidCallback? aoConversar;
 
   /// Chamado ao tocar em "Voltar".
@@ -91,18 +97,11 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraTheme tema = context.memora;
-    final MemoraCores cores = tema.cores;
-    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final MemoraCores cores = context.memora.cores;
     final double escala = MediaQuery.textScalerOf(context).scale(1);
-    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
-    final int totalSecoes = widget.guia.secoes.length;
-    final int totalConcluidas = _concluidas.length;
-    final bool todasConcluidas = totalSecoes > 0 && totalConcluidas == totalSecoes;
-
-    final String rotuloProgresso = totalConcluidas > 0
-        ? '$totalConcluidas de $totalSecoes assuntos aprendidos'
-        : '$totalSecoes assuntos para aprender';
+    final int total = widget.guia.secoes.length;
+    final int feitas = _concluidas.length;
+    final bool todasFeitas = total > 0 && feitas == total;
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -110,10 +109,7 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            CabecalhoDeTela(
-              titulo: _nomeServico,
-              aoVoltar: widget.aoVoltar,
-            ),
+            CabecalhoDeTela(titulo: _nomeServico, aoVoltar: widget.aoVoltar),
             Expanded(
               child: SingleChildScrollView(
                 key: TelaSeletorDeSecao.chaveLista,
@@ -121,89 +117,67 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    // Cabeçalho editorial do aplicativo/serviço com progresso e dica
+                    // O aplicativo e quanto dele a pessoa já aprendeu (007).
                     Cartao(
                       padding: const EdgeInsets.all(MemoraEspacamento.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              if (escala <
-                                  MemoraDimensoes.escalaTextoAlta) ...<Widget>[
-                                IconeDoAplicativo(
-                                  chave: widget.guia.chave,
-                                  nome: _nomeServico,
-                                  tamanho: MemoraDimensoes.alvoDecisao,
+                          if (escala <
+                              MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+                            IconeDoAplicativo(
+                              chave: widget.guia.chave,
+                              nome: _nomeServico,
+                              tamanho: MemoraDimensoes.alvoDecisao,
+                            ),
+                            const SizedBox(width: MemoraEspacamento.md),
+                          ],
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                TextoMemora(
+                                  _nomeServico,
+                                  estilo: EstiloTexto.tituloSecao,
                                 ),
-                                const SizedBox(width: MemoraEspacamento.md),
+                                const SizedBox(height: MemoraEspacamento.xs),
+                                BadgeDeStatus(
+                                  rotulo: TextosGuias.progressoDasSecoes(
+                                    feitas,
+                                    total,
+                                  ),
+                                  icone: todasFeitas
+                                      ? Icons.check_circle_outline
+                                      : Icons.menu_book_outlined,
+                                  tom: todasFeitas
+                                      ? TomBadgeStatus.positivo
+                                      : TomBadgeStatus.informativo,
+                                ),
                               ],
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    TextoMemora(
-                                      _nomeServico,
-                                      estilo: EstiloTexto.tituloSecao,
-                                    ),
-                                    const SizedBox(height: MemoraEspacamento.xs),
-                                    BadgeDeStatus(
-                                      rotulo: rotuloProgresso,
-                                      icone: todasConcluidas
-                                          ? Icons.check_circle_outline
-                                          : Icons.menu_book_outlined,
-                                      tom: todasConcluidas
-                                          ? TomBadgeStatus.positivo
-                                          : TomBadgeStatus.informativo,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: MemoraEspacamento.md),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              if (escala <
-                                  MemoraDimensoes.escalaTextoAlta) ...<Widget>[
-                                const MemoraPersonagem(
-                                  expressao: ExpressaoDaMemora.dica,
-                                  tamanho: MemoraDimensoes.alvoMinimo,
-                                ),
-                                const SizedBox(width: MemoraEspacamento.md),
-                              ],
-                              Expanded(
-                                child: TextoMemora(
-                                  'O que você quer aprender no $_nomeServico? Escolha um assunto abaixo:',
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(height: MemoraEspacamento.md),
+                    BalaoDeFala(
+                      autor: AutorDoBalao.memora,
+                      texto: TextosGuias.perguntaDaSecao(_nomeServico),
+                    ),
                     const SizedBox(height: MemoraEspacamento.lg),
-
-                    for (int i = 0;
-                        i < widget.guia.secoes.length;
-                        i++) ...<Widget>[
-                      _buildModuloLinha(
-                        context: context,
-                        cores: cores,
-                        ehAltoContraste: ehAltoContraste,
-                        compacto: compacto,
-                        indice: i,
-                        secao: widget.guia.secoes[i],
+                    for (final SecaoDoGuia secao
+                        in widget.guia.secoes) ...<Widget>[
+                      _CartaoSecao(
+                        secao: secao,
+                        concluida: _concluidas.contains(secao.chave),
+                        aoTocar: () => widget.aoEscolherSecao(secao),
                       ),
-                      const SizedBox(height: MemoraEspacamento.sm),
-                    ],
-
-                    if (widget.aoConversar != null) ...<Widget>[
                       const SizedBox(height: MemoraEspacamento.md),
+                    ],
+                    if (widget.aoConversar != null) ...<Widget>[
+                      const SizedBox(height: MemoraEspacamento.sm),
                       BotaoSecundario(
                         key: TelaSeletorDeSecao.chaveConversar,
-                        rotulo: 'Não achei o que procuro — perguntar à Memora',
+                        rotulo: TextosGuias.naoAcheiOQueProcuro,
                         icone: Icons.chat_bubble_outline,
                         aoTocar: widget.aoConversar!,
                       ),
@@ -218,35 +192,47 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
       ),
     );
   }
+}
 
-  Widget _buildModuloLinha({
-    required BuildContext context,
-    required MemoraCores cores,
-    required bool ehAltoContraste,
-    required bool compacto,
-    required int indice,
-    required SecaoDoGuia secao,
-  }) {
-    final bool concluida = _concluidas.contains(secao.chave);
+class _CartaoSecao extends StatelessWidget {
+  final SecaoDoGuia secao;
+  final bool concluida;
+  final VoidCallback aoTocar;
+
+  const _CartaoSecao({
+    required this.secao,
+    required this.concluida,
+    required this.aoTocar,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraCores cores = context.memora.cores;
     final int qtd = secao.passos.length;
-    final String contagem = '$qtd ${qtd == 1 ? 'passo' : 'passos'}';
-    final String subtitulo = concluida && compacto
-        ? '${secao.subtitulo} · $contagem · Já aprendeu'
-        : (compacto
-              ? '${secao.subtitulo} · $contagem'
-              : (concluida
-                    ? '${secao.subtitulo} · Já aprendeu'
-                    : secao.subtitulo));
+    final String contagem = TextosGuias.quantidadeDePassos(qtd);
+    final String textoMeta = concluida
+        ? TextosGuias.secaoJaAprendida(contagem)
+        : contagem;
 
+    final MemoraTheme tema = context.memora;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final Color corMeta = concluida ? cores.sucessoTexto : cores.primaria;
+
+    // A linha de lista do redesenho 007 já é o botão do leitor de tela, com
+    // `onTap` na própria Semantics (sem ele o TalkBack anuncia o botão e o
+    // duplo toque não faz nada), foco e pressão visíveis por mais de um sinal.
     return LinhaDeLista(
       key: TelaSeletorDeSecao.chaveDaSecao(secao.chave),
+      rotuloDoLeitor: TextosGuias.secaoDescrita(
+        secao.titulo,
+        secao.subtitulo,
+        textoMeta,
+      ),
       esquerda: Container(
-        width: MemoraDimensoes.alvoMinimo,
-        height: MemoraDimensoes.alvoMinimo,
-        alignment: Alignment.center,
+        padding: const EdgeInsets.all(MemoraEspacamento.sm),
         decoration: BoxDecoration(
           color: concluida ? cores.saudeSuave : cores.destaque,
-          shape: BoxShape.circle,
+          borderRadius: BorderRadius.circular(MemoraRaio.padrao),
           border: ehAltoContraste
               ? Border.all(
                   color: cores.borda,
@@ -254,21 +240,34 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                 )
               : null,
         ),
-        child: TextoMemora(
-          '${indice + 1}',
-          estilo: EstiloTexto.corpoForte,
-          cor: concluida ? cores.sucessoTexto : cores.primaria,
+        child: Icon(
+          secao.icone,
+          size: MemoraDimensoes.iconeDestaque,
+          color: corMeta,
         ),
       ),
       titulo: secao.titulo,
-      subtitulo: subtitulo,
-      direita: compacto
-          ? null
-          : TextoMemora.apoio(
-              contagem,
-              cor: concluida ? cores.sucessoTexto : cores.primaria,
+      subtitulo: secao.subtitulo,
+      rodape: Row(
+        children: <Widget>[
+          if (concluida) ...<Widget>[
+            Icon(
+              Icons.check_circle,
+              size: MemoraDimensoes.iconePequeno,
+              color: corMeta,
             ),
-      aoTocar: () => widget.aoEscolherSecao(secao),
+            const SizedBox(width: MemoraEspacamento.xs),
+          ],
+          Flexible(
+            child: TextoMemora(
+              textoMeta,
+              estilo: EstiloTexto.apoio,
+              cor: corMeta,
+            ),
+          ),
+        ],
+      ),
+      aoTocar: aoTocar,
     );
   }
 }

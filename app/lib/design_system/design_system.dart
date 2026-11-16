@@ -26,6 +26,8 @@ export 'componentes/dialogos/folha_inferior.dart';
 export 'componentes/feedback/carregando.dart';
 export 'componentes/feedback/estado_vazio.dart';
 export 'componentes/feedback/mensagem_erro.dart';
+export 'componentes/guia/captura_ampliada.dart';
+export 'componentes/guia/captura_com_destaque.dart';
 export 'componentes/guia/indicador_de_passo.dart';
 export 'componentes/guia/passo_ilustrado.dart';
 export 'componentes/ilustracao/avatar_memora.dart';

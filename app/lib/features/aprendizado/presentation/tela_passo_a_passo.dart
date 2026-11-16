@@ -13,6 +13,19 @@ import '../domain/guia.dart';
 /// Integra [CabecalhoDeTela], [PassoIlustrado] protagonista com tipografia
 /// editorial e barra fixa inferior em `cores.superficieBarra` com ações rápidas
 /// `"Anterior"` e `"Próximo"`.
+///
+/// ## Princípios aplicados
+///
+/// 1. **Ensina dentro do Memora**: a explicação acontece inteira aqui, com capturas
+///    marcadas como "Exemplo" e nunca pedindo `SYSTEM_ALERT_WINDOW` (FR-028, FR-029).
+/// 2. **Acolhimento com a Memora**: o rosto da Memora acompanha a instrução de
+///    cada passo (FR-003), parabenizando na última etapa.
+/// 3. **Defesa contra engenharia social**: o botão "A minha tela está diferente"
+///    alerta **primeiro, offline e no próprio guia**, que telas divergentes pedindo
+///    senhas ou códigos podem ser tentativa de golpe (FR-026).
+/// 4. **Sem atalho para abrir**: a oferta "Peça à Memora para abrir" só surge para
+///    aplicativos cotidianos, quando o catálogo veio do servidor com conexão ativa
+///    (FR-027), e leva à conversa — o guia **nunca abre nada diretamente**.
 class TelaPassoAPasso extends StatefulWidget {
   /// Chave do diálogo de tela diferente.
   static const Key chaveDialogoDiferente = Key('passo.dialogo_diferente');
@@ -24,7 +37,8 @@ class TelaPassoAPasso extends StatefulWidget {
   /// O guia a ser percorrido.
   final Guia guia;
 
-  /// Seção específica escolhida pelo usuário (para guias extensos, Feature 006).
+  /// A seção que a pessoa escolheu, nos guias extensos (FR-028d). Com ela, a
+  /// tela percorre só os passos da seção.
   final SecaoDoGuia? secao;
 
   /// Os dados do catálogo correspondentes ao serviço (se houver).
@@ -184,14 +198,15 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
     final String? id = widget.idDaConta;
     if (prog == null || id == null || id.trim().isEmpty) return;
 
-    final String chaveProgresso = widget.secao != null
+    // O progresso de um guia em seções é por seção: `<guia>:<seção>`.
+    final String chaveDoProgresso = widget.secao != null
         ? '${widget.guia.chave}:${widget.secao!.chave}'
         : widget.guia.chave;
 
     try {
       await prog.registrarChegadaAoPasso(
         idDaConta: id,
-        chave: chaveProgresso,
+        chave: chaveDoProgresso,
         numeroDoPasso: _posicao,
         totalDePassos: total,
       );
@@ -407,11 +422,12 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                       if (widget.aoTirarDuvida != null) {
                         final String nomeBase =
                             widget.servico?.nomeExibido ?? widget.guia.titulo;
-                        final String contexto = widget.secao != null
-                            ? '$nomeBase (${widget.secao!.titulo})'
-                            : nomeBase;
                         widget.aoTirarDuvida!(
-                          TextosGuias.rascunhoDuvida(contexto),
+                          TextosGuias.rascunhoDuvida(
+                            widget.secao != null
+                                ? '$nomeBase (${widget.secao!.titulo})'
+                                : nomeBase,
+                          ),
                         );
                       } else {
                         widget.aoConversarSobreDiferenca!();
