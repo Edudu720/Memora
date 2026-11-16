@@ -232,6 +232,82 @@ void main() {
     });
   });
 
+  group('A saída da tela de baixo, sozinha — FR-014', () {
+    // Dentro de um `Navigator` o `ModalBarrier` da rota de cima já tapa a tela
+    // de baixo, e o teste acima passaria mesmo sem a trava da transição. Aqui
+    // a transição é montada SEM `Navigator`: só a trava dela impede o toque.
+    Future<int> tocarNaTelaDeBaixo(
+      WidgetTester t,
+      void Function(AnimationController) configurar,
+    ) async {
+      int toques = 0;
+      final AnimationController secundaria = AnimationController(
+        vsync: t,
+        duration: const Duration(seconds: 1),
+      );
+      configurar(secundaria);
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: Builder(
+            builder: (BuildContext context) => TransicaoMemora.construir(
+              context: context,
+              animation: kAlwaysCompleteAnimation,
+              secondaryAnimation: secundaria,
+              child: Scaffold(
+                // No meio da janela: com a paralaxe a tela anda para a
+                // esquerda, e um botão no canto sairia da janela e tornaria o
+                // toque inútil, com ou sem a trava.
+                body: Center(
+                  child: TextButton(
+                    key: const Key('baixo.botao'),
+                    onPressed: () => toques++,
+                    child: const Text('baixo'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.pump(const Duration(milliseconds: 100));
+      // O botão anda com a paralaxe: toca onde ele está agora.
+      await t.tapAt(t.getCenter(find.byKey(const Key('baixo.botao'))));
+      await t.pump();
+      secundaria
+        ..stop()
+        ..dispose();
+      return toques;
+    }
+
+    testWidgets('enquanto outra tela a cobre, não recebe toque', (
+      WidgetTester t,
+    ) async {
+      final int toques = await tocarNaTelaDeBaixo(
+        t,
+        (AnimationController c) => c.forward(from: 0.2),
+      );
+      expect(toques, 0, reason: 'a tela que sai engoliu um toque');
+    });
+
+    testWidgets('enquanto a de cima sai, já recebe: o toque vale para a que '
+        'ficará à vista', (WidgetTester t) async {
+      final int toques = await tocarNaTelaDeBaixo(
+        t,
+        (AnimationController c) => c.reverse(from: 0.8),
+      );
+      expect(toques, 1, reason: 'o toque se perdeu');
+    });
+
+    testWidgets('parada, recebe', (WidgetTester t) async {
+      final int toques = await tocarNaTelaDeBaixo(
+        t,
+        (AnimationController c) => c.value = 0,
+      );
+      expect(toques, 1);
+    });
+  });
+
   group('Reduzir movimento — FR-013 (V9)', () {
     testWidgets('avançar e voltar são instantâneos', (WidgetTester t) async {
       await t.pumpWidget(app(reduzir: true));
