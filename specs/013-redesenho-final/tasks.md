@@ -202,10 +202,10 @@ servidor não manda mais emoji em mensagem de tela.
 **Independent Test**: abrir a frio no celular: Memora parada (nativo) → Memora
 acenando → fluxo de entrada, sem pulo.
 
-- [ ] T035 [P] [US7] `app/test/features/abertura/abertura_memora_test.dart`: sai só quando carregou **e** o aceno completou; frase de "quase pronta" aos 4 s; falha leva à tela de erro; com "reduzir movimento" do sistema, pose parada (V12); quebrar saindo antes do carregamento terminar
-- [ ] T036 [US7] `app/lib/features/abertura/presentation/abertura_memora.dart` conforme o contrato, com textos novos em `app/lib/l10n/` (duas frases, voz da Memora)
-- [ ] T037 [US7] `app/lib/main.dart`: chamar o `runApp` com a `AberturaMemora` **antes** de carregar preferências e composição; o carregamento atual passa para dentro dela, sem mudar a ordem nem o que é carregado
-- [ ] T038 [P] [US7] Abertura nativa: `android/app/src/main/res/drawable/launch_background.xml` (e `drawable-v21`, `values-night`) com o fundo do tema e a Memora parada como desenho vetorial do Android, na mesma posição do aceno; Android 12+ com `windowSplashScreen*` sobre o mesmo fundo (FR-037, R9)
+- [X] T035 [P] [US7] `app/test/features/abertura/abertura_memora_test.dart`: sai só quando carregou **e** o aceno completou; frase de "quase pronta" aos 4 s; falha leva à tela de erro; com "reduzir movimento" do sistema, pose parada (V12); quebrar saindo antes do carregamento terminar
+- [X] T036 [US7] `app/lib/features/abertura/presentation/abertura_memora.dart` conforme o contrato, com textos novos em `app/lib/l10n/` (duas frases, voz da Memora)
+- [X] T037 [US7] `app/lib/main.dart`: chamar o `runApp` com a `AberturaMemora` **antes** de carregar preferências e composição; o carregamento atual passa para dentro dela, sem mudar a ordem nem o que é carregado
+- [X] T038 [P] [US7] Abertura nativa: `android/app/src/main/res/drawable/launch_background.xml` (e `drawable-v21`, `values-night`) com o fundo do tema e a Memora parada como desenho vetorial do Android, na mesma posição do aceno; Android 12+ com `windowSplashScreen*` sobre o mesmo fundo (FR-037, R9)
 - [ ] T039 [US7] Medir no celular (APK de release) o tempo até a tela de entrada, antes e depois, e registrar no `quickstart.md` (SC-009)
 
 **Checkpoint**: abertura pronta.
