@@ -51,7 +51,15 @@ class RepositorioAssistenteApi implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async {
+    final CancelToken cancelToken = CancelToken();
+    aoCriarCancelamento?.call(() {
+      if (!cancelToken.isCancelled) {
+        cancelToken.cancel('espera_encerrada');
+      }
+    });
+
     final String corpo = jsonEncode(
       api.AssistenteConversaPostRequest(
         mensagem: mensagem,
@@ -76,6 +84,7 @@ class RepositorioAssistenteApi implements RepositorioAssistente {
         () => _api.dio.post<ResponseBody>(
           '/assistente/conversa',
           data: corpo,
+          cancelToken: cancelToken,
           options: Options(
             responseType: ResponseType.stream,
             contentType: 'application/json',
@@ -140,6 +149,7 @@ class RepositorioAssistenteApi implements RepositorioAssistente {
           // (ver `ServicoDoCatalogo.memoraPodeAbrir`): a regra da FR-041 mora
           // num lugar só.
           memoraPodeAbrir: s.memoraPodeAbrir,
+          identificadorAndroid: s.identificadorAndroid,
         ),
     ];
   }

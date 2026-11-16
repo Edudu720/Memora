@@ -141,8 +141,8 @@ class ConversaNaoPersisteTest extends TesteComBanco {
     }
 
     @Test
-    @DisplayName("sugestao recusada vira trilha, mas o pedido entra truncado")
-    void pedidoLongoEhTruncado() {
+    @DisplayName("sugestao recusada vira trilha de auditoria sem gravar o texto da conversa")
+    void acaoRecusadaNaoGravaTextoDaConversa() {
         String pedidoEnorme = SEGREDO_DA_PESSOA.repeat(10);
         assistente.sugerirAbrir("com.banco.aplicativo");
 
@@ -157,9 +157,10 @@ class ConversaNaoPersisteTest extends TesteComBanco {
                         String.class,
                         pessoaId);
 
-        // O corte acontece no servidor. Confia-lo ao aparelho transformaria um
-        // campo de tabela imutavel em texto livre de tamanho arbitrario.
-        assertThat(gravado).hasSizeLessThanOrEqualTo(120);
+        assertThat(gravado).isNull();
+        assertThat(colunasQueContem(SEGREDO_DA_PESSOA))
+                .as("o texto da conversa recusada nao pode aparecer em nenhuma coluna")
+                .isEmpty();
     }
 
     /**

@@ -61,4 +61,13 @@ class PersonaDaMemoraTest {
                 .contains("irreversíveis")
                 .contains("segurança do dinheiro");
     }
+
+    @Test
+    @DisplayName("acolhe quando a pessoa não acha um botão porque a tela mudou (T090)")
+    void acolheQuandoNaoAchaBotaoNaTela() {
+        assertThat(TEXTO)
+                .contains("não achei o botão")
+                .contains("sem culpar")
+                .contains("mudam desenhos");
+    }
 }

@@ -49,6 +49,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Mandar mensagem e fazer chamada de vídeo',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'com.whatsapp',
     ),
     ServicoDoCatalogo(
       id: 'facebook',
@@ -57,6 +58,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Ver o que a família e os amigos postaram',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'com.facebook.katana',
     ),
     ServicoDoCatalogo(
       id: 'instagram',
@@ -65,6 +67,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Ver fotos e vídeos de quem você segue',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'com.instagram.android',
     ),
     ServicoDoCatalogo(
       id: 'youtube',
@@ -73,6 +76,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Ver vídeos',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'com.google.android.youtube',
     ),
     ServicoDoCatalogo(
       id: 'google-fotos',
@@ -81,6 +85,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Ver as fotos que você tirou e as que te enviaram',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'com.google.android.apps.photos',
     ),
     ServicoDoCatalogo(
       id: 'telegram',
@@ -89,6 +94,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Outro jeito de mandar mensagem',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'org.telegram.messenger',
     ),
     ServicoDoCatalogo(
       id: 'tiktok',
@@ -97,6 +103,7 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
       descricaoCurta: 'Assistir a vídeos e seguir criadores de conteúdo',
       categoria: CategoriaDoServico.cotidiano,
       memoraPodeAbrir: true,
+      identificadorAndroid: 'com.zhiliaoapp.musically',
     ),
     ServicoDoCatalogo(
       id: 'gov-br',
@@ -197,8 +204,14 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async {
+    bool cancelado = false;
+    aoCriarCancelamento?.call(() => cancelado = true);
     await _esperar();
+    if (cancelado) {
+      return const AssistenteFalhou(FalhaDaAssistente.semConexao);
+    }
 
     // Qualquer uma das cinco falhas, sob comando — inclusive
     // `assistenteIndisponivel` (FR-057), que o servidor real entrega como
@@ -216,6 +229,18 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
         'abrisse aplicativo de banco para você, alguém poderia ligar dizendo '
         'ser do suporte e pedir a mesma coisa. Assim fica mais seguro 😊 '
         'Vamos com calma: procure na sua tela o desenho azul e branco.',
+        aoReceberTrecho,
+      );
+    }
+
+    // Aplicativo mudou de visual / pessoa não achou o botão (T090):
+    // acolhe sem culpar e orienta outras pistas visuais sem oferecer abrir.
+    if (_naoAchouBotaoNaTela(pedido)) {
+      return _emPedacos(
+        'Sem problemas! Os aplicativos mudam os desenhos e cores de lugar '
+        'quando atualizam — não foi erro seu 😊 Me conta o que aparece na sua '
+        'tela agora (algum símbolo, três pontinhos no alto ou palavra escrita '
+        'perto) que a gente procura juntos o novo botão.',
         aoReceberTrecho,
       );
     }
@@ -311,6 +336,24 @@ class RepositorioAssistenteSimulado implements RepositorioAssistente {
         'beneficio',
         'aposentadoria',
         'pix',
+      ].any(pedido.contains);
+
+  bool _naoAchouBotaoNaTela(String pedido) => <String>[
+        'não achei o botão',
+        'nao achei o botao',
+        'não achei esse botão',
+        'nao achei esse botao',
+        'não encontrei o botão',
+        'nao encontrei o botao',
+        'botão sumiu',
+        'botao sumiu',
+        'botão mudou',
+        'botao mudou',
+        'tela mudou',
+        'botão diferente',
+        'botao diferente',
+        'não achei o ícone',
+        'nao achei o icone',
       ].any(pedido.contains);
 
   bool _declarouDificuldade(String pedido) => <String>[

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../services/acessibilidade/memora_binding_atividade.dart';
+import '../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../../../l10n/textos_configuracoes.dart';
@@ -138,6 +139,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
   final AbridorDeAplicativo? abridor;
 
+  /// Consulta quais aplicativos estão instalados no aparelho (T089, FR-046).
+  ///
+  /// Opcional: quando ausente (por exemplo, em testes sem consulta), os
+  /// itens que sabem abrir mantêm o rótulo padrão sem bloquear testes antigos.
+  final ConsultaDeAplicativos? consultaAplicativos;
+
   /// Quem manda o endereço oficial de download para fora do aplicativo (T089).
   ///
   /// **Nulo é "o assunto Compartilhar da Ajuda não existe"** (R12, FR-018):
@@ -173,6 +180,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.assistente,
     this.localizador,
     this.abridor,
+    this.consultaAplicativos,
     this.conversaLocal = ConversaLocal.new,
     this.aceiteDoAviso,
     this.sessaoPerdida,
@@ -776,6 +784,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
+          consultaAplicativos: widget.consultaAplicativos,
           // Se o item tiver guia de passo a passo embarcado, abre o guia;
           // caso contrário, vai para a conversa já perguntando (T069, FR-027).
           aoAbrirGuia: (Guia guia, ServicoDoCatalogo servico) => _abrirGuia(
@@ -902,6 +911,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
               widget.conversaLocal(),
               aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
               abridor: widget.abridor,
+              consultaAplicativos: widget.consultaAplicativos,
               leitorDeVoz: LeitorDeVozSpeechToText(
                 aoMudarEstado: (ResultadoDitado r) =>
                     controlador.aplicarEstadoDitadoExterno(r),

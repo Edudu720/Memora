@@ -409,6 +409,7 @@ class _RepositorioDoServidor implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async {
     chamadas.add('conversar');
     return const AssistenteRespondeu('ok');

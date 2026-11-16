@@ -134,12 +134,11 @@ public class ServicoDeConversa {
         Optional<AutorizadorDeAcao.AcaoAutorizada> acao =
                 autorizador.autorizar(resposta.sugestao());
 
-        // Sugestão recusada vira trilha. Silenciosa para a pessoa — dizer "a
-        // Memora tentou abrir seu banco e eu impedi" assustaria quem não fez
-        // nada de errado —, e nada silenciosa para nós: uma sequência destes
-        // eventos é o sinal de que alguém está tentando.
+        // Sugestão recusada vira trilha de auditoria sem gravar o conteúdo do
+        // chat (T088, FR-047): o texto cru da pessoa pode conter mensagem de
+        // golpe colada ou dados sensíveis e nunca deve ir para o servidor.
         if (resposta.sugestao().isPresent() && acao.isEmpty()) {
-            registrar(pessoaId, TipoDeEventoDaAssistente.ACAO_RECUSADA, null, mensagem);
+            registrar(pessoaId, TipoDeEventoDaAssistente.ACAO_RECUSADA, null, null);
         }
 
         return new Resultado(resposta.texto(), acao);

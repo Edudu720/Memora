@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../../../../l10n/textos_assistente.dart';
+import '../../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../data/abridor_de_aplicativo.dart';
 import '../../data/aceite_do_aviso.dart';
 import '../../data/conversa_local.dart';
@@ -54,6 +55,7 @@ class ControladorConversa extends ChangeNotifier {
   final ConversaLocal _local;
   final AceiteDoAviso _aceite;
   final AbridorDeAplicativo? _abridor;
+  final ConsultaDeAplicativos? _consultaAplicativos;
   final LeitorDeVoz? _leitorDeVoz;
 
   /// Cria o controlador.
@@ -77,10 +79,12 @@ class ControladorConversa extends ChangeNotifier {
     this._local, {
     required AceiteDoAviso aceite,
     AbridorDeAplicativo? abridor,
+    ConsultaDeAplicativos? consultaAplicativos,
     LeitorDeVoz? leitorDeVoz,
     String rascunhoInicial = '',
   }) : _aceite = aceite,
        _abridor = abridor,
+       _consultaAplicativos = consultaAplicativos,
        _leitorDeVoz = leitorDeVoz,
        _rascunho = rascunhoInicial;
 
@@ -108,6 +112,7 @@ class ControladorConversa extends ChangeNotifier {
   /// recebe duas respostas para uma pergunta.
   int _envio = 0;
   Timer? _cronometro;
+  void Function()? _cancelarRequisicaoAtual;
   bool _descartado = false;
 
   /// A pessoa já aceitou o aviso de privacidade (FR-051)? Falso até lido.
@@ -377,9 +382,13 @@ class ControladorConversa extends ChangeNotifier {
     notifyListeners();
 
     _cronometro?.cancel();
+    _cancelarRequisicaoAtual?.call();
+    _cancelarRequisicaoAtual = null;
     _cronometro = Timer(esperaMaxima, () {
       if (esteEnvio != _envio) return;
       _envio++;
+      _cancelarRequisicaoAtual?.call();
+      _cancelarRequisicaoAtual = null;
       _trechoEmCurso = '';
       _devolverPergunta(fala);
       _falha = FalhaDaAssistente.semConexao;
@@ -399,9 +408,17 @@ class ControladorConversa extends ChangeNotifier {
         _trechoEmCurso += trecho;
         notifyListeners();
       },
+      aoCriarCancelamento: (void Function() cancelar) {
+        if (esteEnvio == _envio && !_descartado) {
+          _cancelarRequisicaoAtual = cancelar;
+        } else {
+          cancelar();
+        }
+      },
     );
 
     if (esteEnvio != _envio) return; // chegou depois do corte
+    _cancelarRequisicaoAtual = null;
     _cronometro?.cancel();
     _trechoEmCurso = '';
 
@@ -417,9 +434,36 @@ class ControladorConversa extends ChangeNotifier {
             momento: DateTime.now(),
           ),
         );
+        // Antes de oferecer abrir, confirma se o app está instalado (T089, FR-046).
+        AcaoAutorizada? acaoConfirmavel = _recusouExecucao ? null : acao;
+        if (acaoConfirmavel != null &&
+            _consultaAplicativos != null &&
+            acaoConfirmavel.identificadorAndroid.trim().isNotEmpty) {
+          bool instalado = false;
+          try {
+            instalado = await _consultaAplicativos.estaInstalado(
+              acaoConfirmavel.identificadorAndroid,
+            );
+          } catch (_) {
+            instalado = false;
+          }
+          if (esteEnvio != _envio || _descartado) return;
+          if (!instalado) {
+            acaoConfirmavel = null;
+            _mensagens.add(
+              MensagemDaConversa(
+                autor: AutorDaMensagem.memora,
+                texto: TextosAssistente.naoInstaladoAntesDeAbrir(
+                  acao!.nomeExibido,
+                ),
+                momento: DateTime.now(),
+              ),
+            );
+          }
+        }
         // Vem do servidor, ou não vem. Este controlador nunca a cria.
         // Se a pessoa já recusou a execução nesta conversa, a oferta não se repete (FR-016, T083).
-        _acaoOferecida = _recusouExecucao ? null : acao;
+        _acaoOferecida = acaoConfirmavel;
         _estado = EstadoConversa.aguardando;
         await _local.guardar(_mensagens);
 
@@ -585,6 +629,8 @@ class ControladorConversa extends ChangeNotifier {
     _descartado = true;
     _envio++;
     _cronometro?.cancel();
+    _cancelarRequisicaoAtual?.call();
+    _cancelarRequisicaoAtual = null;
     _leitorDeVoz?.dispose();
     super.dispose();
   }
@@ -596,6 +642,8 @@ class ControladorConversa extends ChangeNotifier {
     // aparelho (FR-040, FR-048).
     _envio++;
     _cronometro?.cancel();
+    _cancelarRequisicaoAtual?.call();
+    _cancelarRequisicaoAtual = null;
     if (ouvindoVoz) {
       unawaited(_leitorDeVoz?.pararEscuta());
     }
