@@ -39,6 +39,13 @@ import 'memora_animada/poses.dart';
 ///
 /// Em qualquer dos três, as dicas continuam ao alcance do toque (FR-054).
 ///
+/// ## Um toque em qualquer lugar da tela adia a troca (FR-052)
+///
+/// A dica não pode trocar no meio da leitura de quem acabou de tocar na tela.
+/// Quem hospeda a anfitriã passa [atividade] — um [Listenable] que avisa
+/// "a pessoa tocou na tela, em qualquer lugar" — e cada aviso **recomeça** a
+/// contagem dos [MemoraMovimento.trocaDeDica] (não para a troca: só a adia).
+///
 /// ## O toque é uma ação, e por isso é a exceção da FR-005b
 ///
 /// As outras Memoras são decorativas. A anfitriã tem o toque que **faz algo**
@@ -73,6 +80,11 @@ class MemoraAnfitria extends StatefulWidget {
   /// A semente do sorteio dos comportamentos. Só para teste.
   final int? sementeDaAgenda;
 
+  /// Avisa que a pessoa tocou na tela, **em qualquer lugar** (FR-052): cada
+  /// aviso adia a troca automática da dica por mais um intervalo inteiro. Nulo
+  /// é "só o toque na anfitriã e no balão conta".
+  final Listenable? atividade;
+
   /// A chave da área tocável da Memora.
   static const Key chaveDaAcao = ValueKey<String>('anfitria.acao');
 
@@ -85,6 +97,7 @@ class MemoraAnfitria extends StatefulWidget {
     this.indiceInicial = 0,
     this.tamanho = MemoraDimensoes.ilustracaoHeroi,
     this.sementeDaAgenda,
+    this.atividade,
     super.key,
   }) : assert(dicas.isNotEmpty, 'a anfitria precisa de ao menos uma dica');
 
@@ -144,10 +157,29 @@ class _MemoraAnfitriaState extends State<MemoraAnfitria>
   }
 
   @override
+  void initState() {
+    super.initState();
+    widget.atividade?.addListener(_aoHaverAtividade);
+  }
+
+  @override
+  void didUpdateWidget(MemoraAnfitria antigo) {
+    super.didUpdateWidget(antigo);
+    if (widget.atividade != antigo.atividade) {
+      antigo.atividade?.removeListener(_aoHaverAtividade);
+      widget.atividade?.addListener(_aoHaverAtividade);
+    }
+  }
+
+  @override
   void dispose() {
+    widget.atividade?.removeListener(_aoHaverAtividade);
     _relogio.dispose();
     super.dispose();
   }
+
+  /// A pessoa tocou na tela: a contagem para a próxima dica recomeça (FR-052).
+  void _aoHaverAtividade() => _segundos = 0;
 
   void _ajustarRelogio() {
     if (_trocaSozinha) {

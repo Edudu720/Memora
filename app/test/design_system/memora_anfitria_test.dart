@@ -40,6 +40,7 @@ void main() {
     NavigatorObserver? observador,
     double tamanho = 160,
     List<String> lista = dicas,
+    Listenable? atividade,
   }) async {
     await t.pumpWidget(
       MaterialApp(
@@ -58,6 +59,7 @@ void main() {
                     dicas: lista,
                     tamanho: tamanho,
                     sementeDaAgenda: 1,
+                    atividade: atividade,
                   ),
                 ),
               ),
@@ -176,6 +178,77 @@ void main() {
           reason: 'troca $i',
         );
       }
+    });
+  });
+
+  group('FR-052: um toque em qualquer lugar da tela adia a troca', () {
+    testWidgets('o aviso de atividade recomeça a contagem dos 20 s', (
+      WidgetTester t,
+    ) async {
+      final ValueNotifier<int> atividade = ValueNotifier<int>(0);
+      addTearDown(atividade.dispose);
+      await montar(t, atividade: atividade);
+      await t.pump(const Duration(seconds: 1));
+      await t.pump(const Duration(seconds: 14));
+
+      // Aos 15 s a pessoa toca na tela, fora da anfitriã.
+      atividade.value++;
+      await t.pump(const Duration(seconds: 10));
+      // Sem o aviso, a troca teria vindo aos 20 s; com ele, só aos 35 s.
+      await acomodar(t);
+      await t.pump(const Duration(seconds: 3));
+      expect(
+        textoDaDica(dicas[0]),
+        findsOneWidget,
+        reason: 'aos 28 s, 13 s depois do toque: ainda não pode trocar',
+      );
+
+      await t.pump(const Duration(seconds: 10));
+      await acomodar(t);
+      await t.pump(const Duration(seconds: 3));
+      expect(
+        textoDaDica(dicas[1]),
+        findsOneWidget,
+        reason: 'passados 20 s do último toque, a troca volta a valer',
+      );
+    });
+
+    testWidgets('um toque a cada 15 s segura a dica para sempre', (
+      WidgetTester t,
+    ) async {
+      final ValueNotifier<int> atividade = ValueNotifier<int>(0);
+      addTearDown(atividade.dispose);
+      await montar(t, atividade: atividade);
+      await t.pump(const Duration(seconds: 1));
+      for (int i = 0; i < 6; i++) {
+        await t.pump(const Duration(seconds: 15));
+        atividade.value++;
+      }
+      await acomodar(t);
+      await t.pump(const Duration(seconds: 3));
+      expect(textoDaDica(dicas[0]), findsOneWidget);
+    });
+
+    testWidgets('trocar o notificador no meio da vida troca a escuta', (
+      WidgetTester t,
+    ) async {
+      final ValueNotifier<int> antigo = ValueNotifier<int>(0);
+      final ValueNotifier<int> novo = ValueNotifier<int>(0);
+      addTearDown(antigo.dispose);
+      addTearDown(novo.dispose);
+      await montar(t, atividade: antigo);
+      await montar(t, atividade: novo);
+      await t.pump(const Duration(seconds: 1));
+      await t.pump(const Duration(seconds: 14));
+      antigo.value++; // ninguém mais escuta: não pode adiar nada
+      await t.pump(const Duration(seconds: 10));
+      await acomodar(t);
+      await t.pump(const Duration(seconds: 3));
+      expect(
+        textoDaDica(dicas[1]),
+        findsOneWidget,
+        reason: 'o notificador antigo continuou sendo ouvido',
+      );
     });
   });
 
