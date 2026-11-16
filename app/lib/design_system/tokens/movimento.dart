@@ -13,6 +13,27 @@ abstract final class MemoraMovimento {
   /// Transições amplas, como abertura de folha inferior.
   static const Duration lento = Duration(milliseconds: 320);
 
+  /// A Memora acena (FR-005a, feature 010): um gesto curto, uma vez só.
+  static const Duration aceno = Duration(milliseconds: 1200);
+
+  /// A Memora pisca ao toque (FR-005a).
+  static const Duration piscada = Duration(milliseconds: 300);
+
+  /// A Memora comemora o fim de um passo a passo (FR-003).
+  static const Duration comemoracao = Duration(milliseconds: 1000);
+
+  /// Quanto leva para a Memora ir de uma expressão a outra.
+  static const Duration trocaDeExpressao = Duration(milliseconds: 360);
+
+  /// Um ciclo completo de "respiração" em repouso. Lento de propósito.
+  static const Duration respiracao = Duration(seconds: 4);
+
+  /// Uma abertura e fechamento de boca enquanto a Memora fala.
+  static const Duration silaba = Duration(milliseconds: 600);
+
+  /// Transição entre telas (SC-004: no máximo 500 ms).
+  static const Duration transicaoDeTela = Duration(milliseconds: 400);
+
   /// Quanto uma superfície tocável encolhe enquanto o dedo está nela.
   ///
   /// É o segundo sinal do estado "pressionado", além da camada de cor do

@@ -32,6 +32,8 @@ void main() {
     'galeria/galeria_memora.dart': 'e a propria galeria',
     'preferencias/controlador_aparencia.dart': 'e controlador, nao componente',
     'preferencias/escopo_aparencia.dart': 'e escopo, nao componente',
+    'preferencias/reducao_de_movimento.dart':
+        'e uma extensao de contexto (context.reduzirMovimento), nao componente',
     'preferencias/preferencia_aparencia.dart': 'e entidade, nao componente',
     'preferencias/tela_aparencia.dart':
         'e uma TELA inteira, com persistencia propria; montar uma tela dentro '

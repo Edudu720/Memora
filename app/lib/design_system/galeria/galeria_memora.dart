@@ -399,6 +399,40 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
       ),
 
+      const _Secao('Poses da Memora e MemoraAnimada', 'A Memora em 2.5D, '
+          'desenhada pelo aplicativo: uma pose para cada momento, e um gesto '
+          'ao toque. Com "reduzir movimento" ela fica parada.'),
+      Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          for (final PoseDaMemora p in PoseDaMemora.values)
+            MemoraAnimada(expressao: p, tamanho: MemoraDimensoes.ilustracaoHeroi),
+        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const TextoMemora(
+        'Os gestos (GestoDaMemora) também disparam por botão:',
+        estilo: EstiloTexto.apoio,
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const _MemoraComGestos(),
+      const SizedBox(height: MemoraEspacamento.md),
+      const TextoMemora(
+        'Ela segue a paleta escolhida em Aparência (no tema claro aqui); no '
+        'alto contraste a paleta não vale.',
+        estilo: EstiloTexto.apoio,
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          for (final String nome in MemoraCores.paletas.keys)
+            _MemoraNaPaleta(paleta: nome),
+        ],
+      ),
+
       const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
           'cartão. No máximo uma principal por tela. A desabilitada só existe '
           'aqui: porta que não abre não é mostrada (FR-018).'),
@@ -742,5 +776,91 @@ class _UltimoToque extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CampoInformacao(rotulo: 'Último toque', valor: valor);
+  }
+}
+
+/// A Memora com os botões que disparam cada gesto.
+class _MemoraComGestos extends StatefulWidget {
+  const _MemoraComGestos();
+
+  @override
+  State<_MemoraComGestos> createState() => _MemoraComGestosState();
+}
+
+class _MemoraComGestosState extends State<_MemoraComGestos> {
+  GestoDaMemora? _gesto;
+
+  void _disparar(GestoDaMemora g) {
+    setState(() => _gesto = g);
+    // Volta a nulo no quadro seguinte, para o mesmo gesto poder repetir.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _gesto = null);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        MemoraAnimada(
+          expressao: PoseDaMemora.neutra,
+          tamanho: MemoraDimensoes.ilustracaoHeroi,
+          gesto: _gesto,
+        ),
+        const SizedBox(width: MemoraEspacamento.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              BotaoSecundario(
+                rotulo: 'Acenar',
+                aoTocar: () => _disparar(GestoDaMemora.aceno),
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
+              BotaoSecundario(
+                rotulo: 'Piscar',
+                aoTocar: () => _disparar(GestoDaMemora.piscada),
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
+              BotaoSecundario(
+                rotulo: 'Comemorar',
+                aoTocar: () => _disparar(GestoDaMemora.comemoracao),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A Memora acenando no tema claro de uma paleta, sobre o fundo dele.
+class _MemoraNaPaleta extends StatelessWidget {
+  final String paleta;
+
+  const _MemoraNaPaleta({required this.paleta});
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData tema = TemasMemora.porId(MemoraTemaId.claro, paleta: paleta);
+    return Theme(
+      data: tema,
+      child: Builder(
+        builder: (BuildContext context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ColoredBox(
+              color: context.memora.cores.fundo,
+              child: MemoraAnimada(
+                expressao: PoseDaMemora.acenando,
+                tamanho: MemoraDimensoes.ilustracaoCabecalho,
+                reageAoToque: false,
+              ),
+            ),
+            TextoMemora.apoio(paleta),
+          ],
+        ),
+      ),
+    );
   }
 }
