@@ -30,6 +30,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Nome sob o icone (FR-009b da 004). A depuracao sobrescreve.
+        manifestPlaceholders["rotuloDoApp"] = "Memora"
     }
 
     // A chave do Memora mora fora do repositorio: key.properties e o .jks estao
@@ -55,6 +57,13 @@ android {
     }
 
     buildTypes {
+        // A versao de depuracao instala ao lado da release no mesmo aparelho
+        // (outro identificador e outro nome), para conferir trabalho em
+        // andamento sem apagar a release nem os dados dela.
+        debug {
+            applicationIdSuffix = ".debug"
+            manifestPlaceholders["rotuloDoApp"] = "Memora (teste)"
+        }
         release {
             signingConfig =
                 if (temChaveDoMemora) {
