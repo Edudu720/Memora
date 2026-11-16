@@ -70,8 +70,9 @@ void main() {
   group('V1: monta em todo tema e tamanho', () {
     for (final MemoraTemaId tema in MemoraTemaId.values) {
       for (final double tamanho in <double>[32, 96, 240]) {
-        testWidgets('toda pose, tema ${tema.name}, ${tamanho.toInt()} dp',
-            (WidgetTester t) async {
+        testWidgets('toda pose, tema ${tema.name}, ${tamanho.toInt()} dp', (
+          WidgetTester t,
+        ) async {
           for (final PoseDaMemora pose in PoseDaMemora.values) {
             await montar(t, pose, tema: tema, tamanho: tamanho);
             await t.pump(const Duration(milliseconds: 120));
@@ -83,8 +84,9 @@ void main() {
       }
     }
 
-    testWidgets('trocar de pose interpola até a nova e não quebra',
-        (WidgetTester t) async {
+    testWidgets('trocar de pose interpola até a nova e não quebra', (
+      WidgetTester t,
+    ) async {
       await montar(t, PoseDaMemora.neutra);
       expect(quadro(t).pose.escudo, 0);
       await montar(t, PoseDaMemora.preocupada);
@@ -117,15 +119,20 @@ void main() {
       return achados;
     }
 
-    testWidgets('não aparece na semântica, nem depois de tocar',
-        (WidgetTester t) async {
+    testWidgets('não aparece na semântica, nem depois de tocar', (
+      WidgetTester t,
+    ) async {
       final SemanticsHandle h = t.ensureSemantics();
       await montar(t, PoseDaMemora.neutra);
       await t.pump();
 
-      expect(comToque(t), isEmpty,
-          reason: 'a Memora responde ao toque, mas o leitor de tela nao pode '
-              've-la como botao (FR-005b)');
+      expect(
+        comToque(t),
+        isEmpty,
+        reason:
+            'a Memora responde ao toque, mas o leitor de tela nao pode '
+            've-la como botao (FR-005b)',
+      );
 
       await tocar(t);
       await t.pump(const Duration(milliseconds: 100));
@@ -138,36 +145,50 @@ void main() {
   });
 
   group('V2: reduzir movimento', () {
-    testWidgets('sem relógio rodando e com o toque sem efeito',
-        (WidgetTester t) async {
+    testWidgets('sem relógio rodando e com o toque sem efeito', (
+      WidgetTester t,
+    ) async {
       await montar(t, PoseDaMemora.acenando, reduzir: true, falando: true);
       await t.pump(const Duration(milliseconds: 100));
 
-      expect(t.binding.transientCallbackCount, 0,
-          reason: 'com "reduzir movimento" nenhum Ticker pode estar ativo '
-              '(FR-004)');
+      expect(
+        t.binding.transientCallbackCount,
+        0,
+        reason:
+            'com "reduzir movimento" nenhum Ticker pode estar ativo '
+            '(FR-004)',
+      );
 
       await tocar(t);
       await t.pump(const Duration(milliseconds: 100));
-      expect(t.binding.transientCallbackCount, 0,
-          reason: 'o toque nao gera gesto (FR-005d)');
+      expect(
+        t.binding.transientCallbackCount,
+        0,
+        reason: 'o toque nao gera gesto (FR-005d)',
+      );
       final ContextoDePintura c = quadro(t);
       expect(c.aceno, 0);
       expect(c.piscar, 0);
-      expect(c.fala, 0, reason: 'a fala nao mexe a boca com movimento reduzido');
+      expect(
+        c.fala,
+        0,
+        reason: 'a fala nao mexe a boca com movimento reduzido',
+      );
       expect(c.respira, 0);
     });
 
-    testWidgets('a pose parada é a pose da expressão (nada some)',
-        (WidgetTester t) async {
+    testWidgets('a pose parada é a pose da expressão (nada some)', (
+      WidgetTester t,
+    ) async {
       await montar(t, PoseDaMemora.preocupada, reduzir: true);
       await t.pump();
       expect(quadro(t).pose.escudo, 1);
       expect(quadro(t).pose.sobrancelha, 1);
     });
 
-    testWidgets('controle: sem a preferência, há relógio e o toque anima',
-        (WidgetTester t) async {
+    testWidgets('controle: sem a preferência, há relógio e o toque anima', (
+      WidgetTester t,
+    ) async {
       // Sem este caso, um teste que olha "nenhum Ticker" passaria com o
       // componente quebrado e parado.
       await montar(t, PoseDaMemora.neutra);
@@ -180,8 +201,7 @@ void main() {
   });
 
   group('V4: o toque', () {
-    testWidgets('alterna aceno e piscada; nada navega',
-        (WidgetTester t) async {
+    testWidgets('alterna aceno e piscada; nada navega', (WidgetTester t) async {
       final _ContaRotas rotas = _ContaRotas();
       await montar(t, PoseDaMemora.neutra, observador: rotas);
       await t.pump(const Duration(milliseconds: 50));
@@ -209,12 +229,16 @@ void main() {
       expect(quadro(t).aceno.abs(), greaterThan(0.1));
       await t.pump(const Duration(milliseconds: 1300));
 
-      expect(rotas.empilhadas, rotasAntes,
-          reason: 'tocar na Memora nao abre nada (FR-005a)');
+      expect(
+        rotas.empilhadas,
+        rotasAntes,
+        reason: 'tocar na Memora nao abre nada (FR-005a)',
+      );
     });
 
-    testWidgets('toque durante um gesto é ignorado e não acumula',
-        (WidgetTester t) async {
+    testWidgets('toque durante um gesto é ignorado e não acumula', (
+      WidgetTester t,
+    ) async {
       await montar(t, PoseDaMemora.neutra);
       await t.pump(const Duration(milliseconds: 50));
 
@@ -231,8 +255,9 @@ void main() {
       expect(c.piscar, 0, reason: 'nenhuma piscada ficou na fila');
     });
 
-    testWidgets('reageAoToque falso: tocar não faz nada',
-        (WidgetTester t) async {
+    testWidgets('reageAoToque falso: tocar não faz nada', (
+      WidgetTester t,
+    ) async {
       await montar(t, PoseDaMemora.neutra, reageAoToque: false);
       await t.pump(const Duration(milliseconds: 50));
       await tocar(t);
@@ -241,16 +266,20 @@ void main() {
       expect(quadro(t).piscar, 0);
     });
 
-    testWidgets('o gesto comemoração dispara por fora, uma vez',
-        (WidgetTester t) async {
+    testWidgets('o gesto comemoração dispara por fora, uma vez', (
+      WidgetTester t,
+    ) async {
       await montar(t, PoseDaMemora.neutra);
       await t.pump(const Duration(milliseconds: 50));
       await montar(t, PoseDaMemora.neutra, gesto: GestoDaMemora.comemoracao);
       await t.pump(const Duration(milliseconds: 500));
       final ContextoDePintura meio = quadro(t);
       expect(meio.pulo, greaterThan(0.5));
-      expect(meio.pose.olhoFeliz, greaterThan(0.5),
-          reason: 'comemorar vira a pose comemorando');
+      expect(
+        meio.pose.olhoFeliz,
+        greaterThan(0.5),
+        reason: 'comemorar vira a pose comemorando',
+      );
       await t.pump(const Duration(milliseconds: 800));
       expect(quadro(t).pulo, 0);
     });
@@ -304,23 +333,24 @@ void main() {
         );
       });
 
-      testWidgets('${pose.name}: com a preferência, nenhum Ticker e nada se mexe', (
-        WidgetTester t,
-      ) async {
-        await montar(t, pose, reduzir: true);
-        await t.pump();
-        final List<double> antes = vida(quadro(t));
-        await t.pump(const Duration(seconds: 5));
-        expect(
-          t.binding.transientCallbackCount,
-          0,
-          reason: 'com "reduzir movimento" nenhum Ticker pode estar ativo',
-        );
-        expect(vida(quadro(t)), antes);
-        expect(quadro(t).antena, 0);
-        expect(quadro(t).ajeita, 0);
-        expect(quadro(t).giro, 0);
-      });
+      testWidgets(
+        '${pose.name}: com a preferência, nenhum Ticker e nada se mexe',
+        (WidgetTester t) async {
+          await montar(t, pose, reduzir: true);
+          await t.pump();
+          final List<double> antes = vida(quadro(t));
+          await t.pump(const Duration(seconds: 5));
+          expect(
+            t.binding.transientCallbackCount,
+            0,
+            reason: 'com "reduzir movimento" nenhum Ticker pode estar ativo',
+          );
+          expect(vida(quadro(t)), antes);
+          expect(quadro(t).antena, 0);
+          expect(quadro(t).ajeita, 0);
+          expect(quadro(t).giro, 0);
+        },
+      );
     }
 
     test('cada expressão tem a sua vida, e não a mesma em todas', () {
@@ -443,7 +473,11 @@ void main() {
       bool inclinou = false;
       bool acenou = false;
       bool pulou = false;
-      for (int i = 0; i < 1200 && !(girou && inclinou && acenou && pulou); i++) {
+      for (
+        int i = 0;
+        i < 1200 && !(girou && inclinou && acenou && pulou);
+        i++
+      ) {
         await t.pump(const Duration(milliseconds: 100));
         final ContextoDePintura c = quadro(t);
         girou = girou || c.giro.abs() > 0.5;
@@ -454,7 +488,8 @@ void main() {
       expect(
         <bool>[girou, inclinou, acenou, pulou],
         everyElement(isTrue),
-        reason: 'em 2 minutos a anfitria devia ter olhado em volta, inclinado '
+        reason:
+            'em 2 minutos a anfitria devia ter olhado em volta, inclinado '
             'a cabeca, acenado e pulado: giro=$girou, inclina=$inclinou, '
             'aceno=$acenou, pulo=$pulou',
       );

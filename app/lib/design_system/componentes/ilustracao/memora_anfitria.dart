@@ -271,10 +271,7 @@ class _MemoraAnfitriaState extends State<MemoraAnfitria>
             maintainState: true,
             child: TextoComNegrito(d),
           ),
-        Positioned(
-          left: 0,
-          right: 0,
-          top: 0,
+        Positioned.fill(
           child: AnimatedSwitcher(
             duration: MemoraMovimento.efetiva(
               MemoraMovimento.padrao,

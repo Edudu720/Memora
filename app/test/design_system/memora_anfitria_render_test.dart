@@ -55,7 +55,12 @@ void main() {
         builder: (BuildContext context) => ColoredBox(
           color: context.memora.cores.fundo,
           child: Padding(
-            padding: const EdgeInsets.all(MemoraEspacamento.sm),
+            padding: const EdgeInsets.fromLTRB(
+              MemoraEspacamento.sm,
+              MemoraEspacamento.xl,
+              MemoraEspacamento.sm,
+              MemoraEspacamento.sm,
+            ),
             child: SizedBox.square(
               dimension: lado,
               child: CustomPaint(
@@ -189,7 +194,7 @@ void main() {
       ),
     ];
 
-    t.view.physicalSize = const Size(1500, 920);
+    t.view.physicalSize = const Size(1500, 1010);
     t.view.devicePixelRatio = 1;
     addTearDown(t.view.reset);
 
@@ -242,5 +247,58 @@ void main() {
       await t.pump();
       await salvar(t, k, 'detalhe_${g.key}.png', 2);
     }
+  }, skip: !ligado);
+
+  testWidgets('grava a anfitriã inteira, com o balão, nos três temas', (
+    WidgetTester t,
+  ) async {
+    final GlobalKey chave = GlobalKey();
+    t.view.physicalSize = const Size(1200, 520);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.reset);
+
+    Widget coluna(MemoraTemaId id, int indice) => SizedBox(
+      width: 400,
+      child: Theme(
+        data: TemasMemora.porId(id),
+        child: Builder(
+          builder: (BuildContext context) => ColoredBox(
+            color: context.memora.cores.fundo,
+            child: Padding(
+              padding: const EdgeInsets.all(MemoraEspacamento.lg),
+              child: MemoraAnfitria(indiceInicial: indice, sementeDaAgenda: 4),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await t.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: Size(1200, 520)),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: RepaintBoundary(
+              key: chave,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  coluna(MemoraTemaId.claro, 0),
+                  coluna(MemoraTemaId.escuro, 2),
+                  coluna(MemoraTemaId.altoContraste, 5),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // Deixa o texto aparecer por inteiro e a Memora fazer o que fizer.
+    for (int i = 0; i < 40; i++) {
+      await t.pump(const Duration(milliseconds: 100));
+    }
+    await salvar(t, chave, 'anfitria_inteira.png', 1.5);
   }, skip: !ligado);
 }
