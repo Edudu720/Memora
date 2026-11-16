@@ -80,9 +80,39 @@ nos 3 temas, animando; com "reduzir movimento", parada.
 - [X] T015 [US1] Gestos de toque (aceno/piscada alternados), com a máquina de estados `ocioso → emGesto → ocioso` (FR-005a, data-model.md)
 - [X] T016 [US1] Gesto único `comemoracao` e entrada animada por expressão (FR-003)
 - [X] T017 [US1] Pôr a `MemoraAnimada` na `GaleriaMemora` em todas as expressões e gestos, e no teste de completude da galeria (V10 da 002)
-- [ ] T018 [US1] Conferência visual: gerar capturas da galeria nos 3 temas e **mostrar ao Henrique** antes de seguir para a Fase B (risco do plano: o desenho em código precisa ficar à altura da referência)
+- [X] T018 [US1] Conferência visual: gerar capturas da galeria nos 3 temas e **mostrar ao Henrique** antes de seguir para a Fase B (risco do plano: o desenho em código precisa ficar à altura da referência). **Aprovada pelo Henrique em 2026-11-16**, depois do vídeo para a equipe, pedindo **mais animação** (T083) e a anfitriã do Início (fase 3b)
+
+- [ ] T083 [US1] **(2026-11-16)** Mais animação em todas as expressões (FR-003a): pequenos movimentos próprios de cada uma — olhar em volta, balançar a antena, piscar, ajeitar o corpo —, sem competir com o texto da tela; nenhum com "reduzir movimento". Teste: com a preferência, nenhum `Ticker` ativo; sem ela, cada expressão tem movimento além da respiração. Conferir no celular
 
 **Checkpoint**: a Memora vetorial está pronta e aprovada na galeria.
+
+---
+
+## Phase 3b: User Story 8 — A anfitriã do Início (P1) — sessão de 2026-11-16
+
+**Goal**: a `MemoraAnfitria`, a Memora do topo do Início: mais detalhada,
+mais animada, se mexe sozinha, conta dicas num balão com a boca mexendo,
+interativa (FR-048 a FR-058). Componente novo do Design System: **não depende
+da `develop`**. Pô-la no Início é a T053.
+
+**Independent Test**: na galeria, a anfitriã se mexe sozinha, troca a dica
+depois de 20 s e ao toque; com o leitor de tela, é "Outra dica da Memora" e
+nada troca sozinho; com "reduzir movimento", parada.
+
+### Testes da US8 (escrever antes e ver falhar)
+
+- [ ] T084 [P] [US8] `app/test/design_system/memora_anfitria_test.dart`: troca a dica aos 20 s (FR-052); **não** troca com leitor de tela, com "reduzir movimento", nem depois de um toque (FR-053); toque mostra a próxima (FR-054); semântica de botão "Outra dica da Memora" com área ≥ 48 dp (FR-055); toque nunca navega (FR-056); boca anima só enquanto o texto aparece (FR-051); nenhum `Ticker` com "reduzir movimento" (FR-057). Quebrar: troca automática ignorando o leitor de tela; tirar o rótulo
+- [ ] T085 [P] [US8] O portão de texto (`texto_da_interface_test.dart`) passa a cobrir o arquivo das dicas: duas frases, sem palavra proibida, sem emoji; e um teste confere que há pelo menos 3 dicas antigolpe (FR-050)
+
+### Implementação da US8
+
+- [ ] T086 [P] [US8] `app/lib/l10n/textos_anfitria.dart`: lista fixa de 12 a 16 dicas na voz da Memora (uso do celular, do Memora e lembretes antigolpe), no máximo duas frases cada, revistas na PR (FR-050)
+- [ ] T087 [US8] Desenho aprimorado da anfitriã (FR-048) sobre os pintores da `MemoraAnimada`: brilho especular, luz de contorno, sombra de contato, giro de cabeça com o rosto deslizando no visor, corpo que estica e encolhe no pulo; cores só de tokens; mais detalhe sem perder a mesma personagem
+- [ ] T088 [US8] Comportamento autônomo (FR-049): agenda de comportamentos que se alternam sem padrão óbvio (flutuar, olhar em volta, acenar de vez em quando, inclinar a cabeça, pulinho); parada fora da tela (FR-058); nada com "reduzir movimento"
+- [ ] T089 [US8] `app/lib/design_system/componentes/ilustracao/memora_anfitria.dart`: anfitriã + balão de dica + boca sincronizada com o texto (FR-051) + troca a cada 20 s com as regras de parada (FR-052, FR-053) + toque como ação acessível que faz um gesto e mostra a próxima (FR-054, FR-055); o leitor de tela anuncia a dica nova só quando a pessoa pediu
+- [ ] T090 [US8] Galeria e renders da anfitriã; **mostrar ao Henrique no celular** (APK "Memora (teste)") antes da T053 — mesmo portão da T018
+
+**Checkpoint**: a anfitriã aprovada; a T053 a coloca no Início.
 
 ---
 
@@ -187,7 +217,7 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 10: User Story 7 — Início e barra inferior (P1) — parte B
 
-- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006)
+- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006). **(2026-11-16)** A Memora do topo é a **`MemoraAnfitria`** (fase 3b, T089), não a `MemoraAnimada` comum
 - [ ] T054 [US7] Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance; atualizar `inicio_ocupa_a_altura_test.dart` e a matriz (FR-041, V13); quebrar fixando a altura da Memora
 - [ ] T055 [P] [US7] `app/test/design_system/navegacao_inferior_test.dart` (novo): ícone + rótulo juntos, alvo ≥ 48 dp, indicador desliza até o destino tocado, sem deslizar com "reduzir movimento" (V15); quebrar tirando o rótulo
 - [ ] T056 [US7] `navegacao_inferior.dart`: barra refeita no acabamento da 007 (superfície, sombra, cantos), ícones arredondados da família única no lugar dos SVG de `assets/icones/navegacao/`, indicador deslizante e resposta ao toque (FR-044 a FR-047, R5)
@@ -240,7 +270,9 @@ acenando → fluxo de entrada, sem pulo.
   andar em paralelo depois da Fundação → Fechamento A (T043–T046).
   - A US2 não depende da US1; a US7-A (abertura) depende da US1 (usa a
     `MemoraAnimada`).
-  - A T018 (aprovação visual da Memora) é **portão** para a Fase B.
+  - A T018 (aprovação visual da Memora) é **portão** para a Fase B. ✅ aprovada em 2026-11-16.
+  - A fase 3b (anfitriã, T083–T090) é componente novo e pode andar já; a
+    T090 (aprovação dela no celular) é portão da T053.
 - **Fase B** (revisada em 2026-11-16): T080 (receber a `develop`, depois da
   PR da `feature/004-prints-e-zoom`) → integração (T047–T052) → US7-B, US4-B,
   US5, US3-B e US6 (inclui T081) em paralelo → validação final.

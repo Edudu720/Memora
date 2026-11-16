@@ -70,6 +70,12 @@ WCAG não deixa cortar. O que mantém o bloco curto é a frase curta.
   de um passo a passo, fica atenta ao lado de um aviso.
 - **Decorativa para o leitor de tela** quando o balão já diz tudo; nunca é a
   única portadora de uma informação.
+- **A anfitriã do Início é a exceção** (spec 013, 2026-11-16): mais
+  detalhada e mais animada que as outras, se mexe sozinha, conta dicas num
+  balão (lista fixa do aplicativo, nunca da IA nem do servidor) com a boca
+  mexendo, troca a dica a cada 20 s **só** sem leitor de tela, sem "reduzir
+  movimento" e enquanto ninguém tocou nela, e o toque nela é uma **ação
+  acessível** ("Outra dica da Memora", 48 dp) que nunca leva a lugar nenhum.
 - **Reage ao toque com um gesto** (aceno ou piscada) e mais nada: não abre,
   não fala, não navega. O gesto não existe para o leitor de tela, não acontece
   com "reduzir movimento", e a área dela fica a pelo menos 8 dp de qualquer

@@ -69,6 +69,26 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   usar reconhecimento fora do aparelho? → A: Não; só no aparelho, senão o
   ditado fica indisponível (FR-034).
 
+### Session 2026-11-16
+
+- T018: o Henrique **aprovou** a Memora vetorial (as expressões), pedindo
+  **mais animação** em todas (FR-003a).
+- Pedido do Henrique: no Início, logo depois de entrar, a Memora é a
+  **anfitriã** — mais bem desenhada, "3D", bem mais animada que as outras, se
+  mexendo sozinha, com balões de dicas que mudam ao longo do tempo, a boca
+  animada enquanto fala, e interativa (tocar muda a fala ou faz um gesto).
+  "Se ficar pesado e ir contra a constituição, pode ser 2.5D." → **Decisão:
+  2.5D aprimorada** (FR-048). 3D de verdade exigiria motor 3D experimental ou
+  visualizador web com biblioteca de fora (peso no aparelho de entrada, rede,
+  privacidade) e um modelo 3D da Memora que a equipe não tem; o 2.5D com luz,
+  brilho, sombra de contato e giro de cabeça entrega a sensação de volume sem
+  dependência nova (FR-048 a FR-058).
+- Consequências que a constituição impõe ao pedido: a dica que troca sozinha
+  precisa poder parar (WCAG 2.2.2, FR-052/053); o toque na anfitriã vira uma
+  **ação** ("outra dica") e por isso ganha rótulo e área de toque (FR-055),
+  diferente das outras Memoras; as dicas vêm de lista fixa no aplicativo,
+  nunca da IA nem do servidor (FR-050).
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -294,6 +314,39 @@ continua escrito.
 
 ---
 
+### User Story 8 — A anfitriã do Início (Priority: P1)
+
+Logo depois de entrar, a pessoa encontra a Memora no topo do Início, viva: ela
+flutua, olha em volta, acena de vez em quando e conta uma dica num balão,
+mexendo a boca enquanto fala. De tempos em tempos a dica muda. Se a pessoa
+tocar nela, a Memora faz um gesto e conta outra. A pessoa sente que tem
+companhia, e aprende alguma coisa só de abrir o aplicativo.
+
+**Why this priority**: É a tela mais vista e o primeiro contato depois de
+entrar; o Henrique pediu nominalmente (sessão de 2026-11-16).
+
+**Independent Test**: Entrar e ficar no Início: a anfitriã se mexe sozinha e
+troca a dica depois de 20 s; tocar nela troca na hora. Com o leitor de tela,
+ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
+"reduzir movimento", ela fica parada e as dicas só trocam ao toque.
+
+**Acceptance Scenarios**:
+
+1. **Given** o Início aberto, **When** passam 20 s sem toque, **Then** o balão
+   troca de dica com transição suave, e a boca da anfitriã se mexe enquanto o
+   texto novo aparece.
+2. **Given** a pessoa tocou na anfitriã, **When** ela toca, **Then** a
+   anfitriã faz um gesto e mostra outra dica, e dali em diante só troca quando
+   a pessoa pedir.
+3. **Given** o leitor de tela ligado, **When** a pessoa chega à anfitriã,
+   **Then** ouve a dica e a ação "Outra dica da Memora", e nada troca sozinho.
+4. **Given** "reduzir movimento" ligado, **When** o Início abre, **Then** a
+   anfitriã aparece parada, e as dicas continuam disponíveis pelo toque.
+5. **Given** qualquer dica, **When** exibida, **Then** tem no máximo duas
+   frases e vem da lista fixa do aplicativo.
+
+---
+
 ### Edge Cases
 
 - **Carregamento demorado** (aparelho lento): a Memora continua acenando de
@@ -350,9 +403,14 @@ continua escrito.
 - **FR-005**: A Memora MUST ser tratada como decorativa pelo leitor de tela
   quando o balão já diz tudo; ela MUST NOT ser a única portadora de nenhuma
   informação.
+- **FR-003a**: Todas as expressões MUST ter mais vida que uma pose parada com
+  respiração: pequenos movimentos próprios de cada uma (olhar em volta,
+  balançar a antena, piscar, ajeitar o corpo), sem nunca competir com o texto
+  da tela, e nenhum com "reduzir movimento" (FR-004).
 - **FR-005a**: Quando a pessoa toca na Memora, ela MUST responder com um gesto
   curto (aceno ou piscada) e voltar à expressão em que estava. O toque MUST NOT
-  abrir nada, mudar de tela, falar nem disparar ação alguma.
+  abrir nada, mudar de tela, falar nem disparar ação alguma. **Exceção: a
+  anfitriã do Início** (FR-055), cujo toque mostra outra dica.
 - **FR-005b**: O gesto de toque MUST NOT aparecer para o leitor de tela: a
   Memora continua decorativa (FR-005), sem ser anunciada como botão.
 - **FR-005c**: A área de toque da Memora MUST NOT ficar a menos de 8 dp de um
@@ -475,6 +533,44 @@ continua escrito.
 - **FR-047**: A barra inferior MUST ter o mesmo acabamento dos demais blocos
   (superfície, sombra, cantos) e resposta visual ao toque em cada item.
 
+**A anfitriã do Início (US8, sessão de 2026-11-16)**
+
+- **FR-048**: No Início, a Memora MUST ser a **anfitriã**: desenhada com mais
+  detalhe e profundidade que as outras (luz, brilho especular, luz de
+  contorno, sombra de contato, giro de cabeça com o rosto deslizando no
+  visor), em 2.5D, sem dependência de motor 3D nem de biblioteca externa.
+- **FR-049**: A anfitriã MUST se mexer sozinha, com um repertório de
+  comportamentos que se alternam sem padrão óbvio (flutuar, olhar em volta,
+  acenar de vez em quando, inclinar a cabeça, pular de leve), mais animada que
+  as Memoras das outras telas, sem nunca cobrir texto nem ação.
+- **FR-050**: A anfitriã MUST falar por um balão com **dicas** curtas (no
+  máximo duas frases, FR-016), tiradas de uma **lista fixa escrita pela
+  equipe dentro do aplicativo** — nunca geradas pela IA nem vindas do
+  servidor. Parte das dicas MUST ser lembrete antigolpe ("Eu nunca peço sua
+  senha nem código").
+- **FR-051**: Enquanto o texto do balão aparece, a **boca** da anfitriã MUST
+  se mexer como se falasse, e parar quando o texto termina.
+- **FR-052**: A dica MUST trocar sozinha a cada **20 segundos**, no mínimo,
+  com transição suave do balão; nunca no meio da leitura de quem tocou na
+  tela há menos de 20 segundos.
+- **FR-053**: A troca automática MUST parar (WCAG 2.2.2) quando: o leitor de
+  tela estiver ligado; "reduzir movimento" estiver ligado; ou a pessoa tocar
+  na anfitriã ou no balão (a partir daí, só troca quando ela pedir).
+- **FR-054**: MUST existir sempre um jeito manual de ver a próxima dica: tocar
+  na anfitriã ou no balão.
+- **FR-055**: Na anfitriã, o toque MUST ser uma **ação acessível**: rótulo
+  para o leitor de tela ("Outra dica da Memora"), área de toque ≥ 48 dp e
+  8 dp de distância de qualquer outro alvo; ao tocar, ela faz um gesto e
+  mostra a próxima dica. Com o leitor de tela, o balão é lido como texto, e a
+  troca é anunciada só quando a pessoa pede.
+- **FR-056**: A anfitriã MUST NOT levar a lugar nenhum: tocar nela nunca abre
+  tela, aplicativo nem link (o caminho para conversar é o cartão principal,
+  como na 007).
+- **FR-057**: Com "reduzir movimento", a anfitriã MUST ficar parada em pose de
+  repouso, sem troca automática; as dicas continuam disponíveis pelo toque.
+- **FR-058**: A anfitriã MUST NOT pesar no aparelho de entrada: parada fora da
+  tela, sem atrasar o toque nas ações do Início (SC-005).
+
 ### Key Entities
 
 - **Expressão da Memora**: o estado visual dela num momento (repouso, falando,
@@ -495,6 +591,7 @@ continua escrito.
 | **Texto curto** | Encurtar um aviso a ponto de ele perder o sentido | Médio | FR-017: o necessário para decidir fica visível; "Saber mais" só para o que é complementar |
 | **Emoji na IA** | Modelo induzido a trocar palavras por emoji ambíguo ("👍" como "pode passar o código") | Médio | FR-023 e FR-024: no máximo um emoji, nunca no lugar de palavra |
 | **Ditado por voz** | Pessoa dita senha ou código em voz alta; áudio enviado a terceiros | Crítico | FR-034 (só no aparelho) e o aviso antigolpe |
+| **Dicas da anfitriã** | Fazer a Memora "dizer" algo falso ("toque aqui para atualizar seu cadastro") por injeção na IA ou no servidor | Alto | FR-050: lista fixa no aplicativo, revisada na PR; FR-056: tocar nela nunca leva a lugar nenhum |
 
 ---
 
