@@ -324,7 +324,7 @@ void main() {
     }
 
     test('cada expressão tem a sua vida, e não a mesma em todas', () {
-      final List<PoseDaMemora> poses = PoseDaMemora.values;
+      const List<PoseDaMemora> poses = PoseDaMemora.values;
       for (int i = 0; i < poses.length; i++) {
         for (int j = i + 1; j < poses.length; j++) {
           bool diferem = false;

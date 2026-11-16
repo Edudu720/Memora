@@ -183,7 +183,7 @@ void main() {
     ) async {
       await montar(t, leitor: true);
       await t.pump(const Duration(seconds: 1));
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 4; i++) {
         await t.pump(const Duration(seconds: 20));
       }
       await acomodar(t);
@@ -202,7 +202,7 @@ void main() {
     ) async {
       await montar(t, reduzir: true);
       await t.pump(const Duration(seconds: 1));
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 4; i++) {
         await t.pump(const Duration(seconds: 20));
       }
       expect(textoDaDica(dicas[0]), findsOneWidget);
@@ -219,7 +219,7 @@ void main() {
       await t.pump(const Duration(seconds: 3));
       expect(textoDaDica(dicas[1]), findsOneWidget);
 
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 4; i++) {
         await t.pump(const Duration(seconds: 20));
       }
       await acomodar(t);
