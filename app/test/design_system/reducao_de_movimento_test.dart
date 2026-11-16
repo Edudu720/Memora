@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
@@ -79,6 +81,47 @@ void main() {
               'passa a nao provar nada — e precisa ser reescrito, nao apagado');
       expect(duracoesDe(t), everyElement(Duration.zero));
     });
+
+    testWidgets(
+      'o botão suprime a escala ao pressionar (1.0) mas mantém o anel de foco externo',
+      (WidgetTester t) async {
+        await montar(
+          t,
+          BotaoPrimario(rotulo: 'Continuar', aoTocar: () {}),
+          reduzirMovimento: true,
+        );
+
+        await t.sendKeyEvent(LogicalKeyboardKey.tab);
+        await t.pump();
+
+        final AnimatedContainer superficie = t.widget<AnimatedContainer>(
+          find.descendant(
+            of: find.byType(BotaoPrimario),
+            matching: find.byType(AnimatedContainer),
+          ),
+        );
+        final BoxDecoration anel =
+            superficie.foregroundDecoration! as BoxDecoration;
+        expect((anel.border! as Border).top.width, MemoraDimensoes.bordaSelecao);
+
+        final TestGesture gesto = await t.startGesture(
+          t.getCenter(find.byType(BotaoPrimario)),
+        );
+        await t.pump(kPressTimeout);
+
+        final AnimatedScale escala = t.widget<AnimatedScale>(
+          find.descendant(
+            of: find.byType(BotaoPrimario),
+            matching: find.byType(AnimatedScale),
+          ),
+        );
+        expect(escala.scale, 1.0);
+        expect(escala.duration, Duration.zero);
+
+        await gesto.up();
+        await t.pump();
+      },
+    );
 
     testWidgets('a opção selecionável não anima', (WidgetTester t) async {
       await montar(

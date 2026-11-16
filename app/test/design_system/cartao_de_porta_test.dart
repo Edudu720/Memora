@@ -27,9 +27,13 @@ void main() {
 
   Widget app(Widget filho, {double escala = 1.0}) => MaterialApp(
     theme: TemasMemora.claro,
-    home: MediaQuery(
-      data: MediaQueryData(textScaler: TextScaler.linear(escala)),
-      child: Scaffold(body: Center(child: filho)),
+    home: Builder(
+      builder: (BuildContext context) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(escala)),
+        child: Scaffold(body: Center(child: filho)),
+      ),
     ),
   );
 
