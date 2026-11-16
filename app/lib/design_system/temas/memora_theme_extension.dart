@@ -33,6 +33,16 @@ class MemoraTheme extends ThemeExtension<MemoraTheme> {
   /// Cores semânticas deste tema.
   final MemoraCores cores;
 
+  /// O nome da paleta de destaque aplicada (uma das chaves de
+  /// [MemoraCores.paletas]); `azul` é a de fábrica.
+  ///
+  /// É **ele** a fonte da paleta: quem precisa saber qual paleta está ativa
+  /// (a Memora, que se pinta com as cores dela) lê este campo, em vez de
+  /// adivinhar pela cor primária — que só diz qual paleta é enquanto nenhuma
+  /// outra produzir a mesma primária. No alto contraste a paleta não vale
+  /// (R15) e o nome fica `azul`.
+  final String paleta;
+
   /// Contraste mínimo exigido para texto neste tema.
   ///
   /// 4.5:1 nos temas comuns; 7:1 no de alto contraste (FR-035).
@@ -43,6 +53,7 @@ class MemoraTheme extends ThemeExtension<MemoraTheme> {
     required this.id,
     required this.cores,
     required this.contrasteMinimoTexto,
+    this.paleta = 'azul',
   });
 
   /// Tema claro, padrão do aplicativo.
@@ -79,6 +90,8 @@ class MemoraTheme extends ThemeExtension<MemoraTheme> {
     final bool ehEscuro = id == MemoraTemaId.escuro;
     return copyWith(
       cores: cores.comPaleta(nome, ehEscuro: ehEscuro),
+      // Nome desconhecido vira `azul`, como em [MemoraCores.comPaleta].
+      paleta: MemoraCores.paletas.containsKey(nome) ? nome : 'azul',
     );
   }
 
@@ -87,11 +100,13 @@ class MemoraTheme extends ThemeExtension<MemoraTheme> {
     MemoraTemaId? id,
     MemoraCores? cores,
     double? contrasteMinimoTexto,
+    String? paleta,
   }) {
     return MemoraTheme(
       id: id ?? this.id,
       cores: cores ?? this.cores,
       contrasteMinimoTexto: contrasteMinimoTexto ?? this.contrasteMinimoTexto,
+      paleta: paleta ?? this.paleta,
     );
   }
 
@@ -104,6 +119,7 @@ class MemoraTheme extends ThemeExtension<MemoraTheme> {
       contrasteMinimoTexto: t < 0.5
           ? contrasteMinimoTexto
           : other.contrasteMinimoTexto,
+      paleta: t < 0.5 ? paleta : other.paleta,
     );
   }
 }
