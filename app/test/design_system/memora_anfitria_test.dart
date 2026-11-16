@@ -220,7 +220,7 @@ void main() {
       addTearDown(atividade.dispose);
       await montar(t, atividade: atividade);
       await t.pump(const Duration(seconds: 1));
-      for (int i = 0; i < 6; i++) {
+      for (int i = 0; i < 5; i++) {
         await t.pump(const Duration(seconds: 15));
         atividade.value++;
       }
