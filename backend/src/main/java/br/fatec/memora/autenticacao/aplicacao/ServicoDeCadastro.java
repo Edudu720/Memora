@@ -175,10 +175,10 @@ public class ServicoDeCadastro {
                             "Essa senha ficou curtinha. Que tal uma frase de que você goste, "
                                     + "com pelo menos "
                                     + PoliticaDeSenha.COMPRIMENTO_MINIMO
-                                    + " letras? 😊";
+                                    + " letras?";
                     case COMPROMETIDA ->
                             "Essa senha é bastante usada, e por isso não protege sua conta. "
-                                    + "Vamos pensar em outra juntos? 😊";
+                                    + "Vamos pensar em outra juntos?";
                 };
 
         throw FalhaDoMemora.de(CodigoDeErro.DADOS_INVALIDOS, mensagem);
