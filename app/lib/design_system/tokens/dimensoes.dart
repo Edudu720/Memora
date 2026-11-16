@@ -173,7 +173,13 @@ abstract final class MemoraDimensoes {
   /// é a primeira a ceder quando falta altura (FR-041): o lado dela é esta
   /// fração dividida pela ampliação, entre `alvoMinimo` e `ilustracaoHeroi`.
   /// Fração, e não pixel, pela lição do teto da conversa.
-  static const double fracaoDaAnfitriaDoInicio = 0.17;
+  ///
+  /// 0,15 foi medido com a Atkinson: num 390×844 a anfitriã inteira (desenho,
+  /// 8 dp e o balão da dica mais longa) ocupa cerca de **um terço** da altura
+  /// (FR-040). Com os quatro atalhos o Início passa da altura de qualquer
+  /// aparelho e rola — o balão sozinho tem 134 dp —, e o que rola chega ao
+  /// toque, acima da barra.
+  static const double fracaoDaAnfitriaDoInicio = 0.15;
 
   /// 40 dp — abaixo disto a ilustração some. Desenho pequeno demais vira
   /// borrão para quem enxerga pouco, e ocupa o espaço de uma linha de texto.
