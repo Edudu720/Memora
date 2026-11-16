@@ -17,6 +17,8 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -122,7 +124,20 @@ public class ControladorConversa {
         ContextoDaRequisicao contexto = ContextoDaRequisicao.atual();
         UUID pessoaId = pessoa.id();
 
-        transmissores.execute(() -> transmitir(emissor, contexto, pessoaId, requisicao));
+        AtomicBoolean concluida = new AtomicBoolean(false);
+        Future<?> execucao =
+                transmissores.submit(
+                        () -> transmitir(emissor, contexto, pessoaId, requisicao, concluida));
+
+        Runnable cancelarSeAberta =
+                () -> {
+                    if (!concluida.get()) {
+                        execucao.cancel(true);
+                    }
+                };
+        emissor.onCompletion(cancelarSeAberta);
+        emissor.onTimeout(cancelarSeAberta);
+        emissor.onError(erro -> cancelarSeAberta.run());
         return emissor;
     }
 
@@ -130,7 +145,8 @@ public class ControladorConversa {
             SseEmitter emissor,
             ContextoDaRequisicao contexto,
             UUID pessoaId,
-            ConversaRequisicao requisicao) {
+            ConversaRequisicao requisicao,
+            AtomicBoolean concluida) {
 
         ContextoDaRequisicao.instalar(contexto);
         try {
@@ -192,6 +208,7 @@ public class ControladorConversa {
             emissor.complete();
 
         } finally {
+            concluida.set(true);
             // Sem isto, a origem desta pessoa reaparece na requisição da
             // seguinte que pegar a mesma thread do pool.
             ContextoDaRequisicao.limpar();
@@ -202,9 +219,10 @@ public class ControladorConversa {
         try {
             emissor.send(SseEmitter.event().name(tipo).data(dado));
         } catch (IOException | IllegalStateException fechou) {
-            // A pessoa fechou a tela no meio da resposta. É o caso comum, não
-            // um defeito: nada a fazer além de parar de escrever.
+            // A pessoa cancelou ou fechou a tela no meio da resposta (FR-052, T096):
+            // interrompe o fio para abortar a leitura do provedor externo.
             LOG.debug("conexao encerrada pelo cliente durante a transmissao");
+            Thread.currentThread().interrupt();
         }
     }
 

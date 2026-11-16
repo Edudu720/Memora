@@ -39,6 +39,16 @@ class TextosAssistente {
   /// O que essa porta faz.
   static const String descricaoAplicativos = 'Eu te ensino e posso abrir';
 
+  /// Rótulo quando o aplicativo cotidiano não está instalado no aparelho (T089).
+  static const String soEnsinaNaoInstalado =
+      'Eu te ensino (não instalado no celular)';
+
+  /// Aviso calmo na conversa quando a ação autorizada aponta para app ausente (T089).
+  static String naoInstaladoAntesDeAbrir(String nome) =>
+      'Olhei aqui e o $nome não está instalado neste celular, então não dá '
+      'para abrir para você agora. Posso continuar te explicando passo a passo '
+      'ou mostrar onde baixar na loja oficial!';
+
   /// Nome da porta de ajuda.
   static const String portaAjuda = 'Preciso de ajuda';
 

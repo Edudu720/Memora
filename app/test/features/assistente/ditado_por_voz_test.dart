@@ -40,12 +40,14 @@ class _RepositorioEspiao extends RepositorioAssistenteSimulado {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) {
     chamadasEnviar++;
     return super.conversar(
       mensagem: mensagem,
       historico: historico,
       aoReceberTrecho: aoReceberTrecho,
+      aoCriarCancelamento: aoCriarCancelamento,
     );
   }
 }

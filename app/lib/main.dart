@@ -14,6 +14,7 @@ import 'features/perfil/data/foto_de_perfil_local.dart';
 import 'services/acessibilidade/memora_binding_atividade.dart';
 import 'services/ambiente/ambiente.dart';
 import 'services/ambiente/composicao.dart';
+import 'services/aplicativos/consulta_de_aplicativos.dart';
 import 'services/preferencias/repositorio_preferencia_aparencia_local.dart';
 import 'services/seguranca/cofre_de_credenciais.dart';
 
@@ -119,6 +120,7 @@ class AplicativoMemora extends StatelessWidget {
               localizador: composicao.localizador,
               aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoPorCanal(),
+              consultaAplicativos: ConsultaDeAplicativosPorCanal(),
             ),
           );
         },

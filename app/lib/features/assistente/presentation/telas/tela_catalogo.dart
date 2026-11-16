@@ -63,6 +63,7 @@ class TelaCatalogo extends StatefulWidget {
 
 class _TelaCatalogoState extends State<TelaCatalogo> {
   List<ServicoDoCatalogo>? _todosServicos;
+  Map<String, bool> _instalacaoPorChave = const <String, bool>{};
   late CategoriaDoServico _categoriaAtiva;
   bool _falhou = false;
   String _busca = '';
@@ -80,7 +81,8 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
     if (antigo.categoria != widget.categoria) {
       _categoriaAtiva = widget.categoria;
     }
-    if (antigo.repositorio != widget.repositorio) {
+    if (antigo.repositorio != widget.repositorio ||
+        antigo.consultaAplicativos != widget.consultaAplicativos) {
       _carregar();
     }
   }
@@ -88,15 +90,42 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
   Future<void> _carregar() async {
     try {
       final List<ServicoDoCatalogo> todos = await widget.repositorio.catalogo();
+      final Map<String, bool> instalacoes = await _consultarInstalacoes(todos);
       if (!mounted) return;
       setState(() {
         _todosServicos = todos;
+        _instalacaoPorChave = instalacoes;
         _falhou = false;
       });
     } on Exception {
       if (!mounted) return;
       setState(() => _falhou = true);
     }
+  }
+
+  Future<Map<String, bool>> _consultarInstalacoes(
+    List<ServicoDoCatalogo> todos,
+  ) async {
+    final ConsultaDeAplicativos? consulta = widget.consultaAplicativos;
+    if (consulta == null) return const <String, bool>{};
+
+    final Map<String, bool> resultado = <String, bool>{};
+    await Future.wait(<Future<void>>[
+      for (final ServicoDoCatalogo servico in todos)
+        if (servico.categoria == CategoriaDoServico.cotidiano &&
+            servico.memoraPodeAbrir &&
+            (servico.identificadorAndroid?.trim().isNotEmpty ?? false))
+          () async {
+            try {
+              resultado[servico.chave] = await consulta.estaInstalado(
+                servico.identificadorAndroid!.trim(),
+              );
+            } catch (_) {
+              resultado[servico.chave] = false;
+            }
+          }(),
+    ]);
+    return resultado;
   }
 
   String get _titulo => switch (_categoriaAtiva) {
@@ -247,6 +276,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                   _ItemDoCatalogo(
                     servico: servico,
                     temGuia: guiaDe(servico.chave) != null,
+                    instalado: _instalacaoPorChave[servico.chave] ?? true,
                     habilitado:
                         widget.aoEscolher != null || widget.aoAbrirGuia != null,
                     aoAcionarPadrao: () => _acionarPadrao(servico),
@@ -268,6 +298,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
 class _ItemDoCatalogo extends StatelessWidget {
   final ServicoDoCatalogo servico;
   final bool temGuia;
+  final bool instalado;
   final bool habilitado;
   final VoidCallback aoAcionarPadrao;
   final VoidCallback? aoPedirAbrir;
@@ -275,6 +306,7 @@ class _ItemDoCatalogo extends StatelessWidget {
   const _ItemDoCatalogo({
     required this.servico,
     required this.temGuia,
+    required this.instalado,
     required this.habilitado,
     required this.aoAcionarPadrao,
     this.aoPedirAbrir,
@@ -285,9 +317,13 @@ class _ItemDoCatalogo extends StatelessWidget {
     final MemoraTheme tema = context.memora;
     final MemoraCores cores = tema.cores;
     final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
-    final bool podeAbrir = servico.categoria == CategoriaDoServico.cotidiano &&
+    final bool podeAbrir = instalado &&
+        servico.categoria == CategoriaDoServico.cotidiano &&
         servico.memoraPodeAbrir &&
         aoPedirAbrir != null;
+    final bool marcadoComoNaoInstalado = !instalado &&
+        servico.categoria == CategoriaDoServico.cotidiano &&
+        servico.memoraPodeAbrir;
 
     return Cartao(
       padding: const EdgeInsets.all(MemoraEspacamento.md),
@@ -326,11 +362,13 @@ class _ItemDoCatalogo extends StatelessWidget {
                     TextoMemora.apoio(servico.descricaoCurta),
                     const SizedBox(height: MemoraEspacamento.sm),
                     BadgeDeStatus(
-                      rotulo: servico.categoria.oQueAMemoraFaz,
-                      icone: servico.memoraPodeAbrir
+                      rotulo: marcadoComoNaoInstalado
+                          ? TextosAssistente.soEnsinaNaoInstalado
+                          : servico.categoria.oQueAMemoraFaz,
+                      icone: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
                           ? Icons.check_circle_outline
                           : Icons.school_outlined,
-                      tom: servico.memoraPodeAbrir
+                      tom: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
                           ? TomBadgeStatus.positivo
                           : TomBadgeStatus.informativo,
                     ),

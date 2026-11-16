@@ -240,6 +240,39 @@ void main() {
         FalhaDaAssistente.semConexao,
       );
     });
+
+    test('aoCriarCancelamento aborta a requisição SSE aberta no Dio (T096)', () async {
+      final StreamController<Uint8List> fluxo = StreamController<Uint8List>();
+      RequestOptions? pedidoCapturado;
+      montar((RequestOptions o, int n) async {
+        pedidoCapturado = o;
+        return ResponseBody(
+          fluxo.stream,
+          200,
+          headers: <String, List<String>>{
+            Headers.contentTypeHeader: <String>['text/event-stream'],
+          },
+        );
+      });
+
+      void Function()? cancelar;
+      final Future<RespostaDaAssistente> resposta = repositorio.conversar(
+        mensagem: 'como envio foto?',
+        historico: const <MensagemDaConversa>[],
+        aoCriarCancelamento: (void Function() fn) => cancelar = fn,
+      );
+      await pumpEventQueue();
+
+      expect(cancelar, isNotNull);
+      expect(pedidoCapturado?.cancelToken?.isCancelled, isFalse);
+
+      cancelar!();
+      await fluxo.close();
+
+      final RespostaDaAssistente resultado = await resposta;
+      expect(pedidoCapturado?.cancelToken?.isCancelled, isTrue);
+      expect(resultado, isA<AssistenteFalhou>());
+    });
   });
 
   group('catálogo, registro e ação', () {
