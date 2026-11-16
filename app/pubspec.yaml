@@ -74,6 +74,14 @@ dependencies:
   # Dispositivo de Cuidado (ESP32 / Wokwi) (FR-013).
   mqtt_client: ^10.3.3
 
+  # Seleção de foto de perfil da galeria (Android Photo Picker) ou câmera
+  # sob demanda (FR-003, feature 011).
+  image_picker: ^1.2.4
+
+  # Validação binária, correção de orientação, recorte 1:1 e remoção completa
+  # de metadados EXIF/GPS em Dart puro antes de persistir (FR-005, feature 011).
+  image: ^4.13.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

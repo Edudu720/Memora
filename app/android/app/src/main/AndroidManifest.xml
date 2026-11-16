@@ -19,6 +19,14 @@
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+    <!--
+        Permissao de camera usada apenas sob demanda quando a pessoa escolhe
+        tirar uma foto de perfil na hora (FR-003, feature 011). Nao declaramos
+        READ_MEDIA_IMAGES nem READ_EXTERNAL_STORAGE para que a escolha na
+        galeria use o Android Photo Picker com acesso restrito ao item escolhido.
+    -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
 
     <queries>
         <package android:name="com.whatsapp"/>
