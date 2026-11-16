@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 /// A transição do diálogo — T020 da feature 013 (V7 e V9), FR-010 e FR-013.
 ///
 /// O diálogo surge no centro, por cima: esmaece e cresce de 96% a 100%, e a
 /// tela de trás não se mexe. Com "reduzir movimento" ele já chega inteiro.
 void main() {
+  movimentoLiberado();
   const Key fundo = Key('fundo');
   const Key abrir = Key('abrir');
   const Key chaveDoDialogo = Key('dialogo');

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/componentes/ilustracao/memora_animada/pintores/contexto_de_pintura.dart';
 import 'package:memora/design_system/componentes/ilustracao/memora_animada/pintores/pintor_da_memora.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 /// A `MemoraAnfitria` (feature 013, T084; FR-051 a FR-057).
 ///
@@ -17,6 +18,7 @@ import 'package:memora/design_system/design_system.dart';
 ///   (`fala` e a pose), o mesmo número que a pessoa vê.
 /// - Os **relógios**: `transientCallbackCount`, que conta os `Ticker` ativos.
 void main() {
+  movimentoLiberado();
   const List<String> dicas = <String>[
     'Primeira dica: toque no cartão grande para começar a conversar comigo.',
     'Segunda dica: a letra pode ficar maior, é só pedir em Ajustes.',

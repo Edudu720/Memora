@@ -67,7 +67,7 @@ void main() {
     ThemeData? tema,
     double escala = 1.0,
     Size tamanho = const Size(390, 844),
-    bool reduzirMovimento = false,
+    bool reduzirMovimento = true,
   }) {
     t.view.physicalSize = tamanho;
     t.view.devicePixelRatio = 1.0;
@@ -420,7 +420,6 @@ void main() {
             tema: tema,
             escala: 2.0,
             tamanho: const Size(320, 568),
-            reduzirMovimento: true,
           ),
         );
         await t.pumpAndSettle();
