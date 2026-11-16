@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/aprendizado/data/guias/guias.dart';
 import 'package:memora/features/aprendizado/domain/guia.dart';
@@ -290,57 +291,96 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       expect(problemas, isEmpty, reason: problemas.join('\n'));
     });
 
-    test('capturas pendentes são registradas sem reprovar a construção (FR-028a)', () {
-      final List<String> pendentes = <String>[
-        for (final Guia g in todosOsGuias)
-          ...capturasPendentesDoGuia(
-            g,
-            capturaExiste: (CapturaDoGuia c) => File(c.caminho).existsSync(),
-          ),
-      ];
-      if (pendentes.isNotEmpty) {
-        // ignore: avoid_print
-        print('Capturas pendentes (FR-028a):\n${pendentes.join('\n')}');
-      }
-    });
-
-    test('a pasta de capturas de cada guia está declarada em assets no pubspec.yaml', () {
-      final String pubspec = File('pubspec.yaml').readAsStringSync();
-      for (final Guia g in todosOsGuias) {
-        final String declaracao = 'assets/guias/${g.chave}/';
-        expect(
-          pubspec.contains(declaracao),
-          isTrue,
-          reason:
-              'A pasta "$declaracao" precisa estar declarada na seção assets do pubspec.yaml.',
-        );
-      }
-    });
-
-    test('o tamanho total de assets/guias/ não passa de 8 MB (T084, contracts/guias.md)', () {
-      final Directory pastaGuias = Directory('assets/guias');
-      expect(
-        pastaGuias.existsSync(),
-        isTrue,
-        reason: 'Diretório assets/guias não encontrado.',
-      );
-
-      int tamanhoTotalEmBytes = 0;
-      for (final FileSystemEntity entidade in pastaGuias.listSync(recursive: true)) {
-        if (entidade is File) {
-          tamanhoTotalEmBytes += entidade.lengthSync();
+    test(
+      'capturas pendentes são registradas sem reprovar a construção (FR-028a)',
+      () {
+        final List<String> pendentes = <String>[
+          for (final Guia g in todosOsGuias)
+            ...capturasPendentesDoGuia(
+              g,
+              capturaExiste: (CapturaDoGuia c) => File(c.caminho).existsSync(),
+            ),
+        ];
+        if (pendentes.isNotEmpty) {
+          // ignore: avoid_print
+          print('Capturas pendentes (FR-028a):\n${pendentes.join('\n')}');
         }
-      }
+      },
+    );
 
-      const int limite8MB = 8 * 1024 * 1024;
-      expect(
-        tamanhoTotalEmBytes,
-        lessThanOrEqualTo(limite8MB),
-        reason:
-            'A pasta assets/guias/ ultrapassou o limite de 8 MB: '
-            '${(tamanhoTotalEmBytes / (1024 * 1024)).toStringAsFixed(2)} MB.',
-      );
-    });
+    test(
+      'a pasta de capturas de cada guia está declarada em assets no pubspec.yaml',
+      () {
+        final String pubspec = File('pubspec.yaml').readAsStringSync();
+        for (final Guia g in todosOsGuias) {
+          final String declaracao = 'assets/guias/${g.chave}/';
+          expect(
+            pubspec.contains(declaracao),
+            isTrue,
+            reason:
+                'A pasta "$declaracao" precisa estar declarada na seção assets do pubspec.yaml.',
+          );
+        }
+      },
+    );
+
+    test(
+      'o tamanho total de assets/guias/ não passa de 8 MB (T084, contracts/guias.md)',
+      () {
+        final Directory pastaGuias = Directory('assets/guias');
+        expect(
+          pastaGuias.existsSync(),
+          isTrue,
+          reason: 'Diretório assets/guias não encontrado.',
+        );
+
+        int tamanhoTotalEmBytes = 0;
+        for (final FileSystemEntity entidade in pastaGuias.listSync(
+          recursive: true,
+        )) {
+          if (entidade is File) {
+            tamanhoTotalEmBytes += entidade.lengthSync();
+          }
+        }
+
+        const int limite8MB = 8 * 1024 * 1024;
+        expect(
+          tamanhoTotalEmBytes,
+          lessThanOrEqualTo(limite8MB),
+          reason:
+              'A pasta assets/guias/ ultrapassou o limite de 8 MB: '
+              '${(tamanhoTotalEmBytes / (1024 * 1024)).toStringAsFixed(2)} MB.',
+        );
+      },
+    );
+
+    // Trocar uma captura de WebP para PNG (ou o contrário) deixa o arquivo
+    // antigo na pasta: ninguém o mostra, e ele pesa no teto de 8 MB. Também
+    // pega o print solto com nome fora do contrato (ex.: `01_feed.jpeg`).
+    test(
+      'nenhuma imagem em assets/guias/<chave>/ fica sem passo que a use',
+      () {
+        final List<String> soltas = <String>[];
+        for (final Guia g in todosOsGuias) {
+          final Directory pasta = Directory('assets/guias/${g.chave}');
+          if (!pasta.existsSync()) continue;
+          final Set<String> usadas = <String>{
+            for (final Passo p in g.todosOsPassos) p.captura.caminho,
+          };
+          for (final FileSystemEntity e in pasta.listSync()) {
+            final String nome = e.uri.pathSegments.last;
+            if (e is! File || nome.startsWith('.')) continue;
+            final String caminho = 'assets/guias/${g.chave}/$nome';
+            if (!usadas.contains(caminho)) soltas.add(caminho);
+          }
+        }
+        expect(
+          soltas,
+          isEmpty,
+          reason: 'Sem passo que as use: ${soltas.join(', ')}',
+        );
+      },
+    );
   });
 
   // O registro está vazio, então os testes acima passam sem examinar nenhum
@@ -369,14 +409,27 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       temCampoDeSenha: senha,
     );
 
+    SecaoDoGuia secao(String chave, int passos, {String titulo = 'Seção'}) =>
+        SecaoDoGuia(
+          chave: chave,
+          titulo: titulo,
+          subtitulo: 'O que se aprende nesta seção.',
+          icone: Icons.info_outline,
+          passos: List<Passo>.generate(passos, (int _) => passo()),
+        );
+
     Guia guia({
       String chave = 'exemplo',
       List<Passo>? passos,
+      List<SecaoDoGuia>? secoes,
       List<String> emMaos = const <String>[],
     }) => Guia(
       chave: chave,
       titulo: 'Aprender a usar o exemplo',
-      passos: passos ?? <Passo>[passo(), passo(), passo()],
+      passos: secoes != null
+          ? const <Passo>[]
+          : (passos ?? <Passo>[passo(), passo(), passo()]),
+      secoes: secoes ?? const <SecaoDoGuia>[],
       capturadoEm: DateTime(2026, 10),
       versaoCapturada: '1.0',
       precisaTerEmMaos: emMaos,
@@ -423,6 +476,108 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       );
     });
 
+    group('guia em seções (FR-028d, T137)', () {
+      test('seções de 3 a 7 passos são aceitas', () {
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('a', 3), secao('b', 7)])),
+          isEmpty,
+        );
+      });
+
+      test('uma seção com 8 passos reprova, mesmo com o guia somando mais', () {
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('a', 4), secao('b', 8)])),
+          contains(contains('seção "b" tem 8 passos')),
+        );
+      });
+
+      test('uma seção com 2 passos reprova', () {
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('a', 4), secao('b', 2)])),
+          contains(contains('seção "b" tem 2 passos')),
+        );
+      });
+
+      test('o total de passos do guia NÃO é limitado: só a seção é', () {
+        // 3 seções de 7 = 21 passos, e nenhum problema.
+        expect(
+          problemas(
+            guia(
+              secoes: <SecaoDoGuia>[
+                secao('a', 7),
+                secao('b', 7),
+                secao('c', 7),
+              ],
+            ),
+          ),
+          isEmpty,
+        );
+      });
+
+      test('seção sem título reprova', () {
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('a', 3, titulo: '  ')])),
+          contains(contains('sem título')),
+        );
+      });
+
+      test('chave de seção repetida reprova (ela compõe o progresso)', () {
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('a', 3), secao('a', 3)])),
+          contains(contains('repetida')),
+        );
+      });
+
+      test('guia com seções e passos soltos reprova', () {
+        final Guia misto = Guia(
+          chave: 'exemplo',
+          titulo: 'Aprender a usar o exemplo',
+          passos: <Passo>[passo(), passo(), passo()],
+          secoes: <SecaoDoGuia>[secao('a', 3)],
+          capturadoEm: DateTime(2026, 10),
+          versaoCapturada: '1.0',
+        );
+        expect(problemas(misto), contains(contains('passos soltos')));
+      });
+
+      test('os passos de todas as seções entram nas conferências', () {
+        // Descrição em branco no passo de uma seção reprova.
+        final SecaoDoGuia comPassoRuim = SecaoDoGuia(
+          chave: 'a',
+          titulo: 'Seção',
+          subtitulo: 'Subtítulo.',
+          icone: Icons.info_outline,
+          passos: <Passo>[
+            passo(),
+            passo(descricao: ''),
+            passo(),
+          ],
+        );
+        expect(
+          problemas(guia(secoes: <SecaoDoGuia>[secao('b', 3), comPassoRuim])),
+          contains(contains('descrição')),
+        );
+        // E a captura pendente de uma seção entra na lista de pendentes.
+        expect(
+          capturasPendentesDoGuia(
+            guia(secoes: <SecaoDoGuia>[secao('a', 3), secao('b', 3)]),
+            capturaExiste: (CapturaDoGuia _) => false,
+          ),
+          hasLength(6),
+        );
+      });
+
+      test('todosOsPassos junta os passos das seções, na ordem', () {
+        final Guia g = guia(
+          secoes: <SecaoDoGuia>[secao('a', 3), secao('b', 4)],
+        );
+        expect(g.temSecoes, isTrue);
+        expect(g.todosOsPassos, hasLength(7));
+        expect(guia().temSecoes, isFalse);
+        expect(guia().todosOsPassos, hasLength(3));
+      });
+    });
+
     test('captura sem descrição reprova, inclusive só de espaços', () {
       expect(
         problemas(
@@ -464,17 +619,86 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
       );
     });
 
-    test('captura ausente entra na lista de pendentes em vez de reprovar (FR-028a)', () {
-      final List<String> pendentes = capturasPendentesDoGuia(
-        guia(),
-        capturaExiste: (CapturaDoGuia _) => false,
+    test('a captura é WebP por padrão, e PNG só quando a constante diz', () {
+      expect(
+        const CapturaDoGuia.paraTeste('tiktok', 2).caminho,
+        'assets/guias/tiktok/passo_2.webp',
       );
       expect(
-        pendentes,
-        contains(contains('assets/guias/exemplo/passo_1.png')),
+        const CapturaDoGuia.paraTeste(
+          'tiktok',
+          2,
+          formato: FormatoDaCaptura.png,
+        ).caminho,
+        'assets/guias/tiktok/passo_2.png',
       );
-      expect(problemas(guia(), arquivoExiste: false), isEmpty);
     });
+
+    test(
+      'JPG só passa como legado da #71 (lista explícita), e reprova fora dela',
+      () {
+        Guia comCaptura(CapturaDoGuia c) => Guia(
+          chave: c.chave,
+          titulo: 't',
+          passos: <Passo>[
+            for (int i = 0; i < 3; i++)
+              Passo(
+                captura: c,
+                destaque: regiao,
+                texto: 'Toque no botão.',
+                descricaoDaCaptura: 'Uma tela.',
+              ),
+          ],
+          capturadoEm: DateTime(2026, 10),
+          versaoCapturada: '1.0',
+        );
+
+        // ignore: invalid_use_of_visible_for_testing_member
+        const CapturaDoGuia legada = CapturaDoGuia.paraTeste(
+          'whatsapp',
+          1,
+          formato: FormatoDaCaptura.jpg,
+        );
+        // ignore: invalid_use_of_visible_for_testing_member
+        const CapturaDoGuia foraDaLista = CapturaDoGuia.paraTeste(
+          'tiktok',
+          1,
+          formato: FormatoDaCaptura.jpg,
+        );
+        // ignore: invalid_use_of_visible_for_testing_member
+        const CapturaDoGuia alemDoLimite = CapturaDoGuia.paraTeste(
+          'whatsapp',
+          5,
+          formato: FormatoDaCaptura.jpg,
+        );
+
+        List<String> deste(CapturaDoGuia c) => problemasDoGuia(
+          comCaptura(c),
+          categoria: CategoriaDoServico.cotidiano,
+          chavesEmCapturasMd: <String>{c.chave},
+          capturaExiste: (CapturaDoGuia _) => true,
+        );
+
+        expect(deste(legada), isEmpty);
+        expect(deste(foraDaLista), contains(contains('JPG')));
+        expect(deste(alemDoLimite), contains(contains('JPG')));
+      },
+    );
+
+    test(
+      'captura ausente entra na lista de pendentes em vez de reprovar (FR-028a)',
+      () {
+        final List<String> pendentes = capturasPendentesDoGuia(
+          guia(),
+          capturaExiste: (CapturaDoGuia _) => false,
+        );
+        expect(
+          pendentes,
+          contains(contains('assets/guias/exemplo/passo_1.webp')),
+        );
+        expect(problemas(guia(), arquivoExiste: false), isEmpty);
+      },
+    );
 
     test('serviço sensível sem "o que ter em mãos" reprova', () {
       expect(
@@ -517,6 +741,32 @@ texto solto | com barra
 
     expect(linhasDeCapturas(md), <String>{'tiktok', 'whatsapp'});
   });
+}
+
+/// As capturas JPG com marcação pintada que a #71 (feature 006) trouxe, e que
+/// o contrato aceita **temporariamente**, por guia: a chave e quantas capturas
+/// (de 1 a N) são legado.
+///
+/// É uma lista explícita, de propósito: o contrato é WebP por padrão e PNG
+/// por exceção (`FormatoDaCaptura`), e **afrouxar o portão para aceitar "qualquer
+/// JPG" deixaria entrar captura nova pintada**. Cada guia sai desta lista
+/// quando suas capturas forem substituídas por prints com o destaque desenhado
+/// pelo aplicativo. Motivo: legado #71, substituir.
+const Map<String, int> capturasLegadasDaPr71 = <String, int>{
+  'whatsapp': 4,
+  'facebook': 10,
+  'telegram': 8,
+  'gov-br': 24,
+  'serasa': 22,
+  'correios': 8,
+};
+
+/// O formato da [captura] é aceito pelo contrato? WebP e PNG sempre; JPG só se
+/// a captura está em [capturasLegadasDaPr71].
+bool formatoPermitido(CapturaDoGuia captura) {
+  if (captura.formato != FormatoDaCaptura.jpg) return true;
+  final int? ate = capturasLegadasDaPr71[captura.chave];
+  return ate != null && captura.numero >= 1 && captura.numero <= ate;
 }
 
 /// As chaves que têm linha na tabela de [capturasMd], ou `null` quando o texto
@@ -564,9 +814,7 @@ List<String> capturasPendentesDoGuia(
   for (int i = 0; i < todos.length; i++) {
     final Passo p = todos[i];
     if (!capturaExiste(p.captura)) {
-      pendentes.add(
-        '$quem, passo ${i + 1}: ${p.captura.caminho} pendente.',
-      );
+      pendentes.add('$quem, passo ${i + 1}: ${p.captura.caminho} pendente.');
     }
   }
   return pendentes;
@@ -585,7 +833,14 @@ List<String> problemasDoGuia(
     problemas.add('$quem não tem item no catálogo (nas migrations).');
   }
 
+  // Guia em seções (FR-028d): a regra de 3 a 7 passos vale POR SEÇÃO, e é o
+  // que permite um guia extenso sem cansar quem lê. O guia que traz seções
+  // não traz passos soltos (seriam ignorados pela tela).
   if (guia.temSecoes) {
+    if (guia.passos.isNotEmpty) {
+      problemas.add('$quem tem seções e também passos soltos.');
+    }
+    final Set<String> vistas = <String>{};
     for (final SecaoDoGuia secao in guia.secoes) {
       final int passos = secao.passos.length;
       if (passos < Guia.minimoDePassos || passos > Guia.maximoDePassos) {
@@ -596,6 +851,12 @@ List<String> problemasDoGuia(
       }
       if (secao.titulo.trim().isEmpty) {
         problemas.add('$quem, seção "${secao.chave}": sem título.');
+      }
+      if (!vistas.add(secao.chave)) {
+        problemas.add(
+          '$quem, seção "${secao.chave}" repetida (a chave compõe o '
+          'progresso).',
+        );
       }
     }
   } else {
@@ -618,6 +879,14 @@ List<String> problemasDoGuia(
       problemas.add('$quem, passo ${i + 1}: sem texto.');
     }
     // FR-028a: captura ausente não reprova a construção (entra na lista de pendentes).
+    if (!formatoPermitido(p.captura)) {
+      problemas.add(
+        '$quem, passo ${i + 1}: ${p.captura.caminho} é JPG, formato que só o '
+        'legado da #71 usa (WebP é o padrão; PNG só onde o WebP borra). '
+        'Converta para WebP — ou, se é captura legada, ela está fora de '
+        'capturasLegadasDaPr71.',
+      );
+    }
   }
 
   if (categoria == CategoriaDoServico.sensivel &&

@@ -25,6 +25,41 @@ abstract final class TextosGuias {
   static const String capturaFalhou =
       'Não foi possível carregar a imagem de exemplo.';
 
+  /// Leitor de tela: o anel de destaque sobre a captura.
+  static const String areaDestacada = 'Área destacada na tela para tocar';
+
+  /// Leitor de tela: o selo "Exemplo".
+  static const String seloExemploDescrito =
+      'Ilustração demonstrativa de exemplo';
+
+  /// Botão visível logo abaixo da captura (FR-028b).
+  static const String verImagemMaior = 'Ver a imagem maior';
+
+  /// Dica do leitor de tela para a captura que se pode tocar (FR-028b).
+  static const String dicaAmpliar = 'Toque duas vezes para ver a imagem maior';
+
+  /// Botão que aumenta a imagem na ampliação (FR-028b).
+  static const String aproximar = 'Aproximar';
+
+  /// Botão que diminui a imagem na ampliação (FR-028b).
+  static const String afastar = 'Afastar';
+
+  /// Botão que fecha a ampliação (FR-028b).
+  static const String fecharImagem = 'Fechar';
+
+  /// Quanto a imagem está ampliada; também é o aviso do leitor de tela.
+  ///
+  /// [vezes] é 1 para a imagem inteira. Número com decimais quando a pessoa
+  /// ampliou com os dois dedos e parou entre dois degraus.
+  static String ampliadaVezes(double vezes) {
+    if (vezes < 1.05) return 'Imagem inteira';
+    final bool inteiro = (vezes - vezes.round()).abs() < 0.05;
+    final String numero = inteiro
+        ? vezes.round().toString()
+        : vezes.toStringAsFixed(1).replaceAll('.', ',');
+    return 'Ampliada $numero vezes';
+  }
+
   /// Título do aviso quando a etapa tem campo de senha (FR-032).
   static const String tituloAvisoSenha = 'Atenção com a sua senha';
 
@@ -88,6 +123,36 @@ abstract final class TextosGuias {
   /// Instrução da caixa de etapa na última etapa do guia (FR-002a, T125c).
   static const String instrucaoConclusao = 'O que você quer fazer agora?';
 
+  // Seletor de seção dos guias extensos (FR-028d, T137)
+
+  /// Pergunta da Memora no topo do seletor de seção. O nome do serviço vai em
+  /// negrito (`**x**`, o balão sabe desenhar).
+  static String perguntaDaSecao(String servico) =>
+      'O que você quer aprender no **$servico**? Escolha uma das opções abaixo:';
+
+  /// Quantos passos tem a seção: "1 passo", "5 passos".
+  static String quantidadeDePassos(int quantidade) =>
+      '$quantidade ${quantidade == 1 ? 'passo' : 'passos'}';
+
+  /// Marca da seção cujo último passo a pessoa já alcançou.
+  static String secaoJaAprendida(String contagem) =>
+      '$contagem · Já aprendeu';
+
+  /// O progresso no cabeçalho do seletor: "2 de 4 assuntos aprendidos".
+  static String progressoDasSecoes(int aprendidas, int total) => aprendidas > 0
+      ? '$aprendidas de $total assuntos aprendidos'
+      : '$total assuntos para aprender';
+
+  /// Leitura do cartão de seção pelo leitor de tela.
+  static String secaoDescrita(String titulo, String subtitulo, String meta) =>
+      '$titulo. $subtitulo. $meta.';
+
+  /// Saída do seletor para quem não achou o assunto: leva à conversa.
+  ///
+  /// Curto de propósito: o "não achei" já está na pergunta da Memora, logo
+  /// acima, e o rótulo longo ocupava meia tela no aparelho pequeno a 200%.
+  static const String naoAcheiOQueProcuro = 'Perguntar à Memora';
+
   // WhatsApp (T071)
   /// Título do guia do WhatsApp.
   static const String tituloWhatsapp = 'Como usar o WhatsApp';
@@ -134,33 +199,129 @@ abstract final class TextosGuias {
   static const String whatsappCaptura4 =
       'Segunda metade das Configurações do WhatsApp com quatro blocos numerados sobre notificações, espaço, acessibilidade e ajuda.';
 
-  // Instagram (T071)
+  // Instagram (T071; refeito na T135 com imagens recriadas por IA, em cinco
+  // seções — ver a linha do Instagram no CAPTURAS.md)
   /// Título do guia do Instagram.
-  static const String tituloInstagram = 'Como ver fotos e vídeos no Instagram';
-  /// Passo 1 do Instagram.
-  static const String instagramPasso1 =
-      'Toque no ícone de casinha, embaixo, à esquerda, para ir à tela inicial.';
-  /// Descrição da captura do passo 1 do Instagram.
+  static const String tituloInstagram = 'Como usar o Instagram';
+
+  /// Seção "Ver fotos e vídeos" do Instagram.
+  static const String instagramSecaoVer = 'Ver fotos e vídeos';
+  /// O que se aprende na seção "Ver fotos e vídeos".
+  static const String instagramSecaoVerSubtitulo =
+      'Curtir as fotos, ver os stories e os Reels';
+  /// Seção "Publicar um story" do Instagram.
+  static const String instagramSecaoStory = 'Publicar um story';
+  /// O que se aprende na seção "Publicar um story".
+  static const String instagramSecaoStorySubtitulo =
+      'Mostrar uma foto aos amigos por um dia';
+  /// Seção "Avisos e mensagens" do Instagram.
+  static const String instagramSecaoAvisos = 'Avisos e mensagens';
+  /// O que se aprende na seção "Avisos e mensagens".
+  static const String instagramSecaoAvisosSubtitulo =
+      'Quem curtiu, quem quer seguir você e as conversas';
+  /// Seção "Procurar pessoas" do Instagram.
+  static const String instagramSecaoProcurar = 'Procurar pessoas';
+  /// O que se aprende na seção "Procurar pessoas".
+  static const String instagramSecaoProcurarSubtitulo =
+      'Achar amigos, família e assuntos';
+  /// Seção "Deixar a conta privada" do Instagram.
+  static const String instagramSecaoPrivada = 'Deixar a conta privada';
+  /// O que se aprende na seção "Deixar a conta privada".
+  static const String instagramSecaoPrivadaSubtitulo =
+      'Só quem você aceita vê as suas fotos';
+
+  /// Ver, passo 1.
+  static const String instagramVer1 =
+      'Estas são as fotos dos seus amigos. Para curtir uma, toque no coração, embaixo da foto, à esquerda.';
+  /// Ver, o story (1 de 2).
+  static const String instagramVerStory1 =
+      'As bolinhas no alto são os stories: fotos e vídeos que os amigos mostram por um dia. Toque numa delas para ver.';
+  /// Ver, o story (2 de 2).
+  static const String instagramVerStory2 =
+      'O story passa sozinho. Para responder, toque em "Enviar mensagem", embaixo. Para sair, deslize o dedo para baixo.';
+  /// Ver, passo 2.
+  static const String instagramVer2 =
+      'Para ver vídeos curtos, toque no segundo ícone de baixo, o dos Reels.';
+  /// Ver, passo 3.
+  static const String instagramVer3 =
+      'Para ver o próximo vídeo, deslize o dedo para cima. Para curtir, toque no coração, à direita. Agora você sabe ver fotos e vídeos.';
+
+  /// Story, passo 1.
+  static const String instagramStory1 =
+      'Toque na sua foto, no alto, à esquerda, onde está escrito "Seu story" e tem o sinal de mais.';
+  /// Story, passo 2.
+  static const String instagramStory2 =
+      'Escolha a foto que quer mostrar: toque nela, em "Recentes".';
+  /// Story, passo 3.
+  static const String instagramStory3 =
+      'Para todos os seus seguidores verem, toque em "Seu story", embaixo, à esquerda. A foto fica no ar por um dia. Agora você sabe publicar um story.';
+
+  /// Avisos, passo 1.
+  static const String instagramAvisos1 =
+      'Para ver quem curtiu ou começou a seguir você, toque no coração, no alto, à direita.';
+  /// Avisos, passo 2.
+  static const String instagramAvisos2 =
+      'Antes de tocar em "Seguir", confira se você conhece mesmo essa pessoa. Golpistas criam perfis com a foto e o nome de parentes.';
+  /// Avisos, passo 3.
+  static const String instagramAvisos3 =
+      'Para ver as suas conversas, volte ao início e toque no aviãozinho de papel, embaixo, no meio.';
+  /// Avisos, passo 4.
+  static const String instagramAvisos4 =
+      'Toque na conversa que você quer ler. Se alguém pedir dinheiro ou código por mensagem, ligue para a pessoa antes de fazer qualquer coisa. Agora você sabe ver avisos e mensagens.';
+
+  /// Procurar, passo 1.
+  static const String instagramProcurar1 =
+      'Para procurar alguém, toque na lupa, embaixo, a segunda opção da direita.';
+  /// Procurar, passo 2.
+  static const String instagramProcurar2 =
+      'Toque na barra de pesquisa, no alto, e escreva o nome da pessoa ou do assunto.';
+  /// Procurar, passo 3.
+  static const String instagramProcurar3 =
+      'As pesquisas que você já fez aparecem aqui: toque num nome para abrir o perfil. Agora você sabe procurar pessoas.';
+
+  /// Privada, passo 1.
+  static const String instagramPrivada1 =
+      'Toque na sua foto, embaixo, à direita, para abrir o seu perfil.';
+  /// Privada, passo 2.
+  static const String instagramPrivada2 =
+      'No seu perfil, toque nas três linhas, no alto, à direita.';
+  /// Privada, passo 3.
+  static const String instagramPrivada3 =
+      'Desça até "Privacidade da conta" e toque nela para deixar a conta privada. Assim, só quem você aceita vê as suas fotos, e um golpista não consegue copiá-las.';
+
+  /// Descrição da captura 1 do Instagram.
   static const String instagramCaptura1 =
-      'Tela inicial do Instagram com o ícone de casinha selecionado embaixo à esquerda.';
-  /// Passo 2 do Instagram.
-  static const String instagramPasso2 =
-      'Arraste o dedo de baixo para cima no meio da tela para ver as fotos e vídeos postados.';
-  /// Descrição da captura do passo 2 do Instagram.
+      'Início do Instagram com uma conta de exemplo: os stories no alto, uma foto com os botões de curtir, comentar e enviar, e embaixo as opções Início, Reels, Mensagens, Pesquisar e Perfil.';
+  /// Descrição da captura 2 do Instagram.
   static const String instagramCaptura2 =
-      'Linha do tempo do Instagram com fotos e vídeos de amigos e perfis.';
-  /// Passo 3 do Instagram.
-  static const String instagramPasso3 =
-      'Toque no desenho de coraçãozinho, logo abaixo da foto, para curtir o que você gostou.';
-  /// Descrição da captura do passo 3 do Instagram.
+      'Um Reel de exemplo de receita de bolo, com os botões de curtir, comentar e compartilhar à direita.';
+  /// Descrição da captura 3 do Instagram.
   static const String instagramCaptura3 =
-      'Publicação no Instagram com o ícone de coração para curtir abaixo da foto.';
-  /// Passo 4 do Instagram.
-  static const String instagramPasso4 =
-      'Para ver os vídeos curtos, toque no ícone de vídeo, embaixo, no meio. Parabéns! Agora você já sabe acompanhar o Instagram.';
-  /// Descrição da captura do passo 4 do Instagram.
+      'Tela Adicionar ao story, com as fotos recentes do celular para escolher.';
+  /// Descrição da captura 4 do Instagram.
   static const String instagramCaptura4 =
-      'Aba de vídeos Reels com botão de reprodução no meio da barra inferior.';
+      'Tela de edição do story, com os botões Seu story e Amigos próximos embaixo.';
+  /// Descrição da captura 5 do Instagram.
+  static const String instagramCaptura5 =
+      'Tela de Notificações com curtidas e sugestões de perfis para seguir.';
+  /// Descrição da captura 6 do Instagram.
+  static const String instagramCaptura6 =
+      'Tela de Mensagens com a lista de conversas de exemplo.';
+  /// Descrição da captura 7 do Instagram.
+  static const String instagramCaptura7 =
+      'Tela de pesquisa, com a barra Pesquisar no alto e fotos sugeridas.';
+  /// Descrição da captura 8 do Instagram.
+  static const String instagramCaptura8 =
+      'Pesquisas recentes, com nomes de perfis de exemplo.';
+  /// Descrição da captura 9 do Instagram.
+  static const String instagramCaptura9 =
+      'Perfil de exemplo, com o menu de três linhas no alto, à direita, e a lista Criar aberta embaixo.';
+  /// Descrição da captura 10 do Instagram.
+  static const String instagramCaptura10 =
+      'Configurações e atividade, com a opção Privacidade da conta embaixo, marcada como Público.';
+  /// Descrição da captura 11 do Instagram.
+  static const String instagramCaptura11 =
+      'Um story de exemplo de um amigo cuidando do jardim, com a capa de uma música e o campo Enviar mensagem embaixo.';
 
   // YouTube (T071)
   /// Título do guia do YouTube.
@@ -729,33 +890,46 @@ abstract final class TextosGuias {
   static const String meuInssCaptura4 =
       'Demonstrativo detalhado do benefício no Meu INSS.';
 
-  // e-Título (T081)
+  // e-Título (T081; refeito em 2026-11-12 com as capturas reais: entrar com a
+  // biometria e um passeio pelas abas)
   /// Título do guia do e-Título.
-  static const String tituloETitulo = 'Como acessar seu título no e-Título';
+  static const String tituloETitulo = 'Como usar o e-Título';
   /// Passo 1 do e-Título.
   static const String eTituloPasso1 =
-      'Abra o aplicativo e toque no botão azul "Entrar", no meio da tela.';
+      'Abra o e-Título e toque no botão laranja "Entrar com biometria", embaixo, para entrar com a sua digital.';
   /// Descrição da captura do passo 1 do e-Título.
   static const String eTituloCaptura1 =
-      'Tela de boas-vindas do aplicativo oficial e-Título com botão Entrar.';
+      'Tela de entrada do e-Título, com uma foto de exemplo, a opção Biometria ligada e o botão laranja Entrar com biometria embaixo.';
   /// Passo 2 do e-Título.
   static const String eTituloPasso2 =
-      'Digite os números do seu CPF ou Título de Eleitor no primeiro campo.';
+      'Pronto, você entrou. Este é o seu título de eleitor no celular. Para saber onde você vota, toque em "Onde votar", embaixo, a segunda opção da esquerda.';
   /// Descrição da captura do passo 2 do e-Título.
   static const String eTituloCaptura2 =
-      'Tela de identificação com campo de CPF ou Título de Eleitor.';
+      'Tela principal do e-Título com um título de eleitor de exemplo: foto, nome, número, zona e seção. Embaixo, as opções e-Título, Onde votar, Notificações e Mais opções.';
   /// Passo 3 do e-Título.
   static const String eTituloPasso3 =
-      'Digite a sua senha cadastrada no e-Título. Lembre-se: digite apenas no aplicativo oficial.';
+      'Aqui aparecem o lugar onde você vota, a seção e a zona. Para tirar uma dúvida sobre as eleições, toque em "ChatVote", embaixo, no meio.';
   /// Descrição da captura do passo 3 do e-Título.
   static const String eTituloCaptura3 =
-      'Tela de autenticação do e-Título com campo de senha vazio.';
+      'Tela Onde votar do e-Título, com um mapa e um cartão com a seção, a zona e uma escola de exemplo como local de votação.';
   /// Passo 4 do e-Título.
   static const String eTituloPasso4 =
-      'Veja o seu documento digital com sua foto e local de votação. Parabéns! Seu título está na palma da mão.';
+      'No ChatVote você escreve a sua dúvida no campo de baixo e toca na seta amarela para enviar. Para ver os avisos da Justiça Eleitoral, toque em "Notificações", embaixo, a segunda opção da direita.';
   /// Descrição da captura do passo 4 do e-Título.
   static const String eTituloCaptura4 =
-      'Tela do título eleitoral digital exibindo dados eleitorais e QR Code de validação.';
+      'Tela do ChatVote do e-Título, com a mensagem de boas-vindas, o campo Digite a sua mensagem e o botão amarelo de enviar embaixo.';
+  /// Passo 5 do e-Título.
+  static const String eTituloPasso5 =
+      'Aqui chegam os avisos da Justiça Eleitoral. Para ver tudo o que o e-Título faz, toque em "Mais opções", embaixo, à direita.';
+  /// Descrição da captura do passo 5 do e-Título.
+  static const String eTituloCaptura5 =
+      'Tela de Notificações do e-Título com quatro avisos da Justiça Eleitoral.';
+  /// Passo 6 do e-Título.
+  static const String eTituloPasso6 =
+      'Em "Mais opções" ficam as certidões, a justificativa de ausência e "Consultar Situação Eleitoral", que mostra se o seu título está em dia. Agora você já sabe entrar e andar pelo e-Título.';
+  /// Descrição da captura do passo 6 do e-Título.
+  static const String eTituloCaptura6 =
+      'Tela Mais opções do e-Título, com as certidões, a consulta da situação eleitoral, a justificativa de ausência e a impressão do título.';
 
   // Serasa (006-guias-servicos-sociais)
   /// Título do guia do Serasa.
@@ -988,33 +1162,116 @@ abstract final class TextosGuias {
   static const String serasaCaptura22 =
       'Opções finais de Serviços do Serasa com três regiões numeradas destacando Validador de boleto e Ajuda.';
 
-  // FGTS (T081)
+  // FGTS (T081; refeito na T138 com as capturas reais, em quatro seções)
   /// Título do guia do FGTS.
-  static const String tituloFgts = 'Como consultar o saldo do FGTS';
-  /// Passo 1 do FGTS.
-  static const String fgtsPasso1 =
-      'Toque no botão laranja "Entrar no aplicativo", no meio da tela.';
-  /// Descrição da captura do passo 1 do FGTS.
+  static const String tituloFgts = 'Como usar o aplicativo do FGTS';
+
+  /// Seção "Entrar no aplicativo" do FGTS.
+  static const String fgtsSecaoEntrar = 'Entrar no aplicativo';
+  /// O que se aprende na seção "Entrar no aplicativo".
+  static const String fgtsSecaoEntrarSubtitulo =
+      'O primeiro acesso, com o seu CPF';
+  /// Seção "Ver o saldo e pedir um saque" do FGTS.
+  static const String fgtsSecaoSaque = 'Ver o saldo e pedir um saque';
+  /// O que se aprende na seção "Ver o saldo e pedir um saque".
+  static const String fgtsSecaoSaqueSubtitulo =
+      'Quanto você tem e onde pedir o saque';
+  /// Seção "Conta bancária para receber" do FGTS.
+  static const String fgtsSecaoConta = 'Conta bancária para receber';
+  /// O que se aprende na seção "Conta bancária para receber".
+  static const String fgtsSecaoContaSubtitulo =
+      'A conta que recebe o dinheiro do seu FGTS';
+  /// Seção "Saque-Aniversário" do FGTS.
+  static const String fgtsSecaoAniversario = 'Saque-Aniversário';
+  /// O que se aprende na seção "Saque-Aniversário".
+  static const String fgtsSecaoAniversarioSubtitulo =
+      'O que é e o que muda se você optar';
+
+  /// Entrar, passo 1.
+  static const String fgtsEntrar1 =
+      'Abra o aplicativo do FGTS e toque no botão laranja "Entrar no aplicativo", embaixo.';
+  /// Entrar, passo 2.
+  static const String fgtsEntrar2 =
+      'Toque no campo "CPF", digite os números do seu CPF e toque em "Próximo", logo abaixo. Na tela seguinte, a Caixa pede a sua senha: ela só se digita ali, no aplicativo oficial.';
+  /// Entrar, passo 3.
+  static const String fgtsEntrar3 =
+      'Leia os termos com calma. Depois, marque "Li e aceito os termos e condições", embaixo, e toque em "Continuar".';
+  /// Entrar, passo 4.
+  static const String fgtsEntrar4 =
+      'O aplicativo pergunta como você quer ser chamado. Se quiser, escreva no campo; se não, toque em "Pular", embaixo.';
+  /// Entrar, passo 5.
+  static const String fgtsEntrar5 =
+      'Para receber os avisos do FGTS, toque em "Ativar notificações". Se preferir não receber, toque em "Agora não". Pronto: você já sabe entrar no aplicativo do FGTS.';
+
+  /// Saldo e saque, passo 1.
+  static const String fgtsSaque1 =
+      'Esta é a página principal. Para ver quanto você tem, toque em "Toque para exibir o saldo", no alto. Quem estiver perto também vê: olhe o saldo num lugar tranquilo.';
+  /// Saldo e saque, passo 2.
+  static const String fgtsSaque2 =
+      'Para pedir um saque, toque em "Saques", embaixo, a segunda opção da esquerda.';
+  /// Saldo e saque, passo 3.
+  static const String fgtsSaque3 =
+      'Toque em "Solicitar saque", a primeira opção da lista.';
+  /// Saldo e saque, passo 4.
+  static const String fgtsSaque4 =
+      'Escolha o motivo do seu saque, como doença grave ou calamidade pública: cada um diz as condições e os documentos. Agora você sabe ver o saldo e onde pedir um saque.';
+
+  /// Conta bancária, passo 1.
+  static const String fgtsConta1 =
+      'Para cuidar da conta que recebe o dinheiro do FGTS, toque em "Meus dados", embaixo, a segunda opção da direita.';
+  /// Conta bancária, passo 2.
+  static const String fgtsConta2 =
+      'Toque em "Conta bancária", a terceira opção da lista.';
+  /// Conta bancária, passo 3.
+  static const String fgtsConta3 =
+      'Aqui aparece a conta cadastrada, e "Alterar conta bancária" troca a conta. Se alguém ligar pedindo para você trocar a conta, é golpe: só você troca, aqui, no aplicativo oficial. Agora você sabe onde fica a sua conta.';
+
+  /// Saque-Aniversário, passo 1.
+  static const String fgtsAniversario1 =
+      'Para conhecer o Saque-Aniversário, toque em "Mais", embaixo, à direita.';
+  /// Saque-Aniversário, passo 2.
+  static const String fgtsAniversario2 =
+      'Toque em "Sistemática de saque", a segunda opção da lista.';
+  /// Saque-Aniversário, passo 3.
+  static const String fgtsAniversario3 =
+      'Antes de decidir, leia com calma "O que muda se eu fizer a opção?". Quem opta pelo Saque-Aniversário e perde o emprego recebe só a multa, e não o saldo todo. Agora você sabe onde fica e o que muda.';
+
+  /// Descrição da captura 1 do FGTS.
   static const String fgtsCaptura1 =
-      'Tela de boas-vindas do FGTS da Caixa com o botão Entrar no aplicativo.';
-  /// Passo 2 do FGTS.
-  static const String fgtsPasso2 =
-      'Digite o seu CPF e toque em "Próximo" para avançar.';
-  /// Descrição da captura do passo 2 do FGTS.
+      'Tela de boas-vindas do aplicativo do FGTS, com o botão laranja Entrar no aplicativo.';
+  /// Descrição da captura 2 do FGTS.
   static const String fgtsCaptura2 =
-      'Tela de identificação por CPF do aplicativo FGTS.';
-  /// Passo 3 do FGTS.
-  static const String fgtsPasso3 =
-      'Digite sua senha numérica da Caixa no teclado seguro do aplicativo oficial.';
-  /// Descrição da captura do passo 3 do FGTS.
+      'Tela de entrada da Caixa com o campo CPF vazio e o botão Próximo.';
+  /// Descrição da captura 3 do FGTS.
   static const String fgtsCaptura3 =
-      'Tela de senha da Caixa Econômica Federal com campos de senha vazios.';
-  /// Passo 4 do FGTS.
-  static const String fgtsPasso4 =
-      'Veja na tela o saldo total de suas contas de FGTS. Parabéns! Você já sabe conferir seus depósitos trabalhistas.';
-  /// Descrição da captura do passo 4 do FGTS.
+      'Termos e condições do aplicativo do FGTS, com a opção Li e aceito os termos e o botão Continuar, embaixo.';
+  /// Descrição da captura 4 do FGTS.
   static const String fgtsCaptura4 =
-      'Extrato do FGTS exibindo valores e empresas trabalhadas.';
+      'Tela Vamos começar, que pergunta como você quer ser chamado, com os botões Cadastrar nome e continuar e Pular.';
+  /// Descrição da captura 5 do FGTS.
+  static const String fgtsCaptura5 =
+      'Tela Fique por dentro de tudo, com os botões Ativar notificações e Agora não.';
+  /// Descrição da captura 6 do FGTS.
+  static const String fgtsCaptura6 =
+      'Página principal do FGTS, com o saldo escondido, os atalhos e, embaixo, as opções Principal, Saques, Meus dados e Mais.';
+  /// Descrição da captura 7 do FGTS.
+  static const String fgtsCaptura7 =
+      'Tela Saques, com as opções Solicitar saque e Acompanhar saques.';
+  /// Descrição da captura 8 do FGTS.
+  static const String fgtsCaptura8 =
+      'Tela Selecione o motivo do saque, com doença grave, falecimento do trabalhador, calamidade pública e aposentadoria.';
+  /// Descrição da captura 9 do FGTS.
+  static const String fgtsCaptura9 =
+      'Tela Meus dados, com Perfil, Notificações do FGTS, Conta bancária e Termos e condições.';
+  /// Descrição da captura 10 do FGTS.
+  static const String fgtsCaptura10 =
+      'Tela Minha conta bancária de exemplo, sem dados de conta, com os botões Alterar conta bancária e Excluir conta bancária.';
+  /// Descrição da captura 11 do FGTS.
+  static const String fgtsCaptura11 =
+      'Tela Mais, com Informações úteis, Sistemática de saque, Empréstimos contratados e outras opções.';
+  /// Descrição da captura 12 do FGTS.
+  static const String fgtsCaptura12 =
+      'Tela Optar pelo Saque-Aniversário, com a explicação e o quadro O que muda se eu fizer a opção.';
 
   // Poupatempo (T081)
   /// Título do guia do Poupatempo.

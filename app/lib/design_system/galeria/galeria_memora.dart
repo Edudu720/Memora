@@ -4,6 +4,14 @@ import 'package:flutter/material.dart';
 import '../../features/aprendizado/domain/guia.dart';
 import '../design_system.dart';
 
+/// O passo que a galeria usa para mostrar a captura, o destaque e a ampliação.
+const Passo _passoDeExemplo = Passo(
+  captura: CapturaDoGuia.lojaOficial,
+  destaque: RegiaoRelativa(x: 0.2, y: 0.3, largura: 0.6, altura: 0.2),
+  texto: 'Toque no botão de pesquisa no canto superior.',
+  descricaoDaCaptura: 'Tela inicial do aplicativo com a lupa no topo.',
+);
+
 /// A galeria do Design System — T045, FR-033 e R9.
 ///
 /// ## Para que ela serve
@@ -484,17 +492,37 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const IndicadorDePasso(posicao: 2, total: 4),
       const SizedBox(height: MemoraEspacamento.md),
       PassoIlustrado(
-        passo: const Passo(
-          captura: CapturaDoGuia.lojaOficial,
-          destaque: RegiaoRelativa(x: 0.2, y: 0.3, largura: 0.6, altura: 0.2),
-          texto: 'Toque no botão de pesquisa no canto superior.',
-          descricaoDaCaptura: 'Tela inicial do aplicativo com a lupa no topo.',
-        ),
+        passo: _passoDeExemplo,
         posicao: 2,
         total: 4,
         aoContinuar: () {},
         aoVoltar: () {},
         aoTelaDiferente: () {},
+      ),
+      const SizedBox(height: MemoraEspacamento.lg),
+      const TextoMemora(
+        'CapturaComDestaque: a imagem na proporção dela (aqui, 9:20) e o '
+        'anel sobre a região da imagem.',
+        estilo: EstiloTexto.apoio,
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const SizedBox(
+        height: MemoraDimensoes.alturaMaximaMolduraPasso,
+        child: CapturaComDestaque(
+          passo: _passoDeExemplo,
+          proporcao: CapturaComDestaque.proporcaoDeReserva,
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const TextoMemora(
+        'CapturaAmpliada: a captura em tela cheia, com Aproximar, Afastar e '
+        'Fechar.',
+        estilo: EstiloTexto.apoio,
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      BotaoSecundario(
+        rotulo: 'Abrir a captura ampliada',
+        aoTocar: () => CapturaAmpliada.abrir(context, passo: _passoDeExemplo),
       ),
       const SizedBox(height: MemoraEspacamento.lg),
 
