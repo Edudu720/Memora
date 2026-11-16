@@ -110,9 +110,7 @@ class AgendaDaAnfitria {
   ComportamentoDaAnfitria _sortear({ComportamentoDaAnfitria? excluindo}) {
     final List<MapEntry<ComportamentoDaAnfitria, int>> candidatos = _pesos
         .entries
-        .where(
-          (MapEntry<ComportamentoDaAnfitria, int> e) => e.key != excluindo,
-        )
+        .where((MapEntry<ComportamentoDaAnfitria, int> e) => e.key != excluindo)
         .toList();
     final int total = candidatos.fold<int>(
       0,

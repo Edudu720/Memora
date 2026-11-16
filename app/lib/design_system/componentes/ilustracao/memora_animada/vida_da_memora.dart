@@ -183,10 +183,9 @@ class VidaNoInstante {
         0.7 * math.sin(w * t * (k + 1) + 1.0) + 0.3 * math.sin(w * t * 3 + 2.5);
 
     // A antena balança em rajadas: um tremor rápido que vai e passa.
-    final double rajada = math.pow(
-      math.max(0.0, math.sin(w * t * 2 + 0.3)),
-      2,
-    ).toDouble();
+    final double rajada = math
+        .pow(math.max(0.0, math.sin(w * t * 2 + 0.3)), 2)
+        .toDouble();
     final double antena = math.sin(w * t * 12) * rajada;
 
     // O ajeitar acontece uma vez por ciclo, num momento que depende da pose.
