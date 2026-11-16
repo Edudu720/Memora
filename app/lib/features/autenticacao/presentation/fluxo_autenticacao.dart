@@ -36,6 +36,8 @@ import '../../assistente/presentation/telas/tela_conversa.dart';
 import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
+import '../../perfil/data/foto_de_perfil_local.dart';
+import '../../perfil/data/seletor_de_imagem.dart';
 import '../../casca/casca_interna.dart';
 import '../../perfil/presentation/tela_perfil.dart';
 import '../../configuracoes/presentation/tela_configuracoes.dart';
@@ -110,6 +112,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// repassa aqui.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
+  /// Onde o Perfil guarda a foto ou avatar escolhido, por conta (FR-006, 011).
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+
+  /// Seletor de foto de galeria/câmera (injetável em testes).
+  final SeletorDeImagemDoAparelho? seletorDeFoto;
+
   /// Quais contas já viram a apresentação inicial (FR-013, T050).
   ///
   /// **Opcional de propósito**: sem ele a pessoa entra direto, como antes da
@@ -174,6 +182,8 @@ class FluxoAutenticacao extends StatefulWidget {
     super.key,
     this.limpeza,
     this.dataDeNascimento,
+    this.fotoDePerfil,
+    this.seletorDeFoto,
     this.apresentacaoVista,
     this.compartilhador,
     this.progresso,
@@ -252,6 +262,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   late final ArmazenamentoDaDataDeNascimento _datas =
       widget.dataDeNascimento ?? DataDeNascimentoEmMemoria();
+
+  late final ArmazenamentoDeFotoDePerfil _fotos =
+      widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
 
   /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
   /// abre vai para a pilha do destino à vista, por [_empilhar].
@@ -1091,6 +1104,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             canal: _canal,
             progresso: widget.progresso,
             dataDeNascimento: _datas,
+            fotoDePerfil: _fotos,
+            seletorDeFoto: widget.seletorDeFoto,
             idDaConta: _pessoa?.id,
           ),
         },

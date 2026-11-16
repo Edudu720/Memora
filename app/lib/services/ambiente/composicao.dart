@@ -24,6 +24,7 @@ import '../../features/localizador/data/repositorios/repositorio_localizador_api
 import '../../features/localizador/data/repositorios/repositorio_localizador_simulado.dart';
 import '../../features/localizador/domain/repositorios/repositorio_localizador.dart';
 import '../../features/perfil/data/data_de_nascimento_local.dart';
+import '../../features/perfil/data/foto_de_perfil_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 import '../seguranca/sessao_perdida.dart';
 
@@ -80,6 +81,11 @@ class Composicao {
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
 
+  /// Onde o Perfil guarda a foto ou avatar escolhido, por conta (FR-006, 011).
+  ///
+  /// É a mesma instância que a [limpeza] esquece no `esquecerTudo` (FR-009).
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+
   /// Quais contas já viram a apresentação inicial (FR-013, T048).
   ///
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
@@ -105,6 +111,7 @@ class Composicao {
     required this.aceiteDoAviso,
     required this.limpeza,
     this.dataDeNascimento,
+    this.fotoDePerfil,
     this.apresentacaoVista,
     this.progresso,
     required this.sessaoPerdida,
@@ -137,6 +144,7 @@ class Composicao {
     required UltimoAcesso ultimoAcesso,
     required AceiteDoAviso aceiteDoAviso,
     DataDeNascimentoDoAparelho? dataDeNascimento,
+    FotoDePerfilDoAparelho? fotoDePerfil,
     ApresentacaoVistaDoAparelho? apresentacaoVista,
     ProgressoDeAprendizado? progresso,
     SharedPreferences? preferencias,
@@ -145,6 +153,8 @@ class Composicao {
   }) {
     final DataDeNascimentoDoAparelho datas =
         dataDeNascimento ?? DataDeNascimentoEmMemoria();
+    final FotoDePerfilDoAparelho fotos =
+        fotoDePerfil ?? FotoDePerfilEmMemoria();
     final ApresentacaoVistaDoAparelho vistas =
         apresentacaoVista ?? ApresentacaoVistaEmMemoria();
     final ProgressoDeAprendizado aprendizado =
@@ -198,6 +208,7 @@ class Composicao {
       aceiteDoAviso: aceiteDoAviso,
       sessaoPerdida: sessaoPerdida,
       dataDeNascimento: datas,
+      fotoDePerfil: fotos,
       apresentacaoVista: vistas,
       progresso: aprendizado,
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
@@ -224,7 +235,7 @@ class Composicao {
           aceiteDoAviso,
           RepositorioContatoEmergenciaLocal(preferencias),
         ],
-        dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas],
+        dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas, fotos],
       ),
     );
   }
