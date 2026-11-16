@@ -184,7 +184,7 @@ void main() {
       );
       await t.pumpAndSettle();
       expect(find.byType(RetratoDoPerfil), findsNothing);
-      expect(find.byType(MemoraPersonagem), findsWidgets);
+      expect(find.byType(MemoraAnfitria), findsOneWidget);
     });
 
     testWidgets('câmera salva foto e cancelamento retorna sem erro',
