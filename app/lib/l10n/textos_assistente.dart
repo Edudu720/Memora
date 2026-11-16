@@ -136,16 +136,14 @@ class TextosAssistente {
 
   /// Fallback amigável quando o ditado é negado ou não suportado.
   static const String vozIndisponivel =
-      'O microfone não pôde ser usado agora. Sem problema: você pode '
-      'escrever a sua pergunta normalmente pelo teclado.';
+      'O microfone não pôde ser usado agora, mas você pode digitar sua '
+      'pergunta pelo teclado.';
 
   /// Orientação acolhedora quando o pacote de voz offline em português falta
   /// ou o aparelho recusa o reconhecimento estritamente local (FR-005).
   static const String vozOfflineIndisponivel =
-      'O ditado por voz offline em português não está disponível neste '
-      'aparelho agora. Sem problema: você pode digitar sua pergunta '
-      'normalmente pelo teclado ou baixar o idioma português offline nas '
-      'configurações do celular.';
+      'O ditado por voz neste celular não está disponível agora, mas você pode '
+      'digitar sua pergunta pelo teclado.';
 
   /// Mensagem amigável quando o reconhecimento falha momentaneamente.
   static const String vozErro =

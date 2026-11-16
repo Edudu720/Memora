@@ -256,11 +256,11 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 11: User Story 4 — Conversa limpa (P2)
 
-- [ ] T058 [US4] `tela_conversa.dart`: só o essencial — cabeçalho, aviso compacto, mensagens, campo; sugestões só antes da primeira mensagem; nenhum elemento decorativo (FR-043)
+- [X] T058 [US4] `tela_conversa.dart`: só o essencial — cabeçalho, aviso compacto, mensagens, campo; sugestões só antes da primeira mensagem; nenhum elemento decorativo (FR-043)
 - [ ] T059 [US4] A Memora pequena no topo da conversa, `falando` enquanto a resposta aparece letra a letra, sem rosto ao lado de cada balão (FR-025, FR-042); ajustar `balao_de_fala.dart`
-- [ ] T060 [US4] Ícones da conversa (enviar, ditar, sugestões, aviso) da família única, com texto e resposta ao toque (FR-029)
-- [ ] T061 [US4] Atualizar `conversa_acessibilidade_test.dart` e a matriz: o aviso continua encolhendo e não sumindo (FR-026), a lista de mensagens mantém a altura mínima (V14)
-- [ ] T062 [US4] Voz: **(rev. 16/11) já implementada na #71** — `leitor_de_voz_nativo.dart` usa `onDevice: true` e não repete pela nuvem, com `ditado_por_voz_test.dart`. Falta: **provar o teste quebrando** (tirar o `onDevice` e ver reprovar) e conferir no aparelho sem reconhecimento local que o botão fica indisponível com o motivo em uma frase e que digitar continua (FR-034, V16)
+- [X] T060 [US4] Ícones da conversa (enviar, ditar, sugestões, aviso) da família única, com texto e resposta ao toque (FR-029)
+- [X] T061 [US4] Atualizar `conversa_acessibilidade_test.dart` e a matriz: o aviso continua encolhendo e não sumindo (FR-026), a lista de mensagens mantém a altura mínima (V14)
+- [X] T062 [US4] Voz: **(rev. 16/11) já implementada na #71** — `leitor_de_voz_nativo.dart` usa `onDevice: true` e não repete pela nuvem, com `ditado_por_voz_test.dart`. Falta: **provar o teste quebrando** (tirar o `onDevice` e ver reprovar) e conferir no aparelho sem reconhecimento local que o botão fica indisponível com o motivo em uma frase e que digitar continua (FR-034, V16)
 
 ## Phase 12: User Story 5 — Ícones e toque (P2)
 
