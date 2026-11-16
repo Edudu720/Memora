@@ -27,8 +27,8 @@ desfazer (CLAUDE.md, seção 8). Cada tarefa de teste diz o que quebrar.
 
 ## Phase 1: Setup
 
-- [ ] T001 Conferir que a branch `feature/010-redesenho-final` está atualizada com a `develop` e que os quatro portões passam antes de começar (linha de base: 2448 testes em 2026-11-15)
-- [ ] T002 [P] Acrescentar a `memora-ux` ao CLAUDE.md (seção 3 ou 9) como leitura obrigatória antes de tarefa de tela
+- [X] T001 Conferir que a branch `feature/010-redesenho-final` está atualizada com a `develop` e que os quatro portões passam antes de começar (linha de base: 2448 testes em 2026-11-15)
+- [X] T002 [P] Acrescentar a `memora-ux` ao CLAUDE.md (seção 3 ou 9) como leitura obrigatória antes de tarefa de tela
 
 ---
 

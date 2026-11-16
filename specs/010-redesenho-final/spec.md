@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-15
 
-**Status**: Draft
+**Status**: Aprovada pelo Henrique para implementar a Fase A até a T018 (2026-11-15); ratificação de Eduardo e Trevisan pendente
 
 **Input**: Ideias do Henrique em 2026-11-15: "telas de blocos simples porém
 sofisticados, com estética de software atual, UI/UX limpa e entendível. Os

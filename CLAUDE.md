@@ -1830,6 +1830,9 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 
 ## 9. Coisas que NÃO se faz neste projeto
 
+- ❌ Mexer em tela sem ler antes a skill **`memora-ux`**
+  (`.claude/skills/memora-ux/SKILL.md`): princípios, números, a Memora,
+  transições, voz do texto e o que nunca aparece na tela (feature 010)
 - ❌ Escrever cor, espaçamento ou tamanho literal fora dos tokens
 - ❌ Criar componente dentro de `features/` quando ele serve a mais de uma tela
 - ❌ Editar cliente de API gerado à mão
