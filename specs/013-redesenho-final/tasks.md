@@ -141,7 +141,7 @@ nada troca sozinho; com "reduzir movimento", parada.
 - [X] T087 [US8] Desenho aprimorado da anfitriã (FR-048) sobre os pintores da `MemoraAnimada`: brilho especular, luz de contorno, sombra de contato, giro de cabeça com o rosto deslizando no visor, corpo que estica e encolhe no pulo; cores só de tokens; mais detalhe sem perder a mesma personagem
 - [X] T088 [US8] Comportamento autônomo (FR-049): agenda de comportamentos que se alternam sem padrão óbvio (flutuar, olhar em volta, acenar de vez em quando, inclinar a cabeça, pulinho); parada fora da tela (FR-058); nada com "reduzir movimento"
 - [X] T089 [US8] `app/lib/design_system/componentes/ilustracao/memora_anfitria.dart`: anfitriã + balão de dica + boca sincronizada com o texto (FR-051) + troca a cada 20 s com as regras de parada (FR-052, FR-053) + toque como ação acessível que faz um gesto e mostra a próxima (FR-054, FR-055); o leitor de tela anuncia a dica nova só quando a pessoa pediu
-- [ ] T090 [US8] Galeria e renders da anfitriã; **mostrar ao Henrique no celular** (APK "Memora (teste)") antes da T053 — mesmo portão da T018
+- [X] T090 [US8] Galeria e renders da anfitriã; **mostrar ao Henrique no celular** (APK "Memora (teste)") antes da T053 — mesmo portão da T018
 
 **Checkpoint**: a anfitriã aprovada; a T053 a coloca no Início.
 
