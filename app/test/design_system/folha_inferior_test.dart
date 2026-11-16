@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 /// A transição da folha inferior — T020 da feature 013 (V7 e V9), FR-010 e
 /// FR-013.
@@ -8,6 +9,7 @@ import 'package:memora/design_system/design_system.dart';
 /// A folha sobe de baixo, por cima, e a tela de trás não se mexe. Com
 /// "reduzir movimento" ela já chega no lugar.
 void main() {
+  movimentoLiberado();
   const Key fundo = Key('fundo');
   const Key abrir = Key('abrir');
   const Key chaveDaFolha = Key('folha');

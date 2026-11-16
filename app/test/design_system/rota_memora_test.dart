@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 /// A rota do Memora — T019 e T020 da feature 013 (V6 e V9), FR-009, FR-013,
 /// FR-014 e FR-015.
@@ -11,6 +12,7 @@ import 'package:memora/design_system/design_system.dart';
 /// (`getTopLeft` aplica as transformações dos ancestrais). Assim o teste não
 /// depende de qual widget faz o deslize — só de onde a página está.
 void main() {
+  movimentoLiberado();
   const Key chaveA = Key('a.pagina');
   const Key chaveB = Key('b.pagina');
   const Key abrirB = Key('a.abrir');

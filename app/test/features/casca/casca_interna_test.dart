@@ -6,10 +6,12 @@ import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/l10n/textos_casca.dart';
 
 import '../../suporte/aparelhos.dart';
+import '../../suporte/movimento.dart';
 
 /// A casca de quem está dentro da conta — T023, FR-015 e
 /// contracts/navegacao.md da feature 004.
 void main() {
+  movimentoLiberado();
   late GlobalKey<CascaInternaState> casca;
   late int atividades;
   late int fechou;

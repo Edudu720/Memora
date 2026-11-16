@@ -83,6 +83,9 @@ class FluxoDentroDaConta {
   /// a real, sobre um transporte falso) e [sessaoPerdida] é o aviso que o fluxo
   /// escuta (T111).
   ///
+  /// [vigia] é chamado com a tela de boas-vindas e depois com a do login à
+  /// vista, antes de a conta entrar.
+  ///
   /// [capturavel] põe um `RepaintBoundary` com essa chave em volta do
   /// aplicativo inteiro: é por onde o álbum de telas (T043) tira a foto da tela
   /// que a pessoa de fato vê.
@@ -97,6 +100,7 @@ class FluxoDentroDaConta {
     Compartilhador? compartilhador,
     RepositorioAssistente? assistente,
     SessaoPerdida? sessaoPerdida,
+    Future<void> Function(WidgetTester t, String tela)? vigia,
   }) async {
     if (em != null) vestir(t, em.aparelho);
     // Com a guarda da apresentação, a conta de Ana já a viu: o cenário começa
@@ -156,7 +160,11 @@ class FluxoDentroDaConta {
     );
     await avancar(t);
 
+    // `vigia` olha as telas de antes da conta pelo caminho de verdade: o teste
+    // da distância da Memora (T052) mede as boas-vindas e o login.
+    await vigia?.call(t, 'boas-vindas');
     await tocar(t, find.text(TextosAutenticacao.botaoJaTenhoConta));
+    await vigia?.call(t, 'login');
     await entrarComConta(t, 'ana@email.com', 'uma frase que so eu lembro');
 
     expect(

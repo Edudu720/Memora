@@ -8,10 +8,14 @@ import 'cores.dart';
 ///
 /// ## Por que um arquivo separado de `cores.dart`
 ///
-/// A feature do redesenho final reescreve `cores.dart`. Ficar ao lado dele, e
-/// não dentro, evita conflito e deixa a integração para quando as duas
-/// estiverem na mesma linha de desenvolvimento. O acesso é o mesmo de
-/// qualquer token: `context.memora.personagem`.
+/// A T048 pensou em fundir este arquivo no `cores.dart`, e ficou como está
+/// (decisão de 2026-11-16): o `cores.dart` já tem 500 linhas de papéis
+/// semânticos da interface (texto, superfície, perigo...), e as 17 cores de um
+/// **desenho** com as seis pinturas de paleta não são papel de interface —
+/// misturá-las só tornaria os dois mais difíceis de ler. O que a T048
+/// resolvia de verdade era a **fonte da paleta**: ela é o nome guardado no
+/// tema ([MemoraTheme.paleta]), e o acesso continua o de qualquer token,
+/// `context.memora.personagem`.
 ///
 /// ## O que muda com a paleta
 ///
@@ -224,26 +228,10 @@ class CoresDaMemora {
     );
   }
 
-  /// Descobre qual paleta está ativa olhando a cor primária do tema.
-  ///
-  /// O [MemoraTheme] não guarda o nome da paleta, só as cores que ela
-  /// produziu; cada paleta tem uma primária própria por tema, e é por ela que
-  /// se acha de volta o nome.
-  static String _paletaDe(MemoraTheme tema) {
-    final bool escuro = tema.id == MemoraTemaId.escuro;
-    for (final MapEntry<String, PaletaDeDestaque> e
-        in MemoraCores.paletas.entries) {
-      final Color primaria = escuro
-          ? e.value.primariaEscuro
-          : e.value.primariaClaro;
-      if (primaria == tema.cores.primaria) return e.key;
-    }
-    return 'azul';
-  }
-
-  /// As cores da Memora do [tema] (com a paleta que ele carrega).
+  /// As cores da Memora do [tema], com a paleta que ele **guarda pelo nome**
+  /// ([MemoraTheme.paleta]) — nunca adivinhada pelas cores dele.
   static CoresDaMemora doTema(MemoraTheme tema) =>
-      para(tema.id, paleta: _paletaDe(tema));
+      para(tema.id, paleta: tema.paleta);
 
   /// Os nomes das paletas que a Memora conhece (os de [MemoraCores.paletas]).
   static Iterable<String> get nomesDasPaletas => _paletas.keys;
