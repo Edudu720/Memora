@@ -9,10 +9,22 @@ tarefa de tela.
 (arquivos diferentes, sem dependência).
 
 **Duas fases** (research.md, R12):
-- **Fase A (T001–T046)** — independe da #71. Pode ir para a `develop` já.
-- **Fase B (T047–T079)** — **só depois que a #71 entrar na `develop`**. Toca
-  arquivos que a #71 reescreve. Quando a #71 entrar, **revisar estas tarefas
-  contra o código dela antes de começar** (decisão do Henrique, 2026-11-15).
+- **Fase A (T001–T046)** — independe da #71.
+- **Fase B (T047–T079)** — tocava arquivos que a #71 reescrevia.
+
+> 🔄 **Revisão de 2026-11-16, depois do merge das #71, #73 e #74 na `develop`**
+> (`c74da78`). As tarefas foram conferidas contra o código delas, e o que
+> mudou está marcado com **(rev. 16/11)**. Consequências:
+> - **A Fase B não espera mais nada**: tudo o que ela pressupunha está na
+>   `develop`. A divisão A/B vira só **ordem de trabalho**, e qualquer tarefa
+>   pode começar depois de a branch receber a `develop` (T080).
+> - A "lista de arquivos intocados" da Fase A **deixou de valer**: a #73 e a
+>   #71 mexeram em `dialogo.dart`, `folha_inferior.dart`, `main.dart`,
+>   `textos_perfil.dart`, `tela_dispositivo_cuidado.dart` e
+>   `secao_idade.dart`. As tarefas da Fase A que tocam neles seguem iguais,
+>   mas sobre a versão nova desses arquivos.
+> - A #73 (foto de perfil) trouxe telas novas, e a #74 (site) é artefato à
+>   parte, fora do escopo desta feature (ver T082).
 
 **Regra de todo portão novo**: commitar, quebrar de propósito, ver reprovar,
 desfazer (CLAUDE.md, seção 8). Cada tarefa de teste diz o que quebrar.
@@ -94,7 +106,7 @@ direção certa; com "reduzir movimento", instantâneo.
 - [ ] T023 [US2] `app/lib/design_system/navegacao/troca_de_destino.dart`: filhos vivos, deslizamento pela posição, fora da tela sem animar e sem foco (R3)
 - [ ] T024 [US2] `app/lib/features/casca/casca_interna.dart`: trocar o `IndexedStack` pela `TrocaDeDestino` e o `MaterialPageRoute` da raiz pela `RotaMemora`
 - [ ] T025 [P] [US2] `app/lib/design_system/componentes/dialogos/dialogo.dart` e `folha_inferior.dart`: transições de sobreposição (centro e de baixo) com `MemoraMovimento.efetiva` (R4)
-- [ ] T026 [P] [US2] Trocar os `MaterialPageRoute` de `tela_dispositivo_cuidado.dart` e `secao_idade.dart` pela `RotaMemora` (o de `fluxo_autenticacao.dart` é a T050, Fase B)
+- [ ] T026 [P] [US2] Trocar os `MaterialPageRoute` de `tela_dispositivo_cuidado.dart`, `secao_idade.dart` e **`secao_foto_perfil.dart`** (pré-visualização da foto, #73) pela `RotaMemora` (o de `fluxo_autenticacao.dart` é a T050) **(rev. 16/11)**
 - [ ] T027 [US2] Rodar a suíte inteira: testes que dependiam do zoom do Android ou de `pumpAndSettle` com duração fixa são ajustados na mesma tarefa (não afrouxar asserção)
 
 **Checkpoint**: navegação com direção onde a #71 não interfere.
@@ -116,7 +128,7 @@ servidor não manda mais emoji em mensagem de tela.
 - [ ] T031 [P] [US3] Reescrever os reprovados de `textos_ajuda.dart`, `textos_apresentacao.dart` e `textos_configuracoes.dart` (mesmas regras)
 - [ ] T032 [US3] Onde um texto virou "Saber mais" ou etapa, ajustar a tela correspondente (só telas que a #71 não altera; as outras vão para a T069) e os testes que procuravam a frase antiga
 - [ ] T033 [P] [US3] Backend: `TextoDaInterfaceTest` varrendo `CodigoDeErro` e as mensagens dos controladores atrás de emoji; provar quebrando
-- [ ] T034 [US3] Backend: tirar o "😊" de `ControladorCanais`, `ControladorRecuperacao` e `ControladorRegistro` (FR-020) e conferir as duas frases dessas mensagens
+- [ ] T034 [US3] Backend: tirar o "😊" das mensagens que chegam à tela (FR-020) e conferir as duas frases delas. **(rev. 16/11)** Na `develop` são 6 arquivos: `CodigoDeErro` (6 ocorrências), `ControladorRecuperacao` (4), `ServicoDeCadastro` (2), `ControladorCanais` (1), `ControladorRegistro` (1); as 2 do `ClienteDaAssistenteSimulado` são fala da IA e ficam (no máximo uma por mensagem, T042)
 
 **Checkpoint**: o portão de texto existe e protege o que já foi revisto.
 
@@ -152,20 +164,22 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé)
 - [ ] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5)
 - [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013
-- [ ] T046 PR da Fase A para a `develop`, com a descrição dizendo que a Fase B espera a #71
+- [ ] T046 PR da Fase A para a `develop` **(rev. 16/11)**: depois da T080, já sobre a `develop` com as #71, #73 e #74
 
 ---
 
-# FASE B — depois que a #71 entrar na `develop`
+# FASE B — tocava o que a #71 reescrevia (já na `develop`)
 
-> **Antes de começar**: trazer a `develop` com a #71, rodar os portões, e
-> **revisar T047–T079 contra o código da #71** (nomes de componentes, telas,
-> chaves). Ajustar este arquivo antes de implementar.
+> **Revisada em 2026-11-16** contra a `develop` `c74da78`: os nomes e as
+> premissas abaixo foram conferidos no código. Antes de começar, a branch
+> precisa ter recebido a `develop` (T080).
+
+- [ ] T080 Trazer a `develop` para a `feature/013-redesenho-final` **depois** que a `feature/004-prints-e-zoom` (com os guias integrados ao modelo da 004) entrar nela; rodar os quatro portões. Conflito esperado em `validar_paleta.py` (os pares da Memora daqui × os tokens da 007): somar os dois **(rev. 16/11)**
 
 ## Phase 9: Integração com a 007
 
 - [ ] T047 [US1] `memora_personagem.dart`: a `MemoraPersonagem` passa a montar uma `MemoraAnimada`, com a mesma assinatura e o mesmo enum (inclusive `dica` e `mini` da #71); o leitor de tela continua igual
-- [ ] T048 [US1] Mover os tokens de `cores_da_memora.dart` para o esquema de cores da #71 (`cores.dart`) e apagar o arquivo separado; `validar_paleta.py` continua passando
+- [ ] T048 [US1] Mover os tokens de `cores_da_memora.dart` para o esquema de cores da #71 (`cores.dart`) e apagar o arquivo separado; `validar_paleta.py` continua passando. **(rev. 16/11)** O `MemoraTheme.comPaleta(nome)` recebe o nome da paleta mas não o guarda: guardar o nome no tema e trocar a descoberta da paleta "pela cor primária" (frágil) por ele
 - [ ] T049 [US2] Registrar a `TransicaoMemora` como transição de página padrão em `temas_memora.dart` (cobre toda rota de página que restar, inclusive as da #71)
 - [ ] T050 [US2] Trocar o `MaterialPageRoute` de `fluxo_autenticacao.dart` pela `RotaMemora`
 - [ ] T051 [US1] Remover os PNGs da Memora de `app/assets/ilustracoes/` que não forem mais usados, e o registro deles no `pubspec.yaml` (o ícone do aplicativo continua); conferir que nenhum teste os carrega
@@ -173,7 +187,7 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 10: User Story 7 — Início e barra inferior (P1) — parte B
 
-- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040)
+- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006)
 - [ ] T054 [US7] Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance; atualizar `inicio_ocupa_a_altura_test.dart` e a matriz (FR-041, V13); quebrar fixando a altura da Memora
 - [ ] T055 [P] [US7] `app/test/design_system/navegacao_inferior_test.dart` (novo): ícone + rótulo juntos, alvo ≥ 48 dp, indicador desliza até o destino tocado, sem deslizar com "reduzir movimento" (V15); quebrar tirando o rótulo
 - [ ] T056 [US7] `navegacao_inferior.dart`: barra refeita no acabamento da 007 (superfície, sombra, cantos), ícones arredondados da família única no lugar dos SVG de `assets/icones/navegacao/`, indicador deslizante e resposta ao toque (FR-044 a FR-047, R5)
@@ -185,12 +199,12 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T059 [US4] A Memora pequena no topo da conversa, `falando` enquanto a resposta aparece letra a letra, sem rosto ao lado de cada balão (FR-025, FR-042); ajustar `balao_de_fala.dart`
 - [ ] T060 [US4] Ícones da conversa (enviar, ditar, sugestões, aviso) da família única, com texto e resposta ao toque (FR-029)
 - [ ] T061 [US4] Atualizar `conversa_acessibilidade_test.dart` e a matriz: o aviso continua encolhendo e não sumindo (FR-026), a lista de mensagens mantém a altura mínima (V14)
-- [ ] T062 [US4] Voz: `onDevice: true` no leitor de voz da #71; sem suporte no aparelho, botão indisponível com o motivo em uma frase; digitar continua (FR-034, V16); teste que reprova se o ditado for chamado sem `onDevice`
+- [ ] T062 [US4] Voz: **(rev. 16/11) já implementada na #71** — `leitor_de_voz_nativo.dart` usa `onDevice: true` e não repete pela nuvem, com `ditado_por_voz_test.dart`. Falta: **provar o teste quebrando** (tirar o `onDevice` e ver reprovar) e conferir no aparelho sem reconhecimento local que o botão fica indisponível com o motivo em uma frase e que digitar continua (FR-034, V16)
 
 ## Phase 12: User Story 5 — Ícones e toque (P2)
 
 - [ ] T063 [P] [US5] Teste lexical: nenhum `Icons.` fora da variante arredondada em `app/lib/` e nenhum `Image.asset` de ícone ou ilustração fora das capturas dos guias (FR-027, FR-030); quebrar com um `Icons.home`
-- [ ] T064 [US5] Trocar os ícones restantes para a variante arredondada e os SVG antigos de ilustração (`porta_*.svg`, `casal_idoso.svg`, `memora_*.svg`) por desenhos da família ou pela `MemoraAnimada`
+- [ ] T064 [US5] Trocar os ícones restantes para a variante arredondada e os SVG antigos de ilustração (`porta_*.svg`, `casal_idoso.svg`, `memora_*.svg`) por desenhos da família ou pela `MemoraAnimada`. **(rev. 16/11)** Volume medido na `develop`: **128 usos** de `Icons.` fora da variante arredondada (os mais comuns: `arrow_forward`, `shield_outlined`, `check`, `check_circle_outline`, `chat_bubble_outline`) — tarefa mecânica, boa para agente
 - [ ] T065 [US5] `superficie_tocavel.dart` (versão da #71): resposta ao toque também com "reduzir movimento" (realce sem afundar), e teste que reprova sem resposta (FR-028)
 
 ## Phase 13: User Story 3 — Texto — parte B
@@ -205,6 +219,7 @@ acenando → fluxo de entrada, sem pulo.
 
 - [ ] T071 [P] [US6] Localizador (`tela_localizador.dart`) e os diálogos de permissão de localização, rota e ligação na linguagem da 013: Memora, transições, ícones, texto; sem mudar o comportamento da 009 (FR-031, FR-032)
 - [ ] T072 [P] [US6] Seletor de seções e passo a passo: Memora `comemorando` na conclusão (FR-003), transição de avançar/voltar entre passos com a `RotaMemora` ou equivalente
+- [ ] T081 [P] [US6] **(rev. 16/11)** Telas da foto de perfil (#73) — `SecaoFotoPerfil`, `TelaPreVisualizacaoFoto`, `RetratoDoPerfil` e os textos novos de `textos_perfil.dart` — na linguagem da 013 (transições, ícones, duas frases), sem mudar o comportamento da spec 011. No Perfil, o topo é o **retrato da pessoa** (decisão da integração das #71 e #73): a Memora não aparece ali
 - [ ] T073 [US6] Estados de carregando, vazio e erro de todas as telas com a Memora na expressão certa (FR-001)
 - [ ] T074 [US6] Percorrer o álbum inteiro contra a checagem da memora-ux (seção 5) e corrigir o que reprovar (V18, SC-001)
 
@@ -226,9 +241,14 @@ acenando → fluxo de entrada, sem pulo.
   - A US2 não depende da US1; a US7-A (abertura) depende da US1 (usa a
     `MemoraAnimada`).
   - A T018 (aprovação visual da Memora) é **portão** para a Fase B.
-- **Fase B**: só depois da #71 na `develop` **e** da revisão destas tarefas.
-  Integração (T047–T052) primeiro; depois US7-B, US4-B, US5, US3-B e US6 em
-  paralelo; validação final por último.
+- **Fase B** (revisada em 2026-11-16): T080 (receber a `develop`, depois da
+  PR da `feature/004-prints-e-zoom`) → integração (T047–T052) → US7-B, US4-B,
+  US5, US3-B e US6 (inclui T081) em paralelo → validação final.
+- **T082 — fora do escopo, registrado para não perder** (rev. 16/11): o site
+  da #74 (`site/`, spec 012) usa os PNGs antigos da Memora e diz "Pessoas
+  Idosas" no título. Quando a Memora vetorial for aprovada (T018), o site
+  precisa de imagens novas e do texto revisto — trabalho da spec 012, não
+  desta.
 
 ## Parallel Opportunities
 
