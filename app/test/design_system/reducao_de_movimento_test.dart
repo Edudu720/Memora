@@ -193,11 +193,16 @@ void main() {
         final String linha = linhas[i].split('//').first;
         // `duration:` dos widgets e a duração das rotas (`transitionDuration` e
         // `reverseTransitionDuration`, feature 013): uma rota que dura o que
-        // quiser ignora "reduzir movimento" do mesmo jeito.
-        if (!linha.contains('duration:') &&
-            !RegExp(r'ransitionDuration').hasMatch(linha)) {
-          continue;
-        }
+        // quiser ignora "reduzir movimento" do mesmo jeito. Na rota só se
+        // olha quem **escreve** uma duração (`Duration(...)` ou um token):
+        // `Duration.zero` (troca sem animação) e uma variável já calculada
+        // com `efetiva` não precisam passar por ela de novo.
+        final String adiante =
+            linha + (i + 1 < linhas.length ? linhas[i + 1] : '');
+        final bool ehDuracaoDeRota =
+            RegExp(r'ransitionDuration').hasMatch(linha) &&
+            RegExp(r'Duration\(|MemoraMovimento\.').hasMatch(adiante);
+        if (!linha.contains('duration:') && !ehDuracaoDeRota) continue;
 
         // A chamada costuma quebrar em várias linhas; olha a linha e a
         // seguinte, que é onde `efetiva(` aparece no estilo daqui.
