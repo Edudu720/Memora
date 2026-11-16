@@ -26,6 +26,37 @@ tarefa de tela.
 > - A #73 (foto de perfil) trouxe telas novas, e a #74 (site) é artefato à
 >   parte, fora do escopo desta feature (ver T082).
 
+## 👥 Divisão e forma de trabalho (decisão do Henrique, 2026-11-16)
+
+**Três frentes, numa branch comum**: quando a #76 entrar na `develop`, a
+`develop` é trazida para cá (T080) e o resultado é publicado como
+**`redesign-final`**. Cada pessoa trabalha numa branch própria saída dela e
+abre PR **para a `redesign-final`**, revisada por outra pessoa da equipe
+(nunca por quem escreveu). No fim, a `redesign-final` vai para a `develop`
+numa PR só.
+
+| Quem | Tarefas | Abertas |
+|---|---|---|
+| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, barra inferior T055–T057, T059, T072, T073, T076. **Fechamento**: T043–T046, T078 | 43 |
+| **Eduardo Juncker** | **Textos**: T029–T034, T066–T070. **Emoji na IA**: T040–T042. **Conversa**: T058, T060, T061, T062. **Ícones**: T063–T065. **Telas da 009 e da 011**: T071, T081. **Validação**: T074, T075, T077, T079 | 27 |
+| **Eduardo Trevisan** | **Todo o site** (spec 012): as tarefas S01–S13 de `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md`, mais a T082 | site |
+
+Por que essa divisão: o Henrique ficou com as mais pesadas (a Memora, a
+anfitriã e todo o movimento), e o resto foi repartido **por área**, para que
+duas pessoas não mexam nos mesmos arquivos ao mesmo tempo. O que é da Memora
+e do Início fica com quem desenhou a Memora; o que é texto, conversa e as
+telas da 009 e da 011 fica com o Eduardo, que redesenhou a conversa na 007 e
+escreveu o Localizador.
+
+**Pontos de contato** (combinar antes de começar):
+- T053/T054 (Início) dependem da T090 (anfitriã aprovada) — Henrique.
+- T059 (Memora na conversa, Henrique) e T058/T060 (conversa limpa e ícones,
+  Eduardo) mexem na mesma tela: a T058 vem primeiro.
+- T030/T031 (textos, Eduardo) e T036 (textos da abertura, Henrique) tocam
+  `l10n/`, em arquivos diferentes.
+- O site (Trevisan) usa a Memora exportada da `MemoraAnimada` (S02) e a lista
+  de dicas da anfitriã (T086, Henrique).
+
 **Regra de todo portão novo**: commitar, quebrar de propósito, ver reprovar,
 desfazer (CLAUDE.md, seção 8). Cada tarefa de teste diz o que quebrar.
 
