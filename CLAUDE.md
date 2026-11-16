@@ -4,7 +4,41 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-11-13 — **FGTS e Instagram nos tutoriais, guias em
+**Última sessão**: 2026-11-15/16 — **a feature 010, o redesenho final**, pelo
+Henrique, na branch **`feature/010-redesenho-final`** (saiu da
+`feature/004-prints-e-zoom` atualizada com a `develop`; **nada tem push**).
+
+> 🎨 **O que existe**: a skill `.claude/skills/memora-ux/` (regras de UI/UX,
+> leitura obrigatória antes de mexer em tela) e `specs/010-redesenho-final/`
+> completa até o `tasks` (79 tarefas). A 010 **continua** a 007 do Eduardo
+> (PR #71): substitui só a Memora em PNG e restringe a voz ao aparelho. Fase
+> **A** (T001–T046) independe da #71; fase **B** (T047–T079) espera a #71
+> entrar na `develop` e, antes, as tarefas dela são revistas contra o código.
+>
+> ✅ **Feito**: T001–T017 (a `MemoraAnimada`, vetorial 2.5D em camadas
+> pintadas pelo app, 8 poses, gestos, segue a paleta, decorativa para o
+> TalkBack, parada com "reduzir movimento", na galeria) e T028 (portão
+> `texto_da_interface_test.dart`, provado quebrando). **2488 testes + 1
+> pulado** antes do portão de texto.
+>
+> ⏸️ **Parado em**: **T018 — o Henrique ainda não aprovou a Memora**; vai
+> mostrar um vídeo à equipe em 2026-11-16 e voltar com o veredito. O
+> **portão de texto está vermelho de propósito** (15 blocos com mais de duas
+> frases ou com "😊" em ajuda, apresentação, autenticação, configurações e
+> perfil): a T029–T031 reescreve. O agente Fable foi **cancelado** pelo
+> Henrique antes de começar.
+>
+> 📱 **Versão de teste no S20 FE**: a depuração agora instala **ao lado** da
+> release (`br.fatec.memora.debug`, nome "Memora (teste)"); a galeria fica em
+> Ajustes. A release segue `br.fatec.memora` / "Memora" — o rótulo dela virou
+> placeholder no manifesto e **ainda não foi conferido num build de release**.
+>
+> ⚠️ **PR #71** (Eduardo, agora com o Trevisan consertando): *changes
+> requested* em nome do Henrique — CPF real em 8 arquivos (reescrever a
+> branch), voz sem `onDevice: true`, Localizador sempre no simulado. A **#72**
+> (capturas Meu INSS e TikTok, Trevisan) foi aprovada e mergeada na `develop`.
+
+Sessão anterior: 2026-11-13 — **FGTS e Instagram nos tutoriais, guias em
 seções e a revisão da #69**, pelo Henrique, na mesma branch
 **`feature/004-prints-e-zoom`** (os commits de hoje **não têm push**).
 
