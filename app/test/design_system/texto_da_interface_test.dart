@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/l10n/textos_anfitria.dart';
 
 /// Portão do texto da interface (feature 013, T028; FR-016, FR-018, FR-020).
 ///
@@ -73,6 +74,57 @@ void main() {
     });
   });
 
+  group('As dicas da anfitriã (T085, FR-050)', () {
+    late Map<String, String> blocos;
+
+    setUpAll(() {
+      blocos = extrairBlocos(
+        File('lib/l10n/textos_anfitria.dart').readAsStringSync(),
+      );
+    });
+
+    /// Os blocos que são dicas: tudo o que o arquivo declara, menos o rótulo
+    /// da ação (que é o que o leitor de tela diz do toque, e não uma dica).
+    Map<String, String> dicasDoArquivo() => <String, String>{
+      for (final MapEntry<String, String> e in blocos.entries)
+        if (e.key != 'rotuloDaAcao') e.key: e.value,
+    };
+
+    test('há de 12 a 16 dicas, todas diferentes', () {
+      expect(TextosAnfitria.dicas.length, inInclusiveRange(12, 16));
+      expect(TextosAnfitria.dicas.toSet().length, TextosAnfitria.dicas.length);
+    });
+
+    test('a lista traz todas as dicas escritas no arquivo, e só elas', () {
+      expect(
+        TextosAnfitria.dicas.toSet(),
+        dicasDoArquivo().values.toSet(),
+        reason: 'dica escrita e fora de `dicas` nunca aparece; dica em '
+            '`dicas` e fora do arquivo escapa deste portao de texto',
+      );
+    });
+
+    test('pelo menos 3 dicas são lembrete antigolpe', () {
+      final List<String> antigolpe = dicasDoArquivo().entries
+          .where((MapEntry<String, String> e) => e.key.startsWith('antigolpe'))
+          .map((MapEntry<String, String> e) => e.value)
+          .toList();
+      expect(antigolpe.length, greaterThanOrEqualTo(3));
+      for (final String dica in antigolpe) {
+        expect(TextosAnfitria.dicas, contains(dica));
+      }
+      expect(
+        antigolpe.any((String d) => d.contains('Eu nunca peço')),
+        isTrue,
+        reason: 'o lembrete da FR-050 ("Eu nunca peço sua senha nem código")',
+      );
+    });
+
+    test('o rótulo da ação é o que a FR-055 pede', () {
+      expect(TextosAnfitria.rotuloDaAcao, 'Outra dica da Memora');
+    });
+  });
+
   group('Os textos da interface (Fase A)', () {
     for (final String arquivo in arquivosVarridos) {
       test('$arquivo: blocos curtos, sem palavra proibida e sem emoji', () {
@@ -116,6 +168,7 @@ void main() {
 /// `textos_guias.dart` e os guias de `features/aprendizado/data/guias/`.
 const List<String> arquivosVarridos = <String>[
   'textos_ajuda.dart',
+  'textos_anfitria.dart',
   'textos_apresentacao.dart',
   'textos_autenticacao.dart',
   'textos_configuracoes.dart',
