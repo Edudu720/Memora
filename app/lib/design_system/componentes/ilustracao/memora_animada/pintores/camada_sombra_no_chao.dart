@@ -13,8 +13,8 @@ class CamadaSombraNoChao extends CamadaDaMemora {
     final double presenca = ctx.pose.corpo;
     if (presenca <= 0) return;
     final double encolhe = 1 - ctx.pulo * 0.35;
-    final double largura = ctx.l(0.52) * encolhe;
-    final double altura = ctx.l(0.055) * encolhe;
+    final double largura = ctx.l(0.6) * encolhe;
+    final double altura = ctx.l(0.068) * encolhe;
     final Paint tinta = ctx.cheio(ctx.cores.sombraChao)
       ..maskFilter = MaskFilter.blur(BlurStyle.normal, ctx.l(0.018));
     canvas.drawOval(

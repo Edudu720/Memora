@@ -107,55 +107,56 @@ class CoresDaMemora {
   static const Color _livroPagina = Color(0xFFE8EEF8);
   static const Color _olho = Color(0xFF0E1F53);
 
-  static const Color _sombraNoClaro = Color(0x2E0D1C50);
-  static const Color _sombraNoEscuro = Color(0x66000000);
+  static const Color _sombraNoClaro = Color(0x520D1C50);
+  static const Color _sombraNoEscuro = Color(0x8C000000);
 
   /// Corpo, sombra, luz, contorno e visor de cada paleta pronta. As chaves são
   /// as de [MemoraCores.paletas]. **A azul é a referência do Henrique.**
-  static const Map<String, _PinturaDaPaleta> _paletas = <String, _PinturaDaPaleta>{
-    'azul': _PinturaDaPaleta(
-      corpo: Color(0xFF3565F3),
-      sombra: Color(0xFF264AA9),
-      luz: Color(0xFF4F76E6),
-      contorno: Color(0xFF0D1C50),
-      visor: Color(0xFFD7E4FC),
-    ),
-    'verde': _PinturaDaPaleta(
-      corpo: Color(0xFF2E9B52),
-      sombra: Color(0xFF1D5530),
-      luz: Color(0xFF3BAC61),
-      contorno: Color(0xFF0A3017),
-      visor: Color(0xFFD9F2E1),
-    ),
-    'roxo': _PinturaDaPaleta(
-      corpo: Color(0xFF7C4FD6),
-      sombra: Color(0xFF542DA1),
-      luz: Color(0xFF906ED6),
-      contorno: Color(0xFF24104A),
-      visor: Color(0xFFE6DCFA),
-    ),
-    'laranja-terra': _PinturaDaPaleta(
-      corpo: Color(0xFFD2641F),
-      sombra: Color(0xFF81411A),
-      luz: Color(0xFFD77638),
-      contorno: Color(0xFF3E1A08),
-      visor: Color(0xFFFBE3D3),
-    ),
-    'rosa': _PinturaDaPaleta(
-      corpo: Color(0xFFD6457F),
-      sombra: Color(0xFF9B2A57),
-      luz: Color(0xFFD56492),
-      contorno: Color(0xFF4A0F28),
-      visor: Color(0xFFFBDDEA),
-    ),
-    'grafite': _PinturaDaPaleta(
-      corpo: Color(0xFF5B6B82),
-      sombra: Color(0xFF38414E),
-      luz: Color(0xFF6A7A92),
-      contorno: Color(0xFF141C2A),
-      visor: Color(0xFFE1E7EF),
-    ),
-  };
+  static const Map<String, _PinturaDaPaleta> _paletas =
+      <String, _PinturaDaPaleta>{
+        'azul': _PinturaDaPaleta(
+          corpo: Color(0xFF3565F3),
+          sombra: Color(0xFF264AA9),
+          luz: Color(0xFF4F76E6),
+          contorno: Color(0xFF0D1C50),
+          visor: Color(0xFFD7E4FC),
+        ),
+        'verde': _PinturaDaPaleta(
+          corpo: Color(0xFF2E9B52),
+          sombra: Color(0xFF1D5530),
+          luz: Color(0xFF3BAC61),
+          contorno: Color(0xFF0A3017),
+          visor: Color(0xFFD9F2E1),
+        ),
+        'roxo': _PinturaDaPaleta(
+          corpo: Color(0xFF7C4FD6),
+          sombra: Color(0xFF542DA1),
+          luz: Color(0xFF906ED6),
+          contorno: Color(0xFF24104A),
+          visor: Color(0xFFE6DCFA),
+        ),
+        'laranja-terra': _PinturaDaPaleta(
+          corpo: Color(0xFFD2641F),
+          sombra: Color(0xFF81411A),
+          luz: Color(0xFFD77638),
+          contorno: Color(0xFF3E1A08),
+          visor: Color(0xFFFBE3D3),
+        ),
+        'rosa': _PinturaDaPaleta(
+          corpo: Color(0xFFD6457F),
+          sombra: Color(0xFF9B2A57),
+          luz: Color(0xFFD56492),
+          contorno: Color(0xFF4A0F28),
+          visor: Color(0xFFFBDDEA),
+        ),
+        'grafite': _PinturaDaPaleta(
+          corpo: Color(0xFF5B6B82),
+          sombra: Color(0xFF38414E),
+          luz: Color(0xFF6A7A92),
+          contorno: Color(0xFF141C2A),
+          visor: Color(0xFFE1E7EF),
+        ),
+      };
 
   /// O conjunto do alto contraste: a paleta não vale aqui (R15).
   static const CoresDaMemora altoContraste = CoresDaMemora(
@@ -216,8 +217,9 @@ class CoresDaMemora {
     final bool escuro = tema.id == MemoraTemaId.escuro;
     for (final MapEntry<String, PaletaDeDestaque> e
         in MemoraCores.paletas.entries) {
-      final Color primaria =
-          escuro ? e.value.primariaEscuro : e.value.primariaClaro;
+      final Color primaria = escuro
+          ? e.value.primariaEscuro
+          : e.value.primariaClaro;
       if (primaria == tema.cores.primaria) return e.key;
     }
     return 'azul';

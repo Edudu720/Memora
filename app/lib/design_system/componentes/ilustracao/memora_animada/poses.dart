@@ -137,16 +137,26 @@ class ValoresDaPose {
   });
 
   // ---- os braços que as poses compartilham ----
-  static const PosicaoDoBraco _esquerdoBaixo =
-      PosicaoDoBraco(Offset(0.245, 0.80), Offset(0.255, 0.915));
-  static const PosicaoDoBraco _direitoBaixo =
-      PosicaoDoBraco(Offset(0.755, 0.80), Offset(0.745, 0.915));
-  static const PosicaoDoBraco _esquerdoAlto =
-      PosicaoDoBraco(Offset(0.15, 0.66), Offset(0.105, 0.40));
-  static const PosicaoDoBraco _direitoAlto =
-      PosicaoDoBraco(Offset(0.85, 0.66), Offset(0.895, 0.40));
-  static const PosicaoDoBraco _direitoAcenando =
-      PosicaoDoBraco(Offset(0.855, 0.72), Offset(0.885, 0.49));
+  static const PosicaoDoBraco _esquerdoBaixo = PosicaoDoBraco(
+    Offset(0.245, 0.80),
+    Offset(0.255, 0.915),
+  );
+  static const PosicaoDoBraco _direitoBaixo = PosicaoDoBraco(
+    Offset(0.755, 0.80),
+    Offset(0.745, 0.915),
+  );
+  static const PosicaoDoBraco _esquerdoAlto = PosicaoDoBraco(
+    Offset(0.15, 0.66),
+    Offset(0.105, 0.40),
+  );
+  static const PosicaoDoBraco _direitoAlto = PosicaoDoBraco(
+    Offset(0.85, 0.66),
+    Offset(0.895, 0.40),
+  );
+  static const PosicaoDoBraco _direitoAcenando = PosicaoDoBraco(
+    Offset(0.855, 0.72),
+    Offset(0.885, 0.49),
+  );
 
   /// Repouso.
   static const ValoresDaPose _neutra = ValoresDaPose(
@@ -179,7 +189,10 @@ class ValoresDaPose {
           inclinacaoDaCabeca: 0.03,
           sorriso: 0.5,
           bocaAbertura: 0.45,
-          bracoDireito: const PosicaoDoBraco(Offset(0.86, 0.78), Offset(0.875, 0.665)),
+          bracoDireito: const PosicaoDoBraco(
+            Offset(0.86, 0.78),
+            Offset(0.875, 0.665),
+          ),
         );
       case PoseDaMemora.pensando:
         return _neutra.copiar(
@@ -188,7 +201,10 @@ class ValoresDaPose {
           olharY: -0.6,
           sorriso: 0.1,
           bochecha: 0.6,
-          bracoDireito: const PosicaoDoBraco(Offset(0.74, 0.87), Offset(0.585, 0.615)),
+          bracoDireito: const PosicaoDoBraco(
+            Offset(0.755, 0.885),
+            Offset(0.60, 0.625),
+          ),
         );
       case PoseDaMemora.comemorando:
         return _neutra.copiar(
@@ -200,11 +216,13 @@ class ValoresDaPose {
         );
       case PoseDaMemora.preocupada:
         return _neutra.copiar(
-          olhoAbertura: 0.88,
-          sorriso: -0.4,
+          sorriso: -0.2,
           sobrancelha: 1,
           bochecha: 0.2,
-          bracoDireito: const PosicaoDoBraco(Offset(0.80, 0.84), Offset(0.78, 0.86)),
+          bracoDireito: const PosicaoDoBraco(
+            Offset(0.80, 0.84),
+            Offset(0.78, 0.86),
+          ),
           escudo: 1,
         );
       case PoseDaMemora.acenando:
@@ -218,17 +236,19 @@ class ValoresDaPose {
           inclinacaoDaCabeca: 0.03,
           sorriso: 0.9,
           bocaAbertura: 0.5,
-          bracoEsquerdo: const PosicaoDoBraco(Offset(0.22, 0.88), Offset(0.30, 0.875)),
-          bracoDireito: const PosicaoDoBraco(Offset(0.84, 0.74), Offset(0.84, 0.54)),
+          bracoEsquerdo: const PosicaoDoBraco(
+            Offset(0.29, 0.885),
+            Offset(0.355, 0.905),
+          ),
+          bracoDireito: const PosicaoDoBraco(
+            Offset(0.845, 0.745),
+            Offset(0.845, 0.56),
+          ),
           dedo: 1,
           livro: 1,
         );
       case PoseDaMemora.mini:
-        return _neutra.copiar(
-          bocaVisivel: 0,
-          bochecha: 0,
-          corpo: 0,
-        );
+        return _neutra.copiar(bocaVisivel: 0, bochecha: 0, corpo: 0);
     }
   }
 

@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart' show Alignment;
 
-
 import 'contexto_de_pintura.dart';
 import 'geometria.dart';
 
@@ -16,10 +15,12 @@ class CamadaCabeca extends CamadaDaMemora {
     final Rect cabeca = ctx.rect(GeometriaDaMemora.cabeca);
 
     // Fones: duas cápsulas escuras, uma de cada lado, atrás da cabeça.
-    final double altura = ctx.l(0.215);
-    final double largura = ctx.l(0.085);
+    final double altura = ctx.l(0.25);
+    final double largura = ctx.l(0.105);
     for (final bool esquerdo in <bool>[true, false]) {
-      final double x = esquerdo ? cabeca.left : cabeca.right;
+      final double x = esquerdo
+          ? cabeca.left - ctx.l(0.012)
+          : cabeca.right + ctx.l(0.012);
       final RRect fone = RRect.fromRectAndRadius(
         Rect.fromCenter(
           center: Offset(x, cabeca.center.dy + ctx.l(0.01)),
@@ -43,31 +44,36 @@ class CamadaCabeca extends CamadaDaMemora {
       );
     }
 
-    final Path forma = Path()..addRRect(ctx.rrect(
-        GeometriaDaMemora.cabeca, GeometriaDaMemora.raioDaCabeca));
+    final Path forma = Path()
+      ..addRRect(
+        ctx.rrect(GeometriaDaMemora.cabeca, GeometriaDaMemora.raioDaCabeca),
+      );
     ctx.contornar(
       canvas,
       forma,
-      ctx.degrade(
-        cabeca,
-        ctx.cores.corpoLuz,
-        ctx.cores.corpo,
-      ),
+      ctx.degrade(cabeca, ctx.cores.corpoLuz, ctx.cores.corpo),
     );
 
     // Sombra de baixo, para o volume: o queixo escurece.
     canvas.save();
     canvas.clipPath(forma);
     canvas.drawRect(
-      Rect.fromLTRB(cabeca.left, cabeca.bottom - cabeca.height * 0.16,
-          cabeca.right, cabeca.bottom),
+      Rect.fromLTRB(
+        cabeca.left,
+        cabeca.bottom - cabeca.height * 0.16,
+        cabeca.right,
+        cabeca.bottom,
+      ),
       ctx.cheio(ctx.cores.corpoSombra.withValues(alpha: 0.6)),
     );
     canvas.restore();
 
     // Reflexo de luz no canto de cima à esquerda.
     final Path reflexo = Path()
-      ..moveTo(cabeca.left + cabeca.width * 0.07, cabeca.top + cabeca.height * 0.36)
+      ..moveTo(
+        cabeca.left + cabeca.width * 0.07,
+        cabeca.top + cabeca.height * 0.36,
+      )
       ..quadraticBezierTo(
         cabeca.left + cabeca.width * 0.06,
         cabeca.top + cabeca.height * 0.12,

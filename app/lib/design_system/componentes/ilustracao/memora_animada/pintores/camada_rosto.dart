@@ -22,7 +22,9 @@ class CamadaRosto extends CamadaDaMemora {
   void _bochechas(Canvas canvas, ContextoDePintura ctx) {
     final double alfa = ctx.pose.bochecha.clamp(0.0, 1.0);
     if (alfa <= 0) return;
-    final Paint tinta = ctx.cheio(ctx.cores.bochecha.withValues(alpha: 0.9 * alfa));
+    final Paint tinta = ctx.cheio(
+      ctx.cores.bochecha.withValues(alpha: 0.9 * alfa),
+    );
     for (final double sinal in <double>[-1, 1]) {
       canvas.drawOval(
         Rect.fromCenter(
@@ -37,8 +39,10 @@ class CamadaRosto extends CamadaDaMemora {
 
   void _olhos(Canvas canvas, ContextoDePintura ctx) {
     final double feliz = ctx.pose.olhoFeliz.clamp(0.0, 1.0);
-    final double aberto =
-        (ctx.pose.olhoAbertura * (1 - ctx.piscar)).clamp(0.0, 1.0);
+    final double aberto = (ctx.pose.olhoAbertura * (1 - ctx.piscar)).clamp(
+      0.0,
+      1.0,
+    );
     for (final double sinal in <double>[-1, 1]) {
       final Offset centro = ctx.p(
         0.5 + sinal * _olhoX + ctx.pose.olharX * 0.012,
@@ -68,8 +72,12 @@ class CamadaRosto extends CamadaDaMemora {
         // O arco feliz: um "^" arredondado.
         final Path arco = Path()
           ..moveTo(centro.dx - ctx.l(0.036), centro.dy + ctx.l(0.014))
-          ..quadraticBezierTo(centro.dx, centro.dy - ctx.l(0.034),
-              centro.dx + ctx.l(0.036), centro.dy + ctx.l(0.014));
+          ..quadraticBezierTo(
+            centro.dx,
+            centro.dy - ctx.l(0.034),
+            centro.dx + ctx.l(0.036),
+            centro.dy + ctx.l(0.014),
+          );
         canvas.drawPath(
           arco,
           ctx.traco(ctx.cores.olho.withValues(alpha: feliz), ctx.l(0.022)),
@@ -86,18 +94,25 @@ class CamadaRosto extends CamadaDaMemora {
       ctx.l(0.02),
     );
     for (final double sinal in <double>[-1, 1]) {
-      // A ponta de dentro desce: é o "franzido".
-      final Offset fora = ctx.p(0.5 + sinal * 0.16, 0.30);
-      final Offset dentro = ctx.p(0.5 + sinal * 0.05, 0.325 + 0.014 * franzir);
-      canvas.drawLine(fora, dentro, tinta);
+      // Preocupação, não bronca: a ponta de dentro SOBE (o contrário do
+      // "franzido" bravo), com uma leve curva. Ela nunca repreende.
+      final Offset fora = ctx.p(0.5 + sinal * 0.155, 0.318);
+      final Offset dentro = ctx.p(0.5 + sinal * 0.055, 0.292 - 0.01 * franzir);
+      final Offset meio = ctx.p(0.5 + sinal * 0.105, 0.296);
+      final Path linha = Path()
+        ..moveTo(fora.dx, fora.dy)
+        ..quadraticBezierTo(meio.dx, meio.dy, dentro.dx, dentro.dy);
+      canvas.drawPath(linha, tinta);
     }
   }
 
   void _boca(Canvas canvas, ContextoDePintura ctx) {
     final double visivel = ctx.pose.bocaVisivel.clamp(0.0, 1.0);
     if (visivel <= 0) return;
-    final double abertura =
-        (ctx.pose.bocaAbertura + ctx.fala * 0.55).clamp(0.0, 1.0);
+    final double abertura = (ctx.pose.bocaAbertura + ctx.fala * 0.55).clamp(
+      0.0,
+      1.0,
+    );
     final double sorriso = ctx.pose.sorriso.clamp(-1.0, 1.0);
     final double meia = ctx.l(0.058 + 0.014 * abertura);
     final Offset centro = ctx.p(0.5 + ctx.pose.olharX * 0.01, 0.46);
@@ -106,8 +121,12 @@ class CamadaRosto extends CamadaDaMemora {
       // Boca fechada: um arco, para cima (sorriso) ou para baixo (preocupada).
       final Path arco = Path()
         ..moveTo(centro.dx - meia, centro.dy)
-        ..quadraticBezierTo(centro.dx, centro.dy + ctx.l(0.06) * sorriso,
-            centro.dx + meia, centro.dy);
+        ..quadraticBezierTo(
+          centro.dx,
+          centro.dy + ctx.l(0.06) * sorriso,
+          centro.dx + meia,
+          centro.dy,
+        );
       canvas.drawPath(
         arco,
         ctx.traco(ctx.cores.olho.withValues(alpha: visivel), ctx.l(0.019)),
@@ -116,16 +135,24 @@ class CamadaRosto extends CamadaDaMemora {
     }
 
     // Boca aberta: a de cima quase reta, a de baixo funda, com a língua.
-    final double fundo = ctx.l(0.025 + 0.07 * abertura) * (0.55 + 0.45 * sorriso.abs());
+    final double fundo =
+        ctx.l(0.025 + 0.07 * abertura) * (0.55 + 0.45 * sorriso.abs());
     final Path boca = Path()
       ..moveTo(centro.dx - meia, centro.dy)
       ..quadraticBezierTo(
-          centro.dx, centro.dy + ctx.l(0.012), centro.dx + meia, centro.dy)
+        centro.dx,
+        centro.dy + ctx.l(0.012),
+        centro.dx + meia,
+        centro.dy,
+      )
       ..quadraticBezierTo(
-          centro.dx, centro.dy + fundo * 2, centro.dx - meia, centro.dy)
+        centro.dx,
+        centro.dy + fundo * 2,
+        centro.dx - meia,
+        centro.dy,
+      )
       ..close();
-    canvas.drawPath(
-        boca, ctx.cheio(ctx.cores.olho.withValues(alpha: visivel)));
+    canvas.drawPath(boca, ctx.cheio(ctx.cores.olho.withValues(alpha: visivel)));
     canvas.save();
     canvas.clipPath(boca);
     canvas.drawOval(

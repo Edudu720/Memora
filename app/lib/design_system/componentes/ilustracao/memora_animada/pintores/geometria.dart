@@ -38,8 +38,11 @@ abstract final class GeometriaDaMemora {
   /// O ombro direito.
   static const Offset ombroDireito = Offset(0.67, 0.715);
 
-  /// A espessura do braço.
-  static const double braco = 0.078;
+  /// A espessura do braço no ombro.
+  static const double bracoOmbro = 0.09;
+
+  /// A espessura do braço no punho: ele afina até a mão.
+  static const double bracoPunho = 0.058;
 
   /// O raio da mão.
   static const double raioDaMao = 0.054;
