@@ -26,6 +26,10 @@ void main() {
       expect(contarFrases('Oi'), 1);
       expect(contarFrases('Fica só aqui. Você não precisa informar.'), 2);
       expect(contarFrases('Uma. Duas! Três?'), 3);
+      // Cada terminador no meio do texto, para que tirar um deles reprove.
+      expect(contarFrases('Tudo bem? Vamos lá.'), 2);
+      expect(contarFrases('Pronto! Vamos lá.'), 2);
+      expect(contarFrases('Pronto. Vamos lá.'), 2);
       expect(contarFrases('Espere… Já volto.'), 2);
       expect(contarFrases('Estou pensando...'), 1);
     });
