@@ -125,8 +125,6 @@ flutter:
 
   assets:
     - assets/ilustracoes/
-    # Os ícones da barra inferior, em pares contorno/preenchido (T112).
-    - assets/icones/navegacao/
     # A licença da fonte vai junto, e aparece em "Licenças" do aplicativo.
     - assets/fontes/atkinson_hyperlegible_next/OFL.txt
     # Guias de aplicativos cotidianos (T071, T072)
