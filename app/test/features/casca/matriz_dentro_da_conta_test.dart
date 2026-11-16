@@ -82,11 +82,7 @@ void main() {
       // texto longo rola: não é ação).
       expect(find.byKey(TelaInicio.chaveMemora), findsOneWidget);
       await exigirAcimaDaBarra(t, find.byKey(MemoraAnfitria.chaveDaAcao), c);
-      await exigirAcimaDaBarra(
-        t,
-        find.byKey(TelaInicio.chaveConversar),
-        c,
-      );
+      await exigirAcimaDaBarra(t, find.byKey(TelaInicio.chaveConversar), c);
       await exigirAcimaDaBarra(t, find.byKey(TelaInicio.chaveVerTudo), c);
 
       // --- Hub
@@ -104,7 +100,8 @@ void main() {
       expect(
         find.byKey(TelaConversa.chaveCampo),
         findsOneWidget,
-        reason: '${nomeDa(c)}: tocar na ação principal do Hub não abriu a '
+        reason:
+            '${nomeDa(c)}: tocar na ação principal do Hub não abriu a '
             'conversa',
       );
       expect(t.takeException(), isNull, reason: 'Conversa, ${nomeDa(c)}');
