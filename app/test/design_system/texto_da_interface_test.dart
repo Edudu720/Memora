@@ -167,6 +167,7 @@ void main() {
 /// A T068 acrescenta `textos_assistente.dart`, `textos_casca.dart`,
 /// `textos_guias.dart` e os guias de `features/aprendizado/data/guias/`.
 const List<String> arquivosVarridos = <String>[
+  'textos_abertura.dart',
   'textos_ajuda.dart',
   'textos_anfitria.dart',
   'textos_apresentacao.dart',
