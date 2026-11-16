@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
@@ -76,6 +77,11 @@ void main() {
 
       // --- Início
       expect(t.takeException(), isNull, reason: 'Início, ${nomeDa(c)}');
+      // A anfitriã (T053/T054) está lá, uma só, e o toque nela chega à vista
+      // acima da barra: encolher é o que ela faz para isso (o balão é texto, e
+      // texto longo rola: não é ação).
+      expect(find.byKey(TelaInicio.chaveMemora), findsOneWidget);
+      await exigirAcimaDaBarra(t, find.byKey(MemoraAnfitria.chaveDaAcao), c);
       await exigirAcimaDaBarra(
         t,
         find.byKey(TelaInicio.chaveConversar),
