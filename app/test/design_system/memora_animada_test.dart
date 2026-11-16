@@ -32,7 +32,7 @@ void main() {
     await t.pumpWidget(
       MaterialApp(
         theme: TemasMemora.porId(tema),
-        navigatorObservers: <NavigatorObserver>[if (observador != null) observador],
+        navigatorObservers: <NavigatorObserver>[?observador],
         home: MediaQuery(
           data: MediaQueryData(disableAnimations: reduzir),
           child: Scaffold(
@@ -74,7 +74,7 @@ void main() {
           for (final PoseDaMemora pose in PoseDaMemora.values) {
             await montar(t, pose, tema: tema, tamanho: tamanho);
             await t.pump(const Duration(milliseconds: 120));
-            expect(t.takeException(), isNull, reason: '${pose.name}');
+            expect(t.takeException(), isNull, reason: pose.name);
             expect(memora, findsOneWidget);
             expect(t.getSize(memora), Size.square(tamanho));
           }
@@ -112,7 +112,7 @@ void main() {
         });
       }
 
-      visitar(t.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
+      visitar(t.getSemantics(find.byType(Scaffold)));
       return achados;
     }
 
