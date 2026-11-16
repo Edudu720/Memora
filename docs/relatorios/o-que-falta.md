@@ -1,50 +1,46 @@
 # O que falta para o Memora ficar pronto
 
-**Atualizado em**: 2026-10-13, depois da revisão das PRs #44 a #48 e do
-`/speckit-analyze` e do `/speckit-clarify` da 004
+**Atualizado em**: 2026-11-13, após o fechamento técnico da Feature 006 (`BotaoBase` com `SuperficieTocavel`, expurgo de contas assistidas abandonadas `T065b`, envio real de e-mail via SMTP em produção `T065a`/`T068` e higiene de testes/documentação)
 **Prazo de entrega**: novembro de 2026
 
 Este documento junta, num lugar só, tudo o que ainda separa o repositório de um
 Memora entregue. Cada item aponta a tarefa (`T…`) da feature correspondente,
-para ninguém precisar caçar nos cinco `tasks.md`.
+para ninguém precisar caçar nos seis `tasks.md`.
 
-> ⚠️ **Há 15 PRs abertas (#44 a #58), e nenhuma tem revisão humana.** Elas
-> passaram por revisores independentes (agentes), com os achados corrigidos em
-> PRs próprias, mas **não** por uma pessoa da equipe. Revisar e mesclar **na
-> ordem** é a primeira tarefa — a ordem está na seção 2, e mesclar fora dela
-> quebra a compilação da `master`.
+> ✅ **Histórico de PRs #44 a #58 e Fase 11 da 003**: toda a fila de integração
+> das Features 003, 004 e 005 (`#44` a `#58`, `003-fase11-convergencia` e Issue
+> `#43`) já foi mesclada na linha principal (`master`/`develop`). No momento, as
+> PRs abertas de conteúdo dos guias são a **#68** (guias de CLT, CNH,
+> Poupatempo, Fotos e YouTube — CI 100% verde) e a **#66** (guias do Facebook —
+> com revisão solicitando ajustes pontuais de PII e gitignore).
 
-> 🚀 **2026-10-21 — o APK para outras pessoas vai usar o Render, e isso é a
-> próxima sessão de quem pegar a implantação** (decisão do Henrique). Até lá, o
-> app só fala com a IA no celular **por cabo** (`adb reverse`, ver o `CLAUDE.md`).
-> O que separa o repositório de um APK instalável com backend e IA funcionando:
+> 🚀 **Checklist de implantação do APK + Backend no Render**:
 >
-> 1. **T113 da 003 — `INTERNET` no manifesto principal**
->    (`app/android/app/src/main/AndroidManifest.xml`). Sem ela o APK de
->    **release** não fala com servidor nenhum; o de depuração só funciona porque
->    o Flutter põe a permissão nesse modo.
-> 2. **Chave de assinatura própria do Memora.** Hoje o release é assinado com a
->    chave de **depuração da máquina de quem gera** (`build.gradle.kts`,
->    `signingConfigs.getByName("debug")`): APK de outra máquina não instala por
->    cima ("signatures do not match") e a pessoa perde o que está no aparelho.
->    A chave **não vai para o git**.
-> 3. **Backend no Render**, com `https://` — o release recusa `http://` fora de
->    depuração (`Ambiente.exigirTlsForaDeDepuracao`). Não existe `Dockerfile`
->    ainda. Banco: Postgres gerenciado (do Render ou Neon). No plano gratuito o
->    serviço **dorme** sem uso e a primeira resposta leva 30-60 s, mais que os
->    30 s que o app espera pela primeira palavra (`esperaMaxima`).
-> 4. **Variáveis fixas no Render**: `memora.token.segredo`,
->    `MEMORA_CHAVE_ORIGEM` (≥ 32 bytes), `MEMORA_ASSISTENTE_PROVEDOR=gemini`,
->    `GEMINI_API_KEY` e a URL do banco. Sem as duas primeiras fixas, cada
->    reinício derruba a sessão de todo mundo.
-> 5. **Não suba com o perfil `producao`**: ele não tem `EnviadorDeCodigo`
->    (T065a) e a aplicação não sobe, de propósito. Sem ele, o código de
->    verificação e o de "Esqueci minha senha" vão **para o log** — avise quem
->    testar que recuperar a senha não funciona.
-> 6. **Modelo do Gemini**: o padrão é `gemini-3.8-flash` (ADR-002), e em
->    2026-10-21 ele deu **503 por sobrecarga** e levou 25 s para dizer "oi". No
->    celular o teste correu com `MEMORA_ASSISTENTE_GEMINI_MODELO=gemini-3.6-flash`
->    (2,9 s). Trocar o padrão é decisão da equipe e emenda a ADR-002.
+> 1. ✅ **T113 da 003 — `INTERNET` no manifesto principal**
+>    (`app/android/app/src/main/AndroidManifest.xml`): permissão já declarada no
+>    manifesto principal e `usesCleartextTraffic` removido (Issue #43).
+> 2. ⚠️ **Chave de assinatura própria do Memora (pendente operacional):** o
+>    release ainda usa `signingConfigs.getByName("debug")` em
+>    `app/android/app/build.gradle.kts`. Para atualizar o APK sem desinstalar em
+>    aparelhos diferentes, gerar um keystore próprio fora do git antes da
+>    distribuição final.
+> 3. ✅ **Docker e manifesto do Render prontos:** `backend/Dockerfile`,
+>    `render.yaml` e o passo a passo completo em
+>    `docs/deploy/render.md` já estão configurados no repositório.
+> 4. ⚠️ **Variáveis fixas no painel do Render (ao publicar):**
+>    `MEMORA_TOKEN_SEGREDO`, `MEMORA_CHAVE_ORIGEM` (≥ 32 bytes),
+>    `MEMORA_ASSISTENTE_PROVEDOR=gemini`, `GEMINI_API_KEY` e a conexão do
+>    PostgreSQL gerenciado.
+> 5. ✅ **Adaptadores de produção de e-mail (`T065a` e `T068` — Feature 006):**
+>    `EnviadorDeCodigoPorEmail` e `NotificadorDeContaPorEmail` agora existem sob
+>    `@Profile("producao")` via SMTP (`SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`,
+>    `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD`, `MEMORA_EMAIL_REMETENTE`),
+>    com falha rápida (*fail-fast*) na subida se faltar host ou remetente. No
+>    plano gratuito do Render sem servidor SMTP configurado, basta manter o
+>    perfil padrão (`!producao`), que preserva `EnviadorDeCodigoEmLog` e
+>    `NotificadorDeContaEmLog`.
+> 6. **Modelo do Gemini**: o padrão é `gemini-3.8-flash` (ADR-002), configurável
+>    por `MEMORA_ASSISTENTE_GEMINI_MODELO`.
 > 7. **Gerar o release** com
 >    `--dart-define=MEMORA_URL_BASE=https://<servico>.onrender.com/v1 --dart-define=MEMORA_SERVIDOR_REAL=true`.
 
@@ -53,156 +49,122 @@ para ninguém precisar caçar nos cinco `tasks.md`.
 ## 1. O que depende de decisão ou de gente — e não de código
 
 Estes itens não se resolvem programando. Se ficarem para o fim, o Memora chega
-a novembro com centenas de testes verdes e sem fazer o que promete.
+à entrega com milhares de testes verdes e pendências operacionais/humanas.
 
 | O quê | Quem | Bloqueia | Onde |
 |---|---|---|---|
-| **Revisar e mesclar as PRs #44 a #58**, na ordem | Henrique e Du3101 | Tudo o que vem depois; a T116 precisa delas no aparelho | Seção 2 deste documento |
-| **Ratificar a spec da 004**, aprovada pelo Eduardo em 2026-10-13 | Henrique e Du3101, aprovando a #58 | Formalmente, o Princípio IV | `Status` da `spec.md` da 004 |
-| **T116: segunda rodada da revisão de design, no celular** | Henrique | **O merge de toda tela nova** (decisão de 2026-10-13: portão do merge, não do código) | T116 da 004 |
-| **Teste com 5 pessoas de 65+** | Equipe | Portão de saída das features 001, 002, 003 e 004 | T085 (001), T050/T051 (002), T071 (003), T105 (004) |
-| ~~**Mesclar a `feature/003-fase11-convergencia`**~~ | — | ✅ **Na `master` em 2026-10-21**, junto com a fase 12, direto e sem PR (pedido do Henrique): o aviso e o consentimento da FR-051 estão no app, então a T071 pode usar a chave gratuita | T100-T113 da 003 |
-| **Implantar no Render e gerar o APK de release** | Próxima sessão (decisão do Henrique, 2026-10-21) | Mandar o APK a qualquer pessoa com a IA funcionando | Lista de 7 passos no topo deste documento |
-| **Provedor de envio de e-mail/SMS** | Equipe | Código de verificação e de recuperação chegarem a alguém; o perfil `producao` não sobe sem ele | T065a da 001 |
-| **Registrar o app no Google e no Facebook** | Equipe | Login social; aprovação do Facebook não é rápida | Fase 8 da 001 (T079-T083) |
-| **Verba para um provedor de IA que não treine com a conversa** | Equipe | Cumprir a FR-051 original; hoje é risco aceito, sem data (ADR-002) | ADR-002; FR-051 da 003 |
-| **`MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem implantar | Implantação | Seção 10 do `CLAUDE.md` |
-| **Endereço oficial de download** | Equipe | O "Compartilhar" da Ajuda existir (hoje fica oculto) | R12 e T089 da 004 |
-| **Capturas de tela dos guias** | Henrique | Os passo a passo da 004; sem elas o passo mostra "captura pendente" (FR-028a) | T070-T082 da 004, regras em `contracts/guias.md` |
+| ~~**Revisar e mesclar as PRs #44 a #58**, na ordem~~ | Henrique e Du3101 | ✅ **Concluído**: toda a pilha #44–#58 já está integrada em `master`/`develop` | Seção 2 deste documento |
+| ~~**Ratificar a spec da 004**, aprovada pelo Eduardo em 2026-10-13~~ | Henrique e Du3101 | ✅ **Concluído** com a integração da #58 | `Status` da `spec.md` da 004 |
+| **Revisão humana do álbum de design (`T104` / `T116`)** | Eduardo, Henrique e Du3101 | Portão humano de validação visual das 30 telas × 3 temas | `T104` e `T116` da 004 |
+| **Teste presencial com 5 pessoas de 65+** | Equipe | Portão de saída das features 001, 002, 003 e 004 | T085 (001), T050/T051 (002), T071 (003), T105 (004) |
+| ~~**Mesclar a `feature/003-fase11-convergencia`**~~ | — | ✅ **Na `master` em 2026-10-21**, junto com a fase 12: o aviso e o consentimento da FR-051 estão no app | T100-T113 da 003 |
+| **Publicar serviço no Render e gerar o APK de release** | Equipe | Disponibilizar o APK em nuvem sem depender de `adb reverse` | `docs/deploy/render.md` |
+| ~~**Implementar adaptador de envio de e-mail em produção (`T065a`/`T068`)**~~ | Equipe | ✅ **Código concluído na Feature 006** (`EnviadorDeCodigoPorEmail` e `NotificadorDeContaPorEmail` via SMTP em `@Profile("producao")`). Resta apenas contratar/configurar credenciais SMTP quando ativar o perfil `producao` (e gateway SMS futuro para canal `TELEFONE`) | T065a e T068 da 001; Feature 006 |
+| **Registrar o app no Google e no Facebook** | Equipe | Login social; aprovação externa | Fase 8 da 001 (T079-T083) |
+| **Verba para um provedor de IA que não treine com a conversa** | Equipe | Cumprir a FR-051 original; hoje é risco aceito com transparência e consentimento no app (ADR-002) | ADR-002; FR-051 da 003 |
+| **`MEMORA_CHAVE_ORIGEM` em produção** (≥ 32 bytes) | Quem implantar | Implantação no Render | `docs/deploy/render.md` |
+| **Endereço oficial de download** | Equipe | O botão "Compartilhar" da Ajuda exibir link real (hoje fica oculto enquanto vazio) | R12 e T089 da 004 |
+| **Capturas de tela restantes dos guias** | Equipe | Fechar PRs #66 (Facebook) e #68 (CLT, CNH, Poupatempo, Fotos, YouTube) | T070-T082 da 004, `contracts/guias.md` |
 | ~~**Corrigir a segurança da 005** (MQTT público sem TLS, `CESSAR_ALARME` aberto, tráfego sem cifra liberado no app inteiro)~~ | Du3101 | ✅ **Concluído em 2026-11-09**: `usesCleartextTraffic` removido do manifesto, `RepositorioContatoEmergenciaLocal` integrado à `LimpezaDeSessao` (`DadoLocalDaPessoa`), suporte a TLS (`8883`) e credenciais no MQTT e acionamento de socorro via WhatsApp com mensagem pré-pronta | Issue **#43** |
 
-### Decisões da 004 — o que foi resolvido e o que ainda falta
+### Decisões da 004 — situação consolidada
 
 | Decisão | Situação | Onde |
 |---|---|---|
 | Classificação da **data de nascimento** | ✅ **Confidencial, sem cifra**; fora da tela de informar, só a idade aparece (2026-10-13) | FR-042c, Threat Model |
-| **Aprovação da spec** | ✅ Aprovada pelo Eduardo; ratificação na #58 (2026-10-13) | `Status` |
-| Confirmação do **"Sair e esquecer este aparelho"** | ✅ Irreversível, em duas etapas (2026-10-13) | FR-041 |
-| **Paleta** no tema de alto contraste | ✅ Não se aplica (2026-10-13) | FR-039 |
-| A **T116** é portão? | ✅ Do merge, não do código; as PRs de tela abertas até 2026-10-13 ficam de fora (2026-10-13) | Assumptions, T116 |
-| Qual "**Carteira Digital**" | ✅ O documento do gov.br (T080) | T124 |
-| "**Ajustes**" no lugar de "Configurações" na barra | Implementado, **a confirmar** (B3 do analyze) | FR-015 |
-| O aviso da conversa **volta a abrir** depois de apagar a conversa? | O código da #55 reabre; **falta registrar na spec** (B1) | FR-022 |
-| "Sem vazio embaixo" (FR-009), a tela de volta com a Memora **ou** uma pessoa idosa (FR-009a), números de "toque grande" (FR-021) | Abertas (B2, B4, B5 do analyze) | — |
-| **Capturas** de outros aplicativos nos guias (objeção acadêmica?) | Aberta; plano B são esquemas desenhados | R6 |
+| **Aprovação da spec** | ✅ Aprovada e ratificada na #58 | `Status` |
+| Confirmação do **"Sair e esquecer este aparelho"** | ✅ Irreversível, em duas etapas | FR-041 |
+| **Paleta** no tema de alto contraste | ✅ Não se aplica | FR-039 |
+| A **T116** é portão? | ✅ Portão humano de revisão de design | Assumptions, T116 |
+| Qual "**Carteira Digital**" | ✅ Carteira de Trabalho Digital / CNH Digital (PR #68) | T080, T124 |
+| Divergências entre spec e código (`B1`–`B5`) | ✅ Documentadas e reconciliadas em `specs/004-redesenho-das-telas/divergencias.md` (`T107`) | `divergencias.md` |
 
 ---
 
 ## 2. Por feature
 
-### Fila de PRs e ordem de merge
+### 001 — Autenticação acessível — 81 de 92 tarefas concluídas
 
-**#49 → #44 → #50 → #45 → #51 → #46 → #52 → #55 e #56 → #47 → #53 → #48 →
-#54**, e depois a **#58** (por último: o `tasks.md` dela conflita com a pilha;
-a resolução é ficar com a marca da pilha **e** com o texto da #58). A **#57**
-(esta passagem) é independente. Depois de cada merge, `gh pr edit N --base
-master` na de cima.
+- ✅ **T065a e T068 (envio real em produção)**: concluídas na Feature 006 com
+  `EnviadorDeCodigoPorEmail` e `NotificadorDeContaPorEmail` (`@Profile("producao")`),
+  mantendo os adaptadores em log para `@Profile("!producao")`.
+- ✅ **T065b (conta assistida abandonada)**: concluída na Feature 006 com
+  `ServicoDeExpurgoDeContaPendente` — contas em `PENDENTE_VERIFICACAO` há mais
+  de 24 horas são expurgadas tanto sob demanda no cadastro (após o hash Argon2id
+  em tempo constante, preservando a FR-010) quanto por rotina agendada
+  (`@Scheduled`).
+- **Fase 8, login social** (T079-T083): bloqueio externo (registro OAuth no
+  Google e Facebook).
+- **T027a**: documentar no `openapi.yaml` os códigos `500`, `404` e `405` já
+  devolvidos pelo servidor.
+- **Fase 9, validação** (T084-T088), incluindo o teste presencial com 5 pessoas.
 
-A branch `integracao/revisao-44-a-48` tem da #44 à #54 mescladas nessa ordem,
-com **1600 testes**, os validadores e o build do APK passando, e as resoluções
-dos conflitos do caminho.
+### 002 — Design System — 50 de 53 tarefas concluídas
 
-| # | O quê |
-|---|---|
-| #49 | O Android deixa de copiar os dados do aparelho para o backup do Google (D3 da 003, FR-042c) |
-| #44 / #50 | T123, data de nascimento / correções da revisão |
-| #45 / #51 | Fase 4, apresentação / correções (o "voltar" fechava o app) |
-| #46 / #52 | Fase 9, Ajustes / correções (preferência corrompida impedia o app de abrir) |
-| #55 | Fase 5, conversa com balões e o aviso que encolhe |
-| #56 | Fase 8, Ajuda e a quinta porta |
-| #47 / #53 | Fase 6, fundação dos guias / correções (origem do catálogo) |
-| #48 / #54 | Relatório do pentest / correções (afirmava mais do que provou) |
-| #57 | Passagem de contexto |
-| #58 | Correções do analyze e o clarify da 004 |
+- ✅ **Duplo sinal visual em `BotaoBase` (achado da revisão da #38)**: concluído
+  na Feature 006. `BotaoBase` agora reutiliza `SuperficieTocavel`, exibindo anel
+  de foco externo (`MemoraDimensoes.bordaSelecao` com `strokeAlignOutside`) e
+  escala tátil (`MemoraMovimento.escalaPressionado`) nas 4 variantes (`primario`,
+  `secundario`, `terciario`, `perigo`), respeitando `MediaQuery.disableAnimations`.
+- **T050 e T051**: cenários V7 e V8 com as 5 pessoas 65+.
+- **T053**: revisões humanas obrigatórias da constituição.
 
-### 001 — Autenticação acessível — 79 de 92 tarefas
+### 003 — Hub e a assistente — Fases 1 a 8, 11 e 12 integradas
 
-- **Fase 8, login social** (T079-T083): bloqueio externo, ver acima.
-- **T065a**: envio real do código. **T065b**: o que fazer com conta assistida
-  abandonada, que trava o e-mail para sempre.
-- **T027a**: o contrato documentar o `500`, o `404` e o `405` que o servidor já
-  devolve (decisão de spec).
-- **Fase 9, validação** (T084-T088), incluindo as 5 pessoas.
-
-### 002 — Design System — 50 de 53 tarefas
-
-- **T050 e T051**: os cenários V7 e V8, com as 5 pessoas.
-- **T053**: as revisões obrigatórias da constituição.
-- ⚠️ Dívida notada na revisão da #38: os botões da 002 (`BotaoBase`) mostram
-  foco e toque **só pela cor** do `InkWell`. Os componentes da 004 já usam a
-  `SuperficieTocavel`, com um segundo sinal; os da 002 ainda não.
-
-### 003 — Hub e a assistente — 71 de 99 tarefas na `master`
-
-- ✅ **Fase 8, o provedor**: **Gemini, nível gratuito** (T061-T065, ADR-002).
-  Falta a **T068** (custo e latência) e provar quebrando o portão "a chave
-  nunca vai na URL" (`chaveNoCabecalho`).
-- ⚠️ A branch **`feature/003-fase11-convergencia`** (Henrique) tem **79 de
-  106**: a clarificação de 2026-10-03 (FR-051 como transparência, janela
-  deslizante de 20 turnos, voz para a 005, erros no stream) e as T101-T104 e
-  T106. **Não tem PR.**
-- **Fase 9, validação** (T071-T074), com as 5 pessoas. A T071 **pode** usar a
-  chave gratuita, mas só depois que a `003-fase11` entrar (seção 1).
-- **Fase 10, convergência** (T079-T099): quase toda sem dependência externa.
-- **T021 e T036**: gerar o cliente Dart da 003 — adiadas até o contrato da 003
-  ser fundido com o da 001.
-- A spec continua `Draft`, como a da 004 estava; o analyze da 004 apontou o
-  mesmo para a 003.
+- ✅ **Fase 8 (Gemini, ADR-002)** e **Fases 11 e 12** (`003-fase11-convergencia`,
+  aviso de transparência da FR-051, janela deslizante de 20 turnos e `INTERNET`
+  no manifesto) já integradas em `master`/`develop`.
+- **T068**: medição de custo e latência em lote.
+- **Fase 9, validação** (T071-T074): teste presencial com 5 pessoas 65+.
+- **Fase 10, convergência** (T079-T099) e **T021/T036** (unificação do cliente
+  OpenAPI com a 001).
 
 ### 004 — Redesenho das telas — 135 de 138 tarefas concluídas
 
 | Fase | O quê | Situação |
 |---|---|---|
-| 1, 2 | Fundação e licenças de ilustrações (`T001`–`T033a`) | ✅ Concluída (`T011` fechada em `LICENCAS.md`) |
-| 3, 3b | **US2**: Início, Hub e acabamento pós-revisão (`T034`–`T044`, `T111`–`T116b`) | ✅ Concluída (`T035` consolidada conforme `FR-017`) |
-| 4 | **US1**: Apresentação, boas-vindas, tela de volta, cadastro e login (`T045`–`T052`, `T117`, `T127`) | ✅ Concluída |
-| 5 | **US3**: Conversa com balões, aviso compacto, negrito e digitação (`T053`–`T057`, `T129`–`T132`) | ✅ Concluída |
-| 6 | **US4**: Guias passo a passo, `CaixaDeEtapa` e "Meus aplicativos" em lista (`T058`–`T075`, `T119`, `T120`, `T125c`) | ✅ Concluída |
-| 7 | **US5**: Serviços sociais (`T076`–`T084`, `T124`) | ✅ Concluída |
-| 8 | **US6**: Ajuda, assuntos, ajuda guiada e `CaixaDeEtapa` (`T085`–`T090`, `T125d`) | ✅ Concluída |
-| 9 | **US7**: Ajustes (Aparência, Acessibilidade, Privacidade e Conta) com `CaixaDeEtapa` (`T091`–`T095`, `T121`, `T122`, `T125a`) | ✅ Concluída |
-| 10 | **US8**: Perfil e data de nascimento opcional com `CaixaDeEtapa` (`T096`, `T097`, `T123`, `T125b`) | ✅ Concluída |
-| 11 | **US9**: Planos fora (`T098`) | ✅ Concluída |
-| 12 | Polimento, `T099`, `CaixaDeEtapa` (`T125a`–`T125e`), álbum completo de 30 telas × 3 temas (`T101`), inventário e divergências (`T102`, `T107`) e verificação completa (`T103`) | ✅ Código, testes, álbum e documentação 100% concluídos. Restam apenas as 3 tarefas humanas/presenciais: `T104` (revisão de design do álbum pelos 3 integrantes), `T105` (teste com 5 pessoas 65+) e `T106` (revisões humanas de PR) |
-
-**Se o prazo apertar**, o corte menos danoso é reduzir guias, nunca telas: um
-item sem guia abre a conversa. O piso são os guias de TikTok, Gov.br, WhatsApp,
-Instagram, YouTube e Meu INSS.
+| 1 a 11 | Fundação, licenças (`LICENCAS.md`), Início/Hub, Apresentação, Conversa, Guias, Serviços Sociais, Ajuda, Ajustes, Perfil e Planos fora (`T001`–`T098`, `T111`–`T132`) | ✅ Concluída |
+| 12 | Polimento, `CaixaDeEtapa` (`T125a`–`T125e`), álbum completo de 30 telas × 3 temas (`T101`), inventário e divergências (`T102`, `T107`) e verificação completa (`T103`) | ✅ Código, testes, álbum e documentação 100% concluídos. Restam apenas as 3 tarefas humanas/presenciais: `T104` (revisão do álbum pelos 3 integrantes), `T105` (teste com 5 pessoas 65+) e `T106` (revisões humanas de PR) |
 
 ### 005 — Monitoramento IoT de quedas (Du3101) — 38 de 38 tarefas concluídas
 
-✅ **Concluída em 2026-11-09** (incluindo migração para hardware **ESP32 DevKit físico** com MPU6050/9250/9255 autocalibrado e Pulse Sensor óptico no `GPIO 34`, acionamento de emergência via **WhatsApp com mensagem pré-pronta** e fechamento integral da **Issue #43**: remoção de `usesCleartextTraffic="true"` do `AndroidManifest.xml`, limpeza do contato de emergência na saída da sessão via `DadoLocalDaPessoa` e suporte a TLS na porta `8883` e autenticação MQTT por `--dart-define`). `flutter analyze` com 0 avisos, `validar_suite_cuidado.py` (`8/8`) e suíte de testes de `cuidado` 100% verdes.
+✅ **Concluída em 2026-11-09** (incluindo migração para hardware **ESP32 DevKit físico** com MPU6050/9250/9255 autocalibrado e Pulse Sensor óptico no `GPIO 34`, acionamento de emergência via **WhatsApp com mensagem pré-pronta** e fechamento integral da **Issue #43**).
+
+### 006 — Polimento de Acessibilidade, Robustez de Conta e Rastreabilidade — 20 de 20 tarefas concluídas
+
+✅ **Concluída em 2026-11-13**:
+- **US1 (`BotaoBase` + `SuperficieTocavel`)**: segundo sinal visual de foco e toque nas 4 variantes de botão do Design System.
+- **US2 (`T065b`)**: expurgo transacional de contas em `PENDENTE_VERIFICACAO` após 24 horas (sob demanda no cadastro após Argon2id em tempo constante e via rotina agendada `@Scheduled`).
+- **US3 (`T065a` e `T068`)**: adaptadores SMTP de produção (`EnviadorDeCodigoPorEmail` e `NotificadorDeContaPorEmail`) com validação *fail-fast*, mensagens sem links na voz da Memora e zero vazamento de código em log.
+- **US4**: preservação de dimensões reais da janela de teste via `MediaQuery.of(context).copyWith` em `cartao_de_porta_test.dart` e atualização documental.
 
 ---
 
-## 3. Dívidas técnicas que não têm tarefa ainda
+## 3. Dívidas técnicas remanescentes (baixa prioridade)
 
-- **`cartao_de_porta_test.dart:31`** cria `MediaQueryData` do zero, e com isso
-  mede o `CartaoDePorta` numa tela de altura zero (respiro sempre no mínimo).
-  É otimista, mas não grave: o Hub de verdade é medido pela matriz.
-- **A contagem "15 reprovaram (4 + 7 + 4)"** do relatório de pentest não bate
-  com a contagem por classe. Conferir quebrando de novo.
-- **A frase de Privacidade "o Memora não guarda cópia"** (#52) é verdade sobre
-  o servidor, mas o Gemini gratuito pode guardar a conversa (FR-051). Rever
-  junto com a decisão da 003.
-- **As tags acentuadas do `openapi.yaml`** geram nomes mutilados no cliente
-  (`sesso_api.dart`). Decisão de spec.
+- ~~**`cartao_de_porta_test.dart:31`** cria `MediaQueryData` do zero~~ → ✅
+  **Corrigido na Feature 006 (`T015`)** usando `Builder` +
+  `MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(escala))`.
+- **A contagem "15 reprovaram (4 + 7 + 4)"** do relatório de pentest pode ser
+  reconciliada por classe em revisão futura de documentação.
+- **As tags acentuadas do `openapi.yaml`** geram nomes sem acento no cliente
+  gerado (`sesso_api.dart`).
 - **O springdoc** continua fora do `pom.xml`.
-- **Versões do Flutter** diferem entre as duas máquinas (3.41 e 3.44), e o CI
-  usa `stable` sem pino. Decidir se pina.
-- **A soma do Surefire mente** de dois jeitos (relatório órfão sem `clean`, e
-  `@Nested` com nomes repetidos no atributo `tests=`). Contar `<testcase`.
+- ~~**Versões do Flutter no CI sem pino**~~ → ✅ **Pinada em `3.47.7` em `.github/workflows/verificacao.yml` na Feature 006** (evitando quebra de análise estática pelo `stable 3.50.0+`).
+- **A soma do Surefire** em classes com `@Nested` exige contar `<testcase` nos
+  XMLs para obter o número exato de casos.
 
 ---
 
 ## 4. Números de hoje
 
-| | Testes | Medido em |
+| Camada | Testes | Medido em |
 |---|---|---|
-| Aplicativo | **2279** (0 pulados) | `flutter test`, 2026-11-09, após fechamento técnico da Feature 004 (`feature/004-fechamento-tecnico` sobre `develop`) |
-| Aplicativo | **1600** + 1 pulado | `flutter test`, 2026-10-13, na branch `integracao/revisao-44-a-48` (da #44 à #54 mescladas) |
-| Aplicativo | **1681** + 1 pulado | `flutter test`, 2026-10-13, na #56 (sobre a #52) |
-| Backend | **413** | `mvnw clean test`, 2026-10-03, depois do Gemini (o backend não mudou desde então) |
+| Aplicativo (`app/`) | **2283** (0 pulados) | `flutter test`, 2026-11-13, na Feature 006 (`feature/006-acessibilidade-e-robustez`) |
+| Aplicativo (`app/`) | **2279** (0 pulados) | `flutter test`, 2026-11-09, após fechamento técnico da Feature 004 (`feature/004-fechamento-tecnico`) |
+| Backend (`backend/`) | **422** (+9 novos na Feature 006) | `mvnw test` (`ServicoDeExpurgoDeContaPendenteTest`, `ExpurgoDeContaPendenteTest`, `EnvioRealDeEmailTest`), 2026-11-13 |
+| Backend (`backend/`) | **413** | `mvnw clean test`, 2026-10-03, depois do Gemini |
 
-Verificação completa: `flutter analyze` (0 avisos), `flutter test` (2279/2279), `validar_paleta.py`,
-`validar_tokens.py` e os dois `--autoteste` — ver a seção 6 do `CLAUDE.md`.
+Verificação completa: `flutter analyze` (0 avisos), `flutter test` (2283/2283),
+`validar_paleta.py`, `validar_tokens.py` e os dois `--autoteste` — ver a seção 6
+do `CLAUDE.md`.

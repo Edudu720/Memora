@@ -18,6 +18,7 @@ import br.fatec.memora.comum.FalhaDoMemora;
 import br.fatec.memora.comum.RegistroDeAuditoria;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -80,6 +81,7 @@ public class ServicoDeCadastro {
     private final ServicoDeSessao sessoes;
     private final EmissorDeTokenDeAcesso emissor;
     private final RegistroDeAuditoria auditoria;
+    private final ServicoDeExpurgoDeContaPendente expurgoDeContaPendente;
     private final Clock relogio;
 
     public ServicoDeCadastro(
@@ -90,6 +92,7 @@ public class ServicoDeCadastro {
             ServicoDeSessao sessoes,
             EmissorDeTokenDeAcesso emissor,
             RegistroDeAuditoria auditoria,
+            ServicoDeExpurgoDeContaPendente expurgoDeContaPendente,
             Clock relogio) {
         this.pessoas = pessoas;
         this.canais = canais;
@@ -98,6 +101,7 @@ public class ServicoDeCadastro {
         this.sessoes = sessoes;
         this.emissor = emissor;
         this.auditoria = auditoria;
+        this.expurgoDeContaPendente = expurgoDeContaPendente;
         this.relogio = relogio;
     }
 
@@ -135,8 +139,18 @@ public class ServicoDeCadastro {
         String valorHash = gerador.hashDe(valor);
         Instant agora = relogio.instant();
 
-        if (canais.findByValorHash(valorHash).isPresent()) {
-            return chamariz(nomeTratamento, tipo, valor, agora);
+        Optional<CanalContato> existente = canais.findByValorHash(valorHash);
+        if (existente.isPresent()) {
+            // T065b (FR-004, FR-005): se o canal pertence a uma conta assistida
+            // abandonada em PENDENTE_VERIFICACAO ha mais de 24 horas, expurgamos
+            // a conta obsoleta (depois do Argon2id acima) e liberamos o cadastro.
+            // Contas ATIVA ou PENDENTE_VERIFICACAO recentes (<= 24h) caem no chamariz.
+            boolean expurgada =
+                    expurgoDeContaPendente.expurgarSeExpirada(
+                            existente.get().getPessoaId(), agora);
+            if (!expurgada) {
+                return chamariz(nomeTratamento, tipo, valor, agora);
+            }
         }
         return criar(
                 nomeTratamento, tipo, valor, valorHash, senhaHash, aparelhoDescricao, agora,

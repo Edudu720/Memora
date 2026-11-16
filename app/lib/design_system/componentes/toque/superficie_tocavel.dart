@@ -121,7 +121,9 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
       onTap: widget.aoTocar,
       child: ExcludeSemantics(
         child: AnimatedScale(
-          scale: _pressionada ? MemoraMovimento.escalaPressionado : 1,
+          scale: _pressionada && !reduzir
+              ? MemoraMovimento.escalaPressionado
+              : 1,
           duration: MemoraMovimento.efetiva(
             MemoraMovimento.rapido,
             reduzirMovimento: reduzir,

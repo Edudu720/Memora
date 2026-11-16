@@ -264,8 +264,8 @@ description: "Task list — Autenticação Acessível do Memora"
 >    espera e não há por onde sair: a pessoa fica com uma conta que existe e não
 >    entra.
 
-- [ ] T065a [US5] Implementar o **envio real** do código (`EnviadorDeCodigo`) — hoje só existe `EnviadorDeCodigoEmLog`, restrito a `@Profile("!producao")`. Sem provedor, a aplicação **não sobe** em produção, de propósito
-- [ ] T065b [US5] Decidir o que fazer com **conta assistida abandonada**: ela fica `PENDENTE_VERIFICACAO` para sempre e mantém o canal ocupado, então um novo cadastro com o mesmo e-mail cai no chamariz da FR-010 e a pessoa fica sem saída. Provável expurgo por idade
+- [X] T065a [US5] Implementar o **envio real** do código (`EnviadorDeCodigo`) — fechado na Feature 006 com `EnviadorDeCodigoPorEmail` (`@Profile("producao")`, via `spring-boot-starter-mail` / `JavaMailSender`, validação *fail-fast* em `@PostConstruct`, texto sem links na voz da Memora e zero registro de código em log), mantendo `EnviadorDeCodigoEmLog` em `@Profile("!producao")`
+- [X] T065b [US5] Decidir o que fazer com **conta assistida abandonada** — fechado na Feature 006 com `ServicoDeExpurgoDeContaPendente`: contas em `PENDENTE_VERIFICACAO` há mais de 24 horas são expurgadas tanto sob demanda (após o hash Argon2id em tempo constante no novo cadastro) quanto por rotina agendada (`@Scheduled`), preservando o chamariz da FR-010 para contas `ATIVA` ou pendentes recentes (`<= 24h`)
 
 ---
 
@@ -279,7 +279,7 @@ description: "Task list — Autenticação Acessível do Memora"
 
 - [X] T066 [US3] Implementar `POST /v1/auth/recuperacao/solicitar`, respondendo `202` **sempre** (FR-019)
 - [X] T067 [US3] Implementar `POST /v1/auth/recuperacao/confirmar`, revogando **todas** as sessões (FR-021)
-- [X] T068 [US3] Notificar pelo canal cadastrado quando a senha mudar (FR-022) — a porta ficou em `aplicacao/NotificadorDeConta.java` e o adaptador em `infra/NotificadorDeContaEmLog.java`, seguindo a divisão que `EnviadorDeCodigo` já usa. **Continua sem provedor real**, como a T065a
+- [X] T068 [US3] Notificar pelo canal cadastrado quando a senha mudar (FR-022) — a porta ficou em `aplicacao/NotificadorDeConta.java`, o adaptador de desenvolvimento em `infra/NotificadorDeContaEmLog.java` (`@Profile("!producao")`) e o adaptador real de produção em `infra/NotificadorDeContaPorEmail.java` (`@Profile("producao")`, fechado na Feature 006 junto com a T065a)
 - [X] T069 [US3] Escrever teste do cenário V5 em `backend/src/test/java/br/fatec/memora/autenticacao/api/TrocaDeSenhaRevogaSessoesTest.java`
 - [X] T069a [US3] Acrescentar o portão de latência da recuperação ao `NaoRevelaExistenciaTest` (V2, FR-019) — o terceiro endpoint público, e o terceiro a hashear antes da consulta ao canal
 

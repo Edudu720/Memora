@@ -71,6 +71,7 @@ jobs:
         with:
           flutter-version: '3.47.7'
           channel: stable
+          flutter-version: '3.47.7'
       - name: Instalar dependências
         run: flutter pub get
       - name: Análise estática
@@ -94,6 +95,7 @@ jobs:
         with:
           flutter-version: '3.47.7'
           channel: stable
+          flutter-version: '3.47.7'
       - name: Instalar dependências
         run: dart pub get
       - name: Análise estática
