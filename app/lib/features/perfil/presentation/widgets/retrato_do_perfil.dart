@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_perfil.dart';
@@ -138,21 +137,11 @@ class RetratoDoPerfil extends StatelessWidget {
     }
 
     if (atual is AvatarIlustradoDePerfil) {
-      final AvatarIlustrado avatar = atual.avatar;
-      if (avatar.ehSvg) {
-        return Padding(
-          padding: EdgeInsets.all(tamanho * 0.08),
-          child: SvgPicture.asset(avatar.caminhoAsset),
-        );
-      }
-      final int cachePx = (tamanho * 2.5).clamp(48, 512).round();
-      return Image.asset(
-        avatar.caminhoAsset,
-        width: tamanho,
-        height: tamanho,
-        fit: BoxFit.contain,
-        cacheWidth: cachePx,
-        cacheHeight: cachePx,
+      return Center(
+        child: DesenhoAvatarIlustrado(
+          avatar: atual.avatar,
+          tamanho: tamanho * 0.84,
+        ),
       );
     }
 
@@ -163,7 +152,7 @@ class RetratoDoPerfil extends StatelessWidget {
     final String? iniciais = iniciaisDe(nome);
     if (iniciais == null) {
       return Icon(
-        Icons.person_outline,
+        Icons.person_outline_rounded,
         size: tamanho * 0.5,
         color: cores.sobrePrimaria,
       );
@@ -181,5 +170,66 @@ class RetratoDoPerfil extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Desenho vetorial (013) para cada opção de [AvatarIlustrado].
+///
+/// Usa a `MemoraAnimada` nas poses da Memora e ícones arredondados do Material
+/// sobre `cores.medalhao` para as opções de pessoas, substituindo os PNGs e SVGs
+/// legados (T081). Em miniaturas da folha de escolha (`animado: false`), mantém
+/// a pose parada para evitar múltiplos tickers na tela (`FR-006`).
+class DesenhoAvatarIlustrado extends StatelessWidget {
+  /// Avatar a desenhar.
+  final AvatarIlustrado avatar;
+
+  /// Lado do quadrado reservado ao desenho.
+  final double tamanho;
+
+  /// Se permite animação da Memora (falso nas miniaturas do seletor).
+  final bool animado;
+
+  /// Cria o desenho do avatar ilustrado.
+  const DesenhoAvatarIlustrado({
+    required this.avatar,
+    required this.tamanho,
+    this.animado = true,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final Color corIcone =
+        tema.id == MemoraTemaId.claro ? cores.primaria : cores.sobrePrimaria;
+
+    final PoseDaMemora? pose = switch (avatar) {
+      AvatarIlustrado.memoraAcenando => PoseDaMemora.acenando,
+      AvatarIlustrado.memoraPensando => PoseDaMemora.pensando,
+      AvatarIlustrado.memoraComemorando => PoseDaMemora.comemorando,
+      AvatarIlustrado.memoraProtegendo => PoseDaMemora.preocupada,
+      AvatarIlustrado.casalIdoso || AvatarIlustrado.pessoaComCelular => null,
+    };
+
+    if (pose != null) {
+      final Widget desenho = MemoraAnimada(
+        expressao: pose,
+        tamanho: tamanho,
+        reageAoToque: false,
+      );
+      if (animado) return desenho;
+      return MediaQuery(
+        data: MediaQuery.of(context).copyWith(disableAnimations: true),
+        child: desenho,
+      );
+    }
+
+    final IconData icone = switch (avatar) {
+      AvatarIlustrado.casalIdoso => Icons.people_rounded,
+      AvatarIlustrado.pessoaComCelular => Icons.smartphone_rounded,
+      _ => Icons.person_rounded,
+    };
+    return Icon(icone, size: tamanho * 0.64, color: corIcone);
   }
 }

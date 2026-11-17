@@ -127,7 +127,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(TelaPerfil.chaveDesenho),
-          matching: find.byIcon(Icons.person_outline),
+          matching: find.byIcon(Icons.person_outline_rounded),
         ),
         findsOneWidget,
       );
@@ -450,5 +450,29 @@ void main() {
         );
       });
     }
+
+    testWidgets(
+      'T081: avatares usam desenhos vetoriais/ícones da 013 e TelaPerfil não exibe Memora extra',
+      (WidgetTester t) async {
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
+        expect(find.byType(MemoraAnimada), findsNothing);
+        expect(find.byType(Image), findsNothing);
+
+        for (final AvatarIlustrado avatar in AvatarIlustrado.values) {
+          await armazenamento.salvarAvatar('conta-123', avatar);
+          await t.pumpWidget(
+            KeyedSubtree(
+              key: ValueKey<AvatarIlustrado>(avatar),
+              child: montarPerfil(t),
+            ),
+          );
+          await t.pumpAndSettle();
+
+          expect(find.byType(DesenhoAvatarIlustrado), findsOneWidget);
+          expect(find.byType(Image), findsNothing, reason: avatar.chave);
+        }
+      },
+    );
   });
 }

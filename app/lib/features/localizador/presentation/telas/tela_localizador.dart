@@ -117,9 +117,9 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
       text: widget.controlador.regiaoManual,
     );
 
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) {
+    DialogoMemora.mostrarConteudo<void>(
+      context,
+      construtor: (BuildContext ctx) {
         return AlertDialog(
           scrollable: true,
           title: const TextoMemora(
@@ -234,7 +234,7 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Icon(
-                              c.emModoMapa ? Icons.list_alt_rounded : Icons.map_outlined,
+                              c.emModoMapa ? Icons.list_alt_rounded : Icons.map_rounded,
                               color: cores.primaria,
                               size: MemoraDimensoes.iconePadrao,
                             ),
@@ -277,7 +277,7 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                       BotaoPrimario(
                         key: TelaLocalizador.chaveBotaoBuscar,
                         rotulo: 'Buscar serviços',
-                        icone: Icons.search,
+                        icone: Icons.search_rounded,
                         aoTocar: c.buscar,
                       ),
                     ],
@@ -290,7 +290,7 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.pin_drop_outlined,
+                        Icons.pin_drop_rounded,
                         size: MemoraDimensoes.iconePequeno,
                         color: cores.primaria,
                       ),
@@ -362,7 +362,9 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                 Expanded(
                   child: c.carregando
                       ? const Center(
-                          child: CircularProgressIndicator(),
+                          child: Carregando(
+                            mensagem: 'Buscando serviços próximos...',
+                          ),
                         )
                       : c.mensagemErro != null
                           ? SingleChildScrollView(
@@ -388,13 +390,16 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                                 )
                               : c.estabelecimentos.isEmpty
                                   ? Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(MemoraEspacamento.lg),
-                                        child: TextoMemora(
-                                          c.regiaoManual.isEmpty && c.posicaoAtual == null
+                                      child: SingleChildScrollView(
+                                        child: EstadoVazio(
+                                          titulo: c.regiaoManual.isEmpty &&
+                                                  c.posicaoAtual == null
+                                              ? 'Escolha uma região'
+                                              : 'Nenhum lugar encontrado',
+                                          explicacao: c.regiaoManual.isEmpty &&
+                                                  c.posicaoAtual == null
                                               ? 'Toque em "Mudar região" ou permita a localização para buscar serviços próximos.'
                                               : 'Nenhum estabelecimento encontrado nesta categoria na região selecionada.',
-                                          estilo: EstiloTexto.corpoForte,
                                         ),
                                       ),
                                     )
