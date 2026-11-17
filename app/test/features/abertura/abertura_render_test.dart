@@ -12,6 +12,9 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/design_system/tokens/abertura.dart';
 import 'package:memora/features/abertura/presentation/abertura_memora.dart';
 
+import '../../suporte/fonte.dart';
+import '../../suporte/movimento.dart';
+
 /// Fotografa a abertura para **olhar** (T092 da feature 013): a anfitriã
 /// segurando a barra de carregamento.
 ///
@@ -24,6 +27,10 @@ import 'package:memora/features/abertura/presentation/abertura_memora.dart';
 /// $env:MEMORA_RENDER_DIR = "C:\memora-tmp\abertura"; cd app; flutter test test/features/abertura/abertura_render_test.dart
 /// ```
 void main() {
+  // A tela inteira mostra a barra correndo: o movimento do sistema volta ao
+  // normal (o flutter_test_config.dart o desliga, e com ele o próprio
+  // AnimationController encurta a passada a quase nada).
+  movimentoLiberado();
   final String? destino = Platform.environment['MEMORA_RENDER_DIR'];
   final bool ligado = destino != null && destino.isNotEmpty;
 
@@ -166,6 +173,8 @@ void main() {
   testWidgets('grava a tela inteira da abertura (360x800)', (
     WidgetTester t,
   ) async {
+    // A frase com a fonte de verdade, e não a quadrada do flutter test.
+    await t.runAsync(carregarAtkinson);
     final GlobalKey chave = GlobalKey();
     t.view.physicalSize = const Size(360, 800);
     t.view.devicePixelRatio = 1;
@@ -192,9 +201,12 @@ void main() {
           ),
         ),
       );
-      // Uma passada e um pouco, e passa dos 4 s para a frase aparecer.
+      // Passa dos 4 s, para a frase aparecer, e para no meio de uma passada.
+      // (Um relógio que recomeça só conta a partir do quadro seguinte: daí o
+      // quadro curto no meio.)
       await t.pump(MemoraAbertura.limiteDaDemora);
-      await t.pump(const Duration(milliseconds: 700));
+      await t.pump(const Duration(milliseconds: 16));
+      await t.pump(const Duration(milliseconds: 650));
       await salvar(t, chave, 'abertura_${id.name}.png', 2);
       await t.pumpWidget(const SizedBox.shrink());
     }
