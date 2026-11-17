@@ -77,21 +77,21 @@ class NavegacaoInferior extends StatelessWidget {
     final MemoraTheme tema = context.memora;
     final MemoraCores cores = tema.cores;
     final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
-    final Color corDivisor = ehAltoContraste ? cores.borda : cores.bordaSutil;
-    final double larguraDivisor = ehAltoContraste
-        ? MemoraDimensoes.bordaEnfase
-        : MemoraDimensoes.espessuraBordaSutil;
     const BorderRadius cantos = BorderRadius.vertical(
       top: Radius.circular(MemoraRaio.cartao),
     );
     final bool reduzir = MediaQuery.disableAnimationsOf(context);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: cores.superficieBarra,
         borderRadius: cantos,
         boxShadow: MemoraElevacao.listaSombrasBarra(cores),
-        border: Border.all(color: corDivisor, width: larguraDivisor),
+        // A sombra separa a barra do conteúdo; só no alto contraste, que não
+        // tem sombra, o contorno faz esse papel.
+        border: ehAltoContraste
+            ? Border.all(color: cores.borda, width: MemoraDimensoes.bordaEnfase)
+            : null,
       ),
       child: Material(
         color: cores.superficieBarra,
@@ -215,43 +215,40 @@ class _Item extends StatelessWidget {
           constraints: const BoxConstraints(
             minHeight: MemoraDimensoes.alvoDecisao,
           ),
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: MemoraEspacamento.sm),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                const SizedBox(height: MemoraDimensoes.indicadorAtivoBarra),
-                const SizedBox(height: MemoraEspacamento.xs),
-                SizedBox(
-                  width: MemoraDimensoes.larguraDaPilulaDeNavegacao,
-                  height: MemoraDimensoes.alturaDaPilulaDeNavegacao,
-                  // Os três desenhos ocupam a mesma caixa, atual ou não.
-                  child: Center(
-                    child: SizedBox(
-                      key: NavegacaoInferior.chaveDoIcone(posicao),
-                      width: MemoraDimensoes.iconeDestaque,
-                      height: MemoraDimensoes.iconeDestaque,
-                      // Decoração: o destino é anunciado pelo rótulo escrito.
-                      child: ExcludeSemantics(
-                        child: Icon(
-                          item.icone.dados,
-                          size: MemoraDimensoes.iconeDestaque,
-                          color: cor,
-                        ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              const SizedBox(height: MemoraDimensoes.indicadorAtivoBarra),
+              const SizedBox(height: MemoraEspacamento.xs),
+              SizedBox(
+                width: MemoraDimensoes.larguraDaPilulaDeNavegacao,
+                height: MemoraDimensoes.alturaDaPilulaDeNavegacao,
+                // Os três desenhos ocupam a mesma caixa, atual ou não.
+                child: Center(
+                  child: SizedBox(
+                    key: NavegacaoInferior.chaveDoIcone(posicao),
+                    width: MemoraDimensoes.iconeDestaque,
+                    height: MemoraDimensoes.iconeDestaque,
+                    // Decoração: o destino é anunciado pelo rótulo escrito.
+                    child: ExcludeSemantics(
+                      child: Icon(
+                        item.icone.dados,
+                        size: MemoraDimensoes.iconeDestaque,
+                        color: cor,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: MemoraEspacamento.xs),
-                // Rótulo escrito, sempre.
-                TextoMemora(
-                  item.rotulo,
-                  estilo: ativo ? EstiloTexto.corpoForte : EstiloTexto.apoio,
-                  cor: cor,
-                  alinhamento: TextAlign.center,
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: MemoraEspacamento.xs),
+              // Rótulo escrito, sempre.
+              TextoMemora(
+                item.rotulo,
+                estilo: ativo ? EstiloTexto.corpoForte : EstiloTexto.apoio,
+                cor: cor,
+                alinhamento: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),
