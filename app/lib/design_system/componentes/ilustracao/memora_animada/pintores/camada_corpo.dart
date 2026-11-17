@@ -32,6 +32,7 @@ class CamadaCorpo extends CamadaDaMemora {
       ctx.cores.corpoSombra,
     );
     ctx.contornar(canvas, forma, tinta);
+    if (ctx.detalhada) ctx.luzNaBorda(canvas, forma, caixa, espessura: 0.034);
 
     // Um reflexo de luz na quina de cima à esquerda.
     final Path reflexo = Path()

@@ -39,6 +39,37 @@ class ContextoDePintura {
   /// A chegada, de 0 (acabou de aparecer) a 1 (já está inteira).
   final double entrada;
 
+  /// O balanço da antena, de -1 a 1 (feature 013, T083): a bolinha balança de
+  /// um lado para o outro, atrasada em relação à cabeça.
+  final double antena;
+
+  /// O "ajeitar" do corpo, de 0 a 1 (T083): um encolher de ombros curto, em
+  /// que tronco e cabeça sobem um fio e voltam.
+  final double ajeita;
+
+  /// O giro da cabeça em torno do pescoço, de -1 (esquerda) a 1 (direita)
+  /// (T083, T087): a cabeça se estreita um pouco e o rosto **desliza dentro
+  /// do visor**, o que dá a sensação de volume.
+  final double giro;
+
+  /// A flutuação da anfitriã, de 0 a 1 (T088): sobe um pouco do chão e a
+  /// sombra clareia e encolhe.
+  final double flutua;
+
+  /// O estica-e-encolhe do corpo no pulo, de -1 (encolhido) a 1 (esticado)
+  /// (T087).
+  final double esticar;
+
+  /// Se este quadro é o da anfitriã, com o acabamento de maior detalhe:
+  /// brilho especular, luz de contorno e sombra de contato (T087, FR-048).
+  final bool detalhada;
+
+  /// Onde está o trecho que corre dentro da barra de carregamento, de 0 (entra
+  /// pela esquerda) a 1 (saiu pela direita): uma volta inteira é uma
+  /// passada (T092). **Nulo é a barra parada**, com o trecho no meio, como
+  /// fica com "reduzir movimento".
+  final double? cicloDaBarra;
+
   /// Cria o contexto de um quadro.
   const ContextoDePintura({
     required this.lado,
@@ -51,6 +82,13 @@ class ContextoDePintura {
     this.pulo = 0,
     this.balanco = 0,
     this.entrada = 1,
+    this.antena = 0,
+    this.ajeita = 0,
+    this.giro = 0,
+    this.flutua = 0,
+    this.esticar = 0,
+    this.detalhada = false,
+    this.cicloDaBarra,
   });
 
   /// Um ponto do desenho, em pixels.
@@ -106,6 +144,35 @@ class ContextoDePintura {
       ..isAntiAlias = true
       ..shader = LinearGradient(begin: de, end: ate, colors: <Color>[a, b])
           .createShader(caixa);
+  }
+
+  /// Um fio de luz na borda de [forma] do lado de baixo e da direita, **para
+  /// dentro** do contorno: é a "luz de contorno" da anfitriã (T087). [caixa] é
+  /// a caixa do degradê, que vai de transparente (em cima, à esquerda) à cor
+  /// da luz (embaixo, à direita).
+  void luzNaBorda(Canvas canvas, Path forma, Rect caixa,
+      {double espessura = 0.03, double forca = 1}) {
+    canvas.save();
+    canvas.clipPath(forma);
+    final Color luz = cores.luzDeContorno;
+    canvas.drawPath(
+      forma,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = l(espessura)
+        ..isAntiAlias = true
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            luz.withValues(alpha: 0),
+            luz.withValues(alpha: 0),
+            luz.withValues(alpha: 0.85 * forca),
+          ],
+          stops: const <double>[0, 0.5, 1],
+        ).createShader(caixa),
+    );
+    canvas.restore();
   }
 
   /// Pinta [forma] com contorno (e aro, se houver) por baixo e o

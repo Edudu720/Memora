@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/l10n/textos_casca.dart';
 
 import '../../suporte/aparelhos.dart';
+import '../../suporte/movimento.dart';
 
 /// A casca de quem está dentro da conta — T023, FR-015 e
 /// contracts/navegacao.md da feature 004.
 void main() {
+  movimentoLiberado();
   late GlobalKey<CascaInternaState> casca;
   late int atividades;
   late int fechou;
@@ -24,7 +25,7 @@ void main() {
     body: Center(child: TextoMemora('raiz de $nome', key: Key('raiz.$nome'))),
   );
 
-  Widget app({MediaQueryData? midia}) {
+  Widget app({MediaQueryData? midia, bool reduzir = false}) {
     final Widget c = CascaInterna(
       key: casca,
       aoRegistrarAtividade: () => atividades++,
@@ -37,6 +38,12 @@ void main() {
     );
     return MaterialApp(
       theme: TemasMemora.claro,
+      builder: reduzir
+          ? (BuildContext context, Widget? child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: child!,
+            )
+          : null,
       home: midia == null ? c : MediaQuery(data: midia, child: c),
     );
   }
@@ -53,16 +60,15 @@ void main() {
     matching: find.text(d.rotulo),
   );
 
-  /// O arquivo SVG que o destino da [posicao] (de 1 a 3) está desenhando.
-  String desenhoDe(WidgetTester t, int posicao) {
-    final SvgPicture figura = t.widget<SvgPicture>(
-      find.descendant(
-        of: find.byKey(NavegacaoInferior.chaveDoIcone(posicao)),
-        matching: find.byType(SvgPicture),
-      ),
-    );
-    return (figura.bytesLoader as SvgAssetLoader).assetName;
-  }
+  /// O desenho que o destino da [posicao] (de 1 a 3) está pintando.
+  IconData desenhoDe(WidgetTester t, int posicao) => t
+      .widget<Icon>(
+        find.descendant(
+          of: find.byKey(NavegacaoInferior.chaveDoIcone(posicao)),
+          matching: find.byType(Icon),
+        ),
+      )
+      .icon!;
 
   group('A barra — FR-015', () {
     testWidgets('três destinos, cada um com desenho e nome escrito', (
@@ -71,32 +77,25 @@ void main() {
       await t.pumpWidget(app());
       for (final DestinoDaCasca d in DestinoDaCasca.values) {
         expect(destino(d), findsOneWidget, reason: d.rotulo);
-        // O desenho é o do próprio destino, e não o de outro: o arquivo leva o
-        // nome dele.
+        // O desenho é o do próprio destino, e não o de outro.
         expect(
           desenhoDe(t, d.index + 1),
-          anyOf(d.icone.caminhoContornado, d.icone.caminhoPreenchido),
+          d.icone.dados,
           reason: 'ícone de ${d.rotulo}',
         );
       }
     });
 
-    testWidgets(
-      'o destino atual tem o ícone preenchido; os outros, só o contorno',
-      (WidgetTester t) async {
-        await t.pumpWidget(app());
-        // Início é o segundo destino.
-        expect(desenhoDe(t, 2), DestinoDaCasca.inicio.icone.caminhoPreenchido);
-        expect(desenhoDe(t, 1), DestinoDaCasca.ajustes.icone.caminhoContornado);
-        expect(desenhoDe(t, 3), DestinoDaCasca.perfil.icone.caminhoContornado);
-
-        await t.tap(destino(DestinoDaCasca.perfil));
-        await t.pumpAndSettle();
-        expect(desenhoDe(t, 3), DestinoDaCasca.perfil.icone.caminhoPreenchido);
-        expect(desenhoDe(t, 2), DestinoDaCasca.inicio.icone.caminhoContornado);
-        expect(desenhoDe(t, 1), DestinoDaCasca.ajustes.icone.caminhoContornado);
-      },
-    );
+    testWidgets('o desenho de cada destino é o mesmo, atual ou não', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pumpAndSettle();
+      for (final DestinoDaCasca d in DestinoDaCasca.values) {
+        expect(desenhoDe(t, d.index + 1), d.icone.dados, reason: d.rotulo);
+      }
+    });
 
     testWidgets('os três ícones ocupam a mesma caixa, atual ou não', (
       WidgetTester t,
@@ -148,6 +147,173 @@ void main() {
       expect(find.byKey(NavegacaoInferior.chaveDoTraco(3)), findsOneWidget);
       expect(find.byKey(NavegacaoInferior.chaveDoTraco(2)), findsNothing);
       h.dispose();
+    });
+  });
+
+  group('A troca de destino — FR-011, R3 (V8)', () {
+    /// A posição horizontal, na tela, do centro da raiz de [nome].
+    double x(WidgetTester t, String nome) =>
+        t.getCenter(find.byKey(Key('raiz.$nome'), skipOffstage: false)).dx;
+
+    // A janela do teste é de 800 por 600: o centro fica em 400.
+    const double centro = 400;
+
+    testWidgets('para um destino à direita, ele entra pela direita', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 100));
+
+      expect(x(t, 'perfil'), greaterThan(centro), reason: 'entra da direita');
+      expect(
+        x(t, 'inicio'),
+        lessThan(centro),
+        reason: 'o Início sai à esquerda',
+      );
+
+      await t.pumpAndSettle();
+      expect(x(t, 'perfil'), centro);
+      expect(find.byKey(const Key('raiz.inicio')), findsNothing);
+    });
+
+    testWidgets('para um destino à esquerda, ele entra pela esquerda', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.ajustes));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 100));
+
+      expect(x(t, 'ajustes'), lessThan(centro), reason: 'entra da esquerda');
+      expect(
+        x(t, 'inicio'),
+        greaterThan(centro),
+        reason: 'o Início sai à direita',
+      );
+      await t.pumpAndSettle();
+    });
+
+    testWidgets('a posição relativa vale também de um lado para o outro', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pumpAndSettle();
+
+      // Do Perfil (à direita) para o Ajustes (à esquerda): entra pela esquerda.
+      await t.tap(destino(DestinoDaCasca.ajustes));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 100));
+      expect(x(t, 'ajustes'), lessThan(centro));
+      expect(x(t, 'perfil'), greaterThan(centro));
+      await t.pumpAndSettle();
+    });
+
+    testWidgets('termina em no máximo 500 ms (SC-004)', (WidgetTester t) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 500));
+      expect(x(t, 'perfil'), centro);
+      expect(
+        find.byKey(const Key('raiz.inicio')),
+        findsNothing,
+        reason: 'o deslize já acabou e o destino que saiu foi para fora',
+      );
+    });
+
+    testWidgets('a pilha de cada destino continua viva, com o estado dela', (
+      WidgetTester t,
+    ) async {
+      final List<int> nasceu = <int>[];
+      await t.pumpWidget(app());
+      casca.currentState!.empilhar<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => _TelaComContador(aoNascer: () => nasceu.add(1)),
+        ),
+      );
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(_TelaComContador.chaveDoBotao));
+      await t.tap(find.byKey(_TelaComContador.chaveDoBotao));
+      await t.pump();
+      expect(find.text('toques: 2'), findsOneWidget);
+
+      // Vai e volta por todos os destinos, devagar e depressa.
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pump(const Duration(milliseconds: 100));
+      await t.tap(destino(DestinoDaCasca.ajustes));
+      await t.pumpAndSettle();
+      await t.tap(destino(DestinoDaCasca.inicio));
+      await t.pumpAndSettle();
+
+      expect(nasceu, hasLength(1), reason: 'a tela foi recriada');
+      expect(
+        find.text('toques: 2'),
+        findsOneWidget,
+        reason: 'a pessoa perdeu onde estava',
+      );
+    });
+
+    testWidgets('o que está fora da tela não anima e não recebe nada', (
+      WidgetTester t,
+    ) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pumpAndSettle();
+
+      final Finder foraDaTela = find.byKey(
+        const Key('raiz.inicio'),
+        skipOffstage: false,
+      );
+      expect(TickerMode.valuesOf(t.element(foraDaTela)).enabled, isFalse);
+      expect(
+        find.bySemanticsLabel('raiz de inicio'),
+        findsNothing,
+        reason: 'o leitor de tela não deve ler o destino que saiu',
+      );
+      expect(
+        find.bySemanticsLabel('raiz de perfil'),
+        findsOneWidget,
+        reason: 'o destino à vista é lido',
+      );
+      h.dispose();
+    });
+
+    testWidgets('com "reduzir movimento", a troca é instantânea', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app(reduzir: true));
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pump();
+      await t.pump();
+
+      expect(x(t, 'perfil'), centro, reason: 'chegou sem deslizar');
+      expect(find.byKey(const Key('raiz.inicio')), findsNothing);
+
+      await t.tap(destino(DestinoDaCasca.ajustes));
+      await t.pump();
+      await t.pump();
+      expect(x(t, 'ajustes'), centro);
+      expect(find.byKey(const Key('raiz.perfil')), findsNothing);
+    });
+
+    testWidgets('o "voltar" do aparelho na raiz também desliza para o Início', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pumpAndSettle();
+
+      await t.binding.handlePopRoute();
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 100));
+      // O Início está à esquerda do Perfil: entra pela esquerda.
+      expect(x(t, 'inicio'), lessThan(centro));
+      expect(x(t, 'perfil'), greaterThan(centro));
+      await t.pumpAndSettle();
     });
   });
 
@@ -299,4 +465,37 @@ void main() {
       });
     }
   });
+}
+
+/// Uma tela com estado, para provar que a pilha do destino não é recriada.
+class _TelaComContador extends StatefulWidget {
+  const _TelaComContador({required this.aoNascer});
+
+  final VoidCallback aoNascer;
+
+  static const Key chaveDoBotao = Key('contador.botao');
+
+  @override
+  State<_TelaComContador> createState() => _TelaComContadorState();
+}
+
+class _TelaComContadorState extends State<_TelaComContador> {
+  int _toques = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.aoNascer();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(
+      child: TextButton(
+        key: _TelaComContador.chaveDoBotao,
+        onPressed: () => setState(() => _toques++),
+        child: Text('toques: $_toques'),
+      ),
+    ),
+  );
 }

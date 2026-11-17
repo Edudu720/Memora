@@ -162,6 +162,11 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                     BalaoDeFala(
                       autor: AutorDoBalao.memora,
                       texto: TextosGuias.perguntaDaSecao(_nomeServico),
+                      // Todas as seções aprendidas: a Memora comemora (FR-003, T072).
+                      // É a única Memora da tela (FR-006).
+                      expressaoDaMemora: todasFeitas
+                          ? ExpressaoDaMemora.comemorando
+                          : ExpressaoDaMemora.mini,
                     ),
                     const SizedBox(height: MemoraEspacamento.lg),
                     for (final SecaoDoGuia secao

@@ -8,10 +8,14 @@ import 'cores.dart';
 ///
 /// ## Por que um arquivo separado de `cores.dart`
 ///
-/// A feature do redesenho final reescreve `cores.dart`. Ficar ao lado dele, e
-/// não dentro, evita conflito e deixa a integração para quando as duas
-/// estiverem na mesma linha de desenvolvimento. O acesso é o mesmo de
-/// qualquer token: `context.memora.personagem`.
+/// A T048 pensou em fundir este arquivo no `cores.dart`, e ficou como está
+/// (decisão de 2026-11-16): o `cores.dart` já tem 500 linhas de papéis
+/// semânticos da interface (texto, superfície, perigo...), e as 17 cores de um
+/// **desenho** com as seis pinturas de paleta não são papel de interface —
+/// misturá-las só tornaria os dois mais difíceis de ler. O que a T048
+/// resolvia de verdade era a **fonte da paleta**: ela é o nome guardado no
+/// tema ([MemoraTheme.paleta]), e o acesso continua o de qualquer token,
+/// `context.memora.personagem`.
 ///
 /// ## O que muda com a paleta
 ///
@@ -78,6 +82,15 @@ class CoresDaMemora {
   /// A sombra que a Memora faz no chão.
   final Color sombraChao;
 
+  /// O brilho especular da anfitriã (T087): o ponto de luz forte no vidro e
+  /// na quina da cabeça. Vem do visor da paleta, clareado.
+  final Color brilho;
+
+  /// A luz de contorno da anfitriã (T087): o fio de luz que desenha a borda
+  /// do lado oposto à luz principal e a destaca do fundo. Mistura da luz do
+  /// corpo com o visor da paleta.
+  final Color luzDeContorno;
+
   /// Cria um conjunto de cores da Memora.
   const CoresDaMemora({
     required this.corpo,
@@ -95,6 +108,8 @@ class CoresDaMemora {
     required this.livro,
     required this.livroPagina,
     required this.sombraChao,
+    required this.brilho,
+    required this.luzDeContorno,
   });
 
   // ---- o que é fixo, em todas as paletas ----
@@ -107,6 +122,7 @@ class CoresDaMemora {
   static const Color _livroPagina = Color(0xFFE8EEF8);
   static const Color _olho = Color(0xFF0E1F53);
 
+  static const Color _branco = Color(0xFFFFFFFF);
   static const Color _sombraNoClaro = Color(0x520D1C50);
   static const Color _sombraNoEscuro = Color(0x8C000000);
 
@@ -175,6 +191,8 @@ class CoresDaMemora {
     livro: _livro,
     livroPagina: _livroPagina,
     sombraChao: Color(0x00000000),
+    brilho: Color(0xFFF8FAFF),
+    luzDeContorno: Color(0xFF9DB8FF),
   );
 
   /// As cores da Memora para um tema e uma paleta.
@@ -205,29 +223,15 @@ class CoresDaMemora {
       livro: _livro,
       livroPagina: _livroPagina,
       sombraChao: escuro ? _sombraNoEscuro : _sombraNoClaro,
+      brilho: Color.lerp(p.visor, _branco, 0.55)!,
+      luzDeContorno: Color.lerp(p.luz, p.visor, 0.5)!,
     );
   }
 
-  /// Descobre qual paleta está ativa olhando a cor primária do tema.
-  ///
-  /// O [MemoraTheme] não guarda o nome da paleta, só as cores que ela
-  /// produziu; cada paleta tem uma primária própria por tema, e é por ela que
-  /// se acha de volta o nome.
-  static String _paletaDe(MemoraTheme tema) {
-    final bool escuro = tema.id == MemoraTemaId.escuro;
-    for (final MapEntry<String, PaletaDeDestaque> e
-        in MemoraCores.paletas.entries) {
-      final Color primaria = escuro
-          ? e.value.primariaEscuro
-          : e.value.primariaClaro;
-      if (primaria == tema.cores.primaria) return e.key;
-    }
-    return 'azul';
-  }
-
-  /// As cores da Memora do [tema] (com a paleta que ele carrega).
+  /// As cores da Memora do [tema], com a paleta que ele **guarda pelo nome**
+  /// ([MemoraTheme.paleta]) — nunca adivinhada pelas cores dele.
   static CoresDaMemora doTema(MemoraTheme tema) =>
-      para(tema.id, paleta: _paletaDe(tema));
+      para(tema.id, paleta: tema.paleta);
 
   /// Os nomes das paletas que a Memora conhece (os de [MemoraCores.paletas]).
   static Iterable<String> get nomesDasPaletas => _paletas.keys;

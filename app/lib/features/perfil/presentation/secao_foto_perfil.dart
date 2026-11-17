@@ -249,7 +249,7 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
       );
     }
     return Navigator.of(context).push<AcaoPreVisualizacaoFoto>(
-      MaterialPageRoute<AcaoPreVisualizacaoFoto>(
+      RotaMemora<AcaoPreVisualizacaoFoto>(
         builder: (BuildContext _) =>
             TelaPreVisualizacaoFoto(bytesJpegSemExif: bytesJpegSemExif),
       ),

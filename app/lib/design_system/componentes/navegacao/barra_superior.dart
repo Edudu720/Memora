@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../preferencias/reducao_de_movimento.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
@@ -28,12 +29,18 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
   /// Expressão opcional da Memora exibida no canto direito (ex.: `mini`).
   final ExpressaoDaMemora? memora;
 
+  /// A Memora do canto está falando: um texto está aparecendo aos poucos.
+  /// Troca a expressão por `falando` e liga a boca. Sem [memora], não faz nada;
+  /// com "reduzir movimento" ligado a Memora fica em repouso, como a anfitriã.
+  final bool memoraFalando;
+
   /// Cria a barra superior.
   const BarraSuperior({
     required this.titulo,
     this.aoVoltar,
     this.acao,
     this.memora,
+    this.memoraFalando = false,
     super.key,
   });
 
@@ -46,6 +53,7 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
     final MemoraTheme tema = context.memora;
     final MemoraCores cores = tema.cores;
     final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final bool falando = memoraFalando && !context.reduzirMovimento;
     final bool mostrarFigura =
         memora != null &&
         MediaQuery.textScalerOf(context).scale(1) <
@@ -124,8 +132,9 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
                 if (mostrarFigura) ...<Widget>[
                   const SizedBox(width: MemoraEspacamento.sm),
                   MemoraPersonagem(
-                    expressao: memora!,
+                    expressao: falando ? ExpressaoDaMemora.falando : memora!,
                     tamanho: MemoraDimensoes.alvoMinimo,
+                    falando: falando,
                   ),
                 ],
                 ?acao,

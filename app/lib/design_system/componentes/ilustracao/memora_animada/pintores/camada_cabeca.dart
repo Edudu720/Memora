@@ -42,6 +42,14 @@ class CamadaCabeca extends CamadaDaMemora {
         ),
         fator: 0.7,
       );
+      if (ctx.detalhada) {
+        // Um fio de luz no alto de cada fone, de onde a luz vem (T087).
+        canvas.drawLine(
+          Offset(fone.left + fone.width * 0.3, fone.top + fone.height * 0.2),
+          Offset(fone.left + fone.width * 0.3, fone.top + fone.height * 0.5),
+          ctx.traco(ctx.cores.luzDeContorno.withValues(alpha: 0.7), ctx.l(0.012)),
+        );
+      }
     }
 
     final Path forma = Path()
@@ -84,5 +92,42 @@ class CamadaCabeca extends CamadaDaMemora {
       reflexo,
       ctx.traco(ctx.cores.visor.withValues(alpha: 0.55), ctx.l(0.016)),
     );
+
+    if (ctx.detalhada) _acabamento(canvas, ctx, forma, cabeca);
+  }
+
+  /// O acabamento da anfitriã (T087): luz de contorno na borda de baixo e da
+  /// direita, e um brilho especular — um ponto de luz forte na quina de cima à
+  /// esquerda, de onde vem a luz, e um segundo, menor, logo ao lado.
+  void _acabamento(Canvas canvas, ContextoDePintura ctx, Path forma, Rect cabeca) {
+    ctx.luzNaBorda(canvas, forma, cabeca);
+
+    canvas.save();
+    canvas.clipPath(forma);
+    canvas.save();
+    canvas.translate(
+      cabeca.left + cabeca.width * 0.2,
+      cabeca.top + cabeca.height * 0.15,
+    );
+    canvas.rotate(-0.45);
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: Offset.zero,
+        width: cabeca.width * 0.24,
+        height: cabeca.height * 0.085,
+      ),
+      ctx.cheio(ctx.cores.brilho.withValues(alpha: 0.75))
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, ctx.l(0.006)),
+    );
+    canvas.restore();
+    canvas.drawCircle(
+      Offset(
+        cabeca.left + cabeca.width * 0.33,
+        cabeca.top + cabeca.height * 0.085,
+      ),
+      ctx.l(0.0085),
+      ctx.cheio(ctx.cores.brilho.withValues(alpha: 0.85)),
+    );
+    canvas.restore();
   }
 }

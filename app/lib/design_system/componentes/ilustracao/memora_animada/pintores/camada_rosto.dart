@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'contexto_de_pintura.dart';
+import 'geometria.dart';
 
 /// Olhos, sobrancelhas, boca e bochechas: o que dá expressão à Memora.
 class CamadaRosto extends CamadaDaMemora {
@@ -13,10 +14,23 @@ class CamadaRosto extends CamadaDaMemora {
 
   @override
   void pintar(Canvas canvas, ContextoDePintura ctx) {
+    final bool girando = ctx.giro.abs() > 0.001;
+    if (girando) {
+      // O rosto **desliza dentro do visor** quando a cabeça gira, e se
+      // estreita um pouco: sai pela borda do vidro, como numa esfera (T087).
+      canvas.save();
+      canvas.clipRRect(
+        ctx.rrect(GeometriaDaMemora.visor, GeometriaDaMemora.raioDoVisor),
+      );
+      canvas.translate(ctx.l(0.5) + ctx.giro * ctx.l(0.05), 0);
+      canvas.scale(1 - 0.12 * ctx.giro.abs(), 1);
+      canvas.translate(-ctx.l(0.5), 0);
+    }
     _bochechas(canvas, ctx);
     _olhos(canvas, ctx);
     _sobrancelhas(canvas, ctx);
     _boca(canvas, ctx);
+    if (girando) canvas.restore();
   }
 
   void _bochechas(Canvas canvas, ContextoDePintura ctx) {

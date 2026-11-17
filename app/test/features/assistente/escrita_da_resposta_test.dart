@@ -10,6 +10,7 @@ import 'package:memora/features/assistente/presentation/controladores/controlado
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 
 import '../../suporte/aceite_em_memoria.dart';
+import '../../suporte/movimento.dart';
 
 /// A espera e a escrita da resposta, na tela de conversa — T132, FR-020b.
 ///
@@ -85,6 +86,12 @@ const String _respostaLimpa =
 const String _antiga =
     'Esta é uma resposta antiga da Memora, que estava guardada no aparelho '
     'e precisa aparecer inteira, sem ninguém escrevê-la de novo.';
+
+/// Quantos relógios as Memoras na tela mantêm ligados: um por `MemoraAnimada`
+/// (feature 013), que repete o dela enquanto houver movimento. É o único
+/// `Ticker` que **pode** sobrar depois da escrita.
+int relogiosDaMemora(WidgetTester t) =>
+    find.byType(MemoraAnimada).evaluate().length;
 
 void main() {
   late _Repositorio repositorio;
@@ -225,6 +232,7 @@ void main() {
     testWidgets('a mensagem final vai aparecendo letra a letra, até o fim', (
       WidgetTester t,
     ) async {
+      liberarMovimento(t);
       await montar(t);
       await perguntar(t);
       await responder(t, _resposta);
@@ -243,8 +251,9 @@ void main() {
       expect(visivel(t), _respostaLimpa);
       expect(
         t.binding.transientCallbackCount,
-        0,
-        reason: 'terminada a escrita, nenhum relógio fica ligado',
+        relogiosDaMemora(t),
+        reason: 'terminada a escrita, nenhum relógio fica ligado: só os das '
+            'Memoras que estão nos balões, que não param',
       );
     });
 
@@ -384,7 +393,10 @@ void main() {
       );
 
       expect(visivel(t), _antiga, reason: 'inteira, já no primeiro quadro');
-      expect(t.binding.transientCallbackCount, 0);
+      // A chegada da Memora do balão leva um quadro; depois só sobra o relógio
+      // dela, e nenhum de escrita.
+      await t.pump(const Duration(seconds: 1));
+      expect(t.binding.transientCallbackCount, relogiosDaMemora(t));
     });
 
     testWidgets('a falha que devolve a pergunta ao campo não faz uma fala '

@@ -101,7 +101,9 @@ public class PersonaDaMemora {
             # Sua voz
 
             Paciente, acolhedora, sem pressa. Sem termo técnico. Nunca culpe a \
-            pessoa por nada. Prefira "vamos fazer isso juntos" a "pronto".
+            pessoa por nada. Prefira "vamos fazer isso juntos" a "pronto". \
+            Use no máximo um emoji por mensagem, e nunca no lugar de uma \
+            palavra.
 
             # Sobre o que vier colado na conversa
 

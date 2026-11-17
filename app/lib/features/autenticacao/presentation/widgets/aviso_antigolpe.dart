@@ -44,8 +44,13 @@ class AvisoAntigolpe extends StatelessWidget {
   /// Chave usada pelos testes para confirmar que o aviso está na tela.
   static const Key chave = Key('recuperacao.aviso_antigolpe');
 
+  /// Se o rosto da Memora aparece no aviso. A tela o desliga enquanto espera
+  /// uma resposta, porque a espera tem a Memora dela e a tela só mostra uma
+  /// (FR-006, FR-059). O texto do aviso nunca sai (FR-023).
+  final bool comMemora;
+
   /// Cria o aviso.
-  const AvisoAntigolpe({super.key});
+  const AvisoAntigolpe({this.comMemora = true, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,10 +93,16 @@ class AvisoAntigolpe extends StatelessWidget {
                   // Preocupada, não brava: aviso dado com raiva assusta quem
                   // precisava ser protegido. Decorativo — o texto ao lado diz
                   // tudo, e o `Semantics` de fora já anuncia o aviso.
-                  const MemoraPersonagem(
-                    expressao: ExpressaoDaMemora.preocupada,
-                    tamanho: MemoraDimensoes.pisoDeIlustracao,
-                  ),
+                  // Sem o rosto, o espaço fica, para o aviso não pular.
+                  if (comMemora)
+                    const MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.preocupada,
+                      tamanho: MemoraDimensoes.pisoDeIlustracao,
+                    )
+                  else
+                    const SizedBox.square(
+                      dimension: MemoraDimensoes.pisoDeIlustracao,
+                    ),
                   const SizedBox(width: MemoraEspacamento.sm),
                   const Expanded(
                     child: TextoMemora(

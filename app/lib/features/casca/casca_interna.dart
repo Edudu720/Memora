@@ -166,14 +166,17 @@ class CascaInternaState extends State<CascaInterna> {
         onPointerDown: (_) => widget.aoRegistrarAtividade(),
         child: Scaffold(
           backgroundColor: context.memora.cores.fundo,
-          body: IndexedStack(
-            index: _atual.index,
-            children: <Widget>[
+          // A troca desliza do lado da posição na barra e deixa as três
+          // pilhas vivas (R3 da 013): quem foi ao Perfil volta ao Início onde
+          // o deixou.
+          body: TrocaDeDestino(
+            indice: _atual.index,
+            filhos: <Widget>[
               for (final DestinoDaCasca d in DestinoDaCasca.values)
                 Navigator(
                   key: _navegadores[d],
                   onGenerateRoute: (RouteSettings _) =>
-                      MaterialPageRoute<void>(builder: widget.raizes[d]!),
+                      RotaMemora<void>(builder: widget.raizes[d]!),
                 ),
             ],
           ),

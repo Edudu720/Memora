@@ -42,5 +42,23 @@ class CamadaVisor extends CamadaDaMemora {
       brilho,
       ctx.traco(ctx.cores.livroPagina.withValues(alpha: 0.85), ctx.l(0.014)),
     );
+
+    if (ctx.detalhada) {
+      // Um segundo reflexo, em faixa diagonal, como o de um vidro de verdade:
+      // ele fica parado enquanto o rosto desliza por baixo (T087).
+      canvas.save();
+      canvas.clipPath(forma);
+      final Path faixa = Path()
+        ..moveTo(caixa.left + caixa.width * 0.55, caixa.top)
+        ..lineTo(caixa.left + caixa.width * 0.72, caixa.top)
+        ..lineTo(caixa.left + caixa.width * 0.44, caixa.bottom)
+        ..lineTo(caixa.left + caixa.width * 0.27, caixa.bottom)
+        ..close();
+      canvas.drawPath(
+        faixa,
+        ctx.cheio(ctx.cores.brilho.withValues(alpha: 0.22)),
+      );
+      canvas.restore();
+    }
   }
 }

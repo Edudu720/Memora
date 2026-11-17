@@ -138,7 +138,9 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   // Antes de tudo, inclusive do convite (FR-023).
-                  const AvisoAntigolpe(),
+                  // Uma Memora por tela (FR-006): durante a espera, o aviso
+                  // fica inteiro, mas sem o rosto dela.
+                  AvisoAntigolpe(comMemora: !c.enviando),
                   const SizedBox(height: MemoraEspacamento.xxl),
                   ...switch (c.etapa) {
                     EtapaRecuperacao.pedirCodigo => _pedirCodigo(c, cores),
@@ -158,14 +160,19 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
   List<Widget> _pedirCodigo(ControladorRecuperacao c, MemoraCores cores) => <Widget>[
         Cartao(
           padding: const EdgeInsets.all(MemoraEspacamento.md),
-          child: const Row(
+          child: Row(
             children: <Widget>[
-              MemoraPersonagem(
-                expressao: ExpressaoDaMemora.falando,
-                tamanho: MemoraDimensoes.alvoDecisao,
-              ),
-              SizedBox(width: MemoraEspacamento.md),
-              Expanded(
+              // Uma Memora por tela (FR-006): enquanto a espera tem a sua,
+              // esta cede o lugar (o espaço fica).
+              if (c.enviando)
+                const SizedBox.square(dimension: MemoraDimensoes.alvoDecisao)
+              else
+                const MemoraPersonagem(
+                  expressao: ExpressaoDaMemora.falando,
+                  tamanho: MemoraDimensoes.alvoDecisao,
+                ),
+              const SizedBox(width: MemoraEspacamento.md),
+              const Expanded(
                 child: TextoMemora(TextosAutenticacao.conviteRecuperacao),
               ),
             ],

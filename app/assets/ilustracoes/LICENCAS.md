@@ -21,7 +21,7 @@ e ela precisa permitir alteração (recolorimos tudo com a paleta).
 | `porta_conversa.svg`, `porta_aplicativos.svg`, `porta_servicos.svg`, `porta_ajuda.svg`, `porta_registro.svg` | Desenho original da equipe, para as portas do Hub (feature 004, T011). `porta_servicos` **não** usa logotipo de órgão nenhum (R7) | Própria | — |
 | `estado_vazio.svg`, `estado_erro.svg`, `aplicativo_generico.svg` | Desenho original da equipe (feature 004, T011) | Própria | — |
 | `ajuste_aparencia.svg` | Desenho original da equipe, para o ajuste de aparência (feature 004, T011) | Própria | — |
-| `memora_perfil_robo.png`, `memora_ajuda_robo.png`, `memora_conclusao_robo.png`, `memora_alerta_robo.png`, `memora_dica_robo.png`, `memora_mini_robo.png` | Arte conceitual do robô Memora 3D da equipe (`Memora-Desing-Ideias/`, feature 004, T116b) | Própria | Recorte e enquadramento circular em alta resolução para medalhões e ícone |
+| `memora_perfil_robo.png`, `memora_ajuda_robo.png`, `memora_conclusao_robo.png`, `memora_alerta_robo.png` | Arte conceitual do robô Memora 3D da equipe (`Memora-Desing-Ideias/`, feature 004, T116b). **Hoje só servem de retrato escolhível em Meu perfil** (`AvatarIlustrado`); a Memora que aparece nas telas é desenhada pelo aplicativo (feature 013). `memora_dica_robo.png` e `memora_mini_robo.png` saíram na T051 | Própria | Recorte e enquadramento circular em alta resolução para medalhões e ícone |
 | `whatsapp_logo.png`, `telegram_logo.png` | Emblemas visuais para reconhecimento de aplicativos cotidianos no `IconeDoAplicativo` (feature 004, T116b / PR #63) | Uso educacional / identificação visual de catálogo (R7) | Recorte quadrado padronizado para o catálogo |
 
 

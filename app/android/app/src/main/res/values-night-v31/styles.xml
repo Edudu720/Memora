@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12 ou mais novo, modo escuro: o mesmo de `values-v31`, com o
+         fundo do tema escuro (`values-night/colors.xml`). -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:windowSplashScreenBackground">@color/abertura_fundo</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/memora_abertura_icone</item>
+    </style>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fundo da abertura no modo escuro do aparelho (feature 013, T038): o
+         fundo do tema escuro (MemoraCores.escuro.fundo, 0xFF0F141E). -->
+    <color name="abertura_fundo">#0F141E</color>
+</resources>

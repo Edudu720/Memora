@@ -47,7 +47,7 @@ void main() {
     return MaterialApp(
       theme: TemasMemora.claro,
       home: MediaQuery(
-        data: MediaQueryData(size: tamanho),
+        data: MediaQueryData(size: tamanho, disableAnimations: true),
         child: SizedBox(
           width: tamanho.width,
           height: tamanho.height,

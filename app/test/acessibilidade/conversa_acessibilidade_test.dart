@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/componentes/toque/superficie_tocavel.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/conversa_local.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
@@ -247,7 +248,7 @@ void main() {
           expect(
             find.descendant(
               of: find.byKey(TelaConversa.chaveAviso),
-              matching: find.byIcon(Icons.shield_outlined),
+              matching: find.byIcon(Icons.shield_rounded),
             ),
             findsOneWidget,
           );
@@ -320,7 +321,7 @@ void main() {
       // De volta ao escudo — e so ele.
       expect(find.byKey(TelaConversa.chaveAviso), findsOneWidget);
       expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
-      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
     });
 
     testWidgets('o escudo tem alvo de toque de 48 dp, em qualquer escala', (
@@ -555,5 +556,105 @@ void main() {
         expect(g.onVerticalDragStart, isNull);
       }
     });
+  });
+
+  group('Conversa limpa, icones da familia e toque — T058, T060, V14', () {
+    testWidgets(
+      'sugestoes aparecem so antes da primeira pergunta e sem Memora duplicada',
+      (WidgetTester t) async {
+        final ControladorConversa c = controladorCom();
+        addTearDown(c.dispose);
+        await montar(t, c);
+
+        await t.dragUntilVisible(
+          find.byKey(TelaConversa.chaveSugestoes),
+          find.byType(ListView).first,
+          const Offset(0, -80),
+        );
+        await avancar(t);
+
+        expect(find.byKey(TelaConversa.chaveSugestoes), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(TelaConversa.chaveSugestoes),
+            matching: find.byType(MemoraPersonagem),
+          ),
+          findsNothing,
+        );
+
+        await perguntar(t, 'como aumento a letra?');
+        expect(find.byKey(TelaConversa.chaveSugestoes), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'controles da conversa usam SuperficieTocavel, texto visivel e icones arredondados',
+      (WidgetTester t) async {
+        final ControladorConversa c = controladorCom();
+        addTearDown(c.dispose);
+        await montar(t, c);
+
+        await t.dragUntilVisible(
+          find.byKey(TelaConversa.chaveSugestoes),
+          find.byType(ListView).first,
+          const Offset(0, -80),
+        );
+
+        // Sugestoes iniciais com icones arredondados e texto.
+        for (final IconData icone in <IconData>[
+          Icons.format_size_rounded,
+          Icons.photo_library_rounded,
+          Icons.shield_rounded,
+          Icons.chat_rounded,
+        ]) {
+          final Finder iconeSugestao = find.descendant(
+            of: find.byKey(TelaConversa.chaveSugestoes),
+            matching: find.byIcon(icone),
+          );
+          await t.dragUntilVisible(
+            iconeSugestao,
+            find.byType(ListView).first,
+            const Offset(0, -80),
+          );
+          expect(iconeSugestao, findsOneWidget);
+        }
+
+        // Enviar, falar e abrir aviso usam SuperficieTocavel com texto visivel.
+        expect(
+          find.descendant(
+            of: find.byKey(TelaConversa.chaveEnviar),
+            matching: find.byType(SuperficieTocavel),
+          ),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.send_rounded), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(TelaConversa.chaveMicrofone),
+            matching: find.byType(SuperficieTocavel),
+          ),
+          findsOneWidget,
+        );
+        expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
+
+        await perguntar(t, 'como mando mensagem');
+
+        // Aviso recolhido no escudo e botao de recomecar usam SuperficieTocavel
+        // e icones arredondados.
+        expect(
+          find.descendant(
+            of: find.byKey(TelaConversa.chaveAviso),
+            matching: find.byType(SuperficieTocavel),
+          ),
+          findsOneWidget,
+        );
+        expect(find.byKey(TelaConversa.chaveRecomecar), findsOneWidget);
+        expect(find.byIcon(Icons.restart_alt_rounded), findsOneWidget);
+        expect(
+          t.widget<SuperficieTocavel>(find.byKey(TelaConversa.chaveRecomecar)),
+          isNotNull,
+        );
+      },
+    );
   });
 }
