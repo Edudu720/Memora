@@ -60,6 +60,9 @@ import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
 import '../../aprendizado/presentation/tela_passo_a_passo.dart';
 import '../../aprendizado/presentation/tela_seletor_de_secao.dart';
+import '../../atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart';
+import '../../atalhos_aplicativos/presentation/controllers/atalhos_aplicativos_controller.dart';
+import '../../atalhos_aplicativos/presentation/telas/tela_atalhos_aplicativos.dart';
 import '../../../services/seguranca/sessao_perdida.dart';
 
 /// Liga as telas das User Stories 1 e 2.
@@ -663,6 +666,23 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     ];
   }
 
+  /// Abre a tela de atalhos diretos para aplicativos comuns (Feature 015).
+  void _abrirAtalhosAplicativos() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => _DonoDosAtalhosAplicativos(
+          criar: () => AtalhosAplicativosController(
+            repositorio: RepositorioAtalhosAplicativos(
+              consulta: widget.consultaAplicativos,
+            ),
+            abridor: widget.abridor,
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
   /// Abre o Localizador de Serviços Essenciais (Feature 009 / 010).
   void _abrirLocalizadorServicos() {
     _empilhar(
@@ -1086,12 +1106,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
                 ? null
                 : () => _abrirConversa(widget.assistente!),
             aoVerTudo: _portasConstruidas().isEmpty ? null : _abrirHub,
-            aoAbrirAplicativos: widget.assistente == null
-                ? null
-                : () => _abrirCatalogo(
-                      widget.assistente!,
-                      CategoriaDoServico.cotidiano,
-                    ),
+            aoAbrirAplicativos: _abrirAtalhosAplicativos,
             aoAbrirServicos: widget.assistente == null
                 ? null
                 : () => _abrirCatalogo(
@@ -1180,5 +1195,38 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
   @override
   Widget build(BuildContext context) {
     return TelaConversa(controlador: _controlador, aoVoltar: widget.aoVoltar);
+  }
+}
+
+/// Cria o [AtalhosAplicativosController] e o descarta quando a rota sai.
+class _DonoDosAtalhosAplicativos extends StatefulWidget {
+  final AtalhosAplicativosController Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonoDosAtalhosAplicativos({
+    required this.criar,
+    required this.aoVoltar,
+  });
+
+  @override
+  State<_DonoDosAtalhosAplicativos> createState() =>
+      _DonoDosAtalhosAplicativosState();
+}
+
+class _DonoDosAtalhosAplicativosState extends State<_DonoDosAtalhosAplicativos> {
+  late final AtalhosAplicativosController _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaAtalhosAplicativos(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
   }
 }

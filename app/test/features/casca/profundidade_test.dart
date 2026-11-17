@@ -10,6 +10,7 @@ import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.d
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
+import 'package:memora/features/atalhos_aplicativos/presentation/telas/tela_atalhos_aplicativos.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
 import 'package:memora/features/perfil/presentation/tela_perfil.dart';
@@ -124,6 +125,12 @@ void main() {
       parte: 'conversa (pelo atalho do Início)',
       toques: <Finder>[find.byKey(TelaInicio.chaveConversar)],
       chegada: find.byKey(TelaConversa.chaveCampo),
+      via: null,
+    ),
+    (
+      parte: 'abrir aplicativos (pelo atalho do Início)',
+      toques: <Finder>[find.byKey(TelaInicio.chaveAplicativos)],
+      chegada: find.byType(TelaAtalhosAplicativos),
       via: null,
     ),
     (
