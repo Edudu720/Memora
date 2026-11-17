@@ -239,7 +239,28 @@ void main() {
 
         expect(find.byKey(TelaConversa.chaveStatusVoz), findsOneWidget);
         expect(find.text(TextosAssistente.vozIndisponivel), findsOneWidget);
+        expect(
+          RegExp(r'[.!?…](?:\s+|$)')
+              .allMatches(TextosAssistente.vozIndisponivel)
+              .length,
+          1,
+        );
 
+        await t.ensureVisible(find.byKey(TelaConversa.chaveMicrofone));
+        await t.pump();
+        final SemanticsHandle h = t.ensureSemantics();
+        expect(
+          t.getSemantics(find.byKey(TelaConversa.chaveMicrofone)),
+          matchesSemantics(
+            label: TextosAssistente.botaoFalar,
+            hint: TextosAssistente.dicaFalar,
+            isButton: true,
+            hasEnabledState: true,
+          ),
+        );
+        h.dispose();
+
+        await t.ensureVisible(find.byKey(TelaConversa.chaveCampo));
         await t.enterText(
           find.byKey(TelaConversa.chaveCampo),
           'como aumento a letra',
@@ -358,6 +379,25 @@ void main() {
           find.text(TextosAssistente.vozOfflineIndisponivel),
           findsOneWidget,
         );
+        expect(
+          RegExp(r'[.!?…](?:\s+|$)')
+              .allMatches(TextosAssistente.vozOfflineIndisponivel)
+              .length,
+          1,
+        );
+        await t.ensureVisible(find.byKey(TelaConversa.chaveMicrofone));
+        await t.pump();
+        final SemanticsHandle h = t.ensureSemantics();
+        expect(
+          t.getSemantics(find.byKey(TelaConversa.chaveMicrofone)),
+          matchesSemantics(
+            label: TextosAssistente.botaoFalar,
+            hint: TextosAssistente.dicaFalar,
+            isButton: true,
+            hasEnabledState: true,
+          ),
+        );
+        h.dispose();
         expect(find.text(TextosAssistente.botaoFalar), findsOneWidget);
         expect(c.rascunho, 'tomar remédio');
         expect(repositorio.chamadasEnviar, 0);
