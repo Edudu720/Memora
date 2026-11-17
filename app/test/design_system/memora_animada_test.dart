@@ -528,6 +528,94 @@ void main() {
       expect(c.aceno, 0);
     });
   });
+
+  group('T092: segurando a barra de carregamento', () {
+    test('a barra vai de uma mão à outra, e só na pose carregando', () {
+      for (final PoseDaMemora pose in PoseDaMemora.values) {
+        expect(
+          ValoresDaPose.de(pose).barra,
+          pose == PoseDaMemora.carregando ? 1 : 0,
+          reason: pose.name,
+        );
+      }
+      // As duas mãos na mesma altura, à frente do corpo, e afastadas o
+      // bastante para a barra aparecer entre elas.
+      final ValoresDaPose p = ValoresDaPose.de(PoseDaMemora.carregando);
+      expect(p.bracoEsquerdo.mao.dy, p.bracoDireito.mao.dy);
+      expect(p.bracoDireito.mao.dx - p.bracoEsquerdo.mao.dx, greaterThan(0.4));
+    });
+
+    testWidgets('com as mãos ocupadas, ela não larga a barra para acenar nem '
+        'para comemorar', (WidgetTester t) async {
+      for (final GestoDaMemora g in <GestoDaMemora>[
+        GestoDaMemora.aceno,
+        GestoDaMemora.comemoracao,
+      ]) {
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: Scaffold(
+              body: Center(
+                child: MemoraAnimada(
+                  key: ValueKey<GestoDaMemora>(g),
+                  expressao: PoseDaMemora.carregando,
+                  tamanho: 96,
+                  anfitria: true,
+                  reageAoToque: false,
+                  gesto: g,
+                ),
+              ),
+            ),
+          ),
+        );
+        final PosicaoDoBraco antes = quadro(t).pose.bracoDireito;
+        for (int i = 0; i < 20; i++) {
+          await t.pump(const Duration(milliseconds: 60));
+          final ContextoDePintura c = quadro(t);
+          expect(c.aceno, 0, reason: g.name);
+          expect(c.pulo, 0, reason: g.name);
+          expect(c.pose.bracoDireito.mao, antes.mao, reason: g.name);
+          expect(c.pose.barra, 1, reason: g.name);
+        }
+      }
+    });
+
+    testWidgets('a barra corre com o relógio que recebe, e para com "reduzir '
+        'movimento"', (WidgetTester t) async {
+      final AnimationController relogio = AnimationController(
+        vsync: const TestVSync(),
+        value: 0.3,
+      );
+      addTearDown(relogio.dispose);
+      Future<void> montarCom({required bool reduzir}) => t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: MediaQuery(
+            data: MediaQueryData(disableAnimations: reduzir),
+            child: Scaffold(
+              body: Center(
+                child: MemoraAnimada(
+                  expressao: PoseDaMemora.carregando,
+                  tamanho: 96,
+                  anfitria: true,
+                  reageAoToque: false,
+                  cicloDaBarra: relogio,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await montarCom(reduzir: false);
+      expect(quadro(t).cicloDaBarra, closeTo(0.3, 1e-9));
+      relogio.value = 0.7;
+      await t.pump();
+      expect(quadro(t).cicloDaBarra, closeTo(0.7, 1e-9));
+
+      await montarCom(reduzir: true);
+      expect(quadro(t).cicloDaBarra, isNull, reason: 'parada');
+    });
+  });
 }
 
 class _ContaRotas extends NavigatorObserver {

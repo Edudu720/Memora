@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'camada_antena.dart';
+import 'camada_barra.dart';
 import 'camada_braco.dart';
 import 'camada_cabeca.dart';
 import 'camada_corpo.dart';
@@ -37,6 +38,7 @@ class PintorDaMemora extends CustomPainter {
   static const CamadaDaMemora _bracoDireito = CamadaBraco(esquerdo: false);
   static const CamadaDaMemora _escudo = CamadaEscudo();
   static const CamadaDaMemora _livro = CamadaLivro();
+  static const CamadaDaMemora _barra = CamadaBarra();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -114,6 +116,8 @@ class PintorDaMemora extends CustomPainter {
     canvas.save();
     canvas.translate(ctx.deslocamento(1.2), -ctx.ajeita * ctx.l(0.008));
     _livro.pintar(canvas, ctx);
+    // A barra antes dos braços: as luvas fecham por cima das pontas dela.
+    _barra.pintar(canvas, ctx);
     _bracoEsquerdo.pintar(canvas, ctx);
     _bracoDireito.pintar(canvas, ctx);
     canvas.restore();

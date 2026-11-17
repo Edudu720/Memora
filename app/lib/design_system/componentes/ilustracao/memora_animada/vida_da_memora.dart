@@ -111,6 +111,16 @@ class VidaDaPose {
           ajeita: 0,
           ritmo: 1,
         );
+      case PoseDaMemora.carregando:
+        // De olho na barra, quase sem passear: a atenção está nas mãos. A
+        // antena acompanha a espera, sem pressa.
+        return const VidaDaPose(
+          olhar: 0.25,
+          cabeca: 0.025,
+          antena: 0.6,
+          ajeita: 0.35,
+          ritmo: 2,
+        );
     }
   }
 }

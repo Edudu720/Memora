@@ -16,6 +16,19 @@ class CamadaBraco extends CamadaDaMemora {
   /// Cria a camada de um braço.
   const CamadaBraco({required this.esquerdo});
 
+  /// Onde fica o centro da mão neste quadro, em pixels, com o aceno somado.
+  /// É o mesmo ponto em que a luva é pintada: quem segura algo nela (a barra
+  /// da abertura, T092) pergunta aqui.
+  static Offset maoNoQuadro(ContextoDePintura ctx, {required bool esquerdo}) {
+    final PosicaoDoBraco braco = esquerdo
+        ? ctx.pose.bracoEsquerdo
+        : ctx.pose.bracoDireito;
+    final double onda = esquerdo ? 0 : ctx.aceno;
+    return ctx
+        .pp(braco.mao)
+        .translate(ctx.l(0.06) * onda, ctx.l(0.008) * onda.abs());
+  }
+
   @override
   void pintar(Canvas canvas, ContextoDePintura ctx) {
     final double presenca = ctx.pose.corpo;
@@ -34,9 +47,7 @@ class CamadaBraco extends CamadaDaMemora {
     final Offset cotovelo = ctx
         .pp(braco.cotovelo)
         .translate(ctx.l(0.02) * onda, 0);
-    final Offset mao = ctx
-        .pp(braco.mao)
-        .translate(ctx.l(0.06) * onda, ctx.l(0.008) * onda.abs());
+    final Offset mao = maoNoQuadro(ctx, esquerdo: esquerdo);
 
     _tubo(canvas, ctx, ombro, cotovelo, mao);
 

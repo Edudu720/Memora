@@ -25,9 +25,13 @@ abstract final class MemoraAbertura {
   /// pronta." (FR-038).
   static const Duration limiteDaDemora = Duration(seconds: 4);
 
-  /// O descanso entre um aceno e o seguinte, quando o carregamento demora.
+  /// Uma passada da barra de carregamento que a Memora segura (T092): o
+  /// trecho entra pela esquerda e sai pela direita, e a passada seguinte
+  /// emenda nesta.
   ///
-  /// Calmo de propósito: a Memora não acelera nem pisca para disfarçar a
-  /// espera. O aceno seguinte começa depois deste intervalo.
-  static const Duration pausaEntreAcenos = Duration(milliseconds: 800);
+  /// É o "gesto" da abertura: ela sai quando carregou **e** a passada em curso
+  /// terminou, nunca mais que uma passada depois (FR-038). Calma de
+  /// propósito, no ritmo de uma barra indeterminada comum: não acelera nem
+  /// pisca para disfarçar a espera.
+  static const Duration passadaDaBarra = Duration(milliseconds: 1500);
 }

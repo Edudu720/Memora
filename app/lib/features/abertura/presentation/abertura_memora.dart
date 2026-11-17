@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_primario.dart';
-import '../../../design_system/componentes/ilustracao/memora_animada/gesto_da_memora.dart';
 import '../../../design_system/componentes/ilustracao/memora_animada/memora_animada.dart';
 import '../../../design_system/componentes/ilustracao/memora_animada/poses.dart';
 import '../../../design_system/componentes/texto/texto_memora.dart';
@@ -16,49 +15,54 @@ import '../../../l10n/textos_abertura.dart';
 
 /// Em que ponto está a abertura (feature 013, data-model.md).
 ///
-/// `carregando` → (`pronto` **e** aceno concluído) → `saindo`. Dois ramos:
-/// `demorando` (passou de 4 s: aparece a frase) e `falhou` (vai à tela de
-/// erro).
+/// `carregando` → (`pronto` **e** passada da barra concluída) → `saindo`.
+/// Dois ramos: `demorando` (passou de 4 s: aparece a frase) e `falhou` (vai à
+/// tela de erro).
 enum EstadoDaAbertura {
-  /// A Memora acena e o aplicativo carrega por baixo.
+  /// A Memora segura a barra e o aplicativo carrega por baixo.
   carregando,
 
   /// Passou de 4 s: a frase "Estou quase pronta." aparece.
   demorando,
 
-  /// Carregou e o aceno completou: a abertura esmaece e entrega o resultado.
+  /// Carregou e a passada da barra completou: a abertura esmaece e entrega o
+  /// resultado.
   saindo,
 
   /// O carregamento falhou: a tela de erro, com a Memora e uma saída.
   falhou,
 }
 
-/// A tela de carregamento: a Memora acenando enquanto o aplicativo termina de
-/// carregar (feature 013, US7; FR-036 a FR-039, R9).
+/// A tela de carregamento: a **anfitriã** (o desenho de mais detalhe, FR-048)
+/// segurando a barra de carregamento enquanto o aplicativo termina de carregar
+/// (feature 013, US7; FR-036 a FR-039, R9; T092).
 ///
 /// ## Por que existe
 ///
 /// A abertura nativa do Android não roda animação do aplicativo (ele ainda não
-/// existe nesse instante). A única forma de a Memora acenar é o aplicativo
+/// existe nesse instante). A única forma de a Memora se mexer é o aplicativo
 /// subir primeiro e carregar depois: o `main.dart` chama o `runApp` com esta
 /// tela **antes** de ler as preferências, e o que antes era feito antes do
 /// `runApp` passa a ser o [carregar] daqui.
 ///
 /// ## O que garante
 ///
-/// - **Sai quando carregou e o aceno em curso completou** — nunca antes de
-///   carregar, e nunca mais que um aceno depois (FR-038, SC-009). A abertura
+/// - **Sai quando carregou e a passada da barra em curso completou** — nunca
+///   antes de carregar, e nunca mais que uma passada
+///   ([MemoraAbertura.passadaDaBarra]) depois (FR-038, SC-009). A abertura
 ///   não é prolongada de propósito.
-/// - **Demora calma**: se o carregamento se estende, a Memora segue acenando
-///   com um descanso entre um aceno e outro, sem acelerar nem piscar. Passados
+/// - **Barra sem número**: indeterminada, ela não diz quanto falta (US7).
+/// - **Demora calma**: se o carregamento se estende, as passadas seguem no
+///   mesmo ritmo, sem acelerar nem piscar. Passados
 ///   [MemoraAbertura.limiteDaDemora], uma frase curta diz que está quase
 ///   pronto.
 /// - **Falha não prende**: a tela de erro, com a Memora e "Tentar de novo".
 /// - **Reduzir movimento** (aqui, o do **sistema**: as preferências do
-///   aplicativo ainda não existem): a Memora fica parada em pose de aceno,
-///   nenhum relógio roda, e a abertura sai assim que carrega (FR-039).
-/// - **Decorativa para o leitor de tela**: a Memora não é anunciada; a frase
-///   de espera é um aviso.
+///   aplicativo ainda não existem): a Memora e a barra ficam paradas, nenhum
+///   relógio roda, e a abertura sai assim que carrega (FR-039).
+/// - **Decorativa para o leitor de tela**: a Memora e a barra não são
+///   anunciadas; quem usa o leitor ouve "Abrindo o Memora.", e a frase de
+///   espera é um aviso.
 ///
 /// Fica **sob** um `MaterialApp` que dê o tema (claro ou escuro do sistema) e
 /// o `MediaQuery` do aparelho.
@@ -93,9 +97,9 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
   bool _pronto = false;
   T? _resultado;
 
-  /// Há um aceno em curso (ou prestes a começar). Verdadeiro de saída: a
-  /// Memora começa acenando ao entrar.
-  bool _acenoEmCurso = true;
+  /// Há uma passada da barra em curso. Verdadeiro de saída: a barra começa a
+  /// correr ao entrar.
+  bool _passadaEmCurso = true;
 
   /// Se o sistema pediu menos movimento. Lido uma vez de saída e de novo se
   /// mudar.
@@ -106,18 +110,10 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
   /// antigo (antes de "Tentar de novo") não vale mais.
   int _geracao = 0;
 
-  /// O relógio dos acenos: um aceno e o descanso até o seguinte. Só existe
-  /// quando há movimento permitido.
-  AnimationController? _ciclo;
-
-  /// Quanto do ciclo é aceno, de 0 a 1.
-  late final double _fracaoDoAceno =
-      MemoraMovimento.aceno.inMicroseconds /
-      (MemoraMovimento.aceno + MemoraAbertura.pausaEntreAcenos).inMicroseconds;
-
-  /// O gesto que se repete a cada ciclo. O primeiro aceno é o da própria
-  /// chegada da pose; os seguintes são pedidos por aqui.
-  GestoDaMemora? _gesto;
+  /// O relógio da barra: de 0 a 1 é uma passada. É ele que a Memora pinta
+  /// ([MemoraAnimada.cicloDaBarra]), e é por ele que a abertura sabe quando a
+  /// passada terminou. Só existe quando há movimento permitido.
+  AnimationController? _passada;
 
   Timer? _relogioDaDemora;
   bool _saiu = false;
@@ -125,7 +121,7 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
   @override
   void initState() {
     super.initState();
-    // O primeiro quadro (a Memora acenando) vai para a tela **antes** de o
+    // O primeiro quadro (a Memora com a barra) vai para a tela **antes** de o
     // carregamento começar: o trabalho pesado não atrasa o que a pessoa vê.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _comecarACarregar();
@@ -140,56 +136,39 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
     _leuOMovimento = true;
     _reduzir = reduzir;
     if (_reduzir) {
-      // Sem movimento: nenhum relógio, e nenhum aceno a esperar.
-      _ciclo?.stop();
-      _acenoEmCurso = false;
+      // Sem movimento: nenhum relógio, e nenhuma passada a esperar.
+      _passada?.stop();
+      _passadaEmCurso = false;
       _tentarSair();
     } else {
-      _acenoEmCurso = true;
-      _iniciarOCiclo();
+      _iniciarAPassada();
     }
   }
 
-  void _iniciarOCiclo() {
-    final AnimationController ciclo = _ciclo ??=
-        AnimationController(
-            vsync: this,
-            duration: MemoraMovimento.efetiva(
-              MemoraMovimento.aceno + MemoraAbertura.pausaEntreAcenos,
-              reduzirMovimento: _reduzir,
-            ),
-          )
-          ..addListener(_aoAndarOCiclo)
-          ..addStatusListener(_aoMudarOStatusDoCiclo);
-    ciclo.forward(from: 0);
+  void _iniciarAPassada() {
+    final AnimationController passada = _passada ??= AnimationController(
+      vsync: this,
+      duration: MemoraMovimento.efetiva(
+        MemoraAbertura.passadaDaBarra,
+        reduzirMovimento: _reduzir,
+      ),
+    )..addStatusListener(_aoMudarOStatusDaPassada);
+    _passadaEmCurso = true;
+    passada.forward(from: 0);
   }
 
-  /// O aceno em curso termina quando o ciclo passa da fração dele.
-  void _aoAndarOCiclo() {
-    if (_acenoEmCurso && _ciclo!.value >= _fracaoDoAceno) {
-      _acenoEmCurso = false;
-      _tentarSair();
-    }
-  }
-
-  /// Acabou o descanso: outro aceno, se ainda estamos esperando.
-  void _aoMudarOStatusDoCiclo(AnimationStatus status) {
+  /// Acabou uma passada: sai, se já carregou; senão, a próxima emenda nesta.
+  void _aoMudarOStatusDaPassada(AnimationStatus status) {
     if (status != AnimationStatus.completed) return;
+    _passadaEmCurso = false;
+    _tentarSair();
     if (_saiu ||
         _estado == EstadoDaAbertura.saindo ||
         _estado == EstadoDaAbertura.falhou) {
       return;
     }
-    _acenoEmCurso = true;
-    // O gesto precisa voltar a `null` por um quadro para o mesmo aceno poder
-    // ser pedido de novo (ver `MemoraAnimada.gesto`).
-    setState(() => _gesto = null);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _estado != EstadoDaAbertura.falhou) {
-        setState(() => _gesto = GestoDaMemora.aceno);
-      }
-    });
-    _ciclo!.forward(from: 0);
+    _passadaEmCurso = true;
+    _passada!.forward(from: 0);
   }
 
   void _comecarACarregar() {
@@ -214,16 +193,16 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
     );
   }
 
-  /// Sai quando as duas coisas são verdade: carregou **e** não há aceno em
+  /// Sai quando as duas coisas são verdade: carregou **e** não há passada em
   /// curso. É o único lugar que decide sair.
   void _tentarSair() {
-    if (!_pronto || _acenoEmCurso || _saiu) return;
+    if (!_pronto || _passadaEmCurso || _saiu) return;
     if (_estado == EstadoDaAbertura.saindo ||
         _estado == EstadoDaAbertura.falhou) {
       return;
     }
     _relogioDaDemora?.cancel();
-    _ciclo?.stop();
+    _passada?.stop();
     if (_reduzir) {
       // Sem movimento não há esmaecer: sai já.
       _entregar();
@@ -241,7 +220,7 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
 
   void _falhou(Object erro) {
     _relogioDaDemora?.cancel();
-    _ciclo?.stop();
+    _passada?.stop();
     setState(() => _estado = EstadoDaAbertura.falhou);
     widget.aoFalhar?.call(erro);
   }
@@ -251,10 +230,9 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
       _estado = EstadoDaAbertura.carregando;
       _pronto = false;
       _resultado = null;
-      _gesto = null;
-      _acenoEmCurso = !_reduzir;
+      _passadaEmCurso = !_reduzir;
     });
-    if (!_reduzir) _iniciarOCiclo();
+    if (!_reduzir) _iniciarAPassada();
     _comecarACarregar();
   }
 
@@ -262,7 +240,7 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
   void dispose() {
     _geracao++;
     _relogioDaDemora?.cancel();
-    _ciclo?.dispose();
+    _passada?.dispose();
     super.dispose();
   }
 
@@ -298,10 +276,11 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
                 child: Semantics(
                   label: TextosAbertura.abrindo,
                   child: MemoraAnimada(
-                    expressao: PoseDaMemora.acenando,
+                    expressao: PoseDaMemora.carregando,
                     tamanho: MemoraAbertura.tamanhoDaMemora,
                     reageAoToque: false,
-                    gesto: _gesto,
+                    anfitria: true,
+                    cicloDaBarra: _reduzir ? null : _passada,
                   ),
                 ),
               ),
