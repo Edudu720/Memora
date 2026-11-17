@@ -116,7 +116,6 @@ class NavegacaoInferior extends StatelessWidget {
                     ),
                     curve: MemoraMovimento.curvaDeTela,
                     left: esquerda,
-                    top: 0,
                     child: Container(
                       key: NavegacaoInferior.chaveDoTraco(indiceAtivo + 1),
                       height: MemoraDimensoes.indicadorAtivoBarra,
