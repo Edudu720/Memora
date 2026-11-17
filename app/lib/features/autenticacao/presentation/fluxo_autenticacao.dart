@@ -6,6 +6,7 @@ import '../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../../../l10n/textos_configuracoes.dart';
+import '../../../l10n/textos_guias.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -795,6 +796,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoEscolher: (ServicoDoCatalogo servico) => _abrirConversa(
             assistente,
             rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+          ),
+          // O botão "Pedir para a Memora abrir" pede para abrir, como o do fim
+          // do passo a passo; reaproveitar o `aoEscolher` fazia a Memora
+          // ensinar em vez de abrir.
+          aoPedirParaAbrir: (ServicoDoCatalogo servico) => _abrirConversa(
+            assistente,
+            rascunho: TextosGuias.pedidoParaAbrir(servico.nomeExibido),
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
