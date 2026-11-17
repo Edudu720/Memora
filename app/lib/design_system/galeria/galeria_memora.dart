@@ -674,6 +674,8 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           ),
         ),
       ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const _DemoTrocaDePasso(),
 
       const _Secao(
         'Blocos Memora 2.0',
@@ -1042,6 +1044,52 @@ class _MemoraNaPaleta extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A troca de passo dentro da mesma tela (T072): "Próximo" traz o passo pela
+/// direita e "Anterior", pela esquerda.
+class _DemoTrocaDePasso extends StatefulWidget {
+  const _DemoTrocaDePasso();
+
+  @override
+  State<_DemoTrocaDePasso> createState() => _DemoTrocaDePassoState();
+}
+
+class _DemoTrocaDePassoState extends State<_DemoTrocaDePasso> {
+  int _passo = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        TrocaDePasso(
+          posicao: _passo,
+          child: Cartao(
+            child: TextoMemora('Passo $_passo de 3'),
+          ),
+        ),
+        const SizedBox(height: MemoraEspacamento.sm),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: BotaoSecundario(
+                rotulo: 'Anterior',
+                aoTocar: _passo > 1 ? () => setState(() => _passo--) : null,
+              ),
+            ),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Expanded(
+              child: BotaoPrimario(
+                rotulo: 'Próximo',
+                aoTocar: _passo < 3 ? () => setState(() => _passo++) : null,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
