@@ -178,6 +178,16 @@ class _TelaConversaState extends State<TelaConversa>
   /// que não pode recomeçar a ser escrita.
   int _emEscrita = -1;
 
+  /// Há texto da Memora aparecendo aos poucos neste instante? Mexe a boca da
+  /// Memora do topo (FR-025). Quem avisa é o próprio texto, ao começar e ao
+  /// parar de escrever.
+  bool _escrevendoNaTela = false;
+
+  void _aoMudarEscrita(bool escrevendo) {
+    if (!mounted || escrevendo == _escrevendoNaTela) return;
+    setState(() => _escrevendoNaTela = escrevendo);
+  }
+
   void _aoMudar() {
     // O controlador é dono do valor; o campo apenas o reflete. Importa depois
     // de enviar, quando o rascunho é limpo por quem não é a pessoa.
@@ -302,8 +312,12 @@ class _TelaConversaState extends State<TelaConversa>
       key: escrevendo ? _chaveDaEscrita(indice) : null,
       autor: daMemora ? AutorDoBalao.memora : AutorDoBalao.pessoa,
       texto: m.texto,
+      comRosto: false,
       escreverAosPoucos: escrevendo,
       aoEscrever: escrevendo ? _rolarParaOFim : null,
+      // Sempre, para a Memora: se a fala deixar de ser a que escreve no meio
+      // da escrita (a próxima pergunta), o aviso de "parou" ainda chega.
+      aoMudarEscrita: daMemora ? _aoMudarEscrita : null,
     );
   }
 
@@ -334,6 +348,13 @@ class _TelaConversaState extends State<TelaConversa>
           appBar: BarraSuperior(
             titulo: TextosAssistente.tituloConversa,
             aoVoltar: widget.aoVoltar,
+            // A Memora desta tela é esta, pequena e no topo, e só ela: os
+            // balões não levam rosto (FR-025, FR-042). Fala enquanto a
+            // resposta aparece, e volta ao repouso quando termina.
+            memora: ExpressaoDaMemora.neutra,
+            memoraFalando:
+                (c.respondendo && c.trechoEmCurso.isNotEmpty) ||
+                _escrevendoNaTela,
           ),
           body: SafeArea(
             top: false,
@@ -502,6 +523,7 @@ class _TelaConversaState extends State<TelaConversa>
                               const BalaoDeFala(
                                 autor: AutorDoBalao.memora,
                                 texto: TextosAssistente.convite,
+                                comRosto: false,
                               ),
                               if (!c.respondendo &&
                                   c.mensagemDeErro == null) ...<Widget>[
@@ -521,7 +543,7 @@ class _TelaConversaState extends State<TelaConversa>
 
                             if (c.respondendo) ...<Widget>[
                               if (c.trechoEmCurso.isEmpty)
-                                const BalaoDeFala.escrevendo()
+                                const BalaoDeFala.escrevendo(comRosto: false)
                               else
                                 // A mesma chave da mensagem em que este texto
                                 // vai se transformar: a posição que ela terá.
@@ -529,9 +551,11 @@ class _TelaConversaState extends State<TelaConversa>
                                   key: _chaveDaEscrita(c.mensagens.length),
                                   autor: AutorDoBalao.memora,
                                   texto: c.trechoEmCurso,
+                                  comRosto: false,
                                   escreverAosPoucos: true,
                                   emAndamento: true,
                                   aoEscrever: _rolarParaOFim,
+                                  aoMudarEscrita: _aoMudarEscrita,
                                 ),
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
@@ -961,16 +985,6 @@ class _ExplicacaoDoAceite extends StatelessWidget {
             cabecalho: true,
           ),
           const SizedBox(height: MemoraEspacamento.md),
-          if (escala < MemoraDimensoes.escalaTextoAlta) ...<Widget>[
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: MemoraPersonagem(
-                expressao: ExpressaoDaMemora.dica,
-                tamanho: MemoraDimensoes.pisoDeIlustracao,
-              ),
-            ),
-            const SizedBox(height: MemoraEspacamento.sm),
-          ],
           const TextoMemora(TextosAssistente.corpoDoAceite),
           const SizedBox(height: MemoraEspacamento.lg),
           BotaoPrimario(

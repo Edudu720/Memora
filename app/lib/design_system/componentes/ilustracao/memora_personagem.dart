@@ -76,12 +76,17 @@ class MemoraPersonagem extends StatelessWidget {
   /// Se o toque nela dispara um aceno ou uma piscada (FR-005a).
   final bool reageAoToque;
 
+  /// A boca acompanha um texto que está aparecendo (liga o ciclo de fala da
+  /// [MemoraAnimada]). Quem usa também troca a [expressao] para `falando`.
+  final bool falando;
+
   /// Cria a Memora.
   const MemoraPersonagem({
     this.expressao = ExpressaoDaMemora.neutra,
     this.tamanho = MemoraDimensoes.ilustracaoCabecalho,
     this.descricao,
     this.reageAoToque = true,
+    this.falando = false,
     super.key,
   });
 
@@ -91,6 +96,7 @@ class MemoraPersonagem extends StatelessWidget {
       expressao: expressao.pose,
       tamanho: tamanho,
       reageAoToque: reageAoToque,
+      falando: falando,
     );
 
     if (descricao == null) {

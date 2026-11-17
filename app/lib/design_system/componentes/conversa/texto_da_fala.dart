@@ -51,6 +51,12 @@ class TextoDaFala extends StatefulWidget {
   /// chamado quando o texto já nasce inteiro (sem escrever aos poucos).
   final VoidCallback? aoTerminar;
 
+  /// Avisa quando a escrita **começa** (verdadeiro) e quando **para** (falso):
+  /// a conversa liga e desliga a boca da Memora do topo por aqui (FR-025).
+  /// Também avisa "parou" se o texto sair da tela no meio da escrita. Chega
+  /// depois do quadro, nunca durante a construção.
+  final ValueChanged<bool>? aoMudarEscrita;
+
   /// Cria o texto.
   const TextoDaFala(
     this.texto, {
@@ -58,6 +64,7 @@ class TextoDaFala extends StatefulWidget {
     this.emAndamento = false,
     this.aoAvancar,
     this.aoTerminar,
+    this.aoMudarEscrita,
     super.key,
   });
 
@@ -75,6 +82,9 @@ class _TextoDaFalaState extends State<TextoDaFala>
   int _total = 0;
   Duration _ultimoQuadro = Duration.zero;
   late String _textoExibido;
+
+  /// O último estado entregue a [TextoDaFala.aoMudarEscrita].
+  bool _avisouEscrevendo = false;
 
   @override
   void initState() {
@@ -101,7 +111,18 @@ class _TextoDaFalaState extends State<TextoDaFala>
   @override
   void dispose() {
     _relogio.dispose();
+    _avisarEscrita(false);
     super.dispose();
+  }
+
+  /// Entrega a mudança de "estou escrevendo" a quem pediu, uma vez por
+  /// mudança e fora da construção.
+  void _avisarEscrita(bool escrevendo) {
+    if (escrevendo == _avisouEscrevendo) return;
+    _avisouEscrevendo = escrevendo;
+    final ValueChanged<bool>? aviso = widget.aoMudarEscrita;
+    if (aviso == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => aviso(escrevendo));
   }
 
   int _contar() => TextoComNegrito.quantasLetras(
@@ -130,6 +151,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
     } else if (_relogio.isActive) {
       _relogio.stop();
     }
+    _avisarEscrita(_relogio.isActive);
   }
 
   void _aCadaQuadro(Duration decorrido) {
@@ -146,6 +168,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
     if (porLetra <= 0) {
       setState(() => _reveladas = _total.toDouble());
       _relogio.stop();
+      _avisarEscrita(false);
       widget.aoTerminar?.call();
       return;
     }
@@ -160,7 +183,10 @@ class _TextoDaFalaState extends State<TextoDaFala>
       _reveladas = math.min(_total.toDouble(), _reveladas + segundos * ritmo);
     });
     final bool terminou = _reveladas >= _total;
-    if (terminou) _relogio.stop();
+    if (terminou) {
+      _relogio.stop();
+      _avisarEscrita(false);
+    }
     widget.aoAvancar?.call();
     if (terminou) widget.aoTerminar?.call();
   }
