@@ -87,7 +87,7 @@ class TelaPrimeiraEntrada extends StatelessWidget {
               BotaoPrimario(
                 key: chaveEntrar,
                 rotulo: TextosAutenticacao.botaoEntrarSozinha,
-                icone: Icons.login,
+                icone: Icons.login_rounded,
                 aoTocar: aoEntrarSozinha,
               ),
               const SizedBox(height: MemoraEspacamento.xxl),

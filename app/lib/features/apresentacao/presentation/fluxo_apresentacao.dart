@@ -194,7 +194,7 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
               child: BotaoPrimario(
                 key: FluxoApresentacao.chaveContinuar,
                 rotulo: TextosApresentacao.continuar,
-                icone: Icons.arrow_forward,
+                icone: Icons.arrow_forward_rounded,
                 aoTocar: _continuar,
               ),
             ),

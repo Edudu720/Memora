@@ -216,7 +216,7 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
                 BotaoPrimario(
                   key: TelaConfirmarCanal.chaveConfirmar,
                   rotulo: TextosAutenticacao.botaoConfirmarCodigo,
-                  icone: Icons.check,
+                  icone: Icons.check_rounded,
                   aoTocar: _podeConfirmar ? _confirmar : null,
                 ),
               const SizedBox(height: MemoraEspacamento.md),

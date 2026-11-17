@@ -32,7 +32,7 @@ class EstadoVazio extends StatelessWidget {
   const EstadoVazio({
     required this.titulo,
     required this.explicacao,
-    this.icone = Icons.inbox_outlined,
+    this.icone = Icons.inbox_rounded,
     this.rotuloAcao,
     this.aoAgir,
     super.key,

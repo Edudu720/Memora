@@ -142,7 +142,7 @@ class _TelaContaState extends State<TelaConta> {
                       botao: (VoidCallback aoTocar) => BotaoSecundario(
                         key: TelaConta.chaveSair,
                         rotulo: TextosAutenticacao.botaoSair,
-                        icone: Icons.logout,
+                        icone: Icons.logout_rounded,
                         aoTocar: aoTocar,
                       ),
                     ),
@@ -218,7 +218,7 @@ class _TelaContaState extends State<TelaConta> {
             alignment: Alignment.centerLeft,
             child: BadgeDeStatus(
               rotulo: 'Sua proteção',
-              icone: Icons.shield_outlined,
+              icone: Icons.shield_rounded,
               tom: TomBadgeStatus.informativo,
             ),
           ),
@@ -253,7 +253,7 @@ class _TelaContaState extends State<TelaConta> {
     return BotaoSecundario(
       key: TelaConta.chaveEsquecer,
       rotulo: TextosConfiguracoes.botaoEsquecer,
-      icone: Icons.phonelink_erase,
+      icone: Icons.phonelink_erase_rounded,
       aoTocar: () => setState(() => _confirmandoEsquecer = true),
     );
   }

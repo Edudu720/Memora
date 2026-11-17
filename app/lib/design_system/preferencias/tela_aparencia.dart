@@ -158,7 +158,7 @@ class TelaAparencia extends StatelessWidget {
                       BotaoPrimario(
                         key: chaveSalvar,
                         rotulo: 'Salvar deste jeito',
-                        icone: Icons.check,
+                        icone: Icons.check_rounded,
                         aoTocar: controlador.confirmar,
                       ),
                       const SizedBox(height: MemoraEspacamento.md),

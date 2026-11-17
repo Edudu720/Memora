@@ -127,7 +127,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(TelaPerfil.chaveDesenho),
-          matching: find.byIcon(Icons.person_outline),
+          matching: find.byIcon(Icons.person_outline_rounded),
         ),
         findsOneWidget,
       );

@@ -175,7 +175,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const SizedBox(height: MemoraEspacamento.md),
       BotaoPrimario(
         rotulo: 'Continuar com ícone',
-        icone: Icons.arrow_forward,
+        icone: Icons.arrow_forward_rounded,
         aoTocar: () => _tocou('primário com ícone'),
       ),
       const SizedBox(height: MemoraEspacamento.md),
@@ -194,7 +194,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const SizedBox(height: MemoraEspacamento.md),
       BotaoPerigo(
         rotulo: 'Apagar minha conta',
-        icone: Icons.delete_outline,
+        icone: Icons.delete_outline_rounded,
         aoTocar: () => _tocou('perigo'),
       ),
       const SizedBox(height: MemoraEspacamento.md),
@@ -210,7 +210,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           CampoInformacao(
             rotulo: 'E-mail',
             valor: 'ana.maria@email.com',
-            icone: Icons.mail_outline,
+            icone: Icons.mail_outline_rounded,
           ),
         ],
       ),
@@ -218,7 +218,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const DestaqueInformacao(
         rotulo: 'Seu código',
         valor: '482913',
-        icone: Icons.vpn_key_outlined,
+        icone: Icons.vpn_key_rounded,
       ),
 
       const _Secao('Campos', 'Normal, com erro, senha e código.'),
@@ -306,7 +306,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       EstadoVazio(
         titulo: 'Nenhuma conversa ainda',
         explicacao: 'Quando você me perguntar alguma coisa, ela aparece aqui.',
-        icone: Icons.chat_bubble_outline,
+        icone: Icons.chat_bubble_outline_rounded,
         rotuloAcao: 'Conversar com a Memora',
         aoAgir: () => _tocou('foi conversar'),
       ),
@@ -314,7 +314,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const EstadoVazio(
         titulo: 'Estado vazio sem ação',
         explicacao: 'Nem todo vazio tem para onde mandar a pessoa.',
-        icone: Icons.folder_open_outlined,
+        icone: Icons.folder_open_rounded,
       ),
 
       const _Secao('Cartões e ilustração'),
@@ -762,7 +762,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           ),
           ChipFiltro(
             rotulo: 'Saúde',
-            icone: Icons.health_and_safety_outlined,
+            icone: Icons.health_and_safety_rounded,
             selecionado: _filtroAtivo == 1,
             aoTocar: () => setState(() => _filtroAtivo = 1),
           ),

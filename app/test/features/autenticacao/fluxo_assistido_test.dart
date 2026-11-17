@@ -155,12 +155,12 @@ void main() {
       await _tocarNaChave(t, TelaCadastro.chavePedirAparelho);
       await _tocarNaChave(t, TelaEntregaDoAparelho.chaveContinuar);
 
-      // `Icons.visibility`, e não `visibility_outlined`: o CampoSenha usa o
+      // `Icons.visibility_rounded`, e não `visibility_outlined`: o CampoSenha usa o
       // primeiro. Procurar o ícone errado fazia este teste passar mesmo com
       // `permitirRevelar: true` — descoberto ao quebrar o portão de propósito.
       final Finder olhinho = find.descendant(
         of: find.byKey(TelaCadastro.chaveSenha),
-        matching: find.byIcon(Icons.visibility),
+        matching: find.byIcon(Icons.visibility_rounded),
       );
       expect(
         olhinho,

@@ -83,7 +83,7 @@ class AvisoAntigolpe extends StatelessWidget {
             children: <Widget>[
               const BadgeDeStatus(
                 rotulo: 'Cuidado com golpes',
-                icone: Icons.shield_outlined,
+                icone: Icons.shield_rounded,
                 tom: TomBadgeStatus.atencao,
               ),
               const SizedBox(height: MemoraEspacamento.sm),

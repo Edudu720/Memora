@@ -167,7 +167,7 @@ class _Voltar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Icon(
-                Icons.arrow_back,
+                Icons.arrow_back_rounded,
                 color: cores.primaria,
                 size: MemoraDimensoes.iconePadrao,
               ),

@@ -20,7 +20,7 @@ class SeloExemplo extends StatelessWidget {
       label: TextosGuias.seloExemploDescrito,
       child: const BadgeDeStatus(
         rotulo: TextosGuias.exemplo,
-        icone: Icons.photo_library_outlined,
+        icone: Icons.photo_library_rounded,
         tom: TomBadgeStatus.neutro,
       ),
     );

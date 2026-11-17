@@ -122,9 +122,10 @@ class TelaAjuda extends StatelessWidget {
                                           ),
                                         ),
                                         alignment: Alignment.center,
-                                        child: IlustracaoMemora(
-                                          assuntos[i].ilustracao,
-                                          altura: MemoraDimensoes.iconeDestaque,
+                                        child: Icon(
+                                          assuntos[i].icone,
+                                          size: MemoraDimensoes.iconePadrao,
+                                          color: cores.primaria,
                                         ),
                                       ),
                                 aoTocar: () => aoAbrirAssunto(assuntos[i]),
@@ -152,13 +153,10 @@ class TelaAjuda extends StatelessWidget {
                                           ),
                                         ),
                                         alignment: Alignment.center,
-                                        // Dentro de uma linha tocável: se ela
-                                        // reagisse, tocar na linha acertando o
-                                        // desenho só faria um aceno (FR-005c).
-                                        child: const MemoraPersonagem(
-                                          tamanho:
-                                              MemoraDimensoes.iconeDestaque,
-                                          reageAoToque: false,
+                                        child: Icon(
+                                          Icons.play_circle_outline_rounded,
+                                          size: MemoraDimensoes.iconePadrao,
+                                          color: cores.primaria,
                                         ),
                                       ),
                                 aoTocar: aoVerApresentacao,

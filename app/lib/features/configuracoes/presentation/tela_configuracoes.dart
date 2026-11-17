@@ -117,7 +117,7 @@ class TelaConfiguracoes extends StatelessWidget {
                                   : _badge(
                                       cores.destaque,
                                       cores.primaria,
-                                      Icons.palette_outlined,
+                                      Icons.palette_rounded,
                                     ),
                               aoTocar: aoAbrirAparencia,
                               mostrarDivisorInferior: true,
@@ -132,7 +132,7 @@ class TelaConfiguracoes extends StatelessWidget {
                                   : _badge(
                                       cores.destaque,
                                       cores.primaria,
-                                      Icons.accessibility_new,
+                                      Icons.accessibility_new_rounded,
                                     ),
                               aoTocar: aoAbrirAcessibilidade,
                               mostrarDivisorInferior: true,
@@ -147,7 +147,7 @@ class TelaConfiguracoes extends StatelessWidget {
                                   : _badge(
                                       cores.saudeSuave,
                                       cores.sucessoTexto,
-                                      Icons.lock_outline,
+                                      Icons.lock_outline_rounded,
                                     ),
                               aoTocar: aoAbrirPrivacidade,
                               mostrarDivisorInferior: true,
@@ -161,7 +161,7 @@ class TelaConfiguracoes extends StatelessWidget {
                                   : _badge(
                                       cores.superficieSutil,
                                       cores.texto,
-                                      Icons.person_outline,
+                                      Icons.person_outline_rounded,
                                     ),
                               aoTocar: aoAbrirConta,
                             ),

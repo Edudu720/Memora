@@ -18,7 +18,7 @@ final Guia guiaSerasa = Guia(
       chave: 'inicio-menu',
       titulo: TextosGuias.serasaSecao1Titulo,
       subtitulo: TextosGuias.serasaSecao1Subtitulo,
-      icone: Icons.home_outlined,
+      icone: Icons.home_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.serasa1,
@@ -70,7 +70,7 @@ final Guia guiaSerasa = Guia(
       chave: 'serasa-score',
       titulo: TextosGuias.serasaSecao2Titulo,
       subtitulo: TextosGuias.serasaSecao2Subtitulo,
-      icone: Icons.speed,
+      icone: Icons.speed_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.serasa5,
@@ -122,7 +122,7 @@ final Guia guiaSerasa = Guia(
       chave: 'dividas-acordos',
       titulo: TextosGuias.serasaSecao3Titulo,
       subtitulo: TextosGuias.serasaSecao3Subtitulo,
-      icone: Icons.receipt_long_outlined,
+      icone: Icons.receipt_long_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.serasa9,
@@ -174,7 +174,7 @@ final Guia guiaSerasa = Guia(
       chave: 'proteger-cpf',
       titulo: TextosGuias.serasaSecao4Titulo,
       subtitulo: TextosGuias.serasaSecao4Subtitulo,
-      icone: Icons.shield_outlined,
+      icone: Icons.shield_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.serasa13,
@@ -237,7 +237,7 @@ final Guia guiaSerasa = Guia(
       chave: 'outros-servicos',
       titulo: TextosGuias.serasaSecao5Titulo,
       subtitulo: TextosGuias.serasaSecao5Subtitulo,
-      icone: Icons.help_outline,
+      icone: Icons.help_outline_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.serasa18,

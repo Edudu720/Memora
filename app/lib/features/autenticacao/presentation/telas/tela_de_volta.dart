@@ -113,7 +113,7 @@ class TelaDeVolta extends StatelessWidget {
                           BotaoPrimario(
                             key: chaveEntrar,
                             rotulo: TextosAutenticacao.botaoEntrar,
-                            icone: Icons.arrow_forward,
+                            icone: Icons.arrow_forward_rounded,
                             aoTocar: aoEntrar,
                           ),
                           const SizedBox(height: MemoraEspacamento.md),

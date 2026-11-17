@@ -234,7 +234,7 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Icon(
-                              c.emModoMapa ? Icons.list_alt_rounded : Icons.map_outlined,
+                              c.emModoMapa ? Icons.list_alt_rounded : Icons.map_rounded,
                               color: cores.primaria,
                               size: MemoraDimensoes.iconePadrao,
                             ),
@@ -277,7 +277,7 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                       BotaoPrimario(
                         key: TelaLocalizador.chaveBotaoBuscar,
                         rotulo: 'Buscar serviços',
-                        icone: Icons.search,
+                        icone: Icons.search_rounded,
                         aoTocar: c.buscar,
                       ),
                     ],
@@ -290,7 +290,7 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                   child: Row(
                     children: <Widget>[
                       Icon(
-                        Icons.pin_drop_outlined,
+                        Icons.pin_drop_rounded,
                         size: MemoraDimensoes.iconePequeno,
                         color: cores.primaria,
                       ),

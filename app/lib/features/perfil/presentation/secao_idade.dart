@@ -130,7 +130,7 @@ class _SecaoIdadeState extends State<SecaoIdade> {
             BotaoSecundario(
               key: SecaoIdade.chaveInformar,
               rotulo: TextosPerfil.botaoInformar,
-              icone: Icons.cake_outlined,
+              icone: Icons.cake_rounded,
               aoTocar: _abrirEntrada,
             ),
           ],
@@ -162,7 +162,7 @@ class _SecaoIdadeState extends State<SecaoIdade> {
             BotaoSecundario(
               key: SecaoIdade.chaveInformar,
               rotulo: TextosPerfil.botaoMudar,
-              icone: Icons.edit_outlined,
+              icone: Icons.edit_rounded,
               aoTocar: _abrirEntrada,
             ),
             const SizedBox(height: MemoraEspacamento.sm),

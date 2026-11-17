@@ -54,11 +54,8 @@ class AvatarMemora extends StatelessWidget {
           ),
         ),
         clipBehavior: Clip.antiAlias,
-        child: Align(
-          // Alinhado ao rodapé: os ombros das figuras terminam na base do
-          // quadro, e centralizar deixaria uma faixa vazia embaixo.
-          alignment: Alignment.bottomCenter,
-          child: IlustracaoMemora(ilustracao, altura: tamanho * 0.92),
+        child: Center(
+          child: IlustracaoMemora(ilustracao, altura: tamanho * 0.56),
         ),
       ),
     );

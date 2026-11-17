@@ -177,7 +177,7 @@ class _FaixaHaMais extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(
-                  Icons.keyboard_arrow_down,
+                  Icons.keyboard_arrow_down_rounded,
                   size: MemoraDimensoes.iconePadrao,
                   color: cores.primaria,
                 ),
@@ -213,7 +213,7 @@ class _FaixaHaMais extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Icon(
-                    Icons.keyboard_arrow_down,
+                    Icons.keyboard_arrow_down_rounded,
                     size: MemoraDimensoes.iconePadrao,
                     color: cores.primaria,
                   ),

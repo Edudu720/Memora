@@ -205,7 +205,7 @@ void main() {
           findsNothing,
         );
         expect(
-          find.descendant(of: dele, matching: find.byIcon(Icons.person)),
+          find.descendant(of: dele, matching: find.byIcon(Icons.person_rounded)),
           findsNothing,
         );
       }

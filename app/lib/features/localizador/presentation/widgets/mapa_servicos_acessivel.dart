@@ -88,7 +88,7 @@ class _MapaServicosAcessivelState extends State<MapaServicosAcessivel> {
                 ),
               ),
               Icon(
-                Icons.arrow_drop_down,
+                Icons.arrow_drop_down_rounded,
                 size: MemoraDimensoes.iconePequeno,
                 color: corPino,
               ),
@@ -128,7 +128,7 @@ class _MapaServicosAcessivelState extends State<MapaServicosAcessivel> {
             children: <Widget>[
               _BotaoZoom(
                 key: MapaServicosAcessivel.chaveZoomMais,
-                icone: Icons.add,
+                icone: Icons.add_rounded,
                 rotuloTexto: 'Mais',
                 rotuloSemantico: 'Aumentar zoom do mapa',
                 aoTocar: () => _ajustarZoom(1.0),
@@ -136,7 +136,7 @@ class _MapaServicosAcessivelState extends State<MapaServicosAcessivel> {
               const SizedBox(height: MemoraEspacamento.sm),
               _BotaoZoom(
                 key: MapaServicosAcessivel.chaveZoomMenos,
-                icone: Icons.remove,
+                icone: Icons.remove_rounded,
                 rotuloTexto: 'Menos',
                 rotuloSemantico: 'Diminuir zoom do mapa',
                 aoTocar: () => _ajustarZoom(-1.0),

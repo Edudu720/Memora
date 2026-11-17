@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../temas/memora_theme_extension.dart';
+import '../../tokens/dimensoes.dart';
+import 'memora_personagem.dart';
+
 /// As ilustrações que o Memora tem.
 ///
 /// Enum, e não caminho solto de arquivo: assim uma ilustração que não existe
@@ -139,22 +143,57 @@ class IlustracaoMemora extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget desenho = SvgPicture.asset(
-      ilustracao.caminho,
-      height: altura,
-      width: largura,
-      fit: fit,
-      colorFilter: cor == null ? null : ColorFilter.mode(cor!, BlendMode.srcIn),
-      // Sem isto, o quadro fica em branco enquanto o arquivo carrega e a tela
-      // "pula" quando ele chega. Reservar o espaço desde o primeiro quadro
-      // evita o salto — que para quem já está lendo devagar é desorientador.
-      placeholderBuilder: (BuildContext _) =>
-          SizedBox(height: altura, width: largura),
-    );
+    final Widget desenho = switch (ilustracao) {
+      Ilustracao.linhaJornada => SvgPicture.asset(
+        ilustracao.caminho,
+        height: altura,
+        width: largura,
+        fit: fit,
+        colorFilter: cor == null
+            ? null
+            : ColorFilter.mode(cor!, BlendMode.srcIn),
+        placeholderBuilder: (BuildContext _) =>
+            SizedBox(height: altura, width: largura),
+      ),
+      Ilustracao.memoraNeutra ||
+      Ilustracao.memoraFalando ||
+      Ilustracao.memoraComemorando ||
+      Ilustracao.memoraPreocupada => MemoraPersonagem(
+        expressao: switch (ilustracao) {
+          Ilustracao.memoraFalando => ExpressaoDaMemora.falando,
+          Ilustracao.memoraComemorando => ExpressaoDaMemora.comemorando,
+          Ilustracao.memoraPreocupada => ExpressaoDaMemora.preocupada,
+          _ => ExpressaoDaMemora.neutra,
+        },
+        tamanho: altura ?? largura ?? MemoraDimensoes.alvoDecisao,
+        reageAoToque: false,
+      ),
+      _ => Icon(
+        _iconeDaFamilia(ilustracao),
+        size: altura ?? largura ?? MemoraDimensoes.iconePadrao,
+        color: cor ?? context.memora.cores.primaria,
+      ),
+    };
 
     if (descricao == null) {
       return ExcludeSemantics(child: desenho);
     }
     return Semantics(image: true, label: descricao, child: desenho);
   }
+
+  static IconData _iconeDaFamilia(Ilustracao ilustracao) =>
+      switch (ilustracao) {
+        Ilustracao.casalIdoso => Icons.people_rounded,
+        Ilustracao.pessoaComCelular => Icons.smartphone_rounded,
+        Ilustracao.portaConversa => Icons.chat_bubble_outline_rounded,
+        Ilustracao.portaAplicativos => Icons.apps_rounded,
+        Ilustracao.portaServicos => Icons.account_balance_rounded,
+        Ilustracao.portaAjuda => Icons.help_outline_rounded,
+        Ilustracao.portaRegistro => Icons.assignment_turned_in_rounded,
+        Ilustracao.estadoVazio => Icons.inbox_rounded,
+        Ilustracao.estadoErro => Icons.cloud_off_rounded,
+        Ilustracao.aplicativoGenerico => Icons.android_rounded,
+        Ilustracao.ajusteAparencia => Icons.palette_rounded,
+        _ => Icons.auto_awesome_rounded,
+      };
 }
