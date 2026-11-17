@@ -38,8 +38,8 @@ abstract final class TextosPerfil {
 
   /// Convite, quando a pessoa ainda não informou.
   static const String convite =
-      'Se quiser, conte quando você nasceu e eu mostro a sua idade aqui. '
-      'Fica só neste aparelho. Você não precisa informar.';
+      'Se quiser, conte quando você nasceu e eu mostro a sua idade aqui — '
+      'fica só neste aparelho. Você não precisa informar.';
 
   /// Abre a tela de entrada, quando ainda não há data.
   static const String botaoInformar = 'Contar quando nasci';

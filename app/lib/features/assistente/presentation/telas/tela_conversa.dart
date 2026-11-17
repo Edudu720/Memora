@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../../../design_system/componentes/toque/superficie_tocavel.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_assistente.dart';
 import '../../domain/assistente.dart';
+import '../../domain/leitor_de_voz.dart';
 import '../controladores/controlador_conversa.dart';
 
 /// A conversa com a Memora (T038, US2; redesenhada na T055, US3 da 004).
@@ -332,32 +334,6 @@ class _TelaConversaState extends State<TelaConversa>
           appBar: BarraSuperior(
             titulo: TextosAssistente.tituloConversa,
             aoVoltar: widget.aoVoltar,
-            acao: (c.mensagens.isNotEmpty && !c.precisaDoAceite)
-                ? Semantics(
-                    button: true,
-                    label: TextosAssistente.rotuloRecomecar,
-                    child: Tooltip(
-                      message: TextosAssistente.rotuloRecomecar,
-                      child: InkWell(
-                        key: TelaConversa.chaveRecomecar,
-                        onTap: () => _confirmarRecomeco(context, c),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(
-                            minWidth: MemoraDimensoes.alvoMinimo,
-                            minHeight: MemoraDimensoes.alvoMinimo,
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.restart_alt,
-                              color: cores.primaria,
-                              size: MemoraDimensoes.iconePadrao,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : null,
           ),
           body: SafeArea(
             top: false,
@@ -375,6 +351,10 @@ class _TelaConversaState extends State<TelaConversa>
                 // utilizável". Na prática a lista ganha bem mais, porque
                 // depois da primeira mensagem o aviso é uma linha.
                 final double altura = restricoes.maxHeight;
+                final bool mostrarRecomecar =
+                    c.mensagens.isNotEmpty &&
+                    !c.precisaDoAceite &&
+                    !tecladoAberto;
                 final double folgaVerticalAviso = c.precisaDoAceite
                     ? 0
                     : MemoraEspacamento.xs;
@@ -394,43 +374,103 @@ class _TelaConversaState extends State<TelaConversa>
                 return Column(
                   children: <Widget>[
                     // Permanente, e no topo. Ver a nota da classe. Recolhido, é
-                    // só um escudo de 48 dp: sem o respiro de cima e de baixo,
-                    // para devolver o espaço à conversa.
-                    Padding(
-                      padding: avisoAberto
-                          ? EdgeInsets.symmetric(
-                              horizontal: MemoraEspacamento.md,
-                              vertical: folgaVerticalAviso,
-                            )
-                          : const EdgeInsets.symmetric(
-                              horizontal: MemoraEspacamento.md,
+                    // só um escudo de 48 dp à direita; o botão de recomeçar
+                    // divide a mesma faixa de 48 dp à esquerda, sem roubar
+                    // altura da lista de mensagens.
+                    Stack(
+                      alignment: Alignment.topCenter,
+                      children: <Widget>[
+                        if (mostrarRecomecar)
+                          Padding(
+                            padding: const EdgeInsets.only(
+                              left: MemoraEspacamento.md,
+                              right:
+                                  MemoraEspacamento.md +
+                                  MemoraDimensoes.alvoMinimo +
+                                  MemoraEspacamento.xs,
                             ),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: tetoAviso > 0 ? tetoAviso : 0,
-                        ),
-                        // As duas chaves marcam a MESMA caixa: o aviso do golpe
-                        // e o de privacidade não têm como se separar, e um não
-                        // fica enquanto o outro some.
-                        child: KeyedSubtree(
-                          key: TelaConversa.chaveAviso,
-                          child: KeyedSubtree(
-                            key: TelaConversa.chaveAvisoPrivacidade,
-                            // A chave muda quando a primeira pergunta é feita, e
-                            // é isso que o recolhe: o aviso é recriado fechado,
-                            // só o escudo. Voltar a abrir é com a pessoa.
-                            child: AvisoCompacto(
-                              key: ValueKey<bool>(avisoAberto),
-                              titulo: TextosAssistente.tituloAvisoAntigolpe,
-                              resumo: TextosAssistente.resumoDosAvisos,
-                              textoCompleto: TextosAssistente.avisosInteiros,
-                              comMemora: false,
-                              abertoNoComeco: avisoAberto,
-                              fechadoSoEscudo: true,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: SuperficieTocavel(
+                                key: TelaConversa.chaveRecomecar,
+                                rotulo: TextosAssistente.rotuloRecomecar,
+                                aoTocar: () => _confirmarRecomeco(context, c),
+                                fundo: cores.superficieSutil,
+                                borda: ehAltoContraste
+                                    ? cores.borda
+                                    : cores.bordaSutil,
+                                larguraBorda: ehAltoContraste
+                                    ? MemoraDimensoes.bordaEnfase
+                                    : MemoraDimensoes.espessuraBordaSutil,
+                                raio: BorderRadius.circular(MemoraRaio.pilula),
+                                child: SizedBox(
+                                  height: MemoraDimensoes.alvoMinimo,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: MemoraEspacamento.md,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.restart_alt_rounded,
+                                          color: cores.primaria,
+                                          size: MemoraDimensoes.iconePadrao,
+                                        ),
+                                        const SizedBox(
+                                          width: MemoraEspacamento.xs,
+                                        ),
+                                        Flexible(
+                                          child: TextoMemora.apoio(
+                                            TextosAssistente.rotuloRecomecar,
+                                            cor: cores.primaria,
+                                            maxLinhas: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        Padding(
+                          padding: avisoAberto
+                              ? EdgeInsets.symmetric(
+                                  horizontal: MemoraEspacamento.md,
+                                  vertical: folgaVerticalAviso,
+                                )
+                              : const EdgeInsets.symmetric(
+                                  horizontal: MemoraEspacamento.md,
+                                ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: tetoAviso > 0 ? tetoAviso : 0,
+                            ),
+                            // As duas chaves marcam a MESMA caixa: o aviso do golpe
+                            // e o de privacidade não têm como se separar, e um não
+                            // fica enquanto o outro some.
+                            child: KeyedSubtree(
+                              key: TelaConversa.chaveAviso,
+                              child: KeyedSubtree(
+                                key: TelaConversa.chaveAvisoPrivacidade,
+                                // A chave muda quando a primeira pergunta é feita, e
+                                // é isso que o recolhe: o aviso é recriado fechado,
+                                // só o escudo. Voltar a abrir é com a pessoa.
+                                child: AvisoCompacto(
+                                  key: ValueKey<bool>(avisoAberto),
+                                  titulo: TextosAssistente.tituloAvisoAntigolpe,
+                                  resumo: TextosAssistente.resumoDosAvisos,
+                                  textoCompleto: TextosAssistente.avisosInteiros,
+                                  comMemora: false,
+                                  abertoNoComeco: avisoAberto,
+                                  fechadoSoEscudo: true,
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
 
                     Expanded(
@@ -463,11 +503,14 @@ class _TelaConversaState extends State<TelaConversa>
                                 autor: AutorDoBalao.memora,
                                 texto: TextosAssistente.convite,
                               ),
-                              const SizedBox(height: MemoraEspacamento.md),
-                              _GradeSugestoesConversa(
-                                escala: escala,
-                                aoEscolherSugestao: c.escrever,
-                              ),
+                              if (!c.respondendo &&
+                                  c.mensagemDeErro == null) ...<Widget>[
+                                const SizedBox(height: MemoraEspacamento.md),
+                                _GradeSugestoesConversa(
+                                  escala: escala,
+                                  aoEscolherSugestao: c.escrever,
+                                ),
+                              ],
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
 
@@ -607,14 +650,17 @@ class _TelaConversaState extends State<TelaConversa>
                                     final Widget botaoMicrofone = _BotaoMicrofone(
                                       key: TelaConversa.chaveMicrofone,
                                       ouvindo: c.ouvindoVoz,
-                                      habilitado: !c.respondendo,
+                                      habilitado:
+                                          !c.respondendo &&
+                                          c.estadoDitado !=
+                                              EstadoDitado.indisponivel,
                                       aoTocar: () =>
                                           _acionarMicrofone(context, c),
                                     );
                                     final Widget botaoEnviar = BotaoPrimario(
                                       key: TelaConversa.chaveEnviar,
                                       rotulo: TextosAssistente.botaoEnviar,
-                                      icone: Icons.send,
+                                      icone: Icons.send_rounded,
                                       aoTocar: c.podeEnviar ? c.enviar : null,
                                     );
 
@@ -675,44 +721,29 @@ class _GradeSugestoesConversa extends StatelessWidget {
         ),
         (
           titulo: TextosAssistente.sugestaoFotos,
-          icone: Icons.photo_library_outlined,
+          icone: Icons.photo_library_rounded,
         ),
         (
           titulo: TextosAssistente.sugestaoGolpe,
-          icone: Icons.shield_outlined,
+          icone: Icons.shield_rounded,
         ),
         (
           titulo: TextosAssistente.sugestaoWhatsapp,
-          icone: Icons.chat_outlined,
+          icone: Icons.chat_rounded,
         ),
       ];
 
   @override
   Widget build(BuildContext context) {
-    final bool ocultarOrnamento = escala >= MemoraDimensoes.escalaTextoAlta;
-
     return KeyedSubtree(
       key: TelaConversa.chaveSugestoes,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              if (!ocultarOrnamento) ...<Widget>[
-                const MemoraPersonagem(
-                  expressao: ExpressaoDaMemora.falando,
-                  tamanho: MemoraDimensoes.pisoDeIlustracao,
-                ),
-                const SizedBox(width: MemoraEspacamento.sm),
-              ],
-              const Expanded(
-                child: TextoMemora(
-                  TextosAssistente.tituloSugestoesConversa,
-                  estilo: EstiloTexto.corpoForte,
-                  cabecalho: true,
-                ),
-              ),
-            ],
+          const TextoMemora(
+            TextosAssistente.tituloSugestoesConversa,
+            estilo: EstiloTexto.corpoForte,
+            cabecalho: true,
           ),
           const SizedBox(height: MemoraEspacamento.sm),
           LayoutBuilder(
@@ -835,65 +866,57 @@ class _BotaoMicrofone extends StatelessWidget {
     final String rotuloCurto = ouvindo
         ? TextosAssistente.botaoPararDitado
         : TextosAssistente.botaoFalar;
-    final String rotuloSemantico = ouvindo
-        ? '$rotuloCurto, ${TextosAssistente.dicaPararDitado}'
-        : '$rotuloCurto, ${TextosAssistente.dicaFalar}';
+    final String dica = ouvindo
+        ? TextosAssistente.dicaPararDitado
+        : TextosAssistente.dicaFalar;
 
-    final Color fundo = ouvindo
-        ? cores.perigo
-        : (ehAltoContraste ? cores.superficie : cores.superficieSutil);
-    final Color conteudoCor = ouvindo ? cores.sobrePerigo : cores.primaria;
-    final Color corBorda = ehAltoContraste
+    final Color fundo = !habilitado
+        ? cores.superficieAlt
+        : (ouvindo
+              ? cores.perigo
+              : (ehAltoContraste ? cores.superficie : cores.superficieSutil));
+    final Color conteudoCor = !habilitado
+        ? cores.textoSuave
+        : (ouvindo ? cores.sobrePerigo : cores.primaria);
+    final Color corBorda = !habilitado
         ? cores.borda
-        : (ouvindo ? cores.perigo : cores.primaria);
-    final BorderRadius raioPilula = BorderRadius.circular(MemoraRaio.pilula);
+        : (ehAltoContraste
+              ? cores.borda
+              : (ouvindo ? cores.perigo : cores.primaria));
 
-    return Semantics(
-      button: true,
-      enabled: habilitado,
-      label: rotuloSemantico,
-      onTap: habilitado ? aoTocar : null,
-      excludeSemantics: true,
-      child: Material(
-        color: fundo,
-        shape: RoundedRectangleBorder(
-          borderRadius: raioPilula,
-          side: BorderSide(
-            color: corBorda,
-            width: MemoraDimensoes.bordaEnfase,
-          ),
+    return SuperficieTocavel(
+      rotulo: rotuloCurto,
+      dica: dica,
+      aoTocar: habilitado ? aoTocar : null,
+      fundo: fundo,
+      borda: corBorda,
+      raio: BorderRadius.circular(MemoraRaio.pilula),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: MemoraDimensoes.alvoDecisao,
+          minHeight: MemoraDimensoes.alvoDecisao,
         ),
-        child: InkWell(
-          borderRadius: raioPilula,
-          onTap: habilitado ? aoTocar : null,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: MemoraDimensoes.alvoDecisao,
-              minHeight: MemoraDimensoes.alvoDecisao,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: MemoraEspacamento.md,
-                vertical: MemoraEspacamento.sm,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: MemoraEspacamento.md,
+            vertical: MemoraEspacamento.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                ouvindo ? Icons.stop_circle_rounded : Icons.mic_rounded,
+                size: MemoraDimensoes.iconePadrao,
+                color: conteudoCor,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    ouvindo ? Icons.stop_circle_rounded : Icons.mic_rounded,
-                    size: MemoraDimensoes.iconePadrao,
-                    color: conteudoCor,
-                  ),
-                  const SizedBox(width: MemoraEspacamento.xs),
-                  TextoMemora(
-                    rotuloCurto,
-                    estilo: EstiloTexto.corpoForte,
-                    cor: conteudoCor,
-                  ),
-                ],
+              const SizedBox(width: MemoraEspacamento.xs),
+              TextoMemora(
+                rotuloCurto,
+                estilo: EstiloTexto.corpoForte,
+                cor: conteudoCor,
               ),
-            ),
+            ],
           ),
         ),
       ),

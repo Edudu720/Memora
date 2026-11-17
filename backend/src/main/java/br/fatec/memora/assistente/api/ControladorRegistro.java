@@ -93,7 +93,7 @@ public class ControladorRegistro {
             throw FalhaDoMemora.de(
                     CodigoDeErro.DADOS_INVALIDOS,
                     "Não consegui anotar o que acabamos de fazer. Não se "
-                            + "preocupe — o que importa é que deu certo 😊");
+                            + "preocupe — o que importa é que deu certo.");
         }
     }
 
