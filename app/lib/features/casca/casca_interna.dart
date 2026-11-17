@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../../design_system/design_system.dart';
 import '../../l10n/textos_casca.dart';
+import '../../l10n/textos_sos.dart';
+import '../cuidado/presentation/widgets/botao_sos_persistente.dart';
 
 /// Os três destinos fixos da barra inferior (FR-015 da feature 004).
 enum DestinoDaCasca {
@@ -65,11 +67,16 @@ class CascaInterna extends StatefulWidget {
   /// O que fecha o Memora, depois da confirmação. Trocável no teste.
   final Future<void> Function() aoFecharOMemora;
 
+  /// Callback disparado pelo botão SOS persistente presente em todas as telas
+  /// internas da conta (Feature 014). Quando nulo, o botão não é exibido.
+  final VoidCallback? aoAcionarSos;
+
   /// Cria a casca.
   const CascaInterna({
     required this.raizes,
     required this.aoRegistrarAtividade,
     this.aoFecharOMemora = _fecharDeVerdade,
+    this.aoAcionarSos,
     super.key,
   });
 
@@ -82,6 +89,12 @@ class CascaInterna extends StatefulWidget {
   /// Chave da barra inferior, para os testes.
   static const Key chaveDaBarra = Key('casca.barra');
 
+  /// Chave da faixa superior dedicada ao botão SOS persistente.
+  static const Key chaveFaixaSos = Key('casca.faixa_sos');
+
+  /// Chave do botão SOS persistente, para os testes.
+  static const Key chaveBotaoSos = Key('casca.sos');
+
   /// Chave da pergunta de fechar o Memora, para os testes.
   static const Key chavePerguntaDeFechar = Key('casca.fechar');
 
@@ -92,6 +105,7 @@ class CascaInterna extends StatefulWidget {
 /// O estado da casca, exposto para o fluxo empilhar telas no destino atual.
 class CascaInternaState extends State<CascaInterna> {
   DestinoDaCasca _atual = DestinoDaCasca.inicio;
+  int _barrasAssumindoSos = 0;
 
   final Map<DestinoDaCasca, GlobalKey<NavigatorState>> _navegadores =
       <DestinoDaCasca, GlobalKey<NavigatorState>>{
@@ -103,6 +117,19 @@ class CascaInternaState extends State<CascaInterna> {
   DestinoDaCasca get destinoAtual => _atual;
 
   NavigatorState get _navegadorAtual => _navegadores[_atual]!.currentState!;
+
+  void _atualizarBarraAssumindoSos(bool assumindo) {
+    final int proximo = _barrasAssumindoSos + (assumindo ? 1 : -1);
+    final int limitado = proximo < 0 ? 0 : proximo;
+    if (limitado == _barrasAssumindoSos || !mounted) return;
+    setState(() => _barrasAssumindoSos = limitado);
+  }
+
+  /// Contexto do navegador da aba atualmente em exibição, útil para abrir
+  /// diálogos presos ao ciclo de vida da casca.
+  BuildContext? get contextoAtivo =>
+      _navegadores[_atual]?.currentState?.overlay?.context ??
+      _navegadores[_atual]?.currentContext;
 
   /// Empilha [rota] no destino à vista.
   ///
@@ -155,6 +182,38 @@ class CascaInternaState extends State<CascaInterna> {
     // Com o teclado aberto, a barra sai e o campo de escrever fica com a
     // altura (FR-015). Ela volta quando o teclado fecha.
     final bool tecladoAberto = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final bool sosHabilitado = widget.aoAcionarSos != null && !tecladoAberto;
+    final bool mostrarFaixaTopo = sosHabilitado && _barrasAssumindoSos == 0;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final double alturaFaixaSos = escala >= MemoraDimensoes.escalaTextoAlta
+        ? MemoraDimensoes.alvoDecisao + MemoraEspacamento.xs
+        : MemoraDimensoes.alvoMinimo +
+              MemoraEspacamento.sm +
+              MemoraDimensoes.bordaEnfase;
+
+    final Widget pilhaNavegadores = IndexedStack(
+      index: _atual.index,
+      children: <Widget>[
+        for (final DestinoDaCasca d in DestinoDaCasca.values)
+          Navigator(
+            key: _navegadores[d],
+            onGenerateRoute: (RouteSettings _) =>
+                MaterialPageRoute<void>(builder: widget.raizes[d]!),
+          ),
+      ],
+    );
+
+    final Widget corpoNavegadores = sosHabilitado
+        ? EscopoSosNaCasca(
+            rotuloBotao: TextosSos.rotuloBotaoSos,
+            construirBotao: (_) => BotaoSosPersistente(
+              key: CascaInterna.chaveBotaoSos,
+              aoTocar: widget.aoAcionarSos!,
+            ),
+            aoAlterarBarraAtiva: _atualizarBarraAssumindoSos,
+            child: pilhaNavegadores,
+          )
+        : pilhaNavegadores;
 
     return PopScope(
       canPop: false,
@@ -166,17 +225,16 @@ class CascaInternaState extends State<CascaInterna> {
         onPointerDown: (_) => widget.aoRegistrarAtividade(),
         child: Scaffold(
           backgroundColor: context.memora.cores.fundo,
-          body: IndexedStack(
-            index: _atual.index,
-            children: <Widget>[
-              for (final DestinoDaCasca d in DestinoDaCasca.values)
-                Navigator(
-                  key: _navegadores[d],
-                  onGenerateRoute: (RouteSettings _) =>
-                      MaterialPageRoute<void>(builder: widget.raizes[d]!),
-                ),
-            ],
-          ),
+          appBar: mostrarFaixaTopo
+              ? PreferredSize(
+                  preferredSize: Size.fromHeight(alturaFaixaSos),
+                  child: _FaixaSosPersistente(
+                    key: CascaInterna.chaveFaixaSos,
+                    aoAcionarSos: widget.aoAcionarSos!,
+                  ),
+                )
+              : null,
+          body: corpoNavegadores,
           bottomNavigationBar: tecladoAberto
               ? null
               : NavegacaoInferior(
@@ -188,6 +246,57 @@ class CascaInternaState extends State<CascaInterna> {
                       ItemNavegacao(icone: d.icone, rotulo: d.rotulo),
                   ],
                 ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FaixaSosPersistente extends StatelessWidget {
+  final VoidCallback aoAcionarSos;
+
+  const _FaixaSosPersistente({
+    required this.aoAcionarSos,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: cores.fundo,
+        border: Border(
+          bottom: BorderSide(
+            color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+            width: ehAltoContraste
+                ? MemoraDimensoes.bordaEnfase
+                : MemoraDimensoes.espessuraBordaSutil,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.only(
+            left: MemoraEspacamento.md,
+            right: MemoraEspacamento.md,
+            bottom: MemoraEspacamento.sm,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Flexible(
+                child: BotaoSosPersistente(
+                  key: CascaInterna.chaveBotaoSos,
+                  aoTocar: aoAcionarSos,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

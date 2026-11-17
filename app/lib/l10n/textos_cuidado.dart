@@ -163,9 +163,17 @@ abstract final class TextosCuidado {
   /// Texto exibido para ajuda parentesco contato.
   static const String ajudaParentescoContato =
       'Qual o vínculo (ex.: Filho, Cuidador, Vizinho)';
+  /// Texto exibido para rotulo email contato.
+  static const String rotuloEmailContato = 'E-mail de emergência (opcional)';
+  /// Texto exibido para ajuda email contato.
+  static const String ajudaEmailContato =
+      'Para aviso automático pela internet (ex.: maria@email.com)';
   /// Texto exibido para erro telefone contato.
   static const String erroTelefoneContato =
       'Por favor, preencha o nome e um telefone com DDD (10 ou 11 números).';
+  /// Texto exibido para erro email contato.
+  static const String erroEmailContato =
+      'O e-mail informado não parece válido. Confira o endereço ou deixe em branco.';
   /// Texto exibido para botao salvar contato.
   static const String botaoSalvarContato = 'Salvar contato';
   /// Texto exibido para botao cancelar contato.

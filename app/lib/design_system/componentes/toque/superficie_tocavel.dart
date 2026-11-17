@@ -82,6 +82,10 @@ class SuperficieTocavel extends StatefulWidget {
   /// da barra inferior). Nulo, a superfície não faz parte de grupo nenhum.
   final bool? selecionada;
 
+  /// Isola o nó semântico como contêiner próprio quando o chamador não possui
+  /// irmãos semânticos que impeçam a fusão com um ancestral.
+  final bool conteinerSemantico;
+
   /// Conteúdo.
   final Widget child;
 
@@ -102,6 +106,7 @@ class SuperficieTocavel extends StatefulWidget {
     this.borda,
     this.larguraBorda = MemoraDimensoes.bordaEnfase,
     this.selecionada,
+    this.conteinerSemantico = false,
     super.key,
   });
 
@@ -123,6 +128,7 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
         : widget.elevacao;
 
     return Semantics(
+      container: widget.conteinerSemantico,
       button: true,
       enabled: habilitada,
       selected: widget.selecionada,
