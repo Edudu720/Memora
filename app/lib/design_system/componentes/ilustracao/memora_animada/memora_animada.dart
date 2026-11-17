@@ -63,6 +63,13 @@ class MemoraAnimada extends StatefulWidget {
   /// uso, cada anfitriã tem a sua sequência.
   final int? sementeDaAgenda;
 
+  /// O andamento da barra de carregamento que ela segura na pose
+  /// [PoseDaMemora.carregando] (T092): de 0 a 1 é uma passada do trecho que
+  /// corre dentro da barra. Quem segura o relógio é quem sabe o que está
+  /// carregando (a abertura), e ele passa por `MemoraMovimento.efetiva`
+  /// lá. **Nulo, ou com "reduzir movimento", a barra fica parada.**
+  final Animation<double>? cicloDaBarra;
+
   /// Cria a Memora animada.
   const MemoraAnimada({
     required this.expressao,
@@ -72,6 +79,7 @@ class MemoraAnimada extends StatefulWidget {
     this.gesto,
     this.anfitria = false,
     this.sementeDaAgenda,
+    this.cicloDaBarra,
     super.key,
   });
 
@@ -281,8 +289,15 @@ class _MemoraAnimadaState extends State<MemoraAnimada>
 
   /// A máquina `ocioso → emGesto → ocioso`. Gesto pedido durante outro é
   /// ignorado, e com reduzir movimento nada acontece.
+  ///
+  /// Com as mãos ocupadas pela barra (T092), o gesto que levanta os braços
+  /// (o aceno, a comemoração) também não acontece: ela não larga a barra.
   void _disparar(GestoDaMemora g) {
     if (_reduzir || _estado == _EstadoDoGesto.emGesto) return;
+    if (_maosOcupadas &&
+        (g == GestoDaMemora.aceno || g == GestoDaMemora.comemoracao)) {
+      return;
+    }
     setState(() {
       _estado = _EstadoDoGesto.emGesto;
       _gestoAtual = g;
@@ -296,6 +311,9 @@ class _MemoraAnimadaState extends State<MemoraAnimada>
       ),
     );
   }
+
+  /// Se ela está segurando a barra (ou indo pegá-la).
+  bool get _maosOcupadas => _para.barra > 0 || _de.barra > 0;
 
   void _aoTocar() {
     if (!widget.reageAoToque || _reduzir) return;
@@ -448,6 +466,7 @@ class _MemoraAnimadaState extends State<MemoraAnimada>
       flutua: flutua,
       esticar: esticar,
       detalhada: widget.anfitria,
+      cicloDaBarra: _reduzir ? null : widget.cicloDaBarra?.value,
     );
   }
 
@@ -458,9 +477,13 @@ class _MemoraAnimadaState extends State<MemoraAnimada>
 
     final Widget desenho = RepaintBoundary(
       child: AnimatedBuilder(
-        animation: Listenable.merge(
-          <Listenable>[_relogio, _troca, _gestoCtrl, _chegada],
-        ),
+        animation: Listenable.merge(<Listenable>[
+          _relogio,
+          _troca,
+          _gestoCtrl,
+          _chegada,
+          if (widget.cicloDaBarra != null) widget.cicloDaBarra!,
+        ]),
         builder: (BuildContext context, Widget? _) {
           final ContextoDePintura quadro = _quadro(lado, cores);
           // Leve perspectiva: a Memora vira poucos graus em torno do eixo

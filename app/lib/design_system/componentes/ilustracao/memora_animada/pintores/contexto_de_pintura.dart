@@ -64,6 +64,12 @@ class ContextoDePintura {
   /// brilho especular, luz de contorno e sombra de contato (T087, FR-048).
   final bool detalhada;
 
+  /// Onde está o trecho que corre dentro da barra de carregamento, de 0 (entra
+  /// pela esquerda) a 1 (saiu pela direita): uma volta inteira é uma
+  /// passada (T092). **Nulo é a barra parada**, com o trecho no meio, como
+  /// fica com "reduzir movimento".
+  final double? cicloDaBarra;
+
   /// Cria o contexto de um quadro.
   const ContextoDePintura({
     required this.lado,
@@ -82,6 +88,7 @@ class ContextoDePintura {
     this.flutua = 0,
     this.esticar = 0,
     this.detalhada = false,
+    this.cicloDaBarra,
   });
 
   /// Um ponto do desenho, em pixels.
