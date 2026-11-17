@@ -13,20 +13,18 @@ void main() {
   movimentoLiberado();
 
   Key chaveDoPasso(int n) => Key('passo.$n');
-  const Key chaveDoToque = Key('toque');
 
-  late int toques;
-  setUp(() => toques = 0);
+  late Map<int, int> toques;
+  setUp(() => toques = <int, int>{});
 
   Widget passo(int n) => SizedBox(
     key: chaveDoPasso(n),
     height: 80,
-    child: Center(
-      child: TextButton(
-        key: n == 1 ? chaveDoToque : null,
-        onPressed: () => toques++,
-        child: Text('passo $n'),
-      ),
+    // O botão ocupa o passo todo: o que sai ainda tem uma faixa à vista.
+    child: TextButton(
+      style: TextButton.styleFrom(minimumSize: const Size(double.infinity, 80)),
+      onPressed: () => toques[n] = (toques[n] ?? 0) + 1,
+      child: Text('passo $n'),
     ),
   );
 
@@ -115,11 +113,18 @@ void main() {
       // 250 ms: os dois passos ainda estão em parte à vista.
       await t.pump(const Duration(milliseconds: 250));
 
-      // O botão do passo 1 ainda está na árvore, deslizando para fora, mas
-      // o toque no centro dele não chega: está ignorado.
-      expect(find.byKey(chaveDoToque), findsOneWidget);
-      await t.tap(find.byKey(chaveDoToque), warnIfMissed: false);
-      expect(toques, 0, reason: 'o passo que sai não aceita toque');
+      final double y = t.getCenter(find.byKey(chaveDoPasso(2))).dy;
+      final double w = largura(t);
+
+      // A faixa à esquerda ainda é do passo 1, que está saindo: o toque nela
+      // não chega ao botão dele.
+      expect(esquerdaDe(t, 1) + w, greaterThan(50));
+      await t.tapAt(Offset(20, y));
+      expect(toques[1], isNull, reason: "o passo que sai não aceita toque");
+
+      // A do passo 2, que chega, aceita (FR-014: o toque não se perde).
+      await t.tapAt(Offset(w - 20, y));
+      expect(toques[2], 1, reason: "o passo que chega aceita toque");
 
       // E só o passo que chega aparece para o leitor de tela.
       expect(find.semantics.byLabel(RegExp('passo 1')), findsNothing);
