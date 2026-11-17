@@ -531,7 +531,8 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
   o aplicativo existir, MUST mostrar a Memora parada no mesmo fundo, para que a
   passagem para a tela de carregamento seja contínua. **(2026-11-17)** Com a
   T092, a nativa ainda mostra a Memora em pose de aceno, e os braços mudam de
-  lugar na troca: ver T094.
+  lugar na troca: ver T094. Decidido: a imagem nativa passa a ser a Memora
+  segurando a barra, parada (opção A).
 - **FR-038**: A tela de carregamento MUST durar o tempo de carregar e no máximo
   o de uma passada completa da barra além disso; ela MUST NOT ser prolongada
   de propósito.
