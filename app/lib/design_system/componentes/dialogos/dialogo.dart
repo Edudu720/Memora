@@ -62,8 +62,29 @@ class DialogoMemora extends StatelessWidget {
     BuildContext context, {
     required DialogoMemora dialogo,
   }) {
+    return mostrarConteudo<void>(
+      context,
+      construtor: (BuildContext _) => dialogo,
+    );
+  }
+
+  /// Exibe um diálogo de **conteúdo livre** — um formulário, por exemplo —
+  /// pela mesma sobreposição do [mostrar]: esmaece e cresce de 96% a 100%, e
+  /// com "reduzir movimento" já chega inteiro (feature 013, FR-010 e FR-013).
+  ///
+  /// Quem tem um `Dialog` próprio, mais rico que o [DialogoMemora], abre por
+  /// aqui em vez de chamar o `showDialog` cru, que ficaria sem a animação
+  /// nova e com 150 ms fixos mesmo com "reduzir movimento" (T091). O
+  /// [construtor] devolve o diálogo inteiro (normalmente um `Dialog`).
+  ///
+  /// Abre no `Navigator` que [context] encontra, pelo mesmo motivo do
+  /// [mostrar].
+  static Future<T?> mostrarConteudo<T>(
+    BuildContext context, {
+    required WidgetBuilder construtor,
+  }) {
     final bool reduzir = context.reduzirMovimento;
-    return showDialog<void>(
+    return showDialog<T>(
       context: context,
       useRootNavigator: false,
       // Surge e some em `padrao`; com "reduzir movimento", de uma vez (FR-013).
@@ -77,7 +98,7 @@ class DialogoMemora extends StatelessWidget {
           reduzirMovimento: reduzir,
         ),
       ),
-      builder: (BuildContext _) => _SurgeNoCentro(child: dialogo),
+      builder: (BuildContext ctx) => _SurgeNoCentro(child: construtor(ctx)),
     );
   }
 
