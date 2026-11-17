@@ -57,6 +57,7 @@ export 'galeria/galeria_memora.dart';
 export 'navegacao/direcao_da_transicao.dart';
 export 'navegacao/rota_memora.dart';
 export 'navegacao/troca_de_destino.dart';
+export 'navegacao/troca_de_passo.dart';
 export 'preferencias/controlador_aparencia.dart';
 export 'preferencias/escopo_aparencia.dart';
 export 'preferencias/preferencia_aparencia.dart';
