@@ -13,27 +13,29 @@ import 'package:memora/l10n/textos_abertura.dart';
 import '../../suporte/aparelhos.dart';
 import '../../suporte/movimento.dart';
 
-/// A abertura com a Memora acenando (feature 013, US7, T035; FR-036 a FR-039,
-/// SC-009).
+/// A abertura com a anfitriã segurando a barra de carregamento (feature 013,
+/// US7, T035 e T092; FR-036 a FR-039, FR-048, SC-009).
 ///
 /// ## O que mais importa aqui
 ///
 /// A abertura **não prolonga o carregamento de propósito** (FR-038): sai
-/// quando o carregamento terminou **e** o aceno em curso completou. As duas
-/// pontas se provam: "nunca antes de carregar" (o portão: sair antes é
-/// entregar ao aplicativo um resultado que não existe) e "nunca mais que um
-/// aceno depois".
+/// quando o carregamento terminou **e** a passada da barra em curso
+/// completou. As duas pontas se provam: "nunca antes de carregar" (o portão:
+/// sair antes é entregar ao aplicativo um resultado que não existe) e "nunca
+/// mais que uma passada depois".
 ///
 /// ## O relógio
 ///
-/// Dentro de `testWidgets` o relógio é falso: o tempo só anda com `pump`. O
-/// aceno dura `MemoraMovimento.aceno` (1,2 s), e depois dele há uma pausa de
-/// `MemoraAbertura.pausaEntreAcenos` antes do aceno seguinte.
+/// Dentro de `testWidgets` o relógio é falso: o tempo só anda com `pump`. Uma
+/// passada dura `MemoraAbertura.passadaDaBarra` (1,5 s), e a seguinte emenda
+/// nela, sem pausa.
 void main() {
-  // O aceno é o que este arquivo prova: liga o movimento que o
+  // A barra correndo é o que este arquivo prova: liga o movimento que o
   // flutter_test_config.dart desliga por padrão. Os testes de "reduzir
   // movimento" ligam a preferência do sistema eles mesmos.
   movimentoLiberado();
+
+  const Duration passada = MemoraAbertura.passadaDaBarra;
 
   /// Monta só a abertura, sob um tema e um "reduzir movimento" do **sistema**
   /// (ainda não há preferência do aplicativo nessa hora).
@@ -96,19 +98,81 @@ void main() {
 
   final Finder frase = find.text(TextosAbertura.quasePronta);
 
-  group('V12: a abertura sai só quando carregou e o aceno completou', () {
-    testWidgets('carregamento rápido: sai depois de um aceno completo, '
+  group('T092: a anfitriã segurando a barra de carregamento', () {
+    testWidgets('é a anfitriã (o desenho de mais detalhe), com a barra entre '
+        'as mãos, e uma Memora só', (WidgetTester t) async {
+      final Completer<int> carga = Completer<int>();
+      await montar(t, carregar: () => carga.future, aoConcluir: (int _) {});
+      await t.pump();
+      expect(memora, findsOneWidget, reason: 'uma Memora só na tela (FR-006)');
+      final MemoraAnimada m = t.widget<MemoraAnimada>(memora);
+      expect(m.anfitria, isTrue, reason: 'o desenho da anfitriã (FR-048)');
+      expect(m.expressao, PoseDaMemora.carregando);
+      expect(m.reageAoToque, isFalse);
+      final ContextoDePintura q = quadro(t);
+      expect(q.detalhada, isTrue);
+      expect(q.pose.barra, 1, reason: 'a barra está nas mãos');
+    });
+
+    testWidgets('a barra corre sem parar enquanto carrega, uma passada atrás '
+        'da outra, e ela não larga a barra para acenar', (
+      WidgetTester t,
+    ) async {
+      final Completer<int> carga = Completer<int>();
+      await montar(t, carregar: () => carga.future, aoConcluir: (int _) {});
+      await t.pump();
+
+      double menor = 1;
+      double maior = 0;
+      int voltas = 0;
+      double anterior = quadro(t).cicloDaBarra!;
+      // Três passadas inteiras.
+      for (int ms = 0; ms < 3 * passada.inMilliseconds; ms += 50) {
+        await t.pump(const Duration(milliseconds: 50));
+        final ContextoDePintura q = quadro(t);
+        final double c = q.cicloDaBarra!;
+        if (c < menor) menor = c;
+        if (c > maior) maior = c;
+        if (c < anterior) voltas++;
+        anterior = c;
+        expect(q.aceno, 0, reason: 'as mãos estão na barra');
+        expect(q.pose.barra, 1);
+      }
+      expect(menor, lessThan(0.05), reason: 'o trecho entra pela esquerda');
+      expect(maior, greaterThan(0.95), reason: 'e sai pela direita');
+      expect(
+        voltas,
+        inInclusiveRange(2, 3),
+        reason: 'no mesmo ritmo, sem acelerar: uma passada a cada 1,5 s',
+      );
+    });
+
+    testWidgets('nada de número nem de porcentagem na tela', (
+      WidgetTester t,
+    ) async {
+      final SemanticsHandle h = t.ensureSemantics();
+      final Completer<int> carga = Completer<int>();
+      await montar(t, carregar: () => carga.future, aoConcluir: (int _) {});
+      await t.pump(const Duration(seconds: 5));
+      expect(find.textContaining(RegExp(r'[0-9%]')), findsNothing);
+      expect(find.bySemanticsLabel(RegExp(r'[0-9%]')), findsNothing);
+      h.dispose();
+    });
+  });
+
+  group('V12: a abertura sai só quando carregou e a passada completou', () {
+    testWidgets('carregamento rápido: sai depois de uma passada completa, '
         'nunca antes', (WidgetTester t) async {
       int? saiu;
       await montar(t, carregar: () async => 7, aoConcluir: (int r) => saiu = r);
-      // O carregamento já terminou no primeiro quadro; a Memora ainda acena.
+      // O carregamento já terminou no primeiro quadro; a barra mal começou.
       await t.pump();
-      expect(saiu, isNull, reason: 'carregou, mas o aceno mal começou');
+      expect(saiu, isNull, reason: 'carregou, mas a passada mal começou');
       expect(memora, findsOneWidget);
 
-      const Duration jaPassado = Duration(milliseconds: 1000);
+      const Duration jaPassado = Duration(milliseconds: 1300);
       await t.pump(jaPassado);
-      expect(saiu, isNull, reason: 'o aceno ainda não completou');
+      expect(saiu, isNull, reason: 'a passada ainda não completou');
 
       final Duration depois = await esperarAte(
         t,
@@ -119,19 +183,21 @@ void main() {
       final Duration total = jaPassado + depois;
       expect(
         total,
-        greaterThanOrEqualTo(MemoraMovimento.aceno),
-        reason: 'nunca antes de o aceno completar',
+        greaterThanOrEqualTo(passada),
+        reason: 'nunca antes de a passada completar',
       );
-      // Um aceno completo e o esmaecer: ~1,5 s no total (SC-009).
+      // Uma passada completa e o esmaecer: ~1,7 s no total (SC-009).
       expect(
         total,
-        lessThanOrEqualTo(const Duration(milliseconds: 1600)),
-        reason: 'a abertura não pode prolongar além de um aceno',
+        lessThanOrEqualTo(
+          passada + MemoraMovimento.padrao + const Duration(milliseconds: 100),
+        ),
+        reason: 'a abertura não pode prolongar além de uma passada',
       );
     });
 
-    testWidgets('carregamento lento: não sai antes de terminar, e sai assim '
-        'que termina', (WidgetTester t) async {
+    testWidgets('carregamento lento: não sai antes de terminar, e sai no fim '
+        'da passada em curso', (WidgetTester t) async {
       final Completer<int> carga = Completer<int>();
       int? saiu;
       await montar(
@@ -141,7 +207,7 @@ void main() {
       );
       await t.pump();
 
-      // Passam vários acenos completos e o carregamento segue de pé: a
+      // Passam várias passadas completas e o carregamento segue de pé: a
       // abertura espera, não sai por conta própria. (É o portão: sair antes
       // do carregamento terminar entregaria um resultado que não existe.)
       await t.pump(const Duration(seconds: 3));
@@ -149,50 +215,35 @@ void main() {
       expect(saiu, isNull);
       expect(memora, findsOneWidget);
 
-      // O 3º aceno começou aos 6 s e acabou aos 7,2 s: aos 7,4 s a Memora
-      // está no descanso entre dois acenos, sem aceno nenhum a esperar.
-      await t.pump(const Duration(milliseconds: 1400));
+      // A 5ª passada começou aos 6 s e acaba aos 7,5 s: aos 6,7 s faltam
+      // 0,8 s dela.
+      await t.pump(const Duration(milliseconds: 700));
       carga.complete(9);
       await t.pump();
-      final Duration depois = await esperarAte(t, () => saiu != null);
+      final Duration depois = await esperarAte(
+        t,
+        () => saiu != null,
+        passo: const Duration(milliseconds: 16),
+      );
       expect(saiu, 9);
       expect(
         depois,
-        lessThanOrEqualTo(
-          MemoraMovimento.padrao + const Duration(milliseconds: 100),
-        ),
-        reason:
-            'no descanso entre acenos não há aceno a esperar: só o esmaecer',
+        greaterThanOrEqualTo(const Duration(milliseconds: 700)),
+        reason: 'espera o resto da passada',
       );
-    });
-
-    testWidgets('enquanto demora, a Memora volta a acenar, com descanso entre '
-        'um aceno e outro', (WidgetTester t) async {
-      final Completer<int> carga = Completer<int>();
-      await montar(t, carregar: () => carga.future, aoConcluir: (int _) {});
-      await t.pump();
-
-      /// Se ela acena (a mão se mexe) em algum quadro do trecho.
-      Future<bool> acenaEntre(int deMs, int ateMs, int agoraMs) async {
-        bool acenou = false;
-        for (int ms = agoraMs; ms < ateMs; ms += 40) {
-          await t.pump(const Duration(milliseconds: 40));
-          if (ms >= deMs && quadro(t).aceno.abs() > 0.01) acenou = true;
-        }
-        return acenou;
-      }
-
-      expect(await acenaEntre(100, 1200, 0), isTrue, reason: '1º aceno');
       expect(
-        await acenaEntre(1400, 1900, 1200),
-        isFalse,
-        reason: 'descanso: calma, sem acelerar',
+        depois,
+        lessThanOrEqualTo(
+          const Duration(milliseconds: 800) +
+              MemoraMovimento.padrao +
+              const Duration(milliseconds: 100),
+        ),
+        reason: 'o resto da passada e o esmaecer, e nada mais',
       );
-      expect(await acenaEntre(2100, 3100, 1900), isTrue, reason: '2º aceno');
     });
 
-    testWidgets('carregamento que termina no meio de um aceno espera o aceno '
-        'acabar', (WidgetTester t) async {
+    testWidgets('carregamento que termina no meio de uma passada espera a '
+        'passada acabar', (WidgetTester t) async {
       final Completer<int> carga = Completer<int>();
       int? saiu;
       await montar(
@@ -201,12 +252,12 @@ void main() {
         aoConcluir: (int r) => saiu = r,
       );
       await t.pump();
-      await t.pump(const Duration(milliseconds: 500)); // meio do 1º aceno
+      await t.pump(const Duration(milliseconds: 500)); // 1/3 da 1ª passada
       carga.complete(1);
       await t.pump();
       expect(saiu, isNull);
-      await t.pump(const Duration(milliseconds: 500));
-      expect(saiu, isNull, reason: 'o aceno só completa aos 1200 ms');
+      await t.pump(const Duration(milliseconds: 800));
+      expect(saiu, isNull, reason: 'a passada só completa aos 1500 ms');
       await esperarAte(t, () => saiu != null);
       expect(saiu, 1);
     });
@@ -358,14 +409,19 @@ void main() {
         0,
         reason: 'nenhum Ticker rodando: nem o da abertura, nem o da Memora',
       );
-      // Parada, em pose de aceno: nem aceno, nem respiração, nem piscada.
+      // Parada, segurando a barra: a barra não corre, e nem aceno, nem
+      // respiração, nem piscada, nem flutuação.
       final ContextoDePintura q = quadro(t);
+      expect(q.pose.barra, 1, reason: 'a barra continua nas mãos');
+      expect(q.cicloDaBarra, isNull, reason: 'a barra parada');
+      expect(q.detalhada, isTrue, reason: 'a anfitriã, mesmo parada');
       expect(q.aceno, 0);
       expect(q.respira, 0);
       expect(q.piscar, 0);
+      expect(q.flutua, 0);
     });
 
-    testWidgets('sai assim que carrega, sem aceno nenhum para esperar', (
+    testWidgets('sai assim que carrega, sem passada nenhuma para esperar', (
       WidgetTester t,
     ) async {
       int? saiu;
