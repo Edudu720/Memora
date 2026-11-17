@@ -288,15 +288,15 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T091 [US2] **(2026-11-16, achado na T025)** Os `showDialog` crus de `dialogo_contato_emergencia.dart` (Cuidado — Henrique) e de `tela_localizador.dart` (Eduardo, junto da T071) passam a abrir pela transição de sobreposição do `Dialogo`: hoje ficam sem a animação nova e com 150 ms fixos mesmo com "reduzir movimento" (contra a FR-013). Se o conteúdo deles for mais rico que o do `DialogoMemora`, dar a ele um construtor de conteúdo livre. **(2026-11-17) Parte do Henrique feita**: `DialogoMemora.mostrarConteudo<T>(context, construtor:)` para conteúdo livre (o `mostrar` passa por ele), e o `dialogo_contato_emergencia` abre por ele; provado quebrando. **Falta a parte do Eduardo** (`tela_localizador.dart`, junto da T071), que já pode usar o `mostrarConteudo`
 - [ ] T081 [P] [US6] **(rev. 16/11)** Telas da foto de perfil (#73) — `SecaoFotoPerfil`, `TelaPreVisualizacaoFoto`, `RetratoDoPerfil` e os textos novos de `textos_perfil.dart` — na linguagem da 013 (transições, ícones, duas frases), sem mudar o comportamento da spec 011. No Perfil, o topo é o **retrato da pessoa** (decisão da integração das #71 e #73): a Memora não aparece ali
 - [ ] T073 [US6] Estados de carregando, vazio e erro de todas as telas com a Memora na expressão certa (FR-001)
-- [ ] T074 [US6] Percorrer o álbum inteiro contra a checagem da memora-ux (seção 5) e corrigir o que reprovar (V18, SC-001)
+- [ ] T074 [US6] Percorrer o álbum inteiro contra a checagem da memora-ux (seção 5) e corrigir o que reprovar (V18, SC-001). **(2026-11-17, auditoria parcial em `origin/redesign-final`)**: álbum regenerado nos 3 temas (96 PNGs); achados de SVGs legados (`13_hub`, `20_ajuda`) e emojis (`14_conversa`, `19_registro`) endereçados nas PRs #89–#91, restando reexecutar pós-merge junto da T073/T096 (2 Memoras visíveis em `19_registro` e `31_cuidado`).
 
 ## Phase 15: Validação final
 
-- [ ] T075 Rodar os quatro portões, a suíte do backend, e regenerar o álbum nos 3 temas
+- [ ] T075 Rodar os quatro portões, a suíte do backend, e regenerar o álbum nos 3 temas. **(2026-11-17, execução parcial pré-merge)**: álbum regenerado (3/3 temas, 96 PNGs) e backend executado (250 testes: 220 aprovados, 0 falhas, 30 erros de Testcontainers sem Docker ativo neste ambiente; `TextoDaInterfaceTest,PersonaDaMemoraTest` 13/13 aprovados). Reexecução final prevista após o merge de todas as PRs na `redesign-final`.
 - [ ] T076 Medir desempenho em perfil (abertura, trocas, gestos) no S20 FE e, se houver, num Galaxy A/M ou no emulador com CPU limitada; registrar no `quickstart.md` (V19, SC-005)
 - [ ] T077 Conferir 50 respostas seguidas da IA real: nenhuma com mais de um emoji (SC-008)
 - [ ] T078 APK de release no celular e revisão do Henrique, registrada (portão da T116 da 004 para tela nova na `master`)
-- [ ] T079 Preparar o roteiro do teste com 5 pessoas de 65+ para o SC-007 (V20), junto do portão pendente das features 001 e 002
+- [X] T079 Preparar o roteiro do teste com 5 pessoas de 65+ para o SC-007 (V20), junto do portão pendente das features 001 e 002. **Feita em 2026-11-17**: roteiro e ficha de registro criados em `specs/013-redesenho-final/teste-com-pessoas.md` consolidando V20 (013), V10 (001), V7–V8 (002), H12 (003) e SC-002–SC-004 (004). (Aplicação presencial com 5 participantes permanece pendente de campo.)
 
 ---
 
