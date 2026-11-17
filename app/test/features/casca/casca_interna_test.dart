@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/casca/casca_interna.dart';
@@ -61,16 +60,15 @@ void main() {
     matching: find.text(d.rotulo),
   );
 
-  /// O arquivo SVG que o destino da [posicao] (de 1 a 3) está desenhando.
-  String desenhoDe(WidgetTester t, int posicao) {
-    final SvgPicture figura = t.widget<SvgPicture>(
-      find.descendant(
-        of: find.byKey(NavegacaoInferior.chaveDoIcone(posicao)),
-        matching: find.byType(SvgPicture),
-      ),
-    );
-    return (figura.bytesLoader as SvgAssetLoader).assetName;
-  }
+  /// O desenho que o destino da [posicao] (de 1 a 3) está pintando.
+  IconData desenhoDe(WidgetTester t, int posicao) => t
+      .widget<Icon>(
+        find.descendant(
+          of: find.byKey(NavegacaoInferior.chaveDoIcone(posicao)),
+          matching: find.byType(Icon),
+        ),
+      )
+      .icon!;
 
   group('A barra — FR-015', () {
     testWidgets('três destinos, cada um com desenho e nome escrito', (
@@ -79,32 +77,25 @@ void main() {
       await t.pumpWidget(app());
       for (final DestinoDaCasca d in DestinoDaCasca.values) {
         expect(destino(d), findsOneWidget, reason: d.rotulo);
-        // O desenho é o do próprio destino, e não o de outro: o arquivo leva o
-        // nome dele.
+        // O desenho é o do próprio destino, e não o de outro.
         expect(
           desenhoDe(t, d.index + 1),
-          anyOf(d.icone.caminhoContornado, d.icone.caminhoPreenchido),
+          d.icone.dados,
           reason: 'ícone de ${d.rotulo}',
         );
       }
     });
 
-    testWidgets(
-      'o destino atual tem o ícone preenchido; os outros, só o contorno',
-      (WidgetTester t) async {
-        await t.pumpWidget(app());
-        // Início é o segundo destino.
-        expect(desenhoDe(t, 2), DestinoDaCasca.inicio.icone.caminhoPreenchido);
-        expect(desenhoDe(t, 1), DestinoDaCasca.ajustes.icone.caminhoContornado);
-        expect(desenhoDe(t, 3), DestinoDaCasca.perfil.icone.caminhoContornado);
-
-        await t.tap(destino(DestinoDaCasca.perfil));
-        await t.pumpAndSettle();
-        expect(desenhoDe(t, 3), DestinoDaCasca.perfil.icone.caminhoPreenchido);
-        expect(desenhoDe(t, 2), DestinoDaCasca.inicio.icone.caminhoContornado);
-        expect(desenhoDe(t, 1), DestinoDaCasca.ajustes.icone.caminhoContornado);
-      },
-    );
+    testWidgets('o desenho de cada destino é o mesmo, atual ou não', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(app());
+      await t.tap(destino(DestinoDaCasca.perfil));
+      await t.pumpAndSettle();
+      for (final DestinoDaCasca d in DestinoDaCasca.values) {
+        expect(desenhoDe(t, d.index + 1), d.icone.dados, reason: d.rotulo);
+      }
+    });
 
     testWidgets('os três ícones ocupam a mesma caixa, atual ou não', (
       WidgetTester t,
@@ -176,7 +167,11 @@ void main() {
       await t.pump(const Duration(milliseconds: 100));
 
       expect(x(t, 'perfil'), greaterThan(centro), reason: 'entra da direita');
-      expect(x(t, 'inicio'), lessThan(centro), reason: 'o Início sai à esquerda');
+      expect(
+        x(t, 'inicio'),
+        lessThan(centro),
+        reason: 'o Início sai à esquerda',
+      );
 
       await t.pumpAndSettle();
       expect(x(t, 'perfil'), centro);
@@ -192,7 +187,11 @@ void main() {
       await t.pump(const Duration(milliseconds: 100));
 
       expect(x(t, 'ajustes'), lessThan(centro), reason: 'entra da esquerda');
-      expect(x(t, 'inicio'), greaterThan(centro), reason: 'o Início sai à direita');
+      expect(
+        x(t, 'inicio'),
+        greaterThan(centro),
+        reason: 'o Início sai à direita',
+      );
       await t.pumpAndSettle();
     });
 

@@ -1,47 +1,35 @@
-/// Os desenhos da barra inferior (feature 004, T112, FR-015).
+import 'package:flutter/material.dart' show IconData, Icons;
+
+/// Os desenhos da barra inferior (feature 013, FR-045, R5).
 ///
-/// Enum, e não caminho solto de arquivo: um desenho que não existe **não
-/// compila**, e cada destino é obrigado a ter as duas versões.
+/// Enum, e não `IconData` solto: um desenho que não existe **não compila**, e
+/// cada destino é obrigado a ter o seu.
 ///
-/// ## Por que desenhados, e não `Icons.*`
+/// ## A família única
 ///
-/// Os ícones do Material vêm de grades e pesos diferentes — a casa é mais
-/// cheia que a engrenagem, a pessoa mais fina que as duas — e a revisão da
-/// T044 pediu justamente "peso visual igual entre os três". Estes seis SVG
-/// (três destinos × contorno e preenchido) saem da **mesma grade 24×24, do
-/// mesmo traço de 2 e da mesma área**, de 3 a 21 nos dois eixos.
+/// Todo ícone do aplicativo é da variante **arredondada** dos ícones Material
+/// que vêm com o Flutter (`Icons.*_rounded`) — a mesma que o resto das telas
+/// já usa. Os seis SVG próprios da feature 004 (`assets/icones/navegacao/`)
+/// saíram: eram uma segunda família, e dois estilos de desenho na mesma tela
+/// era justamente o que a feature 013 veio desfazer.
 ///
-/// ## Contorno e preenchido
-///
-/// O destino atual usa a versão **preenchida**; os outros, a **contornada**.
-/// É um dos sinais além da cor que a FR-015 exige: quem não distingue a
-/// primária da cor do texto ainda vê qual desenho está cheio.
-///
-/// Os arquivos não têm cor própria (`currentColor`): quem os desenha os tinge
-/// pelo tema, e por isso valem nos três temas sem uma linha a mais.
+/// A família arredondada não tem versão só com contorno para estes três
+/// desenhos, e por isso o destino atual **não** se distingue pelo ícone
+/// preenchido (era um dos sinais da 004). Ele continua marcado por mais de um
+/// sinal além da cor: o indicador deslizante, a pílula atrás do ícone e o
+/// rótulo em negrito.
 enum IconeDeNavegacao {
   /// A engrenagem: Ajustes.
-  ajustes('ajustes'),
+  ajustes(Icons.settings_rounded),
 
   /// A casa: Início.
-  inicio('inicio'),
+  inicio(Icons.home_rounded),
 
   /// A pessoa: Meu perfil.
-  perfil('perfil');
+  perfil(Icons.person_rounded);
 
-  const IconeDeNavegacao(this._nome);
+  const IconeDeNavegacao(this.dados);
 
-  final String _nome;
-
-  /// O desenho só com o contorno — destino que **não** é o atual.
-  String get caminhoContornado =>
-      'assets/icones/navegacao/${_nome}_contorno.svg';
-
-  /// O desenho cheio — o destino atual.
-  String get caminhoPreenchido =>
-      'assets/icones/navegacao/${_nome}_preenchido.svg';
-
-  /// O arquivo do desenho, conforme o destino seja o atual ou não.
-  String caminho({required bool preenchido}) =>
-      preenchido ? caminhoPreenchido : caminhoContornado;
+  /// O desenho, da família arredondada.
+  final IconData dados;
 }
