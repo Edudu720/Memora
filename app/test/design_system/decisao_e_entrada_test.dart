@@ -327,7 +327,14 @@ void main() {
       );
 
       expect(find.text('Estou entrando na sua conta...'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is MemoraAnimada && w.expressao == PoseDaMemora.carregando,
+        ),
+        findsOneWidget,
+        reason: 'A espera é a Memora segurando a barra (FR-059).',
+      );
     });
 
     testWidgets('erro é anunciado como região viva ao leitor de tela',

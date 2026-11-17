@@ -226,13 +226,13 @@ void main() {
     );
   });
 
-  testWidgets('o que o giro comunica, o texto também comunica (FR-028)',
+  testWidgets('o que a barra comunica, o texto também comunica (FR-028)',
       (WidgetTester t) async {
-    // A segunda metade do V9. O `CircularProgressIndicator` do Material gira
-    // independentemente da preferência — não é nosso para desligar. O que
-    // está ao nosso alcance é garantir que ele não seja o ÚNICO portador da
-    // informação: quem não percebe o movimento continua sabendo que a Memora
-    // está pensando, porque está escrito e anunciado.
+    // A segunda metade do V9. Desde a T095 a espera é a Memora segurando a
+    // barra, e ela obedece a "reduzir movimento" (fica parada). Mesmo assim
+    // o desenho não é o ÚNICO portador da informação: quem não percebe o
+    // movimento continua sabendo que a Memora está pensando, porque está
+    // escrito e anunciado.
     final SemanticsHandle h = t.ensureSemantics();
     await montar(
       t,
