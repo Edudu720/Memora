@@ -39,9 +39,11 @@ Além disso, o Memora já possui:
 2. `CanalDoAbridor.kt` / `AbridorDeAplicativo`: Método `abrir(pacote)` usando `context.packageManager.getLaunchIntentForPackage(pacote)` com `Intent.FLAG_ACTIVITY_NEW_TASK`.
 
 ### 1.3 Decisão de Implementação
-- **Decisão**: A tela consultará o estado de instalação exclusivamente dos 7 aplicativos comuns cadastrados no catálogo seguro.
-- **Comportamento Padrão**: A lista exibida filtra dinamicamente `apps.where((a) => a.instalado).toList()`. Se o idoso tiver instalado apenas WhatsApp e YouTube, apenas WhatsApp e YouTube aparecem como cartões de ação imediata.
-- **Fallback / Descoberta**: Para evitar uma sensação de "tela quebrada" caso o aparelho não tenha nenhum desses 7 apps (ou se o usuário desejar saber quais outros existem), haverá um botão/filtro simples: *"Ver aplicativos recomendados"* ou botão *"Apenas instalados"*.
+- **Decisão**: A tela apresenta diretamente todos os 7 aplicativos comuns cadastrados no catálogo seguro, sem filtros ou ocultação de itens não instalados.
+- **Comportamento**: Cada cartão exibe o nome, ícone e status de instalação (`Instalado` ou `Disponível para baixar`).
+- **Ações**:
+  - Se instalado: toca para abrir com diálogo de confirmação.
+  - Se não instalado: toca para abrir a página oficial na Google Play Store.
 
 ---
 

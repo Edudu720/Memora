@@ -18,15 +18,15 @@
 
 Os testes são executados com `ConsultaDeAplicativosSimulada` e `AbridorDeAplicativoSimulado`, garantindo determinismo sem depender de apps instalados na máquina do desenvolvedor ou na esteira de CI.
 
-### Cenário 1: Exibição Padrão Apenas de Aplicativos Instalados
+### Cenário 1: Exibição Direta de Todos os Aplicativos Comuns
 - **Configuração**: Simular que apenas `com.whatsapp` e `com.google.android.youtube` estão instalados.
 - **Ação**: Montar a `TelaAtalhosAplicativos` e aguardar estabilização dos microtasks.
 - **Resultado Esperado**:
-  - Exibe exatamente 2 cartões de aplicativo: "WhatsApp" e "YouTube".
-  - Não exibe cartões para Instagram, Facebook, TikTok, etc.
-  - O filtro "Apenas instalados" está selecionado por padrão.
+  - Exibe todos os 7 cartões de aplicativo da lista comum (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram, TikTok).
+  - WhatsApp e YouTube exibem status *"Instalado"*.
+  - Os demais exibem status *"Não instalado"* / *"Toque para baixar"*.
 
-### Cenário 2: Confirmação de Abertura Preventiva
+### Cenário 2: Confirmação de Abertura Preventiva de Aplicativo Instalado
 - **Configuração**: WhatsApp instalado.
 - **Ação**: Tocar no cartão do "WhatsApp".
 - **Resultado Esperado**:
@@ -42,20 +42,13 @@ Os testes são executados com `ConsultaDeAplicativosSimulada` e `AbridorDeAplica
   - `AbridorDeAplicativoSimulado.abertos` permanece vazio.
   - Usuário permanece na tela de atalhos.
 
-### Cenário 4: Alternância para Exibir Todos os Recomendados
-- **Configuração**: Apenas WhatsApp instalado.
-- **Ação**: Tocar no alternador/filtro *"Mostrar recomendados"*.
+### Cenário 4: Toque em Aplicativo Não Instalado (Acesso à Play Store)
+- **Configuração**: Instagram não instalado.
+- **Ação**: Tocar no cartão do "Instagram".
 - **Resultado Esperado**:
-  - A lista expande para conter todos os 7 aplicativos comuns do catálogo.
-  - WhatsApp aparece com indicador *"Instalado"*.
-  - Os demais (Instagram, Facebook, etc.) aparecem com indicador *"Disponível na Play Store"*.
-
-### Cenário 5: Estado Vazio quando Nenhum Aplicativo está Instalado
-- **Configuração**: Nenhum pacote instalado (`instalados: {}`).
-- **Ação**: Carregar a tela no modo padrão ("Apenas instalados").
-- **Resultado Esperado**:
-  - Exibe estado vazio acolhedor: *"Nenhum destes aplicativos foi encontrado no seu aparelho"*.
-  - Exibe botão para ver os aplicativos recomendados.
+  - Exibe o diálogo *"Instalar o Instagram?"*.
+  - Oferece o botão *"Ir para a Play Store"*.
+  - Ao confirmar, dispara a abertura da URL oficial do pacote na loja.
 
 ---
 

@@ -20,29 +20,29 @@ Ao tocar em um aplicativo, o Memora solicita uma confirmação simples e clara e
    - Estão contemplados exclusivamente aplicativos populares de comunicação, mídia e redes sociais: **WhatsApp**, **YouTube**, **Instagram**, **Facebook**, **Google Fotos**, **Telegram** e **TikTok**.
    - **Exclusão Estrita de Serviços Sociais / Governamentais**: Não entram nesta tela serviços públicos, governamentais ou financeiros (como Gov.br, Meu INSS, Carteira de Trabalho, Poupatempo, Serasa, Caixa Tem, bancos). Tais serviços requerem cuidados pedagógicos e contexto de segurança diferenciados presentes nos guias educativos da Feature 006.
 
-2. **Detecção e Exibição de Aplicativos Instalados**:
-   - A tela analisa os aplicativos comuns homologados e exibe **por padrão somente os aplicativos que estão efetivamente instalados no dispositivo**.
-   - Respeita a restrição do Android 11+ (API 30+) que limita a visibilidade de pacotes àqueles explicitamente declarados na seção `<queries>` do `AndroidManifest.xml`, garantindo conformidade com as políticas do Google Play e com o Princípio I da Constituição (sem permissão abusiva `QUERY_ALL_PACKAGES`).
-   - Disponibiliza uma opção clara para visualizar os aplicativos recomendados que ainda não estão instalados, permitindo abrir a página oficial na Google Play Store para download seguro caso o idoso deseje.
+2. **Apresentação Direta de Todos os Aplicativos Comuns**:
+   - A tela apresenta a lista completa de aplicativos comuns homologados (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram, TikTok).
+   - Não há filtro para esconder aplicativos não instalados. Todos os aplicativos da lista aparecem de forma clara e visível.
+   - O estado de instalação (`instalado: true/false`) é detectado para orientar a ação de toque: se instalado, oferece abertura imediata; se não instalado, oferece ida à Google Play Store para download oficial.
 
 ---
 
 ## 3. Histórias de Usuário (User Stories)
 
-### US1 — Visualizar Aplicativos Instalados (P1)
+### US1 — Visualizar Aplicativos Comuns e seus Status (P1)
 > **Como** uma pessoa idosa usando o Memora,  
-> **Quero** acessar uma tela que mostre os aplicativos comuns que eu já tenho instalados no meu celular de forma grande, limpa e organizada,  
-> **Para que** eu não precise me perder procurando ícones pequenos e dispersos na tela inicial do meu aparelho.
+> **Quero** acessar uma tela que mostre os aplicativos comuns em cartões grandes, limpos e com indicação se já estão instalados no meu celular,  
+> **Para que** eu encontre meus aplicativos facilmente em um único lugar sem me perder na tela inicial do aparelho.
 
-### US2 — Abrir o Aplicativo com Confirmação Segura (P1)
+### US2 — Abrir o Aplicativo Instalado com Confirmação Segura (P1)
 > **Como** uma pessoa idosa,  
-> **Quero** tocar no cartão de um aplicativo instalado e receber uma confirmação simples antes de sair do Memora,  
+> **Quero** tocar em um aplicativo instalado e receber uma confirmação simples antes de sair do Memora,  
 > **Para que** eu tenha certeza de para onde estou indo e nunca saia do Memora por um toque acidental.
 
-### US3 — Estado Vazio e Acesso a Aplicativos Não Instalados (P2)
-> **Como** uma pessoa idosa que ainda não possui determinados aplicativos comuns,  
-> **Quero** poder ver quais outros aplicativos comuns existem e abrir a loja oficial Google Play Store se eu quiser instalá-los,  
-> **Para que** eu não fique com a tela vazia caso ainda não tenha instalado os principais comunicadores e saiba como obtê-los com segurança.
+### US3 — Instalar Aplicativo Não Instalado via Google Play Store (P2)
+> **Como** uma pessoa idosa que deseja usar um aplicativo que ainda não está no meu celular,  
+> **Quero** tocar nele e ser orientada com segurança a abrir a loja oficial Google Play Store para instalá-lo,  
+> **Para que** eu saiba exatamente como obtê-lo sem cair em sites suspeitos ou golpes.
 
 ---
 
@@ -58,12 +58,12 @@ Ao tocar em um aplicativo, o Memora solicita uma confirmação simples e clara e
   6. Telegram (`org.telegram.messenger`)
   7. TikTok (`com.zhiliaoapp.musically`)
 - **FR-003**: Ao abrir a tela, o sistema deve consultar de forma assíncrona o estado de instalação de cada aplicativo da lista através do serviço `ConsultaDeAplicativos`.
-- **FR-004**: Por padrão, a tela deve exibir a visualização filtrada **"Instalados"**, mostrando apenas os aplicativos cuja verificação `estaInstalado` retornou `true`.
+- **FR-004**: A tela deve exibir todos os 7 aplicativos comuns homologados diretamente, indicando em cada cartão se o aplicativo está instalado no aparelho ou disponível para instalação na loja.
 - **FR-005**: Cada item da lista de aplicativos deve ser exibido como um cartão de alta legibilidade contendo:
   - Ícone real do aplicativo (PNG extraído via canal nativo) ou ícone vetorial de alta definição com cores oficiais;
   - Nome amigável em destaque (`AtkinsonHyperlegibleNext`, peso semibold, `>= 18 sp`);
   - Breve descrição de uma frase em linguagem simples (ex.: *"Mensagens e chamadas com a família"*);
-  - Indicador visual e textual de status (*"Instalado — Toque para abrir"* ou *"Disponível na Play Store"*);
+  - Indicador visual e textual de status (*"Instalado — Toque para abrir"* ou *"Não instalado — Toque para baixar"*);
   - Alvo de toque mínimo de `56 dp` de altura.
 - **FR-006**: Ao tocar em um aplicativo instalado, o Memora **não deve abrir tutoriais nem guias**. O sistema deve exibir um diálogo de confirmação claro e acolhedor (Princípio II da Constituição):
   - Título: *"Abrir o [Nome do App]?"*
@@ -72,18 +72,13 @@ Ao tocar em um aplicativo, o Memora solicita uma confirmação simples e clara e
   - Botão de cancelamento: *"Não, continuar no Memora"* (neutro).
 - **FR-007**: Ao confirmar, o Memora deve invocar o serviço `AbridorDeAplicativo` para disparar a `Intent` de inicialização do aplicativo nativo.
 - **FR-008**: Se por qualquer motivo o sistema operacional falhar em abrir o aplicativo, o Memora deve exibir um aviso amigável: *"Não foi possível abrir o [Nome do App]. Verifique se o aplicativo está atualizado."*
-- **FR-009**: A tela deve fornecer um alternador de visualização simples ou seção secundária:
-  - Botão/filtro: *"Mostrar todos os recomendados"* / *"Apenas instalados"*.
-- **FR-010**: Ao selecionar um aplicativo que **não** está instalado, o diálogo de confirmação deve orientar sobre a instalação segura:
+- **FR-009**: Ao tocar em um aplicativo que **não** está instalado, o diálogo de confirmação deve orientar sobre a instalação segura:
   - Título: *"Instalar o [Nome do App]?"*
   - Mensagem: *"O [Nome do App] ainda não está no seu celular. Deseja abrir a loja oficial Google Play Store para instalá-lo?"*
   - Botão de ação primária: *"Ir para a Play Store"*
   - Botão de cancelamento: *"Agora não"*
-- **FR-011**: Caso nenhum dos aplicativos comuns esteja instalado no dispositivo, a tela deve exibir um estado vazio acolhedor:
-  - Ilustração temática com contraste adequado;
-  - Texto: *"Nenhum destes aplicativos foi encontrado no seu aparelho."*
-  - Ação sugerida: *"Ver aplicativos recomendados para instalar"*.
-- **FR-012**: Não deve haver rastreamento, envio de dados de telemetria sobre quais apps o usuário tem instalados para servidores externos, respeitando a privacidade total do idoso (Princípio I e LGPD).
+- **FR-010**: Ao confirmar no diálogo de instalação, o Memora deve abrir com segurança a página oficial do pacote na Google Play Store via URL launcher (`market://details?id={pacote}` ou fallback web oficial).
+- **FR-011**: Não deve haver rastreamento, envio de dados de telemetria sobre quais apps o usuário tem instalados para servidores externos, respeitando a privacidade total do idoso (Princípio I e LGPD).
 
 ---
 
@@ -108,12 +103,12 @@ Ao tocar em um aplicativo, o Memora solicita uma confirmação simples e clara e
 ## 6. Critérios de Aceitação (AC)
 
 - **AC-001**: O usuário acessa a tela *"Meus Aplicativos"* através do Hub ou Início.
-- **AC-002**: Na visualização padrão, apenas os aplicativos que estão instalados no aparelho são exibidos.
+- **AC-002**: A tela exibe diretamente todos os 7 aplicativos comuns homologados, sem ocultar nenhum aplicativo.
 - **AC-003**: Ao tocar em um aplicativo instalado, surge a caixa de confirmação *"Abrir o [Nome do App]?"*.
 - **AC-004**: Ao tocar em *"Sim, abrir agora"*, o aplicativo externo abre imediatamente e o Memora fica em segundo plano.
 - **AC-005**: Ao tocar em *"Não, continuar no Memora"*, a caixa fecha e o usuário permanece na mesma tela sem nenhuma ação externa.
-- **AC-006**: Ao ativar a visualização de todos os recomendados, os aplicativos não instalados aparecem com badge de status *"Não instalado"* e opção de abrir na Play Store.
-- **AC-007**: Se nenhum aplicativo da lista estiver instalado, a tela exibe o estado vazio acolhedor com opção para ver a lista de recomendados.
+- **AC-006**: Ao tocar em um aplicativo não instalado, surge a caixa *"Instalar o [Nome do App]?"* com opção de ir para a Google Play Store.
+- **AC-007**: Ao confirmar a ida para a Play Store, a loja oficial abre na página exata do aplicativo.
 - **AC-008**: Nenhum serviço social ou governamental (Gov.br, INSS, Poupatempo, etc.) aparece nesta tela.
 - **AC-009**: A tela mantém legibilidade perfeita em modo claro e escuro, respeitando a escala de acessibilidade de até 200%.
 - **AC-010**: Todos os testes unitários e de widget com `ConsultaDeAplicativosSimulada` e `AbridorDeAplicativoSimulado` passam com 100% de sucesso.

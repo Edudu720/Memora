@@ -8,7 +8,7 @@
 
 Implementar uma tela dedicada no Memora intitulada *"Meus Aplicativos"*, fornecendo atalhos diretos para que pessoas idosas possam abrir aplicativos comuns do cotidiano (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok) sem passos guiados ou tutoriais. 
 
-A tela filtra dinamicamente os aplicativos para exibir por padrão **somente aqueles instalados no aparelho do usuário**, utilizando as tags `<queries>` pré-declaradas no manifesto Android e a camada nativa de `MethodChannel` (`ConsultaDeAplicativos` e `AbridorDeAplicativo`). Serviços sociais/governamentais foram estritamente excluídos do escopo desta funcionalidade para manter a simplicidade e segurança. Para proteção contra toques involuntários (Princípio II da Constituição), toda abertura exige diálogo de confirmação claro antes da transição.
+A tela apresenta diretamente os **7 aplicativos comuns homologados** (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok), sem ocultar nenhum item. O estado de instalação é detectado em tempo real via `ConsultaDeAplicativos` para indicar se o app está instalado ou se está disponível para baixar. Serviços sociais/governamentais foram estritamente excluídos do escopo desta funcionalidade para manter a simplicidade e segurança. Para proteção contra toques involuntários (Princípio II da Constituição), a abertura de app instalado exige diálogo de confirmação claro antes da transição; caso não esteja instalado, oferece opção segura de abrir a Google Play Store oficial.
 
 ---
 

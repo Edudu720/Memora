@@ -42,31 +42,21 @@ Estado imutável gerenciado pelo `AtalhosAplicativosController`.
 ```dart
 class EstadoTelaAtalhos {
   final bool carregando;
-  final List<AtalhoAplicativo> todosAplicativos;
-  final bool apenasInstalados;
+  final List<AtalhoAplicativo> aplicativos;
   final String? mensagemAviso;
 
   const EstadoTelaAtalhos({
     this.carregando = true,
-    this.todosAplicativos = const [],
-    this.apenasInstalados = true,
+    this.aplicativos = const [],
     this.mensagemAviso,
   });
 
-  /// Lista filtrada de acordo com a preferência do usuário
-  List<AtalhoAplicativo> get aplicativosExibidos {
-    if (apenasInstalados) {
-      return todosAplicativos.where((app) => app.instalado).toList();
-    }
-    return todosAplicativos;
-  }
-
   /// Quantidade de aplicativos instalados detectados
   int get totalInstalados =>
-      todosAplicativos.where((app) => app.instalado).length;
+      aplicativos.where((app) => app.instalado).length;
 
-  /// Indica se a lista exibida está vazia (útil para acionar o estado vazio acolhedor)
-  bool get estaVazio => aplicativosExibidos.isEmpty;
+  /// Total de aplicativos suportados
+  int get totalSuportados => aplicativos.length;
 }
 ```
 
