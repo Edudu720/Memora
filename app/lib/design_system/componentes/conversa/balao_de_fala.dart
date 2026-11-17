@@ -95,6 +95,13 @@ class BalaoDeFala extends StatelessWidget {
   /// Chamado a cada letra que entra na tela — para a lista rolar atrás.
   final VoidCallback? aoEscrever;
 
+  /// O rosto da Memora ao lado do balão (T072). Só vale para o balão dela.
+  ///
+  /// O padrão é a cabeça pequena ([ExpressaoDaMemora.mini]). Quem fala de uma
+  /// conclusão pode pedir [ExpressaoDaMemora.comemorando]: o balão continua
+  /// sendo a **única** Memora da tela (FR-006).
+  final ExpressaoDaMemora expressaoDaMemora;
+
   /// Cria uma fala.
   const BalaoDeFala({
     required this.autor,
@@ -103,6 +110,7 @@ class BalaoDeFala extends StatelessWidget {
     this.escreverAosPoucos = false,
     this.emAndamento = false,
     this.aoEscrever,
+    this.expressaoDaMemora = ExpressaoDaMemora.mini,
     super.key,
   });
 
@@ -117,7 +125,8 @@ class BalaoDeFala extends StatelessWidget {
       opcoes = const <OpcaoDoBalao>[],
       escreverAosPoucos = false,
       emAndamento = false,
-      aoEscrever = null;
+      aoEscrever = null,
+      expressaoDaMemora = ExpressaoDaMemora.mini;
 
   /// Nome escrito de quem fala.
   static String nomeDe(AutorDoBalao autor) =>
@@ -207,7 +216,10 @@ class BalaoDeFala extends StatelessWidget {
 
     final Widget rosto = _daMemora
         ? MemoraPersonagem(
-            expressao: ExpressaoDaMemora.mini,
+            // Chave pela expressão: ao trocar, a Memora nova chega e faz o
+            // gesto da expressão (a comemoração, uma vez).
+            key: ValueKey<ExpressaoDaMemora>(expressaoDaMemora),
+            expressao: expressaoDaMemora,
             tamanho: MemoraDimensoes.pisoDeIlustracao,
           )
         : _RostoDaPessoa(cores: cores);
