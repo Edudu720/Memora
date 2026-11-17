@@ -44,6 +44,9 @@ class OpcaoDoBalao {
 /// disse: …" — sem isso, a conversa lida em voz alta seria um texto corrido
 /// sem dono.
 ///
+/// Na **conversa** o desenho sai ([comRosto] falso): a Memora é uma só, no topo
+/// da tela (FR-042), e quem fala segue dito pela posição e pelo nome escrito.
+///
 /// ## O canto que aponta
 ///
 /// O canto do lado de quem fala é menos arredondado: é o "rabinho" do balão
