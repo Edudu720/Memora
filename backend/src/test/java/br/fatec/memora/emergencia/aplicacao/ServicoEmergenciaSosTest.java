@@ -21,6 +21,7 @@ import br.fatec.memora.emergencia.dominio.StatusEventoEmergencia;
 import br.fatec.memora.emergencia.dominio.TipoEventoEmergencia;
 import br.fatec.memora.emergencia.infra.NotificadorDeEmergencia;
 import br.fatec.memora.emergencia.infra.RepositorioEventoEmergencia;
+import br.fatec.memora.emergencia.seguranca.LimitadorDeEnvioSos;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -51,7 +52,11 @@ class ServicoEmergenciaSosTest {
         notificador = mock(NotificadorDeEmergencia.class);
         servico =
                 new ServicoEmergenciaSos(
-                        eventos, pessoas, notificador, Clock.fixed(AGORA, ZoneOffset.UTC));
+                        eventos,
+                        pessoas,
+                        notificador,
+                        new LimitadorDeEnvioSos(),
+                        Clock.fixed(AGORA, ZoneOffset.UTC));
 
         pessoaId = UUID.randomUUID();
         eventoId = UUID.randomUUID();
@@ -242,5 +247,86 @@ class ServicoEmergenciaSosTest {
                 .contains("e-mail")
                 .contains("192")
                 .doesNotContain("CANAL_NAO_SUPORTADO_NO_SERVIDOR");
+    }
+
+    @Test
+    @DisplayName("aplica limite 429 por conta e por destinatário, preserva idempotência e não retém PII de terceiro")
+    void limiteAntiSpamENaoRetencaoDePii() {
+        when(eventos.findById(any())).thenReturn(Optional.empty());
+        when(notificador.notificar(any()))
+                .thenReturn(NotificadorDeEmergencia.ResultadoEntrega.sucesso("ent-lim"));
+
+        for (int i = 0; i < LimitadorDeEnvioSos.MAXIMO_POR_HORA; i++) {
+            SolicitarSosRequest req =
+                    new SolicitarSosRequest(
+                            "SOS_MANUAL",
+                            UUID.randomUUID(),
+                            null,
+                            "Maria",
+                            "vitima-" + i + "@email.com");
+            SolicitarSosResponse ok = servico.registrarEEnviar(pessoaId, req);
+            assertThat(ok.status()).isEqualTo("ENVIADO");
+        }
+
+        // A 4ª tentativa da mesma conta na mesma hora deve falhar com LIMITE_DE_SOS (429) e espera.
+        SolicitarSosRequest quartaConta =
+                new SolicitarSosRequest(
+                        "SOS_MANUAL", UUID.randomUUID(), null, "Maria", "outra@email.com");
+        assertThatThrownBy(() -> servico.registrarEEnviar(pessoaId, quartaConta))
+                .isInstanceOf(FalhaDoMemora.class)
+                .satisfies(ex -> {
+                    FalhaDoMemora falha = (FalhaDoMemora) ex;
+                    assertThat(falha.getCodigo()).isEqualTo(CodigoDeErro.LIMITE_DE_SOS);
+                    assertThat(falha.getTentarNovamenteEmSegundos()).isPositive();
+                });
+
+        // Mesmo de contas distintas, o mesmo destinatário também respeita o limite por hora.
+        String mesmoDestino = "alvo.unico@email.com";
+        for (int i = 0; i < LimitadorDeEnvioSos.MAXIMO_POR_HORA; i++) {
+            UUID contaDistinta = UUID.randomUUID();
+            PessoaUsuaria u =
+                    new PessoaUsuaria("Conta " + i, "hash", AGORA.minusSeconds(30), EstadoDaConta.ATIVA);
+            when(pessoas.findById(contaDistinta)).thenReturn(Optional.of(u));
+            servico.registrarEEnviar(
+                    contaDistinta,
+                    new SolicitarSosRequest("SOS_MANUAL", UUID.randomUUID(), null, "Alvo", mesmoDestino));
+        }
+
+        UUID quartaContaDistinta = UUID.randomUUID();
+        when(pessoas.findById(quartaContaDistinta))
+                .thenReturn(
+                        Optional.of(
+                                new PessoaUsuaria(
+                                        "Conta Extra", "hash", AGORA.minusSeconds(30), EstadoDaConta.ATIVA)));
+        SolicitarSosRequest spamMesmoDestino =
+                new SolicitarSosRequest(
+                        "SOS_MANUAL", UUID.randomUUID(), null, "Alvo", "  ALVO.UNICO@email.com ");
+        assertThatThrownBy(() -> servico.registrarEEnviar(quartaContaDistinta, spamMesmoDestino))
+                .isInstanceOf(FalhaDoMemora.class)
+                .extracting(e -> ((FalhaDoMemora) e).getCodigo())
+                .isEqualTo(CodigoDeErro.LIMITE_DE_SOS);
+
+        // Nenhuma solicitação persistiu contato_nome ou contato_destino no banco após o despacho.
+        ArgumentCaptor<EventoEmergencia> captor = ArgumentCaptor.forClass(EventoEmergencia.class);
+        verify(eventos, times(LimitadorDeEnvioSos.MAXIMO_POR_HORA * 2)).save(captor.capture());
+        assertThat(captor.getAllValues())
+                .allSatisfy(salvo -> {
+                    assertThat(salvo.getContatoNome()).isNull();
+                    assertThat(salvo.getContatoDestino()).isNull();
+                });
+
+        // Formato de e-mail malicioso/inválido é recusado antes do notificador.
+        UUID contaMaliciosa = UUID.randomUUID();
+        when(pessoas.findById(contaMaliciosa))
+                .thenReturn(
+                        Optional.of(
+                                new PessoaUsuaria("M", "h", AGORA.minusSeconds(10), EstadoDaConta.ATIVA)));
+        SolicitarSosResponse invalido =
+                servico.registrarEEnviar(
+                        contaMaliciosa,
+                        new SolicitarSosRequest(
+                                "SOS_MANUAL", UUID.randomUUID(), null, "M", "a\nb@c.com"));
+        assertThat(invalido.status()).isEqualTo("FALHA");
+        verify(notificador, times(LimitadorDeEnvioSos.MAXIMO_POR_HORA * 2)).notificar(any());
     }
 }

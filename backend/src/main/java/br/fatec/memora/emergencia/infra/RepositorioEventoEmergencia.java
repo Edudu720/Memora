@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 public interface RepositorioEventoEmergencia extends JpaRepository<EventoEmergencia, UUID> {
 
     /**
-     * Remove coordenadas de eventos cuja janela de retenção expirou (NFR-006).
+     * Remove coordenadas e eventuais dados de contato residuais de eventos cuja janela de retenção
+     * expirou (NFR-006 e minimização de PII de terceiros).
      */
     @Modifying
     @Transactional
@@ -24,6 +25,8 @@ public interface RepositorioEventoEmergencia extends JpaRepository<EventoEmergen
             UPDATE EventoEmergencia e
                SET e.latitude = NULL,
                    e.longitude = NULL,
+                   e.contatoNome = NULL,
+                   e.contatoDestino = NULL,
                    e.expiraLocalizacaoEm = NULL
              WHERE e.expiraLocalizacaoEm IS NOT NULL
                AND e.expiraLocalizacaoEm <= :agora

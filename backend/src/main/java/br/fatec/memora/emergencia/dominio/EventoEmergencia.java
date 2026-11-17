@@ -111,6 +111,12 @@ public class EventoEmergencia {
         this.expiraLocalizacaoEm = null;
     }
 
+    /** Remove PII de terceiros após a tentativa de envio (minimização de dados, Feature 014). */
+    public void limparDadosDoContato() {
+        this.contatoNome = null;
+        this.contatoDestino = null;
+    }
+
     public UUID getId() {
         return id;
     }

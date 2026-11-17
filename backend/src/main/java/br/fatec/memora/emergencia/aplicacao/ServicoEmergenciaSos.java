@@ -11,11 +11,13 @@ import br.fatec.memora.emergencia.dominio.StatusEventoEmergencia;
 import br.fatec.memora.emergencia.dominio.TipoEventoEmergencia;
 import br.fatec.memora.emergencia.infra.NotificadorDeEmergencia;
 import br.fatec.memora.emergencia.infra.RepositorioEventoEmergencia;
+import br.fatec.memora.emergencia.seguranca.LimitadorDeEnvioSos;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -46,19 +48,25 @@ public class ServicoEmergenciaSos {
             "Seu contato ainda não tem e-mail cadastrado para o aviso automático. "
                     + "Use o celular para avisar ou ligue para o 192.";
 
+    private static final Pattern PADRAO_EMAIL =
+            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+
     private final RepositorioEventoEmergencia eventos;
     private final RepositorioPessoaUsuaria pessoas;
     private final NotificadorDeEmergencia notificador;
+    private final LimitadorDeEnvioSos limitador;
     private final Clock relogio;
 
     public ServicoEmergenciaSos(
             RepositorioEventoEmergencia eventos,
             RepositorioPessoaUsuaria pessoas,
             NotificadorDeEmergencia notificador,
+            LimitadorDeEnvioSos limitador,
             Clock relogio) {
         this.eventos = eventos;
         this.pessoas = pessoas;
         this.notificador = notificador;
+        this.limitador = limitador;
         this.relogio = relogio;
     }
 
@@ -90,6 +98,38 @@ public class ServicoEmergenciaSos {
         Double longitude = request.localizacao() != null ? request.localizacao().longitude() : null;
 
         String destinoLimpo = limpar(request.contatoDestino());
+        if (!contatoEhValido(destinoLimpo)) {
+            EventoEmergencia eventoInvalido =
+                    new EventoEmergencia(
+                            request.eventoId(),
+                            pessoaId,
+                            tipo,
+                            latitude,
+                            longitude,
+                            null,
+                            null,
+                            agora);
+            eventoInvalido.marcarFalha("CONTATO_INVALIDO_OU_INEXISTENTE", agora);
+            eventos.save(eventoInvalido);
+            return new SolicitarSosResponse(
+                    eventoInvalido.getId(),
+                    eventoInvalido.getTipo().name(),
+                    eventoInvalido.getStatus().name(),
+                    MENSAGEM_SEM_CONTATO,
+                    eventoInvalido.getOcorridoEm());
+        }
+
+        LimitadorDeEnvioSos.Decisao decisao =
+                limitador.verificarERegistrar(pessoaId, destinoLimpo, agora);
+        if (!decisao.permitido()) {
+            LOG.warn(
+                    "Limite de envios SOS atingido para pessoa {} (tentar novamente em {}s).",
+                    pessoaId,
+                    decisao.tentarNovamenteEmSegundos());
+            throw FalhaDoMemora.limiteSos(decisao.tentarNovamenteEmSegundos());
+        }
+
+        String nomeContatoLimpo = limpar(request.contatoNome());
         EventoEmergencia evento =
                 new EventoEmergencia(
                         request.eventoId(),
@@ -97,20 +137,9 @@ public class ServicoEmergenciaSos {
                         tipo,
                         latitude,
                         longitude,
-                        limpar(request.contatoNome()),
+                        nomeContatoLimpo,
                         destinoLimpo,
                         agora);
-
-        if (!contatoEhValido(destinoLimpo)) {
-            evento.marcarFalha("CONTATO_INVALIDO_OU_INEXISTENTE", agora);
-            eventos.save(evento);
-            return new SolicitarSosResponse(
-                    evento.getId(),
-                    evento.getTipo().name(),
-                    evento.getStatus().name(),
-                    MENSAGEM_SEM_CONTATO,
-                    evento.getOcorridoEm());
-        }
 
         String nomeSolicitante =
                 pessoas.findById(pessoaId).map(PessoaUsuaria::getNomeTratamento).orElse("");
@@ -139,6 +168,8 @@ public class ServicoEmergenciaSos {
                     instantePosEnvio);
         }
 
+        // Minimização de PII de terceiros: o destino e o nome não ficam retidos após o despacho.
+        evento.limparDadosDoContato();
         eventos.save(evento);
         return paraResposta(evento);
     }
@@ -192,8 +223,7 @@ public class ServicoEmergenciaSos {
             return false;
         }
         if (destino.contains("@")) {
-            int arroba = destino.indexOf('@');
-            return arroba > 0 && destino.indexOf('.', arroba) > arroba + 1;
+            return PADRAO_EMAIL.matcher(destino).matches();
         }
         String digitos = destino.replaceAll("\\D", "");
         return digitos.length() >= 10 && digitos.length() <= 13;

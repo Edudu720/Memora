@@ -45,10 +45,12 @@ A `localizacao` é opcional e só enviada quando autorizada no dispositivo.
 }
 ```
 
-## 3. Prevenção de Duplicidade & Privacidade
+## 3. Prevenção de Duplicidade, Anti-Abuso & Privacidade
 - Cada tentativa confirmada no cliente gera um `UUID` único (`eventoId`), reutilizado em caso de retentativa de rede e recusado/bloqueado contra cliques repetidos enquanto o envio está em processamento.
 - No backend, a chave primária da tabela `evento_emergencia` é o próprio `eventoId`. Reenvios com o mesmo `eventoId` e o mesmo usuário retornam o registro existente sem disparar nova notificação; `eventoId` pertencente a outro usuário é rejeitado.
-- Localização só é persistida quando explicitamente fornecida e recebe prazo de expiração (`expira_localizacao_em = ocorrido_em + 24h`), sendo removida em expurgo periódico.
+- Limitador `LimitadorDeEnvioSos` impõe teto de `3` envios por hora e `10` por dia tanto por conta quanto por destinatário (armazenado via hash SHA-256), respondendo `429 LIMITE_DE_SOS` com `tentar_novamente_em_segundos`; formato de e-mail é validado estritamente antes do envio SMTP.
+- Dados de terceiro (`contato_nome`, `contato_destino`) são limpos antes da persistência após o despacho, e a localização opcional recebe prazo de expiração (`expira_localizacao_em = ocorrido_em + 24h`) com expurgo periódico.
+- Em `producao`, o envio remoto atende contatos com e-mail válido; contatos somente com telefone continuam válidos no aparelho para fallback local (WhatsApp/SMS/`192`). `QUEDA_AUTOMATICA` permanece apenas como reserva estrutural de classificação, respeitando o Princípio VI (nenhuma ação autônoma sem confirmação).
 
 ## 4. Testes
 - Presença persistente do botão SOS nas telas principais durante navegação entre módulos da `CascaInterna`.

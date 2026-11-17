@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.fatec.memora.autenticacao.dominio.EstadoDaConta;
 import br.fatec.memora.autenticacao.seguranca.PessoaAutenticada;
+import br.fatec.memora.comum.FalhaDoMemora;
 import br.fatec.memora.comum.TratadorGlobalDeErros;
 import br.fatec.memora.emergencia.api.dto.SolicitarSosResponse;
 import br.fatec.memora.emergencia.aplicacao.ServicoEmergenciaSos;
@@ -148,5 +149,28 @@ class EmergenciaSosControllerTest {
                                 .content(corpoInvalido))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codigo").value("DADOS_INVALIDOS"));
+    }
+
+    @Test
+    @DisplayName("responde 429 LIMITE_DE_SOS com tentar_novamente_em_segundos quando excede cota")
+    void responde429QuandoExcedeLimiteSos() throws Exception {
+        UUID pessoaId = UUID.randomUUID();
+        principalAtual = new PessoaAutenticada(pessoaId, EstadoDaConta.ATIVA, UUID.randomUUID());
+        when(servico.registrarEEnviar(eq(pessoaId), any()))
+                .thenThrow(FalhaDoMemora.limiteSos(300));
+
+        String corpo =
+                """
+                {"tipo": "SOS_MANUAL", "eventoId": "%s", "contatoDestino": "maria@email.com"}
+                """
+                        .formatted(UUID.randomUUID());
+
+        mockMvc.perform(
+                        post("/api/v1/emergencias/sos")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(corpo))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.codigo").value("LIMITE_DE_SOS"))
+                .andExpect(jsonPath("$.tentar_novamente_em_segundos").value(300));
     }
 }

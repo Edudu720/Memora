@@ -75,6 +75,9 @@ Entretanto, existem situações em que a pessoa necessita de ajuda sem que uma q
 - **BR-008**: O sistema não deve substituir serviços públicos de emergência (`192`), oferecendo a discagem explícita apenas como orientação alternativa mediante ação do usuário.
 - **BR-009**: O acionamento deve possuir mecanismo de proteção contra duplicidade.
 - **BR-010**: A solicitação não deve ser cancelada automaticamente depois de enviada ao servidor.
+- **BR-011**: No perfil `producao`, o envio remoto pelo servidor atualmente requer contato de emergência com e-mail cadastrado; contatos apenas com telefone recebem orientação imediata para acionamento local (WhatsApp/SMS/discador `192`).
+- **BR-012**: Para impedir abuso do servidor como disparador de e-mails e esgotamento da cota SMTP compartilhada (Princípio II), o servidor aplica limite de envios por conta e por destinatário (`429 LIMITE_DE_SOS` com espera), valida estritamente o formato do e-mail e não retém `contato_nome`/`contato_destino` após o despacho. Opt-in prévio de confirmação pelo destinatário fica registrado no `/speckit-clarify` como evolução obrigatória antes de ampliar o envio remoto.
+- **BR-013**: A classificação `QUEDA_AUTOMATICA` permanece reservada apenas no modelo de dados e contrato; nenhum envio autônomo ocorre sem confirmação explícita da pessoa (Princípio VI).
 
 ---
 

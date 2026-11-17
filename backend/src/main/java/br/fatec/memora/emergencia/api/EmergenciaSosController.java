@@ -15,7 +15,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Endpoint autenticado para acionamento manual ou automático de emergência SOS (Feature 014).
+ * Endpoint autenticado para acionamento de emergência SOS (Feature 014).
+ *
+ * <p>A classificação {@code QUEDA_AUTOMATICA} existe no modelo apenas como reserva estrutural; no
+ * aplicativo todo pedido remoto exige confirmação explícita da pessoa (Princípio VI).
  */
 @RestController
 @RequestMapping({"/v1/emergencias", "/api/v1/emergencias"})

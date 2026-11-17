@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,8 @@ public class NotificadorDeEmergenciaPorEmail implements NotificadorDeEmergencia 
 
     private static final Logger LOG =
             LoggerFactory.getLogger(NotificadorDeEmergenciaPorEmail.class);
+    private static final Pattern PADRAO_EMAIL =
+            Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final DateTimeFormatter HORA_BR =
             DateTimeFormatter.ofPattern("dd/MM/yyyy 'às' HH:mm", Locale.forLanguageTag("pt-BR"))
                     .withZone(ZoneId.of("America/Sao_Paulo"));
@@ -60,16 +63,23 @@ public class NotificadorDeEmergenciaPorEmail implements NotificadorDeEmergencia 
         if (destino == null || destino.isBlank()) {
             return ResultadoEntrega.falha("CONTATO_INEXISTENTE");
         }
-        if (!destino.contains("@")) {
+        String destinoLimpo = destino.trim();
+        if (!destinoLimpo.contains("@")) {
             LOG.warn(
                     "Contato de emergencia do evento {} nao possui e-mail para despacho SMTP.",
                     pedido.eventoId());
             return ResultadoEntrega.falha("CANAL_NAO_SUPORTADO_NO_SERVIDOR");
         }
+        if (!PADRAO_EMAIL.matcher(destinoLimpo).matches()) {
+            LOG.warn(
+                    "Formato de e-mail invalido no despacho SOS do evento {}.",
+                    pedido.eventoId());
+            return ResultadoEntrega.falha("EMAIL_INVALIDO");
+        }
 
         SimpleMailMessage mensagem = new SimpleMailMessage();
         mensagem.setFrom(remetente.trim());
-        mensagem.setTo(destino.trim());
+        mensagem.setTo(destinoLimpo);
         mensagem.setSubject("Alerta SOS do Memora — pedido manual de ajuda");
         mensagem.setText(montarCorpoSemLinks(pedido));
 
