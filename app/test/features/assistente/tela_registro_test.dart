@@ -85,6 +85,38 @@ void main() {
     return c;
   }
 
+  group('Uma Memora por tela, também na espera (FR-006, FR-059, T095)', () {
+    testWidgets('esperando a lista, só a Memora da barra fica',
+        (WidgetTester t) async {
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaRegistro(repositorio: assistente),
+        ),
+      );
+
+      // Primeiro quadro: a lista ainda não chegou.
+      expect(find.byType(Carregando), findsOneWidget);
+      expect(find.byType(MemoraAnimada), findsOneWidget);
+      expect(
+        t.widget<MemoraAnimada>(find.byType(MemoraAnimada)).expressao,
+        PoseDaMemora.carregando,
+      );
+
+      // Chegou a lista: a Memora do cartão volta e a da barra sai.
+      await avancar(t);
+      expect(find.byType(Carregando), findsNothing);
+      expect(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is MemoraAnimada && w.expressao == PoseDaMemora.carregando,
+        ),
+        findsNothing,
+      );
+      expect(find.byType(MemoraAnimada), findsWidgets);
+    });
+  });
+
   group('H9 — o registro mostra o que foi feito', () {
     testWidgets('a acao executada aparece, em linguagem comum',
         (WidgetTester t) async {
