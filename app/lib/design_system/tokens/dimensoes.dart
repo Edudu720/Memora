@@ -113,12 +113,6 @@ abstract final class MemoraDimensoes {
   /// 2.5 dp — espessura do giro pequeno.
   static const double espessuraIndicadorEmBotao = 2.5;
 
-  /// 40 dp — o giro que ocupa a tela enquanto a pessoa espera.
-  static const double indicadorDeTela = 40;
-
-  /// 4 dp — espessura do giro grande.
-  static const double espessuraIndicadorDeTela = 4;
-
   // ---------------------------------------------------------------------------
   // Ilustração (feature 004)
   //

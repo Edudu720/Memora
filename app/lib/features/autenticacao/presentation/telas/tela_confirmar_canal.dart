@@ -158,10 +158,17 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
                 padding: const EdgeInsets.all(MemoraEspacamento.md),
                 child: Row(
                   children: <Widget>[
-                    const MemoraPersonagem(
-                      expressao: ExpressaoDaMemora.falando,
-                      tamanho: MemoraDimensoes.alvoDecisao,
-                    ),
+                    // Uma Memora por tela (FR-006): enquanto a espera tem a
+                    // sua, esta cede o lugar (o espaço fica).
+                    if (_enviando)
+                      const SizedBox.square(
+                        dimension: MemoraDimensoes.alvoDecisao,
+                      )
+                    else
+                      const MemoraPersonagem(
+                        expressao: ExpressaoDaMemora.falando,
+                        tamanho: MemoraDimensoes.alvoDecisao,
+                      ),
                     const SizedBox(width: MemoraEspacamento.md),
                     Expanded(
                       child: TextoMemora(

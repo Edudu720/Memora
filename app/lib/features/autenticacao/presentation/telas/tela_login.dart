@@ -164,21 +164,27 @@ class _TelaLoginState extends State<TelaLogin> {
                           ),
                           child: Cartao(
                             padding: const EdgeInsets.all(MemoraEspacamento.md),
-                            child: const Column(
+                            child: Column(
                               children: <Widget>[
                                 Center(
-                                  child: MemoraPersonagem(
-                                    
-                                  ),
+                                  // Uma Memora por tela (FR-006): enquanto a
+                                  // espera tem a sua, esta cede o lugar (o
+                                  // espaço fica, para a tela não pular).
+                                  child: c.enviando
+                                      ? const SizedBox.square(
+                                          dimension: MemoraDimensoes
+                                              .ilustracaoCabecalho,
+                                        )
+                                      : const MemoraPersonagem(),
                                 ),
-                                SizedBox(height: MemoraEspacamento.sm),
-                                TextoMemora(
+                                const SizedBox(height: MemoraEspacamento.sm),
+                                const TextoMemora(
                                   'Memora',
                                   estilo: EstiloTexto.destaque,
                                   alinhamento: TextAlign.center,
                                 ),
-                                SizedBox(height: MemoraEspacamento.xs),
-                                TextoMemora.apoio(
+                                const SizedBox(height: MemoraEspacamento.xs),
+                                const TextoMemora.apoio(
                                   'Seu assistente digital para usar o celular com facilidade',
                                   alinhamento: TextAlign.center,
                                 ),

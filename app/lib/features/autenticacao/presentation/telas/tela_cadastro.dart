@@ -124,9 +124,16 @@ class _TelaCadastroState extends State<TelaCadastro> {
                     padding: const EdgeInsets.all(MemoraEspacamento.md),
                     child: Row(
                       children: <Widget>[
-                        const MemoraPersonagem(
-                          tamanho: MemoraDimensoes.alvoDecisao,
-                        ),
+                        // Uma Memora por tela (FR-006): enquanto a espera tem
+                        // a sua, esta cede o lugar (o espaço fica).
+                        if (c.podeDigitarSenha && c.enviando)
+                          const SizedBox.square(
+                            dimension: MemoraDimensoes.alvoDecisao,
+                          )
+                        else
+                          const MemoraPersonagem(
+                            tamanho: MemoraDimensoes.alvoDecisao,
+                          ),
                         const SizedBox(width: MemoraEspacamento.md),
                         const Expanded(
                           child: TextoMemora(
