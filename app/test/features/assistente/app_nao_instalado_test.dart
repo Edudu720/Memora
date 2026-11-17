@@ -116,6 +116,7 @@ void main() {
                 instalados: const <String>{'com.whatsapp'},
               ),
               aoEscolher: (_) {},
+              aoPedirParaAbrir: (_) {},
               aoAbrirGuia: (_, _) {},
             ),
           ),

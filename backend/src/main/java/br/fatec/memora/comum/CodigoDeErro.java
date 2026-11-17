@@ -95,6 +95,15 @@ public enum CodigoDeErro {
             "Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui."),
 
     /**
+     * Limite temporário de envios remotos de SOS por conta ou destinatário
+     * (Feature 014, Princípio II).
+     */
+    LIMITE_DE_SOS(
+            HttpStatus.TOO_MANY_REQUESTS,
+            "Muitos pedidos de ajuda foram enviados em pouco tempo. Aguarde um "
+                    + "instante antes de tentar novamente ou ligue para o 192."),
+
+    /**
      * O serviço que gera as respostas da assistente não respondeu (T063).
      *
      * <p>Cobre a cota do provedor acabada, falha do lado dele e rede caída: para

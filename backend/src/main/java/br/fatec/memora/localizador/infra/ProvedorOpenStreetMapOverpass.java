@@ -35,11 +35,15 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProvedorOpenStreetMapOverpass.class);
     private static final String OVERPASS_URL_PADRAO = "https://overpass-api.de/api/interpreter";
+    public static final List<String> OVERPASS_URLS_PADRAO = List.of(
+            OVERPASS_URL_PADRAO,
+            "https://overpass.kumi.systems/api/interpreter",
+            "https://overpass.private.coffee/api/interpreter");
     private static final String NOMINATIM_URL_PADRAO = "https://nominatim.openstreetmap.org/search";
 
     private final HttpClient httpClient;
     private final JsonMapper jsonMapper;
-    private final String overpassUrl;
+    private final List<String> overpassUrls;
     private final String nominatimUrl;
     private final LongSupplier relogioMs;
     private final EsperaComInterrupcao esperarMs;
@@ -50,7 +54,14 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
 
     @Autowired
     public ProvedorOpenStreetMapOverpass(JsonMapper jsonMapper) {
-        this(jsonMapper, OVERPASS_URL_PADRAO, NOMINATIM_URL_PADRAO);
+        this(
+                jsonMapper,
+                OVERPASS_URLS_PADRAO,
+                NOMINATIM_URL_PADRAO,
+                System::currentTimeMillis,
+                Thread::sleep,
+                TIMEOUT_NOMINATIM_PADRAO,
+                TIMEOUT_OVERPASS_PADRAO);
     }
 
     public ProvedorOpenStreetMapOverpass(
@@ -63,6 +74,20 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
                 nominatimUrl,
                 System::currentTimeMillis,
                 Thread::sleep);
+    }
+
+    public ProvedorOpenStreetMapOverpass(
+            JsonMapper jsonMapper,
+            List<String> overpassUrls,
+            String nominatimUrl) {
+        this(
+                jsonMapper,
+                overpassUrls,
+                nominatimUrl,
+                System::currentTimeMillis,
+                Thread::sleep,
+                TIMEOUT_NOMINATIM_PADRAO,
+                TIMEOUT_OVERPASS_PADRAO);
     }
 
     public ProvedorOpenStreetMapOverpass(
@@ -89,8 +114,28 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
             EsperaComInterrupcao esperarMs,
             Duration timeoutNominatim,
             Duration timeoutOverpass) {
+        this(
+                jsonMapper,
+                List.of(overpassUrl != null ? overpassUrl : OVERPASS_URL_PADRAO),
+                nominatimUrl,
+                relogioMs,
+                esperarMs,
+                timeoutNominatim,
+                timeoutOverpass);
+    }
+
+    ProvedorOpenStreetMapOverpass(
+            JsonMapper jsonMapper,
+            List<String> overpassUrls,
+            String nominatimUrl,
+            LongSupplier relogioMs,
+            EsperaComInterrupcao esperarMs,
+            Duration timeoutNominatim,
+            Duration timeoutOverpass) {
         this.jsonMapper = jsonMapper != null ? jsonMapper : JsonMapper.builder().build();
-        this.overpassUrl = overpassUrl != null ? overpassUrl : OVERPASS_URL_PADRAO;
+        this.overpassUrls = (overpassUrls != null && !overpassUrls.isEmpty())
+                ? List.copyOf(overpassUrls)
+                : OVERPASS_URLS_PADRAO;
         this.nominatimUrl = nominatimUrl != null ? nominatimUrl : NOMINATIM_URL_PADRAO;
         this.relogioMs = relogioMs != null ? relogioMs : System::currentTimeMillis;
         this.esperarMs = esperarMs != null ? esperarMs : (ms -> {});
@@ -123,33 +168,50 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
             String termoFiltro) {
 
         String queryOverpass = construirQueryOverpass(latitude, longitude, raioMetros, categoria);
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(overpassUrl))
-                    .timeout(timeoutOverpass)
-                    .header("User-Agent", USER_AGENT_PROJETO)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .POST(HttpRequest.BodyPublishers.ofString("data=" + queryOverpass))
-                    .build();
+        ProvedorGeograficoIndisponivelException ultimaFalha = null;
 
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 200) {
-                return parsearElementosOverpass(response.body(), categoria);
+        for (String urlAtual : overpassUrls) {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(urlAtual))
+                        .timeout(timeoutOverpass)
+                        .header("User-Agent", USER_AGENT_PROJETO)
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .POST(HttpRequest.BodyPublishers.ofString("data=" + queryOverpass))
+                        .build();
+
+                HttpResponse<String> response =
+                        httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    return parsearElementosOverpass(response.body(), categoria);
+                }
+                LOG.warn(
+                        "Overpass API em {} retornou HTTP {} sem fallback fictício.",
+                        urlAtual,
+                        response.statusCode());
+                ultimaFalha = new ProvedorGeograficoIndisponivelException(
+                        "Serviço público de mapas retornou status HTTP " + response.statusCode());
+            } catch (ProvedorGeograficoIndisponivelException e) {
+                ultimaFalha = e;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProvedorGeograficoIndisponivelException(
+                        "Consulta ao serviço público de mapas interrompida.", e);
+            } catch (Exception e) {
+                LOG.warn(
+                        "Falha ao consultar Overpass API em {} ({}): {}",
+                        urlAtual,
+                        e.getClass().getSimpleName(),
+                        e.getMessage());
+                ultimaFalha = new ProvedorGeograficoIndisponivelException(
+                        "Não foi possível consultar o serviço de mapas no momento.", e);
             }
-            LOG.warn("Overpass API retornou HTTP {} sem fallback fictício.", response.statusCode());
-            throw new ProvedorGeograficoIndisponivelException(
-                    "Serviço público de mapas retornou status HTTP " + response.statusCode());
-        } catch (ProvedorGeograficoIndisponivelException e) {
-            throw e;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new ProvedorGeograficoIndisponivelException(
-                    "Consulta ao serviço público de mapas interrompida.", e);
-        } catch (Exception e) {
-            LOG.warn("Falha ao consultar Overpass API: {}", e.getMessage());
-            throw new ProvedorGeograficoIndisponivelException(
-                    "Não foi possível consultar o serviço de mapas no momento.", e);
         }
+
+        throw ultimaFalha != null
+                ? ultimaFalha
+                : new ProvedorGeograficoIndisponivelException(
+                        "Não foi possível consultar o serviço de mapas no momento.");
     }
 
     @Override
@@ -192,7 +254,7 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
             throw new ProvedorGeograficoIndisponivelException(
                     "Consulta de geocodificação interrompida.", e);
         } catch (Exception e) {
-            LOG.warn("Erro ao geocodificar com Nominatim: {}", e.getMessage());
+            LOG.warn("Erro ao geocodificar com Nominatim ({}): {}", e.getClass().getSimpleName(), e.getMessage());
             throw new ProvedorGeograficoIndisponivelException(
                     "Não foi possível consultar o serviço de geocodificação no momento.", e);
         }

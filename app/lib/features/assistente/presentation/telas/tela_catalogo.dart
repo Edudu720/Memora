@@ -30,8 +30,15 @@ class TelaCatalogo extends StatefulWidget {
   /// Categoria exibida ao abrir a tela.
   final CategoriaDoServico categoria;
 
-  /// Abre a conversa já perguntando sobre um serviço.
+  /// Abre a conversa já perguntando sobre um serviço (a Memora **ensina**).
   final void Function(ServicoDoCatalogo servico)? aoEscolher;
+
+  /// Abre a conversa já **pedindo para a Memora abrir** o aplicativo.
+  ///
+  /// É um caminho à parte do [aoEscolher]: o botão "Pedir para a Memora abrir"
+  /// não pode reaproveitá-lo, ou o rascunho sai "Você me ensina…" e a Memora
+  /// ensina em vez de abrir. Nulo, o botão não aparece.
+  final void Function(ServicoDoCatalogo servico)? aoPedirParaAbrir;
 
   /// Abre o guia passo a passo quando disponível.
   final void Function(Guia guia, ServicoDoCatalogo servico)? aoAbrirGuia;
@@ -50,6 +57,7 @@ class TelaCatalogo extends StatefulWidget {
     required this.repositorio,
     required this.categoria,
     this.aoEscolher,
+    this.aoPedirParaAbrir,
     this.aoAbrirGuia,
     this.consultaAplicativos,
     this.aoVoltar,
@@ -280,8 +288,8 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                     habilitado:
                         widget.aoEscolher != null || widget.aoAbrirGuia != null,
                     aoAcionarPadrao: () => _acionarPadrao(servico),
-                    aoPedirAbrir: widget.aoEscolher != null
-                        ? () => widget.aoEscolher!(servico)
+                    aoPedirAbrir: widget.aoPedirParaAbrir != null
+                        ? () => widget.aoPedirParaAbrir!(servico)
                         : null,
                   ),
                   const SizedBox(height: MemoraEspacamento.md),

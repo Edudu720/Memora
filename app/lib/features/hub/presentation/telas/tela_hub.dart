@@ -98,16 +98,24 @@ class _TelaHubState extends State<TelaHub> {
               )
             : Stack(
                 children: <Widget>[
-                  SingleChildScrollView(
-                    key: TelaHub.chaveLista,
-                    controller: _rolagem,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: MemoraEspacamento.md,
-                      vertical: MemoraEspacamento.sm,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: _construirPortas(),
+                  NotificationListener<ScrollMetricsNotification>(
+                    onNotification: (ScrollMetricsNotification _) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => _atualizarIndicadorDeRolagem(),
+                      );
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      key: TelaHub.chaveLista,
+                      controller: _rolagem,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: MemoraEspacamento.md,
+                        vertical: MemoraEspacamento.sm,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _construirPortas(),
+                      ),
                     ),
                   ),
                   if (_haMaisAbaixo)
