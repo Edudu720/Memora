@@ -186,9 +186,8 @@ abstract final class TextosAutenticacao {
   /// A FR-059 interrompe um gesto de cuidado, e sem explicação a interrupção
   /// soa como acusação. O texto agradece antes de pedir.
   static const String motivoEntregaDoAparelho =
-      'Você ajudou até aqui, e isso fez toda a diferença 😊 Só que ninguém '
-      'além dela deve saber essa senha — nem eu sei, nem consigo mostrar '
-      'depois.';
+      'Você ajudou até aqui, e isso fez toda a diferença. Só que ninguém além '
+      'dela deve saber essa senha — nem eu sei, nem consigo mostrar depois.';
 
   /// Rótulo do botão que segue para a senha.
   static const String botaoAparelhoEntregue = 'Pronto, o celular está comigo';
@@ -222,7 +221,7 @@ abstract final class TextosAutenticacao {
   /// Não distingue errado de vencido: é uma recusa só, como no servidor.
   static const String codigoNaoConfere =
       'Esse número não conferiu. Ele vale por 10 minutinhos — se já passou, eu '
-      'posso te enviar outro 😊';
+      'posso te enviar outro.';
 
   /// Confirmação de que outro código foi enviado.
   static const String codigoReenviado =
@@ -377,7 +376,7 @@ abstract final class TextosAutenticacao {
   /// mostra o caminho para que da próxima vez ela consiga sozinha.
   static const String promessa =
       'Eu mostro o caminho e *você faz*. E não faço nada sem te avisar '
-      'antes 😊';
+      'antes.';
 
   /// Rótulo da única ação principal da tela.
   static const String botaoComecar = 'Começar minha jornada';
@@ -440,7 +439,7 @@ abstract final class TextosAutenticacao {
   /// acesso" soa como punição para quem só quer emprestar o telefone.
   static const String avisoSair =
       'Para entrar de novo, você vai precisar da sua senha. Seus dados '
-      'continuam guardados, viu? 😊';
+      'continuam guardados, viu?';
 
   /// Confirmação da saída.
   static const String botaoConfirmarSaida = 'Sim, quero sair';

@@ -184,12 +184,12 @@ servidor não manda mais emoji em mensagem de tela.
 `textos_perfil`; o teste do backend passa.
 
 - [X] T028 [US3] `app/test/design_system/texto_da_interface_test.dart`: varredura lexical (R6) — mais de 2 frases, palavras/frases proibidas da memora-ux, emoji fora da fala da IA — sobre a **lista de arquivos da Fase A** (a lista cresce na T068); provar quebrando com um bloco de 3 frases, um "idoso" e um emoji
-- [ ] T029 [US3] Rodar o portão e listar os blocos reprovados em `textos_ajuda.dart`, `textos_apresentacao.dart`, `textos_autenticacao.dart`, `textos_configuracoes.dart` e `textos_perfil.dart`
-- [ ] T030 [P] [US3] Reescrever os reprovados de `textos_autenticacao.dart` e `textos_perfil.dart` (duas frases, voz da Memora; excedente vira etapa ou "Saber mais"; o necessário para decidir continua visível — FR-017)
-- [ ] T031 [P] [US3] Reescrever os reprovados de `textos_ajuda.dart`, `textos_apresentacao.dart` e `textos_configuracoes.dart` (mesmas regras)
-- [ ] T032 [US3] Onde um texto virou "Saber mais" ou etapa, ajustar a tela correspondente (só telas que a #71 não altera; as outras vão para a T069) e os testes que procuravam a frase antiga
-- [ ] T033 [P] [US3] Backend: `TextoDaInterfaceTest` varrendo `CodigoDeErro` e as mensagens dos controladores atrás de emoji; provar quebrando
-- [ ] T034 [US3] Backend: tirar o "😊" das mensagens que chegam à tela (FR-020) e conferir as duas frases delas. **(rev. 16/11)** Na `develop` são 6 arquivos: `CodigoDeErro` (6 ocorrências), `ControladorRecuperacao` (4), `ServicoDeCadastro` (2), `ControladorCanais` (1), `ControladorRegistro` (1); as 2 do `ClienteDaAssistenteSimulado` são fala da IA e ficam (no máximo uma por mensagem, T042)
+- [X] T029 [US3] Rodar o portão e listar os blocos reprovados em `textos_ajuda.dart`, `textos_apresentacao.dart`, `textos_autenticacao.dart`, `textos_configuracoes.dart` e `textos_perfil.dart`
+- [X] T030 [P] [US3] Reescrever os reprovados de `textos_autenticacao.dart` e `textos_perfil.dart` (duas frases, voz da Memora; excedente vira etapa ou "Saber mais"; o necessário para decidir continua visível — FR-017)
+- [X] T031 [P] [US3] Reescrever os reprovados de `textos_ajuda.dart`, `textos_apresentacao.dart` e `textos_configuracoes.dart` (mesmas regras)
+- [X] T032 [US3] Onde um texto virou "Saber mais" ou etapa, ajustar a tela correspondente (só telas que a #71 não altera; as outras vão para a T069) e os testes que procuravam a frase antiga
+- [X] T033 [P] [US3] Backend: `TextoDaInterfaceTest` varrendo `CodigoDeErro` e as mensagens dos controladores atrás de emoji; provar quebrando
+- [X] T034 [US3] Backend: tirar o "😊" das mensagens que chegam à tela (FR-020) e conferir as duas frases delas. **(rev. 16/11)** Na `develop` são 6 arquivos: `CodigoDeErro` (6 ocorrências), `ControladorRecuperacao` (4), `ServicoDeCadastro` (2), `ControladorCanais` (1), `ControladorRegistro` (1); as 2 do `ClienteDaAssistenteSimulado` são fala da IA e ficam (no máximo uma por mensagem, T042)
 
 **Checkpoint**: o portão de texto existe e protege o que já foi revisto.
 
@@ -214,9 +214,9 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 7: User Story 4 — Conversa — parte A (emoji)
 
-- [ ] T040 [P] [US4] `app/test/features/assistente/limitar_emoji_test.dart`: zero, um e vários emojis; emoji composto (com modificador de tom e com junção) conta como um; sem espaço duplo (V11); quebrar devolvendo o texto sem filtro
-- [ ] T041 [US4] `app/lib/features/assistente/domain/limitar_emoji.dart` (contrato) e aplicá-lo no texto exibido da resposta em `texto_da_fala.dart` (FR-024)
-- [ ] T042 [P] [US4] Backend: regra "no máximo um emoji por mensagem, nunca no lugar de uma palavra" em `PersonaDaMemora.java`, com teste em `PersonaDaMemoraTest`; conferir que as falas do `ClienteDaAssistenteSimulado` obedecem (FR-023)
+- [X] T040 [P] [US4] `app/test/features/assistente/limitar_emoji_test.dart`: zero, um e vários emojis; emoji composto (com modificador de tom e com junção) conta como um; sem espaço duplo (V11); quebrar devolvendo o texto sem filtro
+- [X] T041 [US4] `app/lib/features/assistente/domain/limitar_emoji.dart` (contrato) e aplicá-lo no texto exibido da resposta em `texto_da_fala.dart` (FR-024)
+- [X] T042 [P] [US4] Backend: regra "no máximo um emoji por mensagem, nunca no lugar de uma palavra" em `PersonaDaMemora.java`, com teste em `PersonaDaMemoraTest`; conferir que as falas do `ClienteDaAssistenteSimulado` obedecem (FR-023)
 
 ---
 
