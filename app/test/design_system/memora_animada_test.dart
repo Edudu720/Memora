@@ -5,6 +5,7 @@ import 'package:memora/design_system/componentes/ilustracao/memora_animada/pinto
 import 'package:memora/design_system/componentes/ilustracao/memora_animada/pintores/pintor_da_memora.dart';
 import 'package:memora/design_system/componentes/ilustracao/memora_animada/vida_da_memora.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 /// A `MemoraAnimada` (feature 013, V1 a V4): monta, é decorativa, respeita
 /// "reduzir movimento" e reage ao toque do jeito certo.
@@ -17,6 +18,7 @@ import 'package:memora/design_system/design_system.dart';
 /// nele `aceno` e `piscar` são zero em repouso e diferentes de zero durante o
 /// gesto. É o mesmo número que a pessoa vê.
 void main() {
+  movimentoLiberado();
   final Finder memora = find.byType(MemoraAnimada);
 
   Future<void> montar(

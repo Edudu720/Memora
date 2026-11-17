@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 Widget _comTema(Widget filho) {
   return MaterialApp(
@@ -475,6 +476,7 @@ void main() {
       testWidgets(
         'as 4 variantes encolhem ao toque e variantes transparentes ganham preenchimento destaque',
         (WidgetTester tester) async {
+      liberarMovimento(tester);
           final List<(Widget, bool)> casos = <(Widget, bool)>[
             (BotaoPrimario(rotulo: 'Primário', aoTocar: () {}), false),
             (BotaoSecundario(rotulo: 'Secundário', aoTocar: () {}), true),

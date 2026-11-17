@@ -9,6 +9,7 @@ import '../../tokens/raio.dart';
 import '../botoes/botao_terciario.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
+import '../toque/superficie_tocavel.dart';
 
 /// O aviso de segurança que fica sempre na tela, sem tomar a tela (R5).
 ///
@@ -127,37 +128,33 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
 
   /// A linha única: escudo, núcleo do aviso e uma seta, tudo um alvo só.
   Widget _linha(MemoraCores cores) {
-    return Semantics(
-      button: true,
-      onTap: _alternar,
-      label: widget.resumo,
-      hint: AvisoCompacto.rotuloAbrir,
-      excludeSemantics: true,
-      child: InkWell(
-        key: AvisoCompacto.chaveAlternar,
-        onTap: _alternar,
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: MemoraDimensoes.alvoMinimo,
-          ),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                Icons.shield_outlined,
-                size: MemoraDimensoes.iconeDestaque,
-                color: cores.perigo,
-              ),
-              const SizedBox(width: MemoraEspacamento.sm),
-              Expanded(child: TextoMemora.apoio(widget.resumo)),
-              const SizedBox(width: MemoraEspacamento.sm),
-              Icon(
-                Icons.expand_more_rounded,
-                size: MemoraDimensoes.iconePadrao,
-                color: cores.texto,
-              ),
-            ],
-          ),
+    return SuperficieTocavel(
+      key: AvisoCompacto.chaveAlternar,
+      rotulo: widget.resumo,
+      dica: AvisoCompacto.rotuloAbrir,
+      aoTocar: _alternar,
+      fundo: Colors.transparent,
+      raio: BorderRadius.circular(MemoraRaio.padrao),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: MemoraDimensoes.alvoMinimo,
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.shield_rounded,
+              size: MemoraDimensoes.iconeDestaque,
+              color: cores.perigo,
+            ),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Expanded(child: TextoMemora.apoio(widget.resumo)),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Icon(
+              Icons.expand_more_rounded,
+              size: MemoraDimensoes.iconePadrao,
+              color: cores.texto,
+            ),
+          ],
         ),
       ),
     );
@@ -172,28 +169,24 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     return Align(
       alignment: Alignment.centerRight,
       heightFactor: 1,
-      child: Semantics(
-        button: true,
-        onTap: _alternar,
-        label: widget.resumo,
-        hint: AvisoCompacto.rotuloAbrir,
-        excludeSemantics: true,
-        child: InkWell(
-          key: AvisoCompacto.chaveAlternar,
-          onTap: _alternar,
-          customBorder: const CircleBorder(),
-          // Tamanho fixo, e não "no mínimo": um `Center` dentro de um mínimo
-          // se estica até o máximo que o pai oferece, e o escudo tomava a
-          // altura toda que o aviso aberto teria.
-          child: SizedBox(
-            width: MemoraDimensoes.alvoMinimo,
-            height: MemoraDimensoes.alvoMinimo,
-            child: Center(
-              child: Icon(
-                Icons.shield_outlined,
-                size: MemoraDimensoes.iconeDestaque,
-                color: cores.perigo,
-              ),
+      child: SuperficieTocavel(
+        key: AvisoCompacto.chaveAlternar,
+        rotulo: widget.resumo,
+        dica: AvisoCompacto.rotuloAbrir,
+        aoTocar: _alternar,
+        fundo: Colors.transparent,
+        raio: BorderRadius.circular(MemoraRaio.pilula),
+        // Tamanho fixo, e não "no mínimo": um `Center` dentro de um mínimo
+        // se estica até o máximo que o pai oferece, e o escudo tomava a
+        // altura toda que o aviso aberto teria.
+        child: SizedBox(
+          width: MemoraDimensoes.alvoMinimo,
+          height: MemoraDimensoes.alvoMinimo,
+          child: Center(
+            child: Icon(
+              Icons.shield_rounded,
+              size: MemoraDimensoes.iconeDestaque,
+              color: cores.perigo,
             ),
           ),
         ),
@@ -212,7 +205,7 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
           const SizedBox(width: MemoraEspacamento.sm),
         ] else ...<Widget>[
           Icon(
-            Icons.shield_outlined,
+            Icons.shield_rounded,
             size: MemoraDimensoes.iconeDestaque,
             color: cores.perigo,
           ),
@@ -276,6 +269,7 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
         rotulo: _aberto
             ? AvisoCompacto.rotuloFechar
             : AvisoCompacto.rotuloAbrir,
+        icone: _aberto ? Icons.expand_less_rounded : Icons.expand_more_rounded,
         aoTocar: _alternar,
       ),
     );

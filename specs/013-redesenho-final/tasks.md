@@ -35,10 +35,10 @@ abre PR **para a `redesign-final`**, revisada por outra pessoa da equipe
 (nunca por quem escreveu). No fim, a `redesign-final` vai para a `develop`
 numa PR só.
 
-| Quem | Tarefas | Abertas |
+| Quem | Tarefas | Abertas (17/11) |
 |---|---|---|
-| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, barra inferior T055–T057, T059, T072, T073, T076. **Fechamento**: T043–T046, T078 | 43 |
-| **Eduardo Juncker** | **Textos**: T029–T034, T066–T070. **Emoji na IA**: T040–T042. **Conversa**: T058, T060, T061, T062. **Ícones**: T063–T065. **Telas da 009 e da 011**: T071, T081. **Validação**: T074, T075, T077, T079 | 27 |
+| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, T093, barra inferior T055–T057, T059, T072, T073, T076, T092. **Fechamento**: T043–T046, T078. Parte da T091 | 15 |
+| **Eduardo Juncker** | **Textos**: T029–T034, T066–T070. **Emoji na IA**: T040–T042. **Conversa**: T058, T060, T061, T062. **Ícones**: T063–T065. **Telas da 009 e da 011**: T071, T081. **Validação**: T074, T075, T077, T079. Parte da T091 | 14 |
 | **Eduardo Trevisan** | **Todo o site** (spec 012): as tarefas S01–S13 de `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md`, mais a T082 | site |
 
 Por que essa divisão: o Henrique ficou com as mais pesadas (a Memora, a
@@ -184,12 +184,12 @@ servidor não manda mais emoji em mensagem de tela.
 `textos_perfil`; o teste do backend passa.
 
 - [X] T028 [US3] `app/test/design_system/texto_da_interface_test.dart`: varredura lexical (R6) — mais de 2 frases, palavras/frases proibidas da memora-ux, emoji fora da fala da IA — sobre a **lista de arquivos da Fase A** (a lista cresce na T068); provar quebrando com um bloco de 3 frases, um "idoso" e um emoji
-- [ ] T029 [US3] Rodar o portão e listar os blocos reprovados em `textos_ajuda.dart`, `textos_apresentacao.dart`, `textos_autenticacao.dart`, `textos_configuracoes.dart` e `textos_perfil.dart`
-- [ ] T030 [P] [US3] Reescrever os reprovados de `textos_autenticacao.dart` e `textos_perfil.dart` (duas frases, voz da Memora; excedente vira etapa ou "Saber mais"; o necessário para decidir continua visível — FR-017)
-- [ ] T031 [P] [US3] Reescrever os reprovados de `textos_ajuda.dart`, `textos_apresentacao.dart` e `textos_configuracoes.dart` (mesmas regras)
-- [ ] T032 [US3] Onde um texto virou "Saber mais" ou etapa, ajustar a tela correspondente (só telas que a #71 não altera; as outras vão para a T069) e os testes que procuravam a frase antiga
-- [ ] T033 [P] [US3] Backend: `TextoDaInterfaceTest` varrendo `CodigoDeErro` e as mensagens dos controladores atrás de emoji; provar quebrando
-- [ ] T034 [US3] Backend: tirar o "😊" das mensagens que chegam à tela (FR-020) e conferir as duas frases delas. **(rev. 16/11)** Na `develop` são 6 arquivos: `CodigoDeErro` (6 ocorrências), `ControladorRecuperacao` (4), `ServicoDeCadastro` (2), `ControladorCanais` (1), `ControladorRegistro` (1); as 2 do `ClienteDaAssistenteSimulado` são fala da IA e ficam (no máximo uma por mensagem, T042)
+- [X] T029 [US3] Rodar o portão e listar os blocos reprovados em `textos_ajuda.dart`, `textos_apresentacao.dart`, `textos_autenticacao.dart`, `textos_configuracoes.dart` e `textos_perfil.dart`
+- [X] T030 [P] [US3] Reescrever os reprovados de `textos_autenticacao.dart` e `textos_perfil.dart` (duas frases, voz da Memora; excedente vira etapa ou "Saber mais"; o necessário para decidir continua visível — FR-017)
+- [X] T031 [P] [US3] Reescrever os reprovados de `textos_ajuda.dart`, `textos_apresentacao.dart` e `textos_configuracoes.dart` (mesmas regras)
+- [X] T032 [US3] Onde um texto virou "Saber mais" ou etapa, ajustar a tela correspondente (só telas que a #71 não altera; as outras vão para a T069) e os testes que procuravam a frase antiga
+- [X] T033 [P] [US3] Backend: `TextoDaInterfaceTest` varrendo `CodigoDeErro` e as mensagens dos controladores atrás de emoji; provar quebrando
+- [X] T034 [US3] Backend: tirar o "😊" das mensagens que chegam à tela (FR-020) e conferir as duas frases delas. **(rev. 16/11)** Na `develop` são 6 arquivos: `CodigoDeErro` (6 ocorrências), `ControladorRecuperacao` (4), `ServicoDeCadastro` (2), `ControladorCanais` (1), `ControladorRegistro` (1); as 2 do `ClienteDaAssistenteSimulado` são fala da IA e ficam (no máximo uma por mensagem, T042)
 
 **Checkpoint**: o portão de texto existe e protege o que já foi revisto.
 
@@ -214,9 +214,9 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 7: User Story 4 — Conversa — parte A (emoji)
 
-- [ ] T040 [P] [US4] `app/test/features/assistente/limitar_emoji_test.dart`: zero, um e vários emojis; emoji composto (com modificador de tom e com junção) conta como um; sem espaço duplo (V11); quebrar devolvendo o texto sem filtro
-- [ ] T041 [US4] `app/lib/features/assistente/domain/limitar_emoji.dart` (contrato) e aplicá-lo no texto exibido da resposta em `texto_da_fala.dart` (FR-024)
-- [ ] T042 [P] [US4] Backend: regra "no máximo um emoji por mensagem, nunca no lugar de uma palavra" em `PersonaDaMemora.java`, com teste em `PersonaDaMemoraTest`; conferir que as falas do `ClienteDaAssistenteSimulado` obedecem (FR-023)
+- [X] T040 [P] [US4] `app/test/features/assistente/limitar_emoji_test.dart`: zero, um e vários emojis; emoji composto (com modificador de tom e com junção) conta como um; sem espaço duplo (V11); quebrar devolvendo o texto sem filtro
+- [X] T041 [US4] `app/lib/features/assistente/domain/limitar_emoji.dart` (contrato) e aplicá-lo no texto exibido da resposta em `texto_da_fala.dart` (FR-024)
+- [X] T042 [P] [US4] Backend: regra "no máximo um emoji por mensagem, nunca no lugar de uma palavra" em `PersonaDaMemora.java`, com teste em `PersonaDaMemoraTest`; conferir que as falas do `ClienteDaAssistenteSimulado` obedecem (FR-023)
 
 ---
 
@@ -225,7 +225,7 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé)
 - [ ] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5)
 - [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013
-- [ ] T046 PR da Fase A para a `develop` **(rev. 16/11)**: depois da T080, já sobre a `develop` com as #71, #73 e #74
+- [X] T046 ~~PR da Fase A para a `develop`~~ **Substituída (2026-11-17, decisão do Henrique)**: com a branch comum `redesign-final`, as fases A e B vão juntas para a `develop` numa PR só, ao fim do redesenho; cada frente entra antes na `redesign-final` por PR revisada por outra pessoa
 
 ---
 
@@ -239,28 +239,29 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 9: Integração com a 007
 
-- [ ] T047 [US1] `memora_personagem.dart`: a `MemoraPersonagem` passa a montar uma `MemoraAnimada`, com a mesma assinatura e o mesmo enum (inclusive `dica` e `mini` da #71); o leitor de tela continua igual
-- [ ] T048 [US1] Mover os tokens de `cores_da_memora.dart` para o esquema de cores da #71 (`cores.dart`) e apagar o arquivo separado; `validar_paleta.py` continua passando. **(rev. 16/11)** O `MemoraTheme.comPaleta(nome)` recebe o nome da paleta mas não o guarda: guardar o nome no tema e trocar a descoberta da paleta "pela cor primária" (frágil) por ele
+- [X] T047 [US1] `memora_personagem.dart`: a `MemoraPersonagem` passa a montar uma `MemoraAnimada`, com a mesma assinatura e o mesmo enum (inclusive `dica` e `mini` da #71); o leitor de tela continua igual
+- [X] T048 [US1] Mover os tokens de `cores_da_memora.dart` para o esquema de cores da #71 (`cores.dart`) e apagar o arquivo separado; `validar_paleta.py` continua passando. **(rev. 16/11)** O `MemoraTheme.comPaleta(nome)` recebe o nome da paleta mas não o guarda: guardar o nome no tema e trocar a descoberta da paleta "pela cor primária" (frágil) por ele
 - [X] T049 [US2] Registrar a `TransicaoMemora` como transição de página padrão em `temas_memora.dart` (cobre toda rota de página que restar, inclusive as da #71)
 - [X] T050 [US2] Trocar o `MaterialPageRoute` de `fluxo_autenticacao.dart` pela `RotaMemora`
-- [ ] T051 [US1] Remover os PNGs da Memora de `app/assets/ilustracoes/` que não forem mais usados, e o registro deles no `pubspec.yaml` (o ícone do aplicativo continua); conferir que nenhum teste os carrega
-- [ ] T052 [US1] `memora_distancia_test.dart`: em cada tela em que a Memora aparece, a área dela fica a ≥ 8 dp de qualquer alvo de toque, na matriz de aparelhos (V5, FR-005c); quebrar encostando a Memora num botão
+- [X] T051 [US1] Remover os PNGs da Memora de `app/assets/ilustracoes/` que não forem mais usados, e o registro deles no `pubspec.yaml` (o ícone do aplicativo continua); conferir que nenhum teste os carrega
+- [X] T052 [US1] `memora_distancia_test.dart`: em cada tela em que a Memora aparece, a área dela fica a ≥ 8 dp de qualquer alvo de toque, na matriz de aparelhos (V5, FR-005c); quebrar encostando a Memora num botão
 
 ## Phase 10: User Story 7 — Início e barra inferior (P1) — parte B
 
-- [ ] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006). **(2026-11-16)** A anfitriã só segura a dica quando o toque é nela ou no balão: a T053 precisa passar a ela um sinal de atividade do Início, para a FR-052 valer para toques em qualquer lugar da tela. **(2026-11-16)** A Memora do topo é a **`MemoraAnfitria`** (fase 3b, T089), não a `MemoraAnimada` comum
-- [ ] T054 [US7] Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance; atualizar `inicio_ocupa_a_altura_test.dart` e a matriz (FR-041, V13); quebrar fixando a altura da Memora
+- [X] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006). **(2026-11-16)** A anfitriã só segura a dica quando o toque é nela ou no balão: a T053 precisa passar a ela um sinal de atividade do Início, para a FR-052 valer para toques em qualquer lugar da tela. **(2026-11-16)** A Memora do topo é a **`MemoraAnfitria`** (fase 3b, T089), não a `MemoraAnimada` comum
+- [X] T054 [US7] Com a anfitriã (balão de ~134 dp, medido pela dica mais longa) o Início passou a rolar no aparelho de referência; o `inicio_ocupa_a_altura_test` trocou a asserção "sobra ≥ 0" por "se rola, tudo alcançável". **(2026-11-17) O Henrique aceitou a rolagem**: FR-040 revista e registrada no clarify. Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance (FR-041, V13). **Provado quebrando** em 2026-11-17: com a altura da anfitriã fixa (sem dividir pela ampliação), 12 casos reprovam ("o desenho dela não é a fração da altura", 85,2 dp contra 56,8 a 150%). As duas Memoras das boas-vindas saíram daqui para a T093
+- [ ] T093 [US7] **(2026-11-17, separada da T054)** As boas-vindas mostram duas Memoras, contra a FR-006: deixar uma só, com teste que reprove se aparecer a segunda
 - [ ] T055 [P] [US7] `app/test/design_system/navegacao_inferior_test.dart` (novo): ícone + rótulo juntos, alvo ≥ 48 dp, indicador desliza até o destino tocado, sem deslizar com "reduzir movimento" (V15); quebrar tirando o rótulo
 - [ ] T056 [US7] `navegacao_inferior.dart`: barra refeita no acabamento da 007 (superfície, sombra, cantos), ícones arredondados da família única no lugar dos SVG de `assets/icones/navegacao/`, indicador deslizante e resposta ao toque (FR-044 a FR-047, R5)
 - [ ] T057 [US7] Apagar `assets/icones/navegacao/` e ajustar `icones_de_navegacao_test.dart` (o teste passa a conferir a família, não os arquivos)
 
 ## Phase 11: User Story 4 — Conversa limpa (P2)
 
-- [ ] T058 [US4] `tela_conversa.dart`: só o essencial — cabeçalho, aviso compacto, mensagens, campo; sugestões só antes da primeira mensagem; nenhum elemento decorativo (FR-043)
+- [X] T058 [US4] `tela_conversa.dart`: só o essencial — cabeçalho, aviso compacto, mensagens, campo; sugestões só antes da primeira mensagem; nenhum elemento decorativo (FR-043)
 - [ ] T059 [US4] A Memora pequena no topo da conversa, `falando` enquanto a resposta aparece letra a letra, sem rosto ao lado de cada balão (FR-025, FR-042); ajustar `balao_de_fala.dart`
-- [ ] T060 [US4] Ícones da conversa (enviar, ditar, sugestões, aviso) da família única, com texto e resposta ao toque (FR-029)
-- [ ] T061 [US4] Atualizar `conversa_acessibilidade_test.dart` e a matriz: o aviso continua encolhendo e não sumindo (FR-026), a lista de mensagens mantém a altura mínima (V14)
-- [ ] T062 [US4] Voz: **(rev. 16/11) já implementada na #71** — `leitor_de_voz_nativo.dart` usa `onDevice: true` e não repete pela nuvem, com `ditado_por_voz_test.dart`. Falta: **provar o teste quebrando** (tirar o `onDevice` e ver reprovar) e conferir no aparelho sem reconhecimento local que o botão fica indisponível com o motivo em uma frase e que digitar continua (FR-034, V16)
+- [X] T060 [US4] Ícones da conversa (enviar, ditar, sugestões, aviso) da família única, com texto e resposta ao toque (FR-029)
+- [X] T061 [US4] Atualizar `conversa_acessibilidade_test.dart` e a matriz: o aviso continua encolhendo e não sumindo (FR-026), a lista de mensagens mantém a altura mínima (V14)
+- [X] T062 [US4] Voz: **(rev. 16/11) já implementada na #71** — `leitor_de_voz_nativo.dart` usa `onDevice: true` e não repete pela nuvem, com `ditado_por_voz_test.dart`. Falta: **provar o teste quebrando** (tirar o `onDevice` e ver reprovar) e conferir no aparelho sem reconhecimento local que o botão fica indisponível com o motivo em uma frase e que digitar continua (FR-034, V16)
 
 ## Phase 12: User Story 5 — Ícones e toque (P2)
 
@@ -280,6 +281,7 @@ acenando → fluxo de entrada, sem pulo.
 
 - [ ] T071 [P] [US6] Localizador (`tela_localizador.dart`) e os diálogos de permissão de localização, rota e ligação na linguagem da 013: Memora, transições, ícones, texto; sem mudar o comportamento da 009 (FR-031, FR-032)
 - [ ] T072 [P] [US6] Seletor de seções e passo a passo: Memora `comemorando` na conclusão (FR-003), transição de avançar/voltar entre passos com a `RotaMemora` ou equivalente
+- [ ] T092 [US7] **(2026-11-16, pedido do Henrique)** A `AberturaMemora` passa a usar o desenho da **anfitriã** (FR-048) **segurando a barra de carregamento** entre as mãos, no lugar da Memora comum só acenando. A barra é indeterminada enquanto carrega; com "reduzir movimento" fica parada e a Memora também; o leitor de tela ouve "Abrindo o Memora." (já existe). A saída continua "carregou e completou o gesto", sem prolongar de propósito (FR-038). A abertura nativa do Android (`memora_abertura*.xml`) **fica como está**. Testes da abertura atualizados (com `movimentoLiberado()`) e prova quebrando
 - [ ] T091 [US2] **(2026-11-16, achado na T025)** Os `showDialog` crus de `dialogo_contato_emergencia.dart` (Cuidado — Henrique) e de `tela_localizador.dart` (Eduardo, junto da T071) passam a abrir pela transição de sobreposição do `Dialogo`: hoje ficam sem a animação nova e com 150 ms fixos mesmo com "reduzir movimento" (contra a FR-013). Se o conteúdo deles for mais rico que o do `DialogoMemora`, dar a ele um construtor de conteúdo livre
 - [ ] T081 [P] [US6] **(rev. 16/11)** Telas da foto de perfil (#73) — `SecaoFotoPerfil`, `TelaPreVisualizacaoFoto`, `RetratoDoPerfil` e os textos novos de `textos_perfil.dart` — na linguagem da 013 (transições, ícones, duas frases), sem mudar o comportamento da spec 011. No Perfil, o topo é o **retrato da pessoa** (decisão da integração das #71 e #73): a Memora não aparece ali
 - [ ] T073 [US6] Estados de carregando, vazio e erro de todas as telas com a Memora na expressão certa (FR-001)

@@ -94,8 +94,8 @@ abstract final class TextosApresentacao {
 
   /// A resposta de exemplo, no balão da Memora.
   static const String exemploResposta =
-      'Claro! Primeiro abra o WhatsApp e entre na conversa com quem vai '
-      'receber a foto. Quando estiver lá, me avise, e eu mostro o próximo '
+      'Claro, primeiro abra o WhatsApp e entre na conversa com quem vai '
+      'receber a foto. Quando estiver lá, me avise que eu mostro o próximo '
       'passo.';
 
   /// Fecha a apresentação e leva ao Início.

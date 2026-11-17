@@ -17,6 +17,7 @@ import '../features/autenticacao/dubles_autenticacao.dart';
 import '../features/autenticacao/fluxo_dentro_da_conta.dart';
 import '../suporte/aceite_em_memoria.dart';
 import 'package:memora/services/seguranca/sessao_perdida.dart';
+import '../suporte/movimento.dart';
 
 /// V9 — redução de movimento (FR-027, FR-028).
 ///
@@ -35,6 +36,7 @@ import 'package:memora/services/seguranca/sessao_perdida.dart';
 /// pega esse terceiro no dia em que ele nascer, sem ninguém precisar lembrar
 /// de escrever um caso para ele.
 void main() {
+  movimentoLiberado();
   Future<void> montar(
     WidgetTester t,
     Widget filho, {

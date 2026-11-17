@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../../../features/assistente/domain/limitar_emoji.dart';
 import '../../tokens/movimento.dart';
 import 'texto_com_negrito.dart';
 
@@ -73,10 +74,12 @@ class _TextoDaFalaState extends State<TextoDaFala>
   double _reveladas = 0;
   int _total = 0;
   Duration _ultimoQuadro = Duration.zero;
+  late String _textoExibido;
 
   @override
   void initState() {
     super.initState();
+    _textoExibido = limitarEmoji(widget.texto);
     _total = _contar();
     if (!widget.aosPoucos) _reveladas = _total.toDouble();
   }
@@ -90,6 +93,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
   @override
   void didUpdateWidget(TextoDaFala antigo) {
     super.didUpdateWidget(antigo);
+    _textoExibido = limitarEmoji(widget.texto);
     _total = _contar();
     _ajustar();
   }
@@ -101,7 +105,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
   }
 
   int _contar() => TextoComNegrito.quantasLetras(
-    widget.texto,
+    _textoExibido,
     emAndamento: widget.emAndamento,
   );
 
@@ -164,7 +168,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
   @override
   Widget build(BuildContext context) {
     return TextoComNegrito(
-      widget.texto,
+      _textoExibido,
       emAndamento: widget.emAndamento,
       caracteresVisiveis: _reveladas >= _total ? null : _reveladas.floor(),
     );

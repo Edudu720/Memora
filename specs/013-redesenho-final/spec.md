@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-15
 
-**Status**: Aprovada pelo Henrique para implementar a Fase A até a T018 (2026-11-15); ratificação de Eduardo e Trevisan pendente
+**Status**: Aprovada pelo Henrique (2026-11-15) e ratificada por Eduardo Juncker (2026-11-16); ratificação de Trevisan pendente
 
 **Input**: Ideias do Henrique em 2026-11-15: "telas de blocos simples porém
 sofisticados, com estética de software atual, UI/UX limpa e entendível. Os
@@ -83,11 +83,26 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   privacidade) e um modelo 3D da Memora que a equipe não tem; o 2.5D com luz,
   brilho, sombra de contato e giro de cabeça entrega a sensação de volume sem
   dependência nova (FR-048 a FR-058).
+- Pedido do Henrique ao ver a abertura no celular (2026-11-16, noite): a tela
+  de carregamento passa a mostrar a **anfitriã** (o desenho aprimorado da
+  FR-048) **segurando a barra de carregamento**, em vez da Memora comum só
+  acenando; o aceno de antes durava pouco demais. A Memora parada da abertura
+  nativa do Android (o instante antes do aplicativo) **fica como está** por
+  ora (FR-036, FR-037; T092).
 - Consequências que a constituição impõe ao pedido: a dica que troca sozinha
   precisa poder parar (WCAG 2.2.2, FR-052/053); o toque na anfitriã vira uma
   **ação** ("outra dica") e por isso ganha rótulo e área de toque (FR-055),
   diferente das outras Memoras; as dicas vêm de lista fixa no aplicativo,
   nunca da IA nem do servidor (FR-050).
+
+### Session 2026-11-17
+
+- Q: Com a anfitriã (o balão da dica mais longa tem ~134 dp), o Início passou
+  a rolar no aparelho de referência. Encurtar as dicas para caber, ou aceitar
+  a rolagem? → A: **A rolagem é esperada** (decisão do Henrique). O Início
+  pode passar da altura da tela; o que não couber chega ao alcance pela
+  rolagem, e a anfitriã continua sendo a primeira a encolher com letra
+  ampliada (FR-040, FR-041; T054).
 
 ---
 
@@ -514,7 +529,10 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
 - **FR-039**: Com "reduzir movimento" ligado, a Memora da tela de carregamento
   MUST aparecer parada, em pose de aceno.
 - **FR-040**: No Início, a Memora em 2.5D MUST ocupar a parte superior da tela
-  (cerca de um terço da altura, com letra a 100%), junto da saudação.
+  (cerca de um terço da altura, com letra a 100%), junto da saudação. O
+  Início MAY rolar: com a anfitriã e os atalhos o conteúdo passa da altura
+  do aparelho de referência, e o que não couber MUST chegar ao alcance pela
+  rolagem, acima da barra inferior (decisão de 2026-11-17).
 - **FR-041**: Com letra ampliada, a área da Memora no Início MUST encolher antes
   de qualquer texto ser cortado ou de qualquer ação sair do alcance; o Início
   MUST continuar passando nas matrizes de acessibilidade.

@@ -70,10 +70,7 @@ class TelaAjuda extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            CabecalhoDeTela(
-              titulo: TextosAjuda.titulo,
-              aoVoltar: aoVoltar,
-            ),
+            CabecalhoDeTela(titulo: TextosAjuda.titulo, aoVoltar: aoVoltar),
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: MemoraEspacamento.lg,
@@ -92,9 +89,7 @@ class TelaAjuda extends StatelessWidget {
                           ),
                           const SizedBox(width: MemoraEspacamento.md),
                         ],
-                        const Expanded(
-                          child: TextoMemora(TextosAjuda.convite),
-                        ),
+                        const Expanded(child: TextoMemora(TextosAjuda.convite)),
                       ],
                     ),
                   ),
@@ -116,7 +111,8 @@ class TelaAjuda extends StatelessWidget {
                                 esquerda: ocultarVisuais
                                     ? null
                                     : Container(
-                                        width: MemoraDimensoes.badgeAtalhoRapido,
+                                        width:
+                                            MemoraDimensoes.badgeAtalhoRapido,
                                         height:
                                             MemoraDimensoes.badgeAtalhoRapido,
                                         decoration: BoxDecoration(
@@ -145,7 +141,8 @@ class TelaAjuda extends StatelessWidget {
                                 esquerda: ocultarVisuais
                                     ? null
                                     : Container(
-                                        width: MemoraDimensoes.badgeAtalhoRapido,
+                                        width:
+                                            MemoraDimensoes.badgeAtalhoRapido,
                                         height:
                                             MemoraDimensoes.badgeAtalhoRapido,
                                         decoration: BoxDecoration(
@@ -155,9 +152,13 @@ class TelaAjuda extends StatelessWidget {
                                           ),
                                         ),
                                         alignment: Alignment.center,
+                                        // Dentro de uma linha tocável: se ela
+                                        // reagisse, tocar na linha acertando o
+                                        // desenho só faria um aceno (FR-005c).
                                         child: const MemoraPersonagem(
                                           tamanho:
                                               MemoraDimensoes.iconeDestaque,
+                                          reageAoToque: false,
                                         ),
                                       ),
                                 aoTocar: aoVerApresentacao,

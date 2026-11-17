@@ -168,6 +168,19 @@ abstract final class MemoraDimensoes {
   /// 390x844 sem rolar, e a figura é o que cede primeiro (regra 7 da R2).
   static const double fracaoDaFiguraDoInicio = 0.14;
 
+  /// Fração da altura disponível que o **lado da anfitriã** do Início ocupa
+  /// (feature 013, T053), antes de descontar a ampliação do texto. A anfitriã
+  /// é a primeira a ceder quando falta altura (FR-041): o lado dela é esta
+  /// fração dividida pela ampliação, entre `alvoMinimo` e `ilustracaoHeroi`.
+  /// Fração, e não pixel, pela lição do teto da conversa.
+  ///
+  /// 0,15 foi medido com a Atkinson: num 390×844 a anfitriã inteira (desenho,
+  /// 8 dp e o balão da dica mais longa) ocupa cerca de **um terço** da altura
+  /// (FR-040). Com os quatro atalhos o Início passa da altura de qualquer
+  /// aparelho e rola — o balão sozinho tem 134 dp —, e o que rola chega ao
+  /// toque, acima da barra.
+  static const double fracaoDaAnfitriaDoInicio = 0.15;
+
   /// 40 dp — abaixo disto a ilustração some. Desenho pequeno demais vira
   /// borrão para quem enxerga pouco, e ocupa o espaço de uma linha de texto.
   static const double pisoDeIlustracao = 40;

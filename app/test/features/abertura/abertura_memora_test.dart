@@ -11,6 +11,7 @@ import 'package:memora/features/abertura/presentation/abertura_memora.dart';
 import 'package:memora/l10n/textos_abertura.dart';
 
 import '../../suporte/aparelhos.dart';
+import '../../suporte/movimento.dart';
 
 /// A abertura com a Memora acenando (feature 013, US7, T035; FR-036 a FR-039,
 /// SC-009).
@@ -29,6 +30,11 @@ import '../../suporte/aparelhos.dart';
 /// aceno dura `MemoraMovimento.aceno` (1,2 s), e depois dele há uma pausa de
 /// `MemoraAbertura.pausaEntreAcenos` antes do aceno seguinte.
 void main() {
+  // O aceno é o que este arquivo prova: liga o movimento que o
+  // flutter_test_config.dart desliga por padrão. Os testes de "reduzir
+  // movimento" ligam a preferência do sistema eles mesmos.
+  movimentoLiberado();
+
   /// Monta só a abertura, sob um tema e um "reduzir movimento" do **sistema**
   /// (ainda não há preferência do aplicativo nessa hora).
   Future<void> montar(
