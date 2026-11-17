@@ -103,6 +103,11 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   pode passar da altura da tela; o que não couber chega ao alcance pela
   rolagem, e a anfitriã continua sendo a primeira a encolher com letra
   ampliada (FR-040, FR-041; T054).
+- Pedido do Henrique ao ver a T092 no celular: **toda espera do aplicativo**
+  (o "Só um instante..." depois de entrar, entrando, criando a conta, saindo,
+  carregando o catálogo e as demais) passa a mostrar **a Memora segurando a
+  barra de carregamento**, como a abertura, no lugar do círculo girando. A
+  frase de espera continua (FR-059; T095).
 
 ---
 
@@ -534,6 +539,11 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
   que está quase pronto.
 - **FR-039**: Com "reduzir movimento" ligado, a Memora da tela de carregamento
   MUST aparecer parada, segurando a barra, e a barra também parada.
+- **FR-059**: Toda espera de tela (o componente de carregamento) MUST mostrar a
+  Memora segurando a barra de carregamento indeterminada, sem número, junto da
+  frase que diz o que está acontecendo; com "reduzir movimento", parada. Se a
+  tela já mostra outra Memora durante a espera, só uma fica (FR-006). O
+  indicador dentro de botão não é espera de tela e fica como está (2026-11-17).
 - **FR-040**: No Início, a Memora em 2.5D MUST ocupar a parte superior da tela
   (cerca de um terço da altura, com letra a 100%), junto da saudação. O
   Início MAY rolar: com a anfitriã e os atalhos o conteúdo passa da altura
