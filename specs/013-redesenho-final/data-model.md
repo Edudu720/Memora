@@ -18,7 +18,8 @@ tela precise mudar. O que muda é o que cada valor desenha.
 | `pensando` *(novo)* | cabeça inclinada, mão no queixo | ajuda, "Estou pensando" da conversa |
 | `comemorando` | braços para cima, salto curto | conclusões |
 | `preocupada` | escudo à frente, olhos atentos | avisos de segurança |
-| `acenando` *(novo)* | braço direito acenando | abertura, boas-vindas |
+| `acenando` *(novo)* | braço direito acenando | boas-vindas (a abertura nativa do Android ainda usa) |
+| `carregando` *(T092)* | as duas mãos seguram a barra de carregamento à frente; não acena nem comemora com as mãos ocupadas | abertura |
 | `dica` *(da #71)* | segura um livro ou cartão | dicas, aprendizado |
 | `mini` *(da #71)* | só a cabeça | lugares pequenos (cabeçalho da conversa) |
 
@@ -31,7 +32,7 @@ Animação curta e única disparada por um evento.
 
 | Gesto | Disparado por | Duração-alvo | Com "reduzir movimento" |
 |---|---|---|---|
-| `aceno` | toque nela; entrada da abertura | ~1,2 s | não acontece |
+| `aceno` | toque nela | ~1,2 s | não acontece |
 | `piscada` | toque nela (alternado com o aceno) | ~0,3 s | não acontece |
 | `comemoracao` | conclusão de um passo a passo | ~1,0 s, uma vez | pose `comemorando` parada |
 
@@ -58,6 +59,6 @@ Uma constante de texto da interface. **Validação** (portão R6):
 
 ## EstadoDaAbertura (novo)
 
-`carregando` → (`pronto` **e** aceno concluído) → `saindo` → fluxo de
+`carregando` → (`pronto` **e** passada da barra concluída, ~1,5 s) → `saindo` → fluxo de
 autenticação. Ramos: `demorando` (passou de 4 s: mostra a frase) e `falhou`
 (vai à tela de erro).

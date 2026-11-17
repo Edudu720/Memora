@@ -518,16 +518,22 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
 **Abertura, Início, conversa e barra inferior (US7 e US4)**
 
 - **FR-036**: Ao abrir o aplicativo, MUST aparecer uma tela de carregamento com
-  a Memora acenando, animada (não imagem solta), sobre o fundo do tema.
+  a **anfitriã** (FR-048) **segurando a barra de carregamento**, animada (não
+  imagem solta), sobre o fundo do tema. A barra é indeterminada: não mostra
+  número nem porcentagem (revisto em 2026-11-17, T092; antes, "a Memora
+  acenando").
 - **FR-037**: O primeiro instante da abertura, controlado pelo sistema antes de
   o aplicativo existir, MUST mostrar a Memora parada no mesmo fundo, para que a
-  passagem para o aceno seja contínua.
+  passagem para a tela de carregamento seja contínua. **(2026-11-17)** Com a
+  T092, a nativa ainda mostra a Memora em pose de aceno, e os braços mudam de
+  lugar na troca: ver T094.
 - **FR-038**: A tela de carregamento MUST durar o tempo de carregar e no máximo
-  o de um aceno completo além disso; ela MUST NOT ser prolongada de propósito.
+  o de uma passada completa da barra além disso; ela MUST NOT ser prolongada
+  de propósito.
   Se o carregamento passar de 4 segundos, MUST aparecer uma frase curta dizendo
   que está quase pronto.
 - **FR-039**: Com "reduzir movimento" ligado, a Memora da tela de carregamento
-  MUST aparecer parada, em pose de aceno.
+  MUST aparecer parada, segurando a barra, e a barra também parada.
 - **FR-040**: No Início, a Memora em 2.5D MUST ocupar a parte superior da tela
   (cerca de um terço da altura, com letra a 100%), junto da saudação. O
   Início MAY rolar: com a anfitriã e os atalhos o conteúdo passa da altura
