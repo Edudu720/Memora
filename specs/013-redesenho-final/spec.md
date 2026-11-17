@@ -95,6 +95,15 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   diferente das outras Memoras; as dicas vêm de lista fixa no aplicativo,
   nunca da IA nem do servidor (FR-050).
 
+### Session 2026-11-17
+
+- Q: Com a anfitriã (o balão da dica mais longa tem ~134 dp), o Início passou
+  a rolar no aparelho de referência. Encurtar as dicas para caber, ou aceitar
+  a rolagem? → A: **A rolagem é esperada** (decisão do Henrique). O Início
+  pode passar da altura da tela; o que não couber chega ao alcance pela
+  rolagem, e a anfitriã continua sendo a primeira a encolher com letra
+  ampliada (FR-040, FR-041; T054).
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -520,7 +529,10 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
 - **FR-039**: Com "reduzir movimento" ligado, a Memora da tela de carregamento
   MUST aparecer parada, em pose de aceno.
 - **FR-040**: No Início, a Memora em 2.5D MUST ocupar a parte superior da tela
-  (cerca de um terço da altura, com letra a 100%), junto da saudação.
+  (cerca de um terço da altura, com letra a 100%), junto da saudação. O
+  Início MAY rolar: com a anfitriã e os atalhos o conteúdo passa da altura
+  do aparelho de referência, e o que não couber MUST chegar ao alcance pela
+  rolagem, acima da barra inferior (decisão de 2026-11-17).
 - **FR-041**: Com letra ampliada, a área da Memora no Início MUST encolher antes
   de qualquer texto ser cortado ou de qualquer ação sair do alcance; o Início
   MUST continuar passando nas matrizes de acessibilidade.

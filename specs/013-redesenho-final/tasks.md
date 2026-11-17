@@ -35,10 +35,10 @@ abre PR **para a `redesign-final`**, revisada por outra pessoa da equipe
 (nunca por quem escreveu). No fim, a `redesign-final` vai para a `develop`
 numa PR só.
 
-| Quem | Tarefas | Abertas |
+| Quem | Tarefas | Abertas (17/11) |
 |---|---|---|
-| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, barra inferior T055–T057, T059, T072, T073, T076. **Fechamento**: T043–T046, T078 | 43 |
-| **Eduardo Juncker** | **Textos**: T029–T034, T066–T070. **Emoji na IA**: T040–T042. **Conversa**: T058, T060, T061, T062. **Ícones**: T063–T065. **Telas da 009 e da 011**: T071, T081. **Validação**: T074, T075, T077, T079 | 27 |
+| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, T093, barra inferior T055–T057, T059, T072, T073, T076, T092. **Fechamento**: T043–T046, T078. Parte da T091 | 15 |
+| **Eduardo Juncker** | **Textos**: T029–T034, T066–T070. **Emoji na IA**: T040–T042. **Conversa**: T058, T060, T061, T062. **Ícones**: T063–T065. **Telas da 009 e da 011**: T071, T081. **Validação**: T074, T075, T077, T079. Parte da T091 | 14 |
 | **Eduardo Trevisan** | **Todo o site** (spec 012): as tarefas S01–S13 de `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md`, mais a T082 | site |
 
 Por que essa divisão: o Henrique ficou com as mais pesadas (a Memora, a
@@ -225,7 +225,7 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé)
 - [ ] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5)
 - [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013
-- [ ] T046 PR da Fase A para a `develop` **(rev. 16/11)**: depois da T080, já sobre a `develop` com as #71, #73 e #74
+- [X] T046 ~~PR da Fase A para a `develop`~~ **Substituída (2026-11-17, decisão do Henrique)**: com a branch comum `redesign-final`, as fases A e B vão juntas para a `develop` numa PR só, ao fim do redesenho; cada frente entra antes na `redesign-final` por PR revisada por outra pessoa
 
 ---
 
@@ -249,7 +249,8 @@ acenando → fluxo de entrada, sem pulo.
 ## Phase 10: User Story 7 — Início e barra inferior (P1) — parte B
 
 - [X] T053 [US7] Início: a Memora em 2.5D no terço superior com a saudação, sobre a estrutura da 007 (cartão herói e atalhos abaixo) (FR-040). **(rev. 16/11)** Na `develop`, o cabeçalho da `tela_inicio.dart` tem uma `MemoraPersonagem` **`mini`** ao lado da saudação, depois o `CartaoHeroi` e a grade 2×2 de `TileAcaoRapida`: a Memora grande **substitui** a `mini` (uma Memora por tela, FR-006). **(2026-11-16)** A anfitriã só segura a dica quando o toque é nela ou no balão: a T053 precisa passar a ela um sinal de atividade do Início, para a FR-052 valer para toques em qualquer lugar da tela. **(2026-11-16)** A Memora do topo é a **`MemoraAnfitria`** (fase 3b, T089), não a `MemoraAnimada` comum
-- [ ] T054 [US7] **(2026-11-16, decisão pendente do Henrique)** Com a anfitriã (balão de ~134 dp, medido pela dica mais longa) o Início passou a rolar no aparelho de referência; o agente trocou a asserção "sobra ≥ 0" do `inicio_ocupa_a_altura_test` por "se rola, tudo alcançável" — afrouxamento que só vale se o Henrique aceitar a rolagem (então revisar a FR-040/US7) ou, se não aceitar, encurtar as dicas longas para o balão caber. Também: as boas-vindas têm duas Memoras (contra a FR-006). Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance; atualizar `inicio_ocupa_a_altura_test.dart` e a matriz (FR-041, V13); quebrar fixando a altura da Memora
+- [X] T054 [US7] Com a anfitriã (balão de ~134 dp, medido pela dica mais longa) o Início passou a rolar no aparelho de referência; o `inicio_ocupa_a_altura_test` trocou a asserção "sobra ≥ 0" por "se rola, tudo alcançável". **(2026-11-17) O Henrique aceitou a rolagem**: FR-040 revista e registrada no clarify. Início: com letra ampliada, a área da Memora encolhe antes de qualquer texto ou ação sair do alcance (FR-041, V13). **Provado quebrando** em 2026-11-17: com a altura da anfitriã fixa (sem dividir pela ampliação), 12 casos reprovam ("o desenho dela não é a fração da altura", 85,2 dp contra 56,8 a 150%). As duas Memoras das boas-vindas saíram daqui para a T093
+- [ ] T093 [US7] **(2026-11-17, separada da T054)** As boas-vindas mostram duas Memoras, contra a FR-006: deixar uma só, com teste que reprove se aparecer a segunda
 - [ ] T055 [P] [US7] `app/test/design_system/navegacao_inferior_test.dart` (novo): ícone + rótulo juntos, alvo ≥ 48 dp, indicador desliza até o destino tocado, sem deslizar com "reduzir movimento" (V15); quebrar tirando o rótulo
 - [ ] T056 [US7] `navegacao_inferior.dart`: barra refeita no acabamento da 007 (superfície, sombra, cantos), ícones arredondados da família única no lugar dos SVG de `assets/icones/navegacao/`, indicador deslizante e resposta ao toque (FR-044 a FR-047, R5)
 - [ ] T057 [US7] Apagar `assets/icones/navegacao/` e ajustar `icones_de_navegacao_test.dart` (o teste passa a conferir a família, não os arquivos)
