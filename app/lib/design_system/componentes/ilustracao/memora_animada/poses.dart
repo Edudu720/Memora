@@ -34,6 +34,10 @@ enum PoseDaMemora {
 
   /// Só a cabeça, para lugares pequenos.
   mini,
+
+  /// Carregando: segura a barra de carregamento com as duas mãos, à frente do
+  /// corpo (feature 013, T092). É a pose da abertura do aplicativo.
+  carregando,
 }
 
 /// Onde ficam o cotovelo e a mão de um braço, em coordenadas do desenho
@@ -109,6 +113,10 @@ class ValoresDaPose {
   /// O livro (0 ausente, 1 inteiro).
   final double livro;
 
+  /// A barra de carregamento entre as mãos (0 ausente, 1 inteira). Ela vai de
+  /// uma mão à outra: é desenhada onde as mãos estão.
+  final double barra;
+
   /// Quanto o corpo aparece (0 só a cabeça).
   final double corpo;
 
@@ -132,6 +140,7 @@ class ValoresDaPose {
     required this.dedo,
     required this.escudo,
     required this.livro,
+    required this.barra,
     required this.corpo,
     required this.salto,
   });
@@ -158,6 +167,15 @@ class ValoresDaPose {
     Offset(0.885, 0.49),
   );
 
+  static const PosicaoDoBraco _esquerdoSegurando = PosicaoDoBraco(
+    Offset(0.165, 0.79),
+    Offset(0.235, 0.875),
+  );
+  static const PosicaoDoBraco _direitoSegurando = PosicaoDoBraco(
+    Offset(0.835, 0.79),
+    Offset(0.765, 0.875),
+  );
+
   /// Repouso.
   static const ValoresDaPose _neutra = ValoresDaPose(
     inclinacaoDaCabeca: 0,
@@ -175,6 +193,7 @@ class ValoresDaPose {
     dedo: 0,
     escudo: 0,
     livro: 0,
+    barra: 0,
     corpo: 1,
     salto: 0,
   );
@@ -249,6 +268,17 @@ class ValoresDaPose {
         );
       case PoseDaMemora.mini:
         return _neutra.copiar(bocaVisivel: 0, bochecha: 0, corpo: 0);
+      case PoseDaMemora.carregando:
+        // Os cotovelos abrem para fora e os antebraços vêm para a frente da
+        // barriga: as mãos fecham nas pontas da barra, na altura em que um
+        // braço dobrado alcança sem esticar.
+        return _neutra.copiar(
+          sorriso: 0.8,
+          olharY: 0.6,
+          bracoEsquerdo: _esquerdoSegurando,
+          bracoDireito: _direitoSegurando,
+          barra: 1,
+        );
     }
   }
 
@@ -269,6 +299,7 @@ class ValoresDaPose {
     double? dedo,
     double? escudo,
     double? livro,
+    double? barra,
     double? corpo,
     double? salto,
   }) {
@@ -288,6 +319,7 @@ class ValoresDaPose {
       dedo: dedo ?? this.dedo,
       escudo: escudo ?? this.escudo,
       livro: livro ?? this.livro,
+      barra: barra ?? this.barra,
       corpo: corpo ?? this.corpo,
       salto: salto ?? this.salto,
     );
@@ -312,6 +344,7 @@ class ValoresDaPose {
       dedo: n(a.dedo, b.dedo),
       escudo: n(a.escudo, b.escudo),
       livro: n(a.livro, b.livro),
+      barra: n(a.barra, b.barra),
       corpo: n(a.corpo, b.corpo),
       salto: n(a.salto, b.salto),
     );

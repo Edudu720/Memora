@@ -6,6 +6,7 @@ import 'package:memora/features/aprendizado/domain/guia.dart';
 import 'package:memora/l10n/textos_guias.dart';
 
 import '../suporte/aparelhos.dart';
+import '../suporte/movimento.dart';
 
 /// T134 — ampliar a captura (FR-028b).
 ///
@@ -33,12 +34,16 @@ void main() {
   Widget appComPasso({
     Passo p = passo,
     MemoraTemaId tema = MemoraTemaId.claro,
-    bool semAnimacao = false,
+    // Nulo herda o do sistema (o `flutter_test_config.dart` o começa ligado).
+    bool? semAnimacao,
   }) {
     return MaterialApp(
       theme: TemasMemora.porId(tema),
       builder: (BuildContext context, Widget? filho) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: semAnimacao),
+        data: MediaQuery.of(context).copyWith(
+          disableAnimations:
+              semAnimacao ?? MediaQuery.of(context).disableAnimations,
+        ),
         child: filho!,
       ),
       home: Scaffold(body: PassoIlustrado(passo: p, posicao: 1, total: 3)),
@@ -395,6 +400,7 @@ void main() {
     testWidgets('sem "reduzir movimento" a aproximação anima', (
       WidgetTester t,
     ) async {
+      liberarMovimento(t);
       await t.pumpWidget(appComPasso());
       await abrirPeloBotao(t);
 

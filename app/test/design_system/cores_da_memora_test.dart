@@ -116,4 +116,59 @@ void main() {
       expect(acVerde, acAzul, reason: 'no alto contraste a paleta nao vale');
     });
   });
+
+  group('a paleta vem do NOME guardado no tema (T048), não da cor primária', () {
+    test('o tema guarda o nome que recebeu; nome desconhecido vira azul', () {
+      expect(MemoraTheme.claro.paleta, 'azul');
+      expect(MemoraTheme.claro.comPaleta('verde').paleta, 'verde');
+      expect(MemoraTheme.escuro.comPaleta('rosa').paleta, 'rosa');
+      expect(MemoraTheme.claro.comPaleta('nao-existe').paleta, 'azul');
+      // O alto contraste devolve o próprio tema: a paleta não vale (R15).
+      expect(MemoraTheme.altoContraste.comPaleta('verde').paleta, 'azul');
+      // O nome atravessa copyWith e a interpolação.
+      expect(MemoraTheme.claro.comPaleta('roxo').copyWith().paleta, 'roxo');
+    });
+
+    test('toda paleta pronta chega à Memora pelo nome, em claro e escuro', () {
+      for (final MemoraTemaId id in <MemoraTemaId>[
+        MemoraTemaId.claro,
+        MemoraTemaId.escuro,
+      ]) {
+        final MemoraTheme base = id == MemoraTemaId.claro
+            ? MemoraTheme.claro
+            : MemoraTheme.escuro;
+        for (final String nome in MemoraCores.paletas.keys) {
+          expect(
+            base.comPaleta(nome).personagem.corpo,
+            CoresDaMemora.para(id, paleta: nome).corpo,
+            reason: '${id.name} / $nome',
+          );
+        }
+      }
+    });
+
+    test('o nome manda: as cores da interface não decidem a Memora', () {
+      // Cores da paleta verde, nome da paleta rosa. Se a Memora voltasse a
+      // adivinhar a paleta pela cor primária, sairia verde.
+      final MemoraTheme verde = MemoraTheme.claro.comPaleta('verde');
+      final MemoraTheme comNomeDeRosa = verde.copyWith(paleta: 'rosa');
+      expect(
+        comNomeDeRosa.personagem.corpo,
+        CoresDaMemora.para(MemoraTemaId.claro, paleta: 'rosa').corpo,
+      );
+      expect(
+        comNomeDeRosa.personagem.corpo,
+        isNot(CoresDaMemora.para(MemoraTemaId.claro, paleta: 'verde').corpo),
+      );
+
+      // E o inverso: cores da azul, nome da verde.
+      final MemoraTheme azulComNomeDeVerde = MemoraTheme.claro.copyWith(
+        paleta: 'verde',
+      );
+      expect(
+        azulComNomeDeVerde.personagem.corpo,
+        CoresDaMemora.para(MemoraTemaId.claro, paleta: 'verde').corpo,
+      );
+    });
+  });
 }

@@ -129,7 +129,7 @@ class TelaBoasVindas extends StatelessWidget {
 
                           const SizedBox(height: MemoraEspacamento.xl),
 
-                          // Bloco de destaque com a Memora na expressão dica.
+                          // Bloco de destaque. A Memora aparece uma vez só na tela (FR-006).
                           Container(
                             padding: const EdgeInsets.all(MemoraEspacamento.lg),
                             decoration: BoxDecoration(
@@ -146,23 +146,8 @@ class TelaBoasVindas extends StatelessWidget {
                                       color: cores.bordaSutil,
                                     ),
                             ),
-                            child: Row(
-                              children: <Widget>[
-                                const Expanded(
-                                  child: TextoComDestaque(
-                                    TextosAutenticacao.oQueVouEnsinar,
-                                  ),
-                                ),
-                                if (!ocultarVisuais) ...<Widget>[
-                                  const SizedBox(width: MemoraEspacamento.md),
-                                  MemoraPersonagem(
-                                    expressao: ExpressaoDaMemora.dica,
-                                    tamanho: compacto
-                                        ? MemoraDimensoes.alvoDecisao
-                                        : MemoraDimensoes.ilustracaoCabecalho,
-                                  ),
-                                ],
-                              ],
+                            child: const TextoComDestaque(
+                              TextosAutenticacao.oQueVouEnsinar,
                             ),
                           ),
 

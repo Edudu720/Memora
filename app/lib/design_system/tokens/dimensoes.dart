@@ -113,12 +113,6 @@ abstract final class MemoraDimensoes {
   /// 2.5 dp — espessura do giro pequeno.
   static const double espessuraIndicadorEmBotao = 2.5;
 
-  /// 40 dp — o giro que ocupa a tela enquanto a pessoa espera.
-  static const double indicadorDeTela = 40;
-
-  /// 4 dp — espessura do giro grande.
-  static const double espessuraIndicadorDeTela = 4;
-
   // ---------------------------------------------------------------------------
   // Ilustração (feature 004)
   //
@@ -168,6 +162,19 @@ abstract final class MemoraDimensoes {
   /// 390x844 sem rolar, e a figura é o que cede primeiro (regra 7 da R2).
   static const double fracaoDaFiguraDoInicio = 0.14;
 
+  /// Fração da altura disponível que o **lado da anfitriã** do Início ocupa
+  /// (feature 013, T053), antes de descontar a ampliação do texto. A anfitriã
+  /// é a primeira a ceder quando falta altura (FR-041): o lado dela é esta
+  /// fração dividida pela ampliação, entre `alvoMinimo` e `ilustracaoHeroi`.
+  /// Fração, e não pixel, pela lição do teto da conversa.
+  ///
+  /// 0,15 foi medido com a Atkinson: num 390×844 a anfitriã inteira (desenho,
+  /// 8 dp e o balão da dica mais longa) ocupa cerca de **um terço** da altura
+  /// (FR-040). Com os quatro atalhos o Início passa da altura de qualquer
+  /// aparelho e rola — o balão sozinho tem 134 dp —, e o que rola chega ao
+  /// toque, acima da barra.
+  static const double fracaoDaAnfitriaDoInicio = 0.15;
+
   /// 40 dp — abaixo disto a ilustração some. Desenho pequeno demais vira
   /// borrão para quem enxerga pouco, e ocupa o espaço de uma linha de texto.
   static const double pisoDeIlustracao = 40;
@@ -182,6 +189,14 @@ abstract final class MemoraDimensoes {
   /// O aviso compacto, aberto, não passa desta fração da altura disponível;
   /// o resto do texto rola dentro dele (R5).
   static const double tetoDoAvisoAberto = 0.5;
+
+  /// Dentro do aviso aberto, o botão de fechar não passa desta fração da altura
+  /// que o aviso tem; acima dela, o botão rola (feature 013).
+  ///
+  /// O botão fica fixo para a pessoa sempre achar a saída, mas pede a altura
+  /// natural dele — e a 200% num 320×568, dentro da casca, ela sozinha passava
+  /// do teto do aviso e a caixa estourava 39 px. O texto rola no resto.
+  static const double tetoDoBotaoDoAvisoAberto = 0.4;
 
   /// A faixa do campo de escrever da conversa, com o respiro dela, não passa
   /// desta fração da altura disponível; acima dela, a faixa rola (T055).

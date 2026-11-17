@@ -89,7 +89,7 @@ class _SecaoIdadeState extends State<SecaoIdade> {
 
   Future<void> _abrirEntrada() async {
     final bool? guardou = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
+      RotaMemora<bool>(
         builder: (BuildContext _) => TelaDataDeNascimento(
           armazenamento: widget.armazenamento,
           idDaConta: widget.idDaConta,

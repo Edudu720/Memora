@@ -219,6 +219,48 @@ void main() {
     }
   });
 
+  group('TelaBoasVindas — a Memora uma vez só (FR-006, T093)', () {
+    testWidgets('mostra exatamente uma Memora em tela comum', (
+      WidgetTester t,
+    ) async {
+      vestir(t, referencia);
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaBoasVindas(aoComecar: () {}, aoJaTerConta: () {}),
+        ),
+      );
+
+      // `MemoraPersonagem` é só a casca de `MemoraAnimada`: contar a segunda
+      // pega as duas (e também a que alguém desenhe sem a casca).
+      expect(
+        find.byType(MemoraAnimada),
+        findsOneWidget,
+        reason: 'FR-006: a Memora aparece no máximo uma vez por tela',
+      );
+    });
+
+    for (final Combinacao c in matriz()) {
+      testWidgets('nunca passa de uma Memora em ${nomeDa(c)}', (
+        WidgetTester t,
+      ) async {
+        vestir(t, c.aparelho);
+        await t.pumpWidget(
+          naCombinacao(
+            c,
+            TelaBoasVindas(aoComecar: () {}, aoJaTerConta: () {}),
+          ),
+        );
+
+        expect(
+          find.byType(MemoraAnimada).evaluate().length,
+          lessThanOrEqualTo(1),
+          reason: '${nomeDa(c)}: FR-006',
+        );
+      });
+    }
+  });
+
   group('TelaDeVolta — Ocupação vertical e matriz (FR-009a, FR-044)', () {
     testWidgets(
       'ocupa a altura disponível sem deixar rodapé vazio em tela alta',

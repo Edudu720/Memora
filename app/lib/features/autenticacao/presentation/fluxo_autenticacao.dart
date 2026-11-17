@@ -484,7 +484,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// por 28 minutos era expulso. Num lugar só continua valendo: toda tela que
   /// o fluxo abre nasce aqui.
   Route<void> _rota({required WidgetBuilder builder}) {
-    return MaterialPageRoute<void>(builder: builder);
+    return RotaMemora<void>(builder: builder);
   }
 
   /// Empilha [rota] no destino à vista da casca.

@@ -235,15 +235,21 @@ A fronteira da `002/FR-012` permanece estrita nos novos blocos:
 
 ## 13. Mascote unificado (`MemoraPersonagem`)
 
-`ExpressaoDaMemora` centraliza as **6 expressões oficiais em PNG** de alta
-resolução em `app/assets/ilustracoes/`:
+`ExpressaoDaMemora` centraliza as **6 expressões** da Memora, que desde a
+feature 013 é **vetorial em 2.5D, desenhada pelo aplicativo** (`MemoraAnimada`),
+e não mais imagem: segue a paleta e o tema, fica parada com "reduzir movimento"
+e responde ao toque com um aceno ou uma piscada (`reageAoToque`; a área de toque
+fica a 8 dp de qualquer botão):
 
-- `neutra` (`memora_perfil_robo.png`) — repouso, boas-vindas, perfil, saúde;
-- `falando` (`memora_ajuda_robo.png`) — conversa, ajuda e orientações;
-- `comemorando` (`memora_conclusao_robo.png`) — conclusão de etapa ou conta criada;
-- `preocupada` (`memora_alerta_robo.png`) — avisos antigolpe e atenção imediata;
-- `dica` (`memora_dica_robo.png`) — cartões de sugestão, exemplo guiado e dicas;
-- `mini` (`memora_mini_robo.png`) — emblema compacto para balões e cabeçalhos estreitos.
+- `neutra` — repouso, boas-vindas, perfil, saúde;
+- `falando` — conversa, ajuda e orientações;
+- `comemorando` — conclusão de etapa ou conta criada;
+- `preocupada` — avisos antigolpe e atenção imediata (com escudo);
+- `dica` — cartões de sugestão, exemplo guiado e dicas (com livro);
+- `mini` — só a cabeça, para balões e cabeçalhos estreitos.
+
+No Início ela é a **anfitriã** (`MemoraAnfitria`): flutua, fala por um balão de
+dicas e adia a troca da dica a cada toque na tela (`atividade`).
 
 ---
 

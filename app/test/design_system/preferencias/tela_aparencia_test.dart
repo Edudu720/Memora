@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 
 import '../../suporte/aparelhos.dart';
+import '../../suporte/movimento.dart';
 
 class _RepositorioFalso implements RepositorioPreferenciaAparencia {
   PreferenciaAparencia? salva;
@@ -373,6 +374,7 @@ void main() {
 
     testWidgets('menos movimento pré-visualizado chega ao MediaQuery da '
         'tela, na hora', (WidgetTester tester) async {
+      liberarMovimento(tester);
       final ControladorAparencia c = ControladorAparencia(_RepositorioFalso());
       await tester.pumpWidget(acessibilidade(c));
       bool reduz() => MediaQuery.disableAnimationsOf(

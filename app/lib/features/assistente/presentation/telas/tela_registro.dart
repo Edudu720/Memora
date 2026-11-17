@@ -71,13 +71,21 @@ class _TelaRegistroState extends State<TelaRegistro> {
               padding: const EdgeInsets.all(MemoraEspacamento.md),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const <Widget>[
-                  MemoraPersonagem(
-                    expressao: ExpressaoDaMemora.falando,
-                    tamanho: MemoraDimensoes.alvoDecisao,
-                  ),
-                  SizedBox(width: MemoraEspacamento.md),
-                  Expanded(
+                children: <Widget>[
+                  // Uma Memora por tela (FR-006): enquanto a espera tem a sua
+                  // (a lista ainda não chegou), esta cede o lugar (o espaço
+                  // fica).
+                  if (!_falhou && acoes == null)
+                    const SizedBox.square(
+                      dimension: MemoraDimensoes.alvoDecisao,
+                    )
+                  else
+                    const MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.falando,
+                      tamanho: MemoraDimensoes.alvoDecisao,
+                    ),
+                  const SizedBox(width: MemoraEspacamento.md),
+                  const Expanded(
                     child: TextoMemora(TextosAssistente.explicacaoDoRegistro),
                   ),
                 ],

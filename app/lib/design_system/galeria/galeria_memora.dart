@@ -70,6 +70,26 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
 
   void _tocou(String o) => setState(() => _ultimoToque = o);
 
+  /// A tela que a demonstração das transições abre.
+  Widget _telaDeExemploDaRota(BuildContext contexto) => Scaffold(
+    body: SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          BarraSuperior(
+            titulo: 'Uma tela de exemplo',
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(MemoraEspacamento.lg),
+            child: TextoMemora('Volte pelo botão ou pelo gesto do aparelho: a '
+                'animação é a mesma.'),
+          ),
+        ],
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     // A galeria troca o tema **só para dentro dela**. Trocar a preferência
@@ -443,6 +463,13 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         ],
       ),
 
+      const _Secao('MemoraAnfitria', 'A Memora do Início (T089): mais '
+          'detalhada, se mexe sozinha e conta dicas num balão, com a boca '
+          'mexendo enquanto o texto aparece. A dica troca a cada 20 s, menos '
+          'com leitor de tela, com "reduzir movimento" ou depois de um toque. '
+          'Tocar nela mostra a próxima e nunca leva a lugar nenhum.'),
+      Center(child: MemoraAnfitria()),
+
       const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
           'cartão. No máximo uma principal por tela. A desabilitada só existe '
           'aqui: porta que não abre não é mostrada (FR-018).'),
@@ -610,6 +637,45 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         indiceAtivo: _abaAtiva,
         aoSelecionar: (int i) => setState(() => _abaAtiva = i),
       ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const _Secao(
+        'Transições',
+        'Avançar entra pela direita, voltar pela esquerda; a barra de '
+            'navegação acima troca de destino pelo lado em que está. Com "reduzir movimento", '
+            'tudo troca de uma vez.',
+      ),
+      SizedBox(
+        height: MemoraDimensoes.alvoDecisao * 2,
+        child: TrocaDeDestino(
+          indice: _abaAtiva,
+          filhos: <Widget>[
+            for (final String nome in <String>['Ajustes', 'Início', 'Meu perfil'])
+              ColoredBox(
+                color: context.memora.cores.superficieSutil,
+                child: Center(child: TextoMemora(nome)),
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir uma tela, vinda da direita',
+        aoTocar: () => Navigator.of(context).push(
+          RotaMemora<void>(builder: _telaDeExemploDaRota),
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir uma tela, vinda da esquerda',
+        aoTocar: () => Navigator.of(context).push(
+          RotaMemora<void>(
+            builder: _telaDeExemploDaRota,
+            direcao: DirecaoDaTransicao.voltar,
+          ),
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const _DemoTrocaDePasso(),
 
       const _Secao(
         'Blocos Memora 2.0',
@@ -978,6 +1044,52 @@ class _MemoraNaPaleta extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A troca de passo dentro da mesma tela (T072): "Próximo" traz o passo pela
+/// direita e "Anterior", pela esquerda.
+class _DemoTrocaDePasso extends StatefulWidget {
+  const _DemoTrocaDePasso();
+
+  @override
+  State<_DemoTrocaDePasso> createState() => _DemoTrocaDePassoState();
+}
+
+class _DemoTrocaDePassoState extends State<_DemoTrocaDePasso> {
+  int _passo = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        TrocaDePasso(
+          posicao: _passo,
+          child: Cartao(
+            child: TextoMemora('Passo $_passo de 3'),
+          ),
+        ),
+        const SizedBox(height: MemoraEspacamento.sm),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: BotaoSecundario(
+                rotulo: 'Anterior',
+                aoTocar: _passo > 1 ? () => setState(() => _passo--) : null,
+              ),
+            ),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Expanded(
+              child: BotaoPrimario(
+                rotulo: 'Próximo',
+                aoTocar: _passo < 3 ? () => setState(() => _passo++) : null,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

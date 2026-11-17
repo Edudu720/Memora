@@ -1,6 +1,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'camada_antena.dart';
+import 'camada_barra.dart';
 import 'camada_braco.dart';
 import 'camada_cabeca.dart';
 import 'camada_corpo.dart';
@@ -37,6 +38,7 @@ class PintorDaMemora extends CustomPainter {
   static const CamadaDaMemora _bracoDireito = CamadaBraco(esquerdo: false);
   static const CamadaDaMemora _escudo = CamadaEscudo();
   static const CamadaDaMemora _livro = CamadaLivro();
+  static const CamadaDaMemora _barra = CamadaBarra();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -60,8 +62,16 @@ class PintorDaMemora extends CustomPainter {
 
     _sombra.pintar(canvas, ctx);
 
-    // O que está acima do chão sobe junto com o salto.
-    canvas.translate(0, -ctx.pulo * ctx.l(0.075));
+    // O que está acima do chão sobe junto com o salto e com a flutuação.
+    canvas.translate(0, -ctx.pulo * ctx.l(0.075) - ctx.flutua * ctx.l(0.022));
+
+    // Estica e encolhe a partir dos pés, no pulo (T087): encolher alarga, e
+    // esticar afina, para o volume parecer o mesmo.
+    if (ctx.esticar != 0) {
+      canvas.translate(pes.dx, pes.dy);
+      canvas.scale(1 - 0.07 * ctx.esticar, 1 + 0.11 * ctx.esticar);
+      canvas.translate(-pes.dx, -pes.dy);
+    }
 
     // O tronco some (esmaecendo) na versão só da cabeça.
     final double corpo = ctx.pose.corpo.clamp(0.0, 1.0);
@@ -73,7 +83,7 @@ class PintorDaMemora extends CustomPainter {
           Paint()..color = ctx.cores.contorno.withValues(alpha: corpo),
         );
       }
-      canvas.translate(ctx.deslocamento(0.3), 0);
+      canvas.translate(ctx.deslocamento(0.3), -ctx.ajeita * ctx.l(0.008));
       _corpo.pintar(canvas, ctx);
       _painel.pintar(canvas, ctx);
       if (corpo < 1) canvas.restore();
@@ -82,11 +92,21 @@ class PintorDaMemora extends CustomPainter {
 
     // A cabeça gira em torno do pescoço e anda mais que o corpo.
     canvas.save();
-    canvas.translate(ctx.deslocamento(0.8), -ctx.respira * ctx.l(0.006));
+    canvas.translate(
+      ctx.deslocamento(0.8),
+      -ctx.respira * ctx.l(0.006) - ctx.ajeita * ctx.l(0.011),
+    );
     final Offset pescoco = ctx.pp(GeometriaDaMemora.pescoco);
     canvas.translate(pescoco.dx, pescoco.dy);
     canvas.rotate(ctx.pose.inclinacaoDaCabeca + ctx.balanco * 0.012);
     canvas.translate(-pescoco.dx, -pescoco.dy);
+    if (ctx.giro != 0) {
+      // Girar a cabeça a estreita um pouco e a desloca para o lado do giro;
+      // o rosto, dentro do visor, desliza mais ainda (ver CamadaRosto).
+      canvas.translate(ctx.l(0.5) + ctx.giro * ctx.l(0.012), 0);
+      canvas.scale(1 - 0.035 * ctx.giro.abs(), 1);
+      canvas.translate(-ctx.l(0.5), 0);
+    }
     _antena.pintar(canvas, ctx);
     _cabeca.pintar(canvas, ctx);
     _visor.pintar(canvas, ctx);
@@ -94,8 +114,10 @@ class PintorDaMemora extends CustomPainter {
     canvas.restore();
 
     canvas.save();
-    canvas.translate(ctx.deslocamento(1.2), 0);
+    canvas.translate(ctx.deslocamento(1.2), -ctx.ajeita * ctx.l(0.008));
     _livro.pintar(canvas, ctx);
+    // A barra antes dos braços: as luvas fecham por cima das pontas dela.
+    _barra.pintar(canvas, ctx);
     _bracoEsquerdo.pintar(canvas, ctx);
     _bracoDireito.pintar(canvas, ctx);
     canvas.restore();

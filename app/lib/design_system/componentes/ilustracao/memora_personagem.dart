@@ -1,40 +1,46 @@
 import 'package:flutter/material.dart';
 
-import '../../temas/memora_theme_extension.dart';
-import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
-import 'ilustracao_memora.dart';
+import 'memora_animada/memora_animada.dart';
+import 'memora_animada/poses.dart';
 
-/// Como a Memora está, em cada momento (alinhado com as ideias de design).
+/// Como a Memora está, em cada momento.
+///
+/// Cada expressão é uma [PoseDaMemora] da Memora vetorial 2.5D
+/// ([MemoraAnimada]), e é por [pose] que a `MemoraPersonagem` a desenha.
 enum ExpressaoDaMemora {
-  /// Em repouso: cabeçalhos, Início, Boas-vindas (acenando).
-  neutra(Ilustracao.memoraNeutra, 'memora_perfil_robo.png'),
+  /// Em repouso: cabeçalhos, Início, Boas-vindas.
+  neutra(PoseDaMemora.neutra),
 
-  /// Falando / Ajuda: apresentação, conversa, ajuda guiada (pensando).
-  falando(Ilustracao.memoraFalando, 'memora_ajuda_robo.png'),
+  /// Falando: apresentação, conversa, ajuda guiada.
+  falando(PoseDaMemora.falando),
 
-  /// Comemorando / Conclusão: fim do passo a passo, conta criada (sucesso).
-  comemorando(Ilustracao.memoraComemorando, 'memora_conclusao_robo.png'),
+  /// Comemorando: fim do passo a passo, conta criada.
+  comemorando(PoseDaMemora.comemorando),
 
-  /// Preocupada / Alerta: ao lado dos avisos de segurança (com escudo).
-  preocupada(Ilustracao.memoraPreocupada, 'memora_alerta_robo.png'),
+  /// Preocupada: ao lado dos avisos de segurança (com escudo).
+  preocupada(PoseDaMemora.preocupada),
 
-  /// Dica: explicação rápida, sugestões e orientação passo a passo (com lâmpada).
-  dica(null, 'memora_dica_robo.png'),
+  /// Dica: explicação rápida, sugestões e orientação passo a passo (com livro).
+  dica(PoseDaMemora.dica),
 
-  /// Mini: emblema compacto para cabeçalhos estreitos e resposta inline.
-  mini(null, 'memora_mini_robo.png');
+  /// Mini: só a cabeça, para cabeçalhos estreitos e resposta inline.
+  mini(PoseDaMemora.mini);
 
-  const ExpressaoDaMemora(this.ilustracao, this.imagemPng);
+  const ExpressaoDaMemora(this.pose);
 
-  /// O desenho desta expressão em SVG legado (presente nas quatro originais).
-  final Ilustracao? ilustracao;
-
-  /// Imagem PNG oficial em alta resolução em `assets/ilustracoes/`.
-  final String imagemPng;
+  /// A pose com que a Memora vetorial desenha esta expressão.
+  final PoseDaMemora pose;
 }
 
-/// O rosto da Memora (FR-003 da feature 004).
+/// A Memora, em qualquer tela (FR-003 da feature 004; feature 013, T047).
+///
+/// É a **porta de entrada única** do personagem: as telas pedem uma
+/// [ExpressaoDaMemora] e um [tamanho], e ela monta a [MemoraAnimada] — o robô
+/// vetorial desenhado pelo aplicativo, que segue a paleta e o tema (as cores
+/// vêm de `context.memora.personagem`) e fica parado com "reduzir movimento".
+/// Antes eram imagens PNG paradas dentro de um medalhão; o medalhão saiu
+/// porque o desenho traz o aro que garante a silhueta nos três temas (FR-007).
 ///
 /// ## Não confundir com o `AvatarMemora`
 ///
@@ -47,58 +53,50 @@ enum ExpressaoDaMemora {
 /// Onde a Memora aparece, o texto ao lado já diz o que ela diz. Anunciar
 /// "imagem da Memora" a cada balão acrescentaria uma parada à navegação do
 /// leitor de tela sem informar nada. Passe [descricao] só quando o rosto **é**
-/// a informação — por exemplo, a expressão preocupada sozinha num aviso.
+/// a informação — por exemplo, a expressão preocupada sozinha num aviso. O
+/// gesto de toque nunca aparece para o leitor de tela (FR-005b).
 ///
-/// ## Sobre o círculo
+/// ## O toque
 ///
-/// Sempre claro, nos três temas, como o [MedalhaoDeIlustracao]: a cabeça azul
-/// da Memora some sobre o azul-marinho dos temas escuros. O corpo dela é
-/// recortado pela base do círculo, como no wireframe, e por isso o desenho é
-/// alinhado embaixo, e não centralizado.
+/// Por padrão ([reageAoToque]) ela responde ao toque com um aceno ou uma
+/// piscada e mais nada (FR-005a). A área que responde é o quadrado inteiro de
+/// [tamanho] e **não pode ficar a menos de 8 dp de um botão** (FR-005c): onde
+/// ela estiver encostada num alvo de toque — dentro de uma linha tocável, por
+/// exemplo —, passe `reageAoToque: false` e o toque cai no alvo.
 class MemoraPersonagem extends StatelessWidget {
   /// A expressão.
   final ExpressaoDaMemora expressao;
 
-  /// Diâmetro do círculo, em pixels lógicos.
+  /// O lado do quadrado que ela ocupa, em pixels lógicos.
   final double tamanho;
 
   /// O que o rosto comunica. Nulo é decorativa.
   final String? descricao;
 
-  /// Cria o rosto da Memora.
+  /// Se o toque nela dispara um aceno ou uma piscada (FR-005a).
+  final bool reageAoToque;
+
+  /// A boca acompanha um texto que está aparecendo (liga o ciclo de fala da
+  /// [MemoraAnimada]). Quem usa também troca a [expressao] para `falando`.
+  final bool falando;
+
+  /// Cria a Memora.
   const MemoraPersonagem({
     this.expressao = ExpressaoDaMemora.neutra,
     this.tamanho = MemoraDimensoes.ilustracaoCabecalho,
     this.descricao,
+    this.reageAoToque = true,
+    this.falando = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-    final int cachePx = (tamanho * 2.5).clamp(48, 512).round();
-    final Widget imagem = Image.asset(
-      'assets/ilustracoes/${expressao.imagemPng}',
-      width: tamanho,
-      height: tamanho,
-      fit: BoxFit.contain,
-      cacheWidth: cachePx,
-      cacheHeight: cachePx,
-    );
-
-    final Widget conteudo = SizedBox.square(
-      dimension: tamanho,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: cores.medalhao,
-        ),
-        child: ClipOval(
-          child: Align(
-            child: imagem,
-          ),
-        ),
-      ),
+    final Widget conteudo = MemoraAnimada(
+      expressao: expressao.pose,
+      tamanho: tamanho,
+      reageAoToque: reageAoToque,
+      falando: falando,
     );
 
     if (descricao == null) {
