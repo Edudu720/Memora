@@ -128,6 +128,25 @@ class _TelaAtalhosAplicativosState extends State<TelaAtalhosAplicativos> {
               );
             }
 
+            if (estado.falha) {
+              return Center(
+                child: MensagemErro(
+                  mensagem: TextosAtalhosAplicativos.erroAoCarregar,
+                  aoTentarNovamente: widget.controlador.carregar,
+                ),
+              );
+            }
+
+            if (estado.aplicativos.isEmpty) {
+              return const Center(
+                child: EstadoVazio(
+                  titulo: TextosAtalhosAplicativos.vazioTitulo,
+                  explicacao: TextosAtalhosAplicativos.vazioExplicacao,
+                  icone: Icons.apps_rounded,
+                ),
+              );
+            }
+
             final double escala = MediaQuery.textScalerOf(contexto).scale(1);
             final bool mostrarMascote =
                 escala < MemoraDimensoes.escalaTextoAlta;

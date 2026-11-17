@@ -45,8 +45,8 @@ class CartaoAtalhoAplicativo extends StatelessWidget {
       rodape: BadgeDeStatus(
         rotulo: textoStatus,
         icone: aplicativo.instalado
-            ? Icons.check_circle_outline
-            : Icons.download_outlined,
+            ? Icons.check_circle_outline_rounded
+            : Icons.download_rounded,
         tom: aplicativo.instalado
             ? TomBadgeStatus.positivo
             : TomBadgeStatus.neutro,

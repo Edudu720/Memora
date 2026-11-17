@@ -1,31 +1,34 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:memora/features/atalhos_aplicativos/data/catalogo_aplicativos_comuns.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
+import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart';
 import 'package:memora/features/atalhos_aplicativos/domain/entidades/atalho_aplicativo.dart';
 import 'package:memora/services/aplicativos/consulta_de_aplicativos.dart';
 
 void main() {
-  group('CatalogoAplicativosComuns — escopo de apps comuns', () {
-    test('contém estritamente os 7 aplicativos cotidianos homologados', () {
-      expect(CatalogoAplicativosComuns.todos, hasLength(7));
+  group('RepositorioAtalhosAplicativos — fonte única do catálogo (R6)', () {
+    test('contém os 7 aplicativos cotidianos do catálogo e exclui sensíveis', () async {
+      final RepositorioAtalhosAplicativos repo = RepositorioAtalhosAplicativos(
+        assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+      );
+      final List<AtalhoAplicativo> itens = await repo.obterAtalhos();
+
+      expect(itens, hasLength(7));
       expect(
-        CatalogoAplicativosComuns.todos.map((AtalhoAplicativo a) => a.chave),
-        containsAllInOrder(<String>[
+        itens.map((AtalhoAplicativo a) => a.chave),
+        containsAll(<String>[
           'whatsapp',
           'youtube',
           'instagram',
           'facebook',
-          'google_fotos',
+          'google-fotos',
           'telegram',
           'tiktok',
         ]),
       );
-    });
 
-    test('exclui estritamente serviços sociais, governamentais e financeiros', () {
       const List<String> chavesProibidas = <String>[
         'gov-br',
         'meu-inss',
@@ -37,32 +40,25 @@ void main() {
         'correios',
         'carteira-de-trabalho',
       ];
-      for (final AtalhoAplicativo app in CatalogoAplicativosComuns.todos) {
+      for (final AtalhoAplicativo app in itens) {
         expect(chavesProibidas, isNot(contains(app.chave)));
         expect(app.pacoteAndroid.contains('gov.br'), isFalse);
       }
     });
 
-    test('todo pacote do catálogo é válido e está em <queries> no AndroidManifest', () {
-      final File manifesto = File('android/app/src/main/AndroidManifest.xml');
-      expect(manifesto.existsSync(), isTrue);
-      final String xml = manifesto.readAsStringSync();
+    test('reflete desativação de aplicativo no catálogo do servidor (R6)', () async {
+      final RepositorioAtalhosAplicativos repo = RepositorioAtalhosAplicativos(
+        assistente: _CatalogoComUmDesativado(),
+      );
+      final List<AtalhoAplicativo> itens = await repo.obterAtalhos();
 
-      for (final AtalhoAplicativo app in CatalogoAplicativosComuns.todos) {
-        expect(pareceUmPacote(app.pacoteAndroid), isTrue);
-        expect(
-          xml.contains('<package android:name="${app.pacoteAndroid}"/>'),
-          isTrue,
-          reason:
-              'Pacote ${app.pacoteAndroid} precisa estar em <queries> no AndroidManifest.xml',
-        );
-      }
+      expect(itens.map((AtalhoAplicativo a) => a.chave), equals(<String>['whatsapp']));
     });
-  });
 
-  group('RepositorioAtalhosAplicativos', () {
-    test('com consulta nula, devolve todos os 7 itens como não instalados', () async {
-      const RepositorioAtalhosAplicativos repo = RepositorioAtalhosAplicativos();
+    test('com consulta nula, devolve itens do servidor como não instalados', () async {
+      final RepositorioAtalhosAplicativos repo = RepositorioAtalhosAplicativos(
+        assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+      );
       final List<AtalhoAplicativo> itens = await repo.obterAtalhos();
 
       expect(itens, hasLength(7));
@@ -82,6 +78,7 @@ void main() {
             },
           );
       final RepositorioAtalhosAplicativos repo = RepositorioAtalhosAplicativos(
+        assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
         consulta: consulta,
       );
 
@@ -106,6 +103,7 @@ void main() {
 
     test('falha na consulta é isolada e tratada como não instalado', () async {
       final RepositorioAtalhosAplicativos repo = RepositorioAtalhosAplicativos(
+        assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
         consulta: _ConsultaQueFalha(),
       );
 
@@ -114,6 +112,55 @@ void main() {
       expect(itens.every((AtalhoAplicativo a) => !a.instalado), isTrue);
     });
   });
+}
+
+class _CatalogoComUmDesativado implements RepositorioAssistente {
+  @override
+  Future<List<ServicoDoCatalogo>> catalogo() async => const <ServicoDoCatalogo>[
+        ServicoDoCatalogo(
+          id: 'whatsapp',
+          chave: 'whatsapp',
+          nomeExibido: 'WhatsApp',
+          descricaoCurta: 'Mensagens e chamadas',
+          categoria: CategoriaDoServico.cotidiano,
+          memoraPodeAbrir: true,
+          identificadorAndroid: 'com.whatsapp',
+        ),
+        ServicoDoCatalogo(
+          id: 'tiktok',
+          chave: 'tiktok',
+          nomeExibido: 'TikTok',
+          descricaoCurta: 'Vídeos curtos',
+          categoria: CategoriaDoServico.cotidiano,
+          memoraPodeAbrir: false,
+          identificadorAndroid: 'com.zhiliaoapp.musically',
+        ),
+        ServicoDoCatalogo(
+          id: 'gov-br',
+          chave: 'gov-br',
+          nomeExibido: 'Gov.br',
+          descricaoCurta: 'Serviços públicos',
+          categoria: CategoriaDoServico.sensivel,
+          memoraPodeAbrir: false,
+        ),
+      ];
+
+  @override
+  Future<RespostaDaAssistente> conversar({
+    required String mensagem,
+    required List<MensagemDaConversa> historico,
+    void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
+  }) async => const AssistenteRespondeu('ok');
+
+  @override
+  Future<void> registrarAcao({
+    required String servicoId,
+    required String pedidoResumido,
+  }) async {}
+
+  @override
+  Future<List<AcaoRegistrada>> registro() async => const <AcaoRegistrada>[];
 }
 
 class _ConsultaQueFalha implements ConsultaDeAplicativos {

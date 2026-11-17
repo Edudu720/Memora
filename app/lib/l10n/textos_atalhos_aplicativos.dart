@@ -1,23 +1,37 @@
-/// Textos da tela de atalhos diretos para aplicativos (Feature 015).
+/// Textos da tela e dos atalhos diretos para aplicativos (Feature 015).
 ///
-/// Linguagem literal, curta e acolhedora, sem termos técnicos como "App",
-/// "Hub" ou "Chatbot" (FR-008) e livre de promessas ou cobranças (US9).
+/// Linguagem literal, curta e acolhedora, alinhada ao portão de textos da 013
+/// (no máximo duas frases curtas, sem emojis e sem termos proibidos).
 abstract final class TextosAtalhosAplicativos {
-  /// Título principal da tela.
+  /// Título principal da tela dedicada de atalhos.
   static const String tituloTela = 'Abrir aplicativos';
 
-  /// Título exibido na porta do catálogo completo.
-  static const String portaAtalhos = 'Abrir aplicativos';
+  /// Título do botão para acessar a grade só com atalhos a partir do catálogo.
+  static const String botaoVerAtalhosDiretos = 'Abrir só por atalhos';
 
-  /// Descrição curta na porta do catálogo completo.
-  static const String descricaoPorta = 'Entre direto no aplicativo que quiser';
+  /// Rótulo do botão de abertura direta no cartão do catálogo.
+  static const String botaoAbrirAgora = 'Abrir agora';
+
+  /// Rótulo do botão de ida à loja oficial quando o app não está instalado.
+  static const String botaoBaixarPlayStore = 'Baixar na Play Store';
 
   /// Orientação curta exibida no topo da lista.
   static const String orientacaoTopo =
       'Toque no aplicativo que você deseja usar. Não precisa de passo a passo.';
 
-  /// Mensagem exibida durante a checagem inicial dos aplicativos instalados.
+  /// Mensagem exibida durante a consulta inicial no servidor e no aparelho.
   static const String carregando = 'Verificando aplicativos no celular...';
+
+  /// Mensagem de erro quando o servidor do catálogo não responde.
+  static const String erroAoCarregar =
+      'Não consegui buscar os aplicativos agora. Tente de novo em instantes.';
+
+  /// Título do estado vazio quando nenhum aplicativo cotidiano está ativo.
+  static const String vazioTitulo = 'Nenhum aplicativo liberado';
+
+  /// Explicação do estado vazio sem prometer prazos.
+  static const String vazioExplicacao =
+      'No momento não há aplicativos disponíveis para abrir por aqui.';
 
   /// Rótulo do selo quando o aplicativo foi encontrado no dispositivo.
   static const String statusInstalado = 'Instalado — Toque para abrir';

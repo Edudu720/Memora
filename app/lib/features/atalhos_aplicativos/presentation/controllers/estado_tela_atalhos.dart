@@ -2,10 +2,13 @@ import '../../domain/entidades/atalho_aplicativo.dart';
 
 /// Estado imutável da tela de atalhos diretos para aplicativos.
 class EstadoTelaAtalhos {
-  /// Indica se a verificação de instalação no dispositivo está em andamento.
+  /// Indica se a busca no catálogo e a verificação de instalação estão em andamento.
   final bool carregando;
 
-  /// Lista completa dos aplicativos comuns homologados com seu status atual.
+  /// Indica se houve falha ao carregar o catálogo oficial do servidor (`FR-006`).
+  final bool falha;
+
+  /// Lista de aplicativos cotidianos ativos no catálogo com seu status atual.
   final List<AtalhoAplicativo> aplicativos;
 
   /// Mensagem eventual de aviso operacional.
@@ -14,6 +17,7 @@ class EstadoTelaAtalhos {
   /// Cria o estado da tela de atalhos.
   const EstadoTelaAtalhos({
     this.carregando = true,
+    this.falha = false,
     this.aplicativos = const <AtalhoAplicativo>[],
     this.mensagemAviso,
   });
@@ -22,6 +26,6 @@ class EstadoTelaAtalhos {
   int get totalInstalados =>
       aplicativos.where((AtalhoAplicativo app) => app.instalado).length;
 
-  /// Total de aplicativos comuns suportados nesta tela.
+  /// Total de aplicativos comuns liberados pelo servidor.
   int get totalSuportados => aplicativos.length;
 }

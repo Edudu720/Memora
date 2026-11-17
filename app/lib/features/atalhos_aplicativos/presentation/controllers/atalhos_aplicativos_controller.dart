@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../services/aplicativos/consulta_de_aplicativos.dart'
+    show pareceUmPacote;
 import '../../../assistente/data/abridor_de_aplicativo.dart';
-import '../../data/catalogo_aplicativos_comuns.dart';
 import '../../domain/entidades/atalho_aplicativo.dart';
 import '../../domain/repositorios/i_repositorio_atalhos.dart';
 import 'estado_tela_atalhos.dart';
@@ -12,9 +13,11 @@ typedef AbridorDeUrlExterna = Future<bool> Function(Uri url);
 
 /// Controlador da tela de atalhos diretos para aplicativos (Feature 015).
 ///
-/// Orquestra o carregamento da lista de aplicativos comuns, o disparo seguro de
-/// aplicativos instalados via [AbridorDeAplicativo] e o encaminhamento à
-/// Google Play Store oficial para aplicativos não instalados.
+/// Orquestra o carregamento da lista de aplicativos cotidianos a partir do
+/// catálogo oficial do servidor, o disparo seguro de aplicativos instalados via
+/// [AbridorDeAplicativo] e o encaminhamento à Google Play Store oficial para
+/// aplicativos não instalados. Não gera registro de auditoria da assistente
+/// (`003/D1`), pois a abertura ocorre por toque direto da pessoa.
 class AtalhosAplicativosController extends ValueNotifier<EstadoTelaAtalhos> {
   final IRepositorioAtalhos _repositorio;
   final AbridorDeAplicativo? _abridor;
@@ -37,22 +40,40 @@ class AtalhosAplicativosController extends ValueNotifier<EstadoTelaAtalhos> {
     super.dispose();
   }
 
-  /// Carrega os aplicativos do repositório consultando quais estão instalados.
+  /// Carrega os aplicativos do repositório consultando o catálogo oficial e o
+  /// estado de instalação no aparelho.
   Future<void> carregar() async {
     value = EstadoTelaAtalhos(aplicativos: value.aplicativos);
-    final List<AtalhoAplicativo> obtidos = await _repositorio.obterAtalhos();
-    if (_descartado) return;
-    value = EstadoTelaAtalhos(
-      carregando: false,
-      aplicativos: obtidos,
+    try {
+      final List<AtalhoAplicativo> obtidos = await _repositorio.obterAtalhos();
+      if (_descartado) return;
+      value = EstadoTelaAtalhos(
+        carregando: false,
+        aplicativos: obtidos,
+      );
+    } catch (_) {
+      if (_descartado) return;
+      value = EstadoTelaAtalhos(
+        carregando: false,
+        falha: true,
+        aplicativos: value.aplicativos,
+      );
+    }
+  }
+
+  bool _pacoteAutorizadoPeloCatalogo(String pacoteAndroid) {
+    final String pacote = pacoteAndroid.trim();
+    if (!pareceUmPacote(pacote)) return false;
+    return value.aplicativos.any(
+      (AtalhoAplicativo item) => item.pacoteAndroid == pacote,
     );
   }
 
   /// Solicita ao sistema operacional a abertura do aplicativo instalado.
   ///
-  /// Só aceita pacotes pertencentes estritamente ao [CatalogoAplicativosComuns].
+  /// Só aceita pacotes presentes no catálogo cotidiano carregado do servidor.
   Future<bool> abrirAplicativo(AtalhoAplicativo aplicativo) async {
-    if (!CatalogoAplicativosComuns.pertenceAoCatalogo(aplicativo.pacoteAndroid)) {
+    if (!_pacoteAutorizadoPeloCatalogo(aplicativo.pacoteAndroid)) {
       return false;
     }
     final AbridorDeAplicativo? abridor = _abridor;
@@ -66,19 +87,35 @@ class AtalhosAplicativosController extends ValueNotifier<EstadoTelaAtalhos> {
 
   /// Abre a página oficial do aplicativo na Google Play Store.
   ///
-  /// Só aceita pacotes pertencentes estritamente ao [CatalogoAplicativosComuns].
+  /// Só aceita pacotes presentes no catálogo cotidiano carregado do servidor.
   Future<bool> abrirNaPlayStore(AtalhoAplicativo aplicativo) async {
-    if (!CatalogoAplicativosComuns.pertenceAoCatalogo(aplicativo.pacoteAndroid)) {
+    if (!_pacoteAutorizadoPeloCatalogo(aplicativo.pacoteAndroid)) {
       return false;
     }
-    final Uri uriLoja = urlPlayStoreDe(aplicativo.pacoteAndroid);
+    return abrirPacoteNaPlayStore(
+      aplicativo.pacoteAndroid,
+      abridorDeUrl: _abridorDeUrl,
+    );
+  }
+
+  /// Abre diretamente a página oficial de [pacoteAndroid] na Google Play Store.
+  ///
+  /// Tenta `market://` e recorre ao link web oficial da Play Store no fallback.
+  static Future<bool> abrirPacoteNaPlayStore(
+    String pacoteAndroid, {
+    AbridorDeUrlExterna? abridorDeUrl,
+  }) async {
+    final String pacote = pacoteAndroid.trim();
+    if (!pareceUmPacote(pacote)) return false;
+    final AbridorDeUrlExterna executor = abridorDeUrl ?? _abrirNaLojaDoSistema;
+    final Uri uriLoja = urlPlayStoreDe(pacote);
     try {
-      final bool abriuLoja = await _abridorDeUrl(uriLoja);
+      final bool abriuLoja = await executor(uriLoja);
       if (abriuLoja) return true;
-      if (_abridorDeUrl != _abrirNaLojaDoSistema) {
+      if (abridorDeUrl != null && abridorDeUrl != _abrirNaLojaDoSistema) {
         return false;
       }
-      return await _abridorDeUrl(urlWebPlayStoreDe(aplicativo.pacoteAndroid));
+      return await executor(urlWebPlayStoreDe(pacote));
     } catch (_) {
       return false;
     }

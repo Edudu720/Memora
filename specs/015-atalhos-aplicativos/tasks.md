@@ -28,9 +28,9 @@ description: "Task list for Feature 015 - Atalhos Rápidos para Aplicativos"
 
 - [X] T003 [P] Criar o enum `CategoriaAplicativo` em `app/lib/features/atalhos_aplicativos/domain/entidades/categoria_aplicativo.dart` com os valores `comunicacao`, `video`, `redesSociais` e `fotos`
 - [X] T004 [P] Criar a entidade imutável `AtalhoAplicativo` em `app/lib/features/atalhos_aplicativos/domain/entidades/atalho_aplicativo.dart` com campos `chave`, `nomeExibido`, `pacoteAndroid`, `descricaoCurta`, `categoria`, `instalado` e `iconeBytes`
-- [X] T005 [P] Criar o catálogo imutável dos 7 aplicativos comuns em `app/lib/features/atalhos_aplicativos/data/catalogo_aplicativos_comuns.dart` contendo WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok
+- [X] T005 [P] Garantir fonte única da verdade em `app/lib/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart` consumindo `RepositorioAssistente.catalogo()` (sem catálogo fixo paralelo, preservando R6 e excluindo serviços sensíveis)
 - [X] T006 [P] Criar a interface abstrata `IRepositorioAtalhos` em `app/lib/features/atalhos_aplicativos/domain/repositorios/i_repositorio_atalhos.dart` definindo `Future<List<AtalhoAplicativo>> obterAtalhos()`
-- [X] T007 Implementar `RepositorioAtalhosAplicativos` em `app/lib/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart` integrando com `ConsultaDeAplicativos` para checar `estaInstalado` e carregar `iconeDe`
+- [X] T007 Implementar `RepositorioAtalhosAplicativos` em `app/lib/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart` integrando `RepositorioAssistente` com `ConsultaDeAplicativos` para checar `estaInstalado` e carregar `iconeDe`
 
 **Checkpoint**: Fundação pronta — modelos e repositório testáveis de forma independente.
 
@@ -95,7 +95,7 @@ description: "Task list for Feature 015 - Atalhos Rápidos para Aplicativos"
 
 **Purpose**: Acessibilidade, rotas e integração com as demais áreas do Memora.
 
-- [X] T021 [P] Adicionar ponto de entrada e atalho para a tela *"Abrir aplicativos"* no Início (`app/lib/features/inicio/presentation/tela_inicio.dart` e `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`)
+- [X] T021 [P] Integrar convivência com o `TelaCatalogo` (`app/lib/features/assistente/presentation/telas/tela_catalogo.dart` e `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart`), mantendo *"Meus aplicativos"* no `TelaInicio` sem conflito com a 013 e cobrindo convivência em `app/test/features/atalhos_aplicativos/catalogo_abertura_direta_test.dart`
 - [X] T022 [P] Validar rótulos semânticos (`Semantics`) para leitores de tela TalkBack em todos os cartões e diálogos em `app/lib/features/atalhos_aplicativos/presentation/widgets/cartao_atalho_aplicativo.dart`
 - [X] T023 Validar ampliação de texto até 200% sem estouro de layout (overflow) na tela e nos modais (`app/test/acessibilidade/atalhos_aplicativos_acessibilidade_test.dart`)
 - [X] T024 Executar toda a suíte de testes de validação conforme `quickstart.md` (`flutter test test/features/atalhos_aplicativos/`)

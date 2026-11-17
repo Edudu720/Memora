@@ -6,9 +6,9 @@
 
 ## Summary
 
-Implementar uma tela dedicada no Memora intitulada *"Meus Aplicativos"*, fornecendo atalhos diretos para que pessoas idosas possam abrir aplicativos comuns do cotidiano (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok) sem passos guiados ou tutoriais. 
+Implementar atalhos diretos para abrir aplicativos comuns do cotidiano (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok) sem exigir tutoriais, **convivendo** com o `TelaCatalogo` e mantendo o catálogo oficial do servidor (`RepositorioAssistente.catalogo()`) como fonte única da verdade (preservando **R6** e **Princípio VII**).
 
-A tela apresenta diretamente os **7 aplicativos comuns homologados** (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok), sem ocultar nenhum item. O estado de instalação é detectado em tempo real via `ConsultaDeAplicativos` para indicar se o app está instalado ou se está disponível para baixar. Serviços sociais/governamentais foram estritamente excluídos do escopo desta funcionalidade para manter a simplicidade e segurança. Para proteção contra toques involuntários (Princípio II da Constituição), a abertura de app instalado exige diálogo de confirmação claro antes da transição; caso não esteja instalado, oferece opção segura de abrir a Google Play Store oficial.
+A porta *"Meus aplicativos"* no Início e no Hub continua levando ao `TelaCatalogo`, onde cada cartão cotidiano passa a oferecer abertura direta segura (*"Abrir agora"* ou *"Baixar na Play Store"*) ao lado das ações educativas (*"Ensinar passo a passo"* e *"Pedir para a Memora abrir"*), além de um botão no catálogo (*"Abrir só por atalhos"*) para a tela dedicada `TelaAtalhosAplicativos`. O estado de instalação é detectado em tempo real via `ConsultaDeAplicativos`, serviços sensíveis/governamentais permanecem estritamente excluídos, aberturas manuais diretas não geram `Registro` da assistente (`003/D1`) e todo disparo externo exige confirmação clara (`DialogoConfirmacaoAbertura` ou `DialogoInstalacaoPlayStore`).
 
 ---
 
@@ -30,7 +30,7 @@ A tela apresenta diretamente os **7 aplicativos comuns homologados** (WhatsApp, 
 
 **Constraints**:
 - Conformidade obrigatória com as regras de visibilidade do Android 11+ (API 30+): proibido `QUERY_ALL_PACKAGES`;
-- 100% funcional offline (sem chamadas ao backend Spring Boot);
+- Fonte única da verdade no catálogo do servidor (`RepositorioAssistente.catalogo()`), preservando **R6** (desativação remota) e **Princípio VII** (sem substituir o catálogo educativo nem conflitar com `TelaInicio`);
 - Acessibilidade sênior (WCAG 2.2 AA/AAA, Atkinson Hyperlegible Next, escala de texto 200%, alvos de toque >= 56 dp).
 
 **Scale/Scope**: 1 tela nova principal, 3 componentes especializados (`CartaoAtalhoAplicativo`, `DialogoConfirmacaoAbertura`, `DialogoInstalacaoPlayStore`), 1 repositório de domínio e 1 controller de estado.
@@ -74,9 +74,10 @@ specs/015-atalhos-aplicativos/
 app/
 ├── lib/
 │   ├── features/
+│   │   ├── assistente/presentation/telas/
+│   │   │   └── tela_catalogo.dart              # Coexistência: Abrir agora / Play Store / Abrir só por atalhos
 │   │   └── atalhos_aplicativos/
 │   │       ├── data/
-│   │       │   ├── catalogo_aplicativos_comuns.dart
 │   │       │   └── repositorio_atalhos_aplicativos.dart
 │   │       ├── domain/
 │   │       │   ├── entidades/
@@ -86,17 +87,24 @@ app/
 │   │       │       └── i_repositorio_atalhos.dart
 │   │       └── presentation/
 │   │           ├── controllers/
+│   │           │   ├── estado_tela_atalhos.dart
 │   │           │   └── atalhos_aplicativos_controller.dart
+│   │           ├── telas/
+│   │           │   └── tela_atalhos_aplicativos.dart
 │   │           └── widgets/
-│   │               ├── tela_atalhos_aplicativos.dart
 │   │               ├── cartao_atalho_aplicativo.dart
-│   │               └── dialogo_confirmacao_abertura.dart
+│   │               ├── dialogo_confirmacao_abertura.dart
+│   │               └── dialogo_instalacao_play_store.dart
 └── test/
+    ├── acessibilidade/
+    │   └── atalhos_aplicativos_acessibilidade_test.dart
     └── features/
         └── atalhos_aplicativos/
-            ├── catalogo_aplicativos_test.dart
-            ├── atalhos_aplicativos_controller_test.dart
-            └── tela_atalhos_aplicativos_test.dart
+            ├── catalogo_abertura_direta_test.dart
+            ├── dialogo_confirmacao_abertura_test.dart
+            ├── dialogo_instalacao_test.dart
+            ├── repositorio_atalhos_test.dart
+            └── tela_atalhos_exibicao_test.dart
 ```
 
 **Structure Decision**: Padrão Feature-First e Clean Architecture aderente às demais features do Memora (`lib/features/...`), reutilizando os serviços compartilhados `ConsultaDeAplicativos` e `AbridorDeAplicativo`.

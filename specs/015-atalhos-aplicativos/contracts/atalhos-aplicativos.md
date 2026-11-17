@@ -49,7 +49,7 @@ Como esta funcionalidade é 100% executada no cliente mobile sem dependência de
 - **Propósito**: Direcionamento seguro para a página oficial do aplicativo na loja de aplicativos para idosos que desejam instalar um app recomendado.
 - **URI Primária**: `market://details?id={pacote}`
 - **URI de Fallback (Web)**: `https://play.google.com/store/apps/details?id={pacote}`
-- **Validação de Segurança**: O parâmetro `{pacote}` deve pertencer estritamente à lista autorizada de 7 aplicativos comuns (`CatalogoAplicativosComuns`). Nunca abrir URLs dinâmicas ou não verificadas.
+- **Validação de Segurança**: O parâmetro `{pacote}` deve satisfazer `pareceUmPacote` e estar presente na lista cotidiana autorizada pelo servidor (`RepositorioAssistente.catalogo()` com `categoria == CategoriaDoServico.cotidiano && memoraPodeAbrir`). Nunca abrir URLs dinâmicas ou pacotes de serviços sensíveis.
 
 ---
 

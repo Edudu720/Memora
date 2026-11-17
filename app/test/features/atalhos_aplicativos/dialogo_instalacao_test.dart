@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart';
 import 'package:memora/features/atalhos_aplicativos/domain/entidades/atalho_aplicativo.dart';
 import 'package:memora/features/atalhos_aplicativos/domain/entidades/categoria_aplicativo.dart';
@@ -22,6 +23,7 @@ void main() {
       urlDeveAbrir = true;
       controlador = AtalhosAplicativosController(
         repositorio: RepositorioAtalhosAplicativos(
+          assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
           consulta: ConsultaDeAplicativosSimulada(),
         ),
         abridorDeUrl: (Uri uri) async {
@@ -127,6 +129,8 @@ void main() {
     });
 
     test('recusa abrir pacote desconhecido fora do catálogo homologado', () async {
+      await controlador.carregar();
+
       const AtalhoAplicativo suspeito = AtalhoAplicativo(
         chave: 'suspeito',
         nomeExibido: 'Suspeito',

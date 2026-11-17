@@ -704,13 +704,14 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     ];
   }
 
-  /// Abre a tela de atalhos diretos para aplicativos comuns (Feature 015).
-  void _abrirAtalhosAplicativos() {
+  /// Abre a tela de atalhos diretos alimentada pelo catálogo do servidor (Feature 015).
+  void _abrirAtalhosAplicativos(RepositorioAssistente assistente) {
     _empilhar(
       _rota(
         builder: (BuildContext contexto) => _DonoDosAtalhosAplicativos(
           criar: () => AtalhosAplicativosController(
             repositorio: RepositorioAtalhosAplicativos(
+              assistente: assistente,
               consulta: widget.consultaAplicativos,
             ),
             abridor: widget.abridor,
@@ -875,6 +876,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           repositorio: assistente,
           categoria: categoria,
           consultaAplicativos: widget.consultaAplicativos,
+          abridor: widget.abridor,
+          aoAbrirAtalhosDiretos: () => _abrirAtalhosAplicativos(assistente),
           // Se o item tiver guia de passo a passo embarcado, abre o guia;
           // caso contrário, vai para a conversa já perguntando (T069, FR-027).
           aoAbrirGuia: (Guia guia, ServicoDoCatalogo servico) => _abrirGuia(
@@ -1184,7 +1187,12 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
                 ? null
                 : () => _abrirConversa(widget.assistente!),
             aoVerTudo: _portasConstruidas().isEmpty ? null : _abrirHub,
-            aoAbrirAplicativos: _abrirAtalhosAplicativos,
+            aoAbrirAplicativos: widget.assistente == null
+                ? null
+                : () => _abrirCatalogo(
+                      widget.assistente!,
+                      CategoriaDoServico.cotidiano,
+                    ),
             aoAbrirServicos: widget.assistente == null
                 ? null
                 : () => _abrirCatalogo(

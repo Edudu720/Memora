@@ -128,8 +128,19 @@ void main() {
       via: null,
     ),
     (
-      parte: 'abrir aplicativos (pelo atalho do Início)',
-      toques: <Finder>[find.byKey(TelaInicio.chaveAplicativos)],
+      parte: 'meus aplicativos (pelo atalho do Início)',
+      toques: <Finder>[find.text(TextosAssistente.portaAplicativos)],
+      chegada: find.byWidgetPredicate(
+        (Widget w) => w is TelaCatalogo && w.categoria.name == 'cotidiano',
+      ),
+      via: null,
+    ),
+    (
+      parte: 'atalhos diretos para aplicativos (a partir do Catálogo)',
+      toques: <Finder>[
+        find.text(TextosAssistente.portaAplicativos),
+        find.byKey(TelaCatalogo.chaveAtalhosDiretos),
+      ],
       chegada: find.byType(TelaAtalhosAplicativos),
       via: null,
     ),

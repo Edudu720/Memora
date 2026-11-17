@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_assistente.dart';
-import '../../../l10n/textos_atalhos_aplicativos.dart';
 import '../../../l10n/textos_casca.dart';
 
 /// A casa do Memora: primeiro ponto depois de entrar (T115, Feature 007).
@@ -31,9 +30,6 @@ class TelaInicio extends StatelessWidget {
 
   /// Contêiner semântico da área "Ver tudo o que eu faço".
   static const Key chaveCaixaVerTudo = Key('inicio.caixaVerTudo');
-
-  /// Atalho rápido para abrir diretamente os aplicativos do celular (Feature 015).
-  static const Key chaveAplicativos = Key('inicio.aplicativos');
 
   /// Nome de tratamento exibido na saudação.
   final String nome;
@@ -80,9 +76,8 @@ class TelaInicio extends StatelessWidget {
     return <_AcaoRapida>[
       if (aoAbrirAplicativos != null || aoVerTudo != null)
         _AcaoRapida(
-          key: chaveAplicativos,
           icone: Icons.apps_rounded,
-          titulo: TextosAtalhosAplicativos.portaAtalhos,
+          titulo: TextosAssistente.portaAplicativos,
           variacao: VarianteBadge.primario,
           aoTocar: aoAbrirAplicativos ?? aoVerTudo,
         ),
@@ -358,7 +353,6 @@ class _TileAtalho extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TileAcaoRapida(
-      key: atalho.key,
       icone: atalho.icone,
       titulo: atalho.titulo,
       variacao: atalho.variacao,
@@ -368,14 +362,12 @@ class _TileAtalho extends StatelessWidget {
 }
 
 class _AcaoRapida {
-  final Key? key;
   final IconData icone;
   final String titulo;
   final VarianteBadge variacao;
   final VoidCallback? aoTocar;
 
   const _AcaoRapida({
-    this.key,
     required this.icone,
     required this.titulo,
     required this.variacao,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/abridor_de_aplicativo.dart';
+import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart';
 import 'package:memora/features/atalhos_aplicativos/presentation/controllers/atalhos_aplicativos_controller.dart';
 import 'package:memora/features/atalhos_aplicativos/presentation/telas/tela_atalhos_aplicativos.dart';
@@ -22,7 +23,10 @@ void main() {
       );
       abridor = AbridorDeAplicativoSimulado();
       controlador = AtalhosAplicativosController(
-        repositorio: RepositorioAtalhosAplicativos(consulta: consulta),
+        repositorio: RepositorioAtalhosAplicativos(
+          assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
+          consulta: consulta,
+        ),
         abridor: abridor,
       );
     });
