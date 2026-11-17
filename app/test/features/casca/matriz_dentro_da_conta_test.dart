@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
@@ -41,14 +42,35 @@ void main() {
     final double topoDaBarra = t
         .getTopLeft(find.byKey(CascaInterna.chaveDaBarra))
         .dy;
+    double topoUtil = 0;
+    final Finder faixaSos = find.byKey(CascaInterna.chaveFaixaSos);
+    if (faixaSos.evaluate().isNotEmpty) {
+      topoUtil = t.getBottomLeft(faixaSos).dy;
+    }
+    final Iterable<Element> barrasSuperiores = find
+        .byType(BarraSuperior)
+        .evaluate()
+        .where((Element e) {
+          final RenderBox? rb = e.findRenderObject() as RenderBox?;
+          return rb != null && rb.hasSize;
+        });
+    for (final Element e in barrasSuperiores) {
+      final double baseBarra = t
+          .getBottomLeft(find.byWidget(e.widget))
+          .dy;
+      if (baseBarra > topoUtil && baseBarra < topoDaBarra) {
+        topoUtil = baseBarra;
+      }
+    }
+    final double alturaVisivel = topoDaBarra - topoUtil;
     expect(
       r.top,
       // Folga de ruído de ponto flutuante: `ensureVisible` alinha o alvo ao
-      // topo e o topo sai como -1e-13 (visto no "ver tudo" do Início, T115).
-      greaterThanOrEqualTo(-0.01),
-      reason: '${nomeDa(c)}: o alvo ficou acima da janela ($r)',
+      // topo da área útil e o topo sai com pequena folga.
+      greaterThanOrEqualTo(topoUtil - 0.01),
+      reason: '${nomeDa(c)}: o alvo ($r) ficou atrás da faixa superior ($topoUtil)',
     );
-    if (r.height <= topoDaBarra) {
+    if (r.height <= alturaVisivel) {
       expect(
         r.bottom,
         lessThanOrEqualTo(topoDaBarra),

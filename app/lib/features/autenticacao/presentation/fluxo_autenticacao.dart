@@ -49,7 +49,13 @@ import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 import '../../cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import '../../cuidado/data/repositorios/repositorio_emergencia_sos_simulado.dart';
+import '../../cuidado/domain/entidades/evento_emergencia_sos.dart';
+import '../../cuidado/domain/repositorios/repositorio_contato_emergencia.dart';
+import '../../cuidado/domain/repositorios/repositorio_emergencia_sos.dart';
 import '../../cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
+import '../../cuidado/presentation/controladores/controlador_sos_emergencia.dart';
+import '../../cuidado/presentation/telas/dialogo_sos_emergencia.dart';
 import '../../cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
 import '../../localizador/data/repositorios/repositorio_localizador_simulado.dart';
 import '../../localizador/domain/repositorios/repositorio_localizador.dart';
@@ -98,6 +104,15 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Opcional em testes isolados de widget; em produção a `Composicao` entrega
   /// [RepositorioLocalizadorApi] quando `usaServidorReal` estiver ativo.
   final RepositorioLocalizador? localizador;
+
+  /// Repositório de envio de pedidos manuais ou automáticos SOS (Feature 014).
+  final RepositorioEmergenciaSos? emergenciaSos;
+
+  /// Repositório do contato de emergência compartilhado entre Cuidado e SOS.
+  final RepositorioContatoEmergencia? contatoEmergencia;
+
+  /// Leitor opcional de localização autorizada para acompanhar pedidos SOS.
+  final Future<LocalizacaoSos?> Function()? obterLocalizacaoSos;
 
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   ///
@@ -179,6 +194,9 @@ class FluxoAutenticacao extends StatefulWidget {
     required this.repositorio,
     this.assistente,
     this.localizador,
+    this.emergenciaSos,
+    this.contatoEmergencia,
+    this.obterLocalizacaoSos,
     this.abridor,
     this.consultaAplicativos,
     this.conversaLocal = ConversaLocal.new,
@@ -274,6 +292,15 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   late final ArmazenamentoDeFotoDePerfil _fotos =
       widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
 
+  late final RepositorioEmergenciaSos _emergenciaSos =
+      widget.emergenciaSos ?? RepositorioEmergenciaSosSimulado();
+
+  late final RepositorioContatoEmergencia _contatoEmergencia =
+      widget.contatoEmergencia ?? RepositorioContatoEmergenciaLocal();
+
+  bool _sosNaTela = false;
+  ControladorSosEmergencia? _controladorSosAtivo;
+
   /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
   /// abre vai para a pilha do destino à vista, por [_empilhar].
   final GlobalKey<CascaInternaState> _casca = GlobalKey<CascaInternaState>();
@@ -311,6 +338,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   void dispose() {
     _rastreadorGlobal.parar();
     widget.sessaoPerdida?.removeListener(_aoPerderASessao);
+    _controladorSosAtivo?.dispose();
     _cadastro.dispose();
     _login?.dispose();
     _recuperacao?.dispose();
@@ -412,6 +440,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// tempo de sessão como qualquer outro, e celular esquecido nela expira.
   void _entrou(PessoaAutenticada pessoa) {
     _expirando = false;
+    _sosNaTela = false;
+    _controladorSosAtivo?.dispose();
+    _controladorSosAtivo = null;
     final int geracao = ++_geracaoDaEntrada;
     final ApresentacaoVista? vistas = widget.apresentacaoVista;
     setState(() {
@@ -463,6 +494,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _etapaDeEntrada = _Etapa.boasVindas;
     }
     _fecharRotasAbertas();
+    _sosNaTela = false;
+    _controladorSosAtivo?.dispose();
+    _controladorSosAtivo = null;
     _irParaLogin();
   }
 
@@ -588,6 +622,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _avisoNaTela = false;
     }
     _fecharRotasAbertas();
+    _sosNaTela = false;
+    _controladorSosAtivo?.dispose();
+    _controladorSosAtivo = null;
     _irParaLogin();
   }
 
@@ -683,13 +720,45 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _rota(
         builder: (BuildContext contexto) => TelaDispositivoCuidado(
           controlador: ControladorDispositivoCuidado(
-            repositorioContato: RepositorioContatoEmergenciaLocal(),
+            repositorioContato: _contatoEmergencia,
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
           nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
         ),
       ),
     );
+  }
+
+  /// Abre o diálogo de confirmação do Botão SOS Persistente (Feature 014)
+  /// preso ao navegador da aba ativa para fechar junto caso a sessão expire.
+  Future<void> _abrirDialogoSos() async {
+    if (!mounted || _etapa != _Etapa.dentro || _expirando || _sosNaTela) {
+      return;
+    }
+    final BuildContext? contextoAlvo = _casca.currentState?.contextoAtivo;
+    if (contextoAlvo == null || !contextoAlvo.mounted) return;
+
+    _sosNaTela = true;
+    final ControladorSosEmergencia controlador = ControladorSosEmergencia(
+      repositorioSos: _emergenciaSos,
+      repositorioContato: _contatoEmergencia,
+      obterLocalizacaoAutorizada: widget.obterLocalizacaoSos,
+      nomePessoa: _pessoa?.nomeTratamento ?? 'Usuário',
+    );
+    _controladorSosAtivo = controlador;
+
+    try {
+      await mostrarDialogoSosEmergencia(
+        context: contextoAlvo,
+        controlador: controlador,
+      );
+    } finally {
+      _sosNaTela = false;
+      if (identical(_controladorSosAtivo, controlador)) {
+        _controladorSosAtivo = null;
+      }
+      controlador.dispose();
+    }
   }
 
   /// A Ajuda, com os assuntos que existem agora (T087, FR-033).
@@ -1067,6 +1136,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _Etapa.dentro => CascaInterna(
         key: _casca,
         aoRegistrarAtividade: _registrarAtividade,
+        aoAcionarSos: _abrirDialogoSos,
         raizes: <DestinoDaCasca, WidgetBuilder>{
           DestinoDaCasca.ajustes: (BuildContext _) => TelaConfiguracoes(
             aoAbrirAparencia: () =>

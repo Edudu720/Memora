@@ -9,6 +9,8 @@ import 'features/assistente/data/abridor_de_aplicativo.dart';
 import 'features/assistente/data/aceite_do_aviso.dart';
 import 'features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'features/autenticacao/data/ultimo_acesso_local.dart';
+import 'features/cuidado/domain/entidades/evento_emergencia_sos.dart';
+import 'features/localizador/data/fontes/servico_geolocalizacao_dispositivo.dart';
 import 'features/perfil/data/data_de_nascimento_local.dart';
 import 'features/perfil/data/foto_de_perfil_local.dart';
 import 'services/acessibilidade/memora_binding_atividade.dart';
@@ -118,6 +120,9 @@ class AplicativoMemora extends StatelessWidget {
               sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
               localizador: composicao.localizador,
+              emergenciaSos: composicao.emergenciaSos,
+              contatoEmergencia: composicao.contatoEmergencia,
+              obterLocalizacaoSos: _lerLocalizacaoSosAutorizada,
               aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoPorCanal(),
               consultaAplicativos: ConsultaDeAplicativosPorCanal(),
@@ -126,6 +131,23 @@ class AplicativoMemora extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+/// Consulta a localização apenas quando a permissão do sistema já estiver concedida.
+Future<LocalizacaoSos?> _lerLocalizacaoSosAutorizada() async {
+  try {
+    final ServicoGeolocalizacaoDispositivo geo =
+        ServicoGeolocalizacaoDispositivo();
+    final StatusPermissaoLocalizacao status = await geo.verificarPermissao();
+    if (status != StatusPermissaoLocalizacao.concedida) {
+      return null;
+    }
+    final PosicaoSimples? pos = await geo.obterPosicaoAtual();
+    if (pos == null) return null;
+    return LocalizacaoSos(latitude: pos.latitude, longitude: pos.longitude);
+  } catch (_) {
+    return null;
   }
 }
 
