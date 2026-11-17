@@ -95,6 +95,17 @@ class BalaoDeFala extends StatelessWidget {
   /// Chamado a cada letra que entra na tela — para a lista rolar atrás.
   final VoidCallback? aoEscrever;
 
+  /// Avisa quando a escrita aos poucos começa (verdadeiro) e quando para
+  /// (falso) — é o que mexe a boca da Memora do topo da conversa (FR-025).
+  final ValueChanged<bool>? aoMudarEscrita;
+
+  /// Mostra o rosto de quem fala ao lado do balão? Verdadeiro por padrão.
+  ///
+  /// A **conversa** desliga (FR-042, FR-043): lá a Memora é uma só, pequena, no
+  /// topo, e o balão fica limpo — quem fala continua dito pela posição e pelo
+  /// nome escrito ("Memora", "Você"), e pelo leitor de tela.
+  final bool comRosto;
+
   /// Cria uma fala.
   const BalaoDeFala({
     required this.autor,
@@ -103,6 +114,8 @@ class BalaoDeFala extends StatelessWidget {
     this.escreverAosPoucos = false,
     this.emAndamento = false,
     this.aoEscrever,
+    this.aoMudarEscrita,
+    this.comRosto = true,
     super.key,
   });
 
@@ -111,13 +124,14 @@ class BalaoDeFala extends StatelessWidget {
   /// É estado, e precisa ser visto por mais de um sinal: o rosto falando, o
   /// texto "escrevendo" e os três pontos — nenhum deles depende de animação,
   /// para valer com "reduzir movimento" ligado (FR-028 da 002).
-  const BalaoDeFala.escrevendo({super.key})
+  const BalaoDeFala.escrevendo({this.comRosto = true, super.key})
     : autor = AutorDoBalao.memora,
       texto = null,
       opcoes = const <OpcaoDoBalao>[],
       escreverAosPoucos = false,
       emAndamento = false,
-      aoEscrever = null;
+      aoEscrever = null,
+      aoMudarEscrita = null;
 
   /// Nome escrito de quem fala.
   static String nomeDe(AutorDoBalao autor) =>
@@ -193,6 +207,7 @@ class BalaoDeFala extends StatelessWidget {
                     aosPoucos: escreverAosPoucos,
                     emAndamento: emAndamento,
                     aoAvancar: aoEscrever,
+                    aoMudarEscrita: aoMudarEscrita,
                   )
                 else if (texto != null)
                   TextoMemora(texto!)
@@ -223,7 +238,9 @@ class BalaoDeFala extends StatelessWidget {
               ? MainAxisAlignment.start
               : MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: _daMemora
+          children: !comRosto
+              ? <Widget>[balao]
+              : _daMemora
               ? <Widget>[
                   rosto,
                   const SizedBox(width: MemoraEspacamento.sm),
