@@ -15,6 +15,43 @@ MAIN_CSS_PATH = DIR_SITE / "styles" / "main.css"
 JS_PATH = DIR_SITE / "scripts" / "tutorial.js"
 ORCAMENTO_JS_BYTES = 102_400
 
+EXPRESSOES_MEMORA = (
+    "neutra",
+    "falando",
+    "pensando",
+    "comemorando",
+    "preocupada",
+    "acenando",
+    "dica",
+    "mini",
+    "carregando",
+)
+GRUPOS_MEMORA = (
+    "sombra",
+    "corpo",
+    "painel-peito",
+    "antena",
+    "cabeca",
+    "visor",
+    "rosto",
+    "olhos",
+    "boca",
+    "braco-esquerdo",
+    "braco-direito",
+    "escudo",
+    "livro",
+    "barra",
+)
+ATIVOS_LEGADOS_MEMORA = (
+    "memora_ajuda_robo.png",
+    "memora_alerta_robo.png",
+    "memora_dica_robo.png",
+    "memora_perfil_robo.png",
+    "memora_comemorando.svg",
+    "memora_falando.svg",
+    "memora_neutra.svg",
+)
+
 JARGOES_PROIBIDOS = [
     r"\biot\b",
     r"\bmqtt\b",
@@ -132,6 +169,13 @@ class InspetorHtml(HTMLParser):
         self.html_lang: str | None = None
         self.html_movimento: str | None = None
         self.tem_botao_movimento: bool = False
+        self.tem_botao_outra_dica: bool = False
+        self.tem_botao_alternar_anfitria: bool = False
+        self.tem_balao_anfitria: bool = False
+        self.tem_anfitria_flutuante: bool = False
+        self.anfitria_dentro_de_main: bool = False
+        self.main_profundidade: int = 0
+        self.personagens_memora: list[dict[str, str | None]] = []
         self.titulo_pagina: str = ""
         self.ids: set[str] = set()
         self.ancoras_href: list[str] = []
@@ -154,8 +198,28 @@ class InspetorHtml(HTMLParser):
         if tag == "html":
             self.html_lang = mapa.get("lang")
             self.html_movimento = mapa.get("data-movimento")
+        if tag == "main":
+            self.main_profundidade += 1
         if "data-acao-movimento" in mapa:
             self.tem_botao_movimento = True
+        if "data-acao-outra-dica" in mapa:
+            self.tem_botao_outra_dica = True
+        if "data-acao-alternar-anfitria" in mapa:
+            self.tem_botao_alternar_anfitria = True
+        if "data-anfitria-bloco" in mapa:
+            if self.main_profundidade > 0:
+                self.anfitria_dentro_de_main = True
+            if tag == "aside":
+                self.tem_anfitria_flutuante = True
+        if "data-anfitria-balao" in mapa:
+            self.tem_balao_anfitria = True
+        if tag == "memora-personagem":
+            self.personagens_memora.append(
+                {
+                    "expressao": mapa.get("expressao"),
+                    "aria_hidden": mapa.get("aria-hidden"),
+                }
+            )
         if "id" in mapa and mapa["id"]:
             self.ids.add(mapa["id"])
         if tag in {"header", "nav", "main", "footer"}:
@@ -205,6 +269,8 @@ class InspetorHtml(HTMLParser):
             self.ignorar_texto_tags.append(tag)
 
     def handle_endtag(self, tag: str) -> None:
+        if tag == "main" and self.main_profundidade > 0:
+            self.main_profundidade -= 1
         if self.pilha_mini_tela:
             self.pilha_mini_tela.pop()
         if self.ignorar_texto_tags and self.ignorar_texto_tags[-1] == tag:
@@ -444,7 +510,7 @@ def validar() -> list[str]:
         if atual - anterior > 1:
             erros.append(f"Salto inválido na hierarquia de títulos: h{anterior} -> h{atual}")
 
-    if not inspetor.imagens:
+    if not inspetor.imagens and not inspetor.personagens_memora:
         erros.append("Nenhuma ilustração encontrada em index.html.")
     for src, alt in inspetor.imagens:
         if not src:
@@ -455,6 +521,71 @@ def validar() -> list[str]:
             erros.append(f"Imagem referenciada não existe: {src}")
         if not alt or not alt.strip():
             erros.append(f"Imagem sem texto alternativo (alt) em português: {src}")
+
+    if not inspetor.personagens_memora:
+        erros.append("Nenhum componente <memora-personagem> encontrado em index.html.")
+    for idx_p, personagem in enumerate(inspetor.personagens_memora, start=1):
+        expr = personagem.get("expressao")
+        if expr not in EXPRESSOES_MEMORA:
+            erros.append(
+                f"<memora-personagem> #{idx_p} com expressao invalida: {expr!r}"
+            )
+        if personagem.get("aria_hidden") != "true":
+            erros.append(
+                f"<memora-personagem> #{idx_p} deve possuir aria-hidden='true'."
+            )
+
+    if not inspetor.tem_botao_outra_dica:
+        erros.append("Controle [data-acao-outra-dica] ausente em index.html.")
+    if not inspetor.tem_botao_alternar_anfitria:
+        erros.append("Controle [data-acao-alternar-anfitria] ausente em index.html.")
+    if not inspetor.tem_anfitria_flutuante:
+        erros.append("Painel <aside class='anfitria-flutuante' data-anfitria-bloco> ausente fora de <main>.")
+    if inspetor.anfitria_dentro_de_main:
+        erros.append("O painel da anfitria [data-anfitria-bloco] deve ficar fora de <main> e dos capitulos.")
+    if not inspetor.tem_balao_anfitria:
+        erros.append("Elemento [data-anfitria-balao] ausente em index.html.")
+
+    dir_ilustracoes = DIR_SITE / "assets" / "ilustracoes"
+    for legado in ATIVOS_LEGADOS_MEMORA:
+        if (dir_ilustracoes / legado).exists():
+            erros.append(f"Ativo legado nao removido de site/assets/ilustracoes: {legado}")
+        if legado in html_texto:
+            erros.append(f"Referencia legada ainda presente em index.html: {legado}")
+
+    dir_memora = DIR_SITE / "assets" / "memora"
+    memora_json_path = dir_memora / "memora.json"
+    memora_dados_js_path = dir_memora / "memora-dados.js"
+    if not memora_json_path.is_file():
+        erros.append("Arquivo exportado ausente: site/assets/memora/memora.json")
+    else:
+        import json
+
+        dados_memora = json.loads(memora_json_path.read_text(encoding="utf-8"))
+        expressoes_json = set(dados_memora.get("expressoes") or [])
+        faltando_expr = sorted(set(EXPRESSOES_MEMORA) - expressoes_json)
+        if faltando_expr:
+            erros.append(f"Expressoes ausentes em memora.json: {faltando_expr}")
+        if len(dados_memora.get("dicasDaAnfitria") or []) < 14:
+            erros.append("memora.json deve conter pelo menos 14 dicas da anfitria.")
+        paletas_memora = set((dados_memora.get("paletas") or {}).keys())
+        if not {"claro", "escuro", "alto-contraste"} <= paletas_memora:
+            erros.append(f"Paletas incompletas em memora.json: {sorted(paletas_memora)}")
+
+    if not memora_dados_js_path.is_file():
+        erros.append("Arquivo exportado ausente: site/assets/memora/memora-dados.js")
+
+    for expr in EXPRESSOES_MEMORA:
+        svg_path = dir_memora / f"{expr}.svg"
+        if not svg_path.is_file():
+            erros.append(f"SVG exportado ausente: site/assets/memora/{expr}.svg")
+            continue
+        svg_texto = svg_path.read_text(encoding="utf-8")
+        for grupo in GRUPOS_MEMORA:
+            if f'id="{grupo}"' not in svg_texto:
+                erros.append(
+                    f"SVG site/assets/memora/{expr}.svg sem grupo semantico id='{grupo}'."
+                )
 
     # 3. Rede externa ausente em CSS/JS, jargões ausentes e portão memora-ux + orçamento JS
     alvos_rede: list[tuple[str, str]] = [

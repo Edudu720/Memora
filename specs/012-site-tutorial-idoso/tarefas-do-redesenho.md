@@ -45,7 +45,7 @@ bem.
 - [X] **S01** — `/speckit-clarify` da spec 012: registrar a Memora animada, o
   botão "reduzir movimento", a regra de biblioteca copiada para dentro e as
   escolhas técnicas acima.
-- [ ] **S02** — **Exportador da Memora** (ferramenta em Dart): roda os
+- [X] **S02** — **Exportador da Memora** (ferramenta em Dart): roda os
   pintores da `MemoraAnimada` (`app/lib/design_system/componentes/ilustracao/memora_animada/`)
   e gera um **SVG por expressão**, com **cada parte num grupo nomeado**
   (cabeça, visor, olhos, boca, braços, antena, escudo…), mais um JSON com as
@@ -53,19 +53,19 @@ bem.
   site tem que ser **a mesma** do aplicativo, nunca redesenhada à parte.
   *Combinar com o Henrique* (dono dos pintores); depende da T083 e da T086 da
   013.
-- [ ] **S03** — Web Component `<memora-personagem>`: monta o SVG e anima
+- [X] **S03** — Web Component `<memora-personagem>`: monta o SVG e anima
   respiração, piscar, aceno, fala e comemoração; atributos `expressao` e
   `falando`; `aria-hidden` (decorativa); parada com "reduzir movimento" e
   quando sai da tela (`IntersectionObserver`). Depende da S02.
-- [ ] **S04** — Trocar as **7 imagens antigas da Memora** (3 PNG e 4 SVG de
+- [X] **S04** — Trocar as **7 imagens antigas da Memora** (3 PNG e 4 SVG de
   `site/assets/ilustracoes/`) pelo componente; apagar os arquivos antigos e
   atualizar o `LICENCAS.md`. Depende da S03.
-- [ ] **S05** — **A anfitriã do site** no topo: balão de dicas com a **mesma
+- [X] **S05** — **A anfitriã do site** no topo: balão de dicas com a **mesma
   lista fixa do aplicativo** (vinda do JSON da S02, nunca uma segunda lista);
   troca a cada 20 s; **para** com leitor de tela, com "reduzir movimento" ou
   depois de um toque (WCAG 2.2.2); o toque é um botão "Outra dica da Memora".
   Mesmas regras da US8 da spec 013 (FR-048 a FR-058). Depende da S03.
-- [ ] **S06** — **A Memora fala junto com o "Ouvir"**: o site já lê os
+- [X] **S06** — **A Memora fala junto com o "Ouvir"**: o site já lê os
   capítulos em voz alta; a boca dela acompanha a leitura pelos eventos de
   fronteira de palavra da síntese de voz. Depende da S03.
 - [X] **S07** — Ícones das "portas" e das pessoas: trocar pela mesma família
@@ -87,9 +87,9 @@ bem.
   e o `tutorial.test.mjs` não rodam no CI), mais Playwright com axe-core para
   acessibilidade e uma meta de desempenho simulando celular lento. Tudo só em
   desenvolvimento; nada disso vai para o site publicado.
-- [ ] **S13** — Orçamento de desempenho: no máximo ~100 KB de JavaScript,
+- [X] **S13** — Orçamento de desempenho: no máximo ~100 KB de JavaScript,
   animar só posição, escala e transparência, e parar a Memora fora da tela.
-- [ ] **T082** (vinda da 013) — quando a Memora vetorial estiver no site, as
+- [X] **T082** (vinda da 013) — quando a Memora vetorial estiver no site, as
   imagens antigas saem de vez (é a S04) e o título é revisto (é a S11).
 
 **Ordem sugerida**: S01 → S10 e S11 (rápidas, sem dependência) → S02 → S03 →

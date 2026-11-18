@@ -18,7 +18,7 @@
 ### 2. Fonte Única da Memora e Lista de Dicas via Exportador Dart (`S02`, `S04`, `FR-015`)
 
 - **Decision**: Implementar ferramenta Dart (`app/tool/exportar_memora_site.dart`) que lê diretamente as poses e camadas de [`PintorDaMemora`](file:///c:/Users/Eduardo/Memora/app/lib/design_system/componentes/ilustracao/memora_animada/pintores/pintor_da_memora.dart) / [`poses.dart`](file:///c:/Users/Eduardo/Memora/app/lib/design_system/componentes/ilustracao/memora_animada/poses.dart) e a lista fixa de dicas da anfitriã (`T086` da 013) para gravar em `site/assets/memora/`:
-  - Um SVG por expressão (`neutra`, `falando`, `pensando`, `comemorando`, `preocupada`, `acenando`, `dica`, `mini`) contendo grupos `<g id="...">` nomeados por peça anatômica (`sombra`, `corpo`, `painel-peito`, `antena`, `cabeca`, `visor`, `rosto`, `olhos`, `boca`, `braco-esquerdo`, `braco-direito`, `escudo`, `livro`);
+  - Um SVG por expressão (`neutra`, `falando`, `pensando`, `comemorando`, `preocupada`, `acenando`, `dica`, `mini`, `carregando`) contendo grupos `<g id="...">` nomeados por peça anatômica (`sombra`, `corpo`, `painel-peito`, `antena`, `cabeca`, `visor`, `rosto`, `olhos`, `boca`, `braco-esquerdo`, `braco-direito`, `escudo`, `livro`, `barra`);
   - Um JSON consolidado (`memora.json`) com metadados das poses, paletas por tema (`claro`, `escuro`, `alto-contraste`) e array ordenado de dicas da anfitriã.
 - **Rationale**:
   - Garante que a Memora do site seja **idêntica** à do aplicativo (`memora-ux`, `FR-015`) e evita divergência editorial ou de segurança nas dicas da anfitriã (que são revisadas no código, nunca vindas da IA em runtime).
@@ -53,3 +53,17 @@
   - Estender `site/tests/validar_site.py` com varredura lexical de frases/termos proibidos/emojis (seguindo a mesma lógica de terminadores e abreviações do `app/test/design_system/texto_da_interface_test.dart`), verificação de remoção das 7 imagens antigas e checagem do orçamento JS (`<= 100 KB`).
   - Criar job `site` em `.github/workflows/verificacao.yml` executando `validar_site.py`, `node --test site/tests/tutorial.test.mjs`, e testes Playwright + `@axe-core/playwright` (instalados apenas em contexto de dev/CI, fora dos arquivos publicados de `site/`).
 - **Rationale**: Mantém o portão do site com o mesmo rigor já adotado no aplicativo (`app/`) e evita que regressões de texto, contraste ou overflow em `320 px` a `200%` voltem a passar despercebidas.
+
+### 6. Acompanhante Global Flutuante fora dos Capítulos (`Session 2026-11-17`, `FR-003`, `FR-013`, `FR-015`)
+
+- **Decision**:
+  - Mover a anfitriã (`[data-anfitria-bloco]`) de dentro de `#boas-vindas` para um marco `<aside class="anfitria-flutuante" aria-label="Dicas da Memora">` fora das seções, fixado no canto inferior esquerdo (oposto ao `.atalho-topo-fixo`).
+  - Manter `#boas-vindas` com abertura limpa focada nos parágrafos e no lema, preservando o selo `mini` no `<header>` e as ilustrações decorativas `<memora-personagem>` nos cartões dos capítulos 6, 8 e 9.
+  - Em desktop largo (`>= 64rem` fora de `data-escala="muito-grande"`), inicia expandida com botão `Recolher` (`>= 48×48 px`); em telas compactas (`< 64rem`) ou escala `200%`, inicia recolhida como cápsula compacta com `<memora-personagem data-memora-anfitria>` visível + botão `Dicas` (`aria-expanded`), evitando cobrir o conteúdo de leitura e mantendo distância segura de `↑ Topo`.
+  - A anfitriã global passa a ser a falante única de `"Ouvir este trecho"` em todos os 9 capítulos (inclusive animando a boca dentro da cápsula compacta quando recolhida) e altera dinamicamente seu atributo `expressao` conforme o capítulo ativo na rolagem ou leitura (`boas-vindas` → `acenando`, `conversa-e-historico` → `pensando`, `aplicativos-e-servicos`/`pulseira-cuidado` → `dica`, `protecao-golpes` → `preocupada`, `duvidas-frequentes` → `comemorando`, demais → `neutra`).
+- **Rationale**:
+  - Permite acompanhar visualmente a Memora falando em voz alta em qualquer capítulo da página única sem perder acesso ao botão `"Outra dica da Memora"` nem poluir leituras em `320 px` a `200%`.
+  - Ao atualizar `expressao` somente quando muda de capítulo (`novo !== atual`), evita reconstruir o Shadow DOM durante pulsos de boca de fala.
+- **Alternatives considered**:
+  - Manter a anfitriã estática no Capítulo 1: deixava a personagem fora da tela durante a maioria das ativações de `"Ouvir este trecho"`.
+  - Painel flutuante sempre aberto em mobile/`200%`: cobriria os parágrafos de leitura e colidiria com `↑ Topo`.

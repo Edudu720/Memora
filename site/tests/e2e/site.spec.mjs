@@ -181,6 +181,48 @@ test('responsivo em 320x568, 390x844 e 768x1024 a 200% e alvos >= 48x48 px', asy
   expect(metricasAlvos.menorLargura).toBeGreaterThanOrEqual(48);
   expect(metricasAlvos.menorAltura).toBeGreaterThanOrEqual(48);
   expect(metricasAlvos.menorEspacamento).toBeGreaterThanOrEqual(7.5);
+
+  const anfitria = page.locator('.anfitria-flutuante');
+  await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'recolhida');
+
+  const caixaAlternar = await page.locator('[data-acao-alternar-anfitria]').boundingBox();
+  expect(caixaAlternar).not.toBeNull();
+  expect(caixaAlternar.width).toBeGreaterThanOrEqual(48);
+  expect(caixaAlternar.height).toBeGreaterThanOrEqual(48);
+
+  const caixaAnfitriaRecolhida = await anfitria.boundingBox();
+  const caixaTopo = await page.locator('.atalho-topo-fixo .botao-topo').boundingBox();
+  expect(caixaAnfitriaRecolhida).not.toBeNull();
+  expect(caixaTopo).not.toBeNull();
+  const gapHorizontal = Math.max(
+    0,
+    caixaTopo.x - (caixaAnfitriaRecolhida.x + caixaAnfitriaRecolhida.width),
+    caixaAnfitriaRecolhida.x - (caixaTopo.x + caixaTopo.width)
+  );
+  const gapVertical = Math.max(
+    0,
+    caixaTopo.y - (caixaAnfitriaRecolhida.y + caixaAnfitriaRecolhida.height),
+    caixaAnfitriaRecolhida.y - (caixaTopo.y + caixaTopo.height)
+  );
+  expect(Math.max(gapHorizontal, gapVertical)).toBeGreaterThanOrEqual(8);
+
+  // Ao expandir a capsula em 320px/200%, mantem alvos >= 48x48 e zero overflow/colisao com Topo
+  await page.locator('[data-acao-alternar-anfitria]').click();
+  await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'expandida');
+  await expect(page.locator('[data-acao-alternar-anfitria]')).toHaveAttribute('aria-expanded', 'true');
+
+  const caixaBotaoDica = await page.locator('[data-acao-outra-dica]').boundingBox();
+  expect(caixaBotaoDica).not.toBeNull();
+  expect(caixaBotaoDica.width).toBeGreaterThanOrEqual(48);
+  expect(caixaBotaoDica.height).toBeGreaterThanOrEqual(48);
+
+  const estouroExpandida = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth
+  );
+  expect(estouroExpandida).toBe(false);
+
+  await page.locator('[data-acao-alternar-anfitria]').click();
+  await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'recolhida');
 });
 
 test('navegacao por teclado: atalho de salto (#conteudo-principal) e abertura de duvidas por Enter', async ({ page }) => {
@@ -236,4 +278,69 @@ test('abertura local via file:// e orcamento JS <= 102.400 bytes sob CPU 4x', as
   expect(errosFile).toEqual([]);
   await expect(page.locator('html')).toHaveAttribute('data-tema', 'escuro');
   expect(duracaoMs).toBeLessThan(8_000);
+});
+
+test('acompanhante global <memora-personagem> fora dos capitulos segue o scroll, muda expressao e recolhe', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(urlBase, { waitUntil: 'load' });
+
+  const anfitria = page.locator('.anfitria-flutuante');
+  await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'expandida');
+  const foraDeMain = await page.evaluate(() => {
+    const el = document.querySelector('.anfitria-flutuante');
+    const main = document.querySelector('main');
+    return Boolean(el && el.tagName === 'ASIDE' && main && !main.contains(el));
+  });
+  expect(foraDeMain).toBe(true);
+
+  const personagens = await page.evaluate(() => {
+    const lista = Array.from(document.querySelectorAll('memora-personagem'));
+    return lista.map((el) => {
+      const svg = el.shadowRoot ? el.shadowRoot.querySelector('svg') : null;
+      return {
+        expressao: el.getAttribute('expressao'),
+        ariaHidden: el.getAttribute('aria-hidden'),
+        temShadowRoot: Boolean(el.shadowRoot),
+        temSvg: Boolean(svg),
+        temCorpo: Boolean(svg && svg.querySelector('#corpo')),
+        temCabeca: Boolean(svg && svg.querySelector('#cabeca')),
+        temOlhos: Boolean(svg && svg.querySelector('#olhos')),
+        temBoca: Boolean(svg && svg.querySelector('#boca')),
+      };
+    });
+  });
+
+  expect(personagens.length).toBeGreaterThanOrEqual(6);
+  for (const p of personagens) {
+    expect(p.ariaHidden).toBe('true');
+    expect(p.temShadowRoot).toBe(true);
+    expect(p.temSvg).toBe(true);
+    expect(p.temCorpo).toBe(true);
+    expect(p.temCabeca).toBe(true);
+    expect(p.temOlhos).toBe(true);
+    expect(p.temBoca).toBe(true);
+  }
+
+  // Ao navegar/rolar para Protecao contra golpes, a anfitria acompanha na tela e muda a expressao
+  await page.locator('[data-link-capitulo][href="#protecao-golpes"]').click();
+  const personagemGlobal = page.locator('[data-memora-anfitria]');
+  await expect(personagemGlobal).toHaveAttribute('expressao', 'preocupada');
+  await expect(personagemGlobal).toBeVisible();
+
+  const balao = page.locator('[data-anfitria-balao]');
+  const textoInicial = (await balao.innerText()).trim();
+  expect(textoInicial.length).toBeGreaterThan(0);
+
+  await page.locator('[data-acao-outra-dica]').click();
+  const textoAtualizado = (await balao.innerText()).trim();
+  expect(textoAtualizado.length).toBeGreaterThan(0);
+  expect(textoAtualizado).not.toBe(textoInicial);
+
+  const anuncio = (await page.locator('#anuncio-acessibilidade').innerText()).trim();
+  expect(anuncio).toBe(textoAtualizado);
+
+  // Recolher mantem o personagem visivel na capsula
+  await page.locator('[data-acao-alternar-anfitria]').click();
+  await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'recolhida');
+  await expect(personagemGlobal).toBeVisible();
 });

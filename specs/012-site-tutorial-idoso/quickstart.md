@@ -63,9 +63,9 @@ Acesse `http://localhost:8080` e teste em `320×568`, `390×844`, `768×1024` e 
 
 ## 5. Checklist Rápido de Conferência Manual
 
-- [ ] **`<title>` e textos (`S11`)**: aba sem `"Pessoas Idosas"` e todos os blocos visíveis curtos (`<= 2` frases) e sem emojis.
-- [ ] **Anfitriã e `<memora-personagem>` (`S03`–`S05`)**: personagem vetorial 2.5D visível com respiração/piscar suaves, dica alternando em `20 s` e parando imediatamente ao tocar em **"Outra dica da Memora"**.
-- [ ] **Leitura em voz alta (`S06`)**: **"Ouvir este trecho"** anima a boca durante a fala e volta ao repouso ao concluir ou ao trocar de capítulo.
-- [ ] **Conforto `"Reduzir movimento"` (`S10`)**: inicia marcado se o sistema pedir `prefers-reduced-motion: reduce`, permite alternar manualmente e congela personagem, dicas automáticas e transições CSS.
-- [ ] **Modos visuais (`S09`)**: `Fundo claro`, `Fundo escuro` e `Alto contraste` mantêm contraste integral inclusive em navegadores sem suporte a `light-dark()`.
-- [ ] **Celular estreito (`320×568`) a `200%`**: `scrollWidth <= clientWidth`, botões `>= 48×48 px` e foco visível ao navegar com `Tab`.
+- [x] **`<title>` e textos (`S11`)**: aba sem `"Pessoas Idosas"` e todos os blocos visíveis curtos (`<= 2` frases) e sem emojis.
+- [x] **Anfitriã acompanhante e `<memora-personagem>` (`S03`–`S05`, `Session 2026-11-17`)**: personagem acompanhando o scroll no canto inferior esquerdo (oposto a `↑ Topo`), expandida em desktop com botão recolher e cápsula compacta visível em `320×568` / `200%`; dica alternando em `20 s` quando expandida e parando imediatamente ao tocar em **"Outra dica da Memora"**.
+- [x] **Leitura em voz alta e expressão por capítulo (`S06`)**: **"Ouvir este trecho"** anima a boca da acompanhante em qualquer um dos 9 capítulos (inclusive quando recolhida em cápsula compacta) e a expressão acompanha o capítulo visível/lido.
+- [x] **Conforto `"Reduzir movimento"` (`S10`)**: inicia marcado se o sistema pedir `prefers-reduced-motion: reduce`, permite alternar manualmente e congela personagem, dicas automáticas e transições CSS.
+- [x] **Modos visuais (`S09`)**: `Fundo claro`, `Fundo escuro` e `Alto contraste` mantêm contraste integral inclusive em navegadores sem suporte a `light-dark()`.
+- [x] **Celular estreito (`320×568`) a `200%`**: `scrollWidth <= clientWidth`, botões `>= 48×48 px` e foco visível ao navegar com `Tab`.

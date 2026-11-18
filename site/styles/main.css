@@ -113,6 +113,7 @@ img {
   border: var(--borda-padrao) solid var(--primaria);
   padding: 0.25rem;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .marca-subtitulo {
@@ -346,12 +347,132 @@ img {
   border-radius: 50%;
   background-color: var(--medalhao);
   border: 3px solid var(--primaria);
+  overflow: hidden;
 }
 
-.medalhao-ilustracao img {
+.medalhao-ilustracao img,
+.medalhao-ilustracao memora-personagem,
+.marca-selo memora-personagem,
+.icone-moldura memora-personagem {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  display: block;
+}
+
+.anfitria-flutuante {
+  position: fixed;
+  left: var(--espaco-sm);
+  bottom: var(--espaco-sm);
+  z-index: 910;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-xs);
+  width: min(18rem, calc(100vw - 2 * var(--espaco-sm)));
+  max-height: calc(100dvh - 2 * var(--espaco-sm));
+  overflow-y: auto;
+  padding: var(--espaco-sm);
+  border-radius: var(--raio-cartao);
+  background-color: var(--superficie);
+  border: var(--borda-padrao) solid var(--primaria);
+  box-shadow: var(--sombra-suave);
+}
+
+.anfitria-flutuante[data-anfitria-estado="recolhida"] {
+  width: auto;
+  max-width: calc(100vw - 9rem);
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--raio-pilula);
+  overflow: visible;
+}
+
+.anfitria-flutuante[data-anfitria-estado="recolhida"] .anfitria-corpo {
+  display: none;
+}
+
+.anfitria-cabecalho-flutuante {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-xs);
+  flex-shrink: 0;
+}
+
+.anfitria-avatar {
+  width: 4.25rem;
+  height: 4.25rem;
+  margin: 0;
+  padding: 0.35rem;
+  flex-shrink: 0;
+}
+
+.anfitria-flutuante[data-anfitria-estado="recolhida"] .anfitria-avatar {
+  width: 3rem;
+  height: 3rem;
+  padding: 0.2rem;
+}
+
+.botao-alternar-anfitria,
+.atalho-topo-fixo .botao-topo {
+  min-height: 3rem;
+  min-width: 3rem;
+  font-size: 1rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.anfitria-corpo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--espaco-xs);
+  flex-shrink: 0;
+}
+
+.anfitria-corpo[hidden] {
+  display: none;
+}
+
+@media (max-width: 47.99rem) {
+  .anfitria-flutuante:not([data-anfitria-estado="recolhida"]) {
+    bottom: 4.5rem;
+    max-height: calc(100dvh - 5.5rem);
+  }
+}
+
+.anfitria-balao {
+  margin: 0;
+  width: 100%;
+  max-height: 10.5rem;
+  overflow-y: auto;
+  background-color: var(--destaque);
+  border: var(--borda-padrao) solid var(--primaria);
+  border-radius: var(--raio-pequeno);
+  padding: var(--espaco-xs) var(--espaco-sm);
+  color: var(--texto);
+  font-size: var(--tamanho-apoio);
+  font-weight: 600;
+  text-align: left;
+}
+
+.botao-dica-anfitria {
+  max-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+:root[data-escala="muito-grande"] .anfitria-balao {
+  font-size: 1.2rem;
+  line-height: 1.45;
+}
+
+:root[data-escala="muito-grande"] .botao-dica-anfitria {
+  font-size: 1.05rem;
+  padding: 0.5rem 0.75rem;
+}
+
+@media (min-width: 64rem) {
+  :root[data-anfitria="expandida"]:not([data-escala="muito-grande"]) body {
+    padding-left: 19.25rem;
+  }
 }
 
 .lema-memora {
@@ -415,8 +536,9 @@ img {
   border-radius: 50%;
   background-color: var(--medalhao);
   border: 2px solid var(--primaria);
-  padding: 0.65rem;
+  padding: 0.55rem;
   flex-shrink: 0;
+  overflow: hidden;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -678,7 +800,7 @@ img {
 .rodape-site {
   background-color: var(--superficie);
   border-top: var(--borda-padrao) solid var(--borda);
-  padding-block: var(--espaco-lg);
+  padding-block: var(--espaco-lg) calc(var(--espaco-xl) + 4.5rem);
 }
 
 .rodape-conteudo {
@@ -716,10 +838,6 @@ img {
 
 /* Responsividade para tablets e computadores */
 @media (min-width: 48rem) {
-  .hero-grade {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
-  }
-
   .grade-duas-colunas {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

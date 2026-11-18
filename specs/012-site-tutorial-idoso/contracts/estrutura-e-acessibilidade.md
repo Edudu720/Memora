@@ -11,7 +11,7 @@ Este documento define os contratos de estrutura HTML, controles de conforto, com
 1. **Raiz HTML**: `<html lang="pt-BR" data-tema="claro" data-escala="padrao" data-movimento="normal">` com `<meta charset="UTF-8">` e `<meta name="viewport" content="width=device-width, initial-scale=1.0">`.
 2. **Título da aba (`<title>`)**: DEVE cumprir a `memora-ux`, sendo estritamente livre de palavras proibidas (`idoso`, `idosa`, `idosos`, `idosas`, `terceira idade`, `melhor idade`, `sênior`) e de emojis (ex.: `"Guia do Memora — passo a passo, no seu ritmo"`).
 3. **Atalho de teclado inicial**: O primeiro elemento focável dentro de `<body>` DEVE ser `"Ir direto para o conteúdo principal"` apontando para `#conteudo-principal`, visível ao receber `:focus-visible`.
-4. **Marcos obrigatórios**: `<header>`, `<nav aria-label="...">` com atalhos para os 9 capítulos (`#boas-vindas` até `#duvidas-frequentes`), `<main id="conteudo-principal" tabindex="-1">` com um único `<h1>` e hierarquia `h2`/`h3` sem saltos, e `<footer>` informativo com botão visível de retorno ao início.
+4. **Marcos obrigatórios**: `<header>`, `<nav aria-label="...">` com atalhos para os 9 capítulos (`#boas-vindas` até `#duvidas-frequentes`), `<main id="conteudo-principal" tabindex="-1">` com um único `<h1>` e hierarquia `h2`/`h3` sem saltos, `<aside class="anfitria-flutuante" aria-label="Dicas da Memora">` fora das seções (nível topo, rótulo acessível único) e `<footer>` informativo com botão visível de retorno ao início.
 
 ---
 
@@ -39,17 +39,18 @@ Este documento define os contratos de estrutura HTML, controles de conforto, com
 
 ## 3. Contrato do Web Component `<memora-personagem>` e da Anfitriã (`FR-003`, `FR-013`, `FR-015`)
 
-1. **Tag & Atributos observados**: `<memora-personagem expressao="neutra|falando|pensando|comemorando|preocupada|acenando|dica|mini" falando="true|false">`
+1. **Tag & Atributos observados**: `<memora-personagem expressao="neutra|falando|pensando|comemorando|preocupada|acenando|dica|mini|carregando" falando="true|false">` (com grupo `<g id="barra">` presente em `carregando`)
 2. **Acessibilidade e autonomia offline (`FR-003`, `SC-006`)**:
    - Deve carregar `aria-hidden="true"` (decorativo; o texto/balão já comunica toda a informação).
    - Deve pausar loops de animação (`respirar`, `piscar`, `falar`) automaticamente quando `data-movimento="reduzido"` estiver ativo ou quando o elemento sair da área visível (`IntersectionObserver`).
    - Os dados das expressões, paletas e dicas da anfitriã DEVEM poder ser carregados localmente via módulo JS gerado (`site/assets/memora/memora-dados.js`) sem exigir `fetch()` (que navegadores bloqueiam em `file://` por CORS); caso o payload falhe ou esteja ausente, a página continua legível e exibe o texto das dicas sem erros visíveis.
-3. **Anfitriã no topo (`S05`, `WCAG 2.2.2`)**:
-   - Exibe balão alimentado exclusivamente por `dicasDaAnfitria` exportadas de `site/assets/memora/`.
-   - Contém botão explícito e acessível **"Outra dica da Memora"** (`>= 48×48 px`, foco visível de alto contraste, nenhuma navegação externa ou alteração de estado de conta).
-   - Alterna automaticamente a cada `20.000 ms` **somente** enquanto: `reduzirMovimento === 'normal'`, o botão **"Outra dica da Memora"** ainda não tiver sido acionado manualmente na sessão e não houver foco ativo por teclado/leitor dentro do bloco da anfitriã.
-4. **Sincronia com leitura em voz alta (`S06`)**:
-   - Enquanto `"Ouvir este trecho"` está ativo para um capítulo, o `<memora-personagem>` ligado ao capítulo assume `falando="true"`.
+3. **Anfitriã Acompanhante Global (`S05`, `WCAG 2.2.2`, `Session 2026-11-17`)**:
+   - Opera fora de `<main>` / capítulos em `<aside class="anfitria-flutuante" data-anfitria-bloco aria-label="Dicas da Memora">`, ancorada no canto inferior esquerdo (lado oposto ao `.atalho-topo-fixo` no canto inferior direito), mantendo `#boas-vindas` com abertura limpa e os capítulos 6, 8 e 9 com `<memora-personagem>` decorativos nos cartões.
+   - Contém `<memora-personagem data-memora-anfitria>` visível em todos os modos (expandida e cápsula compacta), balão alimentado exclusivamente por `dicasDaAnfitria` exportadas de `site/assets/memora/`, botão explícito **"Outra dica da Memora"** (`>= 48×48 px`) e botão alternador recolher/expandir (`[data-acao-alternar-anfitria]`, `aria-expanded`, `>= 48×48 px`).
+   - Em telas largas (`>= 64rem`) fora de `data-escala="muito-grande"`, inicia expandida; em telas `< 64rem` ou `data-escala="muito-grande"` (`200%`), inicia recolhida em cápsula compacta com o personagem visível e folga horizontal `>= 8 px` para o botão `↑ Topo`, expandindo sob toque dentro dos limites da viewport sem gerar `scrollWidth > clientWidth`.
+   - Alterna dicas automaticamente a cada `20.000 ms` **somente** enquanto: o balão está expandido, `reduzirMovimento === 'normal'`, o botão **"Outra dica da Memora"** ainda não tiver sido acionado manualmente na sessão e não houver foco ativo por teclado/leitor dentro do bloco da anfitriã.
+4. **Sincronia com leitura em voz alta e expressão por capítulo (`S06`, `Session 2026-11-17`)**:
+   - Enquanto `"Ouvir este trecho"` está ativo em qualquer dos 9 capítulos, o `<memora-personagem data-memora-anfitria>` acompanhante global assume `falando="true"` (visível tanto expandida quanto na cápsula recolhida) e exibe a expressão correspondente ao capítulo lido; em estado ocioso, acompanha a expressão do capítulo visível na rolagem (`acenando`, `pensando`, `dica`, `preocupada`, `comemorando`, `neutra`), atualizando o atributo somente quando o valor muda.
    - Eventos `onboundary` animam a boca de acordo com as palavras; na ausência de eventos `onboundary` após `onstart`, mantém ritmo calmo contínuo até `onend`/`onerror`. Sob `data-movimento="reduzido"`, a boca permanece parada sem ocultar o botão `"Ouvir este trecho"`.
 
 ---

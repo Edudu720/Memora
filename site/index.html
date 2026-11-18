@@ -6,6 +6,8 @@
   <title>Guia do Memora — passo a passo, no seu ritmo</title>
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/main.css">
+  <script src="assets/memora/memora-dados.js" defer></script>
+  <script src="scripts/memora-personagem.js" defer></script>
   <script src="scripts/tutorial.js" defer></script>
 </head>
 <body id="topo">
@@ -17,7 +19,7 @@
       <div class="barra-identidade">
         <div class="marca-memora">
           <span class="marca-selo">
-            <img src="assets/ilustracoes/memora_neutra.svg" alt="Rosto amigável da assistente Memora">
+            <memora-personagem expressao="mini" aria-hidden="true"></memora-personagem>
           </span>
           <div>
             <div>Guia do Memora</div>
@@ -95,10 +97,6 @@
           <blockquote class="lema-memora" data-leitura-conteudo>
             “Eu mostro o caminho e você faz. E não faço nada sem te avisar antes.”
           </blockquote>
-        </div>
-
-        <div class="medalhao-ilustracao">
-          <img src="assets/ilustracoes/memora_falando.svg" alt="Assistente Memora acenando e sorrindo para dar boas-vindas">
         </div>
       </div>
 
@@ -351,7 +349,7 @@
 
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/memora_perfil_robo.png" alt="Avatar ilustrado do robô Memora disponível para perfil">
+              <memora-personagem expressao="neutra" aria-hidden="true"></memora-personagem>
             </span>
             <h3>Sua foto ou avatar em Meu perfil</h3>
           </div>
@@ -439,7 +437,7 @@
         <div class="cartao-interno cartao-perigo" data-leitura-conteudo>
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/memora_alerta_robo.png" alt="Assistente Memora fazendo sinal de atenção para proteger contra golpes">
+              <memora-personagem expressao="preocupada" aria-hidden="true"></memora-personagem>
             </span>
             <h3>Sinais claros de alerta: desconfie na hora</h3>
           </div>
@@ -462,7 +460,7 @@
         <div class="cartao-interno cartao-sucesso" data-leitura-conteudo>
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/memora_dica_robo.png" alt="Assistente Memora dando uma dica segura com expressão serena">
+              <memora-personagem expressao="dica" aria-hidden="true"></memora-personagem>
             </span>
             <h3>O que fazer diante de uma dúvida suspeita</h3>
           </div>
@@ -553,7 +551,7 @@
       <article class="cartao-interno cartao-destaque cartao-familiares" data-leitura-conteudo>
         <div class="icone-com-legenda">
           <span class="icone-moldura">
-            <img src="assets/ilustracoes/memora_comemorando.svg" alt="Assistente Memora comemorando o aprendizado junto com o usuário">
+            <memora-personagem expressao="comemorando" aria-hidden="true"></memora-personagem>
           </span>
           <h3>Para familiares e cuidadores que apoiam os primeiros passos</h3>
         </div>
@@ -572,6 +570,21 @@
       <a class="botao-topo" href="#topo">↑ Voltar para o início da página</a>
     </div>
   </footer>
+
+  <aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">
+    <div class="anfitria-cabecalho-flutuante">
+      <div class="medalhao-ilustracao anfitria-avatar">
+        <memora-personagem expressao="acenando" anfitria="true" data-memora-anfitria aria-hidden="true"></memora-personagem>
+      </div>
+      <button type="button" class="botao-controle botao-alternar-anfitria" data-acao-alternar-anfitria aria-expanded="true" aria-controls="anfitria-conteudo">Recolher dicas</button>
+    </div>
+    <div id="anfitria-conteudo" class="anfitria-corpo" data-anfitria-conteudo>
+      <p class="anfitria-balao" data-anfitria-balao>
+        Cada guia mostra a tela do celular, um passo de cada vez. Eu fico com você até o fim.
+      </p>
+      <button type="button" class="botao-controle botao-dica-anfitria" data-acao-outra-dica>Outra dica da Memora</button>
+    </div>
+  </aside>
 
   <div class="atalho-topo-fixo">
     <a class="botao-topo" href="#topo" aria-label="Topo — voltar para o início da página"><span aria-hidden="true">↑</span> Topo</a>

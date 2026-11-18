@@ -313,7 +313,7 @@ acenando → fluxo de entrada, sem pulo.
 - **Fase B** (revisada em 2026-11-16): T080 (receber a `develop`, depois da
   PR da `feature/004-prints-e-zoom`) → integração (T047–T052) → US7-B, US4-B,
   US5, US3-B e US6 (inclui T081) em paralelo → validação final.
-- **T082 — fora do escopo, registrado para não perder** (rev. 16/11): o site
+- **T082 — fora do escopo, registrado para não perder** (rev. 16/11; ✅ concluída na spec `012` — `S04`, `S11`, `T038`, `T044`): o site
   da #74 (`site/`, spec 012) usa os PNGs antigos da Memora e diz "Pessoas
   Idosas" no título. Quando a Memora vetorial for aprovada (T018), o site
   precisa de imagens novas e do texto revisto — trabalho da spec 012, não

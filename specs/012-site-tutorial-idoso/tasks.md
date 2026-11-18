@@ -139,17 +139,17 @@
 
 ---
 
-## Phase 10: Rodada 2 — Memora 2.5D Exportada, Anfitriã e Sincronismo Vocal (US1 & US3 — Depende de T083 e T086 da 013)
+## Phase 10: Rodada 2 — Memora 2.5D Exportada, Anfitriã e Sincronismo Vocal (US1 & US3 — Desbloqueada pela PR #87)
 
 **Purpose**: Substituir as 7 imagens antigas da Memora pela personagem vetorial 2.5D única exportada do app, ativar a anfitriã com a lista fixa de dicas e sincronizar a boca com `"Ouvir este trecho"`.
 
 **Independent Test**: Rodar `dart run tool/exportar_memora_site.dart` em `app/`, testar `<memora-personagem>`, anfitriã (`20.000 ms`, pausa no botão `"Outra dica da Memora"` e em movimento reduzido) e sincronia de fala em `site/tests/tutorial.test.mjs`, e validar via `file://` e `site/tests/validar_site.py` ausência dos 7 arquivos legados.
 
-- [ ] T036 [US1] Criar o exportador Dart em `app/tool/exportar_memora_site.dart` lendo `PintorDaMemora`/`poses.dart` (`8` expressões `neutra|falando|pensando|comemorando|preocupada|acenando|dica|mini`, grupos `<g id="...">` nomeados `sombra`, `corpo`, `painel-peito`, `antena`, `cabeca`, `visor`, `rosto`, `olhos`, `boca`, `braco-esquerdo`, `braco-direito`, `escudo`, `livro`) e `dicasDaAnfitria` (`T086`) para gerar `site/assets/memora/<expressao>.svg`, `site/assets/memora/memora.json` e o módulo JS local compatível com `file://` `site/assets/memora/memora-dados.js` (depende de T083 e T086 da 013) [S02]
-- [ ] T037 [P] [US1] Implementar o Web Component `<memora-personagem expressao="neutra|falando|pensando|comemorando|preocupada|acenando|dica|mini" falando="true|false">` com `aria-hidden="true"`, animações compositoras (`transform`, `opacity`) via Web Animations API (ou biblioteca enxuta copiada em `site/vendor/` dentro do teto `<= 102.400 bytes`), pausa fora da viewport via `IntersectionObserver` e parada em `[data-movimento="reduzido"]` em `site/scripts/memora-personagem.js`, adicionando testes em `site/tests/tutorial.test.mjs` [S03, S13]
-- [ ] T038 [US1] Trocar todas as referências às 7 imagens antigas da Memora em `site/index.html` por `<memora-personagem>`, remover `memora_ajuda_robo.png`, `memora_alerta_robo.png`, `memora_dica_robo.png`, `memora_perfil_robo.png`, `memora_comemorando.svg`, `memora_falando.svg` e `memora_neutra.svg` de `site/assets/ilustracoes/`, atualizar `site/assets/ilustracoes/LICENCAS.md` e validar remoção/zero órfãos em `site/tests/validar_site.py` [S04, T082 da 013]
-- [ ] T039 [US1] Implementar a anfitriã no topo de `site/index.html` e `site/scripts/tutorial.js` consumindo `dicasDaAnfitria` de `site/assets/memora/memora-dados.js` (com fallback textual se ausente), rotação automática de `20.000 ms` desativada sob leitor de tela/foco ou `[data-movimento="reduzido"]`, e botão **"Outra dica da Memora"** (`>= 48x48 px`) que interrompe definitivamente a troca automática na sessão (`WCAG 2.2.2`), com testes em `site/tests/tutorial.test.mjs` [S05]
-- [ ] T040 [US3] Sincronizar `"Ouvir este trecho"` em `site/scripts/tutorial.js` com `falando="true"` no `<memora-personagem>` do capítulo ativo entre `onstart` e `onend`/`onerror`, usando eventos `onboundary` com fallback temporal rítmico calmo quando `onboundary` não for emitido pela voz e mantendo boca estática sob `[data-movimento="reduzido"]`, com testes em `site/tests/tutorial.test.mjs` [S06]
+- [X] T036 [US1] Criar o exportador Dart puro em `app/tool/exportar_memora_site.dart` (rodando via `dart run` sem depender de `dart:ui`, lendo geometria e constantes diretamente dos fontes de `app/lib/`) para `PintorDaMemora`/`poses.dart` (`9` expressões de `PoseDaMemora`: `neutra|falando|pensando|comemorando|preocupada|acenando|dica|mini|carregando`, grupos `<g id="...">` nomeados `sombra`, `corpo`, `painel-peito`, `antena`, `cabeca`, `visor`, `rosto`, `olhos`, `boca`, `braco-esquerdo`, `braco-direito`, `escudo`, `livro`, `barra`), `CoresDaMemora` (`app/lib/design_system/tokens/cores_da_memora.dart`) e `TextosAnfitria.dicas` (`app/lib/l10n/textos_anfitria.dart`, `T086` já na branch) gerando `site/assets/memora/<expressao>.svg`, `site/assets/memora/memora.json` e o módulo JS local compatível com `file://` `site/assets/memora/memora-dados.js` (`T083` e `T086` integrados via PR #87) [S02]
+- [X] T037 [P] [US1] Implementar o Web Component `<memora-personagem expressao="neutra|falando|pensando|comemorando|preocupada|acenando|dica|mini|carregando" falando="true|false">` com `aria-hidden="true"`, animações compositoras (`transform`, `opacity`) via Web Animations API (ou biblioteca enxuta copiada em `site/vendor/` dentro do teto `<= 102.400 bytes`), pausa fora da viewport via `IntersectionObserver` e parada em `[data-movimento="reduzido"]` em `site/scripts/memora-personagem.js`, adicionando testes em `site/tests/tutorial.test.mjs` [S03, S13]
+- [X] T038 [US1] Trocar todas as referências às 7 imagens antigas da Memora em `site/index.html` por `<memora-personagem>`, remover `memora_ajuda_robo.png`, `memora_alerta_robo.png`, `memora_dica_robo.png`, `memora_perfil_robo.png`, `memora_comemorando.svg`, `memora_falando.svg` e `memora_neutra.svg` de `site/assets/ilustracoes/`, atualizar `site/assets/ilustracoes/LICENCAS.md` e validar remoção/zero órfãos em `site/tests/validar_site.py` [S04, T082 da 013]
+- [X] T039 [US1] Implementar a anfitriã no topo de `site/index.html` e `site/scripts/tutorial.js` consumindo `dicasDaAnfitria` de `site/assets/memora/memora-dados.js` (com fallback textual se ausente), rotação automática de `20.000 ms` desativada sob leitor de tela/foco ou `[data-movimento="reduzido"]`, e botão **"Outra dica da Memora"** (`>= 48x48 px`) que interrompe definitivamente a troca automática na sessão (`WCAG 2.2.2`), com testes em `site/tests/tutorial.test.mjs` [S05]
+- [X] T040 [US3] Sincronizar `"Ouvir este trecho"` em `site/scripts/tutorial.js` com `falando="true"` no `<memora-personagem>` do capítulo ativo entre `onstart` e `onend`/`onerror`, usando eventos `onboundary` com fallback temporal rítmico calmo quando `onboundary` não for emitido pela voz e mantendo boca estática sob `[data-movimento="reduzido"]`, com testes em `site/tests/tutorial.test.mjs` [S06]
 
 **Checkpoint**: Site 100% unificado com a Memora 2.5D do aplicativo e sincronia vocal acessível.
 
@@ -161,8 +161,8 @@
 
 - [X] T041 [P] Configurar Playwright + `@axe-core/playwright` apenas como ferramenta dev-only em `site/tests/e2e/package.json` e criar a suíte `site/tests/e2e/site.spec.mjs` validando 0 violações `axe-core`, 0 overflow em `320x568` a `200%`, interação da anfitriã/`"Reduzir movimento"`, compatibilidade `file://` e simulação `CPU 4x` dentro do orçamento de JS `<= 102.400 bytes` [S12, S13]
 - [X] T042 Adicionar o job `site` em `.github/workflows/verificacao.yml` executando `python site/tests/validar_site.py`, `node --test site/tests/tutorial.test.mjs`, a suíte `site/tests/e2e/` e preservando os validadores `validar_paleta.py` e `validar_tokens.py` [S12]
-- [ ] T043 Executar validação final completa de `specs/012-site-tutorial-idoso/quickstart.md` (`validar_site.py`, `node --test`, `site/tests/e2e/`, conferência `file://` e HTTP estático de `320×568` a `1280×800`) confirmando orçamento JS total `<= 102.400 bytes` [S12, S13]
-- [ ] T044 [P] Marcar conclusões espelhadas em `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md` e na tarefa `T082` de `specs/013-redesenho-final/tasks.md`
+- [X] T043 Executar validação final completa de `specs/012-site-tutorial-idoso/quickstart.md` (`validar_site.py`, `node --test`, `site/tests/e2e/`, conferência `file://` e HTTP estático de `320×568` a `1280×800`) confirmando orçamento JS total `<= 102.400 bytes` [S12, S13]
+- [X] T044 [P] Marcar conclusões espelhadas em `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md` e na tarefa `T082` de `specs/013-redesenho-final/tasks.md`
 
 ---
 
@@ -175,6 +175,7 @@
 - **Phase 9 (`S07`, `S08`, `S09`)**: `T033`–`T035` sem bloqueio da `013`; `T034` aproveita o atributo `data-movimento` criado em `T030`.
 - **Phase 10 (`S02`–`S06`, `T082`)**: `T036` depende da entrega de `T083` e `T086` (Henrique na `013`); `T037` pode iniciar em paralelo com estrutura mockada e conectar ao bundle real de `T036`; `T038`, `T039` e `T040` dependem de `T036` e `T037`.
 - **Phase 11 (`S12`, `S13`)**: `T041` e `T042` podem correr em paralelo desde já sobre os critérios de acessibilidade/orçamento existentes, fechando com `T043` e `T044` ao final da Phase 10.
+- **Phase 14 (`Session 2026-11-17` — Acompanhante Global)**: depende da conclusão da Phase 10 (`T036`–`T040`, já `[X]`); `T051` (`index.html`) e `T052` (`main.css`) preparam a base estrutural e visual fora dos capítulos, seguidas de `T053`–`T054` (`tutorial.js`) e encerrando com as verificações `T055`–`T056`.
 
 ### Parallel Opportunities
 
@@ -182,6 +183,7 @@
 - **Phase 9**: `T033` (`tokens.css`), `T034` (`main.css`/`tutorial.js`) e `T035` (`assets/ilustracoes/`) podem rodar em paralelo.
 - **Phase 10**: `T037` (`<memora-personagem>` em `site/scripts/memora-personagem.js`) pode avançar enquanto `T036` finaliza o exportador Dart; em seguida `T038`, `T039` e `T040` integram em `site/index.html` e `site/scripts/tutorial.js`.
 - **Phase 11**: `T041` (`site/tests/e2e/`) e `T042` (`.github/workflows/verificacao.yml`) podem ser preparadas em paralelo.
+- **Phase 14**: `T052` (`main.css`) pode correr em paralelo com `T051` (`index.html`), e `T055` (`validar_site.py` / `tutorial.test.mjs`) pode correr em paralelo com `T056` (`site.spec.mjs`).
 
 ---
 
@@ -203,7 +205,8 @@ Task: "Suíte Playwright + axe-core dev-only em site/tests/e2e/site.spec.mjs" (T
 1. **Lote 1 (Imediato — Independente)**: `T029`–`T032` (`S10`, `S11`) + opcionalmente `T041`–`T042` (`S12`).
 2. **Lote 2 (CSS & Ícones — Independente)**: `T033`–`T035` (`S07`, `S08`, `S09`).
 3. **Lote 3 (Após `T083`/`T086` do Henrique)**: `T036` -> `T037` -> `T038`, `T039`, `T040` (`S02`–`S06`, `T082`).
-4. **Fechamento**: `T043`–`T044` validando quickstart, orçamento `<= 102.400 bytes`, Playwright/`axe-core` e abrindo PR final para `redesign-final`.
+4. **Lote 4 (Acompanhante Global `Session 2026-11-17`)**: `T051`, `T052` -> `T053`, `T054` -> `T055`, `T056`.
+5. **Fechamento**: `T043`–`T044` validando quickstart, orçamento `<= 102.400 bytes`, Playwright/`axe-core` e abrindo PR final para `redesign-final`.
 
 
 ---
@@ -226,3 +229,18 @@ Task: "Suíte Playwright + axe-core dev-only em site/tests/e2e/site.spec.mjs" (T
 - [X] T048 CRITICAL: Preservar `background-color: var(--primaria)` e `color: var(--sobre-primaria)` no estado `:focus-visible` dos controles ativos (`.botao-controle[aria-pressed="true"]`, `.botao-ouvir[aria-pressed="true"]` e `.link-sumario[aria-current="true"]`) em `site/styles/main.css` evitando sobrescrita de contraste pela regra genérica `:focus-visible` (`var(--destaque)`) per Constitution III, AC-001, SC-003 (partial)
 - [X] T049 Ampliar `site/tests/e2e/site.spec.mjs` para verificar contraste WCAG `axe-core` com `:focus-visible` em controle ativo (`[aria-pressed="true"]`/`[aria-current="true"]`), dimensões de `.atalho-topo-fixo .botao-topo` (`>= 48x48 px`) e espaçamento mínimo `>= 8 px` entre controles adjacentes per AC-002, SC-003, SC-004 (partial)
 - [X] T050 Estender `validar_memora_ux_e_orcamento` em `site/tests/validar_site.py` para varrer `tem_emoji` e `palavras_proibidas_em` também em `inspetor.textos_visiveis` (cobrindo textos fora de `BLOCOS_TAG`/`CLASSES_BLOCO`, como badges `.marca-texto` e cabeçalhos `<div>`) per FR-002, SC-001 (partial)
+
+---
+
+## Phase 14: Rodada 2 — Acompanhante Global Flutuante fora dos Capítulos (US1 & US3 — Session 2026-11-17)
+
+**Purpose**: Mover a Memora anfitriã de dentro do Capítulo 1 (`#boas-vindas`) para uma acompanhante global flutuante fora dos capítulos (canto inferior esquerdo, oposto a `↑ Topo`), iniciando expandida em desktop e recolhida em cápsula compacta com personagem visível em telas `< 64rem` ou `200%`, sincronizando expressão e fala (`"Ouvir este trecho"`) em todos os 9 capítulos.
+
+**Independent Test**: Verificar em desktop (`1280×800`) e mobile (`320×568` e `data-escala="muito-grande"`) que `<aside class="anfitria-flutuante">` acompanha o scroll fora das `<section>`, inicia recolhida em cápsula compacta em telas estreitas/`200%` sem sobrepor texto nem `↑ Topo` (`>= 8 px` de folga), alterna `aria-expanded` pelo botão `[data-acao-alternar-anfitria]` (`>= 48×48 px`), adapta `expressao` ao capítulo ativo e anima a boca em `"Ouvir este trecho"` em qualquer capítulo.
+
+- [X] T051 [US1] Mover o bloco da anfitriã de dentro de `#boas-vindas` para `<aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">` fora de `<main>` em `site/index.html`, deixando `#boas-vindas` com abertura limpa sem painel lateral duplicado, mantendo o selo `mini` no cabeçalho e os `<memora-personagem>` decorativos nos cartões dos capítulos 6, 8 e 9, e adicionando o botão acessível de recolher/expandir (`[data-acao-alternar-anfitria]`, rótulos `"Recolher dicas"` / `"Ver dicas"`, `aria-expanded="true|false"`, `aria-controls="anfitria-conteudo"`, área `>= 48x48 px`)
+- [X] T052 [P] [US1] Estilizar `.anfitria-flutuante` em `site/styles/main.css` ancorada no canto inferior esquerdo (lado oposto ao `.atalho-topo-fixo` no canto inferior direito, com folga `>= 8 px`), iniciando expandida em telas `>= 64rem` fora de `data-escala="muito-grande"` e recolhida em cápsula compacta com `<memora-personagem data-memora-anfitria>` visível em telas `< 64rem` ou `data-escala="muito-grande"` (`200%`), sem gerar `scrollWidth > clientWidth` nem encobrir o rodapé
+- [X] T053 [US1] Estender `criarControladorDaAnfitria` e `inicializarPagina` em `site/scripts/tutorial.js` com os campos `expandida` (`boolean`: `true` em `>= 64rem` e `tamanhoFonte !== 'muito-grande'`, `false` em `< 64rem` ou `'muito-grande'`) e `expressaoAtual` (`acenando | neutra | pensando | dica | preocupada | comemorando`), pausando `rotacaoAutomaticaAtiva` quando `expandida === false`, conectando o botão `[data-acao-alternar-anfitria]` (`"Recolher dicas"` quando expandida e `"Ver dicas"` quando recolhida) e atualizando a expressão do `<memora-personagem data-memora-anfitria>` conforme o capítulo ativo na rolagem (somente quando o valor de `expressao` mudar)
+- [X] T054 [US3] Atualizar a sincronização de `"Ouvir este trecho"` em `site/scripts/tutorial.js` para que o `<memora-personagem data-memora-anfitria>` acompanhante global seja a falante principal em todos os 9 capítulos (inclusive visível na cápsula recolhida), assumindo `falando="true"` e a expressão do capítulo lido entre `onstart` e `onend`/`onerror` e restaurando a expressão do capítulo visível na rolagem ao concluir
+- [X] T055 [P] [US1] Atualizar `site/tests/validar_site.py` e `site/tests/tutorial.test.mjs` para validar a presença de `<aside class="anfitria-flutuante">` e `[data-acao-alternar-anfitria]` em `site/index.html`, a pausa da rotação automática quando recolhida (`expandida: false`), a troca dinâmica de expressão por capítulo e a sincronia vocal na acompanhante global
+- [X] T056 [P] [US3] Atualizar `site/tests/e2e/site.spec.mjs` para verificar que `.anfitria-flutuante` inicia expandida em desktop (`1280x800`) e recolhida em cápsula compacta em `320x568` ou `data-escala="muito-grande"` sem colidir com `.atalho-topo-fixo` (`>= 8 px` de folga) nem gerar overflow horizontal, que `[data-acao-alternar-anfitria]` possui área `>= 48x48 px` e alterna `aria-expanded`, e que zero violações `axe-core` ocorrem nos 3 temas

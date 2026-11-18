@@ -1,7 +1,7 @@
-# Implementation Plan: Site Tutorial Acolhedor do Memora (`012`) — Rodada 2
+# Implementation Plan: Site Tutorial Acolhedor do Memora (`012`) — Rodada 2 + Acompanhante Global
 
-**Branch**: `redesign/S01-S10-S11-site-base` (base `redesign-final`) | **Date**: 2026-11-16 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/012-site-tutorial-idoso/spec.md)  
-**Input**: Especificação clarificada em `specs/012-site-tutorial-idoso/spec.md` (`S01`) + roadmap `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md` (`S01`–`S13`) + regras de [SKILL.md](file:///c:/Users/Eduardo/Memora/.claude/skills/memora-ux/SKILL.md)
+**Branch**: `redesign/S01-S10-S11-site-base` (base `redesign-final`) | **Date**: 2026-11-17 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/012-site-tutorial-idoso/spec.md)  
+**Input**: Especificação clarificada em `specs/012-site-tutorial-idoso/spec.md` (`S01` + `Session 2026-11-17`) + roadmap `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md` (`S01`–`S13`) + regras de [SKILL.md](file:///c:/Users/Eduardo/Memora/.claude/skills/memora-ux/SKILL.md)
 
 ---
 
@@ -9,7 +9,7 @@
 
 Modernizar o site tutorial estático em `site/` mantendo-o **100% autônomo do app Android (`app/`) e do backend (`backend/`)**, agora alinhado visual e editorialmente à feature `013-redesenho-final`:
 
-- **Uma só Memora entre app e site (`S02`–`S06`)**: exportador em Dart reutiliza os pintores e poses oficiais de `PintorDaMemora` ([app/lib/design_system/componentes/ilustracao/memora_animada/](file:///c:/Users/Eduardo/Memora/app/lib/design_system/componentes/ilustracao/memora_animada/)) e a lista fixa de dicas da anfitriã (`T086`) para gerar SVGs com grupos nomeados + JSON compartilhado, consumidos pelo Web Component `<memora-personagem>` com Web Animations nativas, pausa fora da tela (`IntersectionObserver`), anfitriã com troca automática segura (`WCAG 2.2.2`) e sincronização da boca com `"Ouvir este trecho"`.
+- **Uma só Memora entre app e site (`S02`–`S06`, `Session 2026-11-17`)**: exportador em Dart reutiliza os pintores e poses oficiais de `PintorDaMemora` ([app/lib/design_system/componentes/ilustracao/memora_animada/](file:///c:/Users/Eduardo/Memora/app/lib/design_system/componentes/ilustracao/memora_animada/)) e a lista fixa de dicas da anfitriã (`T086`) para gerar SVGs com grupos nomeados + JSON/módulo local compartilhado, consumidos pelo Web Component `<memora-personagem>` em **acompanhante global flutuante fora dos capítulos** (canto inferior esquerdo, oposto ao `↑ Topo`) com abertura limpa no `#boas-vindas`, cápsula compacta recolhível em telas `< 64rem` ou `200%`, adaptação de expressão ao capítulo ativo na rolagem e sincronização da boca com `"Ouvir este trecho"` em todos os 9 capítulos (mantendo o selo `mini` no cabeçalho e as ilustrações decorativas dos capítulos 6, 8 e 9 nos cartões).
 - **Acessibilidade, movimento e texto pela `memora-ux` (`S08`–`S11`, `S13`)**: botão `"Reduzir movimento"` integrado ao painel de conforto (respeitando `prefers-reduced-motion` no carregamento e prevalecendo a escolha manual salva localmente), ícones arredondados vetoriais consistentes com o app (`S07`), CSS moderno apenas como melhoria progressiva via `@supports` (`light-dark()` para Claro/Escuro mantendo `alto-contraste >= 7,0:1`, container queries, `text-wrap: pretty`, View Transitions e revelação na rolagem), revisão editorial (`<= 2` frases por bloco, zero emojis na UI, zero termos proibidos inclusive no `<title>`) e orçamento máximo de `~100 KB` de JavaScript.
 - **Qualidade contínua no CI (`S12`)**: job dedicado no [verificacao.yml](file:///c:/Users/Eduardo/Memora/.github/workflows/verificacao.yml) rodando `validar_site.py` (HTML, offline, anti-golpe, contraste WCAG, regra `memora-ux`, orçamento JS), `node --test site/tests/tutorial.test.mjs`, e suíte dev-only com Playwright + `axe-core` simulando celular de entrada.
 
@@ -28,7 +28,7 @@ Modernizar o site tutorial estático em `site/` mantendo-o **100% autônomo do a
 **Project Type**: Static Educational Web Site (`site/`) + gerador de ativos acoplado apenas em build/exportação aos pintores de `app/`.  
 **Performance Goals**: Orçamento total de JS em produção (`site/scripts/` + `site/vendor/` + dados locais gerados) <= `102.400 bytes` (`100 KiB`); apenas propriedades compositoras (`transform`, `opacity`) animadas; `<memora-personagem>` pausada fora da tela via `IntersectionObserver`; aprovação em perfil `CPU 4x` simulado sem violações `axe-core` nem bloqueio visível da interação.  
 **Constraints**: Zero formulários/campos sensíveis (`FR-011`), zero links externos (`FR-012`), zero dependências em CDN (`FR-014`), conformidade integral com `memora-ux` (`FR-002`, `SC-001`), preservação rigorosa do modo Alto Contraste `>= 7,0:1` (`AC-001`, `FR-016`).  
-**Scale/Scope**: 1 página única contínua (`index.html`), painel de conforto (`tamanho`, `tema`, `reduzir movimento`), módulo anfitriã no topo, `<memora-personagem>` reutilizada nos capítulos, exportação de 8 poses/expressões oficiais da `MemoraAnimada`, e cobertura completa de validação no CI.
+**Scale/Scope**: 1 página única contínua (`index.html`), painel de conforto (`tamanho`, `tema`, `reduzir movimento`), módulo acompanhante global da anfitriã fora das `<section>` (expandido no canto inferior esquerdo em desktop com botão de recolher, e cápsula compacta recolhida por padrão em mobile/`200%`), `<memora-personagem>` decorativas nos capítulos 6/8/9 e selo `mini`, exportação de 9 poses/expressões oficiais da `MemoraAnimada` (incluindo `carregando`), e cobertura completa de validação no CI.
 
 ---
 
@@ -40,7 +40,7 @@ Modernizar o site tutorial estático em `site/` mantendo-o **100% autônomo do a
 | :--- | :--- | :--- |
 | **I. Segurança Acima de Tudo** | *Threat Model* atualizado para permitir bibliotecas JS somente copiadas localmente com versão fixa (zero CDN/terceiros em runtime); zero formulários, zero coleta de dados pessoais ou telemetria. | ✅ APROVADO |
 | **II. Engenharia Social** | Lista fixa de dicas da anfitriã exportada diretamente do código revisado do app (nunca gerada por IA ou servidor em runtime); toque na anfitriã apenas troca dica e nunca abre URL nem dispara ação externa; textos curtos preservam avisos essenciais visíveis (`FR-002`, `FR-008`). | ✅ APROVADO |
-| **III. Acessibilidade** | `<memora-personagem>` marcada `aria-hidden="true"` (decorativa); botão acessível `"Outra dica da Memora"` (`>= 48×48 px`); pausa automática de rotação para leitor de tela, movimento reduzido ou após interação (`WCAG 2.2.2`); controle `"Reduzir movimento"` integrado; contraste WCAG 2.2 AA/AAA validado matematicamente e via `axe-core`. | ✅ APROVADO |
+| **III. Acessibilidade** | `<memora-personagem>` marcada `aria-hidden="true"` (decorativa); botões acessíveis **"Outra dica da Memora"** e de recolher/expandir a anfitriã (`>= 48×48 px` e folga `>= 8 px` com `↑ Topo`); pausa automática de rotação ao recolher, sob leitor de tela, movimento reduzido, foco contínuo ou após interação (`WCAG 2.2.2`); controle `"Reduzir movimento"` integrado; contraste WCAG 2.2 AA/AAA validado matematicamente e via `axe-core`; abertura inicial em cápsula compacta em `< 64rem` e `200%` sem sobrepor conteúdo. | ✅ APROVADO |
 | **IV. Spec Antes de Código** | `spec.md` clarificada na `S01` (5/5 respostas registradas e `checklists/requirements.md` `16/16`), seguida deste `plan.md`, `research.md`, `data-model.md`, `contracts/` e `quickstart.md` antes da implementação. | ✅ APROVADO |
 | **V. Arquitetura Limpa / Fonte Única** | Fonte única da Memora (`PintorDaMemora`) e das dicas (`T086`) via ferramenta exportadora em Dart; separação limpa em `site/` entre HTML semântico, tokens/estilos CSS, Web Component `<memora-personagem>`, controlador JS (`tutorial.js`), ativos e suíte de verificação. | ✅ APROVADO |
 | **VI. IA Nunca Age Sozinha** | Site puramente educativo e offline, sem chamadas a provedor de IA; fala local em `window.speechSynthesis` nunca envia dados à rede (`FR-013`). | ✅ APROVADO |
@@ -63,7 +63,8 @@ specs/012-site-tutorial-idoso/
 │   └── estrutura-e-acessibilidade.md            # Contratos HTML/CSS/WCAG/CustomElement/Exportação (Phase 1)
 ├── checklists/
 │   ├── requirements.md                          # Checklist de qualidade da spec
-│   └── revisao-requisitos.md                    # Revisão complementar da spec
+│   ├── revisao-requisitos.md                    # Revisão complementar da spec
+│   └── redesenho-ux.md                          # Checklist UX/AC do redesenho (Rodada 2)
 ├── tasks.md                                     # Tarefas da Rodada 1 concluídas + convergência Rodada 2
 └── tarefas-do-redesenho.md                      # Lista S01–S13 de trabalho da Rodada 2 no redesign-final
 ```
@@ -76,13 +77,13 @@ app/
     └── exportar_memora_site.dart                # S02: exportador CLI usando PintorDaMemora/poses + dicas da T086 -> site/assets/memora/
 
 site/
-├── index.html                                   # S04, S05, S10, S11: página única contínua, sem termos proibidos, painel + anfitriã + <memora-personagem>
+├── index.html                                   # S04, S05, S10, S11: página única contínua, hero limpo em #boas-vindas, <aside> acompanhante global fora das seções + capítulos 6/8/9 e selo mini
 ├── styles/
 │   ├── tokens.css                               # S09: tokens oficiais Claro/Escuro/Alto Contraste + progressivo light-dark() em @supports
-│   └── main.css                                 # S08, S09, S10: layout fluido, container queries, View Transitions, scroll reveal, [data-movimento="reduzido"]
+│   └── main.css                                 # S08, S09, S10: layout fluido, container queries, View Transitions, scroll reveal, anfitriã flutuante + cápsula mobile/200%, [data-movimento="reduzido"]
 ├── scripts/
 │   ├── memora-personagem.js                     # S03, S06, S13: Web Component <memora-personagem> + Web Animations + IntersectionObserver
-│   └── tutorial.js                              # S05, S06, S10: preferências (escala, tema, reduzir movimento), anfitriã 20s, SpeechSynthesis + sync boca
+│   └── tutorial.js                              # S05, S06, S10: preferências, anfitriã acompanhante global (20s/recolher/expressão por capítulo), SpeechSynthesis + sync boca global
 ├── assets/
 │   ├── memora/                                  # S02: SVGs exportados por expressão (grupos nomeados) + memora.json + memora-dados.js (compatível com file:// sem fetch)
 │   └── ilustracoes/                             # S04, S07: ícones Material Rounded em SVG (substituindo porta_*, casal_idoso, pessoa_com_celular, ajuste_aparencia) + LICENCAS.md (sem as 7 imagens antigas da Memora)
