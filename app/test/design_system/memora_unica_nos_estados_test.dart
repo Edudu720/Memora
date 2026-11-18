@@ -447,7 +447,6 @@ void main() {
       titulo: 'Aprender a usar o TikTok',
       capturadoEm: DateTime(2026, 10),
       versaoCapturada: '34.0.0',
-      passos: const <Passo>[],
     );
 
     for (final (String estado, PoseDaMemora pose) in <(String, PoseDaMemora)>[
