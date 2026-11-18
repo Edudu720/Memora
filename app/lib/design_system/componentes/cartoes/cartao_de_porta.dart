@@ -122,6 +122,9 @@ class CartaoDePorta extends StatelessWidget {
   /// O desenho.
   final Ilustracao ilustracao;
 
+  /// Ícone opcional da família `_rounded` exibido no medalhão da porta.
+  final IconData? icone;
+
   /// Ao abrir. Nula, a porta aparece desabilitada — mas a FR-018 manda não
   /// mostrar porta que não funciona, então isso só existe para a galeria.
   final VoidCallback? aoAbrir;
@@ -135,6 +138,7 @@ class CartaoDePorta extends StatelessWidget {
     required this.explicacao,
     required this.ilustracao,
     required this.aoAbrir,
+    this.icone,
     this.principal = false,
     super.key,
   });
@@ -186,6 +190,7 @@ class CartaoDePorta extends StatelessWidget {
                 MedalhaoDeIlustracao(
                   ilustracao,
                   tamanho: MemoraDimensoes.ilustracaoCartao,
+                  icone: icone,
                   // Só onde a cor não separa o medalhão da porta: na
                   // secundária (mesmo azul-claro no tema claro). Na principal
                   // ele já se destaca do preenchimento em primária.

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart' show immutable;
-import 'package:flutter/widgets.dart' show VoidCallback;
+import 'package:flutter/widgets.dart' show IconData, VoidCallback;
 
 import '../../../design_system/design_system.dart' show Ilustracao;
 
@@ -41,6 +41,9 @@ class PortaDoHub {
   /// ícone do Material que a porta carregava antes do redesenho.
   final Ilustracao ilustracao;
 
+  /// Ícone opcional da família `_rounded` exibido no medalhão da porta.
+  final IconData? icone;
+
   /// O que abrir. Obrigatório — ver a nota da classe.
   final VoidCallback aoAbrir;
 
@@ -57,6 +60,7 @@ class PortaDoHub {
     required this.descricao,
     required this.ilustracao,
     required this.aoAbrir,
+    this.icone,
     this.principal = false,
   });
 }

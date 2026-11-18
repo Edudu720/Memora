@@ -43,10 +43,14 @@ class MedalhaoDeIlustracao extends StatelessWidget {
   /// cabeçalho e a Memora, que o usam sobre o fundo, teriam de acompanhar.
   final Color? contorno;
 
+  /// Ícone alternativo da família `_rounded` exibido no lugar de [ilustracao].
+  final IconData? icone;
+
   /// Cria o medalhão.
   const MedalhaoDeIlustracao(
     this.ilustracao, {
     required this.tamanho,
+    this.icone,
     this.descricao,
     this.contorno,
     super.key,
@@ -59,6 +63,31 @@ class MedalhaoDeIlustracao extends StatelessWidget {
     final Color corIcone = tema.id == MemoraTemaId.claro
         ? cores.primaria
         : cores.sobrePrimaria;
+    final Widget conteudo = icone != null
+        ? (descricao == null
+              ? ExcludeSemantics(
+                  child: Icon(
+                    icone,
+                    size: tamanho * proporcaoDoDesenho,
+                    color: corIcone,
+                  ),
+                )
+              : Semantics(
+                  image: true,
+                  label: descricao,
+                  child: Icon(
+                    icone,
+                    size: tamanho * proporcaoDoDesenho,
+                    color: corIcone,
+                  ),
+                ))
+        : IlustracaoMemora(
+            ilustracao,
+            altura: tamanho * proporcaoDoDesenho,
+            largura: tamanho * proporcaoDoDesenho,
+            cor: corIcone,
+            descricao: descricao,
+          );
     return SizedBox.square(
       dimension: tamanho,
       child: DecoratedBox(
@@ -72,15 +101,7 @@ class MedalhaoDeIlustracao extends StatelessWidget {
                   width: MemoraDimensoes.bordaEnfase,
                 ),
         ),
-        child: Center(
-          child: IlustracaoMemora(
-            ilustracao,
-            altura: tamanho * proporcaoDoDesenho,
-            largura: tamanho * proporcaoDoDesenho,
-            cor: corIcone,
-            descricao: descricao,
-          ),
-        ),
+        child: Center(child: conteudo),
       ),
     );
   }

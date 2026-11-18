@@ -130,7 +130,7 @@ abstract final class TextosCuidado {
   static const String badgeContagemQueda = 'Confirmação de segurança';
   /// Texto exibido para apoio cronometro queda.
   static const String apoioCronometroQueda =
-      'Ao zerar, prepararemos o pedido de ajuda.';
+      'Quando chegar a zero, eu preparo o pedido de ajuda.';
   /// Texto exibido para badge atencao queda.
   static const String badgeAtencaoQueda = 'Queda possível detectada';
   /// Texto exibido para titulo verificacao queda.
