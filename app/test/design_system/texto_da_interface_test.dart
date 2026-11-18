@@ -125,14 +125,24 @@ void main() {
     });
   });
 
-  group('Os textos da interface (Fase A)', () {
+  group('Os textos da interface (T068: toda lib/l10n e guias)', () {
+    test('todo arquivo em lib/l10n/ está coberto pela varredura', () {
+      final Set<String> noDisco = Directory('lib/l10n')
+          .listSync()
+          .whereType<File>()
+          .where((File f) => f.path.endsWith('.dart'))
+          .map((File f) => f.path.replaceAll('\\', '/').split('/').last)
+          .toSet();
+      expect(arquivosVarridos.toSet(), noDisco);
+    });
+
     for (final String arquivo in arquivosVarridos) {
       test('$arquivo: blocos curtos, sem palavra proibida e sem emoji', () {
         final File fonte = File('lib/l10n/$arquivo');
         expect(fonte.existsSync(), isTrue, reason: 'rode na pasta app/');
 
-        final Map<String, String> blocos =
-            extrairBlocos(fonte.readAsStringSync());
+        final String codigo = fonte.readAsStringSync();
+        final Map<String, String> blocos = extrairBlocos(codigo);
         expect(blocos, isNotEmpty, reason: 'nenhum texto encontrado');
 
         final List<String> reprovados = <String>[];
@@ -150,6 +160,18 @@ void main() {
           }
         });
 
+        // Garante também ausência de emoji ou termo proibido em helpers (static String).
+        final List<String> linhas = codigo.split('\n');
+        for (int i = 0; i < linhas.length; i++) {
+          final String semComentario = linhas[i].split('//').first;
+          if (temEmoji(semComentario)) {
+            reprovados.add('linha ${i + 1}: emoji fora de constante');
+          }
+          for (final String p in palavrasProibidasEm(semComentario)) {
+            reprovados.add('linha ${i + 1}: palavra proibida "$p"');
+          }
+        }
+
         expect(
           reprovados,
           isEmpty,
@@ -160,19 +182,61 @@ void main() {
         );
       });
     }
+
+    test('todos os guias em features/aprendizado/data/guias/ respeitam o limite', () {
+      final List<File> guias = Directory('lib/features/aprendizado/data/guias')
+          .listSync()
+          .whereType<File>()
+          .where((File f) => f.path.endsWith('.dart'))
+          .toList()
+        ..sort((File a, File b) => a.path.compareTo(b.path));
+      expect(guias, isNotEmpty);
+
+      final RegExp literal = RegExp(_literalSimples + r'|' + _literalDuplo);
+      final List<String> reprovados = <String>[];
+
+      for (final File guia in guias) {
+        final List<String> linhas = guia.readAsLinesSync();
+        for (int i = 0; i < linhas.length; i++) {
+          final String codigo = linhas[i].split('//').first;
+          for (final RegExpMatch m in literal.allMatches(codigo)) {
+            final String bruto = m.group(0)!;
+            final String texto = bruto
+                .substring(1, bruto.length - 1)
+                .replaceAll(r"\'", "'")
+                .replaceAll(r'\"', '"');
+            final int frases = contarFrases(texto);
+            if (frases > 2) {
+              reprovados.add('${guia.path}:${i + 1}: $frases frases — "$texto"');
+            }
+            for (final String p in palavrasProibidasEm(texto)) {
+              reprovados.add('${guia.path}:${i + 1}: proibida "$p" — "$texto"');
+            }
+            if (temEmoji(texto)) {
+              reprovados.add('${guia.path}:${i + 1}: emoji — "$texto"');
+            }
+          }
+        }
+      }
+
+      expect(reprovados, isEmpty, reason: reprovados.join('\n'));
+    });
   });
 }
 
-/// Os arquivos que este portão cobre. **Fase A**: só os que a #71 não altera.
-/// A T068 acrescenta `textos_assistente.dart`, `textos_casca.dart`,
-/// `textos_guias.dart` e os guias de `features/aprendizado/data/guias/`.
+/// Os arquivos que este portão cobre em `lib/l10n/`.
+/// T068 estende a varredura sobre todos os arquivos de texto do aplicativo.
 const List<String> arquivosVarridos = <String>[
   'textos_abertura.dart',
   'textos_ajuda.dart',
   'textos_anfitria.dart',
   'textos_apresentacao.dart',
+  'textos_assistente.dart',
   'textos_autenticacao.dart',
+  'textos_casca.dart',
   'textos_configuracoes.dart',
+  'textos_cuidado.dart',
+  'textos_guias.dart',
   'textos_perfil.dart',
 ];
 

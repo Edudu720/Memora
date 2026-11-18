@@ -41,15 +41,22 @@ abstract final class TextosApresentacao {
   /// Título do quadro do que a Memora nunca faz.
   static const String tituloNunca = 'O que eu nunca faço';
 
-  /// O que **ninguém do Memora** faz (FR-036a).
+  /// Garantia de canal único: a Memora só fala com a pessoa dentro do
+  /// aplicativo (FR-035).
+  static const String soDentroDoAplicativo =
+      'Eu só falo com você dentro do aplicativo — nunca por mensagem, '
+      'ligação ou rede social.';
+
+  /// O que **ninguém do Memora** faz (FR-036a, FR-035).
   ///
   /// Literal de propósito: a versão "o Memora nunca pede senha" seria falsa,
   /// porque ele pede a senha no login, na recuperação e na confirmação do
   /// canal. O que ninguém faz é pedir **por telefone, mensagem ou e-mail**.
-  /// São quatro frases curtas, e não um parágrafo: quem lê devagar acha cada
+  /// São cinco frases curtas, e não um parágrafo: quem lê devagar acha cada
   /// uma sem reler as outras.
   static const List<String> nuncaFaco = <String>[
     'Eu nunca peço sua senha ou um código por telefone, mensagem ou e-mail.',
+    soDentroDoAplicativo,
     'Ninguém do Memora liga para você.',
     'Eu nunca peço para instalar um aplicativo fora da loja oficial, nem '
         '"para o Memora funcionar".',

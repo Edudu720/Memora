@@ -344,10 +344,28 @@ void main() {
       expect(dito, contains('para o memora funcionar'));
       // Cobrar.
       expect(dito, contains('cobro'));
+      // Canal único: só dentro do aplicativo (FR-035, V17).
+      expect(dito, contains('dentro do aplicativo'));
       // E o que fazer.
       expect(dito, contains('golpe'));
       expect(dito, contains('desligar'));
     });
+
+    testWidgets(
+      'diz que a Memora só fala com a pessoa dentro do aplicativo (FR-035, V17)',
+      (t) async {
+        await montarPrimeira(t);
+        final String dito = textoDe(
+          t,
+          find.byKey(FluxoApresentacao.chaveNuncaFaco),
+        ).toLowerCase();
+
+        expect(dito, contains('dentro do aplicativo'));
+        expect(dito, contains('mensagem'));
+        expect(dito, contains('ligação'));
+        expect(dito, contains('rede social'));
+      },
+    );
 
     testWidgets('não diz que o Memora "nunca pede senha" sem a ressalva', (
       t,

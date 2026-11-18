@@ -271,11 +271,11 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 13: User Story 3 — Texto — parte B
 
-- [ ] T066 [P] [US3] Reescrever os reprovados de `textos_assistente.dart` e `textos_casca.dart` (versões da #71)
-- [ ] T067 [US3] Reescrever os passos dos guias em `textos_guias.dart` e em `features/aprendizado/data/guias/*.dart` que passarem de duas frases, dividindo em passos quando preciso (FR-022); a captura de cada passo continua batendo com o texto
-- [ ] T068 [US3] Estender a lista de arquivos do `texto_da_interface_test.dart` para **todos** os arquivos de `l10n/` e de `guias/`; o portão passa sobre o aplicativo inteiro (SC-002)
-- [ ] T069 [US3] Ajustar as telas que a #71 alterou onde texto virou "Saber mais" ou etapa
-- [ ] T070 [US3] FR-035: frase na apresentação ("a Memora só fala com você dentro do aplicativo") em `textos_apresentacao.dart` e `fluxo_apresentacao.dart`, com teste (V17)
+- [X] T066 [P] [US3] Reescrever os reprovados de `textos_assistente.dart` e `textos_casca.dart` (versões da #71). **Feita em 2026-11-17**: reescritos `convite`, `corpoDoAceite`, `vocePodeFazerSozinha`, `porqueNaoAbroServicoSensivel`, `assistenteIndisponivel` e `caminhoPercorrido` em `textos_assistente.dart` em até 2 frases e removidos os 11 emojis de tela (`😊`) de `textos_assistente.dart`; `textos_casca.dart` já passava integralmente.
+- [X] T067 [US3] Reescrever os passos dos guias em `textos_guias.dart` e em `features/aprendizado/data/guias/*.dart` que passarem de duas frases, dividindo em passos quando preciso (FR-022); a captura de cada passo continua batendo com o texto. **Feita em 2026-11-17**: reescritos os 15 passos de 3 frases em `textos_guias.dart` (Instagram, YouTube, Google Fotos, Meu INSS, e-Título, FGTS, Poupatempo, Carteira Digital, Carteira de Trabalho Digital) para até 2 frases mantendo alinhamento com cada captura.
+- [X] T068 [US3] Estender a lista de arquivos do `texto_da_interface_test.dart` para **todos** os arquivos de `l10n/` e de `guias/`; o portão passa sobre o aplicativo inteiro (SC-002). **Feita em 2026-11-17**: estendido `texto_da_interface_test.dart` para cobrir dinamicamente todos os 11 arquivos de `lib/l10n/` (constantes e helpers sem emoji/proibidas) e todos os arquivos de `features/aprendizado/data/guias/`. Provado quebrando com bloco de 3 frases em `textos_guias.dart`.
+- [X] T069 [US3] Ajustar as telas que a #71 alterou onde texto virou "Saber mais" ou etapa. **Feita em 2026-11-17**: mantidas todas as informações de decisão visíveis em 2 frases diretas nos textos da conversa, catálogo e registro (sem ocultar itens obrigatórios); telas e matriz verificadas.
+- [X] T070 [US3] FR-035: frase na apresentação ("a Memora só fala com você dentro do aplicativo") em `textos_apresentacao.dart` e `fluxo_apresentacao.dart`, com teste (V17). **Feita em 2026-11-17**: adicionada `TextosApresentacao.soDentroDoAplicativo` em `nuncaFaco` e exibida na primeira tela de `FluxoApresentacao`, com caso dedicado em `fluxo_apresentacao_test.dart`.
 
 ## Phase 14: User Story 6 — Nenhuma tela fica de fora (P3)
 
