@@ -4,7 +4,8 @@
          O sistema desenha a abertura sozinho, e ignora o `windowBackground`:
          o fundo vem de `windowSplashScreenBackground` e a Memora do
          `windowSplashScreenAnimatedIcon` (o desenho parado, de 288 dp, com a
-         Memora de 160 dp no centro). O mesmo fundo e o mesmo lugar do aceno
+         Memora de 160 dp no centro, segurando a barra: T094). O mesmo fundo,
+         o mesmo desenho e o mesmo lugar do primeiro quadro da AberturaMemora,
          que vem em seguida. -->
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">@drawable/launch_background</item>

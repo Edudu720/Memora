@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:flutter/painting.dart' show Alignment, LinearGradient;
+import 'package:flutter/painting.dart' show Alignment;
 
 import '../poses.dart';
 import 'contexto_de_pintura.dart';
@@ -115,14 +115,13 @@ class CamadaBraco extends CamadaDaMemora {
     ctx.contornar(
       canvas,
       braco,
-      Paint()
-        ..style = PaintingStyle.fill
-        ..isAntiAlias = true
-        ..shader = LinearGradient(
-          begin: esquerdo ? Alignment.centerRight : Alignment.centerLeft,
-          end: esquerdo ? Alignment.centerLeft : Alignment.centerRight,
-          colors: <Color>[ctx.cores.corpoLuz, ctx.cores.corpoSombra],
-        ).createShader(caixa),
+      ctx.degrade(
+        caixa,
+        ctx.cores.corpoLuz,
+        ctx.cores.corpoSombra,
+        de: esquerdo ? Alignment.centerRight : Alignment.centerLeft,
+        ate: esquerdo ? Alignment.centerLeft : Alignment.centerRight,
+      ),
       fator: 0.9,
     );
     if (ctx.detalhada) {
