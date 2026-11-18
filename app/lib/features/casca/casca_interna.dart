@@ -237,9 +237,8 @@ class CascaInternaState extends State<CascaInterna> {
               // Só para tela sem cabeçalho com a vaga: no canto de cima,
               // dentro da área segura, por cima do conteúdo.
               if (mostrarSosFlutuante)
-                Positioned(
-                  top: 0,
-                  right: 0,
+                Align(
+                  alignment: Alignment.topRight,
                   child: SafeArea(
                     key: CascaInterna.chaveSosFlutuante,
                     bottom: false,
