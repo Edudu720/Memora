@@ -226,9 +226,9 @@ class TextosAssistente {
   /// escrever.
   static const String corpoDoAceite =
       'O que você escrever aqui vai para um serviço do Google, fora do Memora, '
-      'que pode usar a conversa para melhorar e pessoas de lá podem lê-la. '
-      'Por isso, nunca escreva senha, documento, endereço, nem nada sobre '
-      'sua saúde ou seu dinheiro.';
+      'que pode usar a conversa para melhorar os programas dele, e pessoas de '
+      'lá podem lê-la. Por isso, nunca escreva senha, documento, endereço, nem '
+      'nada sobre sua saúde ou seu dinheiro.';
 
   /// Aceita. Diz o que acontece, e não "OK".
   static const String botaoAceitar = 'Entendi, vamos conversar';
@@ -278,7 +278,7 @@ class TextosAssistente {
   static const String porqueNaoAbroServicoSensivel =
       'Esse eu te ensino, mas não abro: se eu abrisse banco e governo, '
       'alguém poderia ligar fingindo ser do suporte e pedir a mesma coisa. '
-      'Assim você fica mais segura.';
+      'Assim é mais seguro para você.';
 
   /// A pergunta que já vem escrita ao tocar num serviço do catálogo (T077).
   ///
@@ -362,9 +362,8 @@ class TextosAssistente {
   /// resultado, ela aprendeu que a Memora resolve. Vendo o caminho, ela tem
   /// chance de reconhecê-lo da próxima vez.
   static String caminhoPercorrido(String aplicativo) =>
-      'Pronto, abri o $aplicativo, tocando no ícone dele na sua tela inicial '
-      'para você reconhecer da próxima vez. Quando quiser tentar sozinha, eu '
-      'fico aqui do lado.';
+      'Pronto, abri o $aplicativo: toquei no ícone dele na sua tela inicial. '
+      'Quando quiser tentar, eu fico aqui do lado.';
 
   /// O aplicativo não estava instalado, ou não abriu.
   ///
