@@ -150,8 +150,17 @@ void main() {
         await t.pump(const Duration(milliseconds: 50));
       }
 
+      // O rosto do convite é a voz dela e não conta (FR-006 e FR-042, rev.
+      // 2026-11-18); fora dele, no máximo uma.
+      final int doConvite = find
+          .descendant(
+            of: find.byKey(TelaConversa.chaveConvite),
+            matching: find.byType(MemoraAnimada),
+          )
+          .evaluate()
+          .length;
       expect(
-        find.byType(MemoraAnimada).evaluate().length,
+        find.byType(MemoraAnimada).evaluate().length - doConvite,
         lessThanOrEqualTo(1),
       );
     });
