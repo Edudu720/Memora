@@ -38,17 +38,17 @@ void main() {
   }
 
   final _DadosAnfitria anfitria = _lerAnfitria(
-    arqDicas.readAsStringSync(encoding: utf8),
+    arqDicas.readAsStringSync(),
   );
   final Map<String, Map<String, String>> paletas = _lerPaletasMemora(
-    arqCoresMemora.readAsStringSync(encoding: utf8),
-    arqCoresDs.readAsStringSync(encoding: utf8),
+    arqCoresMemora.readAsStringSync(),
+    arqCoresDs.readAsStringSync(),
   );
   final _Geometria geometria = _lerGeometria(
-    arqGeometria.readAsStringSync(encoding: utf8),
+    arqGeometria.readAsStringSync(),
   );
   final Map<String, _PoseSpec> poses = _lerPoses(
-    arqPoses.readAsStringSync(encoding: utf8),
+    arqPoses.readAsStringSync(),
   );
 
   final Directory dirSaida = Directory('${raiz.path}/site/assets/memora');
@@ -70,7 +70,7 @@ void main() {
     );
     variacoes[nome] = varPose;
     final String svg = _montarSvgCompleto(nome, partesBase, varPose);
-    File('${dirSaida.path}/$nome.svg').writeAsStringSync('$svg\n', encoding: utf8);
+    File('${dirSaida.path}/$nome.svg').writeAsStringSync('$svg\n');
 
     metaPoses[nome] = <String, dynamic>{
       'inclinacaoCabecaGraus': _arredondar(pose.inclinacao * 180 / math.pi),
@@ -133,7 +133,6 @@ void main() {
   final File arqJson = File('${dirSaida.path}/memora.json');
   arqJson.writeAsStringSync(
     '${const JsonEncoder.withIndent('  ').convert(payload)}\n',
-    encoding: utf8,
   );
 
   final Map<String, dynamic> bundleJs = <String, dynamic>{
@@ -159,7 +158,7 @@ void main() {
       "})(typeof window !== 'undefined' ? window : globalThis);\n";
 
   final File arqBundleJs = File('${dirSaida.path}/memora-dados.js');
-  arqBundleJs.writeAsStringSync(conteudoJs, encoding: utf8);
+  arqBundleJs.writeAsStringSync(conteudoJs);
 
   stdout.writeln(
     'OK: Exportadas ${poses.length} expressoes (${poses.keys.join(', ')}), '
@@ -657,18 +656,17 @@ Map<String, _PoseSpec> _lerPoses(String fonte) {
     }
 
     _BracoPose? bracoArg(String campo) {
+      final String campoEscapado = RegExp.escape(campo);
       final RegExpMatch? mRef = RegExp(
-        r'\b' + RegExp.escape(campo) + r'\s*:\s*(_\w+)',
+        '\\b$campoEscapado\\s*:\\s*(_\\w+)',
       ).firstMatch(args);
       if (mRef != null && bracos.containsKey(mRef.group(1))) {
         return bracos[mRef.group(1)!];
       }
       final RegExpMatch? mInline = RegExp(
-        r'\b' +
-            RegExp.escape(campo) +
-            r'\s*:\s*(?:const\s+)?PosicaoDoBraco\(\s*'
-            r'(?:const\s+)?Offset\(\s*([\d.]+)\s*,\s*([\d.]+)\s*\)\s*,\s*'
-            r'(?:const\s+)?Offset\(\s*([\d.]+)\s*,\s*([\d.]+)\s*\)\s*,?\s*\)',
+        '\\b$campoEscapado\\s*:\\s*(?:const\\s+)?PosicaoDoBraco\\(\\s*'
+        '(?:const\\s+)?Offset\\(\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*\\)\\s*,\\s*'
+        '(?:const\\s+)?Offset\\(\\s*([\\d.]+)\\s*,\\s*([\\d.]+)\\s*\\)\\s*,?\\s*\\)',
         dotAll: true,
       ).firstMatch(args);
       if (mInline != null) {
@@ -710,7 +708,7 @@ Map<String, String> _renderizarPartesBase(_Geometria g) {
   const double lado = 240.0;
   double l(double prop) => prop * lado;
 
-  final String defs =
+  const String defs =
       '<linearGradient id="g-corpo" x1="0" y1="0" x2="1" y2="1">'
       '<stop offset="0%" stop-color="var(--memora-corpo-luz, #4F76E6)"/>'
       '<stop offset="100%" stop-color="var(--memora-corpo-sombra, #264AA9)"/>'
