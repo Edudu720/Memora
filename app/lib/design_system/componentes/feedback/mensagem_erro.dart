@@ -79,7 +79,7 @@ class MensagemErro extends StatelessWidget {
                 children: <Widget>[
                   // Ícone E texto: cor sozinha não comunica.
                   Icon(
-                    Icons.error_outline,
+                    Icons.error_outline_rounded,
                     color: cores.perigo,
                     size: MemoraDimensoes.iconeDestaque,
                   ),
@@ -91,7 +91,7 @@ class MensagemErro extends StatelessWidget {
                 const SizedBox(height: MemoraEspacamento.md),
                 BotaoSecundario(
                   rotulo: rotuloTentarNovamente,
-                  icone: Icons.refresh,
+                  icone: Icons.refresh_rounded,
                   aoTocar: aoTentarNovamente,
                 ),
               ],

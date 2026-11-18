@@ -247,7 +247,7 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                 child: BotaoSecundario(
                   key: CapturaAmpliada.chaveFechar,
                   rotulo: TextosGuias.fecharImagem,
-                  icone: Icons.close,
+                  icone: Icons.close_rounded,
                   larguraTotal: false,
                   aoTocar: () => Navigator.of(context).pop(),
                 ),
@@ -315,7 +315,7 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                       BotaoSecundario(
                         key: CapturaAmpliada.chaveAproximar,
                         rotulo: TextosGuias.aproximar,
-                        icone: Icons.add,
+                        icone: Icons.add_rounded,
                         aoTocar:
                             escala < CapturaAmpliada.escalaMaxima - _tolerancia
                             ? _aproximar
@@ -325,7 +325,7 @@ class _EstadoDaCapturaAmpliada extends State<CapturaAmpliada>
                       BotaoSecundario(
                         key: CapturaAmpliada.chaveAfastar,
                         rotulo: TextosGuias.afastar,
-                        icone: Icons.remove,
+                        icone: Icons.remove_rounded,
                         aoTocar:
                             escala > CapturaAmpliada.escalaMinima + _tolerancia
                             ? _afastar

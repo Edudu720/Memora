@@ -224,7 +224,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       child: BotaoPrimario(
                         key: TelaCadastro.chavePedirAparelho,
                         rotulo: 'Agora vamos criar a senha',
-                        icone: Icons.arrow_forward,
+                        icone: Icons.arrow_forward_rounded,
                         aoTocar:
                             c.podePedirOAparelho &&
                                 widget.aoEntregarAparelho != null
@@ -274,7 +274,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       BotaoPrimario(
                         key: TelaCadastro.chaveEnviar,
                         rotulo: 'Criar minha conta',
-                        icone: Icons.check,
+                        icone: Icons.check_rounded,
                         aoTocar: c.podeEnviar ? c.enviar : null,
                       ),
                   const SizedBox(height: MemoraEspacamento.lg),

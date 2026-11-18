@@ -89,7 +89,7 @@ class FolhaInferior extends StatelessWidget {
               // Saída escrita: arrastar para baixo não pode ser o único caminho.
               BotaoSecundario(
                 rotulo: 'Fechar',
-                icone: Icons.close,
+                icone: Icons.close_rounded,
                 aoTocar: aoFechar ?? () => Navigator.of(context).pop(),
               ),
             ],

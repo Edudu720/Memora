@@ -31,7 +31,7 @@ void main() {
         chave: 'entrar',
         titulo: 'Entrar na conta',
         subtitulo: 'Usar CPF e senha.',
-        icone: Icons.login,
+        icone: Icons.login_rounded,
         passos: <Passo>[
           passo(1, 'Primeiro passo de entrar.'),
           passo(2, 'Segundo passo de entrar.'),
@@ -42,7 +42,7 @@ void main() {
         chave: 'certidoes',
         titulo: 'Baixar Certidões',
         subtitulo: 'Emitir comprovantes.',
-        icone: Icons.description_outlined,
+        icone: Icons.description_rounded,
         passos: <Passo>[
           passo(4, 'Primeiro passo das certidões.'),
           passo(5, 'Segundo passo das certidões.'),

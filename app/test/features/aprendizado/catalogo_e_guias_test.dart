@@ -414,7 +414,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
           chave: chave,
           titulo: titulo,
           subtitulo: 'O que se aprende nesta seção.',
-          icone: Icons.info_outline,
+          icone: Icons.info_outline_rounded,
           passos: List<Passo>.generate(passos, (int _) => passo()),
         );
 
@@ -546,7 +546,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
           chave: 'a',
           titulo: 'Seção',
           subtitulo: 'Subtítulo.',
-          icone: Icons.info_outline,
+          icone: Icons.info_outline_rounded,
           passos: <Passo>[
             passo(),
             passo(descricao: ''),

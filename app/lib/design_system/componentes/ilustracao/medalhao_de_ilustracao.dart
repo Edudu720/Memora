@@ -54,7 +54,11 @@ class MedalhaoDeIlustracao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final Color corIcone = tema.id == MemoraTemaId.claro
+        ? cores.primaria
+        : cores.sobrePrimaria;
     return SizedBox.square(
       dimension: tamanho,
       child: DecoratedBox(
@@ -73,6 +77,7 @@ class MedalhaoDeIlustracao extends StatelessWidget {
             ilustracao,
             altura: tamanho * proporcaoDoDesenho,
             largura: tamanho * proporcaoDoDesenho,
+            cor: corIcone,
             descricao: descricao,
           ),
         ),

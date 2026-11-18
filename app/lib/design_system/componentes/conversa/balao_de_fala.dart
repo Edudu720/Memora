@@ -296,7 +296,7 @@ class _RostoDaPessoa extends StatelessWidget {
           color: cores.destaque,
         ),
         child: Icon(
-          Icons.person,
+          Icons.person_rounded,
           color: cores.primaria,
           size: MemoraDimensoes.iconePadrao,
         ),

@@ -218,7 +218,7 @@ class _TelaAssuntoState extends State<TelaAssunto> {
           BotaoPrimario(
             key: TelaAssunto.chaveCompartilhar,
             rotulo: TextosAjuda.botaoCompartilhar,
-            icone: Icons.share,
+            icone: Icons.share_rounded,
             carregando: _enviando,
             aoTocar: _enviando
                 ? null

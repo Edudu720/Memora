@@ -160,7 +160,7 @@ class _TelaPrivacidadeState extends State<TelaPrivacidade> {
       _Fase.inicial => BotaoSecundario(
         key: TelaPrivacidade.chaveApagar,
         rotulo: TextosConfiguracoes.botaoApagarConversa,
-        icone: Icons.delete_outline,
+        icone: Icons.delete_outline_rounded,
         aoTocar: () => setState(() => _fase = _Fase.perguntando),
       ),
       _Fase.perguntando => ConfirmacaoMemora.irreversivel(

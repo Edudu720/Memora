@@ -28,7 +28,7 @@ final Guia guiaFgts = Guia(
       chave: 'entrar',
       titulo: TextosGuias.fgtsSecaoEntrar,
       subtitulo: TextosGuias.fgtsSecaoEntrarSubtitulo,
-      icone: Icons.login,
+      icone: Icons.login_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.fgts1,
@@ -71,7 +71,7 @@ final Guia guiaFgts = Guia(
       chave: 'saldo-e-saque',
       titulo: TextosGuias.fgtsSecaoSaque,
       subtitulo: TextosGuias.fgtsSecaoSaqueSubtitulo,
-      icone: Icons.savings_outlined,
+      icone: Icons.savings_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.fgts6,
@@ -107,7 +107,7 @@ final Guia guiaFgts = Guia(
       chave: 'conta-bancaria',
       titulo: TextosGuias.fgtsSecaoConta,
       subtitulo: TextosGuias.fgtsSecaoContaSubtitulo,
-      icone: Icons.account_balance_outlined,
+      icone: Icons.account_balance_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.fgts6,
@@ -136,7 +136,7 @@ final Guia guiaFgts = Guia(
       chave: 'saque-aniversario',
       titulo: TextosGuias.fgtsSecaoAniversario,
       subtitulo: TextosGuias.fgtsSecaoAniversarioSubtitulo,
-      icone: Icons.cake_outlined,
+      icone: Icons.cake_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.fgts6,

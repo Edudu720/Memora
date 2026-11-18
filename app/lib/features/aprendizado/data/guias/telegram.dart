@@ -14,7 +14,7 @@ final Guia guiaTelegram = Guia(
       chave: 'conversas-contatos',
       titulo: TextosGuias.telegramSecao1Titulo,
       subtitulo: TextosGuias.telegramSecao1Subtitulo,
-      icone: Icons.chat_bubble_outline,
+      icone: Icons.chat_bubble_outline_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.telegram1,
@@ -46,7 +46,7 @@ final Guia guiaTelegram = Guia(
       chave: 'perfil-configuracoes',
       titulo: TextosGuias.telegramSecao2Titulo,
       subtitulo: TextosGuias.telegramSecao2Subtitulo,
-      icone: Icons.settings_outlined,
+      icone: Icons.settings_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.telegram5,

@@ -202,7 +202,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
           BotaoPrimario(
             key: TelaRecuperacao.chavePedirCodigo,
             rotulo: TextosAutenticacao.botaoPedirCodigo,
-            icone: Icons.arrow_forward,
+            icone: Icons.arrow_forward_rounded,
             aoTocar: c.podePedirCodigo ? c.pedirCodigo : null,
           ),
       ];
@@ -248,7 +248,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
           BotaoPrimario(
             key: TelaRecuperacao.chaveTrocarSenha,
             rotulo: TextosAutenticacao.botaoTrocarSenha,
-            icone: Icons.check,
+            icone: Icons.check_rounded,
             aoTocar: c.podeTrocarSenha ? c.trocarSenha : null,
           ),
         const SizedBox(height: MemoraEspacamento.md),
@@ -288,7 +288,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
         BotaoPrimario(
           key: TelaRecuperacao.chaveContinuar,
           rotulo: TextosAutenticacao.botaoEntrarComSenhaNova,
-          icone: Icons.arrow_forward,
+          icone: Icons.arrow_forward_rounded,
           aoTocar: () => widget.aoConcluir(c.pessoa!),
         ),
       ];

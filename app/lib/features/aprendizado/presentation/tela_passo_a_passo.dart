@@ -362,7 +362,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                   child: EstadoVazio(
                     titulo: 'Nenhum passo disponível',
                     explicacao: 'Este guia ainda não tem etapas cadastradas.',
-                    icone: Icons.school_outlined,
+                    icone: Icons.school_rounded,
                   ),
                 ),
               ),
@@ -378,13 +378,13 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
 
     final Widget botaoAnterior = BotaoSecundario(
       rotulo: 'Anterior',
-      icone: compacto ? null : Icons.arrow_back,
+      icone: compacto ? null : Icons.arrow_back_rounded,
       aoTocar: _posicao > 1 ? _retroceder : null,
     );
 
     final Widget botaoProximo = BotaoPrimario(
       rotulo: 'Próximo',
-      icone: compacto ? null : Icons.arrow_forward,
+      icone: compacto ? null : Icons.arrow_forward_rounded,
       aoTocar: _avancar,
     );
 

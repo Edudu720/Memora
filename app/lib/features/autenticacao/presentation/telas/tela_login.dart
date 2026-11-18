@@ -250,7 +250,7 @@ class _TelaLoginState extends State<TelaLogin> {
                           BotaoPrimario(
                             key: TelaLogin.chaveEntrar,
                             rotulo: TextosAutenticacao.botaoEntrar,
-                            icone: Icons.arrow_forward,
+                            icone: Icons.arrow_forward_rounded,
                             aoTocar: c.podeEnviar ? c.entrar : null,
                           ),
                       ],

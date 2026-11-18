@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/material.dart' show IconData, Icons, immutable;
 
 import '../../../design_system/design_system.dart' show Ilustracao;
 import '../../../l10n/textos_ajuda.dart';
@@ -60,6 +60,9 @@ class AssuntoDeAjuda {
   /// O desenho. Nunca aparece sozinho: o nome vem escrito ao lado.
   final Ilustracao ilustracao;
 
+  /// Ícone arredondado usado na lista da Ajuda (FR-006 / FR-027).
+  final IconData icone;
+
   /// As ideias, uma por tela. Vazia só em "A conversa".
   final List<String> telas;
 
@@ -69,6 +72,7 @@ class AssuntoDeAjuda {
     required this.titulo,
     required this.explicacao,
     required this.ilustracao,
+    required this.icone,
     this.telas = const <String>[],
   });
 
@@ -102,6 +106,7 @@ class AssuntoDeAjuda {
         titulo: TextosAjuda.tituloAplicativo,
         explicacao: TextosAjuda.explicacaoAplicativo,
         ilustracao: Ilustracao.pessoaComCelular,
+        icone: Icons.smartphone_rounded,
         telas: TextosAjuda.telasDoAplicativo,
       ),
       const AssuntoDeAjuda(
@@ -109,6 +114,7 @@ class AssuntoDeAjuda {
         titulo: TextosAjuda.tituloMemora,
         explicacao: TextosAjuda.explicacaoMemora,
         ilustracao: Ilustracao.memoraFalando,
+        icone: Icons.chat_bubble_outline_rounded,
         telas: TextosAjuda.telasDaMemora,
       ),
       const AssuntoDeAjuda(
@@ -116,12 +122,14 @@ class AssuntoDeAjuda {
         titulo: TextosAjuda.tituloConversa,
         explicacao: TextosAjuda.explicacaoConversa,
         ilustracao: Ilustracao.portaConversa,
+        icone: Icons.forum_rounded,
       ),
       const AssuntoDeAjuda(
         id: IdDoAssunto.servicos,
         titulo: TextosAjuda.tituloServicos,
         explicacao: TextosAjuda.explicacaoServicos,
         ilustracao: Ilustracao.portaServicos,
+        icone: Icons.account_balance_rounded,
         telas: TextosAjuda.telasDosServicos,
       ),
       const AssuntoDeAjuda(
@@ -129,6 +137,7 @@ class AssuntoDeAjuda {
         titulo: TextosAjuda.tituloBaixarAplicativo,
         explicacao: TextosAjuda.explicacaoBaixarAplicativo,
         ilustracao: Ilustracao.portaAplicativos,
+        icone: Icons.install_mobile_rounded,
         telas: TextosAjuda.telasDeBaixarAplicativo,
       ),
       if (podeCompartilhar)
@@ -137,6 +146,7 @@ class AssuntoDeAjuda {
           titulo: TextosAjuda.tituloCompartilhar,
           explicacao: TextosAjuda.explicacaoCompartilhar,
           ilustracao: Ilustracao.casalIdoso,
+          icone: Icons.share_rounded,
           telas: TextosAjuda.telasDeCompartilhar,
         ),
       const AssuntoDeAjuda(
@@ -144,6 +154,7 @@ class AssuntoDeAjuda {
         titulo: TextosAjuda.tituloSeguranca,
         explicacao: TextosAjuda.explicacaoSeguranca,
         ilustracao: Ilustracao.memoraPreocupada,
+        icone: Icons.shield_rounded,
         telas: TextosAjuda.dicasDeSeguranca,
       ),
     ];

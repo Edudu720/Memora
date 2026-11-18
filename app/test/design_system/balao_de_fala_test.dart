@@ -38,10 +38,10 @@ void main() {
         app(const BalaoDeFala(autor: AutorDoBalao.pessoa, texto: 'Oi')),
       );
       expect(find.byType(MemoraPersonagem), findsNothing);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(Icons.person_rounded), findsOneWidget);
       expect(find.text('Você'), findsOneWidget);
       expect(
-        t.getTopLeft(find.byIcon(Icons.person)).dx,
+        t.getTopLeft(find.byIcon(Icons.person_rounded)).dx,
         greaterThan(t.getTopLeft(find.text('Oi')).dx),
       );
     });
@@ -70,7 +70,7 @@ void main() {
       );
       expect(find.byType(MemoraPersonagem), findsNothing);
       expect(find.byType(MemoraAnimada), findsNothing);
-      expect(find.byIcon(Icons.person), findsNothing);
+      expect(find.byIcon(Icons.person_rounded), findsNothing);
       expect(find.text('Memora'), findsNWidgets(2));
       expect(find.text('Você'), findsOneWidget);
       // O balão da pessoa continua à direita da Memora.

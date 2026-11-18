@@ -102,7 +102,7 @@ class TelaEntregaDoAparelho extends StatelessWidget {
               BotaoPrimario(
                 key: chaveContinuar,
                 rotulo: TextosAutenticacao.botaoAparelhoEntregue,
-                icone: Icons.check,
+                icone: Icons.check_rounded,
                 aoTocar: aoReceberOAparelho,
               ),
               if (aoAdiar != null) ...<Widget>[

@@ -167,7 +167,7 @@ class TelaBoasVindas extends StatelessWidget {
                           BotaoPrimario(
                             key: TelaBoasVindas.chaveComecar,
                             rotulo: TextosAutenticacao.botaoComecar,
-                            icone: Icons.arrow_forward,
+                            icone: Icons.arrow_forward_rounded,
                             aoTocar: aoComecar,
                           ),
 
