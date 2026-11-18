@@ -15,6 +15,7 @@ import 'package:memora/features/autenticacao/presentation/telas/tela_cadastro.da
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
 import 'package:memora/l10n/textos_assistente.dart';
+import 'package:memora/l10n/textos_guias.dart';
 import '../../suporte/aceite_em_memoria.dart';
 
 import '../autenticacao/dubles_autenticacao.dart';
@@ -186,6 +187,94 @@ void main() {
 
     expect(find.byType(TelaConversa), findsOneWidget);
     expect(_textoDoCampo(t), TextosAssistente.perguntaSobre('Serviço Futuro'));
+  });
+
+  group('"Pedir para a Memora abrir" pede para abrir, não para ensinar', () {
+    testWidgets(
+      'na tela, o botão chama o callback de abrir com o serviço e não o de ensinar',
+      (WidgetTester t) async {
+        ServicoDoCatalogo? pediuAbrir;
+        ServicoDoCatalogo? pediuEnsinar;
+
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaCatalogo(
+              repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+              categoria: CategoriaDoServico.cotidiano,
+              aoEscolher: (ServicoDoCatalogo s) => pediuEnsinar = s,
+              aoPedirParaAbrir: (ServicoDoCatalogo s) => pediuAbrir = s,
+              aoAbrirGuia: (_, _) {},
+            ),
+          ),
+        );
+        await _avancar(t);
+
+        final Finder doWhatsApp = find.descendant(
+          of: find.ancestor(
+            of: find.text('WhatsApp'),
+            matching: find.byType(Cartao),
+          ),
+          matching: find.text('Pedir para a Memora abrir'),
+        );
+        await _tocar(t, doWhatsApp);
+
+        expect(pediuAbrir?.chave, 'whatsapp');
+        expect(
+          pediuEnsinar,
+          isNull,
+          reason: 'o botão de abrir não pode cair no pedido de ensinar',
+        );
+      },
+    );
+
+    testWidgets('sem o callback de abrir, o botão não aparece', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaCatalogo(
+            repositorio: RepositorioAssistenteSimulado(demora: Duration.zero),
+            categoria: CategoriaDoServico.cotidiano,
+            aoEscolher: (_) {},
+            aoAbrirGuia: (_, _) {},
+          ),
+        ),
+      );
+      await _avancar(t);
+
+      expect(find.text('Pedir para a Memora abrir'), findsNothing);
+    });
+
+    testWidgets(
+      'no fluxo real, o botão abre a conversa com o pedido de abrir no campo',
+      (WidgetTester t) async {
+        await _chegarAoHub(t);
+
+        await _tocar(
+          t,
+          find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaAplicativos)),
+        );
+        await _avancar(t, 6);
+        final Finder botao = find.descendant(
+          of: find.ancestor(
+            of: find.text('Facebook'),
+            matching: find.byType(Cartao),
+          ),
+          matching: find.text('Pedir para a Memora abrir'),
+        );
+        await _tocar(t, botao);
+
+        expect(find.byType(TelaConversa), findsOneWidget);
+        expect(_textoDoCampo(t), TextosGuias.pedidoParaAbrir('Facebook'));
+        expect(
+          _textoDoCampo(t),
+          isNot(TextosAssistente.perguntaSobre('Facebook')),
+          reason: 'o rascunho de ensinar faz a Memora ensinar em vez de abrir',
+        );
+      },
+    );
   });
 
   test('o estado vazio do catálogo não promete "em breve" (H1)', () {

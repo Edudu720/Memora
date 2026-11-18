@@ -34,6 +34,18 @@ CPU) e medir.
   5 min** e cobra tempo de computação. Por isso o health check do Render e o
   ping usam **`/actuator/health/liveness`**, que não toca no banco. O
   `/actuator/health` consulta o banco e o manteria acordado o mês inteiro.
+- **Conexão aberta também mantém o Neon acordado.** Em 2026-11-17 o primeiro
+  projeto gastou as **100 CU-hora gratuitas do mês em ~16 dias** e foi
+  suspenso, com o ping certo no `/liveness`: o Hikari mantinha as 20 conexões
+  do pool abertas o tempo todo (`minimum-idle` padrão = máximo), e o Neon nunca
+  dormia. O gráfico de RAM do Monitoring mostrava o compute **Active** a hora
+  inteira com CPU perto de zero. Hoje `minimum-idle=0` e `idle-timeout=60000`
+  (no `application.properties`) deixam as conexões paradas fecharem em 1 min, e
+  a limpeza de contas pendentes roda a cada 6 h. **Conferir depois de cada
+  implantação:** uns 10 min sem uso, o Monitoring deve mostrar a faixa
+  hachurada de "Endpoint inactive". Se a cota acabar de novo, o limite é **por
+  projeto** (o plano gratuito permite vários): um projeto novo na mesma conta
+  volta a funcionar, ao custo dos dados.
 - **Virginia + us-east-1**: as duas peças na mesma região. Cada requisição faz
   várias consultas, e banco longe do servidor multiplica a latência.
 

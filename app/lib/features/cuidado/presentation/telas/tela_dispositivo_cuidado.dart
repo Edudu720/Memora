@@ -239,7 +239,9 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
                         icone: Icons.contact_phone_rounded,
                         titulo: TextosCuidado.tituloContatoEmergencia,
                         subtitulo: (contato != null && contato.ehValido)
-                            ? '${contato.nome} (${contato.parentesco}) · ${contato.telefone}'
+                            ? (contato.temEmailValido
+                                  ? '${contato.nome} (${contato.parentesco}) · ${contato.telefone} · ${contato.email.trim()}'
+                                  : '${contato.nome} (${contato.parentesco}) · ${contato.telefone}')
                             : TextosCuidado.pistaCadastrarContato,
                         variacao: VarianteBadge.saude,
                         pistaAcao: (contato != null && contato.ehValido)
