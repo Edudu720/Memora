@@ -176,6 +176,7 @@
 - **Phase 10 (`S02`–`S06`, `T082`)**: `T036` depende da entrega de `T083` e `T086` (Henrique na `013`); `T037` pode iniciar em paralelo com estrutura mockada e conectar ao bundle real de `T036`; `T038`, `T039` e `T040` dependem de `T036` e `T037`.
 - **Phase 11 (`S12`, `S13`)**: `T041` e `T042` podem correr em paralelo desde já sobre os critérios de acessibilidade/orçamento existentes, fechando com `T043` e `T044` ao final da Phase 10.
 - **Phase 14 (`Session 2026-11-17` — Acompanhante Global)**: depende da conclusão da Phase 10 (`T036`–`T040`, já `[X]`); `T051` (`index.html`) e `T052` (`main.css`) preparam a base estrutural e visual fora dos capítulos, seguidas de `T053`–`T054` (`tutorial.js`) e encerrando com as verificações `T055`–`T056`.
+- **Phase 15 (`Session 2026-11-18` — Correções da Revisão PR #93)**: depende de `T051`–`T056` (já `[X]`); `T057` (`index.html` texto/Modo Assistido) e `T058` (`index.html`/`main.css` posicionamento sem sobreposição no celular) atualizam markup e estilos; `T059` (remoção de `porta_ajuda.svg` + `LICENCAS.md`), `T060` (`validar_site.py`) e `T061` (`site.spec.mjs`) validam em paralelo.
 
 ### Parallel Opportunities
 
@@ -184,6 +185,7 @@
 - **Phase 10**: `T037` (`<memora-personagem>` em `site/scripts/memora-personagem.js`) pode avançar enquanto `T036` finaliza o exportador Dart; em seguida `T038`, `T039` e `T040` integram em `site/index.html` e `site/scripts/tutorial.js`.
 - **Phase 11**: `T041` (`site/tests/e2e/`) e `T042` (`.github/workflows/verificacao.yml`) podem ser preparadas em paralelo.
 - **Phase 14**: `T052` (`main.css`) pode correr em paralelo com `T051` (`index.html`), e `T055` (`validar_site.py` / `tutorial.test.mjs`) pode correr em paralelo com `T056` (`site.spec.mjs`).
+- **Phase 15**: `T059` (remoção de `porta_ajuda.svg` e atualização de `LICENCAS.md`), `T060` (`validar_site.py`) e `T061` (`site.spec.mjs`) podem avançar em paralelo após `T057`–`T058`.
 
 ---
 
@@ -206,7 +208,8 @@ Task: "Suíte Playwright + axe-core dev-only em site/tests/e2e/site.spec.mjs" (T
 2. **Lote 2 (CSS & Ícones — Independente)**: `T033`–`T035` (`S07`, `S08`, `S09`).
 3. **Lote 3 (Após `T083`/`T086` do Henrique)**: `T036` -> `T037` -> `T038`, `T039`, `T040` (`S02`–`S06`, `T082`).
 4. **Lote 4 (Acompanhante Global `Session 2026-11-17`)**: `T051`, `T052` -> `T053`, `T054` -> `T055`, `T056`.
-5. **Fechamento**: `T043`–`T044` validando quickstart, orçamento `<= 102.400 bytes`, Playwright/`axe-core` e abrindo PR final para `redesign-final`.
+5. **Lote 5 (Correções da PR #93 `Session 2026-11-18`)**: `T057` -> `T058` -> `T059`, `T060`, `T061`.
+6. **Fechamento**: `T043`–`T044` validando quickstart, orçamento `<= 102.400 bytes`, Playwright/`axe-core` e atualizando a PR final para `redesign-final`.
 
 
 ---
@@ -244,3 +247,17 @@ Task: "Suíte Playwright + axe-core dev-only em site/tests/e2e/site.spec.mjs" (T
 - [X] T054 [US3] Atualizar a sincronização de `"Ouvir este trecho"` em `site/scripts/tutorial.js` para que o `<memora-personagem data-memora-anfitria>` acompanhante global seja a falante principal em todos os 9 capítulos (inclusive visível na cápsula recolhida), assumindo `falando="true"` e a expressão do capítulo lido entre `onstart` e `onend`/`onerror` e restaurando a expressão do capítulo visível na rolagem ao concluir
 - [X] T055 [P] [US1] Atualizar `site/tests/validar_site.py` e `site/tests/tutorial.test.mjs` para validar a presença de `<aside class="anfitria-flutuante">` e `[data-acao-alternar-anfitria]` em `site/index.html`, a pausa da rotação automática quando recolhida (`expandida: false`), a troca dinâmica de expressão por capítulo e a sincronia vocal na acompanhante global
 - [X] T056 [P] [US3] Atualizar `site/tests/e2e/site.spec.mjs` para verificar que `.anfitria-flutuante` inicia expandida em desktop (`1280x800`) e recolhida em cápsula compacta em `320x568` ou `data-escala="muito-grande"` sem colidir com `.atalho-topo-fixo` (`>= 8 px` de folga) nem gerar overflow horizontal, que `[data-acao-alternar-anfitria]` possui área `>= 48x48 px` e alterna `aria-expanded`, e que zero violações `axe-core` ocorrem nos 3 temas
+
+---
+
+## Phase 15: Rodada 2 — Correções da Revisão da PR #93 (US1, US2, US3 & US5 — Session 2026-11-18)
+
+**Purpose**: Alinhar os textos de acesso/senha, Modo Assistido e confirmação de saída aos rótulos e regras de segurança reais do aplicativo (`FR-059`/`FR-063` da `001` e Princípio II), impedir qualquer sobreposição de elementos flutuantes sobre botões e textos no celular (`320×568` e `390×844`, inclusive a `200%`), e remover o ativo órfão `porta_ajuda.svg`.
+
+**Independent Test**: Rodar `python site/tests/validar_site.py` (confirmando ausência de `"Frase Secreta"`, `"Mostrar frase"`, `"cafe com bolo"` e zero ativos órfãos em `site/assets/ilustracoes/`) e `npm test` em `site/tests/e2e/` (confirmando via `document.elementFromPoint` em `320×568`, `390×844` e `1280×800` que nenhum botão ou link visível é coberto pela anfitriã ou por `.atalho-topo-fixo`).
+
+- [X] T057 [US2] Atualizar o Capítulo 2 (`#primeiros-passos`) e o bloco `"Para familiares e cuidadores"` do Capítulo 9 (`#duvidas-frequentes`) em `site/index.html` para usar os rótulos reais do aplicativo (`"senha"`, `"Sua senha"` e `"Mostrar senha"` em vez de `"Frase Secreta"` e `"Mostrar frase"`), substituir `"lembrança de família"` e remover o exemplo copiável `"cafe com bolo da tarde"` da mini-tela orientando a usar `"uma frase que só você sabe e que ninguém adivinharia"`, deixar explícito no Modo Assistido que na hora da senha o acompanhante devolve o celular e deixa a pessoa criar a senha sozinha sem olhar, e corrigir a saída da conta para uma confirmação calma (respeitando `<= 2` frases curtas por bloco pela `memora-ux`)
+- [X] T058 [US1] Reposicionar `<aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">` para imediatamente após `</header>` (antes de `<main>`) em `site/index.html` e ajustar `site/styles/main.css` para que abaixo de `64rem` (`320px`, `390px`, `768px`) ou sob `:root[data-escala="muito-grande"]` (`200%`) a anfitriã opere no fluxo normal da página (`position: static`) e `.atalho-topo-fixo` fique oculto (`display: none`), mantendo `position: fixed` na faixa lateral esquerda dedicada exclusivamente em `@media (min-width: 64rem)` fora de `data-escala="muito-grande"`
+- [X] T059 [P] [US2] Remover o arquivo órfão `site/assets/ilustracoes/porta_ajuda.svg` (não referenciado em `site/index.html`) e atualizar `site/assets/ilustracoes/LICENCAS.md` para listar apenas os 7 ícones Material Rounded em uso
+- [X] T060 [P] [US2] Estender `site/tests/validar_site.py` para reprovar termos divergentes do aplicativo ou exemplos copiáveis de senha (`"Frase Secreta"`, `"Mostrar frase"`, `"cafe com bolo"`) no texto visível e verificar que não existam arquivos SVG/PNG órfãos não referenciados em `site/assets/ilustracoes/`
+- [X] T061 [P] [US3] Atualizar `site/tests/e2e/site.spec.mjs` para verificar com `document.elementFromPoint` nos cantos internos e centro dos controles interativos visíveis (`.botao-controle`, `.link-sumario`, `.duvida-pergunta`, `.botao-topo`) em `320x568`, `390x844` e `1280x800` (em `padrao` e `muito-grande`) que nenhum alvo tocável é interceptado pela anfitriã ou por `.atalho-topo-fixo`

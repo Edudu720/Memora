@@ -75,6 +75,21 @@
     </div>
   </header>
 
+  <aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">
+    <div class="anfitria-cabecalho-flutuante">
+      <div class="medalhao-ilustracao anfitria-avatar">
+        <memora-personagem expressao="acenando" anfitria="true" data-memora-anfitria aria-hidden="true"></memora-personagem>
+      </div>
+      <button type="button" class="botao-controle botao-alternar-anfitria" data-acao-alternar-anfitria aria-expanded="true" aria-controls="anfitria-conteudo">Recolher dicas</button>
+    </div>
+    <div id="anfitria-conteudo" class="anfitria-corpo" data-anfitria-conteudo>
+      <p class="anfitria-balao" data-anfitria-balao>
+        Cada guia mostra a tela do celular, um passo de cada vez. Eu fico com você até o fim.
+      </p>
+      <button type="button" class="botao-controle botao-dica-anfitria" data-acao-outra-dica>Outra dica da Memora</button>
+    </div>
+  </aside>
+
   <main id="conteudo-principal" class="conteudo-principal conteiner" tabindex="-1">
     <!-- Capítulo 1: Boas-vindas e Propósito -->
     <section id="boas-vindas" class="capitulo capitulo-hero" aria-labelledby="titulo-boas-vindas">
@@ -116,7 +131,7 @@
       </div>
     </section>
 
-    <!-- Capítulo 2: Primeiros Passos (Frase Secreta, Modo Assistido e Saída Segura) -->
+    <!-- Capítulo 2: Primeiros Passos (Senha, Modo Assistido e Saída Segura) -->
     <section id="primeiros-passos" class="capitulo" aria-labelledby="titulo-primeiros-passos">
       <div class="capitulo-cabecalho">
         <div>
@@ -132,26 +147,26 @@
             <span class="icone-moldura">
               <img src="assets/ilustracoes/pessoa_com_celular.svg" alt="Pessoa segurando um celular com expressão tranquila">
             </span>
-            <h3>Entrada fácil com Frase Secreta</h3>
+            <h3>Entrada fácil com sua senha</h3>
           </div>
           <p class="texto-leitura">
-            Você não precisa decorar códigos cheios de símbolos difíceis. No Memora, você entra usando seu telefone ou e-mail e uma <strong>Frase Secreta</strong> que faça sentido na sua vida, como uma lembrança de família.
+            Você não precisa decorar códigos cheios de símbolos difíceis. No Memora, você entra usando seu telefone ou e-mail e uma <strong>senha</strong> em forma de frase que só você sabe e que ninguém adivinharia.
           </p>
           <ol class="passos-lista">
             <li><strong>Escolha como prefere entrar:</strong> toque no botão grande de entrar e informe seu telefone ou e-mail.</li>
-            <li><strong>Digite sua Frase Secreta:</strong> escreva com calma; você pode tocar em “Mostrar frase” para conferir letra por letra antes de confirmar.</li>
-            <li><strong>Peça ajuda se quiser no começo:</strong> com o <em>Modo Assistido</em>, um filho ou cuidador pode ajudar na primeira configuração sem tomar a conta de você.</li>
-            <li><strong>Sair sem acidentes:</strong> quando quiser sair da conta, o Memora pede duas confirmações calmas para evitar que um toque sem querer desconecte você.</li>
+            <li><strong>Digite sua senha:</strong> escreva com calma; você pode tocar em “Mostrar senha” para conferir letra por letra antes de confirmar.</li>
+            <li><strong>Peça ajuda se quiser no começo:</strong> com o <em>Modo Assistido</em>, um familiar ajuda nos primeiros dados, mas na hora da senha devolve o celular para você criar sua senha sozinho, sem ninguém olhar.</li>
+            <li><strong>Sair sem acidentes:</strong> quando quiser sair da conta, o Memora pede uma confirmação calma para evitar que um toque sem querer desconecte você.</li>
           </ol>
         </div>
 
-        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de como a tela de entrada com Frase Secreta aparece no aplicativo">
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de como a tela de entrada com senha aparece no aplicativo">
           <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
           <div class="mini-tela-moldura">
             <p class="mini-tela-titulo">Que bom ver você por aqui</p>
             <div class="mini-tela-balao">
-              <strong>Sua frase secreta</strong><br>
-              Exemplo fácil de lembrar: “cafe com bolo da tarde”
+              <strong>Sua senha</strong><br>
+              Crie uma frase que só você sabe e que ninguém adivinharia. Toque em “Mostrar senha” para conferir as letras.
             </div>
             <div class="mini-botao-simulado">Entrar no Memora</div>
             <div class="mini-botao-simulado mini-botao-secundario">Estou sendo ajudado por um familiar</div>
@@ -556,7 +571,7 @@
           <h3>Para familiares e cuidadores que apoiam os primeiros passos</h3>
         </div>
         <p class="texto-leitura">
-          Deixe a pessoa segurar o celular e tocar na tela enquanto você acompanha ao lado. Escolham juntos a Frase Secreta e lembre que o objetivo é dar autonomia, nunca substituir quem usa.
+          Deixe a pessoa segurar o celular e tocar na tela enquanto você acompanha ao lado. Na hora da senha, devolva o celular e deixe a pessoa criar a senha sozinha, sem olhar.
         </p>
       </article>
     </section>
@@ -570,21 +585,6 @@
       <a class="botao-topo" href="#topo">↑ Voltar para o início da página</a>
     </div>
   </footer>
-
-  <aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">
-    <div class="anfitria-cabecalho-flutuante">
-      <div class="medalhao-ilustracao anfitria-avatar">
-        <memora-personagem expressao="acenando" anfitria="true" data-memora-anfitria aria-hidden="true"></memora-personagem>
-      </div>
-      <button type="button" class="botao-controle botao-alternar-anfitria" data-acao-alternar-anfitria aria-expanded="true" aria-controls="anfitria-conteudo">Recolher dicas</button>
-    </div>
-    <div id="anfitria-conteudo" class="anfitria-corpo" data-anfitria-conteudo>
-      <p class="anfitria-balao" data-anfitria-balao>
-        Cada guia mostra a tela do celular, um passo de cada vez. Eu fico com você até o fim.
-      </p>
-      <button type="button" class="botao-controle botao-dica-anfitria" data-acao-outra-dica>Outra dica da Memora</button>
-    </div>
-  </aside>
 
   <div class="atalho-topo-fixo">
     <a class="botao-topo" href="#topo" aria-label="Topo — voltar para o início da página"><span aria-hidden="true">↑</span> Topo</a>

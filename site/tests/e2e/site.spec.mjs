@@ -184,29 +184,17 @@ test('responsivo em 320x568, 390x844 e 768x1024 a 200% e alvos >= 48x48 px', asy
 
   const anfitria = page.locator('.anfitria-flutuante');
   await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'recolhida');
+  await expect(page.locator('.atalho-topo-fixo')).toBeHidden();
+
+  const posicaoMobile = await anfitria.evaluate((el) => getComputedStyle(el).position);
+  expect(posicaoMobile).toBe('static');
 
   const caixaAlternar = await page.locator('[data-acao-alternar-anfitria]').boundingBox();
   expect(caixaAlternar).not.toBeNull();
   expect(caixaAlternar.width).toBeGreaterThanOrEqual(48);
   expect(caixaAlternar.height).toBeGreaterThanOrEqual(48);
 
-  const caixaAnfitriaRecolhida = await anfitria.boundingBox();
-  const caixaTopo = await page.locator('.atalho-topo-fixo .botao-topo').boundingBox();
-  expect(caixaAnfitriaRecolhida).not.toBeNull();
-  expect(caixaTopo).not.toBeNull();
-  const gapHorizontal = Math.max(
-    0,
-    caixaTopo.x - (caixaAnfitriaRecolhida.x + caixaAnfitriaRecolhida.width),
-    caixaAnfitriaRecolhida.x - (caixaTopo.x + caixaTopo.width)
-  );
-  const gapVertical = Math.max(
-    0,
-    caixaTopo.y - (caixaAnfitriaRecolhida.y + caixaAnfitriaRecolhida.height),
-    caixaAnfitriaRecolhida.y - (caixaTopo.y + caixaTopo.height)
-  );
-  expect(Math.max(gapHorizontal, gapVertical)).toBeGreaterThanOrEqual(8);
-
-  // Ao expandir a capsula em 320px/200%, mantem alvos >= 48x48 e zero overflow/colisao com Topo
+  // Ao expandir a capsula em 320px/200%, opera no fluxo normal com alvos >= 48x48 e zero overflow
   await page.locator('[data-acao-alternar-anfitria]').click();
   await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'expandida');
   await expect(page.locator('[data-acao-alternar-anfitria]')).toHaveAttribute('aria-expanded', 'true');
@@ -343,4 +331,126 @@ test('acompanhante global <memora-personagem> fora dos capitulos segue o scroll,
   await page.locator('[data-acao-alternar-anfitria]').click();
   await expect(anfitria).toHaveAttribute('data-anfitria-estado', 'recolhida');
   await expect(personagemGlobal).toBeVisible();
+});
+
+async function coletarSobreposicoesPorPonto(page) {
+  return page.evaluate(() => {
+    const seletorControles =
+      '.botao-controle, .botao-ouvir, .link-sumario, .duvida-pergunta, .botao-topo';
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
+    const anfitria = document.querySelector('.anfitria-flutuante');
+    const atalhoTopo = document.querySelector('.atalho-topo-fixo');
+    const obstrucoes = [];
+
+    for (const el of document.querySelectorAll(seletorControles)) {
+      const style = getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden' || el.closest('[hidden]')) {
+        continue;
+      }
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) {
+        continue;
+      }
+
+      const insetX = Math.min(10, rect.width / 3);
+      const insetY = Math.min(10, rect.height / 3);
+      const pontos = [
+        ['centro', rect.left + rect.width / 2, rect.top + rect.height / 2],
+        ['sup-esq', rect.left + insetX, rect.top + insetY],
+        ['sup-dir', rect.right - insetX, rect.top + insetY],
+        ['inf-esq', rect.left + insetX, rect.bottom - insetY],
+        ['inf-dir', rect.right - insetX, rect.bottom - insetY],
+      ];
+
+      for (const [nomePonto, x, y] of pontos) {
+        if (x < 2 || x > vw - 2 || y < 2 || y > vh - 2) {
+          continue;
+        }
+        const hit = document.elementFromPoint(x, y);
+        const interceptadoPorAnfitria = Boolean(
+          anfitria && hit && anfitria.contains(hit) && !anfitria.contains(el)
+        );
+        const interceptadoPorTopo = Boolean(
+          atalhoTopo && hit && atalhoTopo.contains(hit) && !atalhoTopo.contains(el)
+        );
+        const dentroDoProprioAlvo = Boolean(hit && (el.contains(hit) || hit.contains(el)));
+
+        if (interceptadoPorAnfitria || interceptadoPorTopo || !dentroDoProprioAlvo) {
+          obstrucoes.push({
+            texto: (el.textContent || '').replace(/\s+/g, ' ').trim(),
+            classe: el.className,
+            ponto: nomePonto,
+            x: Math.round(x),
+            y: Math.round(y),
+            hitTag: hit ? hit.tagName : null,
+            hitClasse: hit ? hit.className : null,
+            interceptadoPorAnfitria,
+            interceptadoPorTopo,
+          });
+        }
+      }
+    }
+    return obstrucoes;
+  });
+}
+
+test('zero sobreposicao de elementos flutuantes sobre controles via elementFromPoint e textos de senha do app', async ({ page }) => {
+  await page.goto(urlBase, { waitUntil: 'load' });
+
+  // Alinhamento editorial PR #93 no Capitulo 2 e Capitulo 9
+  const textoPrimeirosPassos = await page.locator('#primeiros-passos').innerText();
+  const textoDuvidas = await page.locator('#duvidas-frequentes').innerText();
+  expect(textoPrimeirosPassos).toContain('Sua senha');
+  expect(textoPrimeirosPassos).toContain('Mostrar senha');
+  expect(textoPrimeirosPassos).not.toMatch(/Frase Secreta|Mostrar frase|cafe com bolo/i);
+  expect(textoDuvidas).toContain('deixe a pessoa criar a senha sozinha, sem olhar');
+  expect(textoDuvidas).not.toMatch(/Frase Secreta/i);
+
+  const cenariosViewport = [
+    { width: 320, height: 568 },
+    { width: 390, height: 844 },
+    { width: 1280, height: 800 },
+  ];
+
+  for (const viewport of cenariosViewport) {
+    await page.setViewportSize(viewport);
+    for (const escala of ['padrao', 'muito-grande']) {
+      await page.goto(urlBase, { waitUntil: 'load' });
+      await page.locator(`[data-acao-escala="${escala}"]`).click();
+      await expect(page.locator('html')).toHaveAttribute('data-escala', escala);
+
+      if (viewport.width < 1024 || escala === 'muito-grande') {
+        await expect(page.locator('.atalho-topo-fixo')).toBeHidden();
+        const pos = await page.locator('.anfitria-flutuante').evaluate((el) => getComputedStyle(el).position);
+        expect(pos, `${viewport.width}x${viewport.height} (${escala})`).toBe('static');
+      } else {
+        await expect(page.locator('.atalho-topo-fixo')).toBeVisible();
+        const pos = await page.locator('.anfitria-flutuante').evaluate((el) => getComputedStyle(el).position);
+        expect(pos, `${viewport.width}x${viewport.height} (${escala})`).toBe('fixed');
+      }
+
+      // Topo da pagina (estado inicial + anfitria expandida manualmente quando aplicavel)
+      await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
+      expect(
+        await coletarSobreposicoesPorPonto(page),
+        `Sobreposicao no topo em ${viewport.width}x${viewport.height} (${escala}, inicial)`
+      ).toEqual([]);
+
+      const estadoAtual = await page.locator('.anfitria-flutuante').getAttribute('data-anfitria-estado');
+      if (estadoAtual !== 'expandida') {
+        await page.locator('[data-acao-alternar-anfitria]').click();
+        await expect(page.locator('.anfitria-flutuante')).toHaveAttribute('data-anfitria-estado', 'expandida');
+      }
+
+      // Rolar por pontos chave (topo, Capitulo 2, Capitulo 9, rodape) mantendo anfitria expandida
+      for (const seletorScroll of ['#topo', '#primeiros-passos', '#duvidas-frequentes', '.rodape-site']) {
+        await page.locator(seletorScroll).scrollIntoViewIfNeeded();
+        expect(
+          await coletarSobreposicoesPorPonto(page),
+          `Sobreposicao em ${seletorScroll} @ ${viewport.width}x${viewport.height} (${escala}, expandida)`
+        ).toEqual([]);
+      }
+    }
+  }
 });

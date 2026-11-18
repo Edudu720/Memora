@@ -64,8 +64,8 @@ Acesse `http://localhost:8080` e teste em `320×568`, `390×844`, `768×1024` e 
 ## 5. Checklist Rápido de Conferência Manual
 
 - [x] **`<title>` e textos (`S11`)**: aba sem `"Pessoas Idosas"` e todos os blocos visíveis curtos (`<= 2` frases) e sem emojis.
-- [x] **Anfitriã acompanhante e `<memora-personagem>` (`S03`–`S05`, `Session 2026-11-17`)**: personagem acompanhando o scroll no canto inferior esquerdo (oposto a `↑ Topo`), expandida em desktop com botão recolher e cápsula compacta visível em `320×568` / `200%`; dica alternando em `20 s` quando expandida e parando imediatamente ao tocar em **"Outra dica da Memora"**.
-- [x] **Leitura em voz alta e expressão por capítulo (`S06`)**: **"Ouvir este trecho"** anima a boca da acompanhante em qualquer um dos 9 capítulos (inclusive quando recolhida em cápsula compacta) e a expressão acompanha o capítulo visível/lido.
+- [ ] **Anfitriã e layout sem sobreposição (`S03`–`S05`, `PR #93`)**: em desktop (`>= 64rem`), anfitriã acompanha na faixa esquerda sem cobrir texto e alterna dicas em `20 s` quando expandida (parando ao clicar em **"Outra dica da Memora"**); em `320×568` e `390×844` (inclusive `200%`), fica no fluxo normal sem cobrir botões do sumário nem perguntas (`elementFromPoint`).
+- [x] **Leitura em voz alta e expressão por capítulo (`S06`)**: **"Ouvir este trecho"** anima a boca da acompanhante em qualquer um dos 9 capítulos e a expressão acompanha o capítulo visível/lido.
 - [x] **Conforto `"Reduzir movimento"` (`S10`)**: inicia marcado se o sistema pedir `prefers-reduced-motion: reduce`, permite alternar manualmente e congela personagem, dicas automáticas e transições CSS.
 - [x] **Modos visuais (`S09`)**: `Fundo claro`, `Fundo escuro` e `Alto contraste` mantêm contraste integral inclusive em navegadores sem suporte a `light-dark()`.
-- [x] **Celular estreito (`320×568`) a `200%`**: `scrollWidth <= clientWidth`, botões `>= 48×48 px` e foco visível ao navegar com `Tab`.
+- [ ] **Celular estreito (`320×568` e `390×844`) a `200%`**: `scrollWidth <= clientWidth`, botões `>= 48×48 px`, zero elementos fixos cobrindo links/perguntas e foco visível ao navegar com `Tab`.

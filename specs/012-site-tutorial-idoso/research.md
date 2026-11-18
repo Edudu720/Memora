@@ -59,11 +59,11 @@
 - **Decision**:
   - Mover a anfitriã (`[data-anfitria-bloco]`) de dentro de `#boas-vindas` para um marco `<aside class="anfitria-flutuante" aria-label="Dicas da Memora">` fora das seções, fixado no canto inferior esquerdo (oposto ao `.atalho-topo-fixo`).
   - Manter `#boas-vindas` com abertura limpa focada nos parágrafos e no lema, preservando o selo `mini` no `<header>` e as ilustrações decorativas `<memora-personagem>` nos cartões dos capítulos 6, 8 e 9.
-  - Em desktop largo (`>= 64rem` fora de `data-escala="muito-grande"`), inicia expandida com botão `Recolher` (`>= 48×48 px`); em telas compactas (`< 64rem`) ou escala `200%`, inicia recolhida como cápsula compacta com `<memora-personagem data-memora-anfitria>` visível + botão `Dicas` (`aria-expanded`), evitando cobrir o conteúdo de leitura e mantendo distância segura de `↑ Topo`.
+  - Em desktop largo (`>= 64rem` fora de `data-escala="muito-grande"`), flutua fixa na faixa esquerda dedicada (iniciando expandida com botão `Recolher dicas` / `Ver dicas` >= `48×48 px`), mantendo distância segura do conteúdo; em telas compactas (`< 64rem`: `320 px`, `390 px`, `768 px`) ou escala `200%`, opera no fluxo normal da página (`position: static` logo abaixo do cabeçalho) com `.atalho-topo-fixo` oculto — evitando que qualquer botão fixo cubra links do sumário, passos ou FAQs (validado via `document.elementFromPoint`).
   - A anfitriã global passa a ser a falante única de `"Ouvir este trecho"` em todos os 9 capítulos (inclusive animando a boca dentro da cápsula compacta quando recolhida) e altera dinamicamente seu atributo `expressao` conforme o capítulo ativo na rolagem ou leitura (`boas-vindas` → `acenando`, `conversa-e-historico` → `pensando`, `aplicativos-e-servicos`/`pulseira-cuidado` → `dica`, `protecao-golpes` → `preocupada`, `duvidas-frequentes` → `comemorando`, demais → `neutra`).
 - **Rationale**:
-  - Permite acompanhar visualmente a Memora falando em voz alta em qualquer capítulo da página única sem perder acesso ao botão `"Outra dica da Memora"` nem poluir leituras em `320 px` a `200%`.
+  - Permite acompanhar visualmente a Memora falando em voz alta em qualquer capítulo no desktop sem perder acesso ao botão `"Outra dica da Memora"` e garante zero cobertura de botões ou texto em `320×568` e `390×844` mesmo durante zoom `200%`.
   - Ao atualizar `expressao` somente quando muda de capítulo (`novo !== atual`), evita reconstruir o Shadow DOM durante pulsos de boca de fala.
 - **Alternatives considered**:
   - Manter a anfitriã estática no Capítulo 1: deixava a personagem fora da tela durante a maioria das ativações de `"Ouvir este trecho"`.
-  - Painel flutuante sempre aberto em mobile/`200%`: cobriria os parágrafos de leitura e colidiria com `↑ Topo`.
+  - Manter cápsula `position: fixed` também no celular (`320 px` / `390 px`): mesmo compacta com `48 px`, cobria links do sumário e perguntas da página durante a rolagem.

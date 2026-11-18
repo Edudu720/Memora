@@ -360,17 +360,13 @@ img {
 }
 
 .anfitria-flutuante {
-  position: fixed;
-  left: var(--espaco-sm);
-  bottom: var(--espaco-sm);
-  z-index: 910;
+  position: static;
   display: flex;
   flex-direction: column;
   gap: var(--espaco-xs);
-  width: min(18rem, calc(100vw - 2 * var(--espaco-sm)));
-  max-height: calc(100dvh - 2 * var(--espaco-sm));
-  overflow-y: auto;
-  padding: var(--espaco-sm);
+  width: min(100% - 2rem, var(--largura-maxima));
+  margin: var(--espaco-md) auto 0 auto;
+  padding: var(--espaco-sm) var(--espaco-md);
   border-radius: var(--raio-cartao);
   background-color: var(--superficie);
   border: var(--borda-padrao) solid var(--primaria);
@@ -378,9 +374,7 @@ img {
 }
 
 .anfitria-flutuante[data-anfitria-estado="recolhida"] {
-  width: auto;
-  max-width: calc(100vw - 9rem);
-  padding: 0.35rem 0.5rem;
+  padding: 0.45rem 0.75rem;
   border-radius: var(--raio-pilula);
   overflow: visible;
 }
@@ -391,6 +385,7 @@ img {
 
 .anfitria-cabecalho-flutuante {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--espaco-xs);
@@ -431,18 +426,9 @@ img {
   display: none;
 }
 
-@media (max-width: 47.99rem) {
-  .anfitria-flutuante:not([data-anfitria-estado="recolhida"]) {
-    bottom: 4.5rem;
-    max-height: calc(100dvh - 5.5rem);
-  }
-}
-
 .anfitria-balao {
   margin: 0;
   width: 100%;
-  max-height: 10.5rem;
-  overflow-y: auto;
   background-color: var(--destaque);
   border: var(--borda-padrao) solid var(--primaria);
   border-radius: var(--raio-pequeno);
@@ -470,8 +456,32 @@ img {
 }
 
 @media (min-width: 64rem) {
-  :root[data-anfitria="expandida"]:not([data-escala="muito-grande"]) body {
+  :root:not([data-escala="muito-grande"]) body {
     padding-left: 19.25rem;
+  }
+
+  :root:not([data-escala="muito-grande"]) .anfitria-flutuante {
+    position: fixed;
+    left: var(--espaco-sm);
+    bottom: calc(var(--espaco-sm) + 3.75rem);
+    z-index: 910;
+    width: 18rem;
+    max-height: calc(100dvh - 5.75rem);
+    margin: 0;
+    padding: var(--espaco-sm);
+    overflow-y: auto;
+  }
+
+  :root:not([data-escala="muito-grande"]) .anfitria-flutuante[data-anfitria-estado="recolhida"] {
+    width: auto;
+    max-width: 18rem;
+    padding: 0.35rem 0.5rem;
+    overflow: visible;
+  }
+
+  :root:not([data-escala="muito-grande"]) .anfitria-balao {
+    max-height: 10.5rem;
+    overflow-y: auto;
   }
 }
 
@@ -800,7 +810,7 @@ img {
 .rodape-site {
   background-color: var(--superficie);
   border-top: var(--borda-padrao) solid var(--borda);
-  padding-block: var(--espaco-lg) calc(var(--espaco-xl) + 4.5rem);
+  padding-block: var(--espaco-lg) var(--espaco-xl);
 }
 
 .rodape-conteudo {
@@ -819,14 +829,22 @@ img {
 }
 
 .atalho-topo-fixo {
-  position: fixed;
-  right: var(--espaco-sm);
-  bottom: var(--espaco-sm);
-  z-index: 900;
+  display: none;
 }
 
 .atalho-topo-fixo .botao-topo {
   box-shadow: var(--sombra-suave);
+}
+
+@media (min-width: 64rem) {
+  :root:not([data-escala="muito-grande"]) .atalho-topo-fixo {
+    display: block;
+    position: fixed;
+    left: var(--espaco-sm);
+    right: auto;
+    bottom: var(--espaco-sm);
+    z-index: 900;
+  }
 }
 
 .pilha-cartoes {

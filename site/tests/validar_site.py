@@ -78,6 +78,13 @@ PADROES_MEMORA_UX_PROIBIDOS = [
     r"modo simplificado",
 ]
 
+TERMOS_DESALINHADOS_APP_PROIBIDOS = [
+    r"frase secreta",
+    r"mostrar frase",
+    r"caf[ée] com bolo",
+    r"lembran[çc]a de fam[íi]lia",
+]
+
 RE_EMOJI = re.compile(
     r"[\U0001F000-\U0001FAFF\u2600-\u27BF\uFE0F\u231A-\u231B\u23E9-\u23FA\u2B05-\u2B55]"
 )
@@ -107,6 +114,15 @@ def contar_frases(texto: str) -> int:
 def palavras_proibidas_em(texto: str) -> list[str]:
     achadas: list[str] = []
     for padrao in PADROES_MEMORA_UX_PROIBIDOS:
+        regex = re.compile(rf"(?<!\w)({padrao})(?!\w)", re.IGNORECASE)
+        for match in regex.finditer(texto):
+            achadas.append(match.group(0))
+    return achadas
+
+
+def termos_desalinhados_em(texto: str) -> list[str]:
+    achadas: list[str] = []
+    for padrao in TERMOS_DESALINHADOS_APP_PROIBIDOS:
         regex = re.compile(rf"(?<!\w)({padrao})(?!\w)", re.IGNORECASE)
         for match in regex.finditer(texto):
             achadas.append(match.group(0))
@@ -303,6 +319,8 @@ def _checar_bloco_memora_ux(origem: str, texto: str, checar_jargoes: bool = Fals
         erros.append(f"Emoji encontrado em {origem}: {texto!r}")
     for proibida in palavras_proibidas_em(texto):
         erros.append(f"Expressao proibida ({proibida!r}) em {origem}: {texto!r}")
+    for termo in termos_desalinhados_em(texto):
+        erros.append(f"Termo divergente ou exemplo de senha proibido ({termo!r}) em {origem}: {texto!r}")
     if checar_jargoes:
         for padrao in JARGOES_PROIBIDOS:
             m = re.search(padrao, texto, re.IGNORECASE)
@@ -372,6 +390,8 @@ def validar_memora_ux_e_orcamento(
             erros.append(f"Emoji encontrado em <title>: {inspetor.titulo_pagina!r}")
         for proibida in palavras_proibidas_em(inspetor.titulo_pagina):
             erros.append(f"Palavra proibida ({proibida!r}) em <title>: {inspetor.titulo_pagina!r}")
+        for termo in termos_desalinhados_em(inspetor.titulo_pagina):
+            erros.append(f"Termo divergente ({termo!r}) em <title>: {inspetor.titulo_pagina!r}")
 
     for origem, texto in inspetor.blocos_texto:
         erros.extend(_checar_bloco_memora_ux(f"<{origem}>", texto))
@@ -381,12 +401,16 @@ def validar_memora_ux_e_orcamento(
             erros.append(f"Emoji encontrado em texto visivel: {texto!r}")
         for proibida in palavras_proibidas_em(texto):
             erros.append(f"Expressao proibida ({proibida!r}) em texto visivel: {texto!r}")
+        for termo in termos_desalinhados_em(texto):
+            erros.append(f"Termo divergente ou exemplo de senha proibido ({termo!r}) em texto visivel: {texto!r}")
 
     for rotulo in inspetor.rotulos_acessibilidade:
         if tem_emoji(rotulo):
             erros.append(f"Emoji encontrado em atributo alt/aria-label: {rotulo!r}")
         for proibida in palavras_proibidas_em(rotulo):
             erros.append(f"Expressao proibida ({proibida!r}) em alt/aria-label: {rotulo!r}")
+        for termo in termos_desalinhados_em(rotulo):
+            erros.append(f"Termo divergente ({termo!r}) em alt/aria-label: {rotulo!r}")
 
     for msg in mensagens_js or []:
         erros.extend(_checar_bloco_memora_ux("tutorial.js", msg, checar_jargoes=True))
@@ -553,6 +577,16 @@ def validar() -> list[str]:
         if legado in html_texto:
             erros.append(f"Referencia legada ainda presente em index.html: {legado}")
 
+    imagens_referenciadas = {
+        (DIR_SITE / src).resolve()
+        for src, _alt in inspetor.imagens
+        if src
+    }
+    for arq_ilustracao in sorted(dir_ilustracoes.iterdir()):
+        if arq_ilustracao.is_file() and arq_ilustracao.suffix.lower() in {".svg", ".png"}:
+            if arq_ilustracao.resolve() not in imagens_referenciadas:
+                erros.append(f"Ativo orfao nao referenciado em index.html: {arq_ilustracao.name}")
+
     dir_memora = DIR_SITE / "assets" / "memora"
     memora_json_path = dir_memora / "memora.json"
     memora_dados_js_path = dir_memora / "memora-dados.js"
@@ -629,6 +663,10 @@ def executar_autoteste() -> None:
     assert tem_emoji("Voltar ↑") is False
     assert palavras_proibidas_em("Guia para Pessoas Idosas") != []
     assert palavras_proibidas_em("Guia do Memora — passo a passo") == []
+    assert termos_desalinhados_em("Use sua Frase Secreta") != []
+    assert termos_desalinhados_em("Toque em Mostrar frase") != []
+    assert termos_desalinhados_em("Exemplo: cafe com bolo da tarde") != []
+    assert termos_desalinhados_em("Use sua senha e toque em Mostrar senha") == []
 
     insp_ruim = InspetorHtml()
     insp_ruim.feed(
@@ -636,6 +674,7 @@ def executar_autoteste() -> None:
         <head><title>Guia para Pessoas Idosas</title></head>
         <body><span class="grupo-legenda">Uma. Duas. Tres.</span>
         <div>Selo para terceira idade 🔒</div>
+        <p>Use Frase Secreta com cafe com bolo da tarde. Toque em Mostrar frase.</p>
         <p>Primeira frase. Segunda frase. Terceira frase.</p>
         <p>Pronto 🔒</p></body></html>"""
     )
@@ -647,6 +686,9 @@ def executar_autoteste() -> None:
         dicas_anfitria=["Dica com API."],
     )
     assert any("Pessoas Idosas" in f or "Idosas" in f for f in falhas_ux), falhas_ux
+    assert any("Frase Secreta" in f for f in falhas_ux), falhas_ux
+    assert any("Mostrar frase" in f for f in falhas_ux), falhas_ux
+    assert any("cafe com bolo" in f for f in falhas_ux), falhas_ux
     assert any("grupo-legenda" in f for f in falhas_ux), falhas_ux
     assert any("texto visivel" in f for f in falhas_ux), falhas_ux
     assert any("tutorial.js" in f for f in falhas_ux), falhas_ux
