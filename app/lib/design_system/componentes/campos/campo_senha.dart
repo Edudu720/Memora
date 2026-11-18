@@ -93,7 +93,7 @@ class _CampoSenhaState extends State<CampoSenha> {
                     child: Row(
                       children: <Widget>[
                         Icon(
-                          _revelada ? Icons.visibility_off : Icons.visibility,
+                          _revelada ? Icons.visibility_off_rounded : Icons.visibility_rounded,
                           color: cores.primaria,
                           size: MemoraDimensoes.iconePadrao,
                         ),

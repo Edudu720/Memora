@@ -14,7 +14,7 @@ final Guia guiaFacebook = Guia(
       chave: 'feed-reels-marketplace',
       titulo: TextosGuias.facebookSecao1Titulo,
       subtitulo: TextosGuias.facebookSecao1Subtitulo,
-      icone: Icons.home_outlined,
+      icone: Icons.home_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.facebook1,
@@ -40,7 +40,7 @@ final Guia guiaFacebook = Guia(
       chave: 'amigos-notificacoes-menu',
       titulo: TextosGuias.facebookSecao2Titulo,
       subtitulo: TextosGuias.facebookSecao2Subtitulo,
-      icone: Icons.people_outline,
+      icone: Icons.people_outline_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.facebook4,
@@ -72,7 +72,7 @@ final Guia guiaFacebook = Guia(
       chave: 'perfil-informacoes',
       titulo: TextosGuias.facebookSecao3Titulo,
       subtitulo: TextosGuias.facebookSecao3Subtitulo,
-      icone: Icons.person_outline,
+      icone: Icons.person_outline_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.facebook8,

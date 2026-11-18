@@ -105,7 +105,7 @@ class _TelaRegistroState extends State<TelaRegistro> {
               const EstadoVazio(
                 titulo: 'Você fez tudo sozinha até agora',
                 explicacao: TextosAssistente.registroVazio,
-                icone: Icons.emoji_events_outlined,
+                icone: Icons.emoji_events_rounded,
               )
             else
               Cartao(
@@ -127,7 +127,7 @@ class _TelaRegistroState extends State<TelaRegistro> {
                               ),
                             ),
                             child: Icon(
-                              Icons.check_circle_outline,
+                              Icons.check_circle_outline_rounded,
                               size: MemoraDimensoes.iconePadrao,
                               color: cores.sucessoTexto,
                             ),

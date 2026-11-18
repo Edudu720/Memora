@@ -245,7 +245,7 @@ void main() {
                   aoTocar: () {},
                 ),
                 TileAcaoRapida(
-                  icone: Icons.apps,
+                  icone: Icons.apps_rounded,
                   titulo: 'Aplicativos',
                   aoTocar: () {},
                 ),

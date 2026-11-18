@@ -189,7 +189,7 @@ void main() {
         expect(
           find.descendant(
             of: faixa,
-            matching: find.byIcon(Icons.keyboard_arrow_down),
+            matching: find.byIcon(Icons.keyboard_arrow_down_rounded),
           ),
           findsOneWidget,
           reason: '${nomeDa(c)}: a faixa não tem a seta',

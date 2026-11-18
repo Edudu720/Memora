@@ -188,7 +188,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
           child: EstadoVazio(
             titulo: TextosAssistente.catalogoVazioTitulo,
             explicacao: TextosAssistente.catalogoVazioExplicacao,
-            icone: Icons.apps_outlined,
+            icone: Icons.apps_rounded,
           ),
         ),
       );
@@ -231,7 +231,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                   ),
                   ChipFiltro(
                     rotulo: 'Serviços sociais',
-                    icone: Icons.shield_outlined,
+                    icone: Icons.shield_rounded,
                     selecionado: _categoriaAtiva == CategoriaDoServico.sensivel,
                     aoTocar: () => setState(
                       () => _categoriaAtiva = CategoriaDoServico.sensivel,
@@ -269,7 +269,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                   titulo: 'Nenhum aplicativo encontrado',
                   explicacao:
                       'Tente buscar com outras palavras ou apague a busca.',
-                  icone: Icons.search_off,
+                  icone: Icons.search_off_rounded,
                 )
               else
                 for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[
@@ -366,8 +366,8 @@ class _ItemDoCatalogo extends StatelessWidget {
                           ? TextosAssistente.soEnsinaNaoInstalado
                           : servico.categoria.oQueAMemoraFaz,
                       icone: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
-                          ? Icons.check_circle_outline
-                          : Icons.school_outlined,
+                          ? Icons.check_circle_outline_rounded
+                          : Icons.school_rounded,
                       tom: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
                           ? TomBadgeStatus.positivo
                           : TomBadgeStatus.informativo,
@@ -382,7 +382,7 @@ class _ItemDoCatalogo extends StatelessWidget {
             BotaoSecundario(
               key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
               rotulo: 'Ensinar passo a passo',
-              icone: Icons.menu_book_outlined,
+              icone: Icons.menu_book_rounded,
               aoTocar: habilitado ? aoAcionarPadrao : null,
             ),
             if (podeAbrir) ...<Widget>[
@@ -397,7 +397,7 @@ class _ItemDoCatalogo extends StatelessWidget {
             BotaoSecundario(
               key: TelaCatalogo.chaveDoItem(servico.nomeExibido),
               rotulo: 'Perguntar na conversa',
-              icone: Icons.chat_bubble_outline,
+              icone: Icons.chat_bubble_outline_rounded,
               aoTocar: habilitado ? aoAcionarPadrao : null,
             ),
         ],

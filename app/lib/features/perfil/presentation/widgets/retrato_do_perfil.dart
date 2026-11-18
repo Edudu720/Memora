@@ -163,7 +163,7 @@ class RetratoDoPerfil extends StatelessWidget {
     final String? iniciais = iniciaisDe(nome);
     if (iniciais == null) {
       return Icon(
-        Icons.person_outline,
+        Icons.person_outline_rounded,
         size: tamanho * 0.5,
         color: cores.sobrePrimaria,
       );

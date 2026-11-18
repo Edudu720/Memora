@@ -59,7 +59,7 @@ class RegrasDeSenha extends StatelessWidget {
                   const TextoMemora.apoio('Sua senha precisa:'),
                   BadgeDeStatus(
                     rotulo: todasAtendidas ? 'Pronta' : 'Obrigatório',
-                    icone: todasAtendidas ? Icons.check : null,
+                    icone: todasAtendidas ? Icons.check_rounded : null,
                     tom: todasAtendidas
                         ? TomBadgeStatus.positivo
                         : TomBadgeStatus.neutro,
@@ -75,8 +75,8 @@ class RegrasDeSenha extends StatelessWidget {
                     children: <Widget>[
                       Icon(
                         atendidas[i]
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_unchecked_rounded,
                         size: MemoraDimensoes.iconePadrao,
                         color: atendidas[i] ? cores.sucesso : cores.textoSuave,
                       ),

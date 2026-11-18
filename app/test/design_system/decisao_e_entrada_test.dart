@@ -219,7 +219,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
       expect(
         find.text('Não consegui entender esse e-mail. Pode conferir?'),
         findsOneWidget,
@@ -456,7 +456,7 @@ void main() {
             BotaoTerciario(rotulo: 'Terciário', aoTocar: () {}),
             BotaoPerigo(
               rotulo: 'Perigo',
-              icone: Icons.delete_outline,
+              icone: Icons.delete_outline_rounded,
               aoTocar: () {},
             ),
           ];
@@ -491,7 +491,7 @@ void main() {
             (
               BotaoPerigo(
                 rotulo: 'Perigo',
-                icone: Icons.delete_outline,
+                icone: Icons.delete_outline_rounded,
                 aoTocar: () {},
               ),
               false,

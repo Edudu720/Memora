@@ -98,7 +98,7 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Icon(
-                              Icons.arrow_back,
+                              Icons.arrow_back_rounded,
                               color: cores.primaria,
                               size: MemoraDimensoes.iconePadrao,
                             ),

@@ -30,7 +30,7 @@ void main() {
       );
       final Finder voltar = find.byKey(CabecalhoDeTela.chaveVoltar);
       expect(
-        find.descendant(of: voltar, matching: find.byIcon(Icons.arrow_back)),
+        find.descendant(of: voltar, matching: find.byIcon(Icons.arrow_back_rounded)),
         findsOneWidget,
       );
       expect(
