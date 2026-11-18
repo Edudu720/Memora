@@ -129,7 +129,10 @@ void main() {
         .evaluate()
         .map((Element e) => (e.widget as Text).data ?? '')
         .toList();
-    expect(escritos, <String>[TextosSos.textoDaBolinha]);
+    // O literal, e não a constante: trocar a constante por "SOS Ajuda" tem
+    // de reprovar aqui (decisão do Henrique, 2026-11-18).
+    expect(escritos, <String>['SOS']);
+    expect(TextosSos.textoDaBolinha, 'SOS');
     expect(
       find.descendant(of: bolinha, matching: find.byType(Icon)),
       findsNothing,
