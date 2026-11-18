@@ -105,7 +105,9 @@ void main() {
       void validarBotao() {
         final Finder finder = find.byKey(CascaInterna.chaveBotaoSos);
         expect(finder, findsOneWidget);
-        expect(find.text(TextosSos.rotuloBotaoSos), findsOneWidget);
+        // A bolinha mostra só "SOS"; o "SOS Ajuda" é o nome falado.
+        expect(find.text(TextosSos.textoDaBolinha), findsOneWidget);
+        expect(find.text(TextosSos.rotuloBotaoSos), findsNothing);
         final Size tamanho = t.getSize(finder);
         expect(tamanho.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
         expect(
@@ -336,8 +338,8 @@ void main() {
       final Finder btn = find.byKey(BotaoSosPersistente.chaveBotao);
       expect(btn, findsOneWidget);
       final Size size = t.getSize(btn);
-      expect(size.width, greaterThanOrEqualTo(MemoraDimensoes.alvoDecisao));
-      expect(size.height, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+      expect(size.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+      expect(size.height, closeTo(size.width, 0.01));
 
       await t.tap(btn);
       expect(toques, 1);
@@ -345,7 +347,7 @@ void main() {
   );
 
   testWidgets(
-    'faixa SOS na CascaInterna reserva espaço próprio sem sobreposição a 200%',
+    'a bolinha do SOS não cobre a saudação do Início a 200% no 320x568',
     (WidgetTester t) async {
       vestir(t, const Size(320, 568));
       await t.pumpWidget(
@@ -383,19 +385,18 @@ void main() {
       await t.pumpAndSettle();
 
       expect(t.takeException(), isNull);
-      final Rect faixa = t.getRect(find.byKey(CascaInterna.chaveFaixaSos));
+      // Sem faixa: a bolinha está no cabeçalho do Início, não flutuando.
+      expect(find.byKey(CascaInterna.chaveSosFlutuante), findsNothing);
       final Rect botao = t.getRect(find.byKey(CascaInterna.chaveBotaoSos));
       final Rect saudacao = t.getRect(find.byKey(TelaInicio.chaveSaudacao));
+      final Rect anfitria = t.getRect(find.byKey(MemoraAnfitria.chaveDaAcao));
 
-      expect(
-        faixa.bottom - botao.bottom,
-        greaterThanOrEqualTo(MemoraDimensoes.separacaoAlvo),
-      );
-      expect(
-        saudacao.top - faixa.bottom,
-        greaterThanOrEqualTo(MemoraDimensoes.separacaoAlvo),
-      );
+      expect(botao.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
       expect(botao.overlaps(saudacao), isFalse);
+      expect(
+        botao.inflate(MemoraDimensoes.separacaoAlvo - 0.01).overlaps(anfitria),
+        isFalse,
+      );
     },
   );
 

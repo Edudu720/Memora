@@ -166,7 +166,8 @@ class _TelaPerfilState extends State<TelaPerfil> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               // Título e retrato pessoal dedicado da pessoa usuária (FR-001, 011)
-              const TextoMemora.tituloTela(TextosPerfil.tituloPerfil),
+              // A bolinha do SOS fica à direita do título (feature 014).
+              const TituloComSos(titulo: TextosPerfil.tituloPerfil),
               const SizedBox(height: MemoraEspacamento.lg),
               if (widget.idDaConta != null && widget.idDaConta!.trim().isNotEmpty)
                 SecaoFotoPerfil(

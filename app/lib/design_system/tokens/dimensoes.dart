@@ -121,6 +121,14 @@ abstract final class MemoraDimensoes {
   // tira de vez abaixo de [pisoDeIlustracao] — o texto e a ação, nunca.
   // ---------------------------------------------------------------------------
 
+  /// Teto da `BarraSuperior` no `appBar` do `Scaffold` — não a altura dela.
+  ///
+  /// A barra mede o próprio conteúdo: 56 dp com a letra normal, e mais com a
+  /// letra ampliada, quando o título e a bolinha do SOS precisam de duas
+  /// linhas (feature 014, 2026-11-18). O `Scaffold` exige um teto finito, e
+  /// este existe para nunca morder: se morder, o título é cortado.
+  static const double tetoDaBarraSuperior = 400;
+
   /// 48 dp — a ilustração de um cartão de porta, ao lado do nome.
   ///
   /// Eram 56. Com 56, a porta tinha 80 dp de altura só por causa do desenho, e
