@@ -24,3 +24,8 @@ __pycache__/
 apps/.originais/
 Memora-Desing-Ideias/
 
+# Dev-only dependencies and reports for site E2E checks (S12)
+node_modules/
+site/tests/e2e/playwright-report/
+site/tests/e2e/test-results/
+
