@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_perfil.dart';
@@ -619,17 +618,12 @@ class _MiniaturaAvatar extends StatelessWidget {
         border: Border.all(color: cores.borda),
       ),
       clipBehavior: Clip.antiAlias,
-      child: avatar.ehSvg
-          ? Padding(
-              padding: const EdgeInsets.all(MemoraEspacamento.xs),
-              child: SvgPicture.asset(avatar.caminhoAsset),
-            )
-          : Image.asset(
-              avatar.caminhoAsset,
-              fit: BoxFit.contain,
-              cacheWidth: 120,
-              cacheHeight: 120,
-            ),
+      child: Center(
+        child: DesenhoAvatarIlustrado(
+          avatar: avatar,
+          tamanho: MemoraDimensoes.alvoMinimo * 0.84,
+        ),
+      ),
     );
   }
 }

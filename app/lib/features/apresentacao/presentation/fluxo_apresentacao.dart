@@ -279,7 +279,8 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
     );
   }
 
-  /// Tela 1: quem ela é e o que ninguém do Memora faz (FR-036a).
+  /// Tela 1: quem ela é, que só fala dentro do aplicativo (FR-035) e o que
+  /// ninguém do Memora faz (FR-036a).
   List<Widget> _telaOla(bool ocultarVisuais) {
     return <Widget>[
       Row(
