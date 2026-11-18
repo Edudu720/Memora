@@ -78,7 +78,7 @@ abstract final class TextosApresentacao {
   /// A Memora explica a conversa.
   static const String conversa =
       'Quando você tiver uma dúvida, é só me perguntar, do seu jeito. Eu '
-      'mostro o caminho, para que da próxima vez você consiga sozinha.';
+      'mostro o caminho, para que da próxima vez você consiga por conta própria.';
 
   /// Ela ensina, não faz por ela (Princípio VII).
   static const String ensinoNaoSubstituo =

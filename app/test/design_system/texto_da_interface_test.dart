@@ -41,15 +41,37 @@ void main() {
       expect(contarFrases('Abra o site www.gov.br e entre.'), 1);
     });
 
-    test('acha palavra e frase proibidas, sem confundir com palavra parecida', () {
-      expect(palavrasProibidasEm('Feito para o idoso'), isNotEmpty);
-      expect(palavrasProibidasEm('Para a pessoa IDOSA'), isNotEmpty);
-      expect(palavrasProibidasEm('Na melhor idade'), isNotEmpty);
-      expect(palavrasProibidasEm('Plano sênior'), isNotEmpty);
-      expect(palavrasProibidasEm('Isso é difícil para você'), isNotEmpty);
-      expect(palavrasProibidasEm('Vamos ver juntos'), isEmpty);
-      expect(palavrasProibidasEm('Idade'), isEmpty);
-      expect(palavrasProibidasEm('Senha'), isEmpty);
+    test(
+      'acha palavra e frase proibidas, sem confundir com palavra parecida',
+      () {
+        expect(palavrasProibidasEm('Feito para o idoso'), isNotEmpty);
+        expect(palavrasProibidasEm('Para a pessoa IDOSA'), isNotEmpty);
+        expect(palavrasProibidasEm('Na melhor idade'), isNotEmpty);
+        expect(palavrasProibidasEm('Plano sênior'), isNotEmpty);
+        expect(palavrasProibidasEm('Isso é difícil para você'), isNotEmpty);
+        expect(palavrasProibidasEm('Vamos ver juntos'), isEmpty);
+        expect(palavrasProibidasEm('Idade'), isEmpty);
+        expect(palavrasProibidasEm('Senha'), isEmpty);
+      },
+    );
+
+    test('acha texto que supõe o gênero da pessoa, e não o da Memora', () {
+      expect(
+        palavrasProibidasEm('da próxima vez você consiga sozinha.'),
+        isNotEmpty,
+      );
+      expect(
+        palavrasProibidasEm('Você fez tudo sozinho até agora'),
+        isNotEmpty,
+      );
+      expect(palavrasProibidasEm('Quero entrar sozinha'), isNotEmpty);
+      expect(palavrasProibidasEm('Prefiro tentar sozinha'), isNotEmpty);
+      expect(palavrasProibidasEm('Como você quer ser chamada'), isNotEmpty);
+      expect(palavrasProibidasEm('Acontece, fica tranquila.'), isNotEmpty);
+      expect(palavrasProibidasEm('Estou quase pronta.'), isEmpty);
+      expect(palavrasProibidasEm('O story passa sozinho.'), isEmpty);
+      expect(palavrasProibidasEm('Quero entrar por conta própria'), isEmpty);
+      expect(palavrasProibidasEm('Como posso te chamar'), isEmpty);
     });
 
     test('acha emoji, mas não sinais comuns de texto', () {
@@ -99,7 +121,8 @@ void main() {
       expect(
         TextosAnfitria.dicas.toSet(),
         dicasDoArquivo().values.toSet(),
-        reason: 'dica escrita e fora de `dicas` nunca aparece; dica em '
+        reason:
+            'dica escrita e fora de `dicas` nunca aparece; dica em '
             '`dicas` e fora do arquivo escapa deste portao de texto',
       );
     });
@@ -175,7 +198,8 @@ void main() {
         expect(
           reprovados,
           isEmpty,
-          reason: 'Reescreva na voz da Memora (memora-ux): no máximo duas '
+          reason:
+              'Reescreva na voz da Memora (memora-ux): no máximo duas '
               'frases; o excedente vira etapa ou "Saber mais", mas o '
               'necessário para decidir continua visível (FR-017).\n'
               '${reprovados.join('\n')}',
@@ -183,44 +207,52 @@ void main() {
       });
     }
 
-    test('todos os guias em features/aprendizado/data/guias/ respeitam o limite', () {
-      final List<File> guias = Directory('lib/features/aprendizado/data/guias')
-          .listSync()
-          .whereType<File>()
-          .where((File f) => f.path.endsWith('.dart'))
-          .toList()
-        ..sort((File a, File b) => a.path.compareTo(b.path));
-      expect(guias, isNotEmpty);
+    test(
+      'todos os guias em features/aprendizado/data/guias/ respeitam o limite',
+      () {
+        final List<File> guias =
+            Directory('lib/features/aprendizado/data/guias')
+                .listSync()
+                .whereType<File>()
+                .where((File f) => f.path.endsWith('.dart'))
+                .toList()
+              ..sort((File a, File b) => a.path.compareTo(b.path));
+        expect(guias, isNotEmpty);
 
-      final RegExp literal = RegExp(_literalSimples + r'|' + _literalDuplo);
-      final List<String> reprovados = <String>[];
+        final RegExp literal = RegExp(_literalSimples + r'|' + _literalDuplo);
+        final List<String> reprovados = <String>[];
 
-      for (final File guia in guias) {
-        final List<String> linhas = guia.readAsLinesSync();
-        for (int i = 0; i < linhas.length; i++) {
-          final String codigo = linhas[i].split('//').first;
-          for (final RegExpMatch m in literal.allMatches(codigo)) {
-            final String bruto = m.group(0)!;
-            final String texto = bruto
-                .substring(1, bruto.length - 1)
-                .replaceAll(r"\'", "'")
-                .replaceAll(r'\"', '"');
-            final int frases = contarFrases(texto);
-            if (frases > 2) {
-              reprovados.add('${guia.path}:${i + 1}: $frases frases — "$texto"');
-            }
-            for (final String p in palavrasProibidasEm(texto)) {
-              reprovados.add('${guia.path}:${i + 1}: proibida "$p" — "$texto"');
-            }
-            if (temEmoji(texto)) {
-              reprovados.add('${guia.path}:${i + 1}: emoji — "$texto"');
+        for (final File guia in guias) {
+          final List<String> linhas = guia.readAsLinesSync();
+          for (int i = 0; i < linhas.length; i++) {
+            final String codigo = linhas[i].split('//').first;
+            for (final RegExpMatch m in literal.allMatches(codigo)) {
+              final String bruto = m.group(0)!;
+              final String texto = bruto
+                  .substring(1, bruto.length - 1)
+                  .replaceAll(r"\'", "'")
+                  .replaceAll(r'\"', '"');
+              final int frases = contarFrases(texto);
+              if (frases > 2) {
+                reprovados.add(
+                  '${guia.path}:${i + 1}: $frases frases — "$texto"',
+                );
+              }
+              for (final String p in palavrasProibidasEm(texto)) {
+                reprovados.add(
+                  '${guia.path}:${i + 1}: proibida "$p" — "$texto"',
+                );
+              }
+              if (temEmoji(texto)) {
+                reprovados.add('${guia.path}:${i + 1}: emoji — "$texto"');
+              }
             }
           }
         }
-      }
 
-      expect(reprovados, isEmpty, reason: reprovados.join('\n'));
-    });
+        expect(reprovados, isEmpty, reason: reprovados.join('\n'));
+      },
+    );
   });
 }
 
@@ -277,6 +309,14 @@ const List<String> _proibidas = <String>[
   r'n[ãa]o se preocupe se n[ãa]o entender',
   r'at[ée] voc[êe] consegue',
   r'modo simplificado',
+  // Gênero (decisão do Henrique, 2026-11-18): o texto fala com a pessoa sem
+  // supor que ela é mulher ou homem. A Memora fala de si no feminino ("estou
+  // quase pronta"), e coisa continua com o gênero dela ("o story passa
+  // sozinho"); só a fala dirigida à pessoa é vigiada.
+  r'voc[êe](\s+\S+){0,5}\s+sozinh[ao]s?',
+  r'(quero|prefiro|vou)(\s+\S+){0,3}\s+sozinh[ao]s?',
+  r'ser chamad[ao]s?',
+  r'fica(r)? tranquil[ao]s?',
 ];
 
 /// Devolve as palavras ou frases proibidas encontradas no texto.
