@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../../suporte/movimento.dart';
 import 'package:memora/features/localizador/data/repositorios/repositorio_localizador_simulado.dart';
 import 'package:memora/features/localizador/domain/entidades/categoria_servico.dart';
 import 'package:memora/features/localizador/domain/entidades/endereco_servico.dart';
@@ -13,6 +16,21 @@ import 'package:memora/features/localizador/presentation/widgets/cartao_estabele
 import 'package:memora/features/localizador/presentation/widgets/dialogo_permissao_localizacao.dart';
 import 'package:memora/features/localizador/presentation/widgets/mapa_servicos_acessivel.dart';
 import 'package:memora/features/localizador/presentation/widgets/seletor_categorias_chips.dart';
+
+class _RepositorioLentoLocalizador implements RepositorioLocalizador {
+  final Completer<ResultadoBuscaServicos> _pendente =
+      Completer<ResultadoBuscaServicos>();
+
+  @override
+  Future<ResultadoBuscaServicos> buscarServicos({
+    String? consulta,
+    CategoriaServico? categoria,
+    double? latitude,
+    double? longitude,
+    String? regiaoManual,
+    int? raioMetros,
+  }) => _pendente.future;
+}
 
 class _RepositorioEspiaoLocalizador implements RepositorioLocalizador {
   int chamadas = 0;
@@ -202,7 +220,11 @@ void main() {
 
     expect(find.byKey(DialogoPermissaoLocalizacao.chaveDialogo), findsOneWidget);
     expect(find.textContaining('OpenStreetMap'), findsOneWidget);
-    expect(find.textContaining('Não enviamos dados pessoais da sua conta'), findsOneWidget);
+    expect(find.textContaining('Não envio dados da sua conta'), findsOneWidget);
+    expect(
+      find.textContaining('nem guardo por onde você passou'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Não agora (pesquisar manual)'));
     await tester.pumpAndSettle();
@@ -276,5 +298,76 @@ void main() {
     final Rect rotaRect = tester.getRect(find.byKey(CartaoEstabelecimento.chaveRota('cartao-estreito')));
     final Rect ligarRect = tester.getRect(find.byKey(CartaoEstabelecimento.chaveLigar('cartao-estreito')));
     expect(ligarRect.top - rotaRect.bottom, greaterThanOrEqualTo(MemoraDimensoes.separacaoAlvo));
+  });
+
+  testWidgets('Exibe Carregando com a Memora no lugar de CircularProgressIndicator (FR-059, T071)', (WidgetTester tester) async {
+    final ControladorLocalizador c = ControladorLocalizador(
+      repositorio: _RepositorioLentoLocalizador(),
+    );
+    addTearDown(c.dispose);
+
+    await tester.pumpWidget(montar(c));
+    await tester.pump();
+
+    await tester.tap(find.text('Não agora (pesquisar manual)'));
+    await tester.pump();
+
+    unawaited(c.buscar());
+    await tester.pump();
+
+    expect(find.byType(Carregando), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(MemoraAnimada), findsOneWidget);
+  });
+
+  testWidgets('Estado vazio usa EstadoVazio com no máximo uma MemoraAnimada (T071)', (WidgetTester tester) async {
+    final ControladorLocalizador c = ControladorLocalizador(
+      repositorio: RepositorioLocalizadorSimulado(),
+    );
+    addTearDown(c.dispose);
+
+    await tester.pumpWidget(montar(c));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Não agora (pesquisar manual)'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(EstadoVazio), findsOneWidget);
+    expect(find.byType(MemoraAnimada).evaluate().length, lessThanOrEqualTo(1));
+  });
+
+  testWidgets('Diálogo de região manual abre via DialogoMemora.mostrarConteudo (T091)', (WidgetTester tester) async {
+    liberarMovimento(tester);
+    final ControladorLocalizador c = ControladorLocalizador(
+      repositorio: RepositorioLocalizadorSimulado(),
+    );
+    addTearDown(c.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: TemasMemora.claro,
+        home: TelaLocalizador(controlador: c),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(MemoraMovimento.padrao);
+
+    await tester.tap(find.text('Não agora (pesquisar manual)'));
+    await tester.pump();
+    await tester.pump(MemoraMovimento.padrao);
+
+    await tester.tap(find.byKey(TelaLocalizador.chaveBotaoRegiaoManual));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+
+    final Finder dialogo = find.byType(AlertDialog);
+    expect(dialogo, findsOneWidget);
+    final Animation<double> animacao = ModalRoute.of(
+      tester.element(dialogo),
+    )!.animation!;
+    expect(animacao.status, AnimationStatus.forward);
+
+    await tester.pump(MemoraMovimento.padrao);
+    await tester.pump();
+    expect(animacao.value, 1.0);
   });
 }
