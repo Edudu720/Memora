@@ -18,6 +18,7 @@ e ela precisa permitir alteração (recolorimos tudo com a paleta).
 | `pessoa_com_celular.svg` | Desenho original da equipe, inspirado na Figura 2 do protótipo (feature 002) | Própria | — |
 | `linha_jornada.svg` | Desenho original da equipe, a partir da Figura 2 do protótipo (feature 002) | Própria | Desenhada com `currentColor` |
 | `memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg`, `memora_preocupada.svg` | Desenho original da equipe, a partir do robô do wireframe (Figuras 5-7 e 15). As quatro saem do mesmo script e compartilham a geometria (feature 004, T010) | Própria | — |
+| `porta_cuidado.svg`, `porta_localizador.svg` | Desenho original da equipe, para as portas do Dispositivo de Cuidado (o coração com o batimento) e do Localizador de Serviços (o alfinete de mapa), que antes repetiam o prédio dos Serviços sociais (revisão de 2026-11-18) | Própria | — |
 | `porta_conversa.svg`, `porta_aplicativos.svg`, `porta_servicos.svg`, `porta_ajuda.svg`, `porta_registro.svg` | Desenho original da equipe, para as portas do Hub (feature 004, T011). `porta_servicos` **não** usa logotipo de órgão nenhum (R7) | Própria | — |
 | `estado_vazio.svg`, `estado_erro.svg`, `aplicativo_generico.svg` | Desenho original da equipe (feature 004, T011) | Própria | — |
 | `ajuste_aparencia.svg` | Desenho original da equipe, para o ajuste de aparência (feature 004, T011) | Própria | — |

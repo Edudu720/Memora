@@ -651,13 +651,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       PortaDoHub(
         rotulo: 'Dispositivo de Cuidado',
         descricao: 'Batimentos, movimento e alerta de queda',
-        ilustracao: Ilustracao.portaServicos,
+        ilustracao: Ilustracao.portaCuidado,
         aoAbrir: _abrirDispositivoCuidado,
       ),
       PortaDoHub(
         rotulo: 'Localizador de Serviços',
         descricao: 'Postos de saúde e farmácias próximas',
-        ilustracao: Ilustracao.portaServicos,
+        ilustracao: Ilustracao.portaLocalizador,
         aoAbrir: _abrirLocalizadorServicos,
       ),
     ];
