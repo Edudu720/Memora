@@ -7,10 +7,6 @@ import '../../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../aprendizado/data/guias/guias.dart';
 import '../../../aprendizado/domain/busca.dart';
 import '../../../aprendizado/domain/guia.dart';
-import '../../../atalhos_aplicativos/presentation/controllers/atalhos_aplicativos_controller.dart';
-import '../../../atalhos_aplicativos/presentation/widgets/dialogo_confirmacao_abertura.dart';
-import '../../../atalhos_aplicativos/presentation/widgets/dialogo_instalacao_play_store.dart';
-import '../../data/abridor_de_aplicativo.dart';
 import '../../domain/assistente.dart';
 
 /// Catálogo unificado de aplicativos e serviços sociais (`T050`, `FR-023`).
@@ -18,8 +14,7 @@ import '../../domain/assistente.dart';
 /// Apresenta busca limpa no topo, filtro segmentado (`Apps do celular` e
 /// `Serviços sociais`), logo oficial em badge suave, `BadgeDeStatus` não
 /// clicável informando o que a Memora pode fazer e ações explícitas sem
-/// confundir cartão informativo com botão (`002/FR-012`), incluindo abertura
-/// direta segura (Feature 015) nos itens cotidianos autorizados pelo servidor.
+/// confundir cartão informativo com botão (`002/FR-012`).
 class TelaCatalogo extends StatefulWidget {
   /// Chave da lista.
   static const Key chaveLista = Key('catalogo.lista');
@@ -27,17 +22,11 @@ class TelaCatalogo extends StatefulWidget {
   /// Chave do campo de busca.
   static const Key chaveBusca = Key('catalogo.busca');
 
-  /// Chave do botão para abrir a lista dedicada de atalhos diretos (`015`).
-  static const Key chaveAtalhosDiretos = Key('catalogo.atalhos_diretos');
-
   /// Chave de um item, pelo nome do serviço.
   static Key chaveDoItem(String nome) => Key('catalogo.item.$nome');
 
-  /// Chave do botão de abertura direta em um cartão cotidiano (`015`).
-  static Key chaveAbrirDireto(String nome) => Key('catalogo.abrir_direto.$nome');
-
-  /// Chave do botão de instalação na Play Store em um cartão cotidiano (`015`).
-  static Key chaveBaixarNaLoja(String nome) => Key('catalogo.baixar_loja.$nome');
+  /// Chave do botão para entrar na lista de abertura direta (`015`).
+  static const Key chaveAtalhosDiretos = Key('catalogo.atalhos_diretos');
 
   /// De onde vêm os serviços.
   final RepositorioAssistente repositorio;
@@ -61,13 +50,7 @@ class TelaCatalogo extends StatefulWidget {
   /// Consulta de plataforma dos aplicativos instalados (se disponível).
   final ConsultaDeAplicativos? consultaAplicativos;
 
-  /// Abridor nativo para abertura direta segura de apps cotidianos (`015`).
-  final AbridorDeAplicativo? abridor;
-
-  /// Executor externo opcional da Google Play Store (injetável em testes).
-  final AbridorDeUrlExterna? abridorDeUrl;
-
-  /// Abre a visualização dedicada apenas com atalhos diretos (`015`).
+  /// Abre a tela dedicada para abrir um aplicativo direto (`015`).
   final VoidCallback? aoAbrirAtalhosDiretos;
 
   /// Volta ao início.
@@ -84,8 +67,6 @@ class TelaCatalogo extends StatefulWidget {
     this.aoPedirParaAbrir,
     this.aoAbrirGuia,
     this.consultaAplicativos,
-    this.abridor,
-    this.abridorDeUrl,
     this.aoAbrirAtalhosDiretos,
     this.aoVoltar,
     this.estadoDeTeste,
@@ -183,74 +164,6 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
     } else if (widget.aoEscolher != null) {
       widget.aoEscolher!(servico);
     }
-  }
-
-  String? _pacoteAutorizado(ServicoDoCatalogo servico) {
-    if (servico.categoria != CategoriaDoServico.cotidiano ||
-        !servico.memoraPodeAbrir) {
-      return null;
-    }
-    final String? pacote = servico.identificadorAndroid?.trim();
-    if (pacote == null || pacote.isEmpty || !pareceUmPacote(pacote)) {
-      return null;
-    }
-    return pacote;
-  }
-
-  void _confirmarAberturaDireta(ServicoDoCatalogo servico, String pacote) {
-    DialogoConfirmacaoAbertura.mostrar(
-      context,
-      nomeAplicativo: servico.nomeExibido,
-      aoConfirmar: () async {
-        final AbridorDeAplicativo? abridor = widget.abridor;
-        if (abridor == null) return;
-        bool abriu = false;
-        try {
-          abriu = await abridor.abrir(pacote);
-        } catch (_) {
-          abriu = false;
-        }
-        if (!abriu && mounted) {
-          _mostrarAvisoDireto(
-            TextosAtalhosAplicativos.erroAoAbrirAplicativo(servico.nomeExibido),
-          );
-        }
-      },
-    );
-  }
-
-  void _confirmarInstalacaoNaLoja(ServicoDoCatalogo servico, String pacote) {
-    DialogoInstalacaoPlayStore.mostrar(
-      context,
-      nomeAplicativo: servico.nomeExibido,
-      aoConfirmar: () async {
-        final bool abriu =
-            await AtalhosAplicativosController.abrirPacoteNaPlayStore(
-          pacote,
-          abridorDeUrl: widget.abridorDeUrl,
-        );
-        if (!abriu && mounted) {
-          _mostrarAvisoDireto(
-            TextosAtalhosAplicativos.erroAoAbrirLoja(servico.nomeExibido),
-          );
-        }
-      },
-    );
-  }
-
-  void _mostrarAvisoDireto(String mensagem) {
-    final MemoraCores cores = context.memora.cores;
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          backgroundColor: cores.superficie,
-          content: Semantics(
-            liveRegion: true,
-            child: TextoMemora(mensagem, cor: cores.texto),
-          ),
-        ),
-      );
   }
 
   @override
@@ -387,33 +300,16 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                 )
               else
                 for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[
-                  Builder(
-                    builder: (BuildContext _) {
-                      final String? pacote = _pacoteAutorizado(servico);
-                      return _ItemDoCatalogo(
-                        servico: servico,
-                        temGuia: guiaDe(servico.chave) != null,
-                        instalado: _instalacaoPorChave[servico.chave] ?? true,
-                        habilitado:
-                            widget.aoEscolher != null ||
-                            widget.aoAbrirGuia != null,
-                        aoAcionarPadrao: () => _acionarPadrao(servico),
-                        aoPedirAbrir: widget.aoPedirParaAbrir != null
-                            ? () => widget.aoPedirParaAbrir!(servico)
-                            : null,
-                        aoAbrirDireto:
-                            (pacote != null && widget.abridor != null)
-                            ? () => _confirmarAberturaDireta(servico, pacote)
-                            : null,
-                        aoBaixarNaLoja:
-                            (pacote != null &&
-                                (widget.abridor != null ||
-                                    widget.abridorDeUrl != null))
-                            ? () =>
-                                _confirmarInstalacaoNaLoja(servico, pacote)
-                            : null,
-                      );
-                    },
+                  _ItemDoCatalogo(
+                    servico: servico,
+                    temGuia: guiaDe(servico.chave) != null,
+                    instalado: _instalacaoPorChave[servico.chave] ?? true,
+                    habilitado:
+                        widget.aoEscolher != null || widget.aoAbrirGuia != null,
+                    aoAcionarPadrao: () => _acionarPadrao(servico),
+                    aoPedirAbrir: widget.aoPedirParaAbrir != null
+                        ? () => widget.aoPedirParaAbrir!(servico)
+                        : null,
                   ),
                   const SizedBox(height: MemoraEspacamento.md),
                 ],
@@ -433,8 +329,6 @@ class _ItemDoCatalogo extends StatelessWidget {
   final bool habilitado;
   final VoidCallback aoAcionarPadrao;
   final VoidCallback? aoPedirAbrir;
-  final VoidCallback? aoAbrirDireto;
-  final VoidCallback? aoBaixarNaLoja;
 
   const _ItemDoCatalogo({
     required this.servico,
@@ -443,8 +337,6 @@ class _ItemDoCatalogo extends StatelessWidget {
     required this.habilitado,
     required this.aoAcionarPadrao,
     this.aoPedirAbrir,
-    this.aoAbrirDireto,
-    this.aoBaixarNaLoja,
   });
 
   @override
@@ -456,14 +348,9 @@ class _ItemDoCatalogo extends StatelessWidget {
         servico.categoria == CategoriaDoServico.cotidiano &&
         servico.memoraPodeAbrir &&
         aoPedirAbrir != null;
-    final bool podeAbrirDireto = instalado &&
-        servico.categoria == CategoriaDoServico.cotidiano &&
-        servico.memoraPodeAbrir &&
-        aoAbrirDireto != null;
     final bool marcadoComoNaoInstalado = !instalado &&
         servico.categoria == CategoriaDoServico.cotidiano &&
         servico.memoraPodeAbrir;
-    final bool podeBaixarNaLoja = marcadoComoNaoInstalado && aoBaixarNaLoja != null;
 
     return Cartao(
       padding: const EdgeInsets.all(MemoraEspacamento.md),
@@ -540,24 +427,6 @@ class _ItemDoCatalogo extends StatelessWidget {
               icone: Icons.chat_bubble_outline,
               aoTocar: habilitado ? aoAcionarPadrao : null,
             ),
-          if (podeAbrirDireto) ...<Widget>[
-            const SizedBox(height: MemoraEspacamento.sm),
-            BotaoSecundario(
-              key: TelaCatalogo.chaveAbrirDireto(servico.nomeExibido),
-              rotulo: TextosAtalhosAplicativos.botaoAbrirAgora,
-              icone: Icons.launch_rounded,
-              aoTocar: aoAbrirDireto,
-            ),
-          ],
-          if (podeBaixarNaLoja) ...<Widget>[
-            const SizedBox(height: MemoraEspacamento.sm),
-            BotaoSecundario(
-              key: TelaCatalogo.chaveBaixarNaLoja(servico.nomeExibido),
-              rotulo: TextosAtalhosAplicativos.botaoBaixarPlayStore,
-              icone: Icons.download_rounded,
-              aoTocar: aoBaixarNaLoja,
-            ),
-          ],
         ],
       ),
     );

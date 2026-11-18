@@ -11,7 +11,7 @@
 ### Session 2026-11-17 (Revisão PR #85 / Clarify com Usuário)
 
 - **Q: Como os atalhos diretos da Feature 015 devem se relacionar com o Catálogo do servidor (`TelaCatalogo`), preservando R6 (003) e o Princípio VII?**  
-  **A: Convivência no Catálogo do servidor.** A porta *"Meus aplicativos"* no Início e no Hub continua abrindo o `TelaCatalogo` alimentado por `RepositorioAssistente.catalogo()`, mantendo o caminho de ensinar primeiro (*"Ensinar passo a passo"*, *"Pedir para a Memora abrir"* e conversa). Os cartões de aplicativos cotidianos no catálogo ganham abertura direta segura (*"Abrir agora"* quando instalado, via `DialogoConfirmacaoAbertura`, ou *"Baixar na Play Store"* quando ausente, via `DialogoInstalacaoPlayStore`), além do botão *"Abrir só por atalhos"* que abre a tela dedicada `TelaAtalhosAplicativos` — igualmente alimentada exclusivamente pelo catálogo do servidor (`RepositorioAssistente`), sem lista fixa divergente no aplicativo. Desativar um aplicativo no banco (R6) remove-o imediatamente tanto do catálogo quanto dos atalhos diretos.
+  **A: Convivência com separação de papéis sobre o Catálogo do servidor.** A porta *"Meus aplicativos"* no Início e no Hub continua abrindo o `TelaCatalogo` alimentado por `RepositorioAssistente.catalogo()`, que permanece sendo o lugar de aprender (*"Ensinar passo a passo"*, *"Pedir para a Memora abrir"* e conversa), sem duplicar dois botões de abrir no mesmo cartão. Na aba cotidiana do catálogo fica disponível o botão *"Abrir um aplicativo direto"* para acessar a tela dedicada `TelaAtalhosAplicativos` (*"Abrir aplicativos"*), onde quem já sabe usar abre diretamente com confirmação segura (`DialogoConfirmacaoAbertura` / `DialogoInstalacaoPlayStore`). A tela dedicada também consome exclusivamente `RepositorioAssistente.catalogo()`, preservando **R6** sem lista paralela.
 - **Q: Sobre o Registro de Ações (D1 da Feature 003), abrir um aplicativo diretamente pela própria pessoa gera registro no servidor?**  
   **A: Não gera registro.** O registro da trilha de auditoria (`003/D1`) audita exclusivamente ações executadas pela assistente de IA a pedido da pessoa. Quando a própria pessoa toca manualmente no atalho e confirma a saída no diálogo modal, não há intervenção da assistente nem envio ao endpoint `/assistente/registro`.
 - **Q: Como ficam o `TelaInicio` e os textos diante do conflito e do portão da Feature 013?**  
@@ -61,7 +61,7 @@ Ao tocar para abrir diretamente (no cartão do catálogo ou na tela dedicada *"A
 
 ## 4. Requisitos Funcionais (FR)
 
-- **FR-001**: A porta *"Meus aplicativos"* no Início e no Hub abre o `TelaCatalogo` (`CategoriaDoServico.cotidiano`), onde cada aplicativo cotidiano abrível oferece a ação direta (*"Abrir agora"* ou *"Baixar na Play Store"*) e acesso em um toque (*"Abrir só por atalhos"*) para a tela dedicada `TelaAtalhosAplicativos` (*"Abrir aplicativos"*).
+- **FR-001**: A porta *"Meus aplicativos"* no Início e no Hub abre o `TelaCatalogo` (`CategoriaDoServico.cotidiano`), que exibe na aba cotidiana o botão *"Abrir um aplicativo direto"* para acessar a tela dedicada `TelaAtalhosAplicativos` (*"Abrir aplicativos"*), mantendo os cartões do catálogo exclusivamente com as ações educativas (*"Ensinar passo a passo"*, *"Perguntar na conversa"* e *"Pedir para a Memora abrir"*).
 - **FR-002**: A lista de aplicativos exibida na `TelaAtalhosAplicativos` e os pacotes elegíveis para abertura direta devem vir exclusivamente do catálogo oficial do servidor (`RepositorioAssistente.catalogo()`, filtrando `CategoriaDoServico.cotidiano` com `memoraPodeAbrir == true` e `identificadorAndroid` válido), espelhando o banco (`WhatsApp`, `YouTube`, `Instagram`, `Facebook`, `Google Fotos`, `Telegram`, `TikTok`) e preservando integralmente o requisito **R6** da 003.
 - **FR-003**: Ao abrir a tela, o sistema deve consultar de forma assíncrona o estado de instalação de cada aplicativo liberado pelo servidor através do serviço `ConsultaDeAplicativos`.
 - **FR-004**: A tela deve exibir todos os aplicativos cotidianos liberados pelo catálogo do servidor diretamente, indicando em cada cartão se o aplicativo está instalado no aparelho ou disponível para instalação na loja, tratando falhas de carregamento e lista vazia conforme `FR-006` (004).
@@ -77,7 +77,7 @@ Ao tocar para abrir diretamente (no cartão do catálogo ou na tela dedicada *"A
   - Botão de ação primária: *"Sim, abrir agora"* (destaque, cor primária).
   - Botão de cancelamento: *"Não, continuar no Memora"* (neutro).
 - **FR-007**: Ao confirmar, o Memora deve invocar o serviço `AbridorDeAplicativo` para disparar a `Intent` de inicialização do aplicativo nativo.
-- **FR-008**: Se por qualquer motivo o sistema operacional falhar em abrir o aplicativo, o Memora deve exibir um aviso amigável: *"Não foi possível abrir o [Nome do App]. Verifique se o aplicativo está atualizado."*
+- **FR-008**: Se por qualquer motivo o sistema operacional falhar em abrir o aplicativo, o Memora deve exibir um aviso amigável na voz da Memora: *"Não consegui abrir o [Nome do App] agora. Confira se ele está atualizado na loja."*
 - **FR-009**: Ao tocar em um aplicativo que **não** está instalado, o diálogo de confirmação deve orientar sobre a instalação segura:
   - Título: *"Instalar o [Nome do App]?"*
   - Mensagem: *"O [Nome do App] ainda não está no seu celular. Deseja abrir a loja oficial Google Play Store para instalá-lo?"*
@@ -108,7 +108,7 @@ Ao tocar para abrir diretamente (no cartão do catálogo ou na tela dedicada *"A
 
 ## 6. Critérios de Aceitação (AC)
 
-- **AC-001**: O usuário acessa *"Meus aplicativos"* pelo Início ou Hub (no `TelaCatalogo`), pode tocar em *"Abrir agora"* / *"Baixar na Play Store"* diretamente no cartão ou entrar em *"Abrir só por atalhos"* (`TelaAtalhosAplicativos`).
+- **AC-001**: O usuário acessa *"Meus aplicativos"* pelo Início ou Hub (no `TelaCatalogo`) e toca em *"Abrir um aplicativo direto"* para entrar na `TelaAtalhosAplicativos`, sem duplicidade de botões de abertura nos cartões do catálogo.
 - **AC-002**: A tela exibe diretamente os aplicativos cotidianos ativos no catálogo do servidor (`RepositorioAssistente`), refletindo desativações remotas (R6) e sem ocultar apps ausentes do aparelho.
 - **AC-003**: Ao tocar em um aplicativo instalado, surge a caixa de confirmação *"Abrir o [Nome do App]?"*.
 - **AC-004**: Ao tocar em *"Sim, abrir agora"*, o aplicativo externo abre imediatamente e o Memora fica em segundo plano.

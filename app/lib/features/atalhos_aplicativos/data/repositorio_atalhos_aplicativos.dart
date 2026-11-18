@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import '../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../assistente/domain/assistente.dart';
 import '../domain/entidades/atalho_aplicativo.dart';
-import '../domain/entidades/categoria_aplicativo.dart';
 import '../domain/repositorios/i_repositorio_atalhos.dart';
 
 /// Implementação do repositório que obtém os aplicativos cotidianos do
@@ -64,7 +63,7 @@ class RepositorioAtalhosAplicativos implements IRepositorioAtalhos {
           nomeExibido: servico.nomeExibido,
           pacoteAndroid: pacote,
           descricaoCurta: servico.descricaoCurta,
-          categoria: _categoriaDe(servico.chave),
+          categoria: servico.categoria,
           instalado: instalado,
           iconeBytes: iconeBytes,
         );
@@ -73,11 +72,4 @@ class RepositorioAtalhosAplicativos implements IRepositorioAtalhos {
 
     return List<AtalhoAplicativo>.unmodifiable(atualizados);
   }
-
-  static CategoriaAplicativo _categoriaDe(String chave) => switch (chave) {
-        'whatsapp' || 'telegram' => CategoriaAplicativo.comunicacao,
-        'youtube' || 'tiktok' => CategoriaAplicativo.video,
-        'google-fotos' => CategoriaAplicativo.fotos,
-        _ => CategoriaAplicativo.redesSociais,
-      };
 }

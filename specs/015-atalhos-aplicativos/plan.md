@@ -6,9 +6,9 @@
 
 ## Summary
 
-Implementar atalhos diretos para abrir aplicativos comuns do cotidiano (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok) sem exigir tutoriais, **convivendo** com o `TelaCatalogo` e mantendo o catálogo oficial do servidor (`RepositorioAssistente.catalogo()`) como fonte única da verdade (preservando **R6** e **Princípio VII**).
+Implementar a tela dedicada de abertura direta para aplicativos comuns do cotidiano (WhatsApp, YouTube, Instagram, Facebook, Google Fotos, Telegram e TikTok) sem exigir tutoriais, **convivendo** com o `TelaCatalogo` em separação clara de papéis e mantendo o catálogo oficial do servidor (`RepositorioAssistente.catalogo()`) como fonte única da verdade (preservando **R6** e **Princípio VII**).
 
-A porta *"Meus aplicativos"* no Início e no Hub continua levando ao `TelaCatalogo`, onde cada cartão cotidiano passa a oferecer abertura direta segura (*"Abrir agora"* ou *"Baixar na Play Store"*) ao lado das ações educativas (*"Ensinar passo a passo"* e *"Pedir para a Memora abrir"*), além de um botão no catálogo (*"Abrir só por atalhos"*) para a tela dedicada `TelaAtalhosAplicativos`. O estado de instalação é detectado em tempo real via `ConsultaDeAplicativos`, serviços sensíveis/governamentais permanecem estritamente excluídos, aberturas manuais diretas não geram `Registro` da assistente (`003/D1`) e todo disparo externo exige confirmação clara (`DialogoConfirmacaoAbertura` ou `DialogoInstalacaoPlayStore`).
+A porta *"Meus aplicativos"* no Início e no Hub continua levando ao `TelaCatalogo` (o lugar de aprender, com *"Ensinar passo a passo"* e *"Pedir para a Memora abrir"*), oferecendo na aba cotidiana o botão *"Abrir um aplicativo direto"* para abrir a `TelaAtalhosAplicativos`. Na tela dedicada, o estado de instalação é detectado em tempo real via `ConsultaDeAplicativos`, serviços sensíveis/governamentais permanecem estritamente excluídos, aberturas manuais diretas não geram `Registro` da assistente (`003/D1`) e todo disparo externo exige confirmação clara (`DialogoConfirmacaoAbertura` ou `DialogoInstalacaoPlayStore`).
 
 ---
 
@@ -75,14 +75,13 @@ app/
 ├── lib/
 │   ├── features/
 │   │   ├── assistente/presentation/telas/
-│   │   │   └── tela_catalogo.dart              # Coexistência: Abrir agora / Play Store / Abrir só por atalhos
+│   │   │   └── tela_catalogo.dart              # Botão único "Abrir um aplicativo direto" na aba cotidiana
 │   │   └── atalhos_aplicativos/
 │   │       ├── data/
 │   │       │   └── repositorio_atalhos_aplicativos.dart
 │   │       ├── domain/
 │   │       │   ├── entidades/
-│   │       │   │   ├── atalho_aplicativo.dart
-│   │       │   │   └── categoria_aplicativo.dart
+│   │       │   │   └── atalho_aplicativo.dart
 │   │       │   └── repositorios/
 │   │       │       └── i_repositorio_atalhos.dart
 │   │       └── presentation/

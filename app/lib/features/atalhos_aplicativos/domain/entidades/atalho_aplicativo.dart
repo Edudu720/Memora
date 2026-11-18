@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
-import 'categoria_aplicativo.dart';
+import '../../../assistente/domain/assistente.dart';
 
-/// Entidade imutável que representa um aplicativo comum na tela de atalhos rápidos.
+/// Entidade imutável que representa um aplicativo cotidiano na tela de abertura direta.
 class AtalhoAplicativo {
   /// Identificador interno estável (ex.: `'whatsapp'`).
   final String chave;
@@ -16,8 +16,8 @@ class AtalhoAplicativo {
   /// Descrição curta de uma frase explicando para que o aplicativo serve.
   final String descricaoCurta;
 
-  /// Categoria funcional do aplicativo.
-  final CategoriaAplicativo categoria;
+  /// Categoria vinda diretamente do catálogo oficial do servidor.
+  final CategoriaDoServico categoria;
 
   /// Indica se o aplicativo foi detectado como instalado no aparelho.
   final bool instalado;
@@ -31,7 +31,7 @@ class AtalhoAplicativo {
     required this.nomeExibido,
     required this.pacoteAndroid,
     required this.descricaoCurta,
-    required this.categoria,
+    this.categoria = CategoriaDoServico.cotidiano,
     this.instalado = false,
     this.iconeBytes,
   });

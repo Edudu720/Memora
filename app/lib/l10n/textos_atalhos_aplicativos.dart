@@ -1,23 +1,16 @@
-/// Textos da tela e dos atalhos diretos para aplicativos (Feature 015).
+/// Textos da tela dedicada de abertura direta para aplicativos (Feature 015).
 ///
 /// Linguagem literal, curta e acolhedora, alinhada ao portão de textos da 013
 /// (no máximo duas frases curtas, sem emojis e sem termos proibidos).
 abstract final class TextosAtalhosAplicativos {
-  /// Título principal da tela dedicada de atalhos.
+  /// Título principal da tela dedicada.
   static const String tituloTela = 'Abrir aplicativos';
 
-  /// Título do botão para acessar a grade só com atalhos a partir do catálogo.
-  static const String botaoVerAtalhosDiretos = 'Abrir só por atalhos';
-
-  /// Rótulo do botão de abertura direta no cartão do catálogo.
-  static const String botaoAbrirAgora = 'Abrir agora';
-
-  /// Rótulo do botão de ida à loja oficial quando o app não está instalado.
-  static const String botaoBaixarPlayStore = 'Baixar na Play Store';
+  /// Título do botão no catálogo para entrar na tela de abertura direta.
+  static const String botaoVerAtalhosDiretos = 'Abrir um aplicativo direto';
 
   /// Orientação curta exibida no topo da lista.
-  static const String orientacaoTopo =
-      'Toque no aplicativo que você deseja usar. Não precisa de passo a passo.';
+  static const String orientacaoTopo = 'Toque no aplicativo que você quer abrir.';
 
   /// Mensagem exibida durante a consulta inicial no servidor e no aparelho.
   static const String carregando = 'Verificando aplicativos no celular...';
@@ -69,12 +62,12 @@ abstract final class TextosAtalhosAplicativos {
   /// Rótulo do botão de recusa no diálogo de instalação.
   static const String botaoCancelarInstalacao = 'Agora não';
 
-  /// Aviso amigável quando o sistema falha em iniciar o aplicativo escolhido.
+  /// Aviso amigável na voz da Memora quando falha ao iniciar o aplicativo.
   static String erroAoAbrirAplicativo(String nomeAplicativo) =>
-      'Não foi possível abrir o $nomeAplicativo. Verifique se o aplicativo '
-      'está atualizado.';
+      'Não consegui abrir o $nomeAplicativo agora. Confira se ele está '
+      'atualizado na loja.';
 
-  /// Aviso amigável quando a loja oficial não pode ser aberta no aparelho.
+  /// Aviso amigável na voz da Memora quando a loja oficial não pode ser aberta.
   static String erroAoAbrirLoja(String nomeAplicativo) =>
-      'Não foi possível abrir a loja oficial para instalar o $nomeAplicativo.';
+      'Não consegui abrir a loja oficial para instalar o $nomeAplicativo agora.';
 }

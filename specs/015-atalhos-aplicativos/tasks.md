@@ -26,7 +26,7 @@ description: "Task list for Feature 015 - Atalhos Rápidos para Aplicativos"
 
 **Purpose**: Entidades fundamentais, enumerações e catálogo imutável que todas as histórias utilizam.
 
-- [X] T003 [P] Criar o enum `CategoriaAplicativo` em `app/lib/features/atalhos_aplicativos/domain/entidades/categoria_aplicativo.dart` com os valores `comunicacao`, `video`, `redesSociais` e `fotos`
+- [X] T003 [P] Reutilizar `CategoriaDoServico` diretamente em `AtalhoAplicativo` sem enum paralelo ou mapeamento por chave fixa (`app/lib/features/atalhos_aplicativos/domain/entidades/atalho_aplicativo.dart`)
 - [X] T004 [P] Criar a entidade imutável `AtalhoAplicativo` em `app/lib/features/atalhos_aplicativos/domain/entidades/atalho_aplicativo.dart` com campos `chave`, `nomeExibido`, `pacoteAndroid`, `descricaoCurta`, `categoria`, `instalado` e `iconeBytes`
 - [X] T005 [P] Garantir fonte única da verdade em `app/lib/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart` consumindo `RepositorioAssistente.catalogo()` (sem catálogo fixo paralelo, preservando R6 e excluindo serviços sensíveis)
 - [X] T006 [P] Criar a interface abstrata `IRepositorioAtalhos` em `app/lib/features/atalhos_aplicativos/domain/repositorios/i_repositorio_atalhos.dart` definindo `Future<List<AtalhoAplicativo>> obterAtalhos()`

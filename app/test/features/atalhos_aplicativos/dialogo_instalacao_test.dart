@@ -4,7 +4,6 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart';
 import 'package:memora/features/atalhos_aplicativos/domain/entidades/atalho_aplicativo.dart';
-import 'package:memora/features/atalhos_aplicativos/domain/entidades/categoria_aplicativo.dart';
 import 'package:memora/features/atalhos_aplicativos/presentation/controllers/atalhos_aplicativos_controller.dart';
 import 'package:memora/features/atalhos_aplicativos/presentation/telas/tela_atalhos_aplicativos.dart';
 import 'package:memora/features/atalhos_aplicativos/presentation/widgets/cartao_atalho_aplicativo.dart';
@@ -136,7 +135,6 @@ void main() {
         nomeExibido: 'Suspeito',
         pacoteAndroid: 'com.malware.fake',
         descricaoCurta: 'Falso',
-        categoria: CategoriaAplicativo.comunicacao,
       );
 
       final bool abriuApp = await controlador.abrirAplicativo(suspeito);
