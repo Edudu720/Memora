@@ -622,7 +622,6 @@ class _MiniaturaAvatar extends StatelessWidget {
         child: DesenhoAvatarIlustrado(
           avatar: avatar,
           tamanho: MemoraDimensoes.alvoMinimo * 0.84,
-          animado: false,
         ),
       ),
     );

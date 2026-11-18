@@ -220,7 +220,11 @@ void main() {
 
     expect(find.byKey(DialogoPermissaoLocalizacao.chaveDialogo), findsOneWidget);
     expect(find.textContaining('OpenStreetMap'), findsOneWidget);
-    expect(find.textContaining('Não enviamos dados pessoais da sua conta'), findsOneWidget);
+    expect(find.textContaining('Não envio dados da sua conta'), findsOneWidget);
+    expect(
+      find.textContaining('nem guardo por onde você passou'),
+      findsOneWidget,
+    );
 
     await tester.tap(find.text('Não agora (pesquisar manual)'));
     await tester.pumpAndSettle();

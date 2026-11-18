@@ -186,14 +186,14 @@ class DesenhoAvatarIlustrado extends StatelessWidget {
   /// Lado do quadrado reservado ao desenho.
   final double tamanho;
 
-  /// Se permite animação da Memora (falso nas miniaturas do seletor).
+  /// Se permite animação da Memora (falso por padrão para manter o retrato estático).
   final bool animado;
 
   /// Cria o desenho do avatar ilustrado.
   const DesenhoAvatarIlustrado({
     required this.avatar,
     required this.tamanho,
-    this.animado = true,
+    this.animado = false,
     super.key,
   });
 
