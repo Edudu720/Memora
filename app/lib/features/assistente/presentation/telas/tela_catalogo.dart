@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_assistente.dart';
+import '../../../../l10n/textos_atalhos_aplicativos.dart';
 import '../../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../aprendizado/data/guias/guias.dart';
 import '../../../aprendizado/domain/busca.dart';
@@ -23,6 +24,9 @@ class TelaCatalogo extends StatefulWidget {
 
   /// Chave de um item, pelo nome do serviço.
   static Key chaveDoItem(String nome) => Key('catalogo.item.$nome');
+
+  /// Chave do botão para entrar na lista de abertura direta (`015`).
+  static const Key chaveAtalhosDiretos = Key('catalogo.atalhos_diretos');
 
   /// De onde vêm os serviços.
   final RepositorioAssistente repositorio;
@@ -46,6 +50,9 @@ class TelaCatalogo extends StatefulWidget {
   /// Consulta de plataforma dos aplicativos instalados (se disponível).
   final ConsultaDeAplicativos? consultaAplicativos;
 
+  /// Abre a tela dedicada para abrir um aplicativo direto (`015`).
+  final VoidCallback? aoAbrirAtalhosDiretos;
+
   /// Volta ao início.
   final VoidCallback? aoVoltar;
 
@@ -60,6 +67,7 @@ class TelaCatalogo extends StatefulWidget {
     this.aoPedirParaAbrir,
     this.aoAbrirGuia,
     this.consultaAplicativos,
+    this.aoAbrirAtalhosDiretos,
     this.aoVoltar,
     this.estadoDeTeste,
     super.key,
@@ -248,6 +256,17 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                 ],
               ),
               const SizedBox(height: MemoraEspacamento.lg),
+
+              if (_categoriaAtiva == CategoriaDoServico.cotidiano &&
+                  widget.aoAbrirAtalhosDiretos != null) ...<Widget>[
+                BotaoSecundario(
+                  key: TelaCatalogo.chaveAtalhosDiretos,
+                  rotulo: TextosAtalhosAplicativos.botaoVerAtalhosDiretos,
+                  icone: Icons.apps_rounded,
+                  aoTocar: widget.aoAbrirAtalhosDiretos,
+                ),
+                const SizedBox(height: MemoraEspacamento.lg),
+              ],
 
               // Para os serviços sensíveis, a explicação vem ANTES da lista (FR-042).
               if (_categoriaAtiva == CategoriaDoServico.sensivel) ...<Widget>[
