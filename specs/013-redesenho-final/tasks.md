@@ -222,8 +222,8 @@ acenando → fluxo de entrada, sem pulo.
 
 ## Phase 8: Fechamento da Fase A
 
-- [ ] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé)
-- [ ] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5)
+- [X] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé). **Feita em 2026-11-18**, na `redesign-final` em `3127087` (#90, #91, #93 e #94 dentro): paleta (13 combinações), tokens (nenhum literal), `flutter analyze` limpo, `flutter test` com **3285 passando, 11 pulados** (os testes de renderização opcionais, `skip: !ligado`) **e nenhuma falha**; backend `mvnw clean test` com Docker: **483 de 484** — o único erro é o `ClienteDaAssistenteGeminiRealTest`, que chama o Google de verdade e não teve resposta em 60 s (sobrecarga externa, não código)
+- [X] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5). **Feita em 2026-11-18**: 96 PNGs; achados e decisões em `specs/013-redesenho-final/revisao-album-fase-a.md`. Emoji do cadastro, texto com gênero e a frase da Privacidade corrigidos na branch `redesign/texto-neutro`; as duas Memoras de 19 e 31, na T096
 - [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013
 - [X] T046 ~~PR da Fase A para a `develop`~~ **Substituída (2026-11-17, decisão do Henrique)**: com a branch comum `redesign-final`, as fases A e B vão juntas para a `develop` numa PR só, ao fim do redesenho; cada frente entra antes na `redesign-final` por PR revisada por outra pessoa
 
