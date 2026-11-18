@@ -37,7 +37,7 @@ numa PR só.
 
 | Quem | Tarefas | Abertas (17/11) |
 |---|---|---|
-| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, T093, barra inferior T055–T057, T059, T072, T073, T076, T092. **Fechamento**: T043–T046, T078. Parte da T091 | 15 |
+| **Henrique** | Já feitas: T001–T018 e T028. **A anfitriã**: T083–T090. **As animações**: transições T019–T027, abertura T035–T039, tema e login T049–T050. **A branch comum**: T080. **Memora e Início**: T047, T048, T051, T052, T053, T054, T093, barra inferior T055–T057, T059, T072, T073, T076, T092. **Fechamento**: T043–T046, T078. **Entrega**: T097 (subir no Render). Parte da T091 | 15 |
 | **Eduardo Juncker** | **Textos**: T029–T034, T066–T070. **Emoji na IA**: T040–T042. **Conversa**: T058, T060, T061, T062. **Ícones**: T063–T065. **Telas da 009 e da 011**: T071, T081. **Validação**: T074, T075, T077, T079. Parte da T091 | 14 |
 | **Eduardo Trevisan** | **Todo o site** (spec 012): as tarefas S01–S13 de `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md`, mais a T082 | site |
 
@@ -298,6 +298,22 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T078 APK de release no celular e revisão do Henrique, registrada (portão da T116 da 004 para tela nova na `master`)
 - [X] T079 Preparar o roteiro do teste com 5 pessoas de 65+ para o SC-007 (V20), junto do portão pendente das features 001 e 002. **Feita em 2026-11-17**: roteiro e ficha de registro criados em `specs/013-redesenho-final/teste-com-pessoas.md` consolidando V20 (013), V10 (001), V7–V8 (002), H12 (003) e SC-002–SC-004 (004). (Aplicação presencial com 5 participantes permanece pendente de campo.)
 
+## Phase 16: Entrega — a `redesign-final` na `develop` e no ar
+
+- [ ] T097 **(2026-11-17, decisão do Henrique)** Quando a PR única `redesign-final` → `develop` entrar (a que substitui a T046), **subir tudo no Render**. É a última tarefa do redesenho. Fazer em PR própria para a `develop`, revisada por outra pessoa:
+  - **Backend**: o Render segue a `develop`. Conferir que o Auto-Deploy está ligado e que o serviço está no commit do merge, e não num rollback. Ele só reconstrói quando `backend/**` ou `render.yaml` mudam, então talvez não haja deploy novo; conferir o `/actuator/health/liveness`.
+  - **Site** (`site/`, spec 012): sem domínio próprio por ora, o endereço é `*.onrender.com`. Acrescentar ao `render.yaml` um serviço de site estático (`runtime: static`) com estas regras:
+    - publicar **só o que é do site**: o comando de build copia `index.html`, `styles/`, `scripts/` e `assets/` para uma pasta de saída, e `site/tests/` fica de fora;
+    - `buildFilter` em `site/**` e `render.yaml`;
+    - cabeçalhos de segurança, porque o site é alvo de imitação (spec 012, golpe do link parecido):
+      - `Content-Security-Policy` sem origem de terceiros, com `frame-ancestors 'none'`;
+      - `X-Frame-Options: DENY`;
+      - `X-Content-Type-Options: nosniff`;
+      - `Referrer-Policy: no-referrer`.
+  - Sincronizar o blueprint no painel do Render.
+  - Conferir de fora, no S20 FE: o site abre pelo endereço público, fica sem rolagem horizontal em 320 px a 200%, continua funcionando sem internet depois de carregar, e os cabeçalhos chegam (`curl -I`).
+  - Registrar o endereço público no `CLAUDE.md` e no `quickstart.md` da 012. Se um domínio for comprado depois, o endereço muda **antes** de qualquer material impresso (QR code, banner, slide).
+
 ---
 
 ## Dependencies & Execution Order
@@ -312,7 +328,8 @@ acenando → fluxo de entrada, sem pulo.
     T090 (aprovação dela no celular) é portão da T053.
 - **Fase B** (revisada em 2026-11-16): T080 (receber a `develop`, depois da
   PR da `feature/004-prints-e-zoom`) → integração (T047–T052) → US7-B, US4-B,
-  US5, US3-B e US6 (inclui T081) em paralelo → validação final.
+  US5, US3-B e US6 (inclui T081) em paralelo → validação final → PR única
+  para a `develop` → entrega no Render (T097).
 - **T082 — fora do escopo, registrado para não perder** (rev. 16/11): o site
   da #74 (`site/`, spec 012) usa os PNGs antigos da Memora e diz "Pessoas
   Idosas" no título. Quando a Memora vetorial for aprovada (T018), o site
