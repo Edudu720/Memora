@@ -50,8 +50,9 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
   ///
   /// O `Scaffold` usa este valor como teto do `appBar`, e a barra mede o
   /// próprio conteúdo: com a letra normal ela tem [MemoraDimensoes.alvoDecisao],
-  /// e com a letra ampliada cresce o que o título e a bolinha do SOS pedirem,
-  /// em vez de cortá-los (feature 014, 2026-11-18).
+  /// e, dentro da casca, com a letra ampliada cresce o que o título e a
+  /// bolinha do SOS pedirem, em vez de cortá-los (feature 014, 2026-11-18).
+  /// Fora da casca ela fica nos [MemoraDimensoes.alvoDecisao] de sempre.
   @override
   Size get preferredSize =>
       const Size.fromHeight(MemoraDimensoes.tetoDaBarraSuperior);
@@ -224,7 +225,7 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    return Material(
+    final Widget barra = Material(
       color: cores.fundo,
       child: SafeArea(
         bottom: false,
@@ -243,6 +244,17 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ),
+    );
+
+    // Fora da casca (sem SOS) a barra continua com a altura fixa de antes:
+    // o crescimento só existe para caber a bolinha e o título em duas linhas.
+    if (comSos) return barra;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight:
+            MemoraDimensoes.alvoDecisao + MediaQuery.paddingOf(context).top,
+      ),
+      child: barra,
     );
   }
 }
