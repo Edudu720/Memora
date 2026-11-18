@@ -265,11 +265,14 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
               ],
 
               if (exibidos.isEmpty)
-                const EstadoVazio(
+                EstadoVazio(
                   titulo: 'Nenhum aplicativo encontrado',
                   explicacao:
                       'Tente buscar com outras palavras ou apague a busca.',
                   icone: Icons.search_off_rounded,
+                  // Uma Memora só (FR-006): na aba dos serviços sociais o cartão
+                  // acima já tem a dela.
+                  comMemora: _categoriaAtiva != CategoriaDoServico.sensivel,
                 )
               else
                 for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[

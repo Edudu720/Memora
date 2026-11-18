@@ -135,7 +135,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
           appBar: BarraSuperior(
             titulo: TextosCuidado.tituloDispositivo,
             aoVoltar: widget.aoVoltar,
-            memora: ExpressaoDaMemora.neutra,
+            // A Memora desta tela é a do painel (FR-006).
           ),
           body: SafeArea(
             top: false,

@@ -97,6 +97,7 @@ class _TelaRegistroState extends State<TelaRegistro> {
               MensagemErro(
                 mensagem: TextosAssistente.semConexao,
                 aoTentarNovamente: _carregar,
+                comMemora: false,
               )
             else if (acoes == null)
               const Carregando()
@@ -106,6 +107,7 @@ class _TelaRegistroState extends State<TelaRegistro> {
                 titulo: 'Você fez tudo sozinha até agora',
                 explicacao: TextosAssistente.registroVazio,
                 icone: Icons.emoji_events_rounded,
+                comMemora: false,
               )
             else
               Cartao(
