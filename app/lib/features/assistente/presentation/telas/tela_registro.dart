@@ -102,9 +102,9 @@ class _TelaRegistroState extends State<TelaRegistro> {
             else if (acoes == null)
               const Carregando()
             else if (acoes.isEmpty)
-              // Lista vazia é notícia boa: a pessoa está fazendo tudo sozinha.
+              // Lista vazia é notícia boa: a pessoa faz tudo por conta própria.
               const EstadoVazio(
-                titulo: 'Você fez tudo sozinha até agora',
+                titulo: 'Até agora você fez tudo por conta própria',
                 explicacao: TextosAssistente.registroVazio,
                 icone: Icons.emoji_events_rounded,
                 comMemora: false,
