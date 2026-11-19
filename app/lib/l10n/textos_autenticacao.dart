@@ -410,8 +410,7 @@ abstract final class TextosAutenticacao {
       'Tem alguém te ajudando agora?';
 
   /// Instrução da caixa de identificação.
-  static const String instrucaoEtapaCadastroIdentificacao =
-      'Como posso te chamar?';
+  static const String instrucaoEtapaCadastroIdentificacao = 'Seu nome';
 
   /// Instrução da caixa de canal.
   static const String instrucaoEtapaCadastroCanal = 'Como você quer entrar?';

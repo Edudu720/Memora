@@ -191,8 +191,8 @@ class TextosAssistente {
   /// fora é do nível gratuito, e a ADR-002 registra por quê.
   static const String avisoPrivacidade =
       'Para eu te responder, o que você escreve vai para um serviço de fora do '
-      'Memora, e pessoas de lá podem ler. Não escreva senha, documento, '
-      'endereço, nem nada sobre sua saúde ou seu dinheiro.';
+      'Memora, e pessoas de lá podem ler. Não escreva dados pessoais aqui: '
+      'nada de senha, documento, endereço, saúde ou dinheiro.';
 
   /// O que o **escudo** diz ao leitor de tela, depois da primeira pergunta
   /// (FR-022 e FR-049 da 004, T130; FR-033 e FR-051 da 003).
@@ -209,7 +209,7 @@ class TextosAssistente {
 
   /// Os dois avisos inteiros, na mesma caixa: o do golpe e o de privacidade.
   static const String avisosInteiros =
-      '$avisoAntigolpe\n\n$tituloAvisoPrivacidade. $avisoPrivacidade';
+      '$avisoAntigolpe\n\n$avisoPrivacidade';
 
   // ---------------------------------------------------------------------------
   // O consentimento antes da primeira mensagem — FR-051
