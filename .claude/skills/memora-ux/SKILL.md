@@ -123,6 +123,11 @@ WCAG não deixa cortar. O que mantém o bloco curto é a frase curta.
   qualquer texto que a pessoa veja.
 - ❌ **Frase de incapacidade**: "é difícil para você", "não se preocupe se não
   entender", "até você consegue", "modo simplificado".
+- ❌ **Texto que supõe o gênero da pessoa**: "sozinha", "chamada",
+  "tranquila", "segura" dirigidos a quem usa. Use forma neutra ("por conta
+  própria", "Como posso te chamar", "sem problema", "é mais seguro para
+  você"). A Memora fala de si no feminino, e isso continua. Portão:
+  `texto_da_interface_test.dart` (decisão do Henrique, 2026-11-18).
 - ❌ Ícone sem texto; cor como único sinal; movimento como único sinal.
 - ❌ Informação que só aparece animando (se a animação for desligada, sumiu).
 - ❌ Valor visual literal fora dos tokens.

@@ -12,7 +12,7 @@ abstract final class TextosPerfil {
   static const String tituloPerfil = 'Meu perfil';
 
   /// Rótulo do nome.
-  static const String rotuloNome = 'Como você quer ser chamada';
+  static const String rotuloNome = 'Como posso te chamar';
 
   /// Rótulo do canal de contato.
   static const String rotuloCanal = 'E-mail ou telefone da conta';

@@ -60,8 +60,9 @@ abstract final class TextosConfiguracoes {
   /// O que é a conversa guardada, e quando sai.
   static const String guardadoConversaValor =
       'O que conversamos fica guardado só aqui e sai quando você sai da '
-      'conta. Para eu responder, a conversa viaja a cada pergunta, mas o '
-      'Memora não guarda cópia.';
+      'conta. Para eu responder, a conversa viaja a cada pergunta até um '
+      'serviço do Google: o Memora não guarda cópia, mas o Google pode '
+      'guardar o que você escreve.';
 
   /// Rótulo da data de nascimento.
   static const String guardadoIdade = 'Sua data de nascimento';

@@ -1198,7 +1198,7 @@ abstract final class TextosGuias {
       'Leia os termos com calma. Depois, marque "Li e aceito os termos e condições", embaixo, e toque em "Continuar".';
   /// Entrar, passo 4.
   static const String fgtsEntrar4 =
-      'O aplicativo pergunta como você quer ser chamado. Se quiser, escreva no campo; se não, toque em "Pular", embaixo.';
+      'O aplicativo pergunta como deve chamar você. Se quiser, escreva no campo; se não, toque em "Pular", embaixo.';
   /// Entrar, passo 5.
   static const String fgtsEntrar5 =
       'Toque em "Ativar notificações" para receber avisos, ou em "Agora não" para pular. Pronto: você já sabe entrar no aplicativo do FGTS.';
@@ -1247,7 +1247,7 @@ abstract final class TextosGuias {
       'Termos e condições do aplicativo do FGTS, com a opção Li e aceito os termos e o botão Continuar, embaixo.';
   /// Descrição da captura 4 do FGTS.
   static const String fgtsCaptura4 =
-      'Tela Vamos começar, que pergunta como você quer ser chamado, com os botões Cadastrar nome e continuar e Pular.';
+      'Tela Vamos começar, que pergunta como deve chamar você, com os botões Cadastrar nome e continuar e Pular.';
   /// Descrição da captura 5 do FGTS.
   static const String fgtsCaptura5 =
       'Tela Fique por dentro de tudo, com os botões Ativar notificações e Agora não.';

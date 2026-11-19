@@ -260,7 +260,7 @@ class TextosAssistente {
   /// *"Prefiro tentar"*, e não *"cancelar"*: quem recusa aqui está escolhendo
   /// aprender, e o texto reconhece isso em vez de tratar a recusa como
   /// desistência.
-  static const String botaoPrefiroTentar = 'Prefiro tentar sozinha';
+  static const String botaoPrefiroTentar = 'Prefiro tentar por conta própria';
 
   /// Reconhecimento depois de a pessoa fazer sozinha.
   static const String vocePodeFazerSozinha =

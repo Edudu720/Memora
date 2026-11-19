@@ -609,7 +609,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           folha: const FolhaInferior(
             titulo: 'Como eu te ajudo',
             child: TextoMemora('Eu mostro o caminho. Quem faz é você — assim, '
-                'da próxima vez, você consegue sozinha.'),
+                'da próxima vez, você consegue por conta própria.'),
           ),
         ),
       ),

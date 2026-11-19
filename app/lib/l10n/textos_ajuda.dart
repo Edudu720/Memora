@@ -98,7 +98,7 @@ abstract final class TextosAjuda {
   /// As ideias do assunto, uma por tela.
   static const List<String> telasDaMemora = <String>[
     'Eu sou a Memora. Estou aqui para te mostrar o caminho, passo a passo, '
-        'para que da próxima vez você consiga sozinha.',
+        'para que da próxima vez você consiga por conta própria.',
     TextosApresentacao.ensinoNaoSubstituo,
     'Se eu não souber, eu digo. E, se uma dúvida for séria, vale perguntar '
         'também a alguém de confiança.',
