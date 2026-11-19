@@ -5,7 +5,6 @@ import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/hub/domain/hub.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
-import 'package:memora/l10n/textos_assistente.dart';
 import 'package:memora/l10n/textos_casca.dart';
 
 import '../../suporte/estados_de_tela.dart';
@@ -251,48 +250,6 @@ void main() {
         await FluxoDentroDaConta.esperarATransicao(t);
         expect(find.byType(TelaHub), findsNothing);
         expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
-      },
-    );
-
-    testWidgets(
-      'T074 (A5): Serviços sociais, Dispositivo de Cuidado e Localizador usam ícones distintos no Hub',
-      (WidgetTester t) async {
-        final FluxoDentroDaConta fluxo = FluxoDentroDaConta();
-        await fluxo.montar(t);
-
-        await FluxoDentroDaConta.irAoHub(t);
-
-        final Finder servicos = find.byKey(
-          TelaHub.chaveDaPorta(TextosAssistente.portaServicos),
-        );
-        final Finder cuidado = find.byKey(
-          TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
-        );
-        final Finder localizador = find.byKey(
-          TelaHub.chaveDaPorta('Localizador de Serviços'),
-        );
-
-        expect(
-          find.descendant(
-            of: servicos,
-            matching: find.byIcon(Icons.account_balance_rounded),
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(
-            of: cuidado,
-            matching: find.byIcon(Icons.favorite_rounded),
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.descendant(
-            of: localizador,
-            matching: find.byIcon(Icons.location_on_rounded),
-          ),
-          findsOneWidget,
-        );
       },
     );
   });

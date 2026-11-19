@@ -149,7 +149,6 @@ class _TelaHubState extends State<TelaHub> {
             nome: porta.rotulo,
             explicacao: porta.descricao,
             ilustracao: porta.ilustracao,
-            icone: porta.icone,
             aoAbrir: porta.aoAbrir,
           ),
         );
