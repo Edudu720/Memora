@@ -70,6 +70,9 @@ import '../controladores/controlador_conversa.dart';
 ///    limpos e barra inferior elevada com campo de texto, ditado por voz
 ///    opcional no rascunho (FR-013) e botão manual `"Perguntar"`.
 class TelaConversa extends StatefulWidget {
+  /// Chave do balão de convite, o primeiro, com o rosto da Memora (FR-042).
+  static const Key chaveConvite = Key('conversa.convite');
+
   /// Chave do campo de mensagem.
   static const Key chaveCampo = Key('conversa.campo');
 
@@ -348,8 +351,9 @@ class _TelaConversaState extends State<TelaConversa>
           appBar: BarraSuperior(
             titulo: TextosAssistente.tituloConversa,
             aoVoltar: widget.aoVoltar,
-            // A Memora desta tela é esta, pequena e no topo, e só ela: os
-            // balões não levam rosto (FR-025, FR-042). Fala enquanto a
+            // A Memora desta tela é esta, pequena e no topo: as respostas não
+            // levam rosto (FR-025, FR-042). Só o convite, antes da primeira
+            // mensagem, leva o rosto dela (rev. 2026-11-18). Fala enquanto a
             // resposta aparece, e volta ao repouso quando termina.
             memora: ExpressaoDaMemora.neutra,
             memoraFalando:
@@ -518,12 +522,15 @@ class _TelaConversaState extends State<TelaConversa>
                             const SizedBox(height: MemoraEspacamento.md),
                           ] else ...<Widget>[
                             // O vazio é a Memora convidando, e não uma área em
-                            // branco (FR-006).
+                            // branco (FR-006). O convite leva o rosto dela
+                            // (FR-042, rev. 2026-11-18): sem ele, o balão
+                            // parecia solto. O rosto do balão é a voz dela,
+                            // e não uma segunda Memora (FR-006).
                             if (primeiraVez) ...<Widget>[
                               const BalaoDeFala(
+                                key: TelaConversa.chaveConvite,
                                 autor: AutorDoBalao.memora,
                                 texto: TextosAssistente.convite,
-                                comRosto: false,
                               ),
                               if (!c.respondendo &&
                                   c.mensagemDeErro == null) ...<Widget>[

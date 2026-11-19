@@ -297,6 +297,7 @@ acenando → fluxo de entrada, sem pulo.
 - [ ] T077 Conferir 50 respostas seguidas da IA real: nenhuma com mais de um emoji (SC-008)
 - [ ] T078 APK de release no celular e revisão do Henrique, registrada (portão da T116 da 004 para tela nova na `master`)
 - [X] T079 Preparar o roteiro do teste com 5 pessoas de 65+ para o SC-007 (V20), junto do portão pendente das features 001 e 002. **Feita em 2026-11-17**: roteiro e ficha de registro criados em `specs/013-redesenho-final/teste-com-pessoas.md` consolidando V20 (013), V10 (001), V7–V8 (002), H12 (003) e SC-002–SC-004 (004). (Aplicação presencial com 5 participantes permanece pendente de campo.)
+- [X] T098 [US4] **(2026-11-18, achado do Henrique no APK 1.0.5)** O convite da conversa, antes da primeira mensagem, leva o rosto da Memora ao lado, e a Memora pequena do topo continua (FR-042 e FR-006 revistas no clarify de 2026-11-18). **Feita em 2026-11-18**: `TelaConversa.chaveConvite` com `comRosto`; `memora_no_topo_da_conversa_test.dart` exige o rosto no convite e só a do topo fora dele
 
 ## Phase 16: Entrega — a `redesign-final` na `develop` e no ar
 

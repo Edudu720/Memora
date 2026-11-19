@@ -109,6 +109,22 @@ Esta feature **substitui** dois pontos da 007 e **acrescenta** o resto:
   barra de carregamento**, como a abertura, no lugar do círculo girando. A
   frase de espera continua (FR-059; T095).
 
+### Session 2026-11-18
+
+- Q: (o Henrique, ao testar o APK 1.0.5 no celular) Na conversa, o balão de
+  boas-vindas parece solto: sem o rosto, não dá a ideia de que a pessoa já está
+  conversando com a Memora. Pôr o rosto dela no balão, ficar só no topo, ou
+  as duas coisas? → A: **As duas.** O convite, o balão que aparece antes da
+  primeira mensagem, leva o rosto da Memora ao lado, e a Memora pequena do
+  topo continua. **O rosto ao lado de um balão dela é a voz da Memora, e não
+  conta como segunda Memora** (FR-006), como já era na apresentação. As
+  respostas da conversa continuam sem rosto ao lado de cada balão (FR-042;
+  T098).
+- Q: O texto fala com a pessoa no feminino ("sozinha", "chamada",
+  "tranquila")? → A: **Não: neutro em gênero em tudo** (decisão do Henrique
+  ao ver o álbum da T044). A Memora continua falando de si no feminino. O
+  portão de texto passa a reprovar fala dirigida à pessoa com gênero.
+
 ---
 
 ## User Scenarios & Testing *(mandatory)*
@@ -438,7 +454,9 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
   nela.
 - **FR-005d**: Com "reduzir movimento" ligado, o toque na Memora MUST NOT gerar
   movimento; no máximo uma troca de expressão sem animação.
-- **FR-006**: A Memora MUST aparecer no máximo uma vez por tela.
+- **FR-006**: A Memora MUST aparecer no máximo uma vez por tela. O rosto
+  pequeno ao lado de um balão dela é a voz da Memora e não conta como segunda
+  (rev. 2026-11-18).
 - **FR-007**: A Memora MUST continuar reconhecível nos três temas (claro,
   escuro, alto contraste), com contraste mínimo de 3:1 com o fundo.
 - **FR-008**: O ícone do aplicativo no celular MUST continuar sendo a Memora
@@ -555,7 +573,9 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
   MUST continuar passando nas matrizes de acessibilidade.
 - **FR-042**: Na conversa, a Memora MUST aparecer pequena, no topo da tela, e
   MUST NOT ocupar o espaço das mensagens; as respostas dela não levam o rosto
-  dela ao lado de cada balão.
+  dela ao lado de cada balão. O convite, o balão que aparece antes da primeira
+  mensagem, MUST levar o rosto dela ao lado (rev. 2026-11-18): sem ele, o
+  balão parece solto.
 - **FR-043**: A conversa MUST mostrar só o essencial: cabeçalho, aviso
   antigolpe compacto, mensagens e o campo de escrever. Sugestões aparecem só
   antes da primeira mensagem; nenhum elemento decorativo além da Memora.

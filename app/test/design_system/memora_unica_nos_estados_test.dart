@@ -298,7 +298,18 @@ void main() {
     await _avancar(t);
 
     expect(find.byKey(TelaConversa.chaveErro), findsOneWidget);
-    expect(_memoras, findsOneWidget, reason: 'FR-006: a da barra, e só.');
+    // O rosto do convite é a voz dela e não conta (FR-006 e FR-042, rev.
+    // 2026-11-18); fora dele, só a da barra.
+    final Finder doConvite = find.descendant(
+      of: find.byKey(TelaConversa.chaveConvite),
+      matching: _memoras,
+    );
+    expect(doConvite, findsOneWidget);
+    expect(
+      _memoras.evaluate().length - doConvite.evaluate().length,
+      1,
+      reason: 'FR-006: a da barra, e só.',
+    );
     expect(_naPose(PoseDaMemora.preocupada), findsNothing);
   });
 
