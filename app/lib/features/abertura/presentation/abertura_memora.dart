@@ -115,6 +115,10 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
   /// passada terminou. Só existe quando há movimento permitido.
   AnimationController? _passada;
 
+  /// Se a próxima passada é a primeira desta abertura: ela parte do meio,
+  /// onde o desenho do Android deixou o trecho (T094).
+  bool _primeiraPassada = true;
+
   Timer? _relogioDaDemora;
   bool _saiu = false;
 
@@ -154,7 +158,10 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
       ),
     )..addStatusListener(_aoMudarOStatusDaPassada);
     _passadaEmCurso = true;
-    passada.forward(from: 0);
+    passada.forward(
+      from: _primeiraPassada ? MemoraAbertura.inicioDaPrimeiraPassada : 0,
+    );
+    _primeiraPassada = false;
   }
 
   /// Acabou uma passada: sai, se já carregou; senão, a próxima emenda nesta.
@@ -280,6 +287,9 @@ class _AberturaMemoraState<T> extends State<AberturaMemora<T>>
                     tamanho: MemoraAbertura.tamanhoDaMemora,
                     reageAoToque: false,
                     anfitria: true,
+                    // Ela já estava na tela, no desenho do Android: sem o
+                    // crescer da chegada (T094, FR-037).
+                    chega: false,
                     cicloDaBarra: _reduzir ? null : _passada,
                   ),
                 ),

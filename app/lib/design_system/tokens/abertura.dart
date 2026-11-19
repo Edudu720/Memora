@@ -9,9 +9,11 @@
 /// e os recursos em `android/app/src/main/res/` os repetem — mudar um sem o
 /// outro faz a Memora "pular" na passagem de um para o outro.
 abstract final class MemoraAbertura {
-  /// O lado do quadrado da Memora, em dp. O mesmo de
-  /// `res/drawable-v21/memora_abertura.xml`, que desenha a Memora num quadro
-  /// de 160 dp, centralizado na janela.
+  /// O lado do quadrado da Memora, em dp. O mesmo dos desenhos do Android
+  /// (`res/drawable*/memora_abertura*.xml`, T094), que têm a Memora de 160 dp
+  /// no centro do quadro. Eles são gerados do primeiro quadro da abertura por
+  /// `test/features/abertura/abertura_nativa_test.dart`: mudou este número,
+  /// gere de novo.
   static const double tamanhoDaMemora = 160;
 
   /// O lado da Memora na tela de erro. Menor: ali ela acompanha o texto, e não
@@ -34,4 +36,15 @@ abstract final class MemoraAbertura {
   /// propósito, no ritmo de uma barra indeterminada comum: não acelera nem
   /// pisca para disfarçar a espera.
   static const Duration passadaDaBarra = Duration(milliseconds: 1500);
+
+  /// De onde a **primeira** passada parte (T094): do meio da passada, com o
+  /// trecho no centro da barra, que é onde o desenho do Android
+  /// (`memora_abertura*.xml`) o deixou parado. Assim a barra continua de onde
+  /// a abertura do sistema parou, em vez de o trecho sumir e reentrar pela
+  /// esquerda. A passada é suavizada nas pontas (`ValoresDaPose.suavizar`,
+  /// simétrica): na metade do tempo o trecho está na metade do caminho.
+  ///
+  /// A primeira passada dura, por isso, metade de [passadaDaBarra]; as
+  /// seguintes são inteiras.
+  static const double inicioDaPrimeiraPassada = 0.5;
 }

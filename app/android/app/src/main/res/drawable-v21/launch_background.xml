@@ -3,9 +3,11 @@
     A abertura nativa, antes de o Flutter existir (feature 013, T038; FR-037).
 
     O fundo do tema do aparelho (claro ou escuro, em `values/colors.xml` e
-    `values-night/colors.xml`) e a Memora parada, acenando, no centro da
-    janela: do mesmo tamanho (160 dp) e no mesmo lugar do primeiro quadro da
-    AberturaMemora, para a passagem do sistema para o aceno ser continua.
+    `values-night/colors.xml`) e a Memora parada, segurando a barra de
+    carregamento (T094), no centro da janela: o primeiro quadro da
+    AberturaMemora, do mesmo tamanho (160 dp) e no mesmo lugar, para a passagem
+    do sistema para o aplicativo ser continua. No modo escuro o desenho vem de
+    `drawable-night/`.
 
     No Android 12 ou mais novo quem manda e a abertura do sistema
     (`values-v31/styles.xml`), com a mesma Memora e o mesmo fundo; este arquivo
