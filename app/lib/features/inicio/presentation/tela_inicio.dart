@@ -1,15 +1,36 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
+import '../../../l10n/textos_anfitria.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_casca.dart';
 
 /// A casa do Memora: primeiro ponto depois de entrar (T115, Feature 007).
 ///
-/// Apresenta a saudação editorial com a mascote [ExpressaoDaMemora.mini], a
-/// ação principal no [CartaoHeroi], uma grade responsiva 2x2 de [TileAcaoRapida]
-/// para atalhos cotidianos e o acesso completo ao Hub ao final da tela.
-class TelaInicio extends StatelessWidget {
+/// Apresenta a saudação e, logo abaixo, a **anfitriã** ([MemoraAnfitria], feature
+/// 013, T053): a Memora com um balão de dicas, no terço de cima da tela (FR-040).
+/// Depois vêm a ação principal no [CartaoHeroi], uma grade responsiva 2x2 de
+/// [TileAcaoRapida] para atalhos cotidianos e o acesso completo ao Hub ao final.
+///
+/// ## A anfitriã encolhe primeiro (FR-041)
+///
+/// Ela é a parte que cede quando falta altura: o lado do desenho é uma
+/// **fração da altura da tela** dividida pela ampliação do texto, entre um
+/// piso e um teto. Texto e ação nunca encolhem por causa dela — e a tela
+/// continua rolando, com tudo ao alcance, quando nem assim cabe.
+///
+/// ## Quem fala é ela (uma Memora por tela, FR-006)
+///
+/// A frase que ensina a tela ("toque numa das caixas abaixo") é a primeira dica
+/// da anfitriã, e não mais um balão à parte: a Memora que ensina e a que dá
+/// dicas são a mesma, e o rosto dela aparece uma vez só.
+///
+/// ## O sinal de atividade (FR-052)
+///
+/// A anfitriã só sabe do toque nela e no balão. Para a dica não trocar no meio
+/// da leitura de quem tocou em **qualquer** lugar do Início, a tela escuta
+/// todo toque (sem consumi-lo) e avisa a anfitriã.
+class TelaInicio extends StatefulWidget {
   /// Saudação nominal no topo da tela.
   static const Key chaveSaudacao = Key('inicio.saudacao');
 
@@ -19,11 +40,8 @@ class TelaInicio extends StatelessWidget {
   /// Atalho para abrir todas as áreas no Hub.
   static const Key chaveVerTudo = Key('inicio.verTudo');
 
-  /// Mascote exibida junto à saudação (oculta em ampliações muito altas).
+  /// A anfitriã, logo abaixo da saudação.
   static const Key chaveMemora = Key('inicio.memora');
-
-  /// Balão de acolhimento com orientação breve logo abaixo da saudação.
-  static const Key chaveTutorial = Key('inicio.tutorial');
 
   /// Contêiner semântico da ação principal de conversa.
   static const Key chaveCaixaConversar = Key('inicio.caixaConversar');
@@ -71,6 +89,29 @@ class TelaInicio extends StatelessWidget {
     this.aoAbrirAjuda,
     super.key,
   });
+
+  @override
+  State<TelaInicio> createState() => _TelaInicioState();
+}
+
+class _TelaInicioState extends State<TelaInicio> {
+  /// Sobe a cada toque na tela: é o que a anfitriã escuta (FR-052).
+  final ValueNotifier<int> _atividade = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _atividade.dispose();
+    super.dispose();
+  }
+
+  String get nome => widget.nome;
+  VoidCallback? get aoConversar => widget.aoConversar;
+  VoidCallback? get aoVerTudo => widget.aoVerTudo;
+  VoidCallback? get aoAbrirAplicativos => widget.aoAbrirAplicativos;
+  VoidCallback? get aoAbrirServicos => widget.aoAbrirServicos;
+  VoidCallback? get aoAbrirRegistro => widget.aoAbrirRegistro;
+  VoidCallback? get aoAbrirCuidado => widget.aoAbrirCuidado;
+  VoidCallback? get aoAbrirAjuda => widget.aoAbrirAjuda;
 
   List<_AcaoRapida> _montarAtalhos() {
     return <_AcaoRapida>[
@@ -122,107 +163,115 @@ class TelaInicio extends StatelessWidget {
     final int acoesPrincipais =
         (aoConversar != null ? 1 : 0) + (aoVerTudo != null ? 1 : 0);
 
-    return Scaffold(
-      backgroundColor: cores.fundo,
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (BuildContext contexto, BoxConstraints restricoes) {
-            final double alturaPermitidaFigura =
-                restricoes.maxHeight * MemoraDimensoes.fracaoDaFiguraDoInicio;
-            final bool mostrarMascote =
-                escala < MemoraDimensoes.escalaTextoAlta &&
-                alturaPermitidaFigura >= MemoraDimensoes.pisoDeIlustracao;
-            final double tamanhoMascote =
-                alturaPermitidaFigura < MemoraDimensoes.iconeEstadoVazio
-                ? alturaPermitidaFigura
-                : MemoraDimensoes.iconeEstadoVazio;
-            final bool emDuasColunas =
-                restricoes.maxWidth - (MemoraEspacamento.md * 2) >=
-                    MemoraDimensoes.larguraMinimaGrade &&
-                escala < MemoraDimensoes.escalaColapsoGrade;
+    return Listener(
+      // Translúcido e só de ouvinte: o toque segue para quem estava embaixo.
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => _atividade.value++,
+      child: Scaffold(
+        backgroundColor: cores.fundo,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (BuildContext contexto, BoxConstraints restricoes) {
+              // O lado da anfitriã: fração da altura, descontada a ampliação do
+              // texto (o texto ampliado come a altura que ela deixa), entre o
+              // piso do alvo de toque e o teto da ilustração principal.
+              final double tamanhoAnfitria =
+                  (restricoes.maxHeight *
+                          MemoraDimensoes.fracaoDaAnfitriaDoInicio /
+                          escala)
+                      .clamp(
+                        MemoraDimensoes.alvoMinimo,
+                        MemoraDimensoes.ilustracaoHeroi,
+                      );
+              final bool emDuasColunas =
+                  restricoes.maxWidth - (MemoraEspacamento.md * 2) >=
+                      MemoraDimensoes.larguraMinimaGrade &&
+                  escala < MemoraDimensoes.escalaColapsoGrade;
 
-            return SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: restricoes.maxHeight),
-                child: Padding(
-                  padding: const EdgeInsets.all(MemoraEspacamento.md),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          _CabecalhoInicio(
-                            nome: nome,
-                            mostrarMascote: mostrarMascote,
-                            tamanhoMascote: tamanhoMascote,
-                            quantidadeDeAcoes: acoesPrincipais,
-                          ),
-                          if (aoConversar != null) ...<Widget>[
-                            const SizedBox(height: MemoraEspacamento.md),
-                            KeyedSubtree(
-                              key: chaveCaixaConversar,
-                              child: CartaoHeroi(
-                                key: chaveConversar,
-                                titulo: TextosCasca.inicioConversar,
-                                subtitulo: TextosCasca.inicioInstrucaoConversar,
-                                rotuloAcao: TextosCasca.acaoComecarConversa,
-                                icone: Icons.chat_bubble_outline_rounded,
-                                aoTocar: aoConversar!,
-                              ),
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: restricoes.maxHeight),
+                  child: Padding(
+                    padding: const EdgeInsets.all(MemoraEspacamento.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            _CabecalhoInicio(
+                              nome: nome,
+                              tamanhoDaAnfitria: tamanhoAnfitria,
+                              quantidadeDeAcoes: acoesPrincipais,
+                              atividade: _atividade,
                             ),
-                          ],
-                          if (atalhos.isNotEmpty) ...<Widget>[
-                            const SizedBox(height: MemoraEspacamento.md),
-                            TextoMemora(
-                              TextosCasca.tituloAtalhosInicio,
-                              estilo: EstiloTexto.tituloSecao,
-                              cabecalho: true,
-                            ),
-                            const SizedBox(height: MemoraEspacamento.sm),
-                            _GradeAtalhosRapidos(
-                              atalhos: atalhos,
-                              emDuasColunas: emDuasColunas,
-                            ),
-                          ],
-                        ],
-                      ),
-                      if (aoVerTudo != null) ...<Widget>[
-                        const SizedBox(height: MemoraEspacamento.md),
-                        KeyedSubtree(
-                          key: chaveCaixaVerTudo,
-                          child: LinhaDeLista(
-                            key: chaveVerTudo,
-                            esquerda: Container(
-                              width: MemoraDimensoes.badgeAtalhoRapido,
-                              height: MemoraDimensoes.badgeAtalhoRapido,
-                              decoration: BoxDecoration(
-                                color: cores.destaque,
-                                borderRadius: BorderRadius.circular(
-                                  MemoraRaio.badge,
+                            if (aoConversar != null) ...<Widget>[
+                              const SizedBox(height: MemoraEspacamento.md),
+                              KeyedSubtree(
+                                key: TelaInicio.chaveCaixaConversar,
+                                child: CartaoHeroi(
+                                  key: TelaInicio.chaveConversar,
+                                  titulo: TextosCasca.inicioConversar,
+                                  subtitulo:
+                                      TextosCasca.inicioInstrucaoConversar,
+                                  rotuloAcao: TextosCasca.acaoComecarConversa,
+                                  icone: Icons.chat_bubble_outline_rounded,
+                                  aoTocar: aoConversar!,
                                 ),
                               ),
-                              alignment: Alignment.center,
-                              child: Icon(
-                                Icons.grid_view_rounded,
-                                size: MemoraDimensoes.iconePadrao,
-                                color: cores.primaria,
+                            ],
+                            if (atalhos.isNotEmpty) ...<Widget>[
+                              const SizedBox(height: MemoraEspacamento.md),
+                              TextoMemora(
+                                TextosCasca.tituloAtalhosInicio,
+                                estilo: EstiloTexto.tituloSecao,
+                                cabecalho: true,
                               ),
-                            ),
-                            titulo: TextosCasca.inicioVerTudo,
-                            subtitulo: TextosCasca.inicioInstrucaoVerTudo,
-                            aoTocar: aoVerTudo,
-                          ),
+                              const SizedBox(height: MemoraEspacamento.sm),
+                              _GradeAtalhosRapidos(
+                                atalhos: atalhos,
+                                emDuasColunas: emDuasColunas,
+                              ),
+                            ],
+                          ],
                         ),
+                        if (aoVerTudo != null) ...<Widget>[
+                          const SizedBox(height: MemoraEspacamento.md),
+                          KeyedSubtree(
+                            key: TelaInicio.chaveCaixaVerTudo,
+                            child: LinhaDeLista(
+                              key: TelaInicio.chaveVerTudo,
+                              esquerda: Container(
+                                width: MemoraDimensoes.badgeAtalhoRapido,
+                                height: MemoraDimensoes.badgeAtalhoRapido,
+                                decoration: BoxDecoration(
+                                  color: cores.destaque,
+                                  borderRadius: BorderRadius.circular(
+                                    MemoraRaio.badge,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.grid_view_rounded,
+                                  size: MemoraDimensoes.iconePadrao,
+                                  color: cores.primaria,
+                                ),
+                              ),
+                              titulo: TextosCasca.inicioVerTudo,
+                              subtitulo: TextosCasca.inicioInstrucaoVerTudo,
+                              aoTocar: aoVerTudo,
+                            ),
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -231,65 +280,43 @@ class TelaInicio extends StatelessWidget {
 
 class _CabecalhoInicio extends StatelessWidget {
   final String nome;
-  final bool mostrarMascote;
-  final double tamanhoMascote;
+  final double tamanhoDaAnfitria;
   final int quantidadeDeAcoes;
+  final Listenable atividade;
 
   const _CabecalhoInicio({
     required this.nome,
-    required this.mostrarMascote,
-    required this.tamanhoMascote,
+    required this.tamanhoDaAnfitria,
     required this.quantidadeDeAcoes,
+    required this.atividade,
   });
 
   @override
   Widget build(BuildContext context) {
-    final MemoraTheme tema = context.memora;
-    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
-    final String textoTutorial = quantidadeDeAcoes > 0
-        ? TextosCasca.inicioTutorial(quantidadeDeAcoes)
-        : '';
+    // A primeira coisa que ela diz é a frase que ensina esta tela; com nenhuma
+    // caixa não há o que apontar (FR-018), e ela só dá as dicas de sempre.
+    final List<String> dicas = <String>[
+      if (quantidadeDeAcoes > 0) TextosCasca.inicioTutorial(quantidadeDeAcoes),
+      ...TextosAnfitria.dicas,
+    ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: TextoMemora.tituloTela(
-                TextosCasca.inicioSaudacao(nome),
-                key: TelaInicio.chaveSaudacao,
-              ),
-            ),
-            if (mostrarMascote) ...<Widget>[
-              const SizedBox(width: MemoraEspacamento.md),
-              MemoraPersonagem(
-                key: TelaInicio.chaveMemora,
-                expressao: ExpressaoDaMemora.mini,
-                tamanho: tamanhoMascote,
-              ),
-            ],
-          ],
+        // A bolinha do SOS fica à direita da saudação, no espaço que sobrava
+        // (feature 014, 2026-11-18).
+        TituloComSos(
+          titulo: TextosCasca.inicioSaudacao(nome),
+          chaveDoTitulo: TelaInicio.chaveSaudacao,
         ),
-        if (quantidadeDeAcoes > 0) ...<Widget>[
-          const SizedBox(height: MemoraEspacamento.sm),
-          Semantics(
-            container: true,
-            label: 'Memora disse: $textoTutorial',
-            child: ExcludeSemantics(
-              child: Cartao(
-                key: TelaInicio.chaveTutorial,
-                comBorda: ehAltoContraste,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: MemoraEspacamento.md,
-                  vertical: MemoraEspacamento.sm,
-                ),
-                child: TextoMemora.apoio(textoTutorial),
-              ),
-            ),
-          ),
-        ],
+        const SizedBox(height: MemoraEspacamento.sm),
+        MemoraAnfitria(
+          key: TelaInicio.chaveMemora,
+          dicas: dicas,
+          tamanho: tamanhoDaAnfitria,
+          atividade: atividade,
+        ),
       ],
     );
   }

@@ -8,6 +8,16 @@
 
 ---
 
+## Clarifications
+
+### Session 2026-11-18
+
+- Q: Como o botão SOS aparece na tela? A versão do APK 1.0.6 mostra três textos (o ícone "sos", "SOS" e "Ajuda") numa pílula, e a casca gasta uma linha inteira no topo de toda tela só para ele. → A: Decisão do Henrique ao testar o APK 1.0.6 no celular: **uma bolinha vermelha (a cor de perigo do tema) com "SOS" escrito em negrito**, igual em todas as telas; sem ícone e sem a palavra "Ajuda". Círculo de 48 dp, que cresce com a letra ampliada (diâmetro = o maior entre 48 dp e o que o texto "SOS" ocupa), sem encolher a letra. O leitor de tela continua anunciando o mesmo de antes ("SOS Ajuda", botão, com a descrição de emergência).
+- Q: Onde a bolinha fica? → A: **A faixa do topo sai**; nenhuma tela perde uma linha para o SOS. A bolinha fica **no canto superior direito do cabeçalho de cada tela, na altura do título**: no Início (à direita de "Oi, <nome>!"), em Meu perfil, em Ajuda e nos demais cabeçalhos sem nada à direita. Em **Ajustes**, a paleta que ocupava o canto passa para **antes da palavra "Ajustes"**, menor, e a bolinha fica onde a paleta estava (a regra vale para todo cabeçalho com figura: a figura vai para antes do título). Nas telas com a **barra "Voltar"**, a bolinha fica na própria barra, à direita. Quando o título não cabe ao lado da bolinha (letra muito ampliada em aparelho estreito), a bolinha sobe para a linha do "Voltar" e o título fica com a largura toda: o título nunca é cortado por causa dela. Tela sem cabeçalho nenhum mostra a bolinha flutuando no canto superior direito, dentro da área segura.
+- Q: O que continua valendo? → A: o SOS some com o teclado aberto; alvo de toque ≥ 48 dp; nenhum estouro na matriz de aparelhos (4 × 3); a bolinha nunca cobre botão, título ou texto e fica a pelo menos 8 dp de qualquer outro alvo de toque.
+
+---
+
 ## 1. Objetivo
 
 Disponibilizar um mecanismo de solicitação manual de ajuda, acessível em todas as telas principais do Memora, permitindo que a pessoa usuária notifique rapidamente seu contato de emergência.
@@ -30,8 +40,8 @@ Entretanto, existem situações em que a pessoa necessita de ajuda sem que uma q
 
 ## 3. Requisitos funcionais
 
-- **FR-001**: Disponibilizar um botão SOS persistente nas telas principais do aplicativo (`CascaInterna`).
-- **FR-002**: O botão deve possuir identificação textual explícita (`"SOS Ajuda"`), sem depender apenas de ícone (Princípio III).
+- **FR-001**: Disponibilizar um botão SOS persistente nas telas principais do aplicativo (`CascaInterna`), **no canto superior direito do cabeçalho de cada tela, na altura do título** — sem faixa própria no topo (nenhuma tela perde uma linha para o SOS). Em Ajustes, a figura que ocupava o canto (a paleta) passa para antes do título, menor, e o mesmo vale para todo cabeçalho com figura; nas telas com a barra "Voltar", a bolinha fica na barra, à direita. Se o título não couber ao lado da bolinha, ela sobe para a linha do "Voltar" (ou para uma linha só dela, à direita, sem "Voltar"); tela sem cabeçalho mostra a bolinha flutuando no canto superior direito, dentro da área segura, sem cobrir nada. (Revisto em 2026-11-18.)
+- **FR-002**: O botão é uma **bolinha na cor de perigo do tema com o texto "SOS" em negrito**, sem ícone e sem a palavra "Ajuda": o texto escrito é a identificação explícita (Princípio III). O leitor de tela anuncia o nome "SOS Ajuda", que começa pela palavra escrita (WCAG 2.5.3), e a descrição de emergência. (Revisto em 2026-11-18; antes: ícone mais o texto "SOS Ajuda".)
 - **FR-003**: O botão deve permanecer acessível durante a navegação entre módulos dentro da conta autenticada.
 - **FR-004**: O acionamento deve apresentar uma confirmação simples e clara antes do envio.
 - **FR-005**: O usuário deve conseguir confirmar ou cancelar a solicitação antes do envio ao servidor.
@@ -51,7 +61,7 @@ Entretanto, existem situações em que a pessoa necessita de ajuda sem que uma q
 
 ## 4. Requisitos não funcionais
 
-- **NFR-001**: O botão deve respeitar os alvos de toque definidos na Constituição ($\ge 48 \times 48\text{ dp}$).
+- **NFR-001**: O botão deve respeitar os alvos de toque definidos na Constituição ($\ge 48 \times 48\text{ dp}$): a bolinha tem no mínimo 48 dp de diâmetro e cresce com a letra ampliada até caber o "SOS" inteiro (a letra nunca encolhe para caber), e fica a pelo menos 8 dp de qualquer outro alvo de toque.
 - **NFR-002**: O componente deve possuir contraste elevado (conformidade WCAG 2.2 AA/AAA com tokens do Design System 2.0).
 - **NFR-003**: O botão deve possuir semântica acessível completa para leitores de tela.
 - **NFR-004**: O envio deve ocorrer por comunicação segura autenticada por token Bearer.
@@ -65,7 +75,7 @@ Entretanto, existem situações em que a pessoa necessita de ajuda sem que uma q
 
 ## 5. Regras de negócio
 
-- **BR-001**: O botão SOS deve estar disponível nas telas principais dentro da casca autenticada.
+- **BR-001**: O botão SOS deve estar disponível nas telas principais dentro da casca autenticada, sempre no mesmo lugar (o canto superior direito do cabeçalho), e some enquanto o teclado está aberto.
 - **BR-002**: O usuário deve confirmar explicitamente a solicitação antes do envio.
 - **BR-003**: O alerta manual (`SOS_MANUAL`) deve ser identificado separadamente do alerta automático de queda (`QUEDA_AUTOMATICA`).
 - **BR-004**: A localização não deve ser compartilhada sem autorização adequada.

@@ -18,7 +18,7 @@ final Guia guiaCorreios = Guia(
       chave: 'rastrear-encomenda',
       titulo: TextosGuias.correiosSecao1Titulo,
       subtitulo: TextosGuias.correiosSecao1Subtitulo,
-      icone: Icons.local_shipping_outlined,
+      icone: Icons.local_shipping_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.correios1,
@@ -50,7 +50,7 @@ final Guia guiaCorreios = Guia(
       chave: 'frete-meu-correios',
       titulo: TextosGuias.correiosSecao2Titulo,
       subtitulo: TextosGuias.correiosSecao2Subtitulo,
-      icone: Icons.calculate_outlined,
+      icone: Icons.calculate_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.correios5,

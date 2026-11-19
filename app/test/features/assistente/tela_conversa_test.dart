@@ -194,7 +194,7 @@ void main() {
   });
 
   group('Quem disse o que — FR-020', () {
-    testWidgets('cada fala e um balao com posicao, rosto e nome', (
+    testWidgets('cada fala e um balao com posicao e nome, sem rosto ao lado', (
       WidgetTester t,
     ) async {
       final ControladorConversa c = controladorCom();
@@ -224,19 +224,22 @@ void main() {
       expect(nomeDela, findsOneWidget);
       expect(nomeDaPessoa, findsOneWidget);
 
-      // Desenho: o rosto da Memora de um lado, o da pessoa do outro.
-      expect(
-        find.descendant(of: dela, matching: find.byType(MemoraPersonagem)),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: daPessoa, matching: find.byType(MemoraPersonagem)),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: daPessoa, matching: find.byIcon(Icons.person)),
-        findsOneWidget,
-      );
+      // Sem rosto ao lado do balao (FR-042, FR-043): a Memora desta tela e a
+      // do topo, uma so (T059, ver memora_no_topo_da_conversa_test.dart).
+      for (final Finder balao in <Finder>[dela, daPessoa]) {
+        expect(
+          find.descendant(of: balao, matching: find.byType(MemoraPersonagem)),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: balao, matching: find.byType(MemoraAnimada)),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: balao, matching: find.byIcon(Icons.person_rounded)),
+          findsNothing,
+        );
+      }
 
       // Posicao: a Memora a esquerda, a pessoa a direita.
       expect(t.getCenter(nomeDaPessoa).dx, greaterThan(t.getCenter(nomeDela).dx));

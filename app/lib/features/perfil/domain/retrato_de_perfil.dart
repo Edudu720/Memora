@@ -12,65 +12,31 @@ abstract final class PoliticaDeImagemDePerfil {
   static const int qualidadeJpegSaida = 88;
 }
 
-/// Catálogo fechado de ilustrações embarcadas do Memora disponíveis como avatar
+/// Catálogo fechado de ilustrações vetoriais disponíveis como avatar
 /// sem solicitar permissões do aparelho (FR-003, FR-004).
 enum AvatarIlustrado {
-  /// Robô da Memora acenando.
-  memoraAcenando(
-    chave: 'memora_acenando',
-    caminhoAsset: 'assets/ilustracoes/memora_perfil_robo.png',
-    ehSvg: false,
-  ),
+  /// Memora acenando.
+  memoraAcenando(chave: 'memora_acenando'),
 
-  /// Robô da Memora pensando.
-  memoraPensando(
-    chave: 'memora_pensando',
-    caminhoAsset: 'assets/ilustracoes/memora_ajuda_robo.png',
-    ehSvg: false,
-  ),
+  /// Memora pensando.
+  memoraPensando(chave: 'memora_pensando'),
 
-  /// Robô da Memora comemorando.
-  memoraComemorando(
-    chave: 'memora_comemorando',
-    caminhoAsset: 'assets/ilustracoes/memora_conclusao_robo.png',
-    ehSvg: false,
-  ),
+  /// Memora comemorando.
+  memoraComemorando(chave: 'memora_comemorando'),
 
-  /// Robô da Memora com escudo protetor.
-  memoraProtegendo(
-    chave: 'memora_protegendo',
-    caminhoAsset: 'assets/ilustracoes/memora_alerta_robo.png',
-    ehSvg: false,
-  ),
+  /// Memora com escudo protetor.
+  memoraProtegendo(chave: 'memora_protegendo'),
 
-  /// Casal idoso acolhedor em vetor.
-  casalIdoso(
-    chave: 'casal_idoso',
-    caminhoAsset: 'assets/ilustracoes/casal_idoso.svg',
-    ehSvg: true,
-  ),
+  /// Casal acolhedor em ícone arredondado.
+  casalIdoso(chave: 'casal_idoso'),
 
-  /// Pessoa utilizando celular em vetor.
-  pessoaComCelular(
-    chave: 'pessoa_com_celular',
-    caminhoAsset: 'assets/ilustracoes/pessoa_com_celular.svg',
-    ehSvg: true,
-  );
+  /// Pessoa com celular em ícone arredondado.
+  pessoaComCelular(chave: 'pessoa_com_celular');
 
   /// Identificador estável persistido no índice local.
   final String chave;
 
-  /// Caminho do ativo embarcado coberto por `LICENCAS.md`.
-  final String caminhoAsset;
-
-  /// Verdadeiro quando o ativo é SVG; falso quando é PNG em alta resolução.
-  final bool ehSvg;
-
-  const AvatarIlustrado({
-    required this.chave,
-    required this.caminhoAsset,
-    required this.ehSvg,
-  });
+  const AvatarIlustrado({required this.chave});
 
   /// Rótulo acessível em português para leitores de tela e cards.
   String get rotulo => switch (this) {

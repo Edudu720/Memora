@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../navegacao/rota_memora.dart';
 import '../tokens/cores.dart';
 import '../tokens/dimensoes.dart';
 import '../tokens/elevacao.dart';
@@ -89,6 +90,13 @@ abstract final class TemasMemora {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(MemoraRaio.cartao),
         ),
+      ),
+      // Toda rota de página que não seja uma `RotaMemora` — as de pacotes e
+      // as que chegarem de fora — desliza do mesmo jeito (feature 013, T049).
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: TransicaoMemora(),
+        },
       ),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: c.superficie,

@@ -239,7 +239,7 @@ class _TelaDataDeNascimentoState extends State<TelaDataDeNascimento> {
                   BotaoPrimario(
                     key: TelaDataDeNascimento.chaveGuardar,
                     rotulo: TextosPerfil.botaoGuardar,
-                    icone: Icons.check,
+                    icone: Icons.check_rounded,
                     carregando: _guardando,
                     aoTocar: _guardando ? null : _guardar,
                   ),

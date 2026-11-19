@@ -59,9 +59,10 @@ abstract final class TextosConfiguracoes {
 
   /// O que é a conversa guardada, e quando sai.
   static const String guardadoConversaValor =
-      'O que você me escreveu e o que eu respondi. Fica guardada só aqui. '
-      'Para eu responder, ela viaja a cada pergunta, mas o Memora não '
-      'guarda cópia. Sai do celular quando você sai da conta.';
+      'O que conversamos fica guardado só aqui e sai quando você sai da '
+      'conta. Para eu responder, a conversa viaja a cada pergunta até um '
+      'serviço do Google: o Memora não guarda cópia, mas o Google pode '
+      'guardar o que você escreve.';
 
   /// Rótulo da data de nascimento.
   static const String guardadoIdade = 'Sua data de nascimento';
@@ -84,9 +85,9 @@ abstract final class TextosConfiguracoes {
 
   /// Quando o identificador sai.
   static const String guardadoContatoValor =
-      'Para você não digitar tudo de novo na próxima vez que entrar. O '
-      'Memora também o conhece, porque é o contato da sua conta. Sai deste '
-      'celular com "Sair e esquecer este aparelho".';
+      'Fica aqui para você não digitar tudo de novo, e o Memora também o '
+      'conhece porque é o contato da sua conta. Sai deste celular com '
+      '"Sair e esquecer este aparelho".';
 
   /// O que **nunca** fica depois de sair.
   static const String guardadoNuncaFica =
@@ -124,7 +125,7 @@ abstract final class TextosConfiguracoes {
 
   /// Quando não deu para apagar.
   static const String conversaNaoApagada =
-      'Não consegui apagar a conversa agora. A conversa continua no celular. '
+      'Não consegui apagar a conversa agora, e ela continua no celular. '
       'Tente de novo daqui a pouco.';
 
   // ---------------------------------------------------------------------------
@@ -158,9 +159,8 @@ abstract final class TextosConfiguracoes {
   /// Para que serve "Sair e esquecer" (FR-041).
   static const String paraQueServeEsquecer =
       'Use se o celular é de mais gente, ou se vai ser vendido ou dado. Além '
-      'de sair, eu apago o que guardei aqui sobre você: a conversa, a sua '
-      'idade, a apresentação e o seu e-mail ou telefone. Os ajustes de '
-      'aparência ficam.';
+      'de sair, eu apago conversa, idade, apresentação e contato — só os '
+      'ajustes de aparência ficam.';
 
   /// O botão que abre a pergunta.
   static const String botaoEsquecer = 'Sair e esquecer este aparelho';

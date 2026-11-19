@@ -190,17 +190,37 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
                     ),
                   )
                 : null,
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: widget.raio,
-              child: InkWell(
-                onTap: widget.aoTocar,
+            // DecoratedBox sempre presente (sem mudar profundidade na árvore)
+            // para sinalizar toque imediato sob "reduzir movimento" (FR-028,
+            // T065) sem desmontar o InkWell nem interromper o onTap.
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration:
+                  (_pressionada &&
+                      reduzir &&
+                      !_focada &&
+                      (widget.gradiente != null || widget.fundo.a > 0))
+                  ? BoxDecoration(
+                      borderRadius: widget.raio,
+                      border: Border.all(
+                        color: cores.borda,
+                        width: MemoraDimensoes.bordaSelecao,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                    )
+                  : const BoxDecoration(),
+              child: Material(
+                color: Colors.transparent,
                 borderRadius: widget.raio,
-                onHighlightChanged: (bool pressionada) =>
-                    setState(() => _pressionada = pressionada),
-                onFocusChange: (bool focada) =>
-                    setState(() => _focada = focada),
-                child: widget.child,
+                child: InkWell(
+                  onTap: widget.aoTocar,
+                  borderRadius: widget.raio,
+                  onHighlightChanged: (bool pressionada) =>
+                      setState(() => _pressionada = pressionada),
+                  onFocusChange: (bool focada) =>
+                      setState(() => _focada = focada),
+                  child: widget.child,
+                ),
               ),
             ),
           ),

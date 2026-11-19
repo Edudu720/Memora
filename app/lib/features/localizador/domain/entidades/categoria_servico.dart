@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 /// Categorias essenciais de serviços próximas para o idoso (FR-002).
 enum CategoriaServico {
   /// Postos de saúde, hospitais, UPAs e farmácias.
-  saude('Saúde', 'Postos de saúde, UPAs, hospitais e farmácias', Icons.local_hospital_outlined),
+  saude('Saúde', 'Postos de saúde, UPAs, hospitais e farmácias', Icons.local_hospital_rounded),
 
   /// Órgãos e atendimentos ao cidadão.
-  servicosPublicos('Serviços públicos', 'Poupatempo, INSS, CRAS e prefeitura', Icons.account_balance_outlined),
+  servicosPublicos('Serviços públicos', 'Poupatempo, INSS, CRAS e prefeitura', Icons.account_balance_rounded),
 
   /// Atendimento imediato de urgência e emergência.
   emergencia('Emergência', 'Bombeiros, SAMU, delegacias e pronto-socorro', Icons.warning_amber_rounded),
 
   /// Serviços básicos do dia a dia.
-  cotidiano('Serviços cotidianos', 'Supermercados, bancos, lotéricas e correios', Icons.storefront_outlined);
+  cotidiano('Serviços cotidianos', 'Supermercados, bancos, lotéricas e correios', Icons.storefront_rounded);
 
   /// Rótulo curto exibido nos filtros e cartões.
   final String rotulo;

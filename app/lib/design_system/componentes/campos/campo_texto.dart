@@ -134,7 +134,7 @@ class CampoTexto extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(Icons.error_outline,
+              Icon(Icons.error_outline_rounded,
                   color: cores.perigo,
                   size: MemoraDimensoes.iconePadrao),
               const SizedBox(width: MemoraEspacamento.sm),

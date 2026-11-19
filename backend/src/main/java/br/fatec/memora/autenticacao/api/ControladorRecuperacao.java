@@ -62,7 +62,7 @@ public class ControladorRecuperacao {
      */
     public static final String MENSAGEM_ACEITA =
             "Se essa conta existir, enviamos um código de 6 números. "
-                    + "Confira suas mensagens 😊";
+                    + "Confira suas mensagens.";
 
     private final ServicoDeRecuperacao recuperacao;
 
@@ -127,7 +127,7 @@ public class ControladorRecuperacao {
                     throw FalhaDoMemora.de(
                             CodigoDeErro.DADOS_INVALIDOS,
                             "Esse código não conferiu. Ele vale por 10 minutinhos — "
-                                    + "se já passou, posso te enviar outro 😊");
+                                    + "se já passou, posso te enviar outro.");
         };
     }
 
@@ -151,10 +151,10 @@ public class ControladorRecuperacao {
                             "Essa senha ficou curtinha. Que tal uma frase de que você goste, "
                                     + "com pelo menos "
                                     + PoliticaDeSenha.COMPRIMENTO_MINIMO
-                                    + " letras? 😊";
+                                    + " letras?";
                     case COMPROMETIDA ->
                             "Essa senha é bastante usada, e por isso não protege sua conta. "
-                                    + "Vamos pensar em outra juntos? 😊";
+                                    + "Vamos pensar em outra juntos?";
                 };
 
         throw FalhaDoMemora.de(CodigoDeErro.DADOS_INVALIDOS, mensagem);

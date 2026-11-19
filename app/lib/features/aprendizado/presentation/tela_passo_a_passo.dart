@@ -362,7 +362,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                   child: EstadoVazio(
                     titulo: 'Nenhum passo disponível',
                     explicacao: 'Este guia ainda não tem etapas cadastradas.',
-                    icone: Icons.school_outlined,
+                    icone: Icons.school_rounded,
                   ),
                 ),
               ),
@@ -378,13 +378,13 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
 
     final Widget botaoAnterior = BotaoSecundario(
       rotulo: 'Anterior',
-      icone: compacto ? null : Icons.arrow_back,
+      icone: compacto ? null : Icons.arrow_back_rounded,
       aoTocar: _posicao > 1 ? _retroceder : null,
     );
 
     final Widget botaoProximo = BotaoPrimario(
       rotulo: 'Próximo',
-      icone: compacto ? null : Icons.arrow_forward,
+      icone: compacto ? null : Icons.arrow_forward_rounded,
       aoTocar: _avancar,
     );
 
@@ -398,42 +398,46 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
               titulo: widget.secao?.titulo ?? widget.guia.titulo,
               aoVoltar: _retroceder,
             ),
-            PassoIlustrado(
-              key: ValueKey<int>(_posicao),
-              rolar: false,
-              passo: passoAtual,
+            TrocaDePasso(
               posicao: _posicao,
-              total: _passos.length,
-              aoContinuar: _avancar,
-              aoVoltar: _posicao > 1 ? _retroceder : null,
-              aoSair: _sairDoPassoAPasso,
-              aoTelaDiferente: _mostrarDialogoTelaDiferente,
-              aoPedirParaAbrir: eUltimo && _podePedirParaAbrir
-                  ? () => widget.aoPedirParaAbrir!(
+              child: PassoIlustrado(
+                key: ValueKey<int>(_posicao),
+                rolar: false,
+                passo: passoAtual,
+                posicao: _posicao,
+                total: _passos.length,
+                aoContinuar: _avancar,
+                aoVoltar: _posicao > 1 ? _retroceder : null,
+                aoSair: _sairDoPassoAPasso,
+                aoTelaDiferente: _mostrarDialogoTelaDiferente,
+                aoPedirParaAbrir: eUltimo && _podePedirParaAbrir
+                    ? () => widget.aoPedirParaAbrir!(
                         TextosGuias.pedidoParaAbrir(
                           widget.servico?.nomeExibido ?? widget.guia.titulo,
                         ),
                       )
-                  : null,
-              aoTirarDuvida: eUltimo &&
-                      (widget.aoTirarDuvida != null ||
-                          widget.aoConversarSobreDiferenca != null)
-                  ? () {
-                      if (widget.aoTirarDuvida != null) {
-                        final String nomeBase =
-                            widget.servico?.nomeExibido ?? widget.guia.titulo;
-                        widget.aoTirarDuvida!(
-                          TextosGuias.rascunhoDuvida(
-                            widget.secao != null
-                                ? '$nomeBase (${widget.secao!.titulo})'
-                                : nomeBase,
-                          ),
-                        );
-                      } else {
-                        widget.aoConversarSobreDiferenca!();
+                    : null,
+                aoTirarDuvida:
+                    eUltimo &&
+                        (widget.aoTirarDuvida != null ||
+                            widget.aoConversarSobreDiferenca != null)
+                    ? () {
+                        if (widget.aoTirarDuvida != null) {
+                          final String nomeBase =
+                              widget.servico?.nomeExibido ?? widget.guia.titulo;
+                          widget.aoTirarDuvida!(
+                            TextosGuias.rascunhoDuvida(
+                              widget.secao != null
+                                  ? '$nomeBase (${widget.secao!.titulo})'
+                                  : nomeBase,
+                            ),
+                          );
+                        } else {
+                          widget.aoConversarSobreDiferenca!();
+                        }
                       }
-                    }
-                  : null,
+                    : null,
+              ),
             ),
           ],
         ),

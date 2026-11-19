@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
+import '../../preferencias/reducao_de_movimento.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/espacamento.dart';
+import '../../tokens/movimento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
 import '../texto/texto_memora.dart';
 
 /// Folha que sobe pela parte de baixo da tela, para escolher entre opções.
+///
+/// Sobe **por cima**, sem mover a tela de trás (feature 013, FR-010).
 ///
 /// Sempre traz um botão de fechar escrito. Fechar arrastando para baixo é
 /// gesto complexo, e a FR-015 proíbe que ele seja o caminho único.
@@ -34,10 +38,24 @@ class FolhaInferior extends StatelessWidget {
     BuildContext context, {
     required FolhaInferior folha,
   }) {
+    final bool reduzir = context.reduzirMovimento;
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      // Sobe devagar e desce depressa; com "reduzir movimento", de uma vez
+      // (FR-013). A tela de trás fica onde está (FR-010).
+      sheetAnimationStyle: AnimationStyle(
+        duration: MemoraMovimento.efetiva(
+          MemoraMovimento.lento,
+          reduzirMovimento: reduzir,
+        ),
+        reverseDuration: MemoraMovimento.efetiva(
+          MemoraMovimento.padrao,
+          reduzirMovimento: reduzir,
+        ),
+        curve: MemoraMovimento.curvaDeSobreposicao,
+      ),
       builder: (BuildContext _) => folha,
     );
   }
@@ -71,7 +89,7 @@ class FolhaInferior extends StatelessWidget {
               // Saída escrita: arrastar para baixo não pode ser o único caminho.
               BotaoSecundario(
                 rotulo: 'Fechar',
-                icone: Icons.close,
+                icone: Icons.close_rounded,
                 aoTocar: aoFechar ?? () => Navigator.of(context).pop(),
               ),
             ],

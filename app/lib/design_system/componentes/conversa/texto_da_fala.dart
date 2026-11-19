@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../../../features/assistente/domain/limitar_emoji.dart';
 import '../../tokens/movimento.dart';
 import 'texto_com_negrito.dart';
 
@@ -45,12 +46,25 @@ class TextoDaFala extends StatefulWidget {
   /// rolar atrás do texto que cresce.
   final VoidCallback? aoAvancar;
 
+  /// Chamado quando a última letra entra na tela e a escrita para — o sinal
+  /// de que a Memora "parou de falar" (a boca da anfitriã, FR-051). Não é
+  /// chamado quando o texto já nasce inteiro (sem escrever aos poucos).
+  final VoidCallback? aoTerminar;
+
+  /// Avisa quando a escrita **começa** (verdadeiro) e quando **para** (falso):
+  /// a conversa liga e desliga a boca da Memora do topo por aqui (FR-025).
+  /// Também avisa "parou" se o texto sair da tela no meio da escrita. Chega
+  /// depois do quadro, nunca durante a construção.
+  final ValueChanged<bool>? aoMudarEscrita;
+
   /// Cria o texto.
   const TextoDaFala(
     this.texto, {
     this.aosPoucos = false,
     this.emAndamento = false,
     this.aoAvancar,
+    this.aoTerminar,
+    this.aoMudarEscrita,
     super.key,
   });
 
@@ -67,10 +81,15 @@ class _TextoDaFalaState extends State<TextoDaFala>
   double _reveladas = 0;
   int _total = 0;
   Duration _ultimoQuadro = Duration.zero;
+  late String _textoExibido;
+
+  /// O último estado entregue a [TextoDaFala.aoMudarEscrita].
+  bool _avisouEscrevendo = false;
 
   @override
   void initState() {
     super.initState();
+    _textoExibido = limitarEmoji(widget.texto);
     _total = _contar();
     if (!widget.aosPoucos) _reveladas = _total.toDouble();
   }
@@ -84,6 +103,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
   @override
   void didUpdateWidget(TextoDaFala antigo) {
     super.didUpdateWidget(antigo);
+    _textoExibido = limitarEmoji(widget.texto);
     _total = _contar();
     _ajustar();
   }
@@ -91,11 +111,22 @@ class _TextoDaFalaState extends State<TextoDaFala>
   @override
   void dispose() {
     _relogio.dispose();
+    _avisarEscrita(false);
     super.dispose();
   }
 
+  /// Entrega a mudança de "estou escrevendo" a quem pediu, uma vez por
+  /// mudança e fora da construção.
+  void _avisarEscrita(bool escrevendo) {
+    if (escrevendo == _avisouEscrevendo) return;
+    _avisouEscrevendo = escrevendo;
+    final ValueChanged<bool>? aviso = widget.aoMudarEscrita;
+    if (aviso == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) => aviso(escrevendo));
+  }
+
   int _contar() => TextoComNegrito.quantasLetras(
-    widget.texto,
+    _textoExibido,
     emAndamento: widget.emAndamento,
   );
 
@@ -120,6 +151,7 @@ class _TextoDaFalaState extends State<TextoDaFala>
     } else if (_relogio.isActive) {
       _relogio.stop();
     }
+    _avisarEscrita(_relogio.isActive);
   }
 
   void _aCadaQuadro(Duration decorrido) {
@@ -136,6 +168,8 @@ class _TextoDaFalaState extends State<TextoDaFala>
     if (porLetra <= 0) {
       setState(() => _reveladas = _total.toDouble());
       _relogio.stop();
+      _avisarEscrita(false);
+      widget.aoTerminar?.call();
       return;
     }
 
@@ -148,14 +182,19 @@ class _TextoDaFalaState extends State<TextoDaFala>
     setState(() {
       _reveladas = math.min(_total.toDouble(), _reveladas + segundos * ritmo);
     });
-    if (_reveladas >= _total) _relogio.stop();
+    final bool terminou = _reveladas >= _total;
+    if (terminou) {
+      _relogio.stop();
+      _avisarEscrita(false);
+    }
     widget.aoAvancar?.call();
+    if (terminou) widget.aoTerminar?.call();
   }
 
   @override
   Widget build(BuildContext context) {
     return TextoComNegrito(
-      widget.texto,
+      _textoExibido,
       emAndamento: widget.emAndamento,
       caracteresVisiveis: _reveladas >= _total ? null : _reveladas.floor(),
     );

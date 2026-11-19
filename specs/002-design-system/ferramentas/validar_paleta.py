@@ -61,6 +61,12 @@ TEMAS = {
             "sobre_gradiente_saude":   "#FFFFFF",
             "saude_suave":             "#E6F6F4",
             "sucesso_texto":           "#0F6A43",
+            # A Memora (feature 013): segue a paleta, menos olhos e afins.
+            "memora_corpo":     "#3565F3",  # referencia do Henrique
+            "memora_contorno":  "#0D1C50",
+            "memora_aro":       "#0D1C50",  # claro: o aro e o proprio contorno
+            "memora_visor":     "#D7E4FC",
+            "memora_olho":      "#0E1F53",
         },
     },
     "escuro": {
@@ -90,6 +96,12 @@ TEMAS = {
             "sobre_gradiente_saude":   "#FFFFFF",
             "saude_suave":             "#123532",
             "sucesso_texto":           "#6EE7B7",
+            # A Memora (feature 013): segue a paleta, menos olhos e afins.
+            "memora_corpo":     "#3565F3",  # referencia do Henrique
+            "memora_contorno":  "#0D1C50",
+            "memora_aro":       "#9CB8FF",  # escuro: o aro e a primaria do tema
+            "memora_visor":     "#D7E4FC",
+            "memora_olho":      "#0E1F53",
         },
     },
     "alto_contraste": {
@@ -119,6 +131,12 @@ TEMAS = {
             "sobre_gradiente_saude":   "#000000",
             "saude_suave":             "#0A0A0A",
             "sucesso_texto":           "#80FFAA",
+            # A Memora no alto contraste: conjunto proprio, a paleta nao vale.
+            "memora_corpo":     "#4F7CFF",
+            "memora_contorno":  "#0D1C50",
+            "memora_aro":       "#FFFFFF",
+            "memora_visor":     "#F0F5FF",
+            "memora_olho":      "#050E33",
         },
     },
 }
@@ -238,6 +256,29 @@ PALETAS = {
     },
 }
 
+# A Memora segue a paleta escolhida (feature 013, decisao do Henrique de
+# 2026-11-15): corpo, contorno e visor mudam; olhos, bochechas, antena e escudo
+# sao a identidade dela e ficam fixos. Os valores do corpo valem nos temas claro
+# e escuro; so o aro (a linha de fora, que garante a silhueta sobre fundo
+# escuro) muda: no claro e o contorno, no escuro e a primaria do tema.
+# Formato: nome -> (corpo, contorno, visor). O azul e o dos TEMAS acima.
+MEMORA_PALETAS = {
+    "verde":         ("#2E9B52", "#0A3017", "#D9F2E1"),
+    "roxo":          ("#7C4FD6", "#24104A", "#E6DCFA"),
+    "laranja-terra": ("#D2641F", "#3E1A08", "#FBE3D3"),
+    "rosa":          ("#D6457F", "#4A0F28", "#FBDDEA"),
+    "grafite":       ("#5B6B82", "#141C2A", "#E1E7EF"),
+}
+for _nome, (_corpo, _contorno, _visor) in MEMORA_PALETAS.items():
+    for _tema in ("claro", "escuro"):
+        _aro = _contorno if _tema == "claro" else PALETAS[_nome]["escuro"]["primaria"]
+        PALETAS[_nome][_tema].update({
+            "memora_corpo": _corpo,
+            "memora_contorno": _contorno,
+            "memora_aro": _aro,
+            "memora_visor": _visor,
+        })
+
 # Os temas em que a paleta se aplica (R15): alto contraste fica de fora.
 TEMAS_COM_PALETA = ("claro", "escuro")
 
@@ -278,6 +319,15 @@ PARES = [
     ("sobre_gradiente_saude", "gradiente_saude_fim",    "texto"),
     ("sucesso_texto",         "superficie",             "texto"),
     ("sucesso_texto",         "saude_suave",            "texto"),
+    # feature 013: a Memora, em CADA paleta e tema. A silhueta (corpo e aro)
+    # precisa de 3:1 com o fundo e com a superficie onde ela pode aparecer; o
+    # contorno precisa de 3:1 com o corpo; os olhos, com o visor.
+    ("memora_corpo",    "fundo",          "grafico"),
+    ("memora_corpo",    "superficie",     "grafico"),
+    ("memora_aro",      "fundo",          "grafico"),
+    ("memora_aro",      "superficie",     "grafico"),
+    ("memora_contorno", "memora_corpo",   "grafico"),
+    ("memora_olho",     "memora_visor",   "grafico"),
 ]
 
 def cores_da(tema_nome, paleta):
@@ -372,7 +422,10 @@ def autoteste():
     ruim_claro = {"claro": {"primaria": "#B8C7FF"}}   # ~1,6:1 sobre #F8F8F8
     ruim_escuro = {"escuro": {"primaria": "#2A3A6A"}}  # ~1,5:1 sobre #101216
     boa = {"claro": {"primaria": "#0B3BD0"}, "escuro": {"primaria": "#A8C0FF"}}
-    paletas = {"ruim_claro": ruim_claro, "ruim_escuro": ruim_escuro, "boa": boa}
+    # feature 013: corpo da Memora igual ao fundo some a silhueta dela
+    ruim_memora = {"claro": {"memora_corpo": "#F8F8F8"}}
+    paletas = {"ruim_claro": ruim_claro, "ruim_escuro": ruim_escuro,
+               "ruim_memora": ruim_memora, "boa": boa}
 
     resultado = rodar(paletas)
     esperado = combinacoes_esperadas(paletas)
@@ -381,12 +434,14 @@ def autoteste():
         erros.append(f"{len(resultado)} combinacoes rodaram, esperadas {esperado}")
 
     for tema, rotulo in (("claro", "paleta ruim_claro"),
-                         ("escuro", "paleta ruim_escuro")):
+                         ("escuro", "paleta ruim_escuro"),
+                         ("claro", "paleta ruim_memora")):
         if (tema, rotulo) not in resultado:
             erros.append(f"{rotulo} nem chegou a ser validada no tema {tema}")
 
     for (tema, rotulo), falhas in resultado.items():
-        deve_falhar = ((tema == "claro" and rotulo == "paleta ruim_claro")
+        deve_falhar = ((tema == "claro"
+                        and rotulo in ("paleta ruim_claro", "paleta ruim_memora"))
                        or (tema == "escuro" and rotulo == "paleta ruim_escuro"))
         if deve_falhar and falhas == 0:
             erros.append(f"{rotulo} NAO reprovou no tema {tema}")

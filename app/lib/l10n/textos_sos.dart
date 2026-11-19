@@ -4,7 +4,12 @@
 /// no máximo duas frases curtas por bloco, sem emojis e sem afirmar que o
 /// contato recebeu a mensagem sem confirmação real do destinatário (BR-007).
 abstract final class TextosSos {
-  /// Texto curto e explícito exibido sempre junto ao ícone do botão SOS.
+  /// O que a bolinha do SOS mostra escrito, e só isso: sem ícone e sem
+  /// "Ajuda" (decisão do Henrique, 2026-11-18).
+  static const String textoDaBolinha = 'SOS';
+
+  /// O nome do botão para o leitor de tela. Começa pela palavra escrita na
+  /// bolinha ([textoDaBolinha]), como pede a WCAG 2.5.3.
   static const String rotuloBotaoSos = 'SOS Ajuda';
 
   /// Descrição acessível anunciada pelo leitor de tela.

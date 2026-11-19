@@ -88,7 +88,7 @@ class TelaPreVisualizacaoFoto extends StatelessWidget {
               BotaoPrimario(
                 key: chaveConfirmar,
                 rotulo: TextosPerfil.botaoUsarEstaFoto,
-                icone: Icons.check_circle_outline,
+                icone: Icons.check_circle_outline_rounded,
                 aoTocar: () => Navigator.of(context)
                     .pop(AcaoPreVisualizacaoFoto.usarEstaFoto),
               ),
@@ -96,7 +96,7 @@ class TelaPreVisualizacaoFoto extends StatelessWidget {
               BotaoSecundario(
                 key: chaveEscolherOutra,
                 rotulo: TextosPerfil.botaoEscolherOutraFoto,
-                icone: Icons.photo_library_outlined,
+                icone: Icons.photo_library_rounded,
                 aoTocar: () => Navigator.of(context)
                     .pop(AcaoPreVisualizacaoFoto.escolherOutra),
               ),

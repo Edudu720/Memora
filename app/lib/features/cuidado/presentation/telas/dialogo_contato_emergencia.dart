@@ -25,9 +25,11 @@ class DialogoContatoEmergencia extends StatefulWidget {
     ContatoEmergencia? contatoAtual,
     required ValueChanged<ContatoEmergencia> aoSalvar,
   }) {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) => DialogoContatoEmergencia(
+    // Pela sobreposição do Dialogo: sem ela o `showDialog` cru ficava sem a
+    // animação nova e com 150 ms fixos mesmo com "reduzir movimento" (T091).
+    return DialogoMemora.mostrarConteudo<void>(
+      context,
+      construtor: (BuildContext ctx) => DialogoContatoEmergencia(
         contatoAtual: contatoAtual,
         aoSalvar: aoSalvar,
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 
+import '../../preferencias/reducao_de_movimento.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
@@ -11,40 +11,7 @@ import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
 import '../toque/superficie_tocavel.dart';
 import 'cabecalho_de_tela.dart';
-
-/// Escopo herdado da casca autenticada para que barras superiores empurradas
-/// possam incorporar o botão SOS persistente no cabeçalho sem empilhar duas
-/// faixas fixas no topo da tela.
-class EscopoSosNaCasca extends InheritedWidget {
-  /// Rótulo textual exibido no botão SOS (usado para medir se cabe na barra).
-  final String rotuloBotao;
-
-  /// Constrói o botão SOS persistente já com a ação configurada pela casca.
-  final WidgetBuilder construirBotao;
-
-  /// Notifica a casca quando uma [BarraSuperior] ativa assume (`true`) ou
-  /// libera (`false`) a exibição do botão SOS.
-  final ValueChanged<bool> aoAlterarBarraAtiva;
-
-  /// Cria o escopo herdado.
-  const EscopoSosNaCasca({
-    required this.rotuloBotao,
-    required this.construirBotao,
-    required this.aoAlterarBarraAtiva,
-    required super.child,
-    super.key,
-  });
-
-  /// Retorna o escopo mais próximo, quando a tela está dentro da `CascaInterna`.
-  static EscopoSosNaCasca? talvezDe(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<EscopoSosNaCasca>();
-
-  @override
-  bool updateShouldNotify(EscopoSosNaCasca oldWidget) =>
-      rotuloBotao != oldWidget.rotuloBotao ||
-      construirBotao != oldWidget.construirBotao ||
-      aoAlterarBarraAtiva != oldWidget.aoAlterarBarraAtiva;
-}
+import 'vaga_do_sos.dart';
 
 /// Barra superior do Memora.
 ///
@@ -64,65 +31,53 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
   /// Expressão opcional da Memora exibida no canto direito (ex.: `mini`).
   final ExpressaoDaMemora? memora;
 
+  /// A Memora do canto está falando: um texto está aparecendo aos poucos.
+  /// Troca a expressão por `falando` e liga a boca. Sem [memora], não faz nada;
+  /// com "reduzir movimento" ligado a Memora fica em repouso, como a anfitriã.
+  final bool memoraFalando;
+
   /// Cria a barra superior.
   const BarraSuperior({
     required this.titulo,
     this.aoVoltar,
     this.acao,
     this.memora,
+    this.memoraFalando = false,
     super.key,
   });
 
+  /// A altura que a barra **pode** ter, não a que ela tem.
+  ///
+  /// O `Scaffold` usa este valor como teto do `appBar`, e a barra mede o
+  /// próprio conteúdo: com a letra normal ela tem [MemoraDimensoes.alvoDecisao],
+  /// e, dentro da casca, com a letra ampliada cresce o que o título e a
+  /// bolinha do SOS pedirem, em vez de cortá-los (feature 014, 2026-11-18).
+  /// Fora da casca ela fica nos [MemoraDimensoes.alvoDecisao] de sempre.
   @override
   Size get preferredSize =>
-      const Size.fromHeight(MemoraDimensoes.alvoDecisao);
+      const Size.fromHeight(MemoraDimensoes.tetoDaBarraSuperior);
 
-  bool _sosCabeNaLinha(
-    BuildContext context, {
-    required String rotuloSos,
-    required bool ehAltoContraste,
-  }) {
-    final TextScaler scaler = MediaQuery.textScalerOf(context);
-    final double escala = scaler.scale(1);
-    if (escala >= MemoraDimensoes.escalaColapsoGrade) return false;
-
-    final double larguraBarra =
-        MediaQuery.sizeOf(context).width - (MemoraEspacamento.md * 2);
-    final double bordaExtra = ehAltoContraste
-        ? MemoraDimensoes.bordaEnfase * 2
-        : MemoraDimensoes.espessuraBordaSutil * 2;
-
-    double medirLarguraTexto(String texto) {
-      final TextPainter tp = TextPainter(
-        text: TextSpan(text: texto, style: MemoraTipografia.corpoForte),
-        textDirection: TextDirection.ltr,
-        textScaler: scaler,
-        maxLines: 1,
-      )..layout();
-      return tp.width;
-    }
-
-    final double larguraVoltar = aoVoltar == null
-        ? 0
-        : (MemoraEspacamento.md * 2) +
-              MemoraDimensoes.iconePadrao +
-              MemoraEspacamento.xs +
-              medirLarguraTexto('Voltar') +
-              bordaExtra +
-              MemoraEspacamento.sm;
-    final double larguraSos =
-        (MemoraEspacamento.md * 2) +
+  double _larguraDoVoltar(BuildContext context, {required bool altoContraste}) {
+    if (aoVoltar == null) return 0;
+    final TextPainter medida = TextPainter(
+      text: const TextSpan(text: 'Voltar', style: MemoraTipografia.corpoForte),
+      textDirection: TextDirection.ltr,
+      textScaler: escalaTextoLimitada(context),
+      maxLines: 1,
+    )..layout();
+    final double texto = medida.width;
+    medida.dispose();
+    final double bordas =
+        (altoContraste
+            ? MemoraDimensoes.bordaEnfase
+            : MemoraDimensoes.espessuraBordaSutil) *
+        2;
+    return (MemoraEspacamento.md * 2) +
         MemoraDimensoes.iconePadrao +
         MemoraEspacamento.xs +
-        medirLarguraTexto(rotuloSos) +
-        bordaExtra +
+        texto +
+        bordas +
         MemoraEspacamento.sm;
-    final double larguraDisponivelTitulo =
-        larguraBarra -
-        larguraVoltar -
-        larguraSos -
-        (MemoraEspacamento.xs * 2);
-    return larguraDisponivelTitulo >= MemoraDimensoes.alvoMinimo;
   }
 
   @override
@@ -130,29 +85,147 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
     final MemoraTheme tema = context.memora;
     final MemoraCores cores = tema.cores;
     final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final bool falando = memoraFalando && !context.reduzirMovimento;
     final bool mostrarFigura =
         memora != null &&
         MediaQuery.textScalerOf(context).scale(1) <
             CabecalhoDeTela.ampliacaoQueTiraAFigura;
-    final EscopoSosNaCasca? escopoSos = EscopoSosNaCasca.talvezDe(context);
-    final bool podeAssumirSos =
-        escopoSos != null &&
-        acao == null &&
-        !mostrarFigura &&
-        _sosCabeNaLinha(
-          context,
-          rotuloSos: escopoSos.rotuloBotao,
-          ehAltoContraste: ehAltoContraste,
+    final bool comSos = EscopoSosNaCasca.talvezDe(context) != null;
+
+    // Rígido na linha única (já medido, cabe); com o texto flexível só na
+    // linha de cima das duas, onde a largura é limitada pela bolinha.
+    Widget? voltar({required bool flexivel}) => aoVoltar == null
+        ? null
+        : SuperficieTocavel(
+            key: CabecalhoDeTela.chaveVoltar,
+            rotulo: 'Voltar',
+            aoTocar: aoVoltar,
+            fundo: cores.superficieSutil,
+            borda: ehAltoContraste ? cores.borda : cores.bordaSutil,
+            larguraBorda: ehAltoContraste
+                ? MemoraDimensoes.bordaEnfase
+                : MemoraDimensoes.espessuraBordaSutil,
+            raio: BorderRadius.circular(MemoraRaio.pilula),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: MemoraDimensoes.alvoMinimo,
+                minHeight: MemoraDimensoes.alvoMinimo,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MemoraEspacamento.md,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      Icons.arrow_back_rounded,
+                      color: cores.primaria,
+                      size: MemoraDimensoes.iconePadrao,
+                    ),
+                    const SizedBox(width: MemoraEspacamento.xs),
+                    // Palavra escrita: seta sozinha é ambígua.
+                    if (flexivel)
+                      Flexible(
+                        child: TextoMemora(
+                          'Voltar',
+                          estilo: EstiloTexto.corpoForte,
+                          cor: cores.primaria,
+                        ),
+                      )
+                    else
+                      TextoMemora(
+                        'Voltar',
+                        estilo: EstiloTexto.corpoForte,
+                        cor: cores.primaria,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          );
+
+    final Widget titulo = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: MemoraEspacamento.xs),
+      child: TextoMemora(
+        this.titulo,
+        estilo: EstiloTexto.corpoForte,
+        cabecalho: true,
+        maxLinhas: 2,
+      ),
+    );
+
+    final List<Widget> direita = <Widget>[
+      if (mostrarFigura) ...<Widget>[
+        const SizedBox(width: MemoraEspacamento.sm),
+        MemoraPersonagem(
+          expressao: falando ? ExpressaoDaMemora.falando : memora!,
+          tamanho: MemoraDimensoes.alvoMinimo,
+          falando: falando,
+        ),
+      ],
+      ?acao,
+      if (comSos) const VagaDoSos(),
+    ];
+
+    Widget linhas(BuildContext contexto, BoxConstraints restricoes) {
+      // A ação de fora (o mapa do Localizador) não se mede antes do layout:
+      // conta como um alvo mínimo, que é o que ela é hoje.
+      double ocupado() =>
+          _larguraDoVoltar(contexto, altoContraste: ehAltoContraste) +
+          (mostrarFigura
+              ? MemoraEspacamento.sm + MemoraDimensoes.alvoMinimo
+              : 0) +
+          (acao != null ? MemoraDimensoes.alvoMinimo : 0) +
+          VagaDoSos.larguraOcupada(contexto) +
+          (MemoraEspacamento.xs * 2);
+      final bool numaLinha =
+          !comSos ||
+          VagaDoSos.palavrasCabem(
+            contexto,
+            texto: this.titulo,
+            estilo: MemoraTipografia.corpoForte,
+            largura: restricoes.maxWidth - ocupado(),
+          );
+
+      if (numaLinha) {
+        return Row(
+          children: <Widget>[
+            if (aoVoltar != null) ...<Widget>[
+              voltar(flexivel: false)!,
+              const SizedBox(width: MemoraEspacamento.sm),
+            ],
+            Expanded(child: titulo),
+            ...direita,
+          ],
         );
+      }
 
-    final Widget? acaoEfetiva = podeAssumirSos
-        ? Padding(
-            padding: const EdgeInsets.only(left: MemoraEspacamento.sm),
-            child: escopoSos.construirBotao(context),
-          )
-        : acao;
+      // O título não cabe ao lado do SOS: "Voltar" e SOS ficam na primeira
+      // linha, e o título ganha a largura inteira logo abaixo. Nunca se corta
+      // palavra do título para caber a bolinha.
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            // Sem `Spacer`: ele dividiria a sobra com o "Voltar", que ficaria
+            // com metade da linha e quebraria a palavra letra a letra.
+            mainAxisAlignment: aoVoltar == null
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              if (aoVoltar != null) Flexible(child: voltar(flexivel: true)!),
+              Row(mainAxisSize: MainAxisSize.min, children: direita),
+            ],
+          ),
+          const SizedBox(height: MemoraEspacamento.xs),
+          titulo,
+        ],
+      );
+    }
 
-    final Widget conteudo = Material(
+    final Widget barra = Material(
       color: cores.fundo,
       child: SafeArea(
         bottom: false,
@@ -163,143 +236,25 @@ class BarraSuperior extends StatelessWidget implements PreferredSizeWidget {
           ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              minHeight: MemoraDimensoes.alvoDecisao,
+              minHeight: MemoraDimensoes.alvoMinimo,
             ),
-            child: Row(
-              children: <Widget>[
-                if (aoVoltar != null) ...<Widget>[
-                  SuperficieTocavel(
-                    key: CabecalhoDeTela.chaveVoltar,
-                    rotulo: 'Voltar',
-                    aoTocar: aoVoltar,
-                    fundo: cores.superficieSutil,
-                    borda: ehAltoContraste ? cores.borda : cores.bordaSutil,
-                    larguraBorda: ehAltoContraste
-                        ? MemoraDimensoes.bordaEnfase
-                        : MemoraDimensoes.espessuraBordaSutil,
-                    raio: BorderRadius.circular(MemoraRaio.pilula),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minWidth: MemoraDimensoes.alvoMinimo,
-                        minHeight: MemoraDimensoes.alvoMinimo,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: MemoraEspacamento.md,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Icon(
-                              Icons.arrow_back,
-                              color: cores.primaria,
-                              size: MemoraDimensoes.iconePadrao,
-                            ),
-                            const SizedBox(width: MemoraEspacamento.xs),
-                            // Palavra escrita: seta sozinha é ambígua.
-                            TextoMemora(
-                              'Voltar',
-                              estilo: EstiloTexto.corpoForte,
-                              cor: cores.primaria,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: MemoraEspacamento.sm),
-                ],
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: MemoraEspacamento.xs,
-                    ),
-                    child: TextoMemora(
-                      titulo,
-                      estilo: EstiloTexto.corpoForte,
-                      cabecalho: true,
-                      maxLinhas: 2,
-                    ),
-                  ),
-                ),
-                if (mostrarFigura) ...<Widget>[
-                  const SizedBox(width: MemoraEspacamento.sm),
-                  MemoraPersonagem(
-                    expressao: memora!,
-                    tamanho: MemoraDimensoes.alvoMinimo,
-                  ),
-                ],
-                ?acaoEfetiva,
-              ],
-            ),
+            child: comSos
+                ? LayoutBuilder(builder: linhas)
+                : linhas(context, const BoxConstraints()),
           ),
         ),
       ),
     );
 
-    if (escopoSos == null) {
-      return conteudo;
-    }
-
-    return _MarcadorSosNaBarra(
-      escopo: escopoSos,
-      assumindo: podeAssumirSos,
-      child: conteudo,
+    // Fora da casca (sem SOS) a barra continua com a altura fixa de antes:
+    // o crescimento só existe para caber a bolinha e o título em duas linhas.
+    if (comSos) return barra;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight:
+            MemoraDimensoes.alvoDecisao + MediaQuery.paddingOf(context).top,
+      ),
+      child: barra,
     );
   }
-}
-
-class _MarcadorSosNaBarra extends StatefulWidget {
-  final EscopoSosNaCasca escopo;
-  final bool assumindo;
-  final Widget child;
-
-  const _MarcadorSosNaBarra({
-    required this.escopo,
-    required this.assumindo,
-    required this.child,
-  });
-
-  @override
-  State<_MarcadorSosNaBarra> createState() => _MarcadorSosNaBarraState();
-}
-
-class _MarcadorSosNaBarraState extends State<_MarcadorSosNaBarra> {
-  bool _registrado = false;
-
-  void _atualizarRegistro(bool proximo) {
-    if (_registrado == proximo) return;
-    _registrado = proximo;
-    final ValueChanged<bool> callback = widget.escopo.aoAlterarBarraAtiva;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      callback(proximo);
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _atualizarRegistro(widget.assumindo && TickerMode.valuesOf(context).enabled);
-  }
-
-  @override
-  void didUpdateWidget(covariant _MarcadorSosNaBarra oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _atualizarRegistro(widget.assumindo && TickerMode.valuesOf(context).enabled);
-  }
-
-  @override
-  void dispose() {
-    if (_registrado) {
-      _registrado = false;
-      final ValueChanged<bool> callback = widget.escopo.aoAlterarBarraAtiva;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        callback(false);
-      });
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => widget.child;
 }

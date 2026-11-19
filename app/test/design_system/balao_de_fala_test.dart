@@ -38,11 +38,45 @@ void main() {
         app(const BalaoDeFala(autor: AutorDoBalao.pessoa, texto: 'Oi')),
       );
       expect(find.byType(MemoraPersonagem), findsNothing);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(Icons.person_rounded), findsOneWidget);
       expect(find.text('Você'), findsOneWidget);
       expect(
-        t.getTopLeft(find.byIcon(Icons.person)).dx,
+        t.getTopLeft(find.byIcon(Icons.person_rounded)).dx,
         greaterThan(t.getTopLeft(find.text('Oi')).dx),
+      );
+    });
+
+    testWidgets('sem rosto (a conversa, FR-042): so posicao e nome escrito', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(
+        app(
+          const Column(
+            children: <Widget>[
+              BalaoDeFala(
+                autor: AutorDoBalao.memora,
+                texto: 'Olá!',
+                comRosto: false,
+              ),
+              BalaoDeFala(
+                autor: AutorDoBalao.pessoa,
+                texto: 'Oi',
+                comRosto: false,
+              ),
+              BalaoDeFala.escrevendo(comRosto: false),
+            ],
+          ),
+        ),
+      );
+      expect(find.byType(MemoraPersonagem), findsNothing);
+      expect(find.byType(MemoraAnimada), findsNothing);
+      expect(find.byIcon(Icons.person_rounded), findsNothing);
+      expect(find.text('Memora'), findsNWidgets(2));
+      expect(find.text('Você'), findsOneWidget);
+      // O balão da pessoa continua à direita da Memora.
+      expect(
+        t.getTopLeft(find.text('Você')).dx,
+        greaterThan(t.getTopLeft(find.text('Memora').first).dx - 1),
       );
     });
 

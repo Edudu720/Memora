@@ -28,21 +28,30 @@ class EstadoVazio extends StatelessWidget {
   /// Acionada ao tocar na ação sugerida.
   final VoidCallback? aoAgir;
 
+  /// Se a Memora (falando) aparece acima do texto (FR-001, T073).
+  ///
+  /// Uma Memora só por tela (FR-006, T096): quando a tela já mostra a dela —
+  /// no cartão de apresentação, na barra, na anfitriã —, passe `false`. O
+  /// texto do estado nunca sai.
+  final bool comMemora;
+
   /// Cria um estado vazio.
   const EstadoVazio({
     required this.titulo,
     required this.explicacao,
-    this.icone = Icons.inbox_outlined,
+    this.icone = Icons.inbox_rounded,
     this.rotuloAcao,
     this.aoAgir,
+    this.comMemora = true,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final bool mostrarMascote =
+        comMemora &&
         MediaQuery.textScalerOf(context).scale(1) <
-        MemoraDimensoes.escalaTextoAlta;
+            MemoraDimensoes.escalaTextoAlta;
 
     return Padding(
       padding: const EdgeInsets.all(MemoraEspacamento.xl),
@@ -52,9 +61,7 @@ class EstadoVazio extends StatelessWidget {
         children: <Widget>[
           if (mostrarMascote) ...<Widget>[
             const Center(
-              child: MemoraPersonagem(
-                expressao: ExpressaoDaMemora.falando,
-              ),
+              child: MemoraPersonagem(expressao: ExpressaoDaMemora.falando),
             ),
             const SizedBox(height: MemoraEspacamento.lg),
           ],

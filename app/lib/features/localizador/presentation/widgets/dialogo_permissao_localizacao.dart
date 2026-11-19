@@ -38,12 +38,11 @@ class DialogoPermissaoLocalizacao extends StatelessWidget {
         key: chaveDialogo,
         titulo: 'Autorizar localização?',
         mensagem:
-            'Para encontrar postos de saúde, farmácias e serviços perto de onde '
-            'você está, o Memora usa sua localização apenas durante esta consulta '
-            'para pesquisar pontos públicos no mapa OpenStreetMap.\n\n'
-            'Não enviamos dados pessoais da sua conta nem gravamos histórico de '
-            'onde você esteve. Se preferir não autorizar, você pode escrever o '
-            'nome do seu bairro ou cidade.',
+            'Para achar saúde, farmácias e serviços perto de você, eu consulto '
+            'sua localização só agora, nos serviços de mapa Geoapify e '
+            'OpenStreetMap.\n\n'
+            'Não envio dados da sua conta nem guardo por onde você passou — se '
+            'preferir, escreva o nome do seu bairro ou cidade.',
         rotuloConfirmar: 'Sim, permitir localização',
         rotuloFechar: 'Não agora (pesquisar manual)',
         aoConfirmar: aoConfirmar,

@@ -24,7 +24,7 @@ final Guia guiaInstagram = Guia(
       chave: 'ver',
       titulo: TextosGuias.instagramSecaoVer,
       subtitulo: TextosGuias.instagramSecaoVerSubtitulo,
-      icone: Icons.photo_library_outlined,
+      icone: Icons.photo_library_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.instagram1,
@@ -67,7 +67,7 @@ final Guia guiaInstagram = Guia(
       chave: 'story',
       titulo: TextosGuias.instagramSecaoStory,
       subtitulo: TextosGuias.instagramSecaoStorySubtitulo,
-      icone: Icons.add_circle_outline,
+      icone: Icons.add_circle_outline_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.instagram1,
@@ -96,7 +96,7 @@ final Guia guiaInstagram = Guia(
       chave: 'avisos-e-mensagens',
       titulo: TextosGuias.instagramSecaoAvisos,
       subtitulo: TextosGuias.instagramSecaoAvisosSubtitulo,
-      icone: Icons.notifications_none,
+      icone: Icons.notifications_none_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.instagram1,
@@ -132,7 +132,7 @@ final Guia guiaInstagram = Guia(
       chave: 'procurar',
       titulo: TextosGuias.instagramSecaoProcurar,
       subtitulo: TextosGuias.instagramSecaoProcurarSubtitulo,
-      icone: Icons.search,
+      icone: Icons.search_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.instagram1,
@@ -161,7 +161,7 @@ final Guia guiaInstagram = Guia(
       chave: 'conta-privada',
       titulo: TextosGuias.instagramSecaoPrivada,
       subtitulo: TextosGuias.instagramSecaoPrivadaSubtitulo,
-      icone: Icons.lock_outline,
+      icone: Icons.lock_outline_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.instagram1,

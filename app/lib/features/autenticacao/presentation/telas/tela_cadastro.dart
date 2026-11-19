@@ -124,14 +124,20 @@ class _TelaCadastroState extends State<TelaCadastro> {
                     padding: const EdgeInsets.all(MemoraEspacamento.md),
                     child: Row(
                       children: <Widget>[
-                        const MemoraPersonagem(
-                          tamanho: MemoraDimensoes.alvoDecisao,
-                        ),
+                        // Uma Memora por tela (FR-006): enquanto a espera tem
+                        // a sua, esta cede o lugar (o espaço fica).
+                        if (c.podeDigitarSenha && c.enviando)
+                          const SizedBox.square(
+                            dimension: MemoraDimensoes.alvoDecisao,
+                          )
+                        else
+                          const MemoraPersonagem(
+                            tamanho: MemoraDimensoes.alvoDecisao,
+                          ),
                         const SizedBox(width: MemoraEspacamento.md),
                         const Expanded(
                           child: TextoMemora(
-                            'Vou te pedir só o necessário. Nada de CPF, banco ou '
-                            'documento — eu nunca preciso disso 😊',
+                            TextosAutenticacao.cadastroSoONecessario,
                           ),
                         ),
                       ],
@@ -212,12 +218,12 @@ class _TelaCadastroState extends State<TelaCadastro> {
                   // o acompanhante já tendo visto o que este modo protege.
                   if (!c.podeDigitarSenha)
                     CaixaDeEtapa(
-                      instrucao:
-                          TextosAutenticacao.instrucaoEtapaCadastroPedirAparelho,
+                      instrucao: TextosAutenticacao
+                          .instrucaoEtapaCadastroPedirAparelho,
                       child: BotaoPrimario(
                         key: TelaCadastro.chavePedirAparelho,
                         rotulo: 'Agora vamos criar a senha',
-                        icone: Icons.arrow_forward,
+                        icone: Icons.arrow_forward_rounded,
                         aoTocar:
                             c.podePedirOAparelho &&
                                 widget.aoEntregarAparelho != null
@@ -251,6 +257,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       c.falha != null) ...<Widget>[
                     const SizedBox(height: MemoraEspacamento.lg),
                     MensagemErro(
+                      // A Memora desta tela é a do cartão (FR-006).
+                      comMemora: false,
                       mensagem: _mensagemDe(c.falha!),
                       aoTentarNovamente: c.tentarNovamente,
                     ),
@@ -267,7 +275,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       BotaoPrimario(
                         key: TelaCadastro.chaveEnviar,
                         rotulo: 'Criar minha conta',
-                        icone: Icons.check,
+                        icone: Icons.check_rounded,
                         aoTocar: c.podeEnviar ? c.enviar : null,
                       ),
                   const SizedBox(height: MemoraEspacamento.lg),

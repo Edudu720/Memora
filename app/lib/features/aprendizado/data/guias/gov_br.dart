@@ -18,7 +18,7 @@ final Guia guiaGovBr = Guia(
       chave: 'entrar',
       titulo: TextosGuias.govBrSecao1Titulo,
       subtitulo: TextosGuias.govBrSecao1Subtitulo,
-      icone: Icons.login,
+      icone: Icons.login_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.govBr1,
@@ -71,7 +71,7 @@ final Guia guiaGovBr = Guia(
       chave: 'minha-area',
       titulo: TextosGuias.govBrSecao2Titulo,
       subtitulo: TextosGuias.govBrSecao2Subtitulo,
-      icone: Icons.folder_shared_outlined,
+      icone: Icons.folder_shared_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.govBr5,
@@ -123,7 +123,7 @@ final Guia guiaGovBr = Guia(
       chave: 'certidoes-agenda',
       titulo: TextosGuias.govBrSecao3Titulo,
       subtitulo: TextosGuias.govBrSecao3Subtitulo,
-      icone: Icons.description_outlined,
+      icone: Icons.description_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.govBr9,
@@ -164,7 +164,7 @@ final Guia guiaGovBr = Guia(
       chave: 'servicos-perfis',
       titulo: TextosGuias.govBrSecao4Titulo,
       subtitulo: TextosGuias.govBrSecao4Subtitulo,
-      icone: Icons.search,
+      icone: Icons.search_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.govBr12,
@@ -227,7 +227,7 @@ final Guia guiaGovBr = Guia(
       chave: 'aplicativos',
       titulo: TextosGuias.govBrSecao5Titulo,
       subtitulo: TextosGuias.govBrSecao5Subtitulo,
-      icone: Icons.apps,
+      icone: Icons.apps_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.govBr17,
@@ -290,7 +290,7 @@ final Guia guiaGovBr = Guia(
       chave: 'ouvidoria',
       titulo: TextosGuias.govBrSecao6Titulo,
       subtitulo: TextosGuias.govBrSecao6Subtitulo,
-      icone: Icons.support_agent,
+      icone: Icons.support_agent_rounded,
       passos: <Passo>[
         Passo(
           captura: CapturaDoGuia.govBr22,

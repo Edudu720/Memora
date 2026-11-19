@@ -9,6 +9,7 @@ import '../../tokens/raio.dart';
 import '../botoes/botao_terciario.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
+import '../toque/superficie_tocavel.dart';
 
 /// O aviso de segurança que fica sempre na tela, sem tomar a tela (R5).
 ///
@@ -127,37 +128,33 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
 
   /// A linha única: escudo, núcleo do aviso e uma seta, tudo um alvo só.
   Widget _linha(MemoraCores cores) {
-    return Semantics(
-      button: true,
-      onTap: _alternar,
-      label: widget.resumo,
-      hint: AvisoCompacto.rotuloAbrir,
-      excludeSemantics: true,
-      child: InkWell(
-        key: AvisoCompacto.chaveAlternar,
-        onTap: _alternar,
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: MemoraDimensoes.alvoMinimo,
-          ),
-          child: Row(
-            children: <Widget>[
-              Icon(
-                Icons.shield_outlined,
-                size: MemoraDimensoes.iconeDestaque,
-                color: cores.perigo,
-              ),
-              const SizedBox(width: MemoraEspacamento.sm),
-              Expanded(child: TextoMemora.apoio(widget.resumo)),
-              const SizedBox(width: MemoraEspacamento.sm),
-              Icon(
-                Icons.expand_more_rounded,
-                size: MemoraDimensoes.iconePadrao,
-                color: cores.texto,
-              ),
-            ],
-          ),
+    return SuperficieTocavel(
+      key: AvisoCompacto.chaveAlternar,
+      rotulo: widget.resumo,
+      dica: AvisoCompacto.rotuloAbrir,
+      aoTocar: _alternar,
+      fundo: Colors.transparent,
+      raio: BorderRadius.circular(MemoraRaio.padrao),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: MemoraDimensoes.alvoMinimo,
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              Icons.shield_rounded,
+              size: MemoraDimensoes.iconeDestaque,
+              color: cores.perigo,
+            ),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Expanded(child: TextoMemora.apoio(widget.resumo)),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Icon(
+              Icons.expand_more_rounded,
+              size: MemoraDimensoes.iconePadrao,
+              color: cores.texto,
+            ),
+          ],
         ),
       ),
     );
@@ -172,28 +169,24 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     return Align(
       alignment: Alignment.centerRight,
       heightFactor: 1,
-      child: Semantics(
-        button: true,
-        onTap: _alternar,
-        label: widget.resumo,
-        hint: AvisoCompacto.rotuloAbrir,
-        excludeSemantics: true,
-        child: InkWell(
-          key: AvisoCompacto.chaveAlternar,
-          onTap: _alternar,
-          customBorder: const CircleBorder(),
-          // Tamanho fixo, e não "no mínimo": um `Center` dentro de um mínimo
-          // se estica até o máximo que o pai oferece, e o escudo tomava a
-          // altura toda que o aviso aberto teria.
-          child: SizedBox(
-            width: MemoraDimensoes.alvoMinimo,
-            height: MemoraDimensoes.alvoMinimo,
-            child: Center(
-              child: Icon(
-                Icons.shield_outlined,
-                size: MemoraDimensoes.iconeDestaque,
-                color: cores.perigo,
-              ),
+      child: SuperficieTocavel(
+        key: AvisoCompacto.chaveAlternar,
+        rotulo: widget.resumo,
+        dica: AvisoCompacto.rotuloAbrir,
+        aoTocar: _alternar,
+        fundo: Colors.transparent,
+        raio: BorderRadius.circular(MemoraRaio.pilula),
+        // Tamanho fixo, e não "no mínimo": um `Center` dentro de um mínimo
+        // se estica até o máximo que o pai oferece, e o escudo tomava a
+        // altura toda que o aviso aberto teria.
+        child: SizedBox(
+          width: MemoraDimensoes.alvoMinimo,
+          height: MemoraDimensoes.alvoMinimo,
+          child: Center(
+            child: Icon(
+              Icons.shield_rounded,
+              size: MemoraDimensoes.iconeDestaque,
+              color: cores.perigo,
             ),
           ),
         ),
@@ -212,7 +205,7 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
           const SizedBox(width: MemoraEspacamento.sm),
         ] else ...<Widget>[
           Icon(
-            Icons.shield_outlined,
+            Icons.shield_rounded,
             size: MemoraDimensoes.iconeDestaque,
             color: cores.perigo,
           ),
@@ -226,6 +219,24 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
           ),
         ),
       ],
+    );
+  }
+
+  /// O botão de fechar do aviso aberto, com um teto de altura.
+  ///
+  /// Fixo, para a saída estar sempre à mão; mas limitado a uma fração do que
+  /// o aviso tem ([alturaDoAviso]), para nunca tomar a caixa inteira — o texto
+  /// rola no resto, e o botão rola dentro do teto dele só nos casos extremos
+  /// (200% num aparelho baixo). A altura vem de fora da `Column`, porque a
+  /// `Column` oferece altura infinita a quem não é flexível. Onde ela também é
+  /// infinita (dentro de uma lista), não há teto a respeitar.
+  Widget _botaoDeFecharComTeto(Widget botao, double alturaDoAviso) {
+    if (!alturaDoAviso.isFinite) return botao;
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: alturaDoAviso * MemoraDimensoes.tetoDoBotaoDoAvisoAberto,
+      ),
+      child: SingleChildScrollView(child: botao),
     );
   }
 
@@ -250,6 +261,18 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
     final double teto = sobra * MemoraDimensoes.tetoDoAvisoAberto;
 
     if (!_aberto && widget.fechadoSoEscudo) return _soEscudo(cores);
+
+    final Widget botao = Align(
+      alignment: Alignment.centerLeft,
+      child: BotaoTerciario(
+        key: AvisoCompacto.chaveAlternar,
+        rotulo: _aberto
+            ? AvisoCompacto.rotuloFechar
+            : AvisoCompacto.rotuloAbrir,
+        icone: _aberto ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+        aoTocar: _alternar,
+      ),
+    );
 
     return Container(
       width: double.infinity,
@@ -277,46 +300,41 @@ class _AvisoCompactoState extends State<AvisoCompacto> {
       ),
       child: modoPilula
           ? _linha(cores)
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                // Aberto, o título rola junto com o texto, e só o botão fica fixo.
-                // A primeira versão deixava título e botão fixos e o texto rolando
-                // entre os dois: a 200% num 320×568, as partes fixas sozinhas já
-                // passavam da metade da tela, e o aviso estourava 225 px. O título
-                // continua na árvore — que é o que os portões procuram.
-                if (_aberto)
-                  Flexible(
-                    child: SingleChildScrollView(
-                      key: AvisoCompacto.chaveTextoCompleto,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          _cabeca(cores),
-                          const SizedBox(height: MemoraEspacamento.xs),
-                          TextoMemora.apoio(widget.textoCompleto),
-                        ],
+          : LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints restricoes) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  // Aberto, o título rola junto com o texto, e só o botão fica fixo.
+                  // A primeira versão deixava título e botão fixos e o texto rolando
+                  // entre os dois: a 200% num 320×568, as partes fixas sozinhas já
+                  // passavam da metade da tela, e o aviso estourava 225 px. O título
+                  // continua na árvore — que é o que os portões procuram.
+                  if (_aberto)
+                    Flexible(
+                      child: SingleChildScrollView(
+                        key: AvisoCompacto.chaveTextoCompleto,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            _cabeca(cores),
+                            const SizedBox(height: MemoraEspacamento.xs),
+                            TextoMemora.apoio(widget.textoCompleto),
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                else ...<Widget>[
-                  _cabeca(cores),
-                  const SizedBox(height: MemoraEspacamento.xs),
-                  TextoMemora(widget.resumo),
+                    )
+                  else ...<Widget>[
+                    _cabeca(cores),
+                    const SizedBox(height: MemoraEspacamento.xs),
+                    TextoMemora(widget.resumo),
+                  ],
+                  _aberto
+                      ? _botaoDeFecharComTeto(botao, restricoes.maxHeight)
+                      : botao,
                 ],
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: BotaoTerciario(
-                    key: AvisoCompacto.chaveAlternar,
-                    rotulo: _aberto
-                        ? AvisoCompacto.rotuloFechar
-                        : AvisoCompacto.rotuloAbrir,
-                    aoTocar: _alternar,
-                  ),
-                ),
-              ],
+              ),
             ),
     );
   }

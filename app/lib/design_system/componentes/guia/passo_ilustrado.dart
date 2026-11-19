@@ -217,7 +217,7 @@ class PassoIlustrado extends StatelessWidget {
                   BotaoSecundario(
                     key: chavePedirParaAbrir,
                     rotulo: TextosGuias.pecaParaAbrir,
-                    icone: Icons.chat_bubble_outline,
+                    icone: Icons.chat_bubble_outline_rounded,
                     aoTocar: aoPedirParaAbrir,
                   ),
                   const SizedBox(height: MemoraEspacamento.md),
@@ -226,7 +226,7 @@ class PassoIlustrado extends StatelessWidget {
                   BotaoSecundario(
                     key: chaveTirarDuvida,
                     rotulo: TextosGuias.ficouComDuvida,
-                    icone: Icons.chat_bubble_outline,
+                    icone: Icons.chat_bubble_outline_rounded,
                     aoTocar: aoTirarDuvida,
                   ),
                   const SizedBox(height: MemoraEspacamento.md),
@@ -237,8 +237,8 @@ class PassoIlustrado extends StatelessWidget {
                       ? TextosGuias.voltarAoHub
                       : TextosGuias.continuar,
                   icone: eUltimoPasso
-                      ? Icons.check_circle_outline
-                      : Icons.arrow_forward,
+                      ? Icons.check_circle_outline_rounded
+                      : Icons.arrow_forward_rounded,
                   aoTocar: aoContinuar,
                 ),
                 if (aoTelaDiferente != null) ...<Widget>[
@@ -246,7 +246,7 @@ class PassoIlustrado extends StatelessWidget {
                   BotaoSecundario(
                     key: chaveTelaDiferente,
                     rotulo: TextosGuias.telaDiferente,
-                    icone: Icons.help_outline,
+                    icone: Icons.help_outline_rounded,
                     aoTocar: aoTelaDiferente,
                   ),
                 ],
@@ -339,7 +339,7 @@ class _EstadoDaCapturaDoPasso extends State<_CapturaDoPasso> {
           BotaoTerciario(
             key: PassoIlustrado.chaveVerImagemMaior,
             rotulo: TextosGuias.verImagemMaior,
-            icone: Icons.zoom_in,
+            icone: Icons.zoom_in_rounded,
             larguraTotal: true,
             aoTocar: _ampliar,
           ),

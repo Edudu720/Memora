@@ -67,7 +67,7 @@ void main() {
     ThemeData? tema,
     double escala = 1.0,
     Size tamanho = const Size(390, 844),
-    bool reduzirMovimento = false,
+    bool reduzirMovimento = true,
   }) {
     t.view.physicalSize = tamanho;
     t.view.devicePixelRatio = 1.0;
@@ -100,95 +100,109 @@ void main() {
 
   group('US1 — Colocar foto de perfil ou avatar pela primeira vez', () {
     testWidgets(
-        'exibe retrato padrão neutro por iniciais/silhueta e botão explícito',
-        (WidgetTester t) async {
-      final SemanticsHandle semantics = t.ensureSemantics();
-      await t.pumpWidget(montarPerfil(t));
-      await t.pumpAndSettle();
+      'exibe retrato padrão neutro por iniciais/silhueta e botão explícito',
+      (WidgetTester t) async {
+        final SemanticsHandle semantics = t.ensureSemantics();
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
 
-      expect(find.byKey(TelaPerfil.chaveDesenho), findsOneWidget);
-      expect(find.text('DA'), findsOneWidget);
-      expect(find.byType(MemoraPersonagem), findsNothing);
-      expect(find.bySemanticsLabel(TextosPerfil.semanticaSemFoto), findsOneWidget);
+        expect(find.byKey(TelaPerfil.chaveDesenho), findsOneWidget);
+        expect(find.text('DA'), findsOneWidget);
+        expect(find.byType(MemoraPersonagem), findsNothing);
+        expect(
+          find.bySemanticsLabel(TextosPerfil.semanticaSemFoto),
+          findsOneWidget,
+        );
 
-      final Finder botao = find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar);
-      expect(botao, findsOneWidget);
-      expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
-      expect(
-        t.getSize(botao).height,
-        greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
-      );
+        final Finder botao = find.byKey(
+          SecaoFotoPerfil.chaveBotaoColocarOuTrocar,
+        );
+        expect(botao, findsOneWidget);
+        expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
+        expect(
+          t.getSize(botao).height,
+          greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+        );
 
-      // Nome sem letras recua para ícone humano neutro
-      await t.pumpWidget(
-        montarPerfil(t, key: const ValueKey<String>('vazio'), nome: '   '),
-      );
-      await t.pumpAndSettle();
-      expect(
-        find.descendant(
-          of: find.byKey(TelaPerfil.chaveDesenho),
-          matching: find.byIcon(Icons.person_outline),
-        ),
-        findsOneWidget,
-      );
-      semantics.dispose();
-    });
+        // Nome sem letras recua para ícone humano neutro
+        await t.pumpWidget(
+          montarPerfil(t, key: const ValueKey<String>('vazio'), nome: '   '),
+        );
+        await t.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveDesenho),
+            matching: find.byIcon(Icons.person_outline_rounded),
+          ),
+          findsOneWidget,
+        );
+        semantics.dispose();
+      },
+    );
 
     testWidgets(
-        'folha de escolha traz explicação integrada (FR-004) e salva foto da galeria após pré-visualização',
-        (WidgetTester t) async {
-      final Uint8List jpeg = _criarJpegValido();
-      seletor.aoSelecionar = (_) async => SelecaoConfirmada(jpeg);
+      'folha de escolha traz explicação integrada (FR-004) e salva foto da galeria após pré-visualização',
+      (WidgetTester t) async {
+        final Uint8List jpeg = _criarJpegValido();
+        seletor.aoSelecionar = (_) async => SelecaoConfirmada(jpeg);
 
-      await t.pumpWidget(montarPerfil(t));
-      await t.pumpAndSettle();
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
 
-      // Explicação integrada visível antes de tocar em qualquer opção
-      expect(find.text(TextosPerfil.avisoPrivacidadeFoto), findsOneWidget);
-      expect(find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria), findsOneWidget);
-      expect(find.byKey(SecaoFotoPerfil.chaveOpcaoCamera), findsOneWidget);
-      expect(find.byKey(SecaoFotoPerfil.chaveOpcaoAvatares), findsOneWidget);
+        // Explicação integrada visível antes de tocar em qualquer opção
+        expect(find.text(TextosPerfil.avisoPrivacidadeFoto), findsOneWidget);
+        expect(find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria), findsOneWidget);
+        expect(find.byKey(SecaoFotoPerfil.chaveOpcaoCamera), findsOneWidget);
+        expect(find.byKey(SecaoFotoPerfil.chaveOpcaoAvatares), findsOneWidget);
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
 
-      expect(seletor.chamadas, <OrigemDaFoto>[OrigemDaFoto.galeria]);
-      expect(find.byType(TelaPreVisualizacaoFoto), findsOneWidget);
-      expect(find.text(TextosPerfil.tituloPreVisualizacaoFoto), findsOneWidget);
+        expect(seletor.chamadas, <OrigemDaFoto>[OrigemDaFoto.galeria]);
+        expect(find.byType(TelaPreVisualizacaoFoto), findsOneWidget);
+        expect(
+          find.text(TextosPerfil.tituloPreVisualizacaoFoto),
+          findsOneWidget,
+        );
 
-      await _tocar(t, find.byKey(TelaPreVisualizacaoFoto.chaveConfirmar));
+        await _tocar(t, find.byKey(TelaPreVisualizacaoFoto.chaveConfirmar));
 
-      expect(find.byType(TelaPreVisualizacaoFoto), findsNothing);
-      expect(find.text(TextosPerfil.fotoAtualizadaComSucesso), findsOneWidget);
-      expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
-      expect(find.byKey(SecaoFotoPerfil.chaveBotaoRemover), findsOneWidget);
+        expect(find.byType(TelaPreVisualizacaoFoto), findsNothing);
+        expect(
+          find.text(TextosPerfil.fotoAtualizadaComSucesso),
+          findsOneWidget,
+        );
+        expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
+        expect(find.byKey(SecaoFotoPerfil.chaveBotaoRemover), findsOneWidget);
 
-      final RetratoDePerfil? salvo = await armazenamento.ler('conta-123');
-      expect(salvo, isA<FotoPropriaDePerfil>());
+        final RetratoDePerfil? salvo = await armazenamento.ler('conta-123');
+        expect(salvo, isA<FotoPropriaDePerfil>());
 
-      // Recria a tela e verifica persistência + TelaInicio inalterada (FR-010)
-      await t.pumpWidget(montarPerfil(t, key: const ValueKey<int>(2)));
-      await t.pumpAndSettle();
-      expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
-      expect(
-        find.bySemanticsLabel(TextosPerfil.semanticaFotoPropria),
-        findsOneWidget,
-      );
+        // Recria a tela e verifica persistência + TelaInicio inalterada (FR-010)
+        await t.pumpWidget(montarPerfil(t, key: const ValueKey<int>(2)));
+        await t.pumpAndSettle();
+        expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
+        expect(
+          find.bySemanticsLabel(TextosPerfil.semanticaFotoPropria),
+          findsOneWidget,
+        );
 
-      await t.pumpWidget(
-        MaterialApp(
-          theme: TemasMemora.claro,
-          home: TelaInicio(nome: 'Dona Ana', aoConversar: () {}),
-        ),
-      );
-      await t.pumpAndSettle();
-      expect(find.byType(RetratoDoPerfil), findsNothing);
-      expect(find.byType(MemoraPersonagem), findsWidgets);
-    });
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaInicio(nome: 'Dona Ana', aoConversar: () {}),
+          ),
+        );
+        await t.pumpAndSettle();
+        expect(find.byType(RetratoDoPerfil), findsNothing);
+        expect(find.byType(MemoraAnfitria), findsOneWidget);
+      },
+    );
 
-    testWidgets('câmera salva foto e cancelamento retorna sem erro',
-        (WidgetTester t) async {
+    testWidgets('câmera salva foto e cancelamento retorna sem erro', (
+      WidgetTester t,
+    ) async {
       final Uint8List jpeg = _criarJpegValido();
       seletor.aoSelecionar = (OrigemDaFoto o) async => o == OrigemDaFoto.camera
           ? SelecaoConfirmada(jpeg)
@@ -218,186 +232,210 @@ void main() {
       expect(await armazenamento.ler('conta-123'), isA<FotoPropriaDePerfil>());
     });
 
-    testWidgets('avatar da Memora salva imediatamente sem chamar seletor nativo',
-        (WidgetTester t) async {
-      await t.pumpWidget(montarPerfil(t));
-      await t.pumpAndSettle();
+    testWidgets(
+      'avatar da Memora salva imediatamente sem chamar seletor nativo',
+      (WidgetTester t) async {
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoAvatares));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoAvatares));
 
-      // Duplo sinal visual via OpcaoSelecionavel / SuperficieTocavel
-      expect(find.byType(OpcaoSelecionavel), findsNWidgets(AvatarIlustrado.values.length));
-      await _tocar(
-        t,
-        find.byKey(
-          Key('perfil.foto.avatar.${AvatarIlustrado.memoraComemorando.chave}'),
-        ),
-      );
+        // Duplo sinal visual via OpcaoSelecionavel / SuperficieTocavel
+        expect(
+          find.byType(OpcaoSelecionavel),
+          findsNWidgets(AvatarIlustrado.values.length),
+        );
+        await _tocar(
+          t,
+          find.byKey(
+            Key(
+              'perfil.foto.avatar.${AvatarIlustrado.memoraComemorando.chave}',
+            ),
+          ),
+        );
 
-      expect(seletor.chamadas, isEmpty);
-      final RetratoDePerfil? salvo = await armazenamento.ler('conta-123');
-      expect(salvo, isA<AvatarIlustradoDePerfil>());
-      expect(
-        (salvo as AvatarIlustradoDePerfil).avatar,
-        AvatarIlustrado.memoraComemorando,
-      );
-    });
+        expect(seletor.chamadas, isEmpty);
+        final RetratoDePerfil? salvo = await armazenamento.ler('conta-123');
+        expect(salvo, isA<AvatarIlustradoDePerfil>());
+        expect(
+          (salvo as AvatarIlustradoDePerfil).avatar,
+          AvatarIlustrado.memoraComemorando,
+        );
+      },
+    );
   });
 
   group('US2 — Trocar, remover, isolar por conta e bloquear concorrência', () {
     testWidgets(
-        '"Escolher outra" volta à origem preservando o retrato anterior; remoção pede confirmação',
-        (WidgetTester t) async {
-      await armazenamento.salvarAvatar(
-        'conta-123',
-        AvatarIlustrado.memoraAcenando,
-      );
-      seletor.aoSelecionar = (_) async => SelecaoConfirmada(_criarJpegValido());
+      '"Escolher outra" volta à origem preservando o retrato anterior; remoção pede confirmação',
+      (WidgetTester t) async {
+        await armazenamento.salvarAvatar(
+          'conta-123',
+          AvatarIlustrado.memoraAcenando,
+        );
+        seletor.aoSelecionar = (_) async =>
+            SelecaoConfirmada(_criarJpegValido());
 
-      await t.pumpWidget(montarPerfil(t));
-      await t.pumpAndSettle();
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
 
-      expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
-      final double fundoTrocar =
-          t.getRect(find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar)).bottom;
-      final double topoRemover =
-          t.getRect(find.byKey(SecaoFotoPerfil.chaveBotaoRemover)).top;
-      expect(
-        topoRemover - fundoTrocar,
-        greaterThanOrEqualTo(MemoraEspacamento.sm),
-      );
+        expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
+        final double fundoTrocar = t
+            .getRect(find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar))
+            .bottom;
+        final double topoRemover = t
+            .getRect(find.byKey(SecaoFotoPerfil.chaveBotaoRemover))
+            .top;
+        expect(
+          topoRemover - fundoTrocar,
+          greaterThanOrEqualTo(MemoraEspacamento.sm),
+        );
 
-      // Trocar -> Galeria -> "Escolher outra" reabre folha -> fecha sem salvar foto nova
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
-      await _tocar(t, find.byKey(TelaPreVisualizacaoFoto.chaveEscolherOutra));
+        // Trocar -> Galeria -> "Escolher outra" reabre folha -> fecha sem salvar foto nova
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
+        await _tocar(t, find.byKey(TelaPreVisualizacaoFoto.chaveEscolherOutra));
 
-      // Folha inferior reaberta
-      expect(find.text(TextosPerfil.tituloEscolherOrigemFoto), findsOneWidget);
-      await _tocar(t, find.text('Fechar'));
+        // Folha inferior reaberta
+        expect(
+          find.text(TextosPerfil.tituloEscolherOrigemFoto),
+          findsOneWidget,
+        );
+        await _tocar(t, find.text('Fechar'));
 
-      // Avatar anterior intacto
-      expect(
-        await armazenamento.ler('conta-123'),
-        isA<AvatarIlustradoDePerfil>(),
-      );
+        // Avatar anterior intacto
+        expect(
+          await armazenamento.ler('conta-123'),
+          isA<AvatarIlustradoDePerfil>(),
+        );
 
-      // Remoção: cancelar mantém; confirmar apaga
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoRemover));
-      expect(
-        find.byKey(SecaoFotoPerfil.chaveConfirmacaoRemover),
-        findsOneWidget,
-      );
+        // Remoção: cancelar mantém; confirmar apaga
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoRemover));
+        expect(
+          find.byKey(SecaoFotoPerfil.chaveConfirmacaoRemover),
+          findsOneWidget,
+        );
 
-      await _tocar(t, find.text(TextosPerfil.botaoManterFoto));
-      expect(await armazenamento.ler('conta-123'), isNotNull);
+        await _tocar(t, find.text(TextosPerfil.botaoManterFoto));
+        expect(await armazenamento.ler('conta-123'), isNotNull);
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoRemover));
-      await _tocar(t, find.text(TextosPerfil.botaoConfirmarRemoverFoto));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoRemover));
+        await _tocar(t, find.text(TextosPerfil.botaoConfirmarRemoverFoto));
 
-      expect(await armazenamento.ler('conta-123'), isNull);
-      expect(find.text(TextosPerfil.fotoRemovidaComSucesso), findsOneWidget);
-      expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
-    });
+        expect(await armazenamento.ler('conta-123'), isNull);
+        expect(find.text(TextosPerfil.fotoRemovidaComSucesso), findsOneWidget);
+        expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
+      },
+    );
 
     testWidgets(
-        'troca de idDaConta isola retratos e evita gravação após expiração externa',
-        (WidgetTester t) async {
-      await armazenamento.salvarAvatar('conta-A', AvatarIlustrado.casalIdoso);
+      'troca de idDaConta isola retratos e evita gravação após expiração externa',
+      (WidgetTester t) async {
+        await armazenamento.salvarAvatar('conta-A', AvatarIlustrado.casalIdoso);
 
-      await t.pumpWidget(montarPerfil(t, nome: 'Ana', idDaConta: 'conta-A'));
-      await t.pumpAndSettle();
-      expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
+        await t.pumpWidget(montarPerfil(t, nome: 'Ana', idDaConta: 'conta-A'));
+        await t.pumpAndSettle();
+        expect(find.text(TextosPerfil.botaoTrocarFoto), findsOneWidget);
 
-      // Conta B não enxerga nada de A
-      await t.pumpWidget(montarPerfil(t, nome: 'Beto', idDaConta: 'conta-B'));
-      await t.pumpAndSettle();
-      expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
+        // Conta B não enxerga nada de A
+        await t.pumpWidget(montarPerfil(t, nome: 'Beto', idDaConta: 'conta-B'));
+        await t.pumpAndSettle();
+        expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
 
-      // Simula seleção lenta na conta B enquanto a conta muda/expira antes de retornar
-      final Completer<ResultadoDaSelecao> pendente =
-          Completer<ResultadoDaSelecao>();
-      seletor.aoSelecionar = (_) => pendente.future;
+        // Simula seleção lenta na conta B enquanto a conta muda/expira antes de retornar
+        final Completer<ResultadoDaSelecao> pendente =
+            Completer<ResultadoDaSelecao>();
+        seletor.aoSelecionar = (_) => pendente.future;
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
-      await t.ensureVisible(find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
-      await t.tap(find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
-      await t.pump();
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await t.ensureVisible(find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
+        await t.tap(find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
+        await t.pump();
 
-      expect(seletor.chamadas.length, 1);
+        expect(seletor.chamadas.length, 1);
 
-      // Muda para conta-C (simulando troca/expiração)
-      await t.pumpWidget(montarPerfil(t, nome: 'Clara', idDaConta: 'conta-C'));
-      await t.pump();
+        // Muda para conta-C (simulando troca/expiração)
+        await t.pumpWidget(
+          montarPerfil(t, nome: 'Clara', idDaConta: 'conta-C'),
+        );
+        await t.pump();
 
-      pendente.complete(SelecaoConfirmada(_criarJpegValido()));
-      await t.pumpAndSettle();
+        pendente.complete(SelecaoConfirmada(_criarJpegValido()));
+        await t.pumpAndSettle();
 
-      expect(find.byType(TelaPreVisualizacaoFoto), findsNothing);
-      expect(await armazenamento.ler('conta-B'), isNull);
-      expect(await armazenamento.ler('conta-C'), isNull);
-    });
+        expect(find.byType(TelaPreVisualizacaoFoto), findsNothing);
+        expect(await armazenamento.ler('conta-B'), isNull);
+        expect(await armazenamento.ler('conta-C'), isNull);
+      },
+    );
   });
 
   group('US3 — Permissões negadas, arquivos inválidos e acessibilidade', () {
     testWidgets(
-        'permissão negada orienta em português, abre ajustes e permite avatar como fallback',
-        (WidgetTester t) async {
-      seletor.aoSelecionar = (OrigemDaFoto o) async => SelecaoSemPermissao(o);
+      'permissão negada orienta em português, abre ajustes e permite avatar como fallback',
+      (WidgetTester t) async {
+        seletor.aoSelecionar = (OrigemDaFoto o) async => SelecaoSemPermissao(o);
 
-      await t.pumpWidget(montarPerfil(t));
-      await t.pumpAndSettle();
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoCamera));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoCamera));
 
-      expect(
-        find.byKey(SecaoFotoPerfil.chaveAvisoErroOuPermissao),
-        findsOneWidget,
-      );
-      expect(find.text(TextosPerfil.erroPermissaoCamera), findsOneWidget);
+        expect(
+          find.byKey(SecaoFotoPerfil.chaveAvisoErroOuPermissao),
+          findsOneWidget,
+        );
+        expect(find.text(TextosPerfil.erroPermissaoCamera), findsOneWidget);
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoAbrirAjustes));
-      expect(seletor.chamadasConfiguracoes, 1);
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoAbrirAjustes));
+        expect(seletor.chamadasConfiguracoes, 1);
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoUsarAvatarFallback));
-      await _tocar(
-        t,
-        find.byKey(
-          Key('perfil.foto.avatar.${AvatarIlustrado.pessoaComCelular.chave}'),
-        ),
-      );
+        await _tocar(
+          t,
+          find.byKey(SecaoFotoPerfil.chaveBotaoUsarAvatarFallback),
+        );
+        await _tocar(
+          t,
+          find.byKey(
+            Key('perfil.foto.avatar.${AvatarIlustrado.pessoaComCelular.chave}'),
+          ),
+        );
 
-      expect(
-        await armazenamento.ler('conta-123'),
-        isA<AvatarIlustradoDePerfil>(),
-      );
-    });
+        expect(
+          await armazenamento.ler('conta-123'),
+          isA<AvatarIlustradoDePerfil>(),
+        );
+      },
+    );
 
     testWidgets(
-        'arquivo inválido ou > 15 MB mantém foto anterior e exibe aviso claro',
-        (WidgetTester t) async {
-      await armazenamento.salvarAvatar(
-        'conta-123',
-        AvatarIlustrado.memoraPensando,
-      );
-      seletor.aoSelecionar = (_) async => SelecaoConfirmada(
-            Uint8List.fromList('NOT_AN_IMAGE_PDF'.codeUnits),
-          );
+      'arquivo inválido ou > 15 MB mantém foto anterior e exibe aviso claro',
+      (WidgetTester t) async {
+        await armazenamento.salvarAvatar(
+          'conta-123',
+          AvatarIlustrado.memoraPensando,
+        );
+        seletor.aoSelecionar = (_) async =>
+            SelecaoConfirmada(Uint8List.fromList('NOT_AN_IMAGE_PDF'.codeUnits));
 
-      await t.pumpWidget(montarPerfil(t));
-      await t.pumpAndSettle();
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
 
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
-      await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
 
-      expect(find.text(TextosPerfil.erroImagemFormatoInvalido), findsOneWidget);
-      expect(
-        await armazenamento.ler('conta-123'),
-        isA<AvatarIlustradoDePerfil>(),
-      );
-    });
+        expect(
+          find.text(TextosPerfil.erroImagemFormatoInvalido),
+          findsOneWidget,
+        );
+        expect(
+          await armazenamento.ler('conta-123'),
+          isA<AvatarIlustradoDePerfil>(),
+        );
+      },
+    );
 
     for (final (String nomeTema, ThemeData tema) in <(String, ThemeData)>[
       ('claro', TemasMemora.claro),
@@ -405,51 +443,84 @@ void main() {
       ('altoContraste', TemasMemora.altoContraste),
     ]) {
       testWidgets(
-          'acessibilidade 200% + disableAnimations sem overflow no tema $nomeTema',
-          (WidgetTester t) async {
-        seletor.aoSelecionar =
-            (_) async => SelecaoConfirmada(_criarJpegValido());
-        await armazenamento.salvarAvatar(
-          'conta-123',
-          AvatarIlustrado.memoraProtegendo,
-        );
+        'acessibilidade 200% + disableAnimations sem overflow no tema $nomeTema',
+        (WidgetTester t) async {
+          seletor.aoSelecionar = (_) async =>
+              SelecaoConfirmada(_criarJpegValido());
+          await armazenamento.salvarAvatar(
+            'conta-123',
+            AvatarIlustrado.memoraProtegendo,
+          );
 
-        await t.pumpWidget(
-          montarPerfil(
+          await t.pumpWidget(
+            montarPerfil(
+              t,
+              tema: tema,
+              escala: 2.0,
+              tamanho: const Size(320, 568),
+            ),
+          );
+          await t.pumpAndSettle();
+          expect(t.takeException(), isNull);
+
+          expect(
+            t
+                .getSize(find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar))
+                .height,
+            greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+          );
+          expect(
+            t.getSize(find.byKey(SecaoFotoPerfil.chaveBotaoRemover)).height,
+            greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+          );
+
+          // Folha de origem a 200% no menor aparelho
+          await _tocar(
             t,
-            tema: tema,
-            escala: 2.0,
-            tamanho: const Size(320, 568),
-            reduzirMovimento: true,
-          ),
-        );
-        await t.pumpAndSettle();
-        expect(t.takeException(), isNull);
+            find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar),
+          );
+          expect(t.takeException(), isNull);
 
-        expect(
-          t
-              .getSize(find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar))
-              .height,
-          greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
-        );
-        expect(
-          t.getSize(find.byKey(SecaoFotoPerfil.chaveBotaoRemover)).height,
-          greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
-        );
-
-        // Folha de origem a 200% no menor aparelho
-        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
-        expect(t.takeException(), isNull);
-
-        // Pré-visualização a 200% com disableAnimations
-        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
-        expect(find.byType(TelaPreVisualizacaoFoto), findsOneWidget);
-        expect(t.takeException(), isNull);
-        expect(
-          t.getSize(find.byKey(TelaPreVisualizacaoFoto.chaveConfirmar)).height,
-          greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
-        );
-      });
+          // Pré-visualização a 200% com disableAnimations
+          await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoGaleria));
+          expect(find.byType(TelaPreVisualizacaoFoto), findsOneWidget);
+          expect(t.takeException(), isNull);
+          expect(
+            t
+                .getSize(find.byKey(TelaPreVisualizacaoFoto.chaveConfirmar))
+                .height,
+            greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+          );
+        },
+      );
     }
+
+    testWidgets(
+      'T081: avatares usam desenhos vetoriais/ícones da 013 e TelaPerfil não exibe Memora extra',
+      (WidgetTester t) async {
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
+        expect(find.byType(MemoraAnimada), findsNothing);
+        expect(find.byType(Image), findsNothing);
+
+        for (final AvatarIlustrado avatar in AvatarIlustrado.values) {
+          await armazenamento.salvarAvatar('conta-123', avatar);
+          await t.pumpWidget(
+            KeyedSubtree(
+              key: ValueKey<AvatarIlustrado>(avatar),
+              child: montarPerfil(t),
+            ),
+          );
+          await t.pumpAndSettle();
+
+          expect(find.byType(DesenhoAvatarIlustrado), findsOneWidget);
+          final DesenhoAvatarIlustrado desenho = t.widget<DesenhoAvatarIlustrado>(
+            find.byType(DesenhoAvatarIlustrado),
+          );
+          expect(desenho.animado, isFalse, reason: avatar.chave);
+          expect(find.byType(Image), findsNothing, reason: avatar.chave);
+        }
+      },
+    );
   });
 }

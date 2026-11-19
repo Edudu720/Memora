@@ -98,7 +98,7 @@ abstract final class TextosAjuda {
   /// As ideias do assunto, uma por tela.
   static const List<String> telasDaMemora = <String>[
     'Eu sou a Memora. Estou aqui para te mostrar o caminho, passo a passo, '
-        'para que da próxima vez você consiga sozinha.',
+        'para que da próxima vez você consiga por conta própria.',
     TextosApresentacao.ensinoNaoSubstituo,
     'Se eu não souber, eu digo. E, se uma dúvida for séria, vale perguntar '
         'também a alguém de confiança.',
@@ -231,33 +231,31 @@ abstract final class TextosAjuda {
 
   /// Primeira tela: o convite (Figura 15).
   static const String guiadaConvite =
-      'Vamos ver, passo a passo, como conversar comigo? É bem simples! Para '
+      'Vamos ver, passo a passo, como conversar comigo? É bem simples — para '
       'continuar, toque no botão azul.';
 
   /// Segunda tela: o que é a conversa (Figura 19).
   static const String guiadaOQueE =
-      'Na conversa, você pergunta e eu respondo. Minha função é tirar suas '
-      'dúvidas sobre o celular e sobre os aplicativos. Veja um exemplo.';
+      'Na conversa, você pergunta e eu tiro suas dúvidas sobre o celular e '
+      'os aplicativos. Veja um exemplo.';
 
   /// A pergunta de exemplo, no balão da pessoa.
   static const String guiadaPergunta = 'Como eu mando uma foto no WhatsApp?';
 
   /// A resposta de exemplo, no balão da Memora.
   static const String guiadaResposta =
-      'Claro! Abra o WhatsApp e entre na conversa de quem vai receber a foto. '
-      'Quando chegar lá, me avise, e eu mostro o próximo passo.';
+      'Claro, abra o WhatsApp e entre na conversa de quem vai receber a foto. '
+      'Quando chegar lá, me avise que eu mostro o próximo passo.';
 
   /// Terceira tela: como escrever (Figura 18).
   static const String guiadaComoEscrever =
-      'Para escrever, toque na barra que fica embaixo da conversa. Escreva do '
-      'seu jeito, como se falasse com uma pessoa. Se eu não entender, eu '
-      'pergunto de novo.';
+      'Para escrever, toque na barra embaixo da conversa e escreva do seu '
+      'jeito. Se eu não entender, eu pergunto de novo.';
 
   /// Quarta tela: abrir aplicativo, sempre com pergunta (Figura 17).
   static const String guiadaAbrir =
-      'Se você pedir, eu posso abrir um aplicativo para você. Mas antes eu '
-      'sempre pergunto, e você responde sim ou não. Eu quero que você aprenda, '
-      'e não que fique dependendo de mim.';
+      'Se você pedir, eu posso abrir um aplicativo para você, mas antes eu '
+      'sempre pergunto. Eu quero que você aprenda, sem depender de mim.';
 
   /// A pergunta da Memora no exemplo de abrir aplicativo.
   static const String guiadaPerguntaDeAbrir =

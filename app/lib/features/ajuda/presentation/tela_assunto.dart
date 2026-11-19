@@ -198,6 +198,8 @@ class _TelaAssuntoState extends State<TelaAssunto> {
         if (_falhou) ...<Widget>[
           const MensagemErro(
             key: TelaAssunto.chaveErro,
+            // A Memora desta tela é a do balão (FR-006).
+            comMemora: false,
             mensagem: TextosAjuda.erroAoCompartilhar,
           ),
           espaco,
@@ -218,7 +220,7 @@ class _TelaAssuntoState extends State<TelaAssunto> {
           BotaoPrimario(
             key: TelaAssunto.chaveCompartilhar,
             rotulo: TextosAjuda.botaoCompartilhar,
-            icone: Icons.share,
+            icone: Icons.share_rounded,
             carregando: _enviando,
             aoTocar: _enviando
                 ? null

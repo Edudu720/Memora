@@ -70,6 +70,26 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
 
   void _tocou(String o) => setState(() => _ultimoToque = o);
 
+  /// A tela que a demonstração das transições abre.
+  Widget _telaDeExemploDaRota(BuildContext contexto) => Scaffold(
+    body: SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          BarraSuperior(
+            titulo: 'Uma tela de exemplo',
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(MemoraEspacamento.lg),
+            child: TextoMemora('Volte pelo botão ou pelo gesto do aparelho: a '
+                'animação é a mesma.'),
+          ),
+        ],
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     // A galeria troca o tema **só para dentro dela**. Trocar a preferência
@@ -155,7 +175,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const SizedBox(height: MemoraEspacamento.md),
       BotaoPrimario(
         rotulo: 'Continuar com ícone',
-        icone: Icons.arrow_forward,
+        icone: Icons.arrow_forward_rounded,
         aoTocar: () => _tocou('primário com ícone'),
       ),
       const SizedBox(height: MemoraEspacamento.md),
@@ -174,7 +194,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const SizedBox(height: MemoraEspacamento.md),
       BotaoPerigo(
         rotulo: 'Apagar minha conta',
-        icone: Icons.delete_outline,
+        icone: Icons.delete_outline_rounded,
         aoTocar: () => _tocou('perigo'),
       ),
       const SizedBox(height: MemoraEspacamento.md),
@@ -190,7 +210,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           CampoInformacao(
             rotulo: 'E-mail',
             valor: 'ana.maria@email.com',
-            icone: Icons.mail_outline,
+            icone: Icons.mail_outline_rounded,
           ),
         ],
       ),
@@ -198,7 +218,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const DestaqueInformacao(
         rotulo: 'Seu código',
         valor: '482913',
-        icone: Icons.vpn_key_outlined,
+        icone: Icons.vpn_key_rounded,
       ),
 
       const _Secao('Campos', 'Normal, com erro, senha e código.'),
@@ -286,7 +306,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       EstadoVazio(
         titulo: 'Nenhuma conversa ainda',
         explicacao: 'Quando você me perguntar alguma coisa, ela aparece aqui.',
-        icone: Icons.chat_bubble_outline,
+        icone: Icons.chat_bubble_outline_rounded,
         rotuloAcao: 'Conversar com a Memora',
         aoAgir: () => _tocou('foi conversar'),
       ),
@@ -294,7 +314,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
       const EstadoVazio(
         titulo: 'Estado vazio sem ação',
         explicacao: 'Nem todo vazio tem para onde mandar a pessoa.',
-        icone: Icons.folder_open_outlined,
+        icone: Icons.folder_open_rounded,
       ),
 
       const _Secao('Cartões e ilustração'),
@@ -408,6 +428,47 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           IconeDoAplicativo(chave: 'meu-inss'),
         ],
       ),
+
+      const _Secao('Poses da Memora e MemoraAnimada', 'A Memora em 2.5D, '
+          'desenhada pelo aplicativo: uma pose para cada momento, e um gesto '
+          'ao toque. Com "reduzir movimento" ela fica parada.'),
+      Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          for (final PoseDaMemora p in PoseDaMemora.values)
+            MemoraAnimada(expressao: p, tamanho: MemoraDimensoes.ilustracaoHeroi),
+        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const TextoMemora(
+        'Os gestos (GestoDaMemora) também disparam por botão:',
+        estilo: EstiloTexto.apoio,
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      const _MemoraComGestos(),
+      const SizedBox(height: MemoraEspacamento.md),
+      const TextoMemora(
+        'Ela segue a paleta escolhida em Aparência (no tema claro aqui); no '
+        'alto contraste a paleta não vale.',
+        estilo: EstiloTexto.apoio,
+      ),
+      const SizedBox(height: MemoraEspacamento.sm),
+      Wrap(
+        spacing: MemoraEspacamento.md,
+        runSpacing: MemoraEspacamento.md,
+        children: <Widget>[
+          for (final String nome in MemoraCores.paletas.keys)
+            _MemoraNaPaleta(paleta: nome),
+        ],
+      ),
+
+      const _Secao('MemoraAnfitria', 'A Memora do Início (T089): mais '
+          'detalhada, se mexe sozinha e conta dicas num balão, com a boca '
+          'mexendo enquanto o texto aparece. A dica troca a cada 20 s, menos '
+          'com leitor de tela, com "reduzir movimento" ou depois de um toque. '
+          'Tocar nela mostra a próxima e nunca leva a lugar nenhum.'),
+      Center(child: MemoraAnfitria()),
 
       const _Secao('Portas', 'Ação, então pílula e preenchimento — e não '
           'cartão. No máximo uma principal por tela. A desabilitada só existe '
@@ -548,7 +609,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           folha: const FolhaInferior(
             titulo: 'Como eu te ajudo',
             child: TextoMemora('Eu mostro o caminho. Quem faz é você — assim, '
-                'da próxima vez, você consegue sozinha.'),
+                'da próxima vez, você consegue por conta própria.'),
           ),
         ),
       ),
@@ -576,6 +637,45 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
         indiceAtivo: _abaAtiva,
         aoSelecionar: (int i) => setState(() => _abaAtiva = i),
       ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const _Secao(
+        'Transições',
+        'Avançar entra pela direita, voltar pela esquerda; a barra de '
+            'navegação acima troca de destino pelo lado em que está. Com "reduzir movimento", '
+            'tudo troca de uma vez.',
+      ),
+      SizedBox(
+        height: MemoraDimensoes.alvoDecisao * 2,
+        child: TrocaDeDestino(
+          indice: _abaAtiva,
+          filhos: <Widget>[
+            for (final String nome in <String>['Ajustes', 'Início', 'Meu perfil'])
+              ColoredBox(
+                color: context.memora.cores.superficieSutil,
+                child: Center(child: TextoMemora(nome)),
+              ),
+          ],
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir uma tela, vinda da direita',
+        aoTocar: () => Navigator.of(context).push(
+          RotaMemora<void>(builder: _telaDeExemploDaRota),
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      BotaoSecundario(
+        rotulo: 'Abrir uma tela, vinda da esquerda',
+        aoTocar: () => Navigator.of(context).push(
+          RotaMemora<void>(
+            builder: _telaDeExemploDaRota,
+            direcao: DirecaoDaTransicao.voltar,
+          ),
+        ),
+      ),
+      const SizedBox(height: MemoraEspacamento.md),
+      const _DemoTrocaDePasso(),
 
       const _Secao(
         'Blocos Memora 2.0',
@@ -662,7 +762,7 @@ class _GaleriaMemoraState extends State<GaleriaMemora> {
           ),
           ChipFiltro(
             rotulo: 'Saúde',
-            icone: Icons.health_and_safety_outlined,
+            icone: Icons.health_and_safety_rounded,
             selecionado: _filtroAtivo == 1,
             aoTocar: () => setState(() => _filtroAtivo = 1),
           ),
@@ -859,5 +959,137 @@ class _UltimoToque extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CampoInformacao(rotulo: 'Último toque', valor: valor);
+  }
+}
+
+/// A Memora com os botões que disparam cada gesto.
+class _MemoraComGestos extends StatefulWidget {
+  const _MemoraComGestos();
+
+  @override
+  State<_MemoraComGestos> createState() => _MemoraComGestosState();
+}
+
+class _MemoraComGestosState extends State<_MemoraComGestos> {
+  GestoDaMemora? _gesto;
+
+  void _disparar(GestoDaMemora g) {
+    setState(() => _gesto = g);
+    // Volta a nulo no quadro seguinte, para o mesmo gesto poder repetir.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _gesto = null);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: <Widget>[
+        MemoraAnimada(
+          expressao: PoseDaMemora.neutra,
+          tamanho: MemoraDimensoes.ilustracaoHeroi,
+          gesto: _gesto,
+        ),
+        const SizedBox(width: MemoraEspacamento.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              BotaoSecundario(
+                rotulo: 'Acenar',
+                aoTocar: () => _disparar(GestoDaMemora.aceno),
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
+              BotaoSecundario(
+                rotulo: 'Piscar',
+                aoTocar: () => _disparar(GestoDaMemora.piscada),
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
+              BotaoSecundario(
+                rotulo: 'Comemorar',
+                aoTocar: () => _disparar(GestoDaMemora.comemoracao),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A Memora acenando no tema claro de uma paleta, sobre o fundo dele.
+class _MemoraNaPaleta extends StatelessWidget {
+  final String paleta;
+
+  const _MemoraNaPaleta({required this.paleta});
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData tema = TemasMemora.porId(MemoraTemaId.claro, paleta: paleta);
+    return Theme(
+      data: tema,
+      child: Builder(
+        builder: (BuildContext context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ColoredBox(
+              color: context.memora.cores.fundo,
+              child: MemoraAnimada(
+                expressao: PoseDaMemora.acenando,
+                tamanho: MemoraDimensoes.ilustracaoCabecalho,
+                reageAoToque: false,
+              ),
+            ),
+            TextoMemora.apoio(paleta),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A troca de passo dentro da mesma tela (T072): "Próximo" traz o passo pela
+/// direita e "Anterior", pela esquerda.
+class _DemoTrocaDePasso extends StatefulWidget {
+  const _DemoTrocaDePasso();
+
+  @override
+  State<_DemoTrocaDePasso> createState() => _DemoTrocaDePassoState();
+}
+
+class _DemoTrocaDePassoState extends State<_DemoTrocaDePasso> {
+  int _passo = 1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        TrocaDePasso(
+          posicao: _passo,
+          child: Cartao(
+            child: TextoMemora('Passo $_passo de 3'),
+          ),
+        ),
+        const SizedBox(height: MemoraEspacamento.sm),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: BotaoSecundario(
+                rotulo: 'Anterior',
+                aoTocar: _passo > 1 ? () => setState(() => _passo--) : null,
+              ),
+            ),
+            const SizedBox(width: MemoraEspacamento.sm),
+            Expanded(
+              child: BotaoPrimario(
+                rotulo: 'Próximo',
+                aoTocar: _passo < 3 ? () => setState(() => _passo++) : null,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

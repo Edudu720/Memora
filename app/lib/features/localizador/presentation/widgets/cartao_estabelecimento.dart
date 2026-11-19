@@ -56,7 +56,7 @@ class CartaoEstabelecimento extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Icon(
-                      Icons.near_me_outlined,
+                      Icons.near_me_rounded,
                       size: MemoraDimensoes.iconePequeno,
                       color: cores.primaria,
                     ),
@@ -90,7 +90,7 @@ class CartaoEstabelecimento extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Icon(
-                Icons.location_on_outlined,
+                Icons.location_on_rounded,
                 size: MemoraDimensoes.iconePadrao,
                 color: cores.texto,
               ),
@@ -165,7 +165,7 @@ class CartaoEstabelecimento extends StatelessWidget {
               final Widget botaoRota = BotaoPrimario(
                 key: chaveRota(estabelecimento.id),
                 rotulo: 'Como chegar',
-                icone: Icons.directions_outlined,
+                icone: Icons.directions_rounded,
                 aoTocar: aoPedirRota,
               );
 
@@ -173,7 +173,7 @@ class CartaoEstabelecimento extends StatelessWidget {
                   ? BotaoSecundario(
                       key: chaveLigar(estabelecimento.id),
                       rotulo: 'Ligar',
-                      icone: Icons.phone_outlined,
+                      icone: Icons.phone_rounded,
                       aoTocar: aoPedirLigacao,
                     )
                   : null;

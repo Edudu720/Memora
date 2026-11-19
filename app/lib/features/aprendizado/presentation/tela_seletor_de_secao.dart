@@ -146,8 +146,8 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                                     total,
                                   ),
                                   icone: todasFeitas
-                                      ? Icons.check_circle_outline
-                                      : Icons.menu_book_outlined,
+                                      ? Icons.check_circle_outline_rounded
+                                      : Icons.menu_book_rounded,
                                   tom: todasFeitas
                                       ? TomBadgeStatus.positivo
                                       : TomBadgeStatus.informativo,
@@ -162,6 +162,11 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                     BalaoDeFala(
                       autor: AutorDoBalao.memora,
                       texto: TextosGuias.perguntaDaSecao(_nomeServico),
+                      // Todas as seções aprendidas: a Memora comemora (FR-003, T072).
+                      // É a única Memora da tela (FR-006).
+                      expressaoDaMemora: todasFeitas
+                          ? ExpressaoDaMemora.comemorando
+                          : ExpressaoDaMemora.mini,
                     ),
                     const SizedBox(height: MemoraEspacamento.lg),
                     for (final SecaoDoGuia secao
@@ -178,7 +183,7 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
                       BotaoSecundario(
                         key: TelaSeletorDeSecao.chaveConversar,
                         rotulo: TextosGuias.naoAcheiOQueProcuro,
-                        icone: Icons.chat_bubble_outline,
+                        icone: Icons.chat_bubble_outline_rounded,
                         aoTocar: widget.aoConversar!,
                       ),
                     ],
@@ -252,7 +257,7 @@ class _CartaoSecao extends StatelessWidget {
         children: <Widget>[
           if (concluida) ...<Widget>[
             Icon(
-              Icons.check_circle,
+              Icons.check_circle_rounded,
               size: MemoraDimensoes.iconePequeno,
               color: corMeta,
             ),

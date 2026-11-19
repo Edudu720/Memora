@@ -42,7 +42,7 @@ class CronometroRegressivoQueda extends StatelessWidget {
             children: <Widget>[
               const BadgeDeStatus(
                 rotulo: TextosCuidado.badgeContagemQueda,
-                icone: Icons.timer_outlined,
+                icone: Icons.timer_rounded,
                 tom: TomBadgeStatus.atencao,
               ),
               const SizedBox(height: MemoraEspacamento.md),

@@ -51,7 +51,7 @@ public enum CodigoDeErro {
     /** Dado informado não pôde ser aceito. */
     DADOS_INVALIDOS(
             HttpStatus.BAD_REQUEST,
-            "Não consegui entender o que foi digitado. Vamos conferir juntos, com calma? 😊"),
+            "Não consegui entender o que foi digitado. Vamos conferir juntos, com calma?"),
 
     /**
      * Credencial recusada.
@@ -62,7 +62,7 @@ public enum CodigoDeErro {
      */
     CREDENCIAIS_INVALIDAS(
             HttpStatus.UNAUTHORIZED,
-            "Esses dados não conferem. Vamos tentar de novo com calma? 😊"),
+            "Esses dados não conferem. Vamos tentar de novo com calma?"),
 
     /** Sessão ausente, expirada ou revogada. */
     SESSAO_EXPIRADA(
@@ -77,9 +77,9 @@ public enum CodigoDeErro {
      */
     MUITAS_TENTATIVAS(
             HttpStatus.TOO_MANY_REQUESTS,
-            "Tudo bem, acontece! Para proteger sua conta, vamos esperar um pouquinho "
+            "Tudo bem, acontece — para proteger sua conta, vamos esperar um pouquinho "
                     + "antes de tentar de novo. Se preferir, eu posso te ajudar a criar "
-                    + "uma senha nova 😊"),
+                    + "uma senha nova."),
 
     /**
      * A pessoa esgotou a cota diária de conversas com a assistente (R7).
@@ -92,7 +92,7 @@ public enum CodigoDeErro {
      */
     LIMITE_DE_CONVERSAS(
             HttpStatus.TOO_MANY_REQUESTS,
-            "Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui."),
+            "Conversamos bastante hoje — vamos continuar amanhã? Eu estarei aqui."),
 
     /**
      * Limite temporário de envios remotos de SOS por conta ou destinatário
@@ -114,7 +114,7 @@ public enum CodigoDeErro {
     ASSISTENTE_INDISPONIVEL(
             HttpStatus.SERVICE_UNAVAILABLE,
             "Estou com um pouquinho de dificuldade para pensar agora — não foi nada que "
-                    + "você fez. Vamos tentar de novo daqui a pouco? 😊"),
+                    + "você fez. Vamos tentar de novo daqui a pouco?"),
 
     /**
      * Falha não prevista. Ver a segunda divergência anotada nesta classe.
@@ -126,7 +126,7 @@ public enum CodigoDeErro {
     ERRO_INESPERADO(
             HttpStatus.INTERNAL_SERVER_ERROR,
             "Alguma coisa não funcionou aqui do meu lado — não foi nada que você fez. "
-                    + "Pode tentar de novo daqui a pouquinho? 😊");
+                    + "Pode tentar de novo daqui a pouquinho?");
 
     private final HttpStatus status;
     private final String mensagemPadrao;

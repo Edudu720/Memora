@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_perfil.dart';
@@ -249,7 +248,7 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
       );
     }
     return Navigator.of(context).push<AcaoPreVisualizacaoFoto>(
-      MaterialPageRoute<AcaoPreVisualizacaoFoto>(
+      RotaMemora<AcaoPreVisualizacaoFoto>(
         builder: (BuildContext _) =>
             TelaPreVisualizacaoFoto(bytesJpegSemExif: bytesJpegSemExif),
       ),
@@ -388,7 +387,7 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Icon(
-                      Icons.info_outline,
+                      Icons.info_outline_rounded,
                       color: cores.perigo,
                       size: MemoraDimensoes.iconeDestaque,
                     ),
@@ -401,7 +400,7 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
                   BotaoSecundario(
                     key: SecaoFotoPerfil.chaveBotaoAbrirAjustes,
                     rotulo: TextosPerfil.botaoAbrirAjustesAparelho,
-                    icone: Icons.settings_outlined,
+                    icone: Icons.settings_rounded,
                     aoTocar: _ocupado
                         ? null
                         : () => widget.seletor.abrirConfiguracoesDoAparelho(),
@@ -411,7 +410,7 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
                 BotaoSecundario(
                   key: SecaoFotoPerfil.chaveBotaoUsarAvatarFallback,
                   rotulo: TextosPerfil.opcaoAvataresFoto,
-                  icone: Icons.face_retouching_natural_outlined,
+                  icone: Icons.face_retouching_natural_rounded,
                   aoTocar: _ocupado || _semConta ? null : _abrirGradeDeAvatares,
                 ),
               ],
@@ -436,8 +435,8 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
                 ? TextosPerfil.botaoTrocarFoto
                 : TextosPerfil.botaoColocarFoto,
             icone: temRetrato
-                ? Icons.photo_camera_outlined
-                : Icons.add_a_photo_outlined,
+                ? Icons.photo_camera_rounded
+                : Icons.add_a_photo_rounded,
             aoTocar: _ocupado || _semConta ? null : _abrirEscolhaDeOrigem,
           ),
           if (temRetrato) ...<Widget>[
@@ -445,7 +444,7 @@ class _SecaoFotoPerfilState extends State<SecaoFotoPerfil> {
             BotaoSecundario(
               key: SecaoFotoPerfil.chaveBotaoRemover,
               rotulo: TextosPerfil.botaoRemoverFoto,
-              icone: Icons.delete_outline,
+              icone: Icons.delete_outline_rounded,
               aoTocar: _ocupado || _semConta
                   ? null
                   : () => setState(() {
@@ -486,7 +485,7 @@ class _QuadroSucessoFoto extends StatelessWidget {
           child: Row(
             children: <Widget>[
               Icon(
-                Icons.check_circle_outline,
+                Icons.check_circle_outline_rounded,
                 color: cores.sucesso,
                 size: MemoraDimensoes.iconePadrao,
               ),
@@ -531,7 +530,7 @@ class _CorpoFolhaOrigem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Icon(
-                Icons.lock_outline,
+                Icons.lock_outline_rounded,
                 color: cores.texto,
                 size: MemoraDimensoes.iconePadrao,
               ),
@@ -546,21 +545,21 @@ class _CorpoFolhaOrigem extends StatelessWidget {
         BotaoSecundario(
           key: SecaoFotoPerfil.chaveOpcaoGaleria,
           rotulo: TextosPerfil.opcaoGaleriaFoto,
-          icone: Icons.photo_library_outlined,
+          icone: Icons.photo_library_rounded,
           aoTocar: aoEscolherGaleria,
         ),
         const SizedBox(height: MemoraEspacamento.sm),
         BotaoSecundario(
           key: SecaoFotoPerfil.chaveOpcaoCamera,
           rotulo: TextosPerfil.opcaoCameraFoto,
-          icone: Icons.photo_camera_outlined,
+          icone: Icons.photo_camera_rounded,
           aoTocar: aoEscolherCamera,
         ),
         const SizedBox(height: MemoraEspacamento.sm),
         BotaoSecundario(
           key: SecaoFotoPerfil.chaveOpcaoAvatares,
           rotulo: TextosPerfil.opcaoAvataresFoto,
-          icone: Icons.face_retouching_natural_outlined,
+          icone: Icons.face_retouching_natural_rounded,
           aoTocar: aoEscolherAvatares,
         ),
       ],
@@ -619,17 +618,12 @@ class _MiniaturaAvatar extends StatelessWidget {
         border: Border.all(color: cores.borda),
       ),
       clipBehavior: Clip.antiAlias,
-      child: avatar.ehSvg
-          ? Padding(
-              padding: const EdgeInsets.all(MemoraEspacamento.xs),
-              child: SvgPicture.asset(avatar.caminhoAsset),
-            )
-          : Image.asset(
-              avatar.caminhoAsset,
-              fit: BoxFit.contain,
-              cacheWidth: 120,
-              cacheHeight: 120,
-            ),
+      child: Center(
+        child: DesenhoAvatarIlustrado(
+          avatar: avatar,
+          tamanho: MemoraDimensoes.alvoMinimo * 0.84,
+        ),
+      ),
     );
   }
 }

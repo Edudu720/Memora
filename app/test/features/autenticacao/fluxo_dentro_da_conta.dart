@@ -60,12 +60,17 @@ class FluxoDentroDaConta {
     }
   }
 
-  /// Rola ate o alvo, toca e bombeia alguns quadros.
+  /// Rola ate o alvo, toca e espera a transicao que o toque possa ter aberto.
+  ///
+  /// Desde a 013 toda troca de tela e um deslizamento de 400 ms: a tela nova
+  /// comeca fora da janela, e um toque dado no meio do caminho cairia no vazio.
+  /// Quem toca esperando a tela seguinte precisa esperar o deslize acabar.
   static Future<void> tocar(WidgetTester t, Finder alvo) async {
     await t.ensureVisible(alvo);
     await t.pump();
     await t.tap(alvo);
     await avancar(t);
+    await esperarATransicao(t);
   }
 
   /// Monta o fluxo e deixa a pessoa no Início, a raiz do destino de mesmo nome.
@@ -77,6 +82,9 @@ class FluxoDentroDaConta {
   /// [assistente] troca a assistente simulada (a do teste da sessão perdida usa
   /// a real, sobre um transporte falso) e [sessaoPerdida] é o aviso que o fluxo
   /// escuta (T111).
+  ///
+  /// [vigia] é chamado com a tela de boas-vindas e depois com a do login à
+  /// vista, antes de a conta entrar.
   ///
   /// [capturavel] põe um `RepaintBoundary` com essa chave em volta do
   /// aplicativo inteiro: é por onde o álbum de telas (T043) tira a foto da tela
@@ -92,6 +100,7 @@ class FluxoDentroDaConta {
     Compartilhador? compartilhador,
     RepositorioAssistente? assistente,
     SessaoPerdida? sessaoPerdida,
+    Future<void> Function(WidgetTester t, String tela)? vigia,
   }) async {
     if (em != null) vestir(t, em.aparelho);
     // Com a guarda da apresentação, a conta de Ana já a viu: o cenário começa
@@ -151,7 +160,11 @@ class FluxoDentroDaConta {
     );
     await avancar(t);
 
+    // `vigia` olha as telas de antes da conta pelo caminho de verdade: o teste
+    // da distância da Memora (T052) mede as boas-vindas e o login.
+    await vigia?.call(t, 'boas-vindas');
     await tocar(t, find.text(TextosAutenticacao.botaoJaTenhoConta));
+    await vigia?.call(t, 'login');
     await entrarComConta(t, 'ana@email.com', 'uma frase que so eu lembro');
 
     expect(
@@ -195,7 +208,8 @@ class FluxoDentroDaConta {
     );
   }
 
-  /// Espera a transicao de uma rota (300 ms) terminar, sem `pumpAndSettle`:
+  /// Espera a transicao de uma rota (400 ms, `MemoraMovimento.transicaoDeTela`)
+  /// terminar, sem `pumpAndSettle`:
   /// uma tela com `Carregando` anima sem parar e ele nunca voltaria.
   ///
   /// Enquanto a transicao corre, a tela de baixo ainda esta na arvore e a

@@ -30,3 +30,6 @@
 ## Phase 5: Validação e PR
 - [X] T017 Rodar todos os portões (`validar_paleta.py`, `validar_tokens.py`, `flutter analyze`, `flutter test` completo e testes unitários Maven)
 - [X] T018 Fazer commit, push de `feature/014-botao-sos-persistente` e abrir Pull Request no GitHub
+
+## Phase 6: Redesenho da bolinha (sessão de clarificação de 2026-11-18)
+- [X] T019 Trocar a pílula "SOS Ajuda" e a faixa do topo pela bolinha vermelha com "SOS" no canto superior direito do cabeçalho (`VagaDoSos`/`TituloComSos` no Design System, usados pelo `CabecalhoDeTela`, pela `BarraSuperior`, pelo Início e por Meu perfil); a paleta de Ajustes para antes do título; bolinha flutuante só em tela sem cabeçalho; portões em `app/test/features/cuidado/presentation/bolinha_sos_test.dart`, provados quebrando. Feita em 2026-11-18.

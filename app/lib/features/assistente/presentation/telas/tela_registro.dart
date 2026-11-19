@@ -71,13 +71,21 @@ class _TelaRegistroState extends State<TelaRegistro> {
               padding: const EdgeInsets.all(MemoraEspacamento.md),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const <Widget>[
-                  MemoraPersonagem(
-                    expressao: ExpressaoDaMemora.falando,
-                    tamanho: MemoraDimensoes.alvoDecisao,
-                  ),
-                  SizedBox(width: MemoraEspacamento.md),
-                  Expanded(
+                children: <Widget>[
+                  // Uma Memora por tela (FR-006): enquanto a espera tem a sua
+                  // (a lista ainda não chegou), esta cede o lugar (o espaço
+                  // fica).
+                  if (!_falhou && acoes == null)
+                    const SizedBox.square(
+                      dimension: MemoraDimensoes.alvoDecisao,
+                    )
+                  else
+                    const MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.falando,
+                      tamanho: MemoraDimensoes.alvoDecisao,
+                    ),
+                  const SizedBox(width: MemoraEspacamento.md),
+                  const Expanded(
                     child: TextoMemora(TextosAssistente.explicacaoDoRegistro),
                   ),
                 ],
@@ -89,15 +97,17 @@ class _TelaRegistroState extends State<TelaRegistro> {
               MensagemErro(
                 mensagem: TextosAssistente.semConexao,
                 aoTentarNovamente: _carregar,
+                comMemora: false,
               )
             else if (acoes == null)
               const Carregando()
             else if (acoes.isEmpty)
-              // Lista vazia é notícia boa: a pessoa está fazendo tudo sozinha.
+              // Lista vazia é notícia boa: a pessoa faz tudo por conta própria.
               const EstadoVazio(
-                titulo: 'Você fez tudo sozinha até agora',
+                titulo: 'Até agora você fez tudo por conta própria',
                 explicacao: TextosAssistente.registroVazio,
-                icone: Icons.emoji_events_outlined,
+                icone: Icons.emoji_events_rounded,
+                comMemora: false,
               )
             else
               Cartao(
@@ -119,7 +129,7 @@ class _TelaRegistroState extends State<TelaRegistro> {
                               ),
                             ),
                             child: Icon(
-                              Icons.check_circle_outline,
+                              Icons.check_circle_outline_rounded,
                               size: MemoraDimensoes.iconePadrao,
                               color: cores.sucessoTexto,
                             ),

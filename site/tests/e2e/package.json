@@ -1,0 +1,13 @@
+{
+  "name": "memora-site-e2e",
+  "private": true,
+  "description": "Auditorias automatizadas de acessibilidade e desempenho do site (dev/CI apenas)",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.51.1"
+  }
+}

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-tema="claro" data-escala="padrao">
+<html lang="pt-BR" data-tema="claro" data-escala="padrao" data-movimento="normal">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memora — Guia Acolhedor de Uso para Pessoas Idosas</title>
+  <title>Guia do Memora — passo a passo, no seu ritmo</title>
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/main.css">
+  <script src="assets/memora/memora-dados.js" defer></script>
+  <script src="scripts/memora-personagem.js" defer></script>
   <script src="scripts/tutorial.js" defer></script>
 </head>
 <body id="topo">
@@ -17,7 +19,7 @@
       <div class="barra-identidade">
         <div class="marca-memora">
           <span class="marca-selo">
-            <img src="assets/ilustracoes/memora_neutra.svg" alt="Rosto amigável da assistente Memora">
+            <memora-personagem expressao="mini" aria-hidden="true"></memora-personagem>
           </span>
           <div>
             <div>Guia do Memora</div>
@@ -46,6 +48,13 @@
               <button type="button" class="botao-controle" data-acao-tema="alto-contraste" aria-pressed="false">Alto contraste</button>
             </div>
           </div>
+
+          <div class="grupo-controle" role="group" aria-label="Movimento na página">
+            <span class="grupo-legenda">Movimento na página</span>
+            <div class="linha-botoes">
+              <button type="button" class="botao-controle" data-acao-movimento aria-pressed="false">Reduzir movimento</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -65,6 +74,21 @@
       </nav>
     </div>
   </header>
+
+  <aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">
+    <div class="anfitria-cabecalho-flutuante">
+      <div class="medalhao-ilustracao anfitria-avatar">
+        <memora-personagem expressao="acenando" anfitria="true" data-memora-anfitria aria-hidden="true"></memora-personagem>
+      </div>
+      <button type="button" class="botao-controle botao-alternar-anfitria" data-acao-alternar-anfitria aria-expanded="true" aria-controls="anfitria-conteudo">Recolher dicas</button>
+    </div>
+    <div id="anfitria-conteudo" class="anfitria-corpo" data-anfitria-conteudo>
+      <p class="anfitria-balao" data-anfitria-balao>
+        Cada guia mostra a tela do celular, um passo de cada vez. Eu fico com você até o fim.
+      </p>
+      <button type="button" class="botao-controle botao-dica-anfitria" data-acao-outra-dica>Outra dica da Memora</button>
+    </div>
+  </aside>
 
   <main id="conteudo-principal" class="conteudo-principal conteiner" tabindex="-1">
     <!-- Capítulo 1: Boas-vindas e Propósito -->
@@ -89,10 +113,6 @@
             “Eu mostro o caminho e você faz. E não faço nada sem te avisar antes.”
           </blockquote>
         </div>
-
-        <div class="medalhao-ilustracao">
-          <img src="assets/ilustracoes/memora_falando.svg" alt="Assistente Memora acenando e sorrindo para dar boas-vindas">
-        </div>
       </div>
 
       <div class="grade-tres-colunas" data-leitura-conteudo>
@@ -111,7 +131,7 @@
       </div>
     </section>
 
-    <!-- Capítulo 2: Primeiros Passos (Frase Secreta, Modo Assistido e Saída Segura) -->
+    <!-- Capítulo 2: Primeiros Passos (Senha, Modo Assistido e Saída Segura) -->
     <section id="primeiros-passos" class="capitulo" aria-labelledby="titulo-primeiros-passos">
       <div class="capitulo-cabecalho">
         <div>
@@ -127,26 +147,26 @@
             <span class="icone-moldura">
               <img src="assets/ilustracoes/pessoa_com_celular.svg" alt="Pessoa segurando um celular com expressão tranquila">
             </span>
-            <h3>Entrada fácil com Frase Secreta</h3>
+            <h3>Entrada fácil com sua senha</h3>
           </div>
           <p class="texto-leitura">
-            Você não precisa decorar códigos cheios de símbolos difíceis. No Memora, você entra usando seu telefone ou e-mail e uma <strong>Frase Secreta</strong> que faça sentido na sua vida, como uma lembrança de família.
+            Você não precisa decorar códigos cheios de símbolos difíceis. No Memora, você entra usando seu telefone ou e-mail e uma <strong>senha</strong> em forma de frase que só você sabe e que ninguém adivinharia.
           </p>
           <ol class="passos-lista">
             <li><strong>Escolha como prefere entrar:</strong> toque no botão grande de entrar e informe seu telefone ou e-mail.</li>
-            <li><strong>Digite sua Frase Secreta:</strong> escreva com calma; você pode tocar em “Mostrar frase” para conferir letra por letra antes de confirmar.</li>
-            <li><strong>Peça ajuda se quiser no começo:</strong> com o <em>Modo Assistido</em>, um filho ou cuidador pode ajudar na primeira configuração sem tomar a conta de você.</li>
-            <li><strong>Sair sem acidentes:</strong> quando quiser sair da conta, o Memora pede duas confirmações calmas para evitar que um toque sem querer desconecte você.</li>
+            <li><strong>Digite sua senha:</strong> escreva com calma; você pode tocar em “Mostrar senha” para conferir letra por letra antes de confirmar.</li>
+            <li><strong>Peça ajuda se quiser no começo:</strong> com o <em>Modo Assistido</em>, um familiar ajuda nos primeiros dados, mas na hora da senha devolve o celular para você criar sua senha sozinho, sem ninguém olhar.</li>
+            <li><strong>Sair sem acidentes:</strong> quando quiser sair da conta, o Memora pede uma confirmação calma para evitar que um toque sem querer desconecte você.</li>
           </ol>
         </div>
 
-        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de como a tela de entrada com Frase Secreta aparece no aplicativo">
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de como a tela de entrada com senha aparece no aplicativo">
           <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
           <div class="mini-tela-moldura">
             <p class="mini-tela-titulo">Que bom ver você por aqui</p>
             <div class="mini-tela-balao">
-              <strong>Sua frase secreta</strong><br>
-              Exemplo fácil de lembrar: “cafe com bolo da tarde”
+              <strong>Sua senha</strong><br>
+              Crie uma frase que só você sabe e que ninguém adivinharia. Toque em “Mostrar senha” para conferir as letras.
             </div>
             <div class="mini-botao-simulado">Entrar no Memora</div>
             <div class="mini-botao-simulado mini-botao-secundario">Estou sendo ajudado por um familiar</div>
@@ -188,9 +208,18 @@
               Toque em qualquer um dos três botões de baixo para mudar de tela sem pressa.
             </div>
             <div class="mini-tela-barra-inferior">
-              <div class="mini-destino">⚙️<span>Ajustes</span></div>
-              <div class="mini-destino mini-destino-ativo">🏠<span>Início</span></div>
-              <div class="mini-destino">👤<span>Meu perfil</span></div>
+              <div class="mini-destino">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.74 0-1.25.4-1.51 1z"></path></svg>
+                <span>Ajustes</span>
+              </div>
+              <div class="mini-destino mini-destino-ativo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"></path></svg>
+                <span>Início</span>
+              </div>
+              <div class="mini-destino">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg>
+                <span>Meu perfil</span>
+              </div>
             </div>
           </div>
           <figcaption class="mini-tela-legenda">
@@ -246,7 +275,7 @@
             <strong>Você perguntou:</strong> “Como mando um áudio no WhatsApp para minha filha?”
           </div>
           <div class="mini-tela-balao">
-            <strong>A Memora respondeu:</strong> Vamos juntos. Primeiro abra a conversa com sua filha. Depois, segure o desenho do microfone no canto de baixo enquanto fala e solte ao terminar.
+            <strong>A Memora respondeu:</strong> Vamos juntos abrir a conversa com sua filha. Depois, segure o desenho do microfone no canto de baixo enquanto fala e solte ao terminar.
           </div>
         </div>
         <figcaption class="mini-tela-legenda">
@@ -335,7 +364,7 @@
 
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/memora_perfil_robo.png" alt="Avatar ilustrado do robô Memora disponível para perfil">
+              <memora-personagem expressao="neutra" aria-hidden="true"></memora-personagem>
             </span>
             <h3>Sua foto ou avatar em Meu perfil</h3>
           </div>
@@ -351,7 +380,7 @@
           <div class="mini-tela-moldura">
             <p class="mini-tela-titulo">Escolher foto de perfil</p>
             <div class="mini-tela-balao">
-              🔒 O Memora só vê a foto que você escolher, e ela fica guardada só neste aparelho.
+              O Memora só vê a foto que você escolher, e ela fica guardada só neste aparelho.
             </div>
             <div class="mini-botao-simulado mini-botao-secundario">Escolher da galeria</div>
             <div class="mini-botao-simulado mini-botao-secundario">Tirar foto agora</div>
@@ -378,7 +407,7 @@
         <div data-leitura-conteudo>
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/casal_idoso.svg" alt="Casal idoso sorrindo com tranquilidade">
+              <img src="assets/ilustracoes/casal_idoso.svg" alt="Duas pessoas sorrindo com tranquilidade">
             </span>
             <h3>Proteção discreta no dia a dia</h3>
           </div>
@@ -399,8 +428,8 @@
             <div class="mini-tela-balao">
               Percebemos um movimento brusco. Toque em uma das opções abaixo:
             </div>
-            <div class="mini-botao-simulado mini-botao-sucesso">✓ Estou bem</div>
-            <div class="mini-botao-simulado mini-botao-perigo">⚠ Preciso de ajuda</div>
+            <div class="mini-botao-simulado mini-botao-sucesso">Estou bem</div>
+            <div class="mini-botao-simulado mini-botao-perigo">Preciso de ajuda</div>
           </div>
           <figcaption class="mini-tela-legenda">
             Se foi apenas um movimento comum, basta tocar em “Estou bem” para silenciar tudo na hora.
@@ -423,7 +452,7 @@
         <div class="cartao-interno cartao-perigo" data-leitura-conteudo>
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/memora_alerta_robo.png" alt="Assistente Memora fazendo sinal de atenção para proteger contra golpes">
+              <memora-personagem expressao="preocupada" aria-hidden="true"></memora-personagem>
             </span>
             <h3>Sinais claros de alerta: desconfie na hora</h3>
           </div>
@@ -446,7 +475,7 @@
         <div class="cartao-interno cartao-sucesso" data-leitura-conteudo>
           <div class="icone-com-legenda">
             <span class="icone-moldura">
-              <img src="assets/ilustracoes/memora_dica_robo.png" alt="Assistente Memora dando uma dica segura com expressão serena">
+              <memora-personagem expressao="dica" aria-hidden="true"></memora-personagem>
             </span>
             <h3>O que fazer diante de uma dúvida suspeita</h3>
           </div>
@@ -489,7 +518,7 @@
             <span class="duvida-indicador">Ver resposta</span>
           </summary>
           <p class="duvida-resposta">
-            Não se preocupe. Ações importantes dentro do aplicativo — como apagar a foto de perfil, limpar conversas ou sair do aparelho — sempre pedem uma confirmação clara em tela antes de acontecer. Se você tocar em “Não” ou cancelar, nada muda.
+            Ações importantes — como apagar a foto, limpar conversas ou sair — sempre pedem confirmação na tela antes de acontecer. Se você tocar em “Não” ou cancelar, nada muda.
           </p>
         </details>
 
@@ -499,7 +528,7 @@
             <span class="duvida-indicador">Ver resposta</span>
           </summary>
           <p class="duvida-resposta">
-            De jeito nenhum. O aplicativo continua funcionando normalmente sem usar câmera nem suas fotos. Se preferir, você pode escolher na hora um dos avatares ilustrados da Memora ou deixar apenas as iniciais do seu nome.
+            O aplicativo continua funcionando normalmente sem usar câmera nem suas fotos. Se preferir, escolha na hora um dos avatares ilustrados da Memora ou deixe apenas as suas iniciais.
           </p>
         </details>
 
@@ -537,12 +566,12 @@
       <article class="cartao-interno cartao-destaque cartao-familiares" data-leitura-conteudo>
         <div class="icone-com-legenda">
           <span class="icone-moldura">
-            <img src="assets/ilustracoes/memora_comemorando.svg" alt="Assistente Memora comemorando o aprendizado junto com o usuário">
+            <memora-personagem expressao="comemorando" aria-hidden="true"></memora-personagem>
           </span>
           <h3>Para familiares e cuidadores que apoiam os primeiros passos</h3>
         </div>
         <p class="texto-leitura">
-          Se você está ajudando alguém da família a configurar o Memora pela primeira vez, deixe a pessoa segurar e tocar na tela enquanto você acompanha ao lado. Use a Frase Secreta com palavras que façam sentido para ela, configure junto o contato de emergência e mostre que ela pode mudar o tamanho das letras sempre que quiser. O objetivo é dar autonomia, nunca substituir a pessoa.
+          Deixe a pessoa segurar o celular e tocar na tela enquanto você acompanha ao lado. Na hora da senha, devolva o celular e deixe a pessoa criar a senha sozinha, sem olhar.
         </p>
       </article>
     </section>
@@ -558,7 +587,7 @@
   </footer>
 
   <div class="atalho-topo-fixo">
-    <a class="botao-topo" href="#topo" aria-label="Voltar para o início da página">↑ Topo</a>
+    <a class="botao-topo" href="#topo" aria-label="Topo — voltar para o início da página"><span aria-hidden="true">↑</span> Topo</a>
   </div>
 </body>
 </html>

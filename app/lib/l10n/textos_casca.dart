@@ -52,7 +52,7 @@ abstract final class TextosCasca {
   static const String tituloPerfil = 'Meu perfil';
 
   /// Rótulo do nome.
-  static const String rotuloNome = 'Como você quer ser chamada';
+  static const String rotuloNome = 'Como posso te chamar';
 
   /// Rótulo do canal.
   static const String rotuloCanal = 'E-mail ou telefone da conta';
@@ -122,8 +122,8 @@ abstract final class TextosCasca {
   /// Rótulo do botão de ação principal do cartão herói no Início e no Hub.
   static const String acaoComecarConversa = 'Começar';
 
-  /// Título da seção de atalhos rápidos do Início.
-  static const String tituloAtalhosInicio = 'Atalhos rápidos';
+  /// Título da seção de ações secundárias do Início.
+  static const String tituloAtalhosInicio = 'Também posso te ajudar com';
 
   /// Balão de boas-vindas curto da Memora no topo do Início.
   static const String balaoInicio = 'Como posso te ajudar hoje?';

@@ -238,13 +238,13 @@ abstract final class TextosGuias {
       'As bolinhas no alto são os stories: fotos e vídeos que os amigos mostram por um dia. Toque numa delas para ver.';
   /// Ver, o story (2 de 2).
   static const String instagramVerStory2 =
-      'O story passa sozinho. Para responder, toque em "Enviar mensagem", embaixo. Para sair, deslize o dedo para baixo.';
+      'O story passa sozinho. Para responder, toque em "Enviar mensagem", embaixo, ou deslize o dedo para baixo para sair.';
   /// Ver, passo 2.
   static const String instagramVer2 =
       'Para ver vídeos curtos, toque no segundo ícone de baixo, o dos Reels.';
   /// Ver, passo 3.
   static const String instagramVer3 =
-      'Para ver o próximo vídeo, deslize o dedo para cima. Para curtir, toque no coração, à direita. Agora você sabe ver fotos e vídeos.';
+      'Para ver o próximo vídeo, deslize o dedo para cima; para curtir, toque no coração, à direita. Agora você sabe ver fotos e vídeos.';
 
   /// Story, passo 1.
   static const String instagramStory1 =
@@ -254,7 +254,7 @@ abstract final class TextosGuias {
       'Escolha a foto que quer mostrar: toque nela, em "Recentes".';
   /// Story, passo 3.
   static const String instagramStory3 =
-      'Para todos os seus seguidores verem, toque em "Seu story", embaixo, à esquerda. A foto fica no ar por um dia. Agora você sabe publicar um story.';
+      'Para mostrar aos seus seguidores por um dia, toque em "Seu story", embaixo, à esquerda. Agora você sabe publicar um story.';
 
   /// Avisos, passo 1.
   static const String instagramAvisos1 =
@@ -267,7 +267,7 @@ abstract final class TextosGuias {
       'Para ver as suas conversas, volte ao início e toque no aviãozinho de papel, embaixo, no meio.';
   /// Avisos, passo 4.
   static const String instagramAvisos4 =
-      'Toque na conversa que você quer ler. Se alguém pedir dinheiro ou código por mensagem, ligue para a pessoa antes de fazer qualquer coisa. Agora você sabe ver avisos e mensagens.';
+      'Toque na conversa que você quer ler — agora você sabe ver avisos e mensagens. Se alguém pedir dinheiro ou código por mensagem, ligue para a pessoa antes de fazer qualquer coisa.';
 
   /// Procurar, passo 1.
   static const String instagramProcurar1 =
@@ -346,7 +346,7 @@ abstract final class TextosGuias {
       'Lista de resultados de busca com miniaturas e títulos de vídeos.';
   /// Passo 4 do YouTube.
   static const String youtubePasso4 =
-      'Toque no meio do vídeo a qualquer momento para pausar ou continuar. Parabéns! Agora você assiste ao que quiser no YouTube.';
+      'Toque no meio do vídeo a qualquer momento para pausar ou continuar. Parabéns, agora você assiste ao que quiser no YouTube.';
   /// Descrição da captura do passo 4 do YouTube.
   static const String youtubeCaptura4 =
       'Vídeo em reprodução no YouTube com os botões de pausar e tela cheia.';
@@ -489,7 +489,7 @@ abstract final class TextosGuias {
       'Foto aberta ocupando toda a tela com botões de compartilhar e editar embaixo.';
   /// Passo 4 do Google Fotos.
   static const String googleFotosPasso4 =
-      'Toque na setinha no alto, à esquerda, para voltar à galeria. Parabéns! Suas lembranças estão sempre guardadas aqui.';
+      'Toque na setinha no alto, à esquerda, para voltar à galeria. Parabéns, suas lembranças estão sempre guardadas aqui.';
   /// Descrição da captura do passo 4 do Google Fotos.
   static const String googleFotosCaptura4 =
       'Foto em tela cheia com seta de voltar no canto superior esquerdo.';
@@ -885,7 +885,7 @@ abstract final class TextosGuias {
       'Painel do Meu INSS mostrando os atalhos de extrato e agendamentos.';
   /// Passo 4 do Meu INSS.
   static const String meuInssPasso4 =
-      'Veja o extrato com o valor e a data do seu benefício. Parabéns! Você já sabe conferir seu benefício.';
+      'Veja o extrato com o valor e a data do seu benefício. Parabéns, você já sabe conferir seu benefício.';
   /// Descrição da captura do passo 4 do Meu INSS.
   static const String meuInssCaptura4 =
       'Demonstrativo detalhado do benefício no Meu INSS.';
@@ -902,7 +902,7 @@ abstract final class TextosGuias {
       'Tela de entrada do e-Título, com uma foto de exemplo, a opção Biometria ligada e o botão laranja Entrar com biometria embaixo.';
   /// Passo 2 do e-Título.
   static const String eTituloPasso2 =
-      'Pronto, você entrou. Este é o seu título de eleitor no celular. Para saber onde você vota, toque em "Onde votar", embaixo, a segunda opção da esquerda.';
+      'Pronto, este é o seu título de eleitor no celular. Para saber onde você vota, toque em "Onde votar", embaixo, a segunda opção da esquerda.';
   /// Descrição da captura do passo 2 do e-Título.
   static const String eTituloCaptura2 =
       'Tela principal do e-Título com um título de eleitor de exemplo: foto, nome, número, zona e seção. Embaixo, as opções e-Título, Onde votar, Notificações e Mais opções.';
@@ -1198,14 +1198,14 @@ abstract final class TextosGuias {
       'Leia os termos com calma. Depois, marque "Li e aceito os termos e condições", embaixo, e toque em "Continuar".';
   /// Entrar, passo 4.
   static const String fgtsEntrar4 =
-      'O aplicativo pergunta como você quer ser chamado. Se quiser, escreva no campo; se não, toque em "Pular", embaixo.';
+      'O aplicativo pergunta como deve chamar você. Se quiser, escreva no campo; se não, toque em "Pular", embaixo.';
   /// Entrar, passo 5.
   static const String fgtsEntrar5 =
-      'Para receber os avisos do FGTS, toque em "Ativar notificações". Se preferir não receber, toque em "Agora não". Pronto: você já sabe entrar no aplicativo do FGTS.';
+      'Toque em "Ativar notificações" para receber avisos, ou em "Agora não" para pular. Pronto: você já sabe entrar no aplicativo do FGTS.';
 
   /// Saldo e saque, passo 1.
   static const String fgtsSaque1 =
-      'Esta é a página principal. Para ver quanto você tem, toque em "Toque para exibir o saldo", no alto. Quem estiver perto também vê: olhe o saldo num lugar tranquilo.';
+      'Nesta página principal, toque em "Toque para exibir o saldo", no alto, para ver quanto você tem. Quem estiver perto também vê: olhe o saldo num lugar tranquilo.';
   /// Saldo e saque, passo 2.
   static const String fgtsSaque2 =
       'Para pedir um saque, toque em "Saques", embaixo, a segunda opção da esquerda.';
@@ -1224,7 +1224,7 @@ abstract final class TextosGuias {
       'Toque em "Conta bancária", a terceira opção da lista.';
   /// Conta bancária, passo 3.
   static const String fgtsConta3 =
-      'Aqui aparece a conta cadastrada, e "Alterar conta bancária" troca a conta. Se alguém ligar pedindo para você trocar a conta, é golpe: só você troca, aqui, no aplicativo oficial. Agora você sabe onde fica a sua conta.';
+      'Aqui aparece sua conta cadastrada, e "Alterar conta bancária" faz a troca — agora você sabe onde ela fica. Se alguém ligar pedindo para você trocar a conta, é golpe: só você troca, aqui, no aplicativo oficial.';
 
   /// Saque-Aniversário, passo 1.
   static const String fgtsAniversario1 =
@@ -1234,7 +1234,7 @@ abstract final class TextosGuias {
       'Toque em "Sistemática de saque", a segunda opção da lista.';
   /// Saque-Aniversário, passo 3.
   static const String fgtsAniversario3 =
-      'Antes de decidir, leia com calma "O que muda se eu fizer a opção?". Quem opta pelo Saque-Aniversário e perde o emprego recebe só a multa, e não o saldo todo. Agora você sabe onde fica e o que muda.';
+      'Antes de decidir, leia "O que muda se eu fizer a opção?", pois quem opta pelo Saque-Aniversário e perde o emprego recebe só a multa, e não o saldo todo. Agora você sabe onde fica e o que muda.';
 
   /// Descrição da captura 1 do FGTS.
   static const String fgtsCaptura1 =
@@ -1247,7 +1247,7 @@ abstract final class TextosGuias {
       'Termos e condições do aplicativo do FGTS, com a opção Li e aceito os termos e o botão Continuar, embaixo.';
   /// Descrição da captura 4 do FGTS.
   static const String fgtsCaptura4 =
-      'Tela Vamos começar, que pergunta como você quer ser chamado, com os botões Cadastrar nome e continuar e Pular.';
+      'Tela Vamos começar, que pergunta como deve chamar você, com os botões Cadastrar nome e continuar e Pular.';
   /// Descrição da captura 5 do FGTS.
   static const String fgtsCaptura5 =
       'Tela Fique por dentro de tudo, com os botões Ativar notificações e Agora não.';
@@ -1296,7 +1296,7 @@ abstract final class TextosGuias {
       'Lista de serviços disponíveis para agendamento no Poupatempo.';
   /// Passo 4 do Poupatempo.
   static const String poupatempoPasso4 =
-      'Escolha o dia, horário e posto de atendimento mais próximo. Parabéns! Seu agendamento está concluído.';
+      'Escolha o dia, horário e posto de atendimento mais próximo. Parabéns, seu agendamento está concluído.';
   /// Descrição da captura do passo 4 do Poupatempo.
   static const String poupatempoCaptura4 =
       'Confirmação do agendamento com data, hora e endereço do posto Poupatempo.';
@@ -1324,7 +1324,7 @@ abstract final class TextosGuias {
       'Aba Documentos exibindo miniaturas de RG e certidões cadastradas.';
   /// Passo 4 da Carteira Digital.
   static const String carteiraDigitalPasso4 =
-      'Toque no documento para abrir em tamanho legível. Parabéns! Seus documentos oficiais estão sempre seguros com você.';
+      'Toque no documento para abrir em tamanho legível. Parabéns, seus documentos oficiais estão sempre seguros com você.';
   /// Descrição da captura do passo 4 da Carteira Digital.
   static const String carteiraDigitalCaptura4 =
       'Documento digital oficial aberto com dados legíveis e código de autenticidade.';
@@ -1439,7 +1439,7 @@ abstract final class TextosGuias {
       'Menu Contratos mostrando a lista de empregos anteriores e atuais.';
   /// Passo 4 da Carteira de Trabalho Digital.
   static const String carteiraDeTrabalhoPasso4 =
-      'Confira as datas de admissão, cargo e anotações da empresa. Parabéns! Seu histórico de trabalho está sempre acessível.';
+      'Confira as datas de admissão, cargo e anotações da empresa. Parabéns, seu histórico de trabalho está sempre acessível.';
   /// Descrição da captura do passo 4 da Carteira de Trabalho Digital.
   static const String carteiraDeTrabalhoCaptura4 =
       'Detalhes de um contrato de trabalho com data de admissão e salário anotados.';

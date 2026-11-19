@@ -1,15 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
-  <!--
-    Porta "Conversar com a Memora": dois baloes de fala.
-
-    Desenho original da equipe (feature 004, T011), no estilo da Memora: formas
-    planas e arredondadas, sem contorno, cores da marca. Sem fundo: quem desenha
-    o medalhao e o IlustracaoMemora.
-  -->
-  <path d="M14 30 C14 20 22 14 32 14 H76 C86 14 94 20 94 30 V58 C94 68 86 74 76 74 H44 L28 88 V74 C20 74 14 68 14 60 Z" fill="#1040F8"/>
-  <circle cx="38" cy="44" r="6" fill="#FFFFFF"/>
-  <circle cx="54" cy="44" r="6" fill="#FFFFFF"/>
-  <circle cx="70" cy="44" r="6" fill="#FFFFFF"/>
-  <path d="M58 70 C58 64 63 60 69 60 H96 C102 60 106 64 106 70 V88 C106 94 102 98 96 98 H94 V108 L82 98 H69 C63 98 58 94 58 88 Z" fill="#FFC83D"/>
-  <path d="M70 79 Q82 89 94 79" stroke="#0B1B4D" stroke-width="5" stroke-linecap="round" fill="none"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#1040F8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <!-- S07: Icone vetorial familia Material Rounded (chat_bubble_rounded) -->
+  <path d="M20 2H4c-1.1 0-2 .9-2 2v15.5a1 1 0 0 0 1.7.7L6.8 17H20c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#1040F8" stroke="none"/>
+  <circle cx="8" cy="9.5" r="1.35" fill="#FFFFFF" stroke="none"/>
+  <circle cx="12" cy="9.5" r="1.35" fill="#FFFFFF" stroke="none"/>
+  <circle cx="16" cy="9.5" r="1.35" fill="#FFFFFF" stroke="none"/>
 </svg>

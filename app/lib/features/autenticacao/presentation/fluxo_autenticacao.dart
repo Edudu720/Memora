@@ -522,7 +522,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// por 28 minutos era expulso. Num lugar só continua valendo: toda tela que
   /// o fluxo abre nasce aqui.
   Route<void> _rota({required WidgetBuilder builder}) {
-    return MaterialPageRoute<void>(builder: builder);
+    return RotaMemora<void>(builder: builder);
   }
 
   /// Empilha [rota] no destino à vista da casca.
@@ -692,13 +692,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       PortaDoHub(
         rotulo: 'Dispositivo de Cuidado',
         descricao: 'Batimentos, movimento e alerta de queda',
-        ilustracao: Ilustracao.portaServicos,
+        ilustracao: Ilustracao.portaCuidado,
         aoAbrir: _abrirDispositivoCuidado,
       ),
       PortaDoHub(
         rotulo: 'Localizador de Serviços',
         descricao: 'Postos de saúde e farmácias próximas',
-        ilustracao: Ilustracao.portaServicos,
+        ilustracao: Ilustracao.portaLocalizador,
         aoAbrir: _abrirLocalizadorServicos,
       ),
     ];

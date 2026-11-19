@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 /// A fala da Memora: negrito e escrita aos poucos — T131 e T132, FR-020a e
 /// FR-020b.
@@ -184,17 +185,23 @@ void main() {
       }
     });
 
+    // A Memora do balão (`MemoraAnimada`, feature 013) tem um relógio só dela,
+    // que não para: é o único `Ticker` que pode sobrar depois da escrita.
+    const int relogioDaMemora = 1;
+
     testWidgets('quando termina, não sobra relógio agendado', (
       WidgetTester t,
     ) async {
+      liberarMovimento(t);
       await t.pumpWidget(app(balao()));
       await t.pump(const Duration(seconds: 10));
       await t.pump();
       expect(visivel(t), falaLimpa);
       expect(
         t.binding.transientCallbackCount,
-        0,
-        reason: 'terminada a escrita, o relógio para: nada de Ticker vivo',
+        relogioDaMemora,
+        reason: 'terminada a escrita, o relógio dela para: só sobra o da '
+            'Memora que está no balão, e mais nenhum',
       );
     });
 
@@ -239,9 +246,13 @@ void main() {
 
     testWidgets('sem escreverAosPoucos (fala antiga), aparece inteira e sem '
         'relógio', (WidgetTester t) async {
+      liberarMovimento(t);
       await t.pumpWidget(app(balao(aosPoucos: false)));
+      // A chegada da Memora do balão leva um quadro; depois dele só sobra o
+      // relógio dela.
+      await t.pump(const Duration(seconds: 1));
       expect(visivel(t), falaLimpa);
-      expect(t.binding.transientCallbackCount, 0);
+      expect(t.binding.transientCallbackCount, relogioDaMemora);
     });
 
     testWidgets('a fala da pessoa nunca é escrita aos poucos', (

@@ -42,11 +42,9 @@ void main() {
     final double topoDaBarra = t
         .getTopLeft(find.byKey(CascaInterna.chaveDaBarra))
         .dy;
+    // Desde 2026-11-18 não há faixa do SOS no topo (feature 014): a bolinha
+    // mora no cabeçalho da tela. O que tampa o topo é só a barra superior.
     double topoUtil = 0;
-    final Finder faixaSos = find.byKey(CascaInterna.chaveFaixaSos);
-    if (faixaSos.evaluate().isNotEmpty) {
-      topoUtil = t.getBottomLeft(faixaSos).dy;
-    }
     final Iterable<Element> barrasSuperiores = find
         .byType(BarraSuperior)
         .evaluate()
@@ -98,11 +96,12 @@ void main() {
 
       // --- Início
       expect(t.takeException(), isNull, reason: 'Início, ${nomeDa(c)}');
-      await exigirAcimaDaBarra(
-        t,
-        find.byKey(TelaInicio.chaveConversar),
-        c,
-      );
+      // A anfitriã (T053/T054) está lá, uma só, e o toque nela chega à vista
+      // acima da barra: encolher é o que ela faz para isso (o balão é texto, e
+      // texto longo rola: não é ação).
+      expect(find.byKey(TelaInicio.chaveMemora), findsOneWidget);
+      await exigirAcimaDaBarra(t, find.byKey(MemoraAnfitria.chaveDaAcao), c);
+      await exigirAcimaDaBarra(t, find.byKey(TelaInicio.chaveConversar), c);
       await exigirAcimaDaBarra(t, find.byKey(TelaInicio.chaveVerTudo), c);
 
       // --- Hub
@@ -120,7 +119,8 @@ void main() {
       expect(
         find.byKey(TelaConversa.chaveCampo),
         findsOneWidget,
-        reason: '${nomeDa(c)}: tocar na ação principal do Hub não abriu a '
+        reason:
+            '${nomeDa(c)}: tocar na ação principal do Hub não abriu a '
             'conversa',
       );
       expect(t.takeException(), isNull, reason: 'Conversa, ${nomeDa(c)}');

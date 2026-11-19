@@ -89,7 +89,7 @@ class _SecaoIdadeState extends State<SecaoIdade> {
 
   Future<void> _abrirEntrada() async {
     final bool? guardou = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
+      RotaMemora<bool>(
         builder: (BuildContext _) => TelaDataDeNascimento(
           armazenamento: widget.armazenamento,
           idDaConta: widget.idDaConta,
@@ -130,7 +130,7 @@ class _SecaoIdadeState extends State<SecaoIdade> {
             BotaoSecundario(
               key: SecaoIdade.chaveInformar,
               rotulo: TextosPerfil.botaoInformar,
-              icone: Icons.cake_outlined,
+              icone: Icons.cake_rounded,
               aoTocar: _abrirEntrada,
             ),
           ],
@@ -162,7 +162,7 @@ class _SecaoIdadeState extends State<SecaoIdade> {
             BotaoSecundario(
               key: SecaoIdade.chaveInformar,
               rotulo: TextosPerfil.botaoMudar,
-              icone: Icons.edit_outlined,
+              icone: Icons.edit_rounded,
               aoTocar: _abrirEntrada,
             ),
             const SizedBox(height: MemoraEspacamento.sm),

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
+  <!--
+    Porta "Dispositivo de Cuidado": um coracao com a linha do batimento. E o
+    mesmo coracao do atalho de Cuidado do Inicio, em verde de saude, para a
+    porta nao se confundir com a dos Servicos sociais (revisao de 2026-11-18).
+
+    Desenho original da equipe, no estilo das outras portas: formas planas e
+    arredondadas, sem contorno. Sem fundo: quem desenha o medalhao e o
+    IlustracaoMemora.
+  -->
+  <path d="M60 100 C56 97 18 72 14 46 C11 28 24 16 38 16 C48 16 55 22 60 30 C65 22 72 16 82 16 C96 16 109 28 106 46 C102 72 64 97 60 100 Z" fill="#0F6A43"/>
+  <path d="M26 56 L44 56 L51 44 L60 70 L68 50 L74 56 L94 56" fill="none" stroke="#E6F6F4" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

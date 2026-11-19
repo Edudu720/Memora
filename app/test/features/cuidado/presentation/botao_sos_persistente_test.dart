@@ -60,13 +60,12 @@ void main() {
   }) async {
     final RepositorioEmergenciaSosSimulado sos =
         repositorioSos ?? RepositorioEmergenciaSosSimulado();
-    final RepositorioAutenticacaoSimulado auth = RepositorioAutenticacaoSimulado(
-      demora: Duration.zero,
-    )..registrarConta(
-        identificador: 'ana@email.com',
-        senha: 'uma frase que so eu lembro',
-        nome: 'Ana',
-      );
+    final RepositorioAutenticacaoSimulado auth =
+        RepositorioAutenticacaoSimulado(demora: Duration.zero)..registrarConta(
+          identificador: 'ana@email.com',
+          senha: 'uma frase que so eu lembro',
+          nome: 'Ana',
+        );
 
     await t.pumpWidget(
       EscopoAparencia(
@@ -106,10 +105,15 @@ void main() {
       void validarBotao() {
         final Finder finder = find.byKey(CascaInterna.chaveBotaoSos);
         expect(finder, findsOneWidget);
-        expect(find.text(TextosSos.rotuloBotaoSos), findsOneWidget);
+        // A bolinha mostra só "SOS"; o "SOS Ajuda" é o nome falado.
+        expect(find.text(TextosSos.textoDaBolinha), findsOneWidget);
+        expect(find.text(TextosSos.rotuloBotaoSos), findsNothing);
         final Size tamanho = t.getSize(finder);
         expect(tamanho.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
-        expect(tamanho.height, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+        expect(
+          tamanho.height,
+          greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+        );
       }
 
       final SemanticsHandle handle = t.ensureSemantics();
@@ -184,7 +188,10 @@ void main() {
 
       expect(find.text(TextosSos.tituloEnviado), findsOneWidget);
       expect(find.text(TextosSos.mensagemEnviado), findsOneWidget);
-      expect(TextosSos.mensagemEnviado, contains('não confirma que o contato já leu'));
+      expect(
+        TextosSos.mensagemEnviado,
+        contains('não confirma que o contato já leu'),
+      );
     },
   );
 
@@ -244,9 +251,8 @@ void main() {
         MaterialApp(
           theme: TemasMemora.claro,
           home: Builder(
-            builder: (BuildContext _) => DialogoSosEmergencia(
-              controlador: ctrlRedeOff,
-            ),
+            builder: (BuildContext _) =>
+                DialogoSosEmergencia(controlador: ctrlRedeOff),
           ),
         ),
       );
@@ -258,7 +264,10 @@ void main() {
 
       expect(find.text(TextosSos.tituloFalhaConexao), findsOneWidget);
       expect(find.text(TextosSos.mensagemFalhaConexao), findsOneWidget);
-      expect(find.byKey(DialogoSosEmergencia.chaveAcionarAparelho), findsOneWidget);
+      expect(
+        find.byKey(DialogoSosEmergencia.chaveAcionarAparelho),
+        findsOneWidget,
+      );
       expect(find.byKey(DialogoSosEmergencia.chaveLigar192), findsOneWidget);
 
       await t.ensureVisible(find.byKey(DialogoSosEmergencia.chaveLigar192));
@@ -273,7 +282,10 @@ void main() {
       await t.tap(find.byKey(CascaInterna.chaveBotaoSos));
       await t.pumpAndSettle();
 
-      expect(find.text(TextosSos.mensagemSemContatoConfirmacao), findsOneWidget);
+      expect(
+        find.text(TextosSos.mensagemSemContatoConfirmacao),
+        findsOneWidget,
+      );
       expect(find.byKey(DialogoSosEmergencia.chaveLigar192), findsOneWidget);
     },
   );
@@ -326,8 +338,8 @@ void main() {
       final Finder btn = find.byKey(BotaoSosPersistente.chaveBotao);
       expect(btn, findsOneWidget);
       final Size size = t.getSize(btn);
-      expect(size.width, greaterThanOrEqualTo(MemoraDimensoes.alvoDecisao));
-      expect(size.height, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+      expect(size.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
+      expect(size.height, closeTo(size.width, 0.01));
 
       await t.tap(btn);
       expect(toques, 1);
@@ -335,7 +347,7 @@ void main() {
   );
 
   testWidgets(
-    'faixa SOS na CascaInterna reserva espaço próprio sem sobreposição a 200%',
+    'a bolinha do SOS não cobre a saudação do Início a 200% no 320x568',
     (WidgetTester t) async {
       vestir(t, const Size(320, 568));
       await t.pumpWidget(
@@ -343,23 +355,28 @@ void main() {
           controlador: ControladorAparencia(PreferenciaEmMemoria()),
           child: MaterialApp(
             theme: TemasMemora.claro,
-            home: MediaQuery(
-              data: const MediaQueryData(
-                size: Size(320, 568),
-                textScaler: TextScaler.linear(2.0),
-              ),
-              child: CascaInterna(
-                aoRegistrarAtividade: () {},
-                aoAcionarSos: () {},
-                raizes: <DestinoDaCasca, WidgetBuilder>{
-                  DestinoDaCasca.ajustes: (_) => const SizedBox.shrink(),
-                  DestinoDaCasca.inicio: (_) => TelaInicio(
-                    nome: 'Ana',
-                    aoConversar: () {},
-                    aoVerTudo: () {},
-                  ),
-                  DestinoDaCasca.perfil: (_) => const SizedBox.shrink(),
-                },
+            // Herda o MediaQuery do aparelho (que já é o 320×568 de `vestir`)
+            // e troca só a escala: um `MediaQueryData` do zero desliga o
+            // "reduzir movimento" dos testes, e a anfitriã da 013, que anima
+            // para sempre, não deixava o `pumpAndSettle` assentar.
+            home: Builder(
+              builder: (BuildContext ctx) => MediaQuery(
+                data: MediaQuery.of(
+                  ctx,
+                ).copyWith(textScaler: const TextScaler.linear(2.0)),
+                child: CascaInterna(
+                  aoRegistrarAtividade: () {},
+                  aoAcionarSos: () {},
+                  raizes: <DestinoDaCasca, WidgetBuilder>{
+                    DestinoDaCasca.ajustes: (_) => const SizedBox.shrink(),
+                    DestinoDaCasca.inicio: (_) => TelaInicio(
+                      nome: 'Ana',
+                      aoConversar: () {},
+                      aoVerTudo: () {},
+                    ),
+                    DestinoDaCasca.perfil: (_) => const SizedBox.shrink(),
+                  },
+                ),
               ),
             ),
           ),
@@ -368,19 +385,18 @@ void main() {
       await t.pumpAndSettle();
 
       expect(t.takeException(), isNull);
-      final Rect faixa = t.getRect(find.byKey(CascaInterna.chaveFaixaSos));
+      // Sem faixa: a bolinha está no cabeçalho do Início, não flutuando.
+      expect(find.byKey(CascaInterna.chaveSosFlutuante), findsNothing);
       final Rect botao = t.getRect(find.byKey(CascaInterna.chaveBotaoSos));
       final Rect saudacao = t.getRect(find.byKey(TelaInicio.chaveSaudacao));
+      final Rect anfitria = t.getRect(find.byKey(MemoraAnfitria.chaveDaAcao));
 
-      expect(
-        faixa.bottom - botao.bottom,
-        greaterThanOrEqualTo(MemoraDimensoes.separacaoAlvo),
-      );
-      expect(
-        saudacao.top - faixa.bottom,
-        greaterThanOrEqualTo(MemoraDimensoes.separacaoAlvo),
-      );
+      expect(botao.width, greaterThanOrEqualTo(MemoraDimensoes.alvoMinimo));
       expect(botao.overlaps(saudacao), isFalse);
+      expect(
+        botao.inflate(MemoraDimensoes.separacaoAlvo - 0.01).overlaps(anfitria),
+        isFalse,
+      );
     },
   );
 
@@ -402,13 +418,12 @@ void main() {
       expect(semEmail.destinoNotificacaoRemota, '11988887777');
       expect(comEmail.temEmailValido, isTrue);
       expect(comEmail.destinoNotificacaoRemota, 'maria@email.com');
-      expect(
-        semEmail.copyWith(email: 'invalido').emailValidoOuVazio,
-        isFalse,
-      );
+      expect(semEmail.copyWith(email: 'invalido').emailValidoOuVazio, isFalse);
 
       final List<Map<String, dynamic>> payloads = <Map<String, dynamic>>[];
-      final Dio dio = Dio(BaseOptions(baseUrl: 'https://api.memora.test/api/v1'));
+      final Dio dio = Dio(
+        BaseOptions(baseUrl: 'https://api.memora.test/api/v1'),
+      );
       dio.interceptors.add(
         InterceptorsWrapper(
           onRequest: (RequestOptions opts, RequestInterceptorHandler h) {
@@ -433,7 +448,9 @@ void main() {
         ),
       );
 
-      final RepositorioEmergenciaSosApi api = RepositorioEmergenciaSosApi(dio: dio);
+      final RepositorioEmergenciaSosApi api = RepositorioEmergenciaSosApi(
+        dio: dio,
+      );
       await api.solicitarSos(
         eventoId: 'ev-1',
         tipo: TipoEventoEmergencia.sosManual,
