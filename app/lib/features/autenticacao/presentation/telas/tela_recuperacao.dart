@@ -193,7 +193,8 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
         ),
         if (c.mensagemDeErro != null) ...<Widget>[
           const SizedBox(height: MemoraEspacamento.lg),
-          MensagemErro(mensagem: c.mensagemDeErro!),
+          // A Memora desta tela é a do aviso ou a do cartão (FR-006).
+          MensagemErro(mensagem: c.mensagemDeErro!, comMemora: false),
         ],
         const SizedBox(height: MemoraEspacamento.xl),
         if (c.enviando)

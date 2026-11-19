@@ -56,6 +56,14 @@ enum Ilustracao {
   /// "O que eu fiz por você": a prancheta marcada.
   portaRegistro('porta_registro'),
 
+  /// "Dispositivo de Cuidado": o coração, em verde de saúde — o mesmo do
+  /// atalho de Cuidado do Início (rev. 2026-11-18).
+  portaCuidado('porta_cuidado'),
+
+  /// "Localizador de Serviços": o alfinete de mapa, o mesmo da tela do
+  /// Localizador (rev. 2026-11-18).
+  portaLocalizador('porta_localizador'),
+
   // ---------------------------------------------------------------------------
   // Estados (feature 004, FR-006)
   // ---------------------------------------------------------------------------
@@ -190,6 +198,8 @@ class IlustracaoMemora extends StatelessWidget {
         Ilustracao.portaServicos => Icons.account_balance_rounded,
         Ilustracao.portaAjuda => Icons.help_outline_rounded,
         Ilustracao.portaRegistro => Icons.assignment_turned_in_rounded,
+        Ilustracao.portaCuidado => Icons.favorite_rounded,
+        Ilustracao.portaLocalizador => Icons.pin_drop_rounded,
         Ilustracao.estadoVazio => Icons.inbox_rounded,
         Ilustracao.estadoErro => Icons.cloud_off_rounded,
         Ilustracao.aplicativoGenerico => Icons.android_rounded,

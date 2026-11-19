@@ -42,14 +42,33 @@ void main() {
     final double topoDaBarra = t
         .getTopLeft(find.byKey(CascaInterna.chaveDaBarra))
         .dy;
+    // Desde 2026-11-18 não há faixa do SOS no topo (feature 014): a bolinha
+    // mora no cabeçalho da tela. O que tampa o topo é só a barra superior.
+    double topoUtil = 0;
+    final Iterable<Element> barrasSuperiores = find
+        .byType(BarraSuperior)
+        .evaluate()
+        .where((Element e) {
+          final RenderBox? rb = e.findRenderObject() as RenderBox?;
+          return rb != null && rb.hasSize;
+        });
+    for (final Element e in barrasSuperiores) {
+      final double baseBarra = t
+          .getBottomLeft(find.byWidget(e.widget))
+          .dy;
+      if (baseBarra > topoUtil && baseBarra < topoDaBarra) {
+        topoUtil = baseBarra;
+      }
+    }
+    final double alturaVisivel = topoDaBarra - topoUtil;
     expect(
       r.top,
       // Folga de ruído de ponto flutuante: `ensureVisible` alinha o alvo ao
-      // topo e o topo sai como -1e-13 (visto no "ver tudo" do Início, T115).
-      greaterThanOrEqualTo(-0.01),
-      reason: '${nomeDa(c)}: o alvo ficou acima da janela ($r)',
+      // topo da área útil e o topo sai com pequena folga.
+      greaterThanOrEqualTo(topoUtil - 0.01),
+      reason: '${nomeDa(c)}: o alvo ($r) ficou atrás da faixa superior ($topoUtil)',
     );
-    if (r.height <= topoDaBarra) {
+    if (r.height <= alturaVisivel) {
       expect(
         r.bottom,
         lessThanOrEqualTo(topoDaBarra),

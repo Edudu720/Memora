@@ -137,8 +137,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                         const SizedBox(width: MemoraEspacamento.md),
                         const Expanded(
                           child: TextoMemora(
-                            'Vou te pedir só o necessário. Nada de CPF, banco ou '
-                            'documento — eu nunca preciso disso 😊',
+                            TextosAutenticacao.cadastroSoONecessario,
                           ),
                         ),
                       ],
@@ -219,8 +218,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                   // o acompanhante já tendo visto o que este modo protege.
                   if (!c.podeDigitarSenha)
                     CaixaDeEtapa(
-                      instrucao:
-                          TextosAutenticacao.instrucaoEtapaCadastroPedirAparelho,
+                      instrucao: TextosAutenticacao
+                          .instrucaoEtapaCadastroPedirAparelho,
                       child: BotaoPrimario(
                         key: TelaCadastro.chavePedirAparelho,
                         rotulo: 'Agora vamos criar a senha',
@@ -258,6 +257,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       c.falha != null) ...<Widget>[
                     const SizedBox(height: MemoraEspacamento.lg),
                     MensagemErro(
+                      // A Memora desta tela é a do cartão (FR-006).
+                      comMemora: false,
                       mensagem: _mensagemDe(c.falha!),
                       aoTentarNovamente: c.tentarNovamente,
                     ),

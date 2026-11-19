@@ -58,13 +58,13 @@ List<Rect> alvosDeToque(WidgetTester t) {
     // botão que está abaixo da dobra é o que a pessoa toca depois de rolar.
     final bool alvo =
         d.hasAction(SemanticsAction.tap) && r.width > 0 && r.height > 0;
-    final bool daAnfitria = excluir.any(
-      (Rect x) =>
-          (x.left - r.left).abs() < 1 &&
-          (x.top - r.top).abs() < 1 &&
-          (x.right - r.right).abs() < 1 &&
-          (x.bottom - r.bottom).abs() < 1,
-    );
+    // Contido, e não só igual: a semântica recorta o nó pelo que está à vista,
+    // e a anfitriã empurrada para baixo da barra (o SOS acima da saudação, a
+    // 200% num aparelho estreito) tem o nó menor que o desenho. Ainda é ela.
+    final bool daAnfitria = excluir.any((Rect x) {
+      final Rect folga = x.inflate(1);
+      return folga.contains(r.topLeft) && folga.contains(r.bottomRight);
+    });
     if (alvo && !daAnfitria) alvos.add(r);
     no.visitChildren((SemanticsNode filho) {
       visitar(filho, m);
@@ -111,8 +111,20 @@ Future<MedidaDaMemora> medirMemora(
     final List<Rect> memoras = areasDeToqueDaMemora(t);
     final List<Rect> alvos = alvosDeToque(t);
     final List<String> violacoes = <String>[];
+    // A barra inferior é fixa, e a rolagem passa por baixo dela: a Memora que
+    // a rolagem levou para baixo da barra (a anfitriã empurrada pelo SOS
+    // acima da saudação, a 200% num aparelho estreito, feature 014) não está
+    // "ao lado" do destino da barra — rolar a separa. Esse par não conta.
+    final Finder barra = find.byType(NavegacaoInferior);
+    final Rect? daBarra = barra.evaluate().length == 1 ? t.getRect(barra) : null;
     for (final Rect m in memoras) {
       for (final Rect a in alvos) {
+        if (daBarra != null &&
+            daBarra.inflate(1).contains(a.topLeft) &&
+            daBarra.inflate(1).contains(a.bottomRight) &&
+            m.bottom > daBarra.top) {
+          continue;
+        }
         final double d = distanciaEntre(m, a);
         if (d < distanciaMinimaDaMemora - 0.01) {
           violacoes.add(

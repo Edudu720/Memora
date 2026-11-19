@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_assistente.dart';
+import '../../../../l10n/textos_atalhos_aplicativos.dart';
 import '../../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../aprendizado/data/guias/guias.dart';
 import '../../../aprendizado/domain/busca.dart';
@@ -24,20 +25,33 @@ class TelaCatalogo extends StatefulWidget {
   /// Chave de um item, pelo nome do serviço.
   static Key chaveDoItem(String nome) => Key('catalogo.item.$nome');
 
+  /// Chave do botão para entrar na lista de abertura direta (`015`).
+  static const Key chaveAtalhosDiretos = Key('catalogo.atalhos_diretos');
+
   /// De onde vêm os serviços.
   final RepositorioAssistente repositorio;
 
   /// Categoria exibida ao abrir a tela.
   final CategoriaDoServico categoria;
 
-  /// Abre a conversa já perguntando sobre um serviço.
+  /// Abre a conversa já perguntando sobre um serviço (a Memora **ensina**).
   final void Function(ServicoDoCatalogo servico)? aoEscolher;
+
+  /// Abre a conversa já **pedindo para a Memora abrir** o aplicativo.
+  ///
+  /// É um caminho à parte do [aoEscolher]: o botão "Pedir para a Memora abrir"
+  /// não pode reaproveitá-lo, ou o rascunho sai "Você me ensina…" e a Memora
+  /// ensina em vez de abrir. Nulo, o botão não aparece.
+  final void Function(ServicoDoCatalogo servico)? aoPedirParaAbrir;
 
   /// Abre o guia passo a passo quando disponível.
   final void Function(Guia guia, ServicoDoCatalogo servico)? aoAbrirGuia;
 
   /// Consulta de plataforma dos aplicativos instalados (se disponível).
   final ConsultaDeAplicativos? consultaAplicativos;
+
+  /// Abre a tela dedicada para abrir um aplicativo direto (`015`).
+  final VoidCallback? aoAbrirAtalhosDiretos;
 
   /// Volta ao início.
   final VoidCallback? aoVoltar;
@@ -50,8 +64,10 @@ class TelaCatalogo extends StatefulWidget {
     required this.repositorio,
     required this.categoria,
     this.aoEscolher,
+    this.aoPedirParaAbrir,
     this.aoAbrirGuia,
     this.consultaAplicativos,
+    this.aoAbrirAtalhosDiretos,
     this.aoVoltar,
     this.estadoDeTeste,
     super.key,
@@ -241,6 +257,17 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
               ),
               const SizedBox(height: MemoraEspacamento.lg),
 
+              if (_categoriaAtiva == CategoriaDoServico.cotidiano &&
+                  widget.aoAbrirAtalhosDiretos != null) ...<Widget>[
+                BotaoSecundario(
+                  key: TelaCatalogo.chaveAtalhosDiretos,
+                  rotulo: TextosAtalhosAplicativos.botaoVerAtalhosDiretos,
+                  icone: Icons.apps_rounded,
+                  aoTocar: widget.aoAbrirAtalhosDiretos,
+                ),
+                const SizedBox(height: MemoraEspacamento.lg),
+              ],
+
               // Para os serviços sensíveis, a explicação vem ANTES da lista (FR-042).
               if (_categoriaAtiva == CategoriaDoServico.sensivel) ...<Widget>[
                 Cartao(
@@ -265,11 +292,14 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
               ],
 
               if (exibidos.isEmpty)
-                const EstadoVazio(
+                EstadoVazio(
                   titulo: 'Nenhum aplicativo encontrado',
                   explicacao:
                       'Tente buscar com outras palavras ou apague a busca.',
                   icone: Icons.search_off_rounded,
+                  // Uma Memora só (FR-006): na aba dos serviços sociais o cartão
+                  // acima já tem a dela.
+                  comMemora: _categoriaAtiva != CategoriaDoServico.sensivel,
                 )
               else
                 for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[
@@ -280,8 +310,8 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                     habilitado:
                         widget.aoEscolher != null || widget.aoAbrirGuia != null,
                     aoAcionarPadrao: () => _acionarPadrao(servico),
-                    aoPedirAbrir: widget.aoEscolher != null
-                        ? () => widget.aoEscolher!(servico)
+                    aoPedirAbrir: widget.aoPedirParaAbrir != null
+                        ? () => widget.aoPedirParaAbrir!(servico)
                         : null,
                   ),
                   const SizedBox(height: MemoraEspacamento.md),

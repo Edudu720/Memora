@@ -223,6 +223,8 @@ class _TelaLoginState extends State<TelaLogin> {
                         if (c.mensagemDeErro != null) ...<Widget>[
                           const SizedBox(height: MemoraEspacamento.md),
                           MensagemErro(
+                            // A Memora desta tela é a do cartão (FR-006).
+                            comMemora: false,
                             mensagem: c.mensagemDeErro!,
                             // Durante o bloqueio não há o que tentar: o botão de
                             // repetir só reapresentaria a mesma recusa e faria a

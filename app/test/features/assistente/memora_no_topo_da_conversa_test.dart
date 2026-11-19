@@ -142,32 +142,56 @@ void main() {
     await t.pump();
   }
 
-  MemoraAnimada memora(WidgetTester t) =>
-      t.widget<MemoraAnimada>(find.byType(MemoraAnimada));
+  /// A Memora do topo. Antes da primeira mensagem há também o rosto do
+  /// convite (FR-042, rev. 2026-11-18), que é a voz dela e não conta.
+  Finder doTopo() => find.descendant(
+    of: find.byType(BarraSuperior),
+    matching: find.byType(MemoraAnimada),
+  );
+
+  MemoraAnimada memora(WidgetTester t) => t.widget<MemoraAnimada>(doTopo());
 
   group('Uma Memora só, pequena e no topo — FR-025, FR-042', () {
-    testWidgets('na barra do topo, acima da lista, e só uma', (
+    testWidgets('na barra do topo, acima da lista, e só uma fora do convite', (
       WidgetTester t,
     ) async {
       await montar(t);
 
-      expect(find.byType(MemoraAnimada), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(BarraSuperior),
-          matching: find.byType(MemoraAnimada),
-        ),
-        findsOneWidget,
+      expect(doTopo(), findsOneWidget);
+      // Fora o rosto do convite, não há outra.
+      final Finder doConvite = find.descendant(
+        of: find.byKey(TelaConversa.chaveConvite),
+        matching: find.byType(MemoraAnimada),
       );
+      expect(doConvite, findsOneWidget);
+      expect(find.byType(MemoraAnimada), findsNWidgets(2));
       // Acima das mensagens: não ocupa o espaço delas.
       expect(
-        t.getRect(find.byType(MemoraAnimada)).bottom,
+        t.getRect(doTopo()).bottom,
         lessThanOrEqualTo(t.getTopLeft(find.byType(ListView).first).dy),
       );
       // Pequena: no máximo o alvo mínimo de toque.
       expect(
-        t.getSize(find.byType(MemoraAnimada)).height,
+        t.getSize(doTopo()).height,
         lessThanOrEqualTo(MemoraDimensoes.alvoMinimo),
+      );
+    });
+
+    testWidgets('o convite, antes da primeira mensagem, leva o rosto dela '
+        '(FR-042, rev. 2026-11-18)', (WidgetTester t) async {
+      await montar(t);
+
+      final BalaoDeFala convite = t.widget<BalaoDeFala>(
+        find.byKey(TelaConversa.chaveConvite),
+      );
+      expect(convite.autor, AutorDoBalao.memora);
+      expect(convite.comRosto, isTrue);
+      expect(
+        find.descendant(
+          of: find.byKey(TelaConversa.chaveConvite),
+          matching: find.byType(MemoraAnimada),
+        ),
+        findsOneWidget,
       );
     });
 
@@ -205,7 +229,10 @@ void main() {
           findsNothing,
         );
         expect(
-          find.descendant(of: dele, matching: find.byIcon(Icons.person_rounded)),
+          find.descendant(
+            of: dele,
+            matching: find.byIcon(Icons.person_rounded),
+          ),
           findsNothing,
         );
       }
@@ -373,8 +400,9 @@ void main() {
             await montar(t, tela: aparelho, escala: escala);
 
             // Com a letra muito ampliada a figura sai da barra (como no
-            // cabeçalho das telas); senão, é uma só e cabe na barra.
-            final Finder figura = find.byType(MemoraAnimada);
+            // cabeçalho das telas); senão, é uma só e cabe na barra. O rosto
+            // do convite (FR-042, rev. 2026-11-18) não é a figura do topo.
+            final Finder figura = doTopo();
             if (escala < CabecalhoDeTela.ampliacaoQueTiraAFigura) {
               expect(figura, findsOneWidget);
               final Rect barra = t.getRect(find.byType(BarraSuperior));

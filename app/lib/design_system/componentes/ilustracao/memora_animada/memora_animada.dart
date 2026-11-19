@@ -70,6 +70,12 @@ class MemoraAnimada extends StatefulWidget {
   /// lá. **Nulo, ou com "reduzir movimento", a barra fica parada.**
   final Animation<double>? cicloDaBarra;
 
+  /// Se ela **chega** ao aparecer: cresce um pouco a partir dos pés. Falso na
+  /// abertura (T094): ali ela já estava na tela, parada, no desenho do
+  /// Android, e o primeiro quadro do aplicativo precisa ser do mesmo tamanho
+  /// (FR-037). Crescer de 90% ali seria um encolher seguido de um pulo.
+  final bool chega;
+
   /// Cria a Memora animada.
   const MemoraAnimada({
     required this.expressao,
@@ -80,6 +86,7 @@ class MemoraAnimada extends StatefulWidget {
     this.anfitria = false,
     this.sementeDaAgenda,
     this.cicloDaBarra,
+    this.chega = true,
     super.key,
   });
 
@@ -218,15 +225,17 @@ class _MemoraAnimadaState extends State<MemoraAnimada>
   /// A chegada de uma Memora que acabou de aparecer: um pequeno crescimento
   /// e, para o aceno e a comemoração, o gesto que combina com ela.
   void _comecar() {
-    _chegada.value = 0;
-    _chegada.animateTo(
-      1,
-      duration: MemoraMovimento.efetiva(
-        MemoraMovimento.trocaDeExpressao,
-        reduzirMovimento: _reduzir,
-      ),
-      curve: Curves.easeOutBack,
-    );
+    if (widget.chega) {
+      _chegada.value = 0;
+      _chegada.animateTo(
+        1,
+        duration: MemoraMovimento.efetiva(
+          MemoraMovimento.trocaDeExpressao,
+          reduzirMovimento: _reduzir,
+        ),
+        curve: Curves.easeOutBack,
+      );
+    }
     if (widget.gesto != null) {
       _disparar(widget.gesto!);
     } else if (widget.expressao == PoseDaMemora.acenando) {

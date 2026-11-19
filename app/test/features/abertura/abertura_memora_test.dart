@@ -147,6 +147,37 @@ void main() {
       );
     });
 
+    testWidgets('T094: começa onde a abertura do Android parou: a Memora '
+        'inteira e o trecho no meio da barra', (WidgetTester t) async {
+      final Completer<int> carga = Completer<int>();
+      await montar(t, carregar: () => carga.future, aoConcluir: (int _) {});
+      // O primeiro quadro do aplicativo, o que substitui o desenho do Android.
+      final ContextoDePintura q = quadro(t);
+      expect(
+        q.entrada,
+        1,
+        reason: 'do mesmo tamanho do desenho do Android, sem crescer de 90%',
+      );
+      expect(
+        ValoresDaPose.suavizar(q.cicloDaBarra!),
+        closeTo(0.5, 1e-9),
+        reason:
+            'o trecho no meio da barra, como no desenho do Android '
+            '(e como fica com a barra parada)',
+      );
+      expect(q.aceno, 0);
+
+      // Daí segue para a direita, e a passada seguinte entra pela esquerda.
+      await t.pump(const Duration(milliseconds: 300));
+      expect(quadro(t).cicloDaBarra!, greaterThan(q.cicloDaBarra!));
+      await t.pump(const Duration(milliseconds: 500));
+      expect(
+        quadro(t).cicloDaBarra!,
+        lessThan(0.1),
+        reason: 'a 2ª passada é inteira: entra pela esquerda',
+      );
+    });
+
     testWidgets('nada de número nem de porcentagem na tela', (
       WidgetTester t,
     ) async {
@@ -161,8 +192,8 @@ void main() {
   });
 
   group('V12: a abertura sai só quando carregou e a passada completou', () {
-    testWidgets('carregamento rápido: sai depois de uma passada completa, '
-        'nunca antes', (WidgetTester t) async {
+    testWidgets('carregamento rápido: sai depois de completar a primeira '
+        'passada, nunca antes', (WidgetTester t) async {
       int? saiu;
       await montar(t, carregar: () async => 7, aoConcluir: (int r) => saiu = r);
       // O carregamento já terminou no primeiro quadro; a barra mal começou.
@@ -170,7 +201,10 @@ void main() {
       expect(saiu, isNull, reason: 'carregou, mas a passada mal começou');
       expect(memora, findsOneWidget);
 
-      const Duration jaPassado = Duration(milliseconds: 1300);
+      // A primeira passada parte do meio (T094): dura meia passada.
+      final Duration primeira =
+          passada * (1 - MemoraAbertura.inicioDaPrimeiraPassada);
+      final Duration jaPassado = primeira - const Duration(milliseconds: 150);
       await t.pump(jaPassado);
       expect(saiu, isNull, reason: 'a passada ainda não completou');
 
@@ -183,14 +217,14 @@ void main() {
       final Duration total = jaPassado + depois;
       expect(
         total,
-        greaterThanOrEqualTo(passada),
+        greaterThanOrEqualTo(primeira),
         reason: 'nunca antes de a passada completar',
       );
-      // Uma passada completa e o esmaecer: ~1,7 s no total (SC-009).
+      // O resto da primeira passada e o esmaecer: ~1 s no total (SC-009).
       expect(
         total,
         lessThanOrEqualTo(
-          passada + MemoraMovimento.padrao + const Duration(milliseconds: 100),
+          primeira + MemoraMovimento.padrao + const Duration(milliseconds: 100),
         ),
         reason: 'a abertura não pode prolongar além de uma passada',
       );
@@ -215,8 +249,9 @@ void main() {
       expect(saiu, isNull);
       expect(memora, findsOneWidget);
 
-      // A 5ª passada começou aos 6 s e acaba aos 7,5 s: aos 6,7 s faltam
-      // 0,8 s dela.
+      // Com o relógio falso, cada pulo de 3 s fecha a passada em curso e a
+      // seguinte recomeça no próprio quadro: a última começou aos 6 s e
+      // acaba aos 7,5 s. Aos 6,7 s faltam 0,8 s dela.
       await t.pump(const Duration(milliseconds: 700));
       carga.complete(9);
       await t.pump();
@@ -252,12 +287,13 @@ void main() {
         aoConcluir: (int r) => saiu = r,
       );
       await t.pump();
-      await t.pump(const Duration(milliseconds: 500)); // 1/3 da 1ª passada
+      // A 1ª passada (de meio) acaba aos 750 ms; a 2ª vai de 750 a 2250 ms.
+      await t.pump(const Duration(milliseconds: 1000)); // 1/6 da 2ª passada
       carga.complete(1);
       await t.pump();
       expect(saiu, isNull);
-      await t.pump(const Duration(milliseconds: 800));
-      expect(saiu, isNull, reason: 'a passada só completa aos 1500 ms');
+      await t.pump(const Duration(milliseconds: 1000));
+      expect(saiu, isNull, reason: 'a passada só completa aos 2250 ms');
       await esperarAte(t, () => saiu != null);
       expect(saiu, 1);
     });

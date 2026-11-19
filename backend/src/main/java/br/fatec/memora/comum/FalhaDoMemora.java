@@ -76,6 +76,14 @@ public class FalhaDoMemora extends RuntimeException {
                 tentarNovamenteEmSegundos);
     }
 
+    /** Limite temporário de envios SOS com espera em segundos para o corpo {@code 429}. */
+    public static FalhaDoMemora limiteSos(long tentarNovamenteEmSegundos) {
+        return new FalhaDoMemora(
+                CodigoDeErro.LIMITE_DE_SOS,
+                CodigoDeErro.LIMITE_DE_SOS.mensagemPadrao(),
+                tentarNovamenteEmSegundos);
+    }
+
     public CodigoDeErro getCodigo() {
         return codigo;
     }

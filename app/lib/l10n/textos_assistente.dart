@@ -181,8 +181,7 @@ class TextosAssistente {
       'nem por e-mail. Se alguém pedir, é golpe: pode desligar sem responder.';
 
   /// Título do aviso de privacidade (FR-051), junto ao antigolpe.
-  static const String tituloAvisoPrivacidade =
-      'Não escreva dados pessoais aqui';
+  static const String tituloAvisoPrivacidade = 'Não escreva dados pessoais aqui';
 
   /// O aviso de privacidade.
   ///
@@ -209,7 +208,8 @@ class TextosAssistente {
       '$resumoAvisoAntigolpe Não escreva dados pessoais.';
 
   /// Os dois avisos inteiros, na mesma caixa: o do golpe e o de privacidade.
-  static const String avisosInteiros = '$avisoAntigolpe\n\n$avisoPrivacidade';
+  static const String avisosInteiros =
+      '$avisoAntigolpe\n\n$avisoPrivacidade';
 
   // ---------------------------------------------------------------------------
   // O consentimento antes da primeira mensagem — FR-051
@@ -260,7 +260,7 @@ class TextosAssistente {
   /// *"Prefiro tentar"*, e não *"cancelar"*: quem recusa aqui está escolhendo
   /// aprender, e o texto reconhece isso em vez de tratar a recusa como
   /// desistência.
-  static const String botaoPrefiroTentar = 'Prefiro tentar sozinha';
+  static const String botaoPrefiroTentar = 'Prefiro tentar por conta própria';
 
   /// Reconhecimento depois de a pessoa fazer sozinha.
   static const String vocePodeFazerSozinha =
@@ -402,9 +402,10 @@ class TextosAssistente {
       'você não vai mais precisar de mim para isso.';
 
   /// O que foi feito, numa frase.
-  static String oQueFoiFeito(String aplicativo, String pedido) => pedido.isEmpty
-      ? 'Abri o $aplicativo para você'
-      : 'Abri o $aplicativo, porque você me pediu: "$pedido"';
+  static String oQueFoiFeito(String aplicativo, String pedido) =>
+      pedido.isEmpty
+          ? 'Abri o $aplicativo para você'
+          : 'Abri o $aplicativo, porque você me pediu: "$pedido"';
 
   /// Quando aconteceu, do jeito que uma pessoa fala.
   ///
@@ -412,18 +413,8 @@ class TextosAssistente {
   /// auditando um sistema, está lembrando de um dia.
   static String quandoAconteceu(DateTime momento) {
     const List<String> meses = <String>[
-      'janeiro',
-      'fevereiro',
-      'março',
-      'abril',
-      'maio',
-      'junho',
-      'julho',
-      'agosto',
-      'setembro',
-      'outubro',
-      'novembro',
-      'dezembro',
+      'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+      'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
     ];
     final String hora = momento.hour.toString().padLeft(2, '0');
     final String minuto = momento.minute.toString().padLeft(2, '0');

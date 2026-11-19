@@ -38,6 +38,10 @@ void main() {
     'preferencias/tela_aparencia.dart':
         'e uma TELA inteira, com persistencia propria; montar uma tela dentro '
             'da galeria misturaria os dois niveis',
+    'componentes/navegacao/vaga_do_sos.dart':
+        'e o lugar do botao SOS, que mora em features/cuidado e so existe '
+            'dentro da casca; fora dela a vaga nao ocupa nada. O cabecalho com '
+            'a bolinha aparece no album de telas (feature 014, 2026-11-18)',
     'temas/memora_theme_extension.dart': 'e extensao de tema',
     'temas/temas_memora.dart': 'e o tema — a galeria troca entre os tres',
   };

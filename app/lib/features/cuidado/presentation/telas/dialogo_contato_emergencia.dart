@@ -44,6 +44,7 @@ class DialogoContatoEmergencia extends StatefulWidget {
 class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
   late final TextEditingController _controladorNome;
   late final TextEditingController _controladorTelefone;
+  late final TextEditingController _controladorEmail;
   late final TextEditingController _controladorParentesco;
 
   String? _erroValidacao;
@@ -55,6 +56,8 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
         TextEditingController(text: widget.contatoAtual?.nome ?? '');
     _controladorTelefone =
         TextEditingController(text: widget.contatoAtual?.telefone ?? '');
+    _controladorEmail =
+        TextEditingController(text: widget.contatoAtual?.email ?? '');
     _controladorParentesco =
         TextEditingController(text: widget.contatoAtual?.parentesco ?? '');
   }
@@ -63,6 +66,7 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
   void dispose() {
     _controladorNome.dispose();
     _controladorTelefone.dispose();
+    _controladorEmail.dispose();
     _controladorParentesco.dispose();
     super.dispose();
   }
@@ -73,12 +77,20 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
           DateTime.now().millisecondsSinceEpoch.toString(),
       nome: _controladorNome.text.trim(),
       telefone: _controladorTelefone.text.trim(),
+      email: _controladorEmail.text.trim(),
       parentesco: _controladorParentesco.text.trim(),
     );
 
     if (!novoContato.ehValido) {
       setState(() {
         _erroValidacao = TextosCuidado.erroTelefoneContato;
+      });
+      return;
+    }
+
+    if (!novoContato.emailValidoOuVazio) {
+      setState(() {
+        _erroValidacao = TextosCuidado.erroEmailContato;
       });
       return;
     }
@@ -163,6 +175,13 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
               textoAjuda: TextosCuidado.ajudaTelefoneContato,
               tipoTeclado: TextInputType.phone,
               controlador: _controladorTelefone,
+            ),
+            const SizedBox(height: MemoraEspacamento.sm),
+            CampoTexto(
+              rotulo: TextosCuidado.rotuloEmailContato,
+              textoAjuda: TextosCuidado.ajudaEmailContato,
+              tipoTeclado: TextInputType.emailAddress,
+              controlador: _controladorEmail,
             ),
             const SizedBox(height: MemoraEspacamento.sm),
             CampoTexto(

@@ -44,8 +44,7 @@ abstract final class TextosAutenticacao {
   static const String rotuloIdentificador = 'Seu e-mail ou telefone';
 
   /// Ajuda do campo de identificador.
-  static const String ajudaIdentificador =
-      'O e-mail ou telefone da sua conta';
+  static const String ajudaIdentificador = 'O e-mail ou telefone da sua conta';
 
   /// Rótulo do campo de senha.
   static const String rotuloSenha = 'Sua senha';
@@ -110,7 +109,7 @@ abstract final class TextosAutenticacao {
   /// que impede alguém de ficar adivinhando), diz **quanto** falta, e aponta a
   /// saída para quem simplesmente não lembra a senha.
   static String bloqueio(int segundos) =>
-      'Acontece com todo mundo, fica tranquila. Como foram várias tentativas '
+      'Acontece com todo mundo, sem problema. Como foram várias tentativas '
       'seguidas, vou dar uma pausa de ${esperaHumana(segundos)} — é isso que '
       'impede outra pessoa de ficar tentando adivinhar sua senha. '
       'Se você não lembra qual é, eu posso criar uma nova com você.';
@@ -237,12 +236,12 @@ abstract final class TextosAutenticacao {
   /// dar errado. Por isso o texto trata a entrada como um teste tranquilo, e
   /// não como uma última burocracia.
   static const String convitePrimeiraEntrada =
-      'Agora vamos fazer juntos uma coisa importante: você vai entrar sozinha, '
+      'Agora vamos fazer juntos uma coisa importante: você vai entrar por conta própria, '
       'uma vez, para ver que consegue. Se travar, quem está aí do lado pode '
       'ajudar — mas quem digita a senha é você.';
 
   /// Rótulo do botão que leva ao login.
-  static const String botaoEntrarSozinha = 'Quero entrar sozinha';
+  static const String botaoEntrarSozinha = 'Quero entrar por conta própria';
 
   // ---------------------------------------------------------------------------
   // Recuperação de acesso — FR-018 a FR-023
@@ -396,6 +395,13 @@ abstract final class TextosAutenticacao {
 
   /// Caminho secundário na tela de volta para começar com outra conta.
   static const String botaoCriarOutraConta = 'Criar outra conta';
+
+  /// O balão da Memora no topo do cadastro: pede só o necessário e diz o que
+  /// ela nunca pede. Era literal na tela, com um emoji que a fonte não tem
+  /// (saía um quadrado vazio) e fora do alcance do portão de texto (T044).
+  static const String cadastroSoONecessario =
+      'Vou te pedir só o necessário. Nada de CPF, banco ou documento — eu '
+      'nunca preciso disso.';
 
   // --- Instruções das caixas de etapa do cadastro (FR-002a, FR-010) --------
 
