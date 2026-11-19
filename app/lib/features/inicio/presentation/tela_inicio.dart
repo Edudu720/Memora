@@ -304,9 +304,11 @@ class _CabecalhoInicio extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        TextoMemora.tituloTela(
-          TextosCasca.inicioSaudacao(nome),
-          key: TelaInicio.chaveSaudacao,
+        // A bolinha do SOS fica à direita da saudação, no espaço que sobrava
+        // (feature 014, 2026-11-18).
+        TituloComSos(
+          titulo: TextosCasca.inicioSaudacao(nome),
+          chaveDoTitulo: TelaInicio.chaveSaudacao,
         ),
         const SizedBox(height: MemoraEspacamento.sm),
         MemoraAnfitria(

@@ -158,10 +158,21 @@ void main() {
         expect(find.byType(TelaHub), findsOneWidget);
         medidas += await exigirMemoraAfastada(t, contexto: 'Hub, ${nomeDa(c)}');
 
-        await FluxoDentroDaConta.tocar(
-          t,
-          find.byKey(TelaHub.chaveDaPorta(TextosAssistente.portaAjuda)),
+        // Toca perto do topo da porta, e não no centro: a 200% no 320x568 a
+        // barra com o SOS e o título em duas linhas (feature 014) deixa menos
+        // altura à vista que a porta tem, e o centro dela fica atrás da barra
+        // inferior — a pessoa toca no que vê.
+        final Finder portaAjuda = find.byKey(
+          TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
         );
+        await t.ensureVisible(portaAjuda);
+        await t.pump();
+        await t.tapAt(
+          t.getTopLeft(portaAjuda) +
+              const Offset(MemoraEspacamento.lg, MemoraEspacamento.lg),
+        );
+        await FluxoDentroDaConta.avancar(t);
+        await FluxoDentroDaConta.esperarATransicao(t);
         expect(find.byType(TelaAjuda), findsOneWidget);
         medidas += await exigirMemoraAfastada(
           t,

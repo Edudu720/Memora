@@ -42,11 +42,9 @@ void main() {
     final double topoDaBarra = t
         .getTopLeft(find.byKey(CascaInterna.chaveDaBarra))
         .dy;
+    // Desde 2026-11-18 não há faixa do SOS no topo (feature 014): a bolinha
+    // mora no cabeçalho da tela. O que tampa o topo é só a barra superior.
     double topoUtil = 0;
-    final Finder faixaSos = find.byKey(CascaInterna.chaveFaixaSos);
-    if (faixaSos.evaluate().isNotEmpty) {
-      topoUtil = t.getBottomLeft(faixaSos).dy;
-    }
     final Iterable<Element> barrasSuperiores = find
         .byType(BarraSuperior)
         .evaluate()

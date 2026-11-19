@@ -10,6 +10,7 @@ import '../ilustracao/medalhao_de_ilustracao.dart';
 import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
 import '../toque/superficie_tocavel.dart';
+import 'vaga_do_sos.dart';
 
 /// O topo de toda tela interna (feature 004, FR-001).
 ///
@@ -30,6 +31,12 @@ import '../toque/superficie_tocavel.dart';
 /// altura da tela e some abaixo de [MemoraDimensoes.pisoDeIlustracao] — e some
 /// também com o texto a partir de 175%, quando o título precisa da largura
 /// inteira (regra 7 da R2). O título e o "Voltar", nunca.
+///
+/// ## O SOS no canto direito (feature 014, 2026-11-18)
+///
+/// Dentro da casca, o canto direito da linha do título é da bolinha do SOS
+/// ([TituloComSos]), e a figura passa para antes do título, menor. Quando o
+/// título não cabe ao lado da bolinha, ela sobe para a linha do "Voltar".
 ///
 /// ## Diferença da `BarraSuperior`
 ///
@@ -102,32 +109,18 @@ class CabecalhoDeTela extends StatelessWidget {
             MemoraEspacamento.lg,
             MemoraEspacamento.lg,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              if (aoVoltar != null) ...<Widget>[
-                _Voltar(aoVoltar: aoVoltar!),
-                const SizedBox(height: MemoraEspacamento.sm),
-              ],
-              Row(
-                children: <Widget>[
-                  Expanded(child: TextoMemora.tituloTela(titulo)),
-                  if (figura != null) ...<Widget>[
-                    const SizedBox(width: MemoraEspacamento.md),
-                    KeyedSubtree(
-                      key: chaveFigura,
-                      child: memora != null
-                          ? MemoraPersonagem(expressao: memora!, tamanho: figura)
-                          : MedalhaoDeIlustracao(
-                              ilustracao!,
-                              tamanho: figura,
-                            ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
+          child: TituloComSos(
+            titulo: titulo,
+            acima: aoVoltar == null ? null : _Voltar(aoVoltar: aoVoltar!),
+            tamanhoDaFigura: figura,
+            figura: figura == null
+                ? null
+                : (double tamanho) => KeyedSubtree(
+                    key: chaveFigura,
+                    child: memora != null
+                        ? MemoraPersonagem(expressao: memora!, tamanho: tamanho)
+                        : MedalhaoDeIlustracao(ilustracao!, tamanho: tamanho),
+                  ),
           ),
         ),
       ),
