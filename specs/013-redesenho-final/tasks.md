@@ -206,7 +206,7 @@ acenando → fluxo de entrada, sem pulo.
 - [X] T036 [US7] `app/lib/features/abertura/presentation/abertura_memora.dart` conforme o contrato, com textos novos em `app/lib/l10n/` (duas frases, voz da Memora)
 - [X] T037 [US7] `app/lib/main.dart`: chamar o `runApp` com a `AberturaMemora` **antes** de carregar preferências e composição; o carregamento atual passa para dentro dela, sem mudar a ordem nem o que é carregado
 - [X] T038 [P] [US7] Abertura nativa: `android/app/src/main/res/drawable/launch_background.xml` (e `drawable-v21`, `values-night`) com o fundo do tema e a Memora parada como desenho vetorial do Android, na mesma posição do aceno; Android 12+ com `windowSplashScreen*` sobre o mesmo fundo (FR-037, R9)
-- [ ] T039 [US7] Medir no celular (APK de release) o tempo até a tela de entrada, antes e depois, e registrar no `quickstart.md` (SC-009)
+- [X] T039 [US7] Medir no celular (APK de release) o tempo até a tela de entrada, antes e depois, e registrar no `quickstart.md` (SC-009). **Aprovada pelo Henrique em 2026-11-18**, no S20 FE, com o APK de release 1.0.7 (a `redesign-final` com a `develop` e as PRs #96 a #104), junto da conferência da abertura nativa da T094. **Aprovação no uso, sem o tempo em segundos registrado**: se a SC-009 precisar do número, medir de novo
 
 **Checkpoint**: abertura pronta.
 
@@ -224,7 +224,7 @@ acenando → fluxo de entrada, sem pulo.
 
 - [X] T043 Rodar os quatro portões e a suíte do backend (`mvnw clean test`, com Docker de pé). **Feita em 2026-11-18**, na `redesign-final` em `3127087` (#90, #91, #93 e #94 dentro): paleta (13 combinações), tokens (nenhum literal), `flutter analyze` limpo, `flutter test` com **3285 passando, 11 pulados** (os testes de renderização opcionais, `skip: !ligado`) **e nenhuma falha**; backend `mvnw clean test` com Docker: **483 de 484** — o único erro é o `ClienteDaAssistenteGeminiRealTest`, que chama o Google de verdade e não teve resposta em 60 s (sobrecarga externa, não código)
 - [X] T044 Gerar o álbum de telas e conferir as telas tocadas na Fase A contra a checagem da memora-ux (seção 5). **Feita em 2026-11-18**: 96 PNGs; achados e decisões em `specs/013-redesenho-final/revisao-album-fase-a.md`. Emoji do cadastro, texto com gênero e a frase da Privacidade corrigidos na branch `redesign/texto-neutro`; as duas Memoras de 19 e 31, na T096
-- [ ] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013
+- [X] T045 APK de release no S20 FE: abertura, transições da casca, diálogos e a Memora na galeria; registrar em `revisao-de-design.md` da 004 ou num arquivo da 013. **Aprovada pelo Henrique em 2026-11-18**, no S20 FE, com o APK de release 1.0.7 (a `redesign-final` com a `develop` e as PRs #96 a #104). Os achados dessa revisão já viraram trabalho no mesmo dia: o rosto no balão da conversa (T098, #100), o SOS em bolinha (014, #104), os ícones do Hub (#102) e a `develop` que faltava (#101)
 - [X] T046 ~~PR da Fase A para a `develop`~~ **Substituída (2026-11-17, decisão do Henrique)**: com a branch comum `redesign-final`, as fases A e B vão juntas para a `develop` numa PR só, ao fim do redesenho; cada frente entra antes na `redesign-final` por PR revisada por outra pessoa
 
 ---
@@ -293,7 +293,7 @@ acenando → fluxo de entrada, sem pulo.
 ## Phase 15: Validação final
 
 - [ ] T075 Rodar os quatro portões, a suíte do backend, e regenerar o álbum nos 3 temas. **(2026-11-17, execução parcial pré-merge)**: álbum regenerado (3/3 temas, 96 PNGs) e backend executado (250 testes: 220 aprovados, 0 falhas, 30 erros de Testcontainers sem Docker ativo neste ambiente; `TextoDaInterfaceTest,PersonaDaMemoraTest` 13/13 aprovados). Reexecução final prevista após o merge de todas as PRs na `redesign-final`.
-- [ ] T076 Medir desempenho em perfil (abertura, trocas, gestos) no S20 FE e, se houver, num Galaxy A/M ou no emulador com CPU limitada; registrar no `quickstart.md` (V19, SC-005)
+- [X] T076 Medir desempenho em perfil (abertura, trocas, gestos) no S20 FE e, se houver, num Galaxy A/M ou no emulador com CPU limitada; registrar no `quickstart.md` (V19, SC-005). **Aprovada pelo Henrique em 2026-11-18**, no S20 FE, com o APK de release 1.0.7 (a `redesign-final` com a `develop` e as PRs #96 a #104). **Aprovação no uso, sem medição em perfil nem aparelho de entrada**: se a V19 precisar dos números, medir de novo
 - [ ] T077 Conferir 50 respostas seguidas da IA real: nenhuma com mais de um emoji (SC-008)
 - [ ] T078 APK de release no celular e revisão do Henrique, registrada (portão da T116 da 004 para tela nova na `master`)
 - [X] T079 Preparar o roteiro do teste com 5 pessoas de 65+ para o SC-007 (V20), junto do portão pendente das features 001 e 002. **Feita em 2026-11-17**: roteiro e ficha de registro criados em `specs/013-redesenho-final/teste-com-pessoas.md` consolidando V20 (013), V10 (001), V7–V8 (002), H12 (003) e SC-002–SC-004 (004). (Aplicação presencial com 5 participantes permanece pendente de campo.)
