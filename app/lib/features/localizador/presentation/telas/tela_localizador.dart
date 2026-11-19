@@ -136,9 +136,9 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
               ),
               const SizedBox(height: MemoraEspacamento.xs),
               const TextoMemora.apoio(
-                'A cidade ou bairro digitado é consultado apenas neste momento '
-                'no mapa público OpenStreetMap, sem enviar dados pessoais da '
-                'sua conta nem salvar histórico.',
+                'A cidade ou bairro digitado é consultado só neste momento, '
+                'nos serviços de mapa Geoapify e OpenStreetMap, sem enviar '
+                'dados pessoais da sua conta nem salvar histórico.',
               ),
               const SizedBox(height: MemoraEspacamento.sm),
               CampoTexto(

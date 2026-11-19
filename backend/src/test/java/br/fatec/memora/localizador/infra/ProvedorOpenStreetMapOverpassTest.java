@@ -303,4 +303,46 @@ class ProvedorOpenStreetMapOverpassTest {
         assertEquals("PR", lista.get(0).endereco().estado());
         assertNull(lista.get(1).endereco().estado());
     }
+
+    @Test
+    @DisplayName("Faz rodízio para a segunda instância do Overpass quando a primeira falha com 502")
+    void fazRodizioQuandoPrimeiraInstanciaFalha() {
+        server.createContext("/overpass-falho", exchange -> {
+            byte[] bytes = "server busy".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(502, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        statusOverpass = 200;
+        bodyOverpass = """
+                {
+                  "elements": [
+                    {
+                      "id": 777,
+                      "lat": -22.74,
+                      "lon": -47.33,
+                      "tags": {
+                        "name": "Farmácia Rodízio",
+                        "amenity": "pharmacy"
+                      }
+                    }
+                  ]
+                }
+                """;
+
+        int port = server.getAddress().getPort();
+        ProvedorOpenStreetMapOverpass provedor = new ProvedorOpenStreetMapOverpass(
+                JsonMapper.builder().build(),
+                List.of(
+                        "http://127.0.0.1:" + port + "/overpass-falho",
+                        "http://127.0.0.1:" + port + "/overpass"),
+                "http://127.0.0.1:" + port + "/nominatim");
+
+        var resultado = provedor.buscarPorCoordenadas(-22.74, -47.33, 5000, CategoriaServico.SAUDE, "farmácia");
+        assertEquals(1, resultado.size());
+        assertEquals("Farmácia Rodízio", resultado.get(0).nome());
+        assertEquals(1, userAgentsOverpass.size());
+    }
 }

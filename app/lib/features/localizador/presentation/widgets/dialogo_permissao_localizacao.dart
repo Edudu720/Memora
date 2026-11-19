@@ -39,7 +39,8 @@ class DialogoPermissaoLocalizacao extends StatelessWidget {
         titulo: 'Autorizar localização?',
         mensagem:
             'Para achar saúde, farmácias e serviços perto de você, eu consulto '
-            'sua localização só agora, no mapa público OpenStreetMap.\n\n'
+            'sua localização só agora, nos serviços de mapa Geoapify e '
+            'OpenStreetMap.\n\n'
             'Não envio dados da sua conta nem guardo por onde você passou — se '
             'preferir, escreva o nome do seu bairro ou cidade.',
         rotuloConfirmar: 'Sim, permitir localização',

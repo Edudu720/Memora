@@ -264,12 +264,14 @@ const List<String> arquivosVarridos = <String>[
   'textos_anfitria.dart',
   'textos_apresentacao.dart',
   'textos_assistente.dart',
+  'textos_atalhos_aplicativos.dart',
   'textos_autenticacao.dart',
   'textos_casca.dart',
   'textos_configuracoes.dart',
   'textos_cuidado.dart',
   'textos_guias.dart',
   'textos_perfil.dart',
+  'textos_sos.dart',
 ];
 
 /// Exceções, sempre com o motivo. Chave: `arquivo:constante`.

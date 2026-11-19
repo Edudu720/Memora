@@ -210,7 +210,7 @@ void main() {
     expect(find.byKey(TelaLocalizador.chaveBannerDemonstracao), findsNothing);
   });
 
-  testWidgets('Exibe transparência explícita sobre OpenStreetMap no diálogo de localização e busca manual', (WidgetTester tester) async {
+  testWidgets('Exibe transparência explícita sobre Geoapify e OpenStreetMap no diálogo de localização e busca manual', (WidgetTester tester) async {
     final RepositorioLocalizadorSimulado repo = RepositorioLocalizadorSimulado();
     final ControladorLocalizador c = ControladorLocalizador(repositorio: repo);
     addTearDown(c.dispose);
@@ -219,6 +219,9 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(DialogoPermissaoLocalizacao.chaveDialogo), findsOneWidget);
+    // A busca vai ao Geoapify (pelo servidor) e o mapa vem do OpenStreetMap
+    // (pelo aparelho): os dois recebem a localização, e o aviso diz isso.
+    expect(find.textContaining('Geoapify'), findsOneWidget);
     expect(find.textContaining('OpenStreetMap'), findsOneWidget);
     expect(find.textContaining('Não envio dados da sua conta'), findsOneWidget);
     expect(
@@ -232,6 +235,7 @@ void main() {
     await tester.tap(find.byKey(TelaLocalizador.chaveBotaoRegiaoManual));
     await tester.pumpAndSettle();
 
+    expect(find.textContaining('Geoapify'), findsOneWidget);
     expect(find.textContaining('OpenStreetMap'), findsOneWidget);
     expect(find.textContaining('sem enviar dados pessoais da sua conta'), findsOneWidget);
   });

@@ -19,6 +19,10 @@ import '../../features/aprendizado/data/progresso_de_aprendizado.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../../features/apresentacao/data/apresentacao_vista.dart';
 import '../../features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import '../../features/cuidado/data/repositorios/repositorio_emergencia_sos_api.dart';
+import '../../features/cuidado/data/repositorios/repositorio_emergencia_sos_simulado.dart';
+import '../../features/cuidado/domain/repositorios/repositorio_contato_emergencia.dart';
+import '../../features/cuidado/domain/repositorios/repositorio_emergencia_sos.dart';
 import '../../features/localizador/data/fontes/fonte_localizador_api.dart';
 import '../../features/localizador/data/repositorios/repositorio_localizador_api.dart';
 import '../../features/localizador/data/repositorios/repositorio_localizador_simulado.dart';
@@ -67,6 +71,12 @@ class Composicao {
   /// ou exemplos seguros de demonstração offline quando não há.
   final RepositorioLocalizador? localizador;
 
+  /// Canal remoto ou simulado de pedidos de emergência SOS (Feature 014).
+  final RepositorioEmergenciaSos? emergenciaSos;
+
+  /// Contato de emergência salvo localmente no aparelho.
+  final RepositorioContatoEmergencia? contatoEmergencia;
+
   /// Se a pessoa já aceitou o aviso de privacidade da conversa (FR-051).
   ///
   /// É o **mesmo objeto** que a [limpeza] apaga na saída: criar um aqui e outro
@@ -108,6 +118,8 @@ class Composicao {
     required this.autenticacao,
     required this.assistente,
     this.localizador,
+    this.emergenciaSos,
+    this.contatoEmergencia,
     required this.aceiteDoAviso,
     required this.limpeza,
     this.dataDeNascimento,
@@ -165,6 +177,9 @@ class Composicao {
     final RepositorioAutenticacao autenticacao;
     final RepositorioAssistente assistente;
     final RepositorioLocalizador localizador;
+    final RepositorioEmergenciaSos emergenciaSos;
+    final RepositorioContatoEmergenciaLocal contatoEmergencia =
+        RepositorioContatoEmergenciaLocal(preferencias);
 
     if (ambiente.usaServidorReal) {
       // [dioDeTeste] existe para o teste trocar o transporte e provar a
@@ -188,12 +203,17 @@ class Composicao {
       localizador = RepositorioLocalizadorApi(
         fonte: FonteLocalizadorApi(cliente.dio, chamadas: chamadas),
       );
+      emergenciaSos = RepositorioEmergenciaSosApi(
+        dio: cliente.dio,
+        chamadaAutenticada: chamadas,
+      );
     } else {
       autenticacao = RepositorioAutenticacaoSimulado(
         preferencias: preferencias,
       );
       assistente = RepositorioAssistenteSimulado();
       localizador = RepositorioLocalizadorSimulado();
+      emergenciaSos = RepositorioEmergenciaSosSimulado();
     }
 
     return Composicao(
@@ -205,6 +225,8 @@ class Composicao {
       // Envolve a assistente escolhida acima, real ou simulada.
       assistente: guardarCatalogo ? CatalogoGuardado(assistente) : assistente,
       localizador: localizador,
+      emergenciaSos: emergenciaSos,
+      contatoEmergencia: contatoEmergencia,
       aceiteDoAviso: aceiteDoAviso,
       sessaoPerdida: sessaoPerdida,
       dataDeNascimento: datas,
@@ -233,7 +255,7 @@ class Composicao {
           ConversaLocal(),
           aprendizado,
           aceiteDoAviso,
-          RepositorioContatoEmergenciaLocal(preferencias),
+          contatoEmergencia,
         ],
         dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas, fotos],
       ),
