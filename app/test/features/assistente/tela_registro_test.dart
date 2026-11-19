@@ -209,7 +209,10 @@ void main() {
       await montarRegistro(t);
 
       // "Nada encontrado" faria a pessoa achar que perdeu alguma coisa.
-      expect(find.text('Você fez tudo sozinha até agora'), findsOneWidget);
+      expect(
+        find.text('Até agora você fez tudo por conta própria'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('o registro nao e clicavel — e informacao, nao acao',

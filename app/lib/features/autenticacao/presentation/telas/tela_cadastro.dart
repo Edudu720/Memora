@@ -258,6 +258,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       c.falha != null) ...<Widget>[
                     const SizedBox(height: MemoraEspacamento.lg),
                     MensagemErro(
+                      // A Memora desta tela é a do cartão (FR-006).
+                      comMemora: false,
                       mensagem: _mensagemDe(c.falha!),
                       aoTentarNovamente: c.tentarNovamente,
                     ),

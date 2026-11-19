@@ -30,11 +30,19 @@ class MensagemErro extends StatelessWidget {
   /// Rótulo do botão de recuperação.
   final String rotuloTentarNovamente;
 
+  /// Se a Memora (preocupada) aparece acima do texto (FR-001, T073).
+  ///
+  /// Uma Memora só por tela (FR-006, T096): quando a tela já mostra a dela —
+  /// no cartão de apresentação, na barra —, passe `false`. O ícone e o texto
+  /// do erro nunca saem (FR-032).
+  final bool comMemora;
+
   /// Cria uma mensagem de erro.
   const MensagemErro({
     required this.mensagem,
     this.aoTentarNovamente,
     this.rotuloTentarNovamente = 'Tentar de novo',
+    this.comMemora = true,
     super.key,
   });
 
@@ -42,8 +50,9 @@ class MensagemErro extends StatelessWidget {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final bool mostrarMascote =
+        comMemora &&
         MediaQuery.textScalerOf(context).scale(1) <
-        MemoraDimensoes.escalaTextoAlta;
+            MemoraDimensoes.escalaTextoAlta;
 
     return Semantics(
       liveRegion: true,

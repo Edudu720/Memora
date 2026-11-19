@@ -563,6 +563,8 @@ class _TelaConversaState extends State<TelaConversa>
                             if (c.mensagemDeErro != null) ...<Widget>[
                               MensagemErro(
                                 key: TelaConversa.chaveErro,
+                                // A Memora desta tela é a da barra (FR-006).
+                                comMemora: false,
                                 mensagem: c.mensagemDeErro!,
                                 // Só as falhas passageiras oferecem tentar de
                                 // novo (FR-052, FR-057): o limite do dia diz
