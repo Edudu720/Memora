@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/features/ajuda/data/abridor_site_tutorial.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_api.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -251,6 +252,76 @@ void main() {
       );
 
       expect(composicao.assistente, isA<RepositorioAssistenteSimulado>());
+    });
+
+    test('urlSiteTutorial e AbridorDeSiteTutorial validam protocolo estrito https://', () {
+      expect(Ambiente.doAmbiente().urlSiteTutorial, isNull);
+      expect(
+        AbridorDeSiteTutorial.doAmbiente(
+          const Ambiente(
+            urlBase: 'https://api.memora.fatec.example',
+            usaServidorReal: false,
+          ),
+        ),
+        isNull,
+      );
+      expect(
+        AbridorDeSiteTutorial.doAmbiente(
+          const Ambiente(
+            urlBase: 'https://api.memora.fatec.example',
+            usaServidorReal: false,
+            urlSiteTutorial: 'http://tutoriais.memora.fatec.example',
+          ),
+        ),
+        isNull,
+      );
+      expect(
+        AbridorDeSiteTutorial.doAmbiente(
+          const Ambiente(
+            urlBase: 'https://api.memora.fatec.example',
+            usaServidorReal: false,
+            urlSiteTutorial: 'https://user@tutoriais.memora.fatec.example',
+          ),
+        ),
+        isNull,
+      );
+      expect(
+        AbridorDeSiteTutorial.doAmbiente(
+          const Ambiente(
+            urlBase: 'https://api.memora.fatec.example',
+            usaServidorReal: false,
+            urlSiteTutorial: 'https://tutoriais.memora.fatec.example/com espaco',
+          ),
+        ),
+        isNull,
+      );
+
+      final Composicao semSite = Composicao.resolver(
+        ambiente: const Ambiente(
+          urlBase: 'https://api.memora.fatec.example',
+          usaServidorReal: false,
+        ),
+        cofre: _CofreDeMentira(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
+      );
+      expect(semSite.abridorSiteTutorial, isNull);
+
+      final Composicao comSite = Composicao.resolver(
+        ambiente: const Ambiente(
+          urlBase: 'https://api.memora.fatec.example',
+          usaServidorReal: false,
+          urlSiteTutorial: '  https://tutoriais.memora.fatec.example  ',
+        ),
+        cofre: _CofreDeMentira(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
+      );
+      expect(comSite.abridorSiteTutorial, isNotNull);
+      expect(
+        comSite.abridorSiteTutorial!.endereco,
+        'https://tutoriais.memora.fatec.example',
+      );
     });
   });
 }

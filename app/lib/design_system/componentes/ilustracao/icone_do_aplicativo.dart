@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
@@ -49,11 +50,61 @@ class IconeDoAplicativo extends StatelessWidget {
     );
   }
 
+  /// Mapa constante dos 7 ícones vetoriais compartilhados em `assets/icones_apps/`
+  /// (Feature 016, Issue #106 Item 6).
+  static const Map<String, String> _iconesSvgPorChave = <String, String>{
+    'youtube': 'assets/icones_apps/youtube.svg',
+    'tiktok': 'assets/icones_apps/tiktok.svg',
+    'googlefotos': 'assets/icones_apps/google-fotos.svg',
+    'meuinss': 'assets/icones_apps/meu-inss.svg',
+    'poupatempo': 'assets/icones_apps/poupatempo.svg',
+    'carteiradigital': 'assets/icones_apps/carteira-digital.svg',
+    'carteiradetrabalho': 'assets/icones_apps/carteira-de-trabalho.svg',
+  };
+
+  static String? _buscarSvgPorChave(String normalizada) {
+    final String? direto = _iconesSvgPorChave[normalizada];
+    if (direto != null) return direto;
+    if (normalizada.contains('trabalho')) {
+      return _iconesSvgPorChave['carteiradetrabalho'];
+    }
+    if (normalizada.contains('carteira')) {
+      return _iconesSvgPorChave['carteiradigital'];
+    }
+    if (normalizada.contains('youtube')) {
+      return _iconesSvgPorChave['youtube'];
+    }
+    if (normalizada.contains('tiktok')) {
+      return _iconesSvgPorChave['tiktok'];
+    }
+    if (normalizada.contains('foto') ||
+        (normalizada.contains('google') && !normalizada.contains('gov'))) {
+      return _iconesSvgPorChave['googlefotos'];
+    }
+    if (normalizada.contains('inss')) {
+      return _iconesSvgPorChave['meuinss'];
+    }
+    if (normalizada.contains('poupatempo')) {
+      return _iconesSvgPorChave['poupatempo'];
+    }
+    return null;
+  }
+
   Widget _desenharIcone(
     BuildContext context,
     String normalizada,
     MemoraCores cores,
   ) {
+    final String? caminhoSvg = _buscarSvgPorChave(normalizada);
+    if (caminhoSvg != null) {
+      return SvgPicture.asset(
+        caminhoSvg,
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.cover,
+      );
+    }
+
     // 1. WhatsApp (logo oficial fornecida)
     if (normalizada.contains('whatsapp')) {
       return Image.asset(
@@ -64,19 +115,7 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 2. YouTube
-    if (normalizada.contains('youtube')) {
-      return Container(
-        color: const Color(0xFFFF0000),
-        alignment: Alignment.center,
-        child: CustomPaint(
-          size: Size(tamanho * 0.48, tamanho * 0.48),
-          painter: _TrianguloBrancoPainter(),
-        ),
-      );
-    }
-
-    // 3. Instagram
+    // 3. Instagram (reservado para Item 13 — @Henrique-Sandrini)
     if (normalizada.contains('instagram')) {
       return Container(
         decoration: const BoxDecoration(
@@ -113,40 +152,6 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 5. TikTok
-    if (normalizada.contains('tiktok')) {
-      return Container(
-        color: const Color(0xFF010101),
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Transform.translate(
-              offset: const Offset(-2.0, -1.5),
-              child: Icon(
-                Icons.music_note_rounded,
-                color: const Color(0xFF00F2FE),
-                size: tamanho * 0.68,
-              ),
-            ),
-            Transform.translate(
-              offset: const Offset(2.0, 1.5),
-              child: Icon(
-                Icons.music_note_rounded,
-                color: const Color(0xFFFE2C55),
-                size: tamanho * 0.68,
-              ),
-            ),
-            Icon(
-              Icons.music_note_rounded,
-              color: Colors.white,
-              size: tamanho * 0.68,
-            ),
-          ],
-        ),
-      );
-    }
-
     // 6. Telegram (logo oficial fornecida)
     if (normalizada.contains('telegram')) {
       return Image.asset(
@@ -154,63 +159,6 @@ class IconeDoAplicativo extends StatelessWidget {
         width: tamanho,
         height: tamanho,
         fit: BoxFit.contain,
-      );
-    }
-
-    // 7. Google Fotos
-    if (normalizada.contains('foto') || normalizada.contains('google')) {
-      return Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(tamanho * 0.12),
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEA4335), // vermelho
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4285F4), // azul
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF34A853), // verde
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFBBC05), // amarelo
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
-        ),
       );
     }
 
@@ -224,20 +172,7 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 9. Meu INSS (Azul Previdência)
-    if (normalizada.contains('inss')) {
-      return Container(
-        color: const Color(0xFF003882),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.health_and_safety_rounded,
-          color: const Color(0xFFFFD100),
-          size: tamanho * 0.64,
-        ),
-      );
-    }
-
-    // 10. E-Título (Verde Eleitoral)
+    // 10. E-Título (Verde Eleitoral — reservado para Item 13)
     if (normalizada.contains('titulo')) {
       return Container(
         color: const Color(0xFF0E5E35),
@@ -260,7 +195,7 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 12. FGTS (Azul Caixa com Laranja)
+    // 12. FGTS (Azul Caixa com Laranja — reservado para Item 13)
     if (normalizada.contains('fgts')) {
       return Container(
         color: const Color(0xFF005CA9),
@@ -281,45 +216,6 @@ class IconeDoAplicativo extends StatelessWidget {
               size: tamanho * 0.60,
             ),
           ],
-        ),
-      );
-    }
-
-    // 13. Poupatempo (Vermelho SP)
-    if (normalizada.contains('poupatempo')) {
-      return Container(
-        color: const Color(0xFFCC1414),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.schedule_rounded,
-          color: Colors.white,
-          size: tamanho * 0.64,
-        ),
-      );
-    }
-
-    // 14. Carteira Digital de Trânsito (Verde CDT)
-    if (normalizada.contains('carteira') && !normalizada.contains('trabalho')) {
-      return Container(
-        color: const Color(0xFF146342),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.drive_eta_rounded,
-          color: const Color(0xFFFFD100),
-          size: tamanho * 0.62,
-        ),
-      );
-    }
-
-    // 15. Carteira de Trabalho (Azul CTPS)
-    if (normalizada.contains('trabalho')) {
-      return Container(
-        color: const Color(0xFF0B2545),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.badge_rounded,
-          color: Colors.white,
-          size: tamanho * 0.62,
         ),
       );
     }
@@ -345,27 +241,6 @@ class IconeDoAplicativo extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Desenha o triângulo branco clássico do YouTube.
-class _TrianguloBrancoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    final Path path = Path()
-      ..moveTo(size.width * 0.15, size.height * 0.1)
-      ..lineTo(size.width * 0.95, size.height * 0.5)
-      ..lineTo(size.width * 0.15, size.height * 0.9)
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// Desenha a silhueta da câmera do Instagram (quadrado arredondado + círculo + ponto).

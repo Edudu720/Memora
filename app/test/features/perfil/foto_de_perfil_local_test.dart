@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -94,9 +95,52 @@ void main() {
       expect(File(primeira.caminhoDoArquivo).existsSync(), isFalse);
       expect(File(segunda.caminhoDoArquivo).existsSync(), isTrue);
 
-      await storage.salvarAvatar('conta-1', AvatarIlustrado.casalIdoso);
+      await storage.salvarAvatar('conta-1', AvatarIlustrado.memoraAcenando);
       expect(File(segunda.caminhoDoArquivo).existsSync(), isFalse);
     });
+
+    test(
+      'chaves aposentadas casal_idoso e pessoa_com_celular recuam com segurança para null',
+      () async {
+        expect(AvatarIlustrado.porChave('casal_idoso'), isNull);
+        expect(AvatarIlustrado.porChave('pessoa_com_celular'), isNull);
+
+        final FotoDePerfilLocal storage = criarStorage();
+        final String chaveA =
+            '${FotoDePerfilLocal.prefixoChave}${FotoDePerfilLocal.contaSegura('conta-casal')}';
+        final String chaveB =
+            '${FotoDePerfilLocal.prefixoChave}${FotoDePerfilLocal.contaSegura('conta-celular')}';
+
+        await prefs.setString(
+          chaveA,
+          jsonEncode(<String, String>{
+            'tipo': 'avatar',
+            'avatar': 'casal_idoso',
+          }),
+        );
+        await prefs.setString(
+          chaveB,
+          jsonEncode(<String, String>{
+            'tipo': 'avatar',
+            'avatar': 'pessoa_com_celular',
+          }),
+        );
+
+        expect(await storage.ler('conta-casal'), isNull);
+        expect(await storage.ler('conta-celular'), isNull);
+
+        await storage.salvarAvatar(
+          'conta-casal',
+          AvatarIlustrado.memoraPensando,
+        );
+        final RetratoDePerfil? atualizado = await storage.ler('conta-casal');
+        expect(atualizado, isA<AvatarIlustradoDePerfil>());
+        expect(
+          (atualizado as AvatarIlustradoDePerfil).avatar,
+          AvatarIlustrado.memoraPensando,
+        );
+      },
+    );
 
     test('recua silenciosamente para null se arquivo no disco desaparecer',
         () async {

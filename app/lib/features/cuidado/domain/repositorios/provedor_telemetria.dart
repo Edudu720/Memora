@@ -3,7 +3,7 @@ import '../entidades/enums_cuidado.dart';
 import '../entidades/evento_queda.dart';
 import '../entidades/telemetria_iot.dart';
 
-/// Contrato para recepção de dados em tempo real do dispositivo IoT (ESP32/Wokwi ou simulador).
+/// Contrato para recepção de dados em tempo real do dispositivo IoT (ESP32 físico via MQTT ou simulador local).
 abstract class ProvedorDeTelemetria {
   /// Fluxo de telemetria contínua (BPM, movimentação, aceleração).
   Stream<TelemetriaIot> get streamTelemetria;

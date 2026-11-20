@@ -90,7 +90,7 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     await _provedorAtual.desconectar();
   }
 
-  /// Alterna entre o modo simulado e o modo MQTT (Wokwi / ESP32).
+  /// Alterna entre o modo simulado local e o modo MQTT do ESP32 físico.
   Future<void> alternarModo(ModoOperacaoIot novoModo, {String? broker, String? topico}) async {
     final String brokerFinal = (broker != null && broker.trim().isNotEmpty)
         ? broker.trim()
@@ -129,11 +129,20 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Dispara uma simulação de queda quando em modo simulado.
+  /// Dispara localmente um evento de queda para validar a tela de verificação,
+  /// tanto no modo simulado quanto no modo ESP32 físico (MQTT).
   void simularQuedaTeste() {
-    if (_provedorAtual is ProvedorDeTelemetriaSimulado) {
-      (_provedorAtual as ProvedorDeTelemetriaSimulado).simularQueda();
+    if (_quedaAtiva != null) return;
+    final ProvedorDeTelemetria provedor = _provedorAtual;
+    if (provedor is ProvedorDeTelemetriaSimulado) {
+      provedor.simularQueda();
+      return;
     }
+    _quedaAtiva = EventoQueda.novo(
+      bpm: _dispositivo.ultimaTelemetria?.bpm ?? 72,
+      aceleracao: 2.8,
+    );
+    notifyListeners();
   }
 
   /// Limpa o evento de queda ativo após abrir a tela de verificação.

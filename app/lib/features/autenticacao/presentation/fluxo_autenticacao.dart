@@ -21,6 +21,7 @@ import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
 import '../../apresentacao/presentation/fluxo_apresentacao.dart';
+import '../../ajuda/data/abridor_site_tutorial.dart';
 import '../../ajuda/data/compartilhar.dart';
 import '../../ajuda/domain/assunto_de_ajuda.dart';
 import '../../ajuda/presentation/ajuda_guiada_da_conversa.dart';
@@ -172,6 +173,11 @@ class FluxoAutenticacao extends StatefulWidget {
   /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
   final Compartilhador? compartilhador;
 
+  /// Abridor seguro `https://` do site oficial de tutoriais (Feature 016).
+  ///
+  /// Quando `null`, o botão do site oficial fica oculto na tela de Ajuda.
+  final AbridorDeSiteTutorial? abridorSiteTutorial;
+
   /// Onde o progresso nos guias de aprendizado e guardado (FR-042a).
   final ProgressoDeAprendizado? progresso;
 
@@ -216,6 +222,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.seletorDeFoto,
     this.apresentacaoVista,
     this.compartilhador,
+    this.abridorSiteTutorial,
     this.progresso,
   });
 
@@ -738,17 +745,19 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
   void _abrirDispositivoCuidado() {
-    _empilhar(
-      _rota(
-        builder: (BuildContext contexto) => TelaDispositivoCuidado(
-          controlador: ControladorDispositivoCuidado(
-            repositorioContato: _contatoEmergencia,
-          ),
-          aoVoltar: () => Navigator.of(contexto).pop(),
-          nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
-        ),
+    final ControladorDispositivoCuidado controlador =
+        ControladorDispositivoCuidado(
+          repositorioContato: _contatoEmergencia,
+        );
+    final Route<void> rota = _rota(
+      builder: (BuildContext contexto) => TelaDispositivoCuidado(
+        controlador: controlador,
+        aoVoltar: () => Navigator.of(contexto).pop(),
+        nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
       ),
     );
+    rota.popped.whenComplete(controlador.dispose);
+    _empilhar(rota);
   }
 
   /// Abre o diálogo de confirmação do Botão SOS Persistente (Feature 014)
@@ -800,6 +809,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoVerApresentacao: vistas == null || _pessoa == null
               ? null
               : () => _reverApresentacao(vistas),
+          abridorSiteTutorial: widget.abridorSiteTutorial,
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
       ),

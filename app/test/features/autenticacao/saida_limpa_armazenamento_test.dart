@@ -74,7 +74,7 @@ void main() {
         () async {
       final FotoDePerfilEmMemoria fotos = FotoDePerfilEmMemoria();
       await fotos.salvarFoto('conta-1', Uint8List.fromList(<int>[1, 2, 3]));
-      await fotos.salvarAvatar('conta-2', AvatarIlustrado.casalIdoso);
+      await fotos.salvarAvatar('conta-2', AvatarIlustrado.memoraProtegendo);
 
       final LimpezaDeSessao limpezaComFoto = LimpezaDeSessao(
         cofre: cofre,

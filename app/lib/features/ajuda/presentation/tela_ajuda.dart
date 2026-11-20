@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_ajuda.dart';
+import '../data/abridor_site_tutorial.dart';
 import '../domain/assunto_de_ajuda.dart';
 
 /// A Ajuda: os assuntos do wireframe que funcionam, cada um com desenho e nome
@@ -33,6 +34,22 @@ class TelaAjuda extends StatelessWidget {
   /// Chave da porta "Ver a apresentação de novo", para os testes.
   static const Key chaveReverApresentacao = Key('ajuda.rever_apresentacao');
 
+  /// Chave do botão para abrir o site oficial de tutoriais (Feature 016).
+  static const Key chaveAbrirSiteTutorial = Key('ajuda.site_tutorial.abrir');
+
+  /// Chave do botão que confirma a abertura do site oficial no modal.
+  static const Key chaveConfirmarSiteTutorial = Key(
+    'ajuda.site_tutorial.confirmar',
+  );
+
+  /// Chave do botão que cancela a abertura do site oficial no modal.
+  static const Key chaveCancelarSiteTutorial = Key(
+    'ajuda.site_tutorial.cancelar',
+  );
+
+  /// Chave do aviso exibido quando o site oficial falha ao abrir.
+  static const Key chaveErroSiteTutorial = Key('ajuda.site_tutorial.erro');
+
   /// Os assuntos que existem agora.
   final List<AssuntoDeAjuda> assuntos;
 
@@ -41,6 +58,9 @@ class TelaAjuda extends StatelessWidget {
 
   /// Rever a apresentação inicial (FR-013). Nulo: a porta não existe.
   final VoidCallback? aoVerApresentacao;
+
+  /// Abridor seguro `https://` do site oficial de tutoriais. Nulo: oculto.
+  final AbridorDeSiteTutorial? abridorSiteTutorial;
 
   /// Volta à tela de onde a Ajuda foi aberta.
   final VoidCallback aoVoltar;
@@ -51,6 +71,7 @@ class TelaAjuda extends StatelessWidget {
     required this.aoAbrirAssunto,
     required this.aoVoltar,
     this.aoVerApresentacao,
+    this.abridorSiteTutorial,
     super.key,
   });
 
@@ -166,12 +187,150 @@ class TelaAjuda extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: MemoraEspacamento.xl),
+                  const SizedBox(height: MemoraEspacamento.lg),
+                  if (abridorSiteTutorial != null) ...<Widget>[
+                    _CartaoSiteTutorial(abridor: abridorSiteTutorial!),
+                    const SizedBox(height: MemoraEspacamento.lg),
+                  ],
+                  const SizedBox(height: MemoraEspacamento.sm),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _CartaoSiteTutorial extends StatefulWidget {
+  final AbridorDeSiteTutorial abridor;
+
+  const _CartaoSiteTutorial({required this.abridor});
+
+  @override
+  State<_CartaoSiteTutorial> createState() => _CartaoSiteTutorialState();
+}
+
+class _CartaoSiteTutorialState extends State<_CartaoSiteTutorial> {
+  bool _abrindo = false;
+  String? _mensagemErro;
+
+  Future<void> _pedirConfirmacao() async {
+    final MemoraCores cores = context.memora.cores;
+    final bool? confirmado = await DialogoMemora.mostrarConteudo<bool>(
+      context,
+      construtor: (BuildContext ctx) => Dialog(
+        backgroundColor: cores.superficie,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(MemoraEspacamento.xl),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const TextoMemora.tituloSecao(
+                  TextosAjuda.siteTutorialModalTitulo,
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                const TextoMemora(TextosAjuda.siteTutorialModalMensagem),
+                const SizedBox(height: MemoraEspacamento.sm),
+                Container(
+                  padding: const EdgeInsets.all(MemoraEspacamento.md),
+                  decoration: BoxDecoration(
+                    color: cores.destaque,
+                    borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+                  ),
+                  child: TextoMemora(widget.abridor.endereco),
+                ),
+                const SizedBox(height: MemoraEspacamento.xl),
+                BotaoPrimario(
+                  key: TelaAjuda.chaveConfirmarSiteTutorial,
+                  rotulo: TextosAjuda.siteTutorialConfirmar,
+                  aoTocar: () => Navigator.of(ctx).pop(true),
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                BotaoSecundario(
+                  key: TelaAjuda.chaveCancelarSiteTutorial,
+                  rotulo: TextosAjuda.siteTutorialCancelar,
+                  aoTocar: () => Navigator.of(ctx).pop(false),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (!mounted || confirmado != true) return;
+
+    setState(() {
+      _abrindo = true;
+      _mensagemErro = null;
+    });
+    final bool abriu = await widget.abridor.abrir();
+    if (!mounted) return;
+    setState(() {
+      _abrindo = false;
+      _mensagemErro = abriu ? null : TextosAjuda.siteTutorialErro;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraCores cores = context.memora.cores;
+
+    return Cartao(
+      padding: const EdgeInsets.all(MemoraEspacamento.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          const TextoMemora.tituloSecao(TextosAjuda.siteTutorialTitulo),
+          const SizedBox(height: MemoraEspacamento.sm),
+          const TextoMemora(TextosAjuda.siteTutorialExplicacao),
+          if (_mensagemErro != null) ...<Widget>[
+            const SizedBox(height: MemoraEspacamento.md),
+            Semantics(
+              key: TelaAjuda.chaveErroSiteTutorial,
+              liveRegion: true,
+              label: _mensagemErro,
+              child: ExcludeSemantics(
+                child: Container(
+                  padding: const EdgeInsets.all(MemoraEspacamento.md),
+                  decoration: BoxDecoration(
+                    color: cores.superficie,
+                    borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+                    border: Border.all(
+                      color: cores.perigo,
+                      width: MemoraDimensoes.bordaEnfase,
+                    ),
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      Icon(
+                        Icons.error_outline_rounded,
+                        color: cores.perigo,
+                        size: MemoraDimensoes.iconePadrao,
+                      ),
+                      const SizedBox(width: MemoraEspacamento.md),
+                      Expanded(child: TextoMemora(_mensagemErro!)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: MemoraEspacamento.md),
+          BotaoSecundario(
+            key: TelaAjuda.chaveAbrirSiteTutorial,
+            rotulo: TextosAjuda.siteTutorialBotao,
+            icone: Icons.open_in_new_rounded,
+            carregando: _abrindo,
+            aoTocar: _abrindo ? null : _pedirConfirmacao,
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ import 'package:memora/features/perfil/presentation/tela_perfil.dart';
 import 'package:memora/features/perfil/presentation/tela_pre_visualizacao_foto.dart';
 import 'package:memora/features/perfil/presentation/widgets/retrato_do_perfil.dart';
 import 'package:memora/l10n/textos_perfil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class _SeletorFalso implements SeletorDeImagemDoAparelho {
   final List<OrigemDaFoto> chamadas = <OrigemDaFoto>[];
@@ -332,7 +334,7 @@ void main() {
     testWidgets(
       'troca de idDaConta isola retratos e evita gravação após expiração externa',
       (WidgetTester t) async {
-        await armazenamento.salvarAvatar('conta-A', AvatarIlustrado.casalIdoso);
+        await armazenamento.salvarAvatar('conta-A', AvatarIlustrado.memoraAcenando);
 
         await t.pumpWidget(montarPerfil(t, nome: 'Ana', idDaConta: 'conta-A'));
         await t.pumpAndSettle();
@@ -399,7 +401,7 @@ void main() {
         await _tocar(
           t,
           find.byKey(
-            Key('perfil.foto.avatar.${AvatarIlustrado.pessoaComCelular.chave}'),
+            Key('perfil.foto.avatar.${AvatarIlustrado.memoraComemorando.chave}'),
           ),
         );
 
@@ -519,6 +521,90 @@ void main() {
           );
           expect(desenho.animado, isFalse, reason: avatar.chave);
           expect(find.byType(Image), findsNothing, reason: avatar.chave);
+        }
+      },
+    );
+
+    testWidgets(
+      'feature 016: grade exibe apenas 4 avatares válidos e fallback legado abre no padrão neutro',
+      (WidgetTester t) async {
+        // 1) Verifica apenas os 4 avatares da Memora na seleção.
+        expect(AvatarIlustrado.values, hasLength(4));
+        await t.pumpWidget(montarPerfil(t));
+        await t.pumpAndSettle();
+
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+        await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoAvatares));
+
+        expect(find.text('Casal acolhedor'), findsNothing);
+        expect(find.text('Pessoa com celular'), findsNothing);
+        for (final AvatarIlustrado item in AvatarIlustrado.values) {
+          expect(
+            find.byKey(Key('perfil.foto.avatar.${item.chave}')),
+            findsOneWidget,
+          );
+        }
+
+        // Fecha a folha e testa persistência legada real em SharedPreferences.
+        Navigator.of(t.element(find.byType(TelaPerfil))).pop();
+        await t.pumpAndSettle();
+
+        for (final String chaveAposentada in <String>[
+          'casal_idoso',
+          'pessoa_com_celular',
+        ]) {
+          SharedPreferences.setMockInitialValues(<String, Object>{
+            '${FotoDePerfilLocal.prefixoChave}${FotoDePerfilLocal.contaSegura('conta-legada')}':
+                jsonEncode(<String, String>{
+                  'tipo': 'avatar',
+                  'avatar': chaveAposentada,
+                }),
+          });
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          final FotoDePerfilLocal local = FotoDePerfilLocal(prefs);
+
+          final SemanticsHandle semantics = t.ensureSemantics();
+          await t.pumpWidget(
+            MaterialApp(
+              theme: TemasMemora.claro,
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: SecaoFotoPerfil(
+                    nome: 'Dona Ana',
+                    armazenamento: local,
+                    idDaConta: 'conta-legada',
+                    seletor: seletor,
+                  ),
+                ),
+              ),
+            ),
+          );
+          await t.pumpAndSettle();
+
+          expect(t.takeException(), isNull, reason: chaveAposentada);
+          expect(find.text('DA'), findsOneWidget, reason: chaveAposentada);
+          expect(
+            find.bySemanticsLabel(TextosPerfil.semanticaSemFoto),
+            findsOneWidget,
+          );
+          expect(find.text(TextosPerfil.botaoColocarFoto), findsOneWidget);
+          semantics.dispose();
+
+          // A pessoa continua conseguindo escolher e salvar um avatar válido.
+          await _tocar(t, find.byKey(SecaoFotoPerfil.chaveBotaoColocarOuTrocar));
+          await _tocar(t, find.byKey(SecaoFotoPerfil.chaveOpcaoAvatares));
+          await _tocar(
+            t,
+            find.byKey(
+              Key('perfil.foto.avatar.${AvatarIlustrado.memoraAcenando.chave}'),
+            ),
+          );
+          final RetratoDePerfil? salvo = await local.ler('conta-legada');
+          expect(salvo, isA<AvatarIlustradoDePerfil>());
+          expect(
+            (salvo as AvatarIlustradoDePerfil).avatar,
+            AvatarIlustrado.memoraAcenando,
+          );
         }
       },
     );

@@ -54,11 +54,20 @@ class Ambiente {
   /// não o confere, porque quem constrói à mão é teste.
   final String? urlDownload;
 
+  /// Endereço oficial `https://` do site de tutoriais exibido na Ajuda
+  /// (Issue #106 Item 11, feature 016), ou nulo enquanto não publicado.
+  ///
+  /// Vem exclusivamente de `--dart-define=MEMORA_URL_SITE_TUTORIAL` e passa
+  /// por [enderecoOficial]: nunca aceita `http://`, usuário em URL nem texto
+  /// digitado pela pessoa usuária.
+  final String? urlSiteTutorial;
+
   /// Cria uma configuração de ambiente.
   const Ambiente({
     required this.urlBase,
     required this.usaServidorReal,
     this.urlDownload,
+    this.urlSiteTutorial,
   });
 
   /// Confere o endereço de download informado no build.
@@ -102,11 +111,15 @@ class Ambiente {
     const bool real = bool.fromEnvironment('MEMORA_SERVIDOR_REAL');
 
     const String download = String.fromEnvironment('MEMORA_URL_DOWNLOAD');
+    const String siteTutorial = String.fromEnvironment(
+      'MEMORA_URL_SITE_TUTORIAL',
+    );
 
     return Ambiente(
       urlBase: url,
       usaServidorReal: real,
       urlDownload: enderecoOficial(download),
+      urlSiteTutorial: enderecoOficial(siteTutorial),
     );
   }
 
