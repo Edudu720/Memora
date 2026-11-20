@@ -2,6 +2,11 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Feature `017-site-no-render`
+
+### Adicionado
+- **Site tutorial no Render (`specs/017-site-no-render/`, `#106` Item 14b)**: declarado o serviço estático `memora-site` no `render.yaml` (`runtime: static`, `staticPublishPath: site`, filtro de caminhos isolado e cabeçalhos `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy` e `Permissions-Policy`), além da atualização de `docs/deploy/render.md` com instruções de publicação e repasse da URL `https://` ao Item 11.
+
 ## [Unreleased] — Feature `016-ajustes-pos-redesenho`
 
 ### Adicionado

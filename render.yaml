@@ -43,3 +43,30 @@ services:
       - key: MEMORA_CHAVE_ORIGEM
         generateValue: true
 
+  - type: web
+    name: memora-site
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: site
+    buildFilter:
+      paths:
+        - site/**
+        - render.yaml
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'"
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: Permissions-Policy
+        value: "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+
+
