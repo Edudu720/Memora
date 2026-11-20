@@ -143,9 +143,19 @@ abstract final class TextosGuias {
       ? '$aprendidas de $total assuntos aprendidos'
       : '$total assuntos para aprender';
 
+  /// Marca de módulo concluído por inteiro no catálogo (020).
+  static const String moduloConcluido = 'Concluído';
+
   /// Leitura do cartão de seção pelo leitor de tela.
   static String secaoDescrita(String titulo, String subtitulo, String meta) =>
       '$titulo. $subtitulo. $meta.';
+
+  /// Leitura do cartão de seção concluída pelo leitor de tela.
+  static String secaoConcluidaDescrita(
+    String titulo,
+    String subtitulo,
+    String meta,
+  ) => '$titulo. $subtitulo. $meta. Concluído.';
 
   /// Saída do seletor para quem não achou o assunto: leva à conversa.
   ///

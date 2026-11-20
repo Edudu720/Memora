@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/aprendizado/data/guias/guias.dart';
 import 'package:memora/features/aprendizado/data/progresso_de_aprendizado.dart';
+import 'package:memora/features/aprendizado/domain/guia.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/casca/casca_interna.dart';
@@ -53,6 +55,12 @@ class _RepositorioEspiao implements RepositorioAssistente {
 
 class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   final Map<String, Map<String, int>> _dados = <String, Map<String, int>>{};
+  final Map<String, Map<String, int>> _ordens = <String, Map<String, int>>{};
+  int _ordemGlobal = 0;
+  final StreamController<void> _alteracoes = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get alteracoes => _alteracoes.stream;
 
   @override
   Future<bool> registrarChegadaAoPasso({
@@ -73,7 +81,11 @@ class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   }) async {
     final Map<String, int> daConta =
         _dados.putIfAbsent(idDaConta, () => <String, int>{});
+    final Map<String, int> ordensConta =
+        _ordens.putIfAbsent(idDaConta, () => <String, int>{});
     daConta[chave] = (daConta[chave] ?? 0) + 1;
+    ordensConta[chave] = ++_ordemGlobal;
+    _alteracoes.add(null);
   }
 
   @override
@@ -82,14 +94,38 @@ class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   }
 
   @override
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async {
+    return _ordens[idDaConta] ?? const <String, int>{};
+  }
+
+  @override
+  Future<String?> ultimoConcluido(String idDaConta) async {
+    final Map<String, int>? ordens = _ordens[idDaConta];
+    if (ordens == null || ordens.isEmpty) return null;
+    String? recente;
+    int maior = -1;
+    for (final MapEntry<String, int> e in ordens.entries) {
+      if (e.value > maior) {
+        maior = e.value;
+        recente = e.key;
+      }
+    }
+    return recente;
+  }
+
+  @override
   Future<String?> aplicativoMaisAprendido(String idDaConta) async {
     final Map<String, int>? daConta = _dados[idDaConta];
+    final Map<String, int>? ordens = _ordens[idDaConta];
     if (daConta == null || daConta.isEmpty) return null;
     String? melhor;
     int maxVezes = -1;
+    int maxOrdem = -1;
     for (final MapEntry<String, int> e in daConta.entries) {
-      if (e.value > maxVezes) {
+      final int ordem = ordens?[e.key] ?? 0;
+      if (e.value > maxVezes || (e.value == maxVezes && ordem > maxOrdem)) {
         maxVezes = e.value;
+        maxOrdem = ordem;
         melhor = e.key;
       }
     }
@@ -99,6 +135,9 @@ class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   @override
   Future<void> apagar() async {
     _dados.clear();
+    _ordens.clear();
+    _ordemGlobal = 0;
+    _alteracoes.add(null);
   }
 }
 
@@ -150,6 +189,7 @@ void main() {
       expect(find.byKey(TelaPerfil.chaveNome), findsOneWidget);
       expect(find.byKey(TelaPerfil.chaveCanal), findsOneWidget);
       expect(find.byKey(TelaPerfil.chaveMaisAprendido), findsOneWidget);
+      expect(find.byKey(TelaPerfil.chaveUltimoAprendido), findsOneWidget);
       expect(find.byKey(TelaPerfil.chaveDesenho), findsOneWidget);
 
       expect(find.text('Dona Ana'), findsOneWidget);
@@ -160,6 +200,7 @@ void main() {
         TelaPerfil.chaveNome,
         TelaPerfil.chaveCanal,
         TelaPerfil.chaveMaisAprendido,
+        TelaPerfil.chaveUltimoAprendido,
       ]) {
         expect(
           t.getSemantics(find.byKey(chave)),
@@ -174,15 +215,16 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('quando vazio, o mais aprendido diz que vamos aprender juntos',
+    testWidgets('quando vazio, mostra frases acolhedoras em mais e último aprendido',
         (WidgetTester t) async {
       await t.pumpWidget(montarTela());
       await t.pumpAndSettle();
 
       expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+      expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsOneWidget);
     });
 
-    testWidgets('quando há progresso, exibe o aplicativo mais aprendido',
+    testWidgets('quando há progresso, exibe o aplicativo mais aprendido e o último concluído',
         (WidgetTester t) async {
       await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
       await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
@@ -190,9 +232,87 @@ void main() {
       await t.pumpWidget(montarTela());
       await t.pumpAndSettle();
 
-      expect(find.text('WhatsApp'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(TelaPerfil.chaveMaisAprendido),
+          matching: find.text('WhatsApp'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          matching: find.text('WhatsApp'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(TextosPerfil.maisAprendidoVazio), findsNothing);
+      expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsNothing);
     });
+
+    testWidgets(
+      'último módulo concluído distingue seccionado parcial/completo e atualiza ao vivo',
+      (WidgetTester t) async {
+        await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
+        await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
+        await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'youtube');
+
+        await t.pumpWidget(montarTela());
+        await t.pumpAndSettle();
+
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveMaisAprendido),
+            matching: find.text('WhatsApp'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('YouTube'),
+          ),
+          findsOneWidget,
+        );
+
+        // Concluir apenas 1 seção do Telegram não o torna último módulo concluído.
+        final Guia telegram = guiaDe('telegram')!;
+        await progresso.registrarConclusao(
+          idDaConta: 'conta-123',
+          chave: 'telegram:${telegram.secoes.first.chave}',
+        );
+        await t.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('YouTube'),
+          ),
+          findsOneWidget,
+        );
+
+        // Ao completar as seções restantes do Telegram, o perfil atualiza ao vivo.
+        for (final SecaoDoGuia s in telegram.secoes.skip(1)) {
+          await progresso.registrarConclusao(
+            idDaConta: 'conta-123',
+            chave: 'telegram:${s.chave}',
+          );
+        }
+        await t.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('Telegram'),
+          ),
+          findsOneWidget,
+        );
+
+        // Ao sair (apagar), volta às mensagens acolhedoras sem vazar dados.
+        await progresso.apagar();
+        await t.pumpAndSettle();
+        expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+        expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsOneWidget);
+      },
+    );
 
     testWidgets('a idade aparece só como informação e apenas se informada (FR-042c)',
         (WidgetTester t) async {

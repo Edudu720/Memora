@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_perfil.dart';
 import '../../aprendizado/data/guias/guias.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
+import '../../aprendizado/domain/estado_do_modulo.dart';
 import '../../assistente/data/repositorio_assistente_simulado.dart';
 import '../../assistente/domain/assistente.dart';
 import '../data/data_de_nascimento_local.dart';
@@ -44,8 +47,8 @@ class TelaPerfil extends StatefulWidget {
   /// Chave da seção de aprendizado local (Feature 016).
   static const Key chaveSecaoAprendizado = Key('perfil.secao_aprendizado');
 
-  /// Chave do campo com o último módulo concluído (Feature 016 / reserva Item 14).
-  static const Key chaveUltimoModulo = Key('perfil.ultimo_modulo');
+  /// Chave do campo com o último módulo concluído (`020`).
+  static const Key chaveUltimoAprendido = Key('perfil.ultimo_aprendido');
 
   /// Chave do desenho da Memora.
   static const Key chaveDesenho = Key('perfil.desenho');
@@ -74,9 +77,6 @@ class TelaPerfil extends StatefulWidget {
   /// Id da conta autenticada.
   final String? idDaConta;
 
-  /// Nome opcional do último módulo concluído no passo a passo (reserva Item 14).
-  final String? ultimoModuloConcluido;
-
   /// Cria a tela de perfil.
   const TelaPerfil({
     required this.nome,
@@ -87,7 +87,6 @@ class TelaPerfil extends StatefulWidget {
     this.seletorDeFoto,
     this.processadorDeFoto,
     this.idDaConta,
-    this.ultimoModuloConcluido,
     super.key,
   });
 
@@ -103,15 +102,18 @@ class _TelaPerfilState extends State<TelaPerfil> {
   };
 
   String? _maisAprendidoNome;
-  bool _carregouMaisAprendido = false;
+  String? _ultimoAprendidoNome;
+  bool _carregouProgresso = false;
   int _versaoCarga = 0;
+  StreamSubscription<void>? _assinaturaProgresso;
   late ArmazenamentoDeFotoDePerfil _fotosEfetivo =
       widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
 
   @override
   void initState() {
     super.initState();
-    _carregarMaisAprendido();
+    _inscreverProgresso();
+    _carregarProgresso();
   }
 
   @override
@@ -120,48 +122,80 @@ class _TelaPerfilState extends State<TelaPerfil> {
     if (antiga.fotoDePerfil != widget.fotoDePerfil) {
       _fotosEfetivo = widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
     }
+    if (antiga.progresso != widget.progresso) {
+      _inscreverProgresso();
+    }
     if (antiga.idDaConta != widget.idDaConta ||
         antiga.progresso != widget.progresso) {
       _maisAprendidoNome = null;
-      _carregouMaisAprendido = false;
-      _carregarMaisAprendido();
+      _ultimoAprendidoNome = null;
+      _carregouProgresso = false;
+      _carregarProgresso();
     }
   }
 
-  static String _resolverNomeExibido(String chave) {
+  @override
+  void dispose() {
+    _assinaturaProgresso?.cancel();
+    super.dispose();
+  }
+
+  void _inscreverProgresso() {
+    _assinaturaProgresso?.cancel();
+    _assinaturaProgresso = widget.progresso?.alteracoes.listen((_) {
+      _carregarProgresso();
+    });
+  }
+
+  static String? _resolverNomeExibido(String? chave) {
+    if (chave == null || chave.isEmpty) return null;
     return _nomesDoCatalogo[chave] ?? guiaDe(chave)?.titulo ?? chave;
   }
 
-  Future<void> _carregarMaisAprendido() async {
+  Future<void> _carregarProgresso() async {
     final int versao = ++_versaoCarga;
     final ProgressoDeAprendizado? prog = widget.progresso;
     final String? id = widget.idDaConta;
     if (prog == null || id == null || id.trim().isEmpty) {
       _maisAprendidoNome = null;
-      _carregouMaisAprendido = true;
+      _ultimoAprendidoNome = null;
+      _carregouProgresso = true;
       return;
     }
 
     final String contaAlvo = id;
-    String? bruta;
+    String? brutaMais;
+    Map<String, int> ordens = const <String, int>{};
     try {
-      bruta = await prog.aplicativoMaisAprendido(contaAlvo);
+      brutaMais = await prog.aplicativoMaisAprendido(contaAlvo);
     } catch (_) {
-      bruta = null;
+      brutaMais = null;
+    }
+    if (!mounted || versao != _versaoCarga || widget.idDaConta != contaAlvo) {
+      return;
+    }
+
+    try {
+      ordens = await prog.ordensDeConclusao(contaAlvo);
+    } catch (_) {
+      ordens = const <String, int>{};
     }
     if (!mounted || versao != _versaoCarga || widget.idDaConta != contaAlvo) {
       return;
     }
 
     // O progresso de um guia em seções é por `<guia>:<seção>` (FR-028d): o
-    // nome que se mostra é o do guia.
-    final String? chave = bruta?.split(':').first;
-    final String? nomeExibido =
-        (chave != null && chave.isNotEmpty) ? _resolverNomeExibido(chave) : null;
+    // nome que se mostra no mais aprendido é o do guia.
+    final String? chaveMais = brutaMais?.split(':').first;
+    final String? chaveUltimo = chaveDoUltimoModuloConcluido(
+      ordens,
+      todosOsGuias,
+    );
 
     setState(() {
-      _maisAprendidoNome = nomeExibido;
-      _carregouMaisAprendido = true;
+      _maisAprendidoNome = _resolverNomeExibido(chaveMais);
+      _ultimoAprendidoNome = _resolverNomeExibido(chaveUltimo);
+      _carregouProgresso = true;
     });
   }
 
@@ -169,12 +203,12 @@ class _TelaPerfilState extends State<TelaPerfil> {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
 
-    final String textoMaisAprendido = _carregouMaisAprendido
+    final String textoMaisAprendido = _carregouProgresso
         ? (_maisAprendidoNome ?? TextosPerfil.maisAprendidoVazio)
         : TextosPerfil.carregandoAprendizado;
-    final String? moduloBruto = widget.ultimoModuloConcluido?.trim();
-    final String? ultimoModuloLimpo =
-        (moduloBruto != null && moduloBruto.isNotEmpty) ? moduloBruto : null;
+    final String textoUltimoAprendido = _carregouProgresso
+        ? (_ultimoAprendidoNome ?? TextosPerfil.ultimoAprendidoVazio)
+        : TextosPerfil.carregandoAprendizado;
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -245,7 +279,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
               ),
               const SizedBox(height: MemoraEspacamento.xl),
 
-              // Bloco 3: Seu aprendizado local + slot compatível do Item 14
+              // Bloco 3: Seu aprendizado local (FR-042a, Feature 016 + 020)
               Column(
                 key: TelaPerfil.chaveSecaoAprendizado,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -264,12 +298,11 @@ class _TelaPerfilState extends State<TelaPerfil> {
                         rotulo: TextosPerfil.rotuloMaisAprendido,
                         valor: textoMaisAprendido,
                       ),
-                      if (ultimoModuloLimpo != null)
-                        CampoInformacao(
-                          key: TelaPerfil.chaveUltimoModulo,
-                          rotulo: TextosPerfil.rotuloUltimoModulo,
-                          valor: ultimoModuloLimpo,
-                        ),
+                      CampoInformacao(
+                        key: TelaPerfil.chaveUltimoAprendido,
+                        rotulo: TextosPerfil.rotuloUltimoAprendido,
+                        valor: textoUltimoAprendido,
+                      ),
                     ],
                   ),
                 ],
