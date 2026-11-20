@@ -43,10 +43,10 @@
   1. `TelaPerfil.chaveNome`
   2. `TelaPerfil.chaveCanal` (quando presente)
   3. `TelaPerfil.chaveMaisAprendido` (`O que você mais aprendeu` — preservado)
-  4. `TelaPerfil.chaveUltimoAprendido` (`Último módulo concluído` — novo, valor `_carregouMaisAprendido ? (_ultimoAprendidoNome ?? TextosPerfil.ultimoAprendidoVazio) : '...'`, nunca clicável).
+  4. `TelaPerfil.chaveUltimoAprendido` (`Último aprendizado` — novo, valor `_carregouProgresso ? (_ultimoAprendidoNome ?? TextosPerfil.ultimoAprendidoVazio) : '...'`, nunca clicável).
 
 ## 3. Contrato de Copy (`app/lib/l10n/`)
 - `TextosGuias.moduloConcluido = 'Concluído'`
 - `TextosGuias.secaoConcluidaDescrita(String titulo, String subtitulo, String meta) => '$titulo. $subtitulo. $meta. Concluído.'`
-- `TextosPerfil.rotuloUltimoAprendido = 'Último módulo concluído'`
+- `TextosPerfil.rotuloUltimoAprendido = 'Último aprendizado'`
 - `TextosPerfil.ultimoAprendidoVazio = 'Ainda vamos concluir o primeiro!'`

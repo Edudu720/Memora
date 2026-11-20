@@ -11,7 +11,7 @@ Implementar integralmente o Item 14a da Issue #106 sem quebrar contratos de aces
 2. Criar funções puras de domínio em `app/lib/features/aprendizado/domain/estado_do_modulo.dart` (`moduloConcluido` e `chaveDoUltimoModuloConcluido`) garantindo que módulos divididos em seções só sejam considerados concluídos quando **todas** as seções tiverem conclusão registrada, usando a maior `ordem` entre suas seções para desempate cronológico.
 3. Atualizar `TelaCatalogo` (conectada a `progresso` e `idDaConta` em `FluxoAutenticacao._abrirCatalogo`) para exibir o `BadgeDeStatus` informativo `"Concluído"` quando o módulo estiver completo e reagir a `alteracoes`.
 4. Atualizar `TelaSeletorDeSecao` para exibir o checkbox verde arredondado construído estritamente com tokens do Design System (`cores.sucesso`, `MemoraDimensoes.iconeDestaque`, `MemoraRaio.balaoPonta`, `Icons.check_rounded` com contraste > 6,5:1 nos três temas), combinado com texto `Já aprendeu`, semântica TalkBack `"Concluído."` e atualização ao vivo via `alteracoes`.
-5. Atualizar `TelaPerfil` com o `CampoInformacao` puramente informativo `TelaPerfil.chaveUltimoAprendido` (`"Último módulo concluído"`), preservando `TelaPerfil.chaveMaisAprendido`, compartilhando helper de resolução de nome legível e atualizando ao vivo dentro da `CascaInterna`.
+5. Atualizar `TelaPerfil` com o `CampoInformacao` puramente informativo `TelaPerfil.chaveUltimoAprendido` (`"Último aprendizado"`), preservando `TelaPerfil.chaveMaisAprendido`, compartilhando helper de resolução de nome legível e atualizando ao vivo dentro da `CascaInterna`.
 
 ## Technical Context
 

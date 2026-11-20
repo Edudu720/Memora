@@ -10,7 +10,7 @@ Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste ar
   - Integração de `progresso` e `idDaConta` em `FluxoAutenticacao._abrirCatalogo` com atualização ao vivo via `ProgressoDeAprendizado.alteracoes`.
 - **Checkbox verde arredondado no seletor de seções (`TelaSeletorDeSecao`)**:
   - Cada seção concluída passa a exibir um checkbox verde arredondado à direita construído exclusivamente com tokens do Design System (`cores.sucesso`, `MemoraDimensoes.iconeDestaque`, `MemoraRaio.balaoPonta`, `Icons.check_rounded`), combinado com o texto `"Já aprendeu"` e anúncio `"Concluído."` no TalkBack (`secaoConcluidaDescrita`).
-- **Campo `"Último módulo concluído"` em Meu Perfil (`TelaPerfil`)**:
+- **Campo `"Último aprendizado"` em Meu Perfil (`TelaPerfil`)**:
   - Novo `CampoInformacao` puramente informativo (`TelaPerfil.chaveUltimoAprendido`) calculado 100% localmente a partir de `ProgressoDeAprendizado.ordensDeConclusao` e `chaveDoUltimoModuloConcluido`, respeitando `FR-042a` (zero rede) e `FR-042b` (limpeza ao sair), com atualização reativa dentro da `CascaInterna`.
 
 ## [Unreleased] — Feature `019-icones-svg-tutoriais`

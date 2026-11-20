@@ -30,4 +30,4 @@
 
 ## R5. Portões de lint, tokens, texto e planos
 - `validar_tokens.py` proíbe qualquer literal fora de `tokens/`. Todos espaçamentos (`MemoraEspacamento.xs`), dimensões (`MemoraDimensoes.iconeDestaque`, `MemoraDimensoes.iconePequeno`, `MemoraDimensoes.bordaEnfase`), raios (`MemoraRaio.balaoPonta`) e cores (`cores.sucesso`, `cores.superficie`, `cores.fundo`, `cores.borda`) vêm dos tokens via `design_system.dart`.
-- Nomes de chaves em `TelaPerfil` e textos (`'Concluído'`, `'Último módulo concluído'`, `'Ainda vamos concluir o primeiro!'`) não contêm palavras proibidas por `texto_da_interface_test.dart` nem por `sem_planos_test.dart`.
+- Nomes de chaves em `TelaPerfil` e textos (`'Concluído'`, `'Último aprendizado'`, `'Ainda vamos concluir o primeiro!'`) não contêm palavras proibidas por `texto_da_interface_test.dart` nem por `sem_planos_test.dart`.

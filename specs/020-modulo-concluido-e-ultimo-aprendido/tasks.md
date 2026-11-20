@@ -81,3 +81,9 @@
 - **Phase 1 (T001)** -> **Phase 2 (T002, T003 [P], T004 [P] -> T005)**
 - Após **Phase 2**, as histórias **US1 (T006–T008)**, **US2 (T009–T010)** e **US3 (T011–T012)** podem avançar em paralelo ou em sequência sem conflito entre si.
 - **Phase 6 (T013–T014)** executa estritamente após todas as edições estarem concluídas.
+
+---
+
+## Phase 7: Ajuste de Rótulo no Perfil
+
+- [X] T015 [US3] Renomear rótulo `TextosPerfil.rotuloUltimoAprendido` para `'Último aprendizado'` em `app/lib/l10n/textos_perfil.dart`, validar em `app/test/features/perfil/tela_perfil_test.dart` e sincronizar `CHANGELOG.md` e artefatos da feature 020

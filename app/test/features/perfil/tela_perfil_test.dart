@@ -194,6 +194,13 @@ void main() {
 
       expect(find.text('Dona Ana'), findsOneWidget);
       expect(find.text('ana@exemplo.com'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          matching: find.text('Último aprendizado'),
+        ),
+        findsOneWidget,
+      );
 
       // Informação nunca é botão (FR-012 da 002)
       for (final Key chave in <Key>[

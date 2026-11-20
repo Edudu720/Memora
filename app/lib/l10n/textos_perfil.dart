@@ -33,7 +33,7 @@ abstract final class TextosPerfil {
   static const String secaoAprendizado = 'Seu aprendizado';
 
   /// Rótulo do último módulo concluído por completo (020).
-  static const String rotuloUltimoAprendido = 'Último módulo concluído';
+  static const String rotuloUltimoAprendido = 'Último aprendizado';
 
   /// Frase quando a pessoa ainda não concluiu nenhum módulo por completo (020).
   static const String ultimoAprendidoVazio = 'Ainda vamos concluir o primeiro!';
