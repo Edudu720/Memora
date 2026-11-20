@@ -2,6 +2,11 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Feature `019-icones-svg-tutoriais`
+
+### Alterado
+- **Ícones SVG de aplicativos (`specs/019-icones-svg-tutoriais/`, `#106` Item 13)**: criados os ícones vetoriais `app/assets/icones_apps/e-titulo.svg`, `fgts.svg` e `instagram.svg` (`viewBox="0 0 48 48"`), unificados no mapa de SVGs de `IconeDoAplicativo` (com dobra de acentos para `e-Título`) e documentados em `LICENCAS.md`.
+
 ## [Unreleased] — Feature `018-estabilidade-gemini`
 
 ### Melhorado

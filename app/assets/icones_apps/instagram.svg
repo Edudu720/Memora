@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <radialGradient id="fundo_instagram" cx="12" cy="44" r="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFDC80"/>
+      <stop offset="0.22" stop-color="#F77737"/>
+      <stop offset="0.45" stop-color="#FD1D1D"/>
+      <stop offset="0.68" stop-color="#E1306C"/>
+      <stop offset="0.86" stop-color="#833AB4"/>
+      <stop offset="1" stop-color="#5851DB"/>
+    </radialGradient>
+  </defs>
+  <rect width="48" height="48" fill="url(#fundo_instagram)"/>
+  <rect x="10.5" y="10.5" width="27" height="27" rx="7.5" fill="none" stroke="#FFFFFF" stroke-width="3.2"/>
+  <circle cx="24" cy="24" r="6.8" fill="none" stroke="#FFFFFF" stroke-width="3.2"/>
+  <circle cx="32.2" cy="15.8" r="2.1" fill="#FFFFFF"/>
+</svg>
