@@ -50,7 +50,8 @@ class ClienteDaAssistenteGeminiTest {
     /** Reconhecível a olho e por busca, para provar que não vaza. */
     private static final String CHAVE = "chave-falsa-0123456789-ABCDEF";
 
-    private static final String MODELO = "gemini-3.8-flash";
+    private static final String MODELO = "gemini-3.6-flash";
+    private static final String MODELO_RESERVA = "gemini-3.5-flash-lite";
 
     /** Texto ofensivo e identificável que o "Google" põe no corpo de erro. */
     private static final String TEXTO_DO_ERRO_DO_GOOGLE = "DETALHE-INTERNO-DO-GOOGLE-NAO-VAZAR";
@@ -122,6 +123,19 @@ class ClienteDaAssistenteGeminiTest {
                 "http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1beta",
                 Duration.ofSeconds(2),
                 leitura);
+    }
+
+    private ClienteDaAssistenteGemini novoClienteComResiliencia(
+            String modeloReserva, int tentativasPrimario, Duration espera) {
+        return new ClienteDaAssistenteGemini(
+                CHAVE,
+                MODELO,
+                modeloReserva,
+                "http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1beta",
+                Duration.ofSeconds(2),
+                Duration.ofSeconds(5),
+                tentativasPrimario,
+                espera);
     }
 
     // ------------------------------------------------------------ utilidades
@@ -678,6 +692,291 @@ class ClienteDaAssistenteGeminiTest {
             try {
                 assertThatThrownBy(() -> conversar(pedido("Oi"), new ArrayList<>()))
                         .isInstanceOf(AssistenteIndisponivel.class);
+            } finally {
+                Thread.interrupted();
+            }
+        }
+
+        @Test
+        @DisplayName("modelo reserva malformado, tentativas < 1 ou espera negativa falham sem vazar chave")
+        void validacoesDeResiliencia() {
+            String url = "http://127.0.0.1:8080/v1beta";
+            Duration seg = Duration.ofSeconds(1);
+
+            assertThatThrownBy(
+                            () ->
+                                    new ClienteDaAssistenteGemini(
+                                            CHAVE,
+                                            MODELO,
+                                            "gemini/../outro",
+                                            url,
+                                            seg,
+                                            seg,
+                                            2,
+                                            Duration.ZERO))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("modelo-reserva")
+                    .hasMessageNotContaining(CHAVE);
+
+            assertThatThrownBy(
+                            () ->
+                                    new ClienteDaAssistenteGemini(
+                                            CHAVE, MODELO, MODELO_RESERVA, url, seg, seg, 0, Duration.ZERO))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("tentativas-primario")
+                    .hasMessageNotContaining(CHAVE);
+
+            assertThatThrownBy(
+                            () ->
+                                    new ClienteDaAssistenteGemini(
+                                            CHAVE,
+                                            MODELO,
+                                            MODELO_RESERVA,
+                                            url,
+                                            seg,
+                                            seg,
+                                            2,
+                                            Duration.ofMillis(-1)))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("espera-retentativa-ms")
+                    .hasMessageNotContaining(CHAVE);
+        }
+    }
+
+    @Nested
+    @DisplayName("resiliencia: retentativa curta e modelo reserva (Item 12 / 018)")
+    class Resiliencia {
+
+        @Test
+        @DisplayName("503 na 1a tentativa recupera na 2a tentativa no mesmo modelo")
+        void recuperaDe503Transitorio() {
+            roteiro =
+                    troca -> {
+                        if (capturadas.size() == 1) {
+                            erro(troca, 503);
+                            return;
+                        }
+                        fluxo(troca, evento(parteDeTexto("Tudo certo agora.")));
+                    };
+            List<String> trechos = new ArrayList<>();
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 2, Duration.ofMillis(10))) {
+                Resposta resposta = resiliente.conversar(pedido("Oi"), trechos::add);
+
+                assertThat(resposta.texto()).isEqualTo("Tudo certo agora.");
+                assertThat(trechos).containsExactly("Tudo certo agora.");
+                assertThat(capturadas).hasSize(2);
+                assertThat(capturadas)
+                        .allSatisfy(
+                                cap ->
+                                        assertThat(cap.caminhoEConsulta())
+                                                .contains("/models/" + MODELO + ":"));
+            }
+        }
+
+        @Test
+        @DisplayName("503 persistente aciona modelo reserva mantendo instrucao, ferramenta e cabecalho")
+        void fallbackEm503Persistente() {
+            roteiro =
+                    troca -> {
+                        String caminho = troca.getRequestURI().toString();
+                        if (caminho.contains("/models/" + MODELO + ":")) {
+                            erro(troca, 503);
+                            return;
+                        }
+                        fluxo(
+                                troca,
+                                evento(parteDeTexto("Resposta da reserva.")),
+                                evento(parteDeFuncao("sugerir_abrir_aplicativo", "com.whatsapp")));
+                    };
+            List<String> trechos = new ArrayList<>();
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 2, Duration.ofMillis(10))) {
+                Resposta resposta = resiliente.conversar(pedido("Abra o WhatsApp"), trechos::add);
+
+                assertThat(resposta.texto()).isEqualTo("Resposta da reserva.");
+                assertThat(resposta.sugestao())
+                        .contains(new ClienteDaAssistente.Sugestao("com.whatsapp"));
+                assertThat(capturadas).hasSize(3);
+                assertThat(capturadas.get(0).caminhoEConsulta()).contains("/models/" + MODELO + ":");
+                assertThat(capturadas.get(1).caminhoEConsulta()).contains("/models/" + MODELO + ":");
+
+                Capturada chamadaReserva = capturadas.get(2);
+                assertThat(chamadaReserva.caminhoEConsulta())
+                        .contains("/models/" + MODELO_RESERVA + ":");
+                assertThat(chamadaReserva.cabecalhos().primeiro("x-goog-api-key")).isEqualTo(CHAVE);
+                JsonNode jsonReserva = JSON.readTree(chamadaReserva.corpo());
+                assertThat(jsonReserva.path("systemInstruction").toString())
+                        .contains("PERSONA-DA-MEMORA")
+                        .contains("CATALOGO-DE-APLICATIVOS");
+                assertThat(jsonReserva.path("tools").toString()).contains("sugerir_abrir_aplicativo");
+            }
+        }
+
+        @Test
+        @DisplayName("429 no principal pula retentativa e aciona modelo reserva na hora")
+        void cotaVaiDiretoParaReserva() {
+            roteiro =
+                    troca -> {
+                        if (troca.getRequestURI().toString().contains("/models/" + MODELO + ":")) {
+                            erro(troca, 429);
+                            return;
+                        }
+                        fluxo(troca, evento(parteDeTexto("Atendido pela reserva.")));
+                    };
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 3, Duration.ofMillis(10))) {
+                Resposta resposta = resiliente.conversar(pedido("Oi"), t -> {});
+
+                assertThat(resposta.texto()).isEqualTo("Atendido pela reserva.");
+                assertThat(capturadas).hasSize(2);
+                assertThat(capturadas.get(0).caminhoEConsulta()).contains("/models/" + MODELO + ":");
+                assertThat(capturadas.get(1).caminhoEConsulta())
+                        .contains("/models/" + MODELO_RESERVA + ":");
+            }
+        }
+
+        @Test
+        @DisplayName("400 ou 403 nao retenta e nao aciona modelo reserva")
+        void recusaDefinitivaNaoRetenta() {
+            roteiro = troca -> erro(troca, 400);
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 2, Duration.ofMillis(10))) {
+                Throwable lancada =
+                        org.assertj.core.api.Assertions.catchThrowable(
+                                () -> resiliente.conversar(pedido("Oi"), t -> {}));
+
+                assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
+                assertThat(((AssistenteIndisponivel) lancada).motivo())
+                        .isEqualTo(Motivo.PEDIDO_RECUSADO);
+                assertThat(capturadas).hasSize(1);
+            }
+        }
+
+        @Test
+        @DisplayName("falha depois do 1o trecho ja entregue nao retenta nem troca de modelo")
+        void falhaAposPrimeiroTrechoNaoRetenta() {
+            roteiro =
+                    troca ->
+                            fluxo(
+                                    troca,
+                                    evento(parteDeTexto("Comecei")),
+                                    evento(
+                                            "{\"error\":{\"code\":503,\"message\":\""
+                                                    + TEXTO_DO_ERRO_DO_GOOGLE
+                                                    + "\"}}"));
+            List<String> trechos = new ArrayList<>();
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 2, Duration.ofMillis(10))) {
+                Throwable lancada =
+                        org.assertj.core.api.Assertions.catchThrowable(
+                                () -> resiliente.conversar(pedido("Oi"), trechos::add));
+
+                assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
+                assertThat(((AssistenteIndisponivel) lancada).motivo())
+                        .isEqualTo(Motivo.FALHA_DO_PROVEDOR);
+                assertThat(trechos).containsExactly("Comecei");
+                assertThat(capturadas).hasSize(1);
+            }
+        }
+
+        @Test
+        @DisplayName("falha dupla (principal e reserva) devolve erro seguro sem vazar chave nem corpo")
+        void falhaDuplaSemVazamento() {
+            roteiro =
+                    troca -> {
+                        if (troca.getRequestURI().toString().contains("/models/" + MODELO + ":")) {
+                            erro(troca, 503);
+                        } else {
+                            erro(troca, 429);
+                        }
+                    };
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 2, Duration.ofMillis(10))) {
+                Throwable lancada =
+                        org.assertj.core.api.Assertions.catchThrowable(
+                                () -> resiliente.conversar(pedido("Oi"), t -> {}));
+
+                assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
+                AssistenteIndisponivel falha = (AssistenteIndisponivel) lancada;
+                assertThat(falha.motivo()).isEqualTo(Motivo.COTA_ESGOTADA);
+                assertThat(falha.getMessage())
+                        .doesNotContain(TEXTO_DO_ERRO_DO_GOOGLE)
+                        .doesNotContain(CHAVE)
+                        .doesNotContain("127.0.0.1");
+                assertThat(capturadas).hasSize(3);
+            }
+        }
+
+        @Test
+        @DisplayName("reserva vazio ou igual ao principal desabilita fallback sem chamada extra")
+        void reservaIgualOuVazioDesabilitaFallback() {
+            roteiro = troca -> erro(troca, 429);
+
+            try (ClienteDaAssistenteGemini reservaVazia =
+                            novoClienteComResiliencia("  ", 2, Duration.ofMillis(5));
+                    ClienteDaAssistenteGemini reservaIgual =
+                            novoClienteComResiliencia(MODELO, 2, Duration.ofMillis(5))) {
+                assertThatThrownBy(() -> reservaVazia.conversar(pedido("Oi"), t -> {}))
+                        .isInstanceOf(AssistenteIndisponivel.class);
+                assertThat(capturadas).hasSize(1);
+
+                capturadas.clear();
+                assertThatThrownBy(() -> reservaIgual.conversar(pedido("Oi"), t -> {}))
+                        .isInstanceOf(AssistenteIndisponivel.class);
+                assertThat(capturadas).hasSize(1);
+            }
+        }
+
+        @Test
+        @DisplayName("interrupcao durante espera entre retentativas aborta sem nova requisicao")
+        void interrupcaoDuranteEsperaAbortaSemRetentar() {
+            Thread threadChamadora = Thread.currentThread();
+            roteiro =
+                    troca -> {
+                        erro(troca, 503);
+                        threadChamadora.interrupt();
+                    };
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 3, Duration.ofMillis(200))) {
+                Throwable lancada =
+                        org.assertj.core.api.Assertions.catchThrowable(
+                                () -> resiliente.conversar(pedido("Oi"), t -> {}));
+
+                assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
+                assertThat(((AssistenteIndisponivel) lancada).motivo()).isEqualTo(Motivo.REDE);
+                assertThat(capturadas).hasSize(1);
+            } finally {
+                Thread.interrupted();
+            }
+        }
+        @Test
+        @DisplayName("interrupcao na ultima tentativa aborta antes de acionar o modelo reserva")
+        void interrupcaoNaUltimaTentativaNaoAcionaReserva() {
+            Thread threadChamadora = Thread.currentThread();
+            roteiro =
+                    troca -> {
+                        erro(troca, 503);
+                        threadChamadora.interrupt();
+                    };
+
+            try (ClienteDaAssistenteGemini resiliente =
+                    novoClienteComResiliencia(MODELO_RESERVA, 1, Duration.ofMillis(10))) {
+                Throwable lancada =
+                        org.assertj.core.api.Assertions.catchThrowable(
+                                () -> resiliente.conversar(pedido("Oi"), t -> {}));
+
+                assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
+                assertThat(((AssistenteIndisponivel) lancada).motivo())
+                        .isIn(Motivo.REDE, Motivo.FALHA_DO_PROVEDOR);
+                assertThat(capturadas).hasSize(1);
             } finally {
                 Thread.interrupted();
             }

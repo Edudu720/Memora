@@ -2,6 +2,13 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Feature `018-estabilidade-gemini`
+
+### Melhorado
+- **Estabilidade da API do Gemini (`specs/018-estabilidade-gemini/`, `#106` Item 12)**:
+  - Alinhado o modelo principal padrão para `gemini-3.6-flash` no código (`ConfiguracaoDoProvedorDeIa`, `application.properties`) e no `render.yaml`.
+  - Adicionada retentativa curta configurável (`tentativas-primario=2`, `espera-retentativa-ms=500`) para falhas transitórias (`5xx`, rede, prazo) e modelo reserva automático configurável (`MEMORA_ASSISTENTE_GEMINI_MODELO_RESERVA=gemini-3.5-flash-lite`) acionado apenas antes da entrega do primeiro trecho em `429` ou esgotamento de tentativas do principal, preservando `systemInstruction`, ferramentas, cabeçalho seguro e descarte de erros externos.
+
 ## [Unreleased] — Feature `017-site-no-render`
 
 ### Adicionado

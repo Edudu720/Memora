@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -101,6 +103,8 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
     /** O cabeçalho da chave. */
     static final String CABECALHO_DA_CHAVE = "x-goog-api-key";
 
+    private static final Logger LOG = LoggerFactory.getLogger(ClienteDaAssistenteGemini.class);
+
     private static final Pattern FORMATO_DO_MODELO = Pattern.compile("[A-Za-z0-9._-]+");
     private static final Pattern FORMATO_DA_CHAVE = Pattern.compile("[\\x21-\\x7E]+");
 
@@ -129,23 +133,54 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
     private final HttpClient http;
     private final ScheduledThreadPoolExecutor vigia;
     private final String chave;
+    private final String modelo;
     private final URI endereco;
+    private final URI enderecoReserva;
+    private final int tentativasPrimario;
+    private final Duration esperaEntreTentativas;
     private final Duration leitura;
 
     /**
-     * Cria o adaptador.
+     * Cria o adaptador sem retentativa extra nem modelo reserva (compatibilidade
+     * com chamadas diretas de uma tentativa).
      *
      * @param chave a chave da API; <b>nunca</b> aparece em mensagem, log ou URL
-     * @param modelo o modelo, p.ex. {@code gemini-3.8-flash}
+     * @param modelo o modelo, p.ex. {@code gemini-3.6-flash}
      * @param urlBase o endereço base da API
      * @param conexao quanto esperar para conectar
      * @param leitura quanto esperar <b>sem receber nada</b>: vale para o início
      *     da resposta e para cada trecho dela (o prazo recomeça a cada linha)
-     * @throws IllegalStateException chave ausente ou malformada — falhar na
-     *     subida é melhor que falhar na primeira pessoa a conversar
+     * @throws IllegalStateException chave ou modelo ausente/malformado — falhar
+     *     na subida é melhor que falhar na primeira pessoa a conversar
      */
     public ClienteDaAssistenteGemini(
             String chave, String modelo, String urlBase, Duration conexao, Duration leitura) {
+        this(chave, modelo, "", urlBase, conexao, leitura, 1, Duration.ZERO);
+    }
+
+    /**
+     * Cria o adaptador com retentativa curta antes do primeiro trecho e modelo
+     * reserva opcional.
+     *
+     * @param chave a chave da API; <b>nunca</b> aparece em mensagem, log ou URL
+     * @param modelo o modelo principal, p.ex. {@code gemini-3.6-flash}
+     * @param modeloReserva modelo reserva opcional, p.ex. {@code gemini-3.5-flash-lite}
+     *     (vazio ou igual ao principal desativa o fallback)
+     * @param urlBase o endereço base da API
+     * @param conexao quanto esperar para conectar
+     * @param leitura quanto esperar <b>sem receber nada</b> em cada linha
+     * @param tentativasPrimario número de tentativas no modelo principal (>= 1)
+     * @param esperaEntreTentativas intervalo entre tentativas no principal (>= 0)
+     */
+    public ClienteDaAssistenteGemini(
+            String chave,
+            String modelo,
+            String modeloReserva,
+            String urlBase,
+            Duration conexao,
+            Duration leitura,
+            int tentativasPrimario,
+            Duration esperaEntreTentativas) {
         if (chave == null || chave.isBlank()) {
             throw new IllegalStateException(
                     "GEMINI_API_KEY nao configurada: o provedor 'gemini' precisa da chave da API "
@@ -164,13 +199,44 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
                     "memora.assistente.gemini.modelo invalido: use so letras, numeros, ponto, "
                             + "hifen e sublinhado.");
         }
-        this.chave = chave.strip();
+        if (tentativasPrimario < 1) {
+            throw new IllegalStateException(
+                    "memora.assistente.gemini.tentativas-primario invalido: use inteiro maior "
+                            + "ou igual a 1.");
+        }
+        if (esperaEntreTentativas == null || esperaEntreTentativas.isNegative()) {
+            throw new IllegalStateException(
+                    "memora.assistente.gemini.espera-retentativa-ms invalido: nao pode ser "
+                            + "negativo.");
+        }
+
+        String modeloPrincipal = modelo.strip();
         String base = urlBase.strip();
         if (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
         }
+
+        URI reservaUri = null;
+        if (modeloReserva != null && !modeloReserva.isBlank()) {
+            String reservaLimpa = modeloReserva.strip();
+            if (!FORMATO_DO_MODELO.matcher(reservaLimpa).matches()) {
+                throw new IllegalStateException(
+                        "memora.assistente.gemini.modelo-reserva invalido: use so letras, "
+                                + "numeros, ponto, hifen e sublinhado.");
+            }
+            if (!reservaLimpa.equals(modeloPrincipal)) {
+                reservaUri =
+                        URI.create(base + "/models/" + reservaLimpa + ":streamGenerateContent?alt=sse");
+            }
+        }
+
+        this.chave = chave.strip();
+        this.modelo = modeloPrincipal;
         this.endereco =
-                URI.create(base + "/models/" + modelo.strip() + ":streamGenerateContent?alt=sse");
+                URI.create(base + "/models/" + modeloPrincipal + ":streamGenerateContent?alt=sse");
+        this.enderecoReserva = reservaUri;
+        this.tentativasPrimario = tentativasPrimario;
+        this.esperaEntreTentativas = esperaEntreTentativas;
         this.leitura = leitura;
         this.http =
                 HttpClient.newBuilder()
@@ -190,16 +256,79 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
 
     @Override
     public Resposta conversar(Pedido pedido, Consumer<String> aoReceberTrecho) {
+        String corpoJson = montarCorpo(pedido);
+        AssistenteIndisponivel ultimaFalha = null;
+
+        for (int tentativa = 1; tentativa <= tentativasPrimario; tentativa++) {
+            AtomicBoolean enviouTrecho = new AtomicBoolean(false);
+            try {
+                return conversarComEndereco(
+                        endereco, corpoJson, aoReceberTrecho, enviouTrecho);
+            } catch (AssistenteIndisponivel falha) {
+                ultimaFalha = falha;
+                if (enviouTrecho.get()
+                        || Thread.currentThread().isInterrupted()
+                        || !ehElegivelFallback(falha.motivo())) {
+                    throw falha;
+                }
+                if (falha.motivo() == Motivo.COTA_ESGOTADA) {
+                    if (enderecoReserva != null) {
+                        LOG.warn(
+                                "Modelo principal {} atingiu cota ({}); acionando reserva.",
+                                modelo,
+                                falha.motivo());
+                    } else {
+                        LOG.warn(
+                                "Modelo principal {} atingiu cota ({}); sem modelo reserva.",
+                                modelo,
+                                falha.motivo());
+                    }
+                    break;
+                }
+                if (tentativa < tentativasPrimario) {
+                    LOG.warn(
+                            "Tentativa {}/{} no modelo {} falhou ({}); repetindo.",
+                            tentativa,
+                            tentativasPrimario,
+                            modelo,
+                            falha.motivo());
+                    aguardarRetentativa();
+                } else if (enderecoReserva != null) {
+                    LOG.warn(
+                            "Modelo principal {} falhou apos {} tentativa(s) ({}); acionando reserva.",
+                            modelo,
+                            tentativasPrimario,
+                            falha.motivo());
+                } else {
+                    LOG.warn(
+                            "Modelo principal {} falhou apos {} tentativa(s) ({}); sem modelo reserva.",
+                            modelo,
+                            tentativasPrimario,
+                            falha.motivo());
+                }
+            }
+        }
+
+        if (enderecoReserva != null) {
+            return conversarComEndereco(
+                    enderecoReserva, corpoJson, aoReceberTrecho, new AtomicBoolean(false));
+        }
+        throw ultimaFalha;
+    }
+
+    private Resposta conversarComEndereco(
+            URI destino,
+            String corpoJson,
+            Consumer<String> aoReceberTrecho,
+            AtomicBoolean enviouTrecho) {
         HttpRequest requisicao =
-                HttpRequest.newBuilder(endereco)
+                HttpRequest.newBuilder(destino)
                         // Prazo ate o INICIO da resposta; o do fluxo e do vigia.
                         .timeout(leitura)
                         .header("Content-Type", "application/json")
                         .header("Accept", "text/event-stream")
                         .header(CABECALHO_DA_CHAVE, chave)
-                        .POST(
-                                HttpRequest.BodyPublishers.ofString(
-                                        montarCorpo(pedido), StandardCharsets.UTF_8))
+                        .POST(HttpRequest.BodyPublishers.ofString(corpoJson, StandardCharsets.UTF_8))
                         .build();
 
         HttpResponse<InputStream> resposta;
@@ -221,10 +350,32 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
                 // dele para decidir nada. O status basta para o log.
                 throw porStatus(status);
             }
-            return lerFluxo(corpo, aoReceberTrecho);
+            return lerFluxo(corpo, aoReceberTrecho, enviouTrecho);
         } catch (IOException aoFechar) {
             // So o fechamento falhou; o que importa ja foi decidido acima.
             throw new AssistenteIndisponivel(Motivo.REDE, aoFechar.getClass().getSimpleName());
+        }
+    }
+
+    private static boolean ehElegivelFallback(Motivo motivo) {
+        return motivo == Motivo.COTA_ESGOTADA
+                || motivo == Motivo.FALHA_DO_PROVEDOR
+                || motivo == Motivo.REDE
+                || motivo == Motivo.PRAZO;
+    }
+
+    private void aguardarRetentativa() {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
+        }
+        if (esperaEntreTentativas.isZero()) {
+            return;
+        }
+        try {
+            Thread.sleep(esperaEntreTentativas.toMillis());
+        } catch (InterruptedException interrompido) {
+            Thread.currentThread().interrupt();
+            throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
         }
     }
 
@@ -336,7 +487,8 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
      * segue para o {@code aoReceberTrecho} assim que chega — a SC-007 pede tela
      * que se mexe.
      */
-    private Resposta lerFluxo(InputStream corpo, Consumer<String> aoReceberTrecho) {
+    private Resposta lerFluxo(
+            InputStream corpo, Consumer<String> aoReceberTrecho, AtomicBoolean enviouTrecho) {
         StringBuilder texto = new StringBuilder();
         Optional<Sugestao> sugestao = Optional.empty();
         AtomicBoolean estourou = new AtomicBoolean(false);
@@ -395,6 +547,7 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
                     JsonNode trecho = parte.get("text");
                     if (trecho != null && trecho.isString() && !trecho.stringValue().isEmpty()) {
                         texto.append(trecho.stringValue());
+                        enviouTrecho.set(true);
                         aoReceberTrecho.accept(trecho.stringValue());
                     }
                     if (sugestao.isEmpty() && parte.has("functionCall")) {
