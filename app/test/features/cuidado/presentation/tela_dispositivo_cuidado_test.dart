@@ -293,6 +293,63 @@ void main() {
         ctrl.dispose();
       },
     );
+
+    testWidgets(
+      'atualiza o ouvinte de queda quando recebe novo controlador via didUpdateWidget',
+      (WidgetTester tester) async {
+        final RepositorioContatoEmergenciaLocal repo =
+            RepositorioContatoEmergenciaLocal();
+        final ControladorDispositivoCuidado ctrl1 = ControladorDispositivoCuidado(
+          repositorioContato: repo,
+          provedorInicial: _ProvedorMqttControlado(),
+        );
+        final ControladorDispositivoCuidado ctrl2 = ControladorDispositivoCuidado(
+          repositorioContato: repo,
+          provedorInicial: _ProvedorMqttControlado(),
+        );
+
+        const Combinacao combinacaoPadrao = (
+          aparelho: referencia,
+          escala: 1.0,
+          tema: MemoraTemaId.claro,
+        );
+
+        vestir(tester, combinacaoPadrao.aparelho);
+        await tester.pumpWidget(
+          naCombinacao(
+            combinacaoPadrao,
+            TelaDispositivoCuidado(controlador: ctrl1, aoVoltar: () {}),
+          ),
+        );
+        await tester.pumpWidget(
+          naCombinacao(
+            combinacaoPadrao,
+            TelaDispositivoCuidado(controlador: ctrl2, aoVoltar: () {}),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(
+          find.text(TextosCuidado.tituloConexaoEsp32Testes),
+        );
+        await tester.tap(find.text(TextosCuidado.tituloConexaoEsp32Testes));
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(find.text(TextosCuidado.botaoSimularQueda));
+        await tester.tap(find.text(TextosCuidado.botaoSimularQueda));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(TelaVerificacaoQueda), findsOneWidget);
+
+        await tester.ensureVisible(find.text(TextosCuidado.botaoEstouBem));
+        await tester.tap(find.text(TextosCuidado.botaoEstouBem));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(TelaVerificacaoQueda), findsNothing);
+        ctrl1.dispose();
+        ctrl2.dispose();
+      },
+    );
   });
 }
 
