@@ -10,12 +10,12 @@ Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste ar
 - **Slot de progresso em Meu Perfil (`US4`, `#106` Item 14)**: suporte opcional `ultimoModuloConcluido` com campo informativo acessível em `TelaPerfil`.
 
 ### Alterado
-- **Dispositivo de Cuidado (`US1`, `#106` Item 7)**: `ControladorDispositivoCuidado.simularQuedaTeste()` passa a disparar a verificação local de queda com segurança também no modo ESP32 físico via MQTT (conectado ou desconectado), com trava contra toques repetidos e limpeza completa de referências residuais ao Wokwi em `app/`.
+- **Dispositivo de Cuidado (`US1`, `#106` Itens 7 e 8)**: `ControladorDispositivoCuidado.simularQuedaTeste()` passa a disparar a verificação local de queda com segurança também no modo ESP32 físico via MQTT (conectado ou desconectado), com ciclo de vida proprietário em `_DonoDoDispositivoCuidado` (descarte garantido ao sair da conta/expirar sessão), guarda `_descartado` pós-`await`, trava contra toques repetidos e limpeza completa de referências residuais ao Wokwi em `app/`.
 - **Guias passo a passo com capturas reais (`US3`, `#106` Item 5)**: atualização de 7 guias (`meu-inss`, `tiktok`, `carteira-digital`, `carteira-de-trabalho`, `poupatempo`, `youtube`, `google-fotos`) com 66 capturas reais higienizadas em WebP qualidade 92, destaques `RegiaoRelativa` medidos sobre as imagens limpas, divisão em seções `SecaoDoGuia` para guias com mais de 7 telas, atualização de `CAPTURAS.md` e revisão do teto global de `app/assets/guias/` para `12 MB`.
-- **Meu Perfil (`US4`, `#106` Item 9)**: reorganização semântica por seções em cartões (*Seu retrato*, *Sua conta*, *Seu aprendizado* e `SecaoIdade`), busca de títulos do catálogo em `O(1)`, descarte de leituras assíncronas obsoletas em troca de conta e eliminação do marcador provisório `'...'`.
+- **Meu Perfil (`US4`, `#106` Item 10)**: reorganização semântica por seções em cartões (*Seu retrato*, *Sua conta*, *Seu aprendizado* e `SecaoIdade`), busca de títulos do catálogo em `O(1)`, tratamento resiliente de erro local (`try/catch`), descarte de leituras assíncronas obsoletas em troca de conta e eliminação do marcador provisório `'...'`.
 
 ### Removido
-- **Retratos descontinuados (`US2`, `#106` Item 8)**: remoção de `casalIdoso` e `pessoaComCelular` da seleção de retrato de perfil com recuo seguro para o retrato padrão neutro caso o armazenamento local ainda traga chaves antigas.
+- **Retratos descontinuados (`US2`, `#106` Item 9)**: remoção de `casalIdoso` e `pessoaComCelular` da seleção de retrato de perfil com recuo seguro para o retrato padrão neutro caso o armazenamento local ainda traga chaves antigas.
 
 ## [0.7.0] — Feature `007-redesenho-visual-profissional`
 

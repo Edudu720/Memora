@@ -1,7 +1,7 @@
 # Contrato Compartilhado: Ícones Vetoriais SVG e Capturas Reais dos Guias
 
 **Feature**: `016-ajustes-pos-redesenho` | **Issue**: [#106 (Itens 5, 6 e 13)](https://github.com/Edudu720/Memora/issues/106)  
-**Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md)
+**Spec**: [spec.md](../spec.md)
 
 ---
 
@@ -27,15 +27,16 @@ Convenção definida em comum acordo entre `@Du3101` (Item 6) e `@Henrique-Sandr
    - `viewBox` quadrado (`0 0 48 48`), com bordas e formas autocontidas adaptáveis ao arredondamento de `ClipRRect` do `IconeDoAplicativo`.
    - Somente elementos vetoriais estáticos (`<svg>`, `<rect>`, `<path>`, `<circle>`, `<g>`, `<defs>`, `<linearGradient>` simples); **proibido** `<script>`, `<image>` externo, `<foreignObject>`, referências HTTP/HTTPS ou `<text>` dependente de fonte local do aparelho.
    - Contraste mínimo de **3:1** dos elementos principais do símbolo sobre o fundo da marca, testado nos temas claro, escuro e alto contraste.
-4. **Resolução no widget `IconeDoAplicativo`**:
-   - Mapa constante explícito `_iconesSvgPorChave` de chave normalizada (`youtube`, `tiktok`, `googlefotos`/`foto`, `meuinss`, `poupatempo`, `carteiradigital`, `carteiradetrabalho`) para o respectivo asset SVG, renderizado via `SvgPicture.asset`.
+4. **Resolução no widget `IconeDoAplicativo` e catálogo de licenças**:
+   - Mapa constante explícito `_iconesSvgPorChave` de chave normalizada (`youtube`, `tiktok`, `googlefotos`/`foto`, `meuinss`, `poupatempo`, `carteiradigital`, `carteiradetrabalho`) para o respectivo asset SVG, renderizado via `SvgPicture.asset` com `excludeFromSemantics: true` (em paridade com o Item 13).
+   - Registro obrigatório de origem, licença e padronização dos 7 SVGs compartilhados em `app/assets/ilustracoes/LICENCAS.md`.
    - Nenhuma alteração nos 6 PNGs existentes (`whatsapp`, `facebook`, `telegram`, `gov_br`, `serasa`, `correios`).
 
 ---
 
 ## 2. Contrato de Capturas Reais e Guias (`app/assets/guias/` e `features/aprendizado`)
 
-Complementa [contracts/guias.md](file:///c:/Users/Eduardo/Memora/specs/004-redesenho-das-telas/contracts/guias.md) para os 7 guias atualizados (`meu-inss`, `tiktok`, `carteira-digital`, `carteira-de-trabalho`, `poupatempo`, `youtube`, `google-fotos`):
+Complementa [contracts/guias.md](../../004-redesenho-das-telas/contracts/guias.md) para os 7 guias atualizados (`meu-inss`, `tiktok`, `carteira-digital`, `carteira-de-trabalho`, `poupatempo`, `youtube`, `google-fotos`):
 
 1. **Formato e conversão**:
    - Origem exclusiva nos arquivos higienizados de `apps/<Pasta>/` (total de 66 imagens).

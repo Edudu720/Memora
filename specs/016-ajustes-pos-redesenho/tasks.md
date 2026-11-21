@@ -1,9 +1,9 @@
 # Tasks: Ajustes Pós-Redesenho — Issue #106 (@Du3101)
 
 **Input**: Design documents from `/specs/016-ajustes-pos-redesenho/`  
-**Prerequisites**: [plan.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/plan.md) (required), [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md) (required for user stories), [research.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/research.md), [data-model.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/data-model.md), [contracts/](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/contracts/), [quickstart.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/quickstart.md)
+**Prerequisites**: [plan.md](plan.md) (required), [spec.md](spec.md) (required for user stories), [research.md](research.md), [data-model.md](data-model.md), [contracts/](contracts/), [quickstart.md](quickstart.md)
 
-**Tests**: Regressões e validações de contrato fazem parte explícita dos requisitos da Issue #106 e de [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md) (`SC-001`–`SC-008`, `checklists/revisao-pr.md` 24/24).
+**Tests**: Regressões e validações de contrato fazem parte explícita dos requisitos da Issue #106 e de [spec.md](spec.md) (`SC-001`–`SC-008`, `checklists/revisao-pr.md` 24/24).
 
 **Organization**: As tarefas estão organizadas por história de usuário para permitir implementação e validação independentes, em ordem de prioridade (`P1` -> `P2`).
 
@@ -243,12 +243,25 @@ Task: "T028 [P] [US3] Criar 7 SVGs em app/assets/icones_apps/ e atualizar app/li
 ## Notes
 
 - Tarefas `[P]` operam em arquivos distintos sem dependências pendentes.
-- Nomes de constantes, chaves e limites citados nas tarefas seguem literalmente [data-model.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/data-model.md) e [contracts/](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/contracts/).
+- Nomes de constantes, chaves e limites citados nas tarefas seguem literalmente [data-model.md](data-model.md) e [contracts/](contracts/).
 - Não alterar capturas de `@Henrique-Sandrini` (`e-titulo`, `fgts`, `instagram`) nem de `@Edudu720` (`whatsapp`, `facebook`, `telegram`, `gov-br`, `serasa`, `correios`).
-- Checklists aprovados: [requirements.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/checklists/requirements.md) (`16/16`) e [revisao-pr.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/checklists/revisao-pr.md) (`24/24`).
+- Checklists aprovados: [requirements.md](checklists/requirements.md) (`16/16`) e [revisao-pr.md](checklists/revisao-pr.md) (`24/24`).
 
 ---
 
 ## Phase 9: Convergence
 
 - [X] T042 [CRITICAL] Ajustar o preenchimento âmbar (`#D98200`, contraste `2,94:1 < 3,0:1` sobre `#FFFFFF`) em `app/assets/icones_apps/google-fotos.svg` e `app/assets/icones_apps/carteira-digital.svg` para tom com contraste WCAG 2.2 `>= 3,0:1` (ex.: `#C97600` com `3,46:1` ou `#B86B00` com `4,08:1`) e adicionar verificação automática de razão de contraste luminância `>= 3,0:1` para os 7 SVGs em `app/test/design_system/icone_do_aplicativo_test.dart` per Constitution III / AC-002 / SC-007 / contracts/icones-e-guias.md §1.3 (contradicts)
+
+---
+
+## Phase 10: PR #107 Review Adjustments (`@Henrique-Sandrini`)
+
+- [X] T043 Envolver `TelaDispositivoCuidado` no `StatefulWidget` proprietário `_DonoDoDispositivoCuidado` em `app/lib/features/autenticacao/presentation/fluxo_autenticacao.dart` e adicionar guarda `_descartado` pós-`await` e em callbacks/métodos de `app/lib/features/cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart`, cobrindo logout/expiração e descarte assíncrono com testes de regressão em `app/test/features/cuidado/presentation/tela_dispositivo_cuidado_test.dart` (Ponto #1 da revisão da PR #107)
+- [X] T044 Adicionar tratamento `try/catch` em `TelaPerfil._carregarMaisAprendido()` em `app/lib/features/perfil/presentation/tela_perfil.dart` com teste de erro em `app/test/features/perfil/tela_perfil_test.dart` (Ponto #2 da revisão da PR #107)
+- [X] T045 [P] Adicionar `excludeFromSemantics: true` no `SvgPicture.asset` de `app/lib/design_system/componentes/ilustracao/icone_do_aplicativo.dart`, registrar os 7 SVGs em `app/assets/ilustracoes/LICENCAS.md` e validar em `app/test/design_system/icone_do_aplicativo_test.dart` (Ponto #3 da revisão da PR #107)
+- [X] T046 [P] Converter os 14 caminhos absolutos locais (`file` URI com prefixo absoluto do workspace) para caminhos relativos nos docs de `specs/016-ajustes-pos-redesenho/` e sincronizar `contracts/`, `plan.md` e `tasks.md` (Ponto #4 da revisão da PR #107)
+- [X] T047 [P] Atualizar o comentário Dartdoc desatualizado em `app/lib/features/ajuda/presentation/tela_ajuda.dart` para controle estrito do site oficial em `https://` (Ponto #5 da revisão da PR #107)
+- [X] T048 [P] Corrigir os números dos itens da Issue #106 em `CHANGELOG.md` (Itens 7–8 no Cuidado, Item 9 em Retratos e Item 10 em Meu Perfil) e preparar nota de correção das seções de `carteira-digital`/`carteira-de-trabalho` (`2` seções de `6 + 4` passos) para a descrição da PR #107 (Ponto #6 da revisão da PR #107)
+- [X] T049 [P] Reforçar `Ambiente.enderecoOficial` em `app/lib/services/ambiente/ambiente.dart` rejeitando `@` na autoridade (`https://@host`) e cobrir o caso em `app/test/services/ambiente_test.dart` (Ponto #7 da revisão da PR #107)
+- [X] T050 Executar todos os portões obrigatórios após as alterações finais (verificação sem URIs absolutas locais na spec 016, `git grep` de `wokwi` em `app/`, `validar_tokens.py`, `flutter analyze` e `flutter test` completo) e marcar `T043`–`T050` como `[X]`

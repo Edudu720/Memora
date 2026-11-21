@@ -102,6 +102,7 @@ class IconeDoAplicativo extends StatelessWidget {
         width: tamanho,
         height: tamanho,
         fit: BoxFit.cover,
+        excludeFromSemantics: true,
       );
     }
 

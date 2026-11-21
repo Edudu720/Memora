@@ -409,7 +409,57 @@ void main() {
         expect(find.text('YouTube'), findsNothing);
       },
     );
+
+    testWidgets(
+      'recupera com segurança quando leitura do progresso local lança erro',
+      (WidgetTester t) async {
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: _ProgressoQueFalha(),
+              idDaConta: 'conta-123',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(find.text(TextosPerfil.carregandoAprendizado), findsNothing);
+        expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+      },
+    );
   });
+}
+
+class _ProgressoQueFalha implements ProgressoDeAprendizado {
+  @override
+  Future<String?> aplicativoMaisAprendido(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<void> apagar() async {}
+
+  @override
+  Future<Map<String, int>> concluidos(String idDaConta) async =>
+      const <String, int>{};
+
+  @override
+  Future<bool> registrarChegadaAoPasso({
+    required String idDaConta,
+    required String chave,
+    required int numeroDoPasso,
+    required int totalDePassos,
+  }) async =>
+      false;
+
+  @override
+  Future<void> registrarConclusao({
+    required String idDaConta,
+    required String chave,
+  }) async {}
 }
 
 class _ProgressoComAtraso implements ProgressoDeAprendizado {

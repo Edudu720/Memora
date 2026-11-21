@@ -3,19 +3,24 @@ import 'dart:async';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_mqtt.dart';
 import 'package:memora/features/cuidado/data/provedores/provedor_telemetria_simulado.dart';
 import 'package:memora/features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import 'package:memora/features/cuidado/domain/entidades/contato_emergencia.dart';
 import 'package:memora/features/cuidado/domain/entidades/enums_cuidado.dart';
 import 'package:memora/features/cuidado/domain/entidades/evento_queda.dart';
 import 'package:memora/features/cuidado/domain/entidades/telemetria_iot.dart';
+import 'package:memora/features/cuidado/domain/repositorios/repositorio_contato_emergencia.dart';
 import 'package:memora/features/cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
 import 'package:memora/features/cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
 import 'package:memora/features/cuidado/presentation/telas/tela_verificacao_queda.dart';
+import 'package:memora/l10n/textos_casca.dart';
 import 'package:memora/l10n/textos_cuidado.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../suporte/aparelhos.dart';
+import '../../autenticacao/fluxo_dentro_da_conta.dart';
 
 void main() {
   setUp(() {
@@ -350,7 +355,115 @@ void main() {
         ctrl2.dispose();
       },
     );
+
+    test(
+      'dispose com Futures pendentes não notifica nem reconecta após descarte',
+      () async {
+        final _RepositorioContatoComAtraso repo =
+            _RepositorioContatoComAtraso();
+        final _ProvedorMqttComAtraso provedorInicial =
+            _ProvedorMqttComAtraso();
+        final ControladorDispositivoCuidado ctrl =
+            ControladorDispositivoCuidado(
+          repositorioContato: repo,
+          provedorInicial: provedorInicial,
+        );
+        int notificacoes = 0;
+        ctrl.addListener(() => notificacoes++);
+
+        final Future<void> salvamento = ctrl.salvarContato(
+          const ContatoEmergencia(
+            id: 'c1',
+            nome: 'Filha',
+            telefone: '19999999999',
+            parentesco: 'Filha',
+          ),
+        );
+        final Future<void> alternancia =
+            ctrl.alternarModo(ModoOperacaoIot.simulado);
+
+        ctrl.dispose();
+
+        repo.completarObter(null);
+        repo.completarSalvar();
+        provedorInicial.completarDesconectar();
+        await Future.wait<void>(<Future<void>>[salvamento, alternancia]);
+
+        expect(notificacoes, 0);
+        expect(ctrl.provedor, same(provedorInicial));
+        expect(provedorInicial.descartes, 1);
+      },
+    );
+
+    testWidgets(
+      'descarga do Dispositivo de Cuidado ocorre ao expirar sessão dentro da conta (sem timer vazado)',
+      (WidgetTester tester) async {
+        final FluxoDentroDaConta fluxo = FluxoDentroDaConta();
+        const Duration prazo = Duration(minutes: 30);
+
+        await fluxo.montar(tester);
+        await FluxoDentroDaConta.tocar(
+          tester,
+          find.text(TextosCasca.atalhoCuidado),
+        );
+        expect(find.byType(TelaDispositivoCuidado), findsOneWidget);
+
+        // Ativa o simulador para iniciar o Timer.periodic interno.
+        await FluxoDentroDaConta.tocar(
+          tester,
+          find.text(TextosCuidado.botaoUsarSimulador),
+        );
+        expect(find.text(TextosCuidado.badgeMonitoramentoAtivo), findsOneWidget);
+
+        // Expirar a sessão força o desmonte do Navigator interno sem completar rota.popped.
+        await tester.pump(prazo);
+        await FluxoDentroDaConta.avancar(tester, 6);
+
+        expect(find.byType(TelaDispositivoCuidado), findsNothing);
+        expect(find.byKey(TelaLogin.chaveEntrar), findsOneWidget);
+      },
+    );
   });
+}
+
+class _RepositorioContatoComAtraso implements RepositorioContatoEmergencia {
+  final Completer<ContatoEmergencia?> _obter = Completer<ContatoEmergencia?>();
+  final Completer<void> _salvar = Completer<void>();
+
+  void completarObter(ContatoEmergencia? contato) {
+    if (!_obter.isCompleted) _obter.complete(contato);
+  }
+
+  void completarSalvar() {
+    if (!_salvar.isCompleted) _salvar.complete();
+  }
+
+  @override
+  Future<ContatoEmergencia?> obterContato() => _obter.future;
+
+  @override
+  Future<void> removerContato() async {}
+
+  @override
+  Future<void> salvarContato(ContatoEmergencia contato) => _salvar.future;
+}
+
+class _ProvedorMqttComAtraso extends _ProvedorMqttControlado {
+  final Completer<void> _desconectar = Completer<void>();
+  int descartes = 0;
+
+  void completarDesconectar() {
+    if (!_desconectar.isCompleted) _desconectar.complete();
+  }
+
+  @override
+  Future<void> desconectar() => _desconectar.future;
+
+  @override
+  void descartar() {
+    descartes++;
+    super.descartar();
+  }
 }
 
 class _ProvedorMqttControlado extends ProvedorDeTelemetriaMqtt {

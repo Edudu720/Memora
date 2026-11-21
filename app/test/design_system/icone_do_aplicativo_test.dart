@@ -154,6 +154,19 @@ void main() {
         }
       },
     );
+
+    test('todos os 7 SVGs compartilhados estão registrados em LICENCAS.md', () {
+      final File licencas = File('assets/ilustracoes/LICENCAS.md');
+      expect(licencas.existsSync(), isTrue);
+      final String conteudo = licencas.readAsStringSync();
+      for (final String chave in chavesSvgOficiais) {
+        expect(
+          conteudo,
+          contains('$chave.svg'),
+          reason: '$chave.svg precisa constar em assets/ilustracoes/LICENCAS.md',
+        );
+      }
+    });
   });
 
   group('Renderização do IconeDoAplicativo nos 3 temas (T029)', () {
@@ -176,7 +189,9 @@ void main() {
           );
           await t.pumpAndSettle();
 
-          expect(find.byType(SvgPicture), findsOneWidget);
+          final Finder svgFinder = find.byType(SvgPicture);
+          expect(svgFinder, findsOneWidget);
+          expect(t.widget<SvgPicture>(svgFinder).excludeFromSemantics, isTrue);
           expect(t.takeException(), isNull);
         });
       }

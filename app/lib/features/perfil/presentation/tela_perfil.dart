@@ -143,7 +143,12 @@ class _TelaPerfilState extends State<TelaPerfil> {
     }
 
     final String contaAlvo = id;
-    final String? bruta = await prog.aplicativoMaisAprendido(contaAlvo);
+    String? bruta;
+    try {
+      bruta = await prog.aplicativoMaisAprendido(contaAlvo);
+    } catch (_) {
+      bruta = null;
+    }
     if (!mounted || versao != _versaoCarga || widget.idDaConta != contaAlvo) {
       return;
     }

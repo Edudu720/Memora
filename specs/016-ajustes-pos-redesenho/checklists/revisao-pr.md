@@ -2,7 +2,7 @@
 
 **Purpose**: Validar completude, clareza, consistência, mensurabilidade e cobertura de segurança, acessibilidade (`WCAG 2.2` / `memora-ux`) e integração entre equipe nos requisitos da feature antes de gerar tarefas e abrir PR para a `develop`.  
 **Created**: 2026-11-19  
-**Feature**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md) · [plan.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/plan.md)
+**Feature**: [spec.md](../spec.md) · [plan.md](../plan.md)
 
 **Ownership & Lifecycle Note**: Este checklist é um artefato de revisão da qualidade dos **requisitos** (não é lista de testes manuais nem de execução de código), pertencente ao autor e aos revisores da PR (`@Edudu720` / `@Henrique-Sandrini`). O marcador `[x]` indica que o critério de qualidade dos requisitos foi avaliado e aprovado pelo revisor — nunca que o código está pronto. O comando `/speckit-implement` apenas consulta este estado sem alterar marcações.
 
@@ -54,11 +54,11 @@
 - Marque os itens concluídos pelos revisores substituindo `[ ]` por `[x]`.
 - Registre eventuais achados, lacunas ou ajustes diretamente abaixo do item correspondente antes de iniciar `/speckit-implement`.
 - Itens enumerados sequencialmente (`CHK001`–`CHK024`) para facilitar referências em comentários da PR na `develop`.
-- Artefatos relacionados: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md) · [plan.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/plan.md) · [research.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/research.md) · [data-model.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/data-model.md) · [contracts/icones-e-guias.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/contracts/icones-e-guias.md) · [contracts/ajuda-e-perfil.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/contracts/ajuda-e-perfil.md) · [checklists/requirements.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/checklists/requirements.md)
+- Artefatos relacionados: [spec.md](../spec.md) · [plan.md](../plan.md) · [research.md](../research.md) · [data-model.md](../data-model.md) · [contracts/icones-e-guias.md](../contracts/icones-e-guias.md) · [contracts/ajuda-e-perfil.md](../contracts/ajuda-e-perfil.md) · [checklists/requirements.md](requirements.md)
 
 ### Registro da revisão (2026-11-19)
 
-Todos os **24 critérios (`CHK001`–`CHK024`)** foram auditados como pertinentes ao projeto e marcados após quatro ajustes redacionais aplicados diretamente em [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md) e [ajuda-e-perfil.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/contracts/ajuda-e-perfil.md):
+Todos os **24 critérios (`CHK001`–`CHK024`)** foram auditados como pertinentes ao projeto e marcados após quatro ajustes redacionais aplicados diretamente em [spec.md](../spec.md) e [ajuda-e-perfil.md](../contracts/ajuda-e-perfil.md):
 
 1. **`CHK002` (`FR-019`)**: explicitada na `spec.md` a exibição visível do endereço oficial de destino dentro do diálogo modal de confirmação na Ajuda antes de sair do aplicativo.
 2. **`CHK003` (`US1` Cenário 3, `FR-002`, `SC-001`, `Edge Cases`)**: eliminada a ambiguidade *"ou informar claramente o motivo"* com o dispositivo físico desconectado — ficou determinístico que o ensaio de queda inicia sempre localmente em menos de 1 s de forma cancelável e com proteção contra duplo toque.

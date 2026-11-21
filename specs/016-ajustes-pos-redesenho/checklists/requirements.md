@@ -2,7 +2,7 @@
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-11-19  
-**Feature**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md)
+**Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 

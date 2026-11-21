@@ -745,19 +745,17 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
 
   /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
   void _abrirDispositivoCuidado() {
-    final ControladorDispositivoCuidado controlador =
-        ControladorDispositivoCuidado(
-          repositorioContato: _contatoEmergencia,
-        );
-    final Route<void> rota = _rota(
-      builder: (BuildContext contexto) => TelaDispositivoCuidado(
-        controlador: controlador,
-        aoVoltar: () => Navigator.of(contexto).pop(),
-        nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => _DonoDoDispositivoCuidado(
+          criar: () => ControladorDispositivoCuidado(
+            repositorioContato: _contatoEmergencia,
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+          nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
+        ),
       ),
     );
-    rota.popped.whenComplete(controlador.dispose);
-    _empilhar(rota);
   }
 
   /// Abre o diálogo de confirmação do Botão SOS Persistente (Feature 014)
@@ -1322,6 +1320,43 @@ class _DonoDosAtalhosAplicativosState extends State<_DonoDosAtalhosAplicativos> 
     return TelaAtalhosAplicativos(
       controlador: _controlador,
       aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorDispositivoCuidado] e o descarta quando a tela sai
+/// (inclusive por logout/expiração forçada de sessão e após a animação).
+class _DonoDoDispositivoCuidado extends StatefulWidget {
+  final ControladorDispositivoCuidado Function() criar;
+  final VoidCallback aoVoltar;
+  final String nomePessoaIdosa;
+
+  const _DonoDoDispositivoCuidado({
+    required this.criar,
+    required this.aoVoltar,
+    required this.nomePessoaIdosa,
+  });
+
+  @override
+  State<_DonoDoDispositivoCuidado> createState() =>
+      _DonoDoDispositivoCuidadoState();
+}
+
+class _DonoDoDispositivoCuidadoState extends State<_DonoDoDispositivoCuidado> {
+  late final ControladorDispositivoCuidado _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaDispositivoCuidado(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+      nomePessoaIdosa: widget.nomePessoaIdosa,
     );
   }
 }

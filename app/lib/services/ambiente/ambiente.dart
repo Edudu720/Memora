@@ -85,6 +85,13 @@ class Ambiente {
     final Uri? uri = Uri.tryParse(texto);
     if (uri == null) return null;
     if (uri.scheme != 'https') return null;
+    final int inicioAutoridade = texto.indexOf('://');
+    if (inicioAutoridade == -1) return null;
+    final String autoridadeBruta = texto
+        .substring(inicioAutoridade + 3)
+        .split(RegExp(r'[/?#]'))
+        .first;
+    if (autoridadeBruta.contains('@')) return null;
     if (uri.host.isEmpty) return null;
     if (uri.userInfo.isNotEmpty) return null;
     return texto;

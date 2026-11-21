@@ -1,6 +1,6 @@
 # Implementation Plan: Ajustes Pós-Redesenho — Issue #106 (@Du3101)
 
-**Branch**: `feature/016-ajustes-pos-redesenho` | **Date**: 2026-11-19 | **Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md)
+**Branch**: `feature/016-ajustes-pos-redesenho` | **Date**: 2026-11-19 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `/specs/016-ajustes-pos-redesenho/spec.md` (esclarecida em 2026-11-19 com `Q1: A, Q2: A, Q3: A` e alinhada na [Issue #106](https://github.com/Edudu720/Memora/issues/106#issuecomment-7021833862)).
 
@@ -83,6 +83,7 @@ app/
 │   │   ├── poupatempo.svg
 │   │   ├── youtube.svg
 │   │   └── google-fotos.svg
+│   ├── ilustracoes/LICENCAS.md                          # Registro dos 7 novos SVGs de aplicativos (Item 6)
 │   └── guias/
 │       ├── CAPTURAS.md                                  # Registro atualizado dos 7 guias + teto 12 MB
 │       ├── meu-inss/                                    # passo_1..19.webp
@@ -95,18 +96,18 @@ app/
 ├── lib/
 │   ├── main.dart                                        # Passar abridorSiteTutorial para FluxoAutenticacao
 │   ├── design_system/componentes/ilustracao/
-│   │   └── icone_do_aplicativo.dart                     # Carregar SVGs de assets/icones_apps/ via SvgPicture.asset
+│   │   └── icone_do_aplicativo.dart                     # Carregar SVGs de assets/icones_apps/ via SvgPicture.asset (excludeFromSemantics: true)
 │   ├── l10n/
 │   │   ├── textos_ajuda.dart                            # Textos do botão, confirmação modal e erro do site tutorial
 │   │   ├── textos_guias.dart                            # Textos, descrições e seções dos 7 guias reais
 │   │   └── textos_perfil.dart                           # Remover rótulos de retratos aposentados; textos dos cartões
 │   ├── services/ambiente/
-│   │   ├── ambiente.dart                                # Campo urlSiteTutorial via MEMORA_URL_SITE_TUTORIAL
+│   │   ├── ambiente.dart                                # Campo urlSiteTutorial via MEMORA_URL_SITE_TUTORIAL + rejeitar @ na autoridade
 │   │   └── composicao.dart                              # Instanciar AbridorDeSiteTutorial.doAmbiente(ambiente)
 │   └── features/
 │       ├── ajuda/
 │       │   ├── data/abridor_site_tutorial.dart          # [NOVO] Interface + UrlLauncher + Simulado
-│       │   └── presentation/tela_ajuda.dart             # _CartaoSiteTutorial + modal rolável com aviso https://
+│       │   └── presentation/tela_ajuda.dart             # _CartaoSiteTutorial + modal rolável com aviso https:// + Dartdoc atualizado
 │       ├── aprendizado/
 │       │   ├── domain/guia.dart                         # Constantes CapturaDoGuia para 66 capturas dos 7 guias
 │       │   └── data/guias/
@@ -118,18 +119,18 @@ app/
 │       │       ├── youtube.dart                         # 7 telas reais medidas
 │       │       └── google_fotos.dart                    # 4 telas reais medidas
 │       ├── autenticacao/presentation/
-│       │   └── fluxo_autenticacao.dart                  # Injetar abridorSiteTutorial em TelaAjuda
+│       │   └── fluxo_autenticacao.dart                  # Injetar abridorSiteTutorial; _DonoDoDispositivoCuidado proprietário do controlador
 │       ├── cuidado/
 │       │   ├── domain/entidades/enums_cuidado.dart      # Remover comentário Wokwi
 │       │   ├── domain/repositorios/provedor_telemetria.dart # Remover comentário Wokwi
 │       │   └── presentation/
-│       │       ├── controladores/controlador_dispositivo_cuidado.dart # Corrigir simularQuedaTeste() + guarda
-│       │       └── telas/tela_dispositivo_cuidado.dart  # Trava _verificacaoQuedaAberta anti-duplicação
+│       │       ├── controladores/controlador_dispositivo_cuidado.dart # Corrigir simularQuedaTeste() + guarda _descartado pós-await
+│       │       └── telas/tela_dispositivo_cuidado.dart  # Trava _verificacaoQuedaAberta + didUpdateWidget
 │       └── perfil/
 │           ├── domain/retrato_de_perfil.dart            # Remover casalIdoso e pessoaComCelular de AvatarIlustrado
 │           └── presentation/
 │               ├── widgets/retrato_do_perfil.dart       # DesenhoAvatarIlustrado só para 4 avatares da Memora
-│               └── tela_perfil.dart                     # Reorganização em cartões, O(1), slot ultimoModuloConcluido
+│               └── tela_perfil.dart                     # Cartões, O(1), slot ultimoModuloConcluido, try/catch em _carregarMaisAprendido
 └── test/
     ├── design_system/icone_do_aplicativo_test.dart      # [NOVO/ATUALIZADO] Carregamento dos 7 SVGs + fallback
     └── features/

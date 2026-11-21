@@ -52,6 +52,12 @@ void main() {
         Ambiente.enderecoOficial('https://play.google.com@golpe.example/x'),
         isNull,
       );
+      expect(Ambiente.enderecoOficial('https://@golpe.example/x'), isNull);
+      expect(Ambiente.enderecoOficial('HTTPS://@golpe.example/x'), isNull);
+      expect(
+        Ambiente.enderecoOficial('https://memora.example/@ajuda'),
+        'https://memora.example/@ajuda',
+      );
     });
 
     test('espaço ou quebra de linha no meio não serve', () {

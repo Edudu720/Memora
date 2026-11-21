@@ -1,7 +1,7 @@
 # Pesquisa Técnica e Decisões Arquiteturais: Ajustes Pós-Redesenho (`016`)
 
 **Feature**: `016-ajustes-pos-redesenho` | **Branch**: `feature/016-ajustes-pos-redesenho` | **Data**: 2026-11-19  
-**Spec**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md)
+**Spec**: [spec.md](spec.md)
 
 ---
 

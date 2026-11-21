@@ -1,7 +1,7 @@
 # Modelo de Dados e Estado: Ajustes Pós-Redesenho (`016`)
 
 **Feature**: `016-ajustes-pos-redesenho` | **Branch**: `feature/016-ajustes-pos-redesenho` | **Data**: 2026-11-19  
-**Referências**: [spec.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/spec.md) · [research.md](file:///c:/Users/Eduardo/Memora/specs/016-ajustes-pos-redesenho/research.md)
+**Referências**: [spec.md](spec.md) · [research.md](research.md)
 
 ---
 

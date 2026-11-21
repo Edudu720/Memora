@@ -22,11 +22,14 @@ import '../domain/assunto_de_ajuda.dart';
 /// estados). O único desvio possível é a folha de compartilhar que não abre, e
 /// esse mora na [TelaAssunto].
 ///
-/// ## Nenhum link para fora
+/// ## Controle estrito de links externos
 ///
-/// O wireframe terminava com "entre no site ajudamemora.com.br". O domínio não
-/// é nosso, e link para domínio que não controlamos é o link que um golpista
-/// compra (R12, FR-037). A pessoa que não achou resposta aqui tem a conversa.
+/// O wireframe terminava com "entre no site ajudamemora.com.br". Domínios não
+/// controlados continuam proibidos (R12, FR-037); a única exceção é o site
+/// oficial de tutoriais em `https://` fixado em tempo de compilação
+/// ([abridorSiteTutorial]), mantido oculto enquanto não configurado e sempre
+/// protegido por confirmação modal explícita antes de deixar o aplicativo.
+/// A pessoa que não achou resposta aqui tem a conversa.
 class TelaAjuda extends StatelessWidget {
   /// Chave de um assunto, para os testes.
   static Key chaveDoAssunto(IdDoAssunto id) => Key('ajuda.assunto.${id.name}');
