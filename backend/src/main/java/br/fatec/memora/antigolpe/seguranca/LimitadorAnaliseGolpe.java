@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,11 +25,13 @@ public class LimitadorAnaliseGolpe {
 
     static final Duration JANELA_HORA = Duration.ofHours(1);
     static final Duration JANELA_DIA = Duration.ofHours(24);
+    static final Duration INTERVALO_EXPURGO = Duration.ofMinutes(5);
 
     private final Clock relogio;
     private final int maximoPorHora;
     private final int maximoPorDia;
     private final Map<UUID, Deque<Instant>> porConta = new ConcurrentHashMap<>();
+    private final AtomicReference<Instant> ultimoExpurgo = new AtomicReference<>(Instant.EPOCH);
 
     @Autowired
     public LimitadorAnaliseGolpe(
@@ -76,7 +79,7 @@ public class LimitadorAnaliseGolpe {
         Objects.requireNonNull(pessoaId, "pessoaId");
         Objects.requireNonNull(agora, "agora");
 
-        expurgarContasInativas(agora);
+        expurgarContasInativasSeNecessario(agora);
 
         Decisao[] decisao = new Decisao[1];
         porConta.compute(
@@ -98,6 +101,14 @@ public class LimitadorAnaliseGolpe {
 
     int contasRastreadas() {
         return porConta.size();
+    }
+
+    private void expurgarContasInativasSeNecessario(Instant agora) {
+        Instant anterior = ultimoExpurgo.get();
+        if (!agora.isBefore(anterior.plus(INTERVALO_EXPURGO))
+                && ultimoExpurgo.compareAndSet(anterior, agora)) {
+            expurgarContasInativas(agora);
+        }
     }
 
     private void expurgarContasInativas(Instant agora) {

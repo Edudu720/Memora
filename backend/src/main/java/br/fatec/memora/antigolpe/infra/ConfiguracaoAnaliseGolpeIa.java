@@ -45,10 +45,16 @@ public class ConfiguracaoAnaliseGolpeIa {
                         Duration.ofSeconds(conexao),
                         Duration.ofSeconds(leituraEfetiva));
 
+        String modeloLimpo = modelo == null ? "" : modelo.strip();
+        String reservaLimpa = modeloReserva == null ? "" : modeloReserva.strip();
+        String reservaLog =
+                reservaLimpa.isEmpty() || reservaLimpa.equals(modeloLimpo)
+                        ? "nenhum"
+                        : reservaLimpa;
         LOG.info(
                 "Analise antigolpe configurada com provedor gemini, modelo {} (reserva: {}).",
-                modelo,
-                modeloReserva);
+                modeloLimpo,
+                reservaLog);
         return cliente;
     }
 }

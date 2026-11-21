@@ -302,8 +302,8 @@ class ClienteAnaliseGolpeGeminiTest {
     }
 
     @Test
-    @DisplayName("faz 1 retentativa no modelo primário e cai para o modelo reserva em falha transitória (429/503)")
-    void retentaPrimarioECaiParaModeloReservaEmFalhaTransitoria() throws Exception {
+    @DisplayName("faz 1 retentativa no modelo primário em 503 e cai para o modelo reserva; em 429 pula retentativa no primário")
+    void retentaPrimarioEm503EPulaRetentativaEm429CaindoParaModeloReserva() throws Exception {
         String respostaInterna =
                 """
                 {
@@ -349,8 +349,61 @@ class ClienteAnaliseGolpeGeminiTest {
                     .isEqualTo("/v1beta/models/" + MODELO + ":generateContent");
             assertThat(capturadas.get(2).caminhoEConsulta())
                     .isEqualTo("/v1beta/models/" + MODELO_RESERVA + ":generateContent");
+
+            // Em HTTP 429 (cota esgotada), NÃO retenta o modelo primário: vai direto para o modelo reserva.
+            capturadas.clear();
+            roteiro =
+                    troca -> {
+                        if (capturadas.size() == 1) {
+                            responderErroGoogle(troca, 429);
+                        } else {
+                            responderJson(troca, 200, envelopeSucesso);
+                        }
+                    };
+
+            ResultadoAnaliseGolpe resultado429 =
+                    clienteComReserva.analisar("Veja https://bit.ly/abc");
+
+            assertThat(resultado429.risco()).isEqualTo(NivelRiscoGolpe.MEDIO);
+            assertThat(capturadas).hasSize(2);
+            assertThat(capturadas.get(0).caminhoEConsulta())
+                    .isEqualTo("/v1beta/models/" + MODELO + ":generateContent");
+            assertThat(capturadas.get(1).caminhoEConsulta())
+                    .isEqualTo("/v1beta/models/" + MODELO_RESERVA + ":generateContent");
         } finally {
             clienteComReserva.close();
+        }
+    }
+
+    @Test
+    @DisplayName("respeita orçamento total de leitura (wall-clock) entre retentativa e modelo reserva")
+    void respeitaOrcamentoTotalDeLeituraEntreTentativas() {
+        ClienteAnaliseGolpeGemini clienteOrcamento =
+                new ClienteAnaliseGolpeGemini(
+                        CHAVE,
+                        MODELO,
+                        MODELO_RESERVA,
+                        "http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1beta",
+                        Duration.ofSeconds(1),
+                        Duration.ofMillis(300),
+                        Duration.ofMillis(10));
+        try {
+            roteiro =
+                    troca -> {
+                        Thread.sleep(500);
+                        responderJson(troca, 200, "{}");
+                    };
+            long inicioNanos = System.nanoTime();
+            assertThatThrownBy(() -> clienteOrcamento.analisar("Teste orcamento total"))
+                    .isInstanceOf(AssistenteIndisponivel.class)
+                    .satisfies(
+                            ex ->
+                                    assertThat(((AssistenteIndisponivel) ex).motivo())
+                                            .isEqualTo(Motivo.PRAZO));
+            long decorridoMs = Duration.ofNanos(System.nanoTime() - inicioNanos).toMillis();
+            assertThat(decorridoMs).isLessThan(700L);
+        } finally {
+            clienteOrcamento.close();
         }
     }
 

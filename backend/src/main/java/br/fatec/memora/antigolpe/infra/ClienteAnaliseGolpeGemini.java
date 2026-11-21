@@ -179,12 +179,16 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
 
     @Override
     public ResultadoAnaliseGolpe analisar(String conteudo) {
+        long inicioNanos = System.nanoTime();
         String corpoRequisicao = montarCorpo(conteudo);
         AssistenteIndisponivel ultimaFalha = null;
 
         for (int tentativa = 1; tentativa <= 2; tentativa++) {
+            int divisorOrcamento =
+                    enderecoReserva != null ? (3 - tentativa) + 1 : (2 - tentativa) + 1;
+            Duration prazoTentativa = prazoParaTentativa(inicioNanos, divisorOrcamento);
             try {
-                return executarRequisicao(endereco, corpoRequisicao);
+                return executarRequisicao(endereco, corpoRequisicao, prazoTentativa);
             } catch (AssistenteIndisponivel falha) {
                 ultimaFalha = falha;
                 if (!ehFalhaTransitoria(falha.motivo())) {
@@ -193,12 +197,27 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
                 if (Thread.currentThread().isInterrupted()) {
                     throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
                 }
+                if (falha.motivo() == Motivo.COTA_ESGOTADA) {
+                    if (enderecoReserva != null) {
+                        LOG.warn(
+                                "Modelo principal {} atingiu cota ({}); acionando reserva {}.",
+                                modelo,
+                                falha.motivo(),
+                                modeloReserva);
+                    } else {
+                        LOG.warn(
+                                "Modelo principal {} atingiu cota ({}); sem modelo reserva.",
+                                modelo,
+                                falha.motivo());
+                    }
+                    break;
+                }
                 if (tentativa == 1) {
                     LOG.warn(
                             "Tentativa 1/2 na analise antigolpe com modelo {} falhou ({}); repetindo.",
                             modelo,
                             falha.motivo());
-                    aguardarRetentativa();
+                    aguardarRetentativa(inicioNanos);
                 }
             }
         }
@@ -207,24 +226,43 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
             if (Thread.currentThread().isInterrupted()) {
                 throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
             }
-            LOG.warn(
-                    "Modelo principal {} falhou apos 2 tentativas ({}); acionando reserva {}.",
-                    modelo,
-                    ultimaFalha.motivo(),
-                    modeloReserva);
-            return executarRequisicao(enderecoReserva, corpoRequisicao);
+            if (ultimaFalha != null && ultimaFalha.motivo() != Motivo.COTA_ESGOTADA) {
+                LOG.warn(
+                        "Modelo principal {} falhou apos 2 tentativas ({}); acionando reserva {}.",
+                        modelo,
+                        ultimaFalha.motivo(),
+                        modeloReserva);
+            }
+            Duration prazoReserva = prazoParaTentativa(inicioNanos, 1);
+            return executarRequisicao(enderecoReserva, corpoRequisicao, prazoReserva);
         }
 
         throw ultimaFalha;
     }
 
-    private ResultadoAnaliseGolpe executarRequisicao(URI destino, String corpoRequisicao) {
+    private Duration prazoParaTentativa(long inicioNanos, int divisor) {
+        Duration restante = tempoRestante(inicioNanos);
+        long ms = Math.max(1L, restante.toMillis() / Math.max(1, divisor));
+        return Duration.ofMillis(ms);
+    }
+
+    private Duration tempoRestante(long inicioNanos) {
+        Duration decorrido = Duration.ofNanos(System.nanoTime() - inicioNanos);
+        Duration restante = leitura.minus(decorrido);
+        if (restante.toMillis() <= 0L) {
+            throw new AssistenteIndisponivel(Motivo.PRAZO, "tempo esgotado");
+        }
+        return restante;
+    }
+
+    private ResultadoAnaliseGolpe executarRequisicao(
+            URI destino, String corpoRequisicao, Duration prazoRequisicao) {
         if (Thread.currentThread().isInterrupted()) {
             throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
         }
         HttpRequest requisicao =
                 HttpRequest.newBuilder(destino)
-                        .timeout(leitura)
+                        .timeout(prazoRequisicao)
                         .header("Content-Type", "application/json")
                         .header(CABECALHO_DA_CHAVE, chave)
                         .POST(
@@ -267,15 +305,20 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
                 || motivo == Motivo.REDE;
     }
 
-    private void aguardarRetentativa() {
+    private void aguardarRetentativa(long inicioNanos) {
         if (Thread.currentThread().isInterrupted()) {
             throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
         }
         if (esperaEntreTentativas.isZero()) {
             return;
         }
+        Duration restante = tempoRestante(inicioNanos);
+        long pausaMs =
+                Math.min(
+                        esperaEntreTentativas.toMillis(),
+                        Math.max(1L, restante.toMillis() / 4));
         try {
-            Thread.sleep(esperaEntreTentativas.toMillis());
+            Thread.sleep(pausaMs);
         } catch (InterruptedException interrompido) {
             Thread.currentThread().interrupt();
             throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");

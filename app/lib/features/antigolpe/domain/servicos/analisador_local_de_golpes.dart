@@ -127,6 +127,7 @@ class AnalisadorLocalDeGolpes {
     'cyou',
     'ai',
     'gd',
+    'gy',
     'in',
     'id',
     'cc',
@@ -141,6 +142,7 @@ class AnalisadorLocalDeGolpes {
     'inss.gov.br',
     'meu.inss.gov.br',
     'receita.fazenda.gov.br',
+    'fazenda.gov.br',
     'bcb.gov.br',
     'valoresareceber.bcb.gov.br',
     'caixa.gov.br',
@@ -148,53 +150,157 @@ class AnalisadorLocalDeGolpes {
     'bb.com.br',
     'bancodobrasil.com.br',
     'itau.com.br',
+    'itau.com',
     'bradesco.com.br',
     'banco.bradesco',
+    'bradesco.com',
     'santander.com.br',
+    'santander.com',
     'nubank.com.br',
     'nu.com.br',
     'bancointer.com.br',
     'inter.co',
     'correios.com.br',
     'serasa.com.br',
+    'serasaexperian.com.br',
     'mercadolivre.com.br',
+    'mercadolibre.com',
     'mercadopago.com.br',
+    'mercadopago.com',
     'magazineluiza.com.br',
     'magalu.com',
+    'amazon.com.br',
+    'amazon.com',
+    'vivo.com.br',
+    'claro.com.br',
+    'tim.com.br',
+    'netflix.com',
+    'netflix.com.br',
+  };
+
+  /// Domínios legítimos do próprio WhatsApp (canal de mensagens, não isenta
+  /// personificação de bancos ou órgãos públicos nem alertas de urgência).
+  static const Set<String> _dominiosWhatsapp = <String>{
     'whatsapp.com',
+    'whatsapp.net',
     'wa.me',
   };
 
-  /// Marcas e órgãos públicos que, quando citados junto com link não oficial,
-  /// indicam possível tentativa de falsificação.
-  ///
-  /// Nota: `'whatsapp'` não entra aqui como menção textual genérica porque é o
-  /// canal onde a pessoa costuma receber links legítimos; falsificações do
-  /// WhatsApp no próprio endereço são detectadas por `_impostorNoHost`.
-  static const List<String> _marcasVigiadas = <String>[
-    'banco do brasil',
-    'bb',
-    'itau',
-    'bradesco',
-    'santander',
-    'caixa',
-    'caixa economica',
-    'nubank',
-    'banco inter',
-    'gov.br',
-    'govbr',
-    'receita federal',
-    'imposto de renda',
-    'malha fina',
-    'inss',
-    'meu inss',
-    'correios',
-    'serasa',
-    'banco central',
-    'valores a receber',
-    'mercado livre',
-    'mercado pago',
-    'magalu',
+  /// Regras de marcas e órgãos públicos vigiados com seus respectivos domínios
+  /// oficiais para validação específica por marca citada.
+  static const List<_RegraMarcaLocal> _regrasMarcas = <_RegraMarcaLocal>[
+    _RegraMarcaLocal(
+      termos: <String>['banco do brasil', 'bancodobrasil', 'bb'],
+      dominiosOficiais: <String>['bb.com.br', 'bancodobrasil.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['itau'],
+      dominiosOficiais: <String>['itau.com.br', 'itau.com'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['bradesco'],
+      dominiosOficiais: <String>[
+        'bradesco.com.br',
+        'banco.bradesco',
+        'bradesco.com',
+      ],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['santander'],
+      dominiosOficiais: <String>['santander.com.br', 'santander.com'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>[
+        'caixa',
+        'caixa economica',
+        'caixa tem',
+        'loterias caixa',
+      ],
+      dominiosOficiais: <String>['caixa.gov.br', 'caixa.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['nubank', 'nu bank', 'roxinho'],
+      dominiosOficiais: <String>['nubank.com.br', 'nu.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['banco inter', 'conta inter'],
+      dominiosOficiais: <String>['bancointer.com.br', 'inter.co'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['gov.br', 'govbr', 'governo federal', 'meu gov'],
+      dominiosOficiais: <String>['gov.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>[
+        'receita federal',
+        'receita fazenda',
+        'imposto de renda',
+        'malha fina',
+        'cpf irregular',
+      ],
+      dominiosOficiais: <String>[
+        'gov.br',
+        'fazenda.gov.br',
+        'receita.fazenda.gov.br',
+      ],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['inss', 'meu inss'],
+      dominiosOficiais: <String>['gov.br', 'inss.gov.br', 'meu.inss.gov.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['banco central', 'valores a receber'],
+      dominiosOficiais: <String>[
+        'bcb.gov.br',
+        'valoresareceber.bcb.gov.br',
+        'gov.br',
+      ],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['correios'],
+      dominiosOficiais: <String>['correios.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['serasa'],
+      dominiosOficiais: <String>['serasa.com.br', 'serasaexperian.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['mercado livre', 'mercadolivre'],
+      dominiosOficiais: <String>['mercadolivre.com.br', 'mercadolibre.com'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['mercado pago', 'mercadopago'],
+      dominiosOficiais: <String>['mercadopago.com.br', 'mercadopago.com'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['magalu', 'magazine luiza'],
+      dominiosOficiais: <String>['magazineluiza.com.br', 'magalu.com'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['amazon'],
+      dominiosOficiais: <String>['amazon.com.br', 'amazon.com'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>[
+        'operadora vivo',
+        'meu vivo',
+        'fatura vivo',
+        'vivo fibra',
+      ],
+      dominiosOficiais: <String>['vivo.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['operadora claro', 'minha claro', 'fatura claro'],
+      dominiosOficiais: <String>['claro.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['operadora tim', 'meu tim', 'fatura tim'],
+      dominiosOficiais: <String>['tim.com.br'],
+    ),
+    _RegraMarcaLocal(
+      termos: <String>['netflix'],
+      dominiosOficiais: <String>['netflix.com', 'netflix.com.br'],
+    ),
   ];
 
   static const List<String> _impostoresDeHost = <String>[
@@ -322,11 +428,16 @@ class AnalisadorLocalDeGolpes {
     'anydesk',
     'teamviewer',
     'rustdesk',
-    'supremo',
     'quicksupport',
     '.apk',
     'acesso remoto',
   ];
+
+  static final RegExp _padraoSupremoRemoto = RegExp(
+    r'\bsupremo\s+(?:remote|control|mobile|assist)\b'
+    r'|\b(?:instal[ae]\w*|baix[ae]\w*|app|aplicativo|acesso\s+remoto|suporte\s+remoto|suporte)\b[^.!?\n]{0,40}\bsupremo\b'
+    r'|\bsupremo\b(?!\s+(?:tribunal|federal|corte))[^.!?\n]{0,40}\b(?:instal[ae]\w*|baix[ae]\w*|app|aplicativo|acesso\s+remoto|suporte\s+remoto|celular)\b',
+  );
 
   static const List<String> _termosTrocaDeNumero = <String>[
     'troquei de numero',
@@ -446,18 +557,18 @@ class AnalisadorLocalDeGolpes {
     }
 
     final bool citaMarca = _citaMarcaVigiada(normalizado);
-    if (temImpostorNoHost) {
+    final bool temMarcaComLinkFalso = _detectarMarcaComLinkIncompativel(
+      normalizado,
+      urls,
+    );
+    if (temImpostorNoHost || temMarcaComLinkFalso) {
       pontuacao += 4;
-      sinais.add(TextosAntigolpe.sinalMarcaFalsa);
-    } else if (citaMarca && temLinkNaoOficial) {
-      pontuacao += 3;
       sinais.add(TextosAntigolpe.sinalMarcaFalsa);
     }
 
-    final bool temAcessoRemotoOuApk = _contemQualquer(
-      normalizado,
-      _termosAcessoRemotoOuApk,
-    );
+    final bool temAcessoRemotoOuApk =
+        _contemQualquer(normalizado, _termosAcessoRemotoOuApk) ||
+        _padraoSupremoRemoto.hasMatch(normalizado);
     if (temAcessoRemotoOuApk) {
       pontuacao += 4;
       sinais.add(TextosAntigolpe.sinalAcessoRemotoOuApk);
@@ -586,26 +697,12 @@ class AnalisadorLocalDeGolpes {
         .replaceAll(RegExp(r'\bhxxp(?=://)', caseSensitive: false), 'http');
   }
 
+  static final RegExp _padraoEmail = RegExp(
+    r'(?<![:/\\a-zA-Z0-9._%+-])[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,15}(?![/\\a-zA-Z0-9_%+-]|\.[a-zA-Z0-9])',
+  );
+
   static String _removerEmailsSemEsquema(String texto) {
-    return texto.replaceAllMapped(RegExp(r'\S+'), (Match m) {
-      final String token = m.group(0)!;
-      if (RegExp(
-        r'^(?:https?://|www\.)',
-        caseSensitive: false,
-      ).hasMatch(token)) {
-        return token;
-      }
-      final String limpo = token.replaceAll(
-        RegExp(r'''^[<("'\[]+|[.,;:!?>)"'\]]+$'''),
-        '',
-      );
-      if (RegExp(
-        r'^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$',
-      ).hasMatch(limpo)) {
-        return '';
-      }
-      return token;
-    });
+    return texto.replaceAll(_padraoEmail, ' ');
   }
 
   static String _normalizar(String texto) {
@@ -626,7 +723,7 @@ class AnalisadorLocalDeGolpes {
 
   static List<_UrlExtraida> _extrairUrls(String texto) {
     final RegExp regex = RegExp(
-      r'''(?:https?://|www\.)[^\s<>"')]+|(?<![a-zA-Z0-9._%+-@])(?:[a-zA-Z0-9\u0080-\uFFFF-]+\.)+[a-zA-Z\u0080-\uFFFF]{2,}(?:/[^\s<>"')]*)?''',
+      r'''(?:https?://|www\.)[^\s<>"')]+|(?<![a-zA-Z0-9\u0080-\uFFFF._%+@-])(?:[a-zA-Z0-9._%+-]+@)?(?:[a-zA-Z0-9\u0100-\uFFFF-]+\.)+[a-zA-Z\u0100-\uFFFF]{2,}(?:/[^\s<>"')]*)?''',
       caseSensitive: false,
     );
 
@@ -698,12 +795,25 @@ class AnalisadorLocalDeGolpes {
   }
 
   static bool _ehDominioOficial(String host) {
-    for (final String oficial in _dominiosOficiais) {
-      if (host == oficial || host.endsWith('.$oficial')) {
+    return _pertenceAoConjunto(host, _dominiosOficiais);
+  }
+
+  static bool _pertenceAoConjunto(String host, Iterable<String> dominios) {
+    for (final String dominio in dominios) {
+      if (host == dominio || host.endsWith('.$dominio')) {
         return true;
       }
     }
     return false;
+  }
+
+  static bool _ehUrlLimpaSemArmadilha(_UrlExtraida url) {
+    final bool temNaoAscii = RegExp(r'[^\x00-\x7F]').hasMatch(url.host);
+    return !temNaoAscii &&
+        !url.temUserinfo &&
+        !url.temBarraInvertida &&
+        !_ehIp(url.host) &&
+        !url.host.contains('xn--');
   }
 
   static bool _ehEncurtador(String host) {
@@ -737,12 +847,15 @@ class AnalisadorLocalDeGolpes {
       'serasa',
       'inss',
       'govbr',
-      'whatsapp',
       'mercadopago',
       'mercadolivre',
     ];
     for (final String marca in marcasNoHost) {
       if (norm.contains(marca)) return true;
+    }
+    if (norm.contains('whatsapp') &&
+        !_pertenceAoConjunto(host, _dominiosWhatsapp)) {
+      return true;
     }
     if (!norm.contains('ao-vivo') &&
         RegExp(
@@ -754,7 +867,43 @@ class AnalisadorLocalDeGolpes {
   }
 
   static bool _citaMarcaVigiada(String normalizado) {
-    return _contemQualquer(normalizado, _marcasVigiadas);
+    for (final _RegraMarcaLocal regra in _regrasMarcas) {
+      if (_contemQualquer(normalizado, regra.termos)) return true;
+    }
+    return false;
+  }
+
+  static bool _detectarMarcaComLinkIncompativel(
+    String normalizado,
+    List<_UrlExtraida> urls,
+  ) {
+    if (urls.isEmpty) return false;
+    final List<_RegraMarcaLocal> citadas = <_RegraMarcaLocal>[
+      for (final _RegraMarcaLocal regra in _regrasMarcas)
+        if (_contemQualquer(normalizado, regra.termos)) regra,
+    ];
+    if (citadas.isEmpty) return false;
+
+    final Set<String> dominiosPermitidos = <String>{
+      for (final _RegraMarcaLocal regra in citadas) ...regra.dominiosOficiais,
+    };
+
+    for (final _RegraMarcaLocal regra in citadas) {
+      final bool temUrlDaMarca = urls.any(
+        (_UrlExtraida u) =>
+            _ehUrlLimpaSemArmadilha(u) &&
+            _pertenceAoConjunto(u.host, regra.dominiosOficiais),
+      );
+      if (!temUrlDaMarca) return true;
+    }
+
+    for (final _UrlExtraida url in urls) {
+      if (!_ehUrlLimpaSemArmadilha(url) ||
+          !_pertenceAoConjunto(url.host, dominiosPermitidos)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static bool _contemCredencialNaoNegada(
@@ -769,7 +918,7 @@ class AnalisadorLocalDeGolpes {
       RegExp(r'[.!?;:\n]+|\bmas\b|\bporem\b|\bentretanto\b|\bcontudo\b'),
     );
     final RegExp avisoProtetivo = RegExp(
-      r'\b(?:nunca|jamais|nao)\s+(?:compartilhe|compartilhar|informe|informar|envie|enviar|passe|passar|forneca|fornecer|digite|digitar|divulgue|divulgar|revele|revelar)\b',
+      r'\b(?:nunca|jamais|nao)\s+(?:pede|peco|pedimos|pedem|pedir|solicita|solicitamos|solicitam|compartilhe|compartilhar|informe|informar|envie|enviar|passe|passar|forneca|fornecer|digite|digitar|divulgue|divulgar|revele|revelar)\b',
     );
     for (final String clausula in clausulas) {
       final String trecho = clausula.trim();
@@ -814,5 +963,15 @@ class _UrlExtraida {
     required this.temUserinfo,
     required this.temBarraInvertida,
     required this.ehHttpInseguro,
+  });
+}
+
+class _RegraMarcaLocal {
+  final List<String> termos;
+  final List<String> dominiosOficiais;
+
+  const _RegraMarcaLocal({
+    required this.termos,
+    required this.dominiosOficiais,
   });
 }

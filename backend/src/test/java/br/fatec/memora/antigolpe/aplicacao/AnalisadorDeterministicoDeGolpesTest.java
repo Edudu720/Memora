@@ -152,19 +152,63 @@ class AnalisadorDeterministicoDeGolpesTest {
     }
 
     @Test
-    @DisplayName("desofusca [:] e [/] antes de hxxp/hxxps e detecta barra invertida na autoridade")
+    @DisplayName("desofusca [:] e [/] antes de hxxp/hxxps, detecta @ sem esquema e barra invertida na autoridade")
     void desofuscaEsquemaComColchetesEDetectaBarraInvertidaNaAutoridade() {
-        ResultadoAnaliseGolpe hxxpColchetesArroba =
-                analisador.analisar("Acesse hxxp[:]//bb.com.br@evil.site/login");
-        assertThat(hxxpColchetesArroba.risco()).isEqualTo(NivelRiscoGolpe.ALTO);
-        assertThat(hxxpColchetesArroba.sinaisDetectados())
-                .contains(AnalisadorDeterministicoDeGolpes.SINAL_ARROBA);
+        for (String entrada :
+                List.of(
+                        "Acesse hxxp[:]//bb.com.br@evil.site/login",
+                        "Acesse bb.com.br@evil.site/login")) {
+            ResultadoAnaliseGolpe resultado = analisador.analisar(entrada);
+            assertThat(resultado.risco()).as("Entrada: %s", entrada).isEqualTo(NivelRiscoGolpe.ALTO);
+            assertThat(resultado.sinaisDetectados())
+                    .contains(AnalisadorDeterministicoDeGolpes.SINAL_ARROBA);
+        }
 
         ResultadoAnaliseGolpe barraInvertidaFalsaMarca =
                 analisador.analisar("Confira em https://evil.site\\.bb.com.br/login");
         assertThat(barraInvertidaFalsaMarca.risco()).isEqualTo(NivelRiscoGolpe.ALTO);
         assertThat(barraInvertidaFalsaMarca.sinaisDetectados())
                 .contains(AnalisadorDeterministicoDeGolpes.SINAL_LINK_SUSPEITO);
+    }
+
+    @Test
+    @DisplayName("detecta personificação de marca com wa.me ou a.co e encurtadores sem esquema (is.gd, rb.gy, lnkd.in)")
+    void detectaPersonificacaoDeMarcaComWaMeOuACoEEncurtadoresSemEsquema() {
+        List<String> golpesDeMarca =
+                List.of(
+                        "Nubank: sua conta foi bloqueada, desbloqueie em https://wa.me/5511999999999",
+                        "Banco do Brasil: valide sua conta em https://a.co/d/golpe",
+                        "Link:itau-seguro.xyz");
+
+        for (String entrada : golpesDeMarca) {
+            ResultadoAnaliseGolpe resultado = analisador.analisar(entrada);
+            assertThat(resultado.risco()).as("Entrada: %s", entrada).isEqualTo(NivelRiscoGolpe.ALTO);
+            assertThat(resultado.sinaisDetectados())
+                    .as("Sinal de marca falsa em: %s", entrada)
+                    .contains(AnalisadorDeterministicoDeGolpes.SINAL_MARCA_FALSA);
+            validarRegrasDeTexto(resultado);
+        }
+
+        for (String encurtadorSemEsquema :
+                List.of(
+                        "Acesse:bit.ly/abc urgente",
+                        "Acesse:is.gd/abc urgente",
+                        "Acesse:rb.gy/abc urgente",
+                        "Acesse:lnkd.in/abc urgente")) {
+            ResultadoAnaliseGolpe resultado = analisador.analisar(encurtadorSemEsquema);
+            assertThat(resultado.risco())
+                    .as("Entrada: %s", encurtadorSemEsquema)
+                    .isEqualTo(NivelRiscoGolpe.ALTO);
+            assertThat(resultado.sinaisDetectados())
+                    .contains(AnalisadorDeterministicoDeGolpes.SINAL_ENCURTADOR);
+        }
+
+        ResultadoAnaliseGolpe supremoRemoto =
+                analisador.analisar(
+                        "Instale o aplicativo Supremo no celular para liberar sua conta.");
+        assertThat(supremoRemoto.risco()).isEqualTo(NivelRiscoGolpe.ALTO);
+        assertThat(supremoRemoto.sinaisDetectados())
+                .contains(AnalisadorDeterministicoDeGolpes.SINAL_CREDENCIAL_OU_ACESSO);
     }
 
     @Test
@@ -218,7 +262,9 @@ class AnalisadorDeterministicoDeGolpesTest {
                         "Recebi no WhatsApp o link do INSS: https://www.gov.br/inss",
                         "Consulte https://www.gov.br e https://www.caixa.gov.br para informações oficiais.",
                         "Assista à transmissão em https://ao-vivo.globo.com agora.",
-                        "Veja a receita de bolo de milho em https://receita.globo.com e https://receitas.globo.com.");
+                        "Veja a receita de bolo de milho em https://receita.globo.com e https://receitas.globo.com.",
+                        "O Supremo Tribunal Federal divulgou o calendário oficial de sessões.",
+                        "Cheguei lá.Me liga!");
 
         for (String entrada : mensagensBaixoRisco) {
             ResultadoAnaliseGolpe resultado = analisador.analisar(entrada);

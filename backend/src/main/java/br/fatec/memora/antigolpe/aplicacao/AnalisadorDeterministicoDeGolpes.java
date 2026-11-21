@@ -86,14 +86,14 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static final Pattern EMAIL =
             Pattern.compile(
-                    "(?i)(?<![:/a-z0-9._%+-])(?!www\\.)[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}(?![/\\\\])");
+                    "(?i)(?<![:/\\\\a-z0-9._%+-])[a-z0-9._%+-]++@(?:[a-z0-9-]++\\.)++[a-z]{2,15}+(?![/\\\\a-z0-9_%+-]|\\.[a-z0-9])");
 
     private static final Pattern EXTRATOR_URL =
             Pattern.compile(
-                    "(?i)(?:https?://(?:\\[[0-9a-f:]+\\](?::\\d{1,5})?(?:/[^\\s<>\"']*)?|[^\\s<>\"']+)"
-                            + "|\\bwww\\.[^\\s<>\"']+"
-                            + "|(?<![\\d.])(?:\\d{1,3}\\.){3}\\d{1,3}(?::\\d{1,5})?(?:/[^\\s<>\"']*)?"
-                            + "|(?<![@\\p{L}\\p{N}.-])(?:[\\p{L}\\p{N}-]+\\.)+(?:xn--[a-z0-9-]+|[a-z]{2,15})(?::\\d{1,5})?(?:/[^\\s<>\"']*)?)");
+                    "(?i)(?:https?://(?:\\[[0-9a-f:]+\\](?::\\d{1,5})?(?:/[^\\s<>\"')]*)?|[^\\s<>\"')]+)"
+                            + "|\\bwww\\.[^\\s<>\"')]+"
+                            + "|(?<![\\d.])(?:\\d{1,3}\\.){3}\\d{1,3}(?::\\d{1,5})?(?:/[^\\s<>\"')]*)?"
+                            + "|(?<![@\\p{L}\\p{N}._%+-])(?:[a-z0-9._%+-]+@)?(?:[a-z0-9\\u0100-\\uFFFF-]+\\.)+(?:xn--[a-z0-9-]+|[a-z\\u0100-\\uFFFF]{2,15})(?::\\d{1,5})?(?:/[^\\s<>\"')]*)?)");
 
     private static final Pattern IPV4 = Pattern.compile("^(?:\\d{1,3}\\.){3}\\d{1,3}$");
     private static final Pattern IP_DECIMAL_OU_HEX =
@@ -130,7 +130,7 @@ public class AnalisadorDeterministicoDeGolpes {
                     "biz", "link", "click", "live", "shop", "club", "vip", "icu", "buzz", "work",
                     "loan", "win", "support", "ly", "gl", "to", "is", "at", "cc", "tv", "uk",
                     "us", "pt", "es", "ar", "cl", "py", "uy", "cn", "ru", "de", "fr", "it", "tk",
-                    "ml", "ga", "cf", "gq");
+                    "ml", "ga", "cf", "gq", "gd", "gy", "in");
 
     private static final Pattern CANAL_WHATSAPP_NO_TEXTO =
             Pattern.compile(
@@ -257,18 +257,25 @@ public class AnalisadorDeterministicoDeGolpes {
                             "amazon",
                             List.of("amazon"),
                             List.of("amazon", "amazonbr"),
-                            List.of("amazon.com.br", "amazon.com", "a.co")));
+                            List.of("amazon.com.br", "amazon.com")));
 
     private static final Set<String> DOMINIOS_OFICIAIS = criarConjuntoOficiais();
     private static final Pattern PADRAO_BB_TEXTO = compilarPalavraTexto("bb");
 
+    private static final String PADRAO_SUPREMO_REMOTO =
+            "(?:\\bsupremo\\s+(?:remote|control|mobile|assist)\\b"
+                    + "|\\b(?:instal[ae]\\w*|baix[ae]\\w*|app|aplicativo|acesso\\s+remoto|suporte\\s+remoto|suporte)\\b[^.!?\\n]{0,40}\\bsupremo\\b"
+                    + "|\\bsupremo\\b(?!\\s+(?:tribunal|federal|corte))[^.!?\\n]{0,40}\\b(?:instal[ae]\\w*|baix[ae]\\w*|app|aplicativo|acesso\\s+remoto|suporte\\s+remoto|celular)\\b)";
+
     private static final Pattern ACESSO_REMOTO_OU_APK =
             Pattern.compile(
-                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|\\bsupremo\\b|\\bquicksupport\\b|\\.apk\\b|\\bfora da loja\\b)");
+                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|"
+                            + PADRAO_SUPREMO_REMOTO
+                            + "|\\bquicksupport\\b|\\.apk\\b|\\bfora da loja\\b)");
 
     private static final Pattern PEDIDO_CREDENCIAL_DIRETA =
             Pattern.compile(
-                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|\\bsupremo\\b|\\bquicksupport\\b|\\.apk\\b|\\bfora da loja\\b"
+                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|\\bquicksupport\\b|\\.apk\\b|\\bfora da loja\\b"
                             + "|\\bcvv\\b"
                             + "|codigo\\s+(?:de\\s+)?(?:6\\s+digitos|verificacao|seguranca|sms|que\\s+chegou)"
                             + "|(?:envie|informe|digite|passe|mande|confirme|atualize|forneca|insira|coloque|me\\s+diga|me\\s+passa).{0,30}(?:senha|codigo|pin|cvv|cartao)"
@@ -276,7 +283,7 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static final Pattern NEGACAO_CREDENCIAL =
             Pattern.compile(
-                    "(?:nunca\\s+peco|nao\\s+peco|nunca\\s+pede|nao\\s+pede|nunca\\s+pedimos|nao\\s+pedimos|nao\\s+compartilhe|nunca\\s+compartilhe|nao\\s+passe|nunca\\s+passe|nao\\s+envie|nunca\\s+envie|nao\\s+informe|jamais\\s+informe|nao\\s+forneca|jamais\\s+forneca).{0,25}(?:senha|codigo|pin|cvv|cartao)");
+                    "\\b(?:nunca|jamais|nao)\\s+(?:pede|peco|pedimos|pedem|pedir|solicita|solicitamos|solicitam|compartilhe|compartilhar|passe|passar|envie|enviar|informe|informar|forneca|fornecer|digite|digitar|divulgue|divulgar|revele|revelar)\\b.{0,25}(?:senha|codigo|pin|cvv|cartao)");
 
     private static final Pattern SEPARADOR_CLAUSULAS =
             Pattern.compile(
@@ -629,7 +636,7 @@ public class AnalisadorDeterministicoDeGolpes {
             return null;
         }
 
-        boolean comArroba = (temEsquema || lower.startsWith("www.")) && autoridade.contains("@");
+        boolean comArroba = autoridade.contains("@");
         String hostComPorta =
                 autoridade.contains("@")
                         ? autoridade.substring(autoridade.lastIndexOf('@') + 1)
@@ -743,22 +750,93 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static boolean detectarImpersonacaoDeMarca(
             String textoDobrado, List<UrlExtraida> urls) {
-        List<UrlExtraida> urlsNaoOficiais = new ArrayList<>();
-        for (UrlExtraida url : urls) {
-            if (!url.oficial() && !ehEncurtador(url.host())) {
-                urlsNaoOficiais.add(url);
-            }
-        }
-        if (urlsNaoOficiais.isEmpty()) {
+        if (urls.isEmpty()) {
             return false;
         }
 
+        // 1. Se qualquer URL menciona uma marca no próprio host (ex.: nubank-resgate.xyz,
+        // whatsapp-suporte.xyz), o host dessa URL precisa pertencer aos domínios oficiais daquela
+        // marca.
+        for (UrlExtraida url : urls) {
+            if (ehEncurtador(url.host())) {
+                continue;
+            }
+            for (RegraMarca marca : MARCAS) {
+                if (urlMencionaMarcaNoHost(marca, url)
+                        && !ehUrlLimpaDaMarca(url, marca)) {
+                    return true;
+                }
+            }
+        }
+
+        // 2. Coleta as marcas institucionais (exceto o canal 'whatsapp') citadas no texto ou host.
+        List<RegraMarca> marcasInstitucionaisCitadas = new ArrayList<>();
+        Set<String> dominiosPermitidosDasMarcasCitadas = new LinkedHashSet<>();
         for (RegraMarca marca : MARCAS) {
-            if (marcaMencionada(marca, textoDobrado, urlsNaoOficiais, true)) {
-                return true;
+            if ("whatsapp".equals(marca.codigo())) {
+                continue;
+            }
+            if (marcaMencionada(marca, textoDobrado, urls, true)) {
+                marcasInstitucionaisCitadas.add(marca);
+                dominiosPermitidosDasMarcasCitadas.addAll(marca.dominiosOficiais());
+            }
+        }
+
+        if (!marcasInstitucionaisCitadas.isEmpty()) {
+            List<UrlExtraida> urlsNaoEncurtadas = new ArrayList<>();
+            for (UrlExtraida url : urls) {
+                if (!ehEncurtador(url.host())) {
+                    urlsNaoEncurtadas.add(url);
+                }
+            }
+            if (!urlsNaoEncurtadas.isEmpty()) {
+                for (RegraMarca marca : marcasInstitucionaisCitadas) {
+                    boolean temUrlOficialDaMarca = false;
+                    for (UrlExtraida url : urlsNaoEncurtadas) {
+                        if (ehUrlLimpaDaMarca(url, marca)) {
+                            temUrlOficialDaMarca = true;
+                            break;
+                        }
+                    }
+                    if (!temUrlOficialDaMarca) {
+                        return true;
+                    }
+                }
+                for (UrlExtraida url : urlsNaoEncurtadas) {
+                    if (!ehUrlLimpaEmDominios(url, dominiosPermitidosDasMarcasCitadas)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // 3. Caso apenas 'whatsapp' seja citado (fora de "no/pelo/via WhatsApp"), exige domínio
+        // legítimo do WhatsApp.
+        for (RegraMarca marca : MARCAS) {
+            if ("whatsapp".equals(marca.codigo())
+                    && marcaMencionada(marca, textoDobrado, urls, true)) {
+                for (UrlExtraida url : urls) {
+                    if (!ehEncurtador(url.host()) && !ehUrlLimpaDaMarca(url, marca)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
+    }
+
+    private static boolean ehUrlLimpaDaMarca(UrlExtraida url, RegraMarca marca) {
+        return ehUrlLimpaEmDominios(url, marca.dominiosOficiais());
+    }
+
+    private static boolean ehUrlLimpaEmDominios(
+            UrlExtraida url, Iterable<String> dominiosPermitidos) {
+        return !url.comArrobaNaAutoridade()
+                && !url.comBarraInvertidaNaAutoridade()
+                && !ehIp(url.host())
+                && !ehPunycodeOuHomografo(url.host())
+                && correspondeASufixo(url.host(), dominiosPermitidos);
     }
 
     private static boolean algumaMarcaMencionada(String textoDobrado, List<UrlExtraida> urls) {
@@ -867,6 +945,9 @@ public class AnalisadorDeterministicoDeGolpes {
     private static Set<String> criarConjuntoOficiais() {
         Set<String> todos = new LinkedHashSet<>();
         for (RegraMarca marca : MARCAS) {
+            if ("whatsapp".equals(marca.codigo())) {
+                continue;
+            }
             todos.addAll(marca.dominiosOficiais());
         }
         return Set.copyOf(todos);

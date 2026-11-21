@@ -140,12 +140,28 @@ void main() {
       expect(resultado.sinaisDetectados, isEmpty);
     });
 
-    test('não penaliza lembrete puramente protetivo sobre nunca compartilhar senha', () {
-      final AnaliseGolpe resultado = analisador.analisar(
+    test('não penaliza lembrete puramente protetivo sobre nunca compartilhar ou pedir senha', () {
+      for (final String aviso in <String>[
         'Nunca compartilhe sua senha nem código de verificação com ninguém.',
-      );
-      expect(resultado.risco, NivelRisco.seguro);
-      expect(resultado.sinaisDetectados, isEmpty);
+        'O banco nunca pede sua senha nem código por mensagem.',
+        'Eu nunca peço sua senha ou código de 6 dígitos.',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(aviso);
+        expect(resultado.risco, NivelRisco.seguro, reason: aviso);
+        expect(resultado.sinaisDetectados, isEmpty, reason: aviso);
+      }
+    });
+
+    test('não confunde frase com palavra acentuada antes de ponto sem espaço ("Cheguei lá.Me liga!") nem Supremo Tribunal Federal com golpe', () {
+      for (final String texto in <String>[
+        'Cheguei lá.Me liga!',
+        'Estou aqui já.Me avisa quando sair.',
+        'O Supremo Tribunal Federal divulgou o calendário oficial de sessões.',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(texto);
+        expect(resultado.risco, NivelRisco.seguro, reason: texto);
+        expect(resultado.sinaisDetectados, isEmpty, reason: texto);
+      }
     });
   });
 
@@ -161,18 +177,60 @@ void main() {
       expect(resultado.sinaisDetectados, contains(TextosAntigolpe.sinalIp));
     });
 
-    test('detecta disfarce com @ (userinfo e @ no início da autoridade) como altoRisco', () {
-      final AnaliseGolpe r1 = analisador.analisar(
+    test('detecta disfarce com @ (userinfo com e sem esquema e @ no início da autoridade) como altoRisco', () {
+      for (final String texto in <String>[
         'Acesse https://bb.com.br@golpe-falso.xyz/entrar agora',
-      );
-      expect(r1.risco, NivelRisco.altoRisco);
-      expect(r1.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
-
-      final AnaliseGolpe r2 = analisador.analisar(
+        'Acesse bb.com.br@evil.site/login para confirmar',
         'Confira em https://@golpe.xyz/login',
+      ]) {
+        final AnaliseGolpe r = analisador.analisar(texto);
+        expect(r.risco, NivelRisco.altoRisco, reason: texto);
+        expect(
+          r.sinaisDetectados,
+          contains(TextosAntigolpe.sinalArroba),
+          reason: texto,
+        );
+      }
+    });
+
+    test('detecta URLs sem esquema após dois-pontos e encurtadores is.gd / rb.gy / lnkd.in', () {
+      for (final String texto in <String>[
+        'Acesse:bit.ly/abc urgente para desbloquear sua conta',
+        'Acesse:is.gd/abc urgente para desbloquear sua conta',
+        'Acesse:rb.gy/abc urgente para desbloquear sua conta',
+        'Acesse:lnkd.in/abc urgente para desbloquear sua conta',
+        'Link:itau-seguro.xyz',
+      ]) {
+        final AnaliseGolpe r = analisador.analisar(texto);
+        expect(r.risco, NivelRisco.altoRisco, reason: texto);
+        expect(r.sinaisDetectados, isNotEmpty, reason: texto);
+      }
+    });
+
+    test('detecta personificação de marca usando wa.me ou a.co como altoRisco', () {
+      for (final String texto in <String>[
+        'Nubank: sua conta foi bloqueada, desbloqueie em https://wa.me/5511999999999',
+        'Banco do Brasil: valide sua conta em https://a.co/d/golpe',
+      ]) {
+        final AnaliseGolpe r = analisador.analisar(texto);
+        expect(r.risco, NivelRisco.altoRisco, reason: texto);
+        expect(
+          r.sinaisDetectados,
+          contains(TextosAntigolpe.sinalMarcaFalsa),
+          reason: texto,
+        );
+      }
+    });
+
+    test('detecta instalação do aplicativo de acesso remoto Supremo como altoRisco', () {
+      final AnaliseGolpe r = analisador.analisar(
+        'Instale o aplicativo Supremo no celular para liberar sua conta.',
       );
-      expect(r2.risco, NivelRisco.altoRisco);
-      expect(r2.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
+      expect(r.risco, NivelRisco.altoRisco);
+      expect(
+        r.sinaisDetectados,
+        contains(TextosAntigolpe.sinalAcessoRemotoOuApk),
+      );
     });
 
     test('detecta barra invertida na autoridade da URL (https://evil.site\\.bb.com.br)', () {
@@ -197,16 +255,20 @@ void main() {
       expect(resultado.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
     });
 
-    test('detecta homógrafo cirílico / não-ASCII no domínio (https://itаu.com.br)', () {
-      final AnaliseGolpe resultado = analisador.analisar(
+    test('detecta homógrafo cirílico / não-ASCII no domínio com e sem esquema (https://itаu.com.br e itаu.com.br)', () {
+      for (final String texto in <String>[
         'Acesse https://it\u0430u.com.br para atualizar',
-      );
+        'Acesse it\u0430u.com.br para atualizar',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(texto);
 
-      expect(resultado.risco, NivelRisco.altoRisco);
-      expect(
-        resultado.sinaisDetectados,
-        contains(TextosAntigolpe.sinalHomografo),
-      );
+        expect(resultado.risco, NivelRisco.altoRisco, reason: texto);
+        expect(
+          resultado.sinaisDetectados,
+          contains(TextosAntigolpe.sinalHomografo),
+          reason: texto,
+        );
+      }
     });
 
     test('remove caracteres invisíveis zero-width e marcas combinantes na análise', () {
