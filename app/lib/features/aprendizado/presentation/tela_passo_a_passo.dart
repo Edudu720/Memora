@@ -390,56 +390,61 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
 
     return Scaffold(
       backgroundColor: cores.fundo,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            CabecalhoDeTela(
-              titulo: widget.secao?.titulo ?? widget.guia.titulo,
-              aoVoltar: _retroceder,
-            ),
-            TrocaDePasso(
-              posicao: _posicao,
-              child: PassoIlustrado(
-                key: ValueKey<int>(_posicao),
-                rolar: false,
-                passo: passoAtual,
-                posicao: _posicao,
-                total: _passos.length,
-                aoContinuar: _avancar,
-                aoVoltar: _posicao > 1 ? _retroceder : null,
-                aoSair: _sairDoPassoAPasso,
-                aoTelaDiferente: _mostrarDialogoTelaDiferente,
-                aoPedirParaAbrir: eUltimo && _podePedirParaAbrir
-                    ? () => widget.aoPedirParaAbrir!(
-                        TextosGuias.pedidoParaAbrir(
-                          widget.servico?.nomeExibido ?? widget.guia.titulo,
-                        ),
-                      )
-                    : null,
-                aoTirarDuvida:
-                    eUltimo &&
-                        (widget.aoTirarDuvida != null ||
-                            widget.aoConversarSobreDiferenca != null)
-                    ? () {
-                        if (widget.aoTirarDuvida != null) {
-                          final String nomeBase =
-                              widget.servico?.nomeExibido ?? widget.guia.titulo;
-                          widget.aoTirarDuvida!(
-                            TextosGuias.rascunhoDuvida(
-                              widget.secao != null
-                                  ? '$nomeBase (${widget.secao!.titulo})'
-                                  : nomeBase,
-                            ),
-                          );
-                        } else {
-                          widget.aoConversarSobreDiferenca!();
-                        }
-                      }
-                    : null,
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: MemoraEspacamento.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              CabecalhoDeTela(
+                titulo: widget.secao?.titulo ?? widget.guia.titulo,
+                aoVoltar: _retroceder,
               ),
-            ),
-          ],
+              TrocaDePasso(
+                posicao: _posicao,
+                child: PassoIlustrado(
+                  key: ValueKey<int>(_posicao),
+                  rolar: false,
+                  passo: passoAtual,
+                  posicao: _posicao,
+                  total: _passos.length,
+                  aoContinuar: _avancar,
+                  aoVoltar: _posicao > 1 ? _retroceder : null,
+                  aoSair: _sairDoPassoAPasso,
+                  aoTelaDiferente: _mostrarDialogoTelaDiferente,
+                  aoPedirParaAbrir: eUltimo && _podePedirParaAbrir
+                      ? () => widget.aoPedirParaAbrir!(
+                          TextosGuias.pedidoParaAbrir(
+                            widget.servico?.nomeExibido ?? widget.guia.titulo,
+                          ),
+                        )
+                      : null,
+                  aoTirarDuvida:
+                      eUltimo &&
+                          (widget.aoTirarDuvida != null ||
+                              widget.aoConversarSobreDiferenca != null)
+                      ? () {
+                          if (widget.aoTirarDuvida != null) {
+                            final String nomeBase =
+                                widget.servico?.nomeExibido ??
+                                widget.guia.titulo;
+                            widget.aoTirarDuvida!(
+                              TextosGuias.rascunhoDuvida(
+                                widget.secao != null
+                                    ? '$nomeBase (${widget.secao!.titulo})'
+                                    : nomeBase,
+                              ),
+                            );
+                          } else {
+                            widget.aoConversarSobreDiferenca!();
+                          }
+                        }
+                      : null,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: DecoratedBox(

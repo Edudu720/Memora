@@ -2,6 +2,20 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Feature `021-analise-golpes`
+
+### Adicionado
+- **Análise antigolpes de links e mensagens estranhas (`specs/021-analise-golpes/`, `POST /v1/golpes/analisar`, `TelaAnaliseGolpe`)**:
+  - Tela dedicada acessível em 1 toque a partir da `TelaInicio` (`TelaInicio.chaveVerificarGolpe`) e pela `TelaAjuda` (`TelaAjuda.chaveVerificarGolpe`), mantendo o Hub com 7 portas (`FR-017`).
+  - Endpoint autenticado `POST /v1/golpes/analisar` no backend com motor heurístico determinístico (`AnalisadorDeterministicoDeGolpes`), integração Gemini REST (`ClienteAnaliseGolpeGemini`), sanitizador pós-IA com piso monotônico (`SanitizadorRespostaAntigolpe`) e limitador de taxa por conta (`LimitadorAnaliseGolpe`).
+  - Fallback local offline automático no aplicativo (`AnalisadorLocalDeGolpes` e `RepositorioAnaliseGolpeApi`) quando sem conexão ou diante de indisponibilidade do servidor.
+- **Passo 5 do guia do WhatsApp (`CapturaDoGuia.whatsapp5`, `whatsappPasso5`)**:
+  - Nova captura higienizada e anotada dentro da conversa do WhatsApp com 4 regiões numeradas e textos explicativos.
+
+### Alterado
+- **Guias visuais anotados em azul Memora acessível (`#1040F8`) e espaçamento de legendas (`scripts/processar_guias_visuais.py`, `PassoIlustrado`, `TelaPassoAPasso`)**:
+  - Círculos e selos numerados nos guias legados passam a utilizar o azul acessível `#1040F8` com posicionamento anti-colisão e folga ampliada entre imagem e legenda na tela passo a passo.
+
 ## [Unreleased] — Feature `020-modulo-concluido-e-ultimo-aprendido`
 
 ### Adicionado

@@ -470,5 +470,65 @@ void main() {
         },
       );
     }
+
+    testWidgets(
+      'TelaPassoAPasso renderiza guia do WhatsApp com 5 passos e legendas numeradas '
+      'espaçadas sem estouro em aparelho pequeno com escala máxima',
+      (WidgetTester t) async {
+        const Combinacao combinacaoCritica = (
+          aparelho: Size(320, 568),
+          escala: 2.0,
+          tema: MemoraTemaId.altoContraste,
+        );
+        final Guia guiaWhatsappTeste = Guia(
+          chave: 'whatsapp',
+          titulo: TextosGuias.tituloWhatsapp,
+          capturadoEm: DateTime(2026, 11),
+          versaoCapturada: '2026.11',
+          passos: const <Passo>[
+            Passo(
+              captura: CapturaDoGuia.whatsapp1,
+              destaque: RegiaoRelativa(x: 0.78, y: 0.85, largura: 0.18, altura: 0.1),
+              texto: TextosGuias.whatsappPasso1,
+              descricaoDaCaptura: TextosGuias.whatsappCaptura1,
+            ),
+            Passo(
+              captura: CapturaDoGuia.whatsapp2,
+              destaque: RegiaoRelativa(x: 0.05, y: 0.12, largura: 0.9, altura: 0.1),
+              texto: TextosGuias.whatsappPasso2,
+              descricaoDaCaptura: TextosGuias.whatsappCaptura2,
+            ),
+            Passo(
+              captura: CapturaDoGuia.whatsapp5,
+              destaque: RegiaoRelativa(x: 0.04, y: 0.88, largura: 0.92, altura: 0.08),
+              texto: TextosGuias.whatsappPasso5,
+              descricaoDaCaptura: TextosGuias.whatsappCaptura5,
+            ),
+          ],
+        );
+
+        vestir(t, combinacaoCritica.aparelho);
+        await t.pumpWidget(
+          naCombinacao(
+            combinacaoCritica,
+            TelaPassoAPasso(
+              guia: guiaWhatsappTeste,
+              servico: servicoCotidiano,
+              origemDoCatalogo: OrigemDoCatalogo.servidor,
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(t.takeException(), isNull);
+        expect(find.text('Tela inicial do WhatsApp:'), findsOneWidget);
+        await exigirAlcancavel(
+          t,
+          find.byKey(PassoIlustrado.chaveContinuar),
+          aparelho: combinacaoCritica.aparelho,
+          contexto: 'WhatsApp multilinha em 320x568 a 200%',
+        );
+      },
+    );
   });
 }

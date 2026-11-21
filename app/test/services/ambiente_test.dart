@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/ajuda/data/abridor_site_tutorial.dart';
+import 'package:memora/features/antigolpe/data/repositorios/repositorio_analise_golpe_api.dart';
+import 'package:memora/features/antigolpe/data/repositorios/repositorio_analise_golpe_simulado.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_api.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
@@ -258,6 +260,30 @@ void main() {
       );
 
       expect(composicao.assistente, isA<RepositorioAssistenteSimulado>());
+    });
+
+    test('resolve RepositorioAnaliseGolpeApi com servidor real e Simulado sem ele', () {
+      final Composicao real = Composicao.resolver(
+        ambiente: const Ambiente(
+          urlBase: 'https://api.memora.app/v1',
+          usaServidorReal: true,
+        ),
+        cofre: _CofreDeMentira(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
+      );
+      expect(real.analiseGolpe, isA<RepositorioAnaliseGolpeApi>());
+
+      final Composicao simulada = Composicao.resolver(
+        ambiente: const Ambiente(
+          urlBase: 'http://10.0.2.2:8080/v1',
+          usaServidorReal: false,
+        ),
+        cofre: _CofreDeMentira(),
+        ultimoAcesso: UltimoAcessoEmMemoria(),
+        aceiteDoAviso: AceiteEmMemoria(),
+      );
+      expect(simulada.analiseGolpe, isA<RepositorioAnaliseGolpeSimulado>());
     });
 
     test('urlSiteTutorial e AbridorDeSiteTutorial validam protocolo estrito https://', () {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_ajuda.dart';
+import '../../../l10n/textos_antigolpe.dart';
 import '../data/abridor_site_tutorial.dart';
 import '../domain/assunto_de_ajuda.dart';
 
@@ -37,6 +38,9 @@ class TelaAjuda extends StatelessWidget {
   /// Chave da porta "Ver a apresentação de novo", para os testes.
   static const Key chaveReverApresentacao = Key('ajuda.rever_apresentacao');
 
+  /// Chave da porta "Verificar golpe", para os testes.
+  static const Key chaveVerificarGolpe = Key('ajuda.verificar_golpe');
+
   /// Chave do botão para abrir o site oficial de tutoriais (Feature 016).
   static const Key chaveAbrirSiteTutorial = Key('ajuda.site_tutorial.abrir');
 
@@ -62,6 +66,9 @@ class TelaAjuda extends StatelessWidget {
   /// Rever a apresentação inicial (FR-013). Nulo: a porta não existe.
   final VoidCallback? aoVerApresentacao;
 
+  /// Abre o verificador de links e mensagens contra golpes. Nulo: a porta não existe.
+  final VoidCallback? aoVerificarGolpe;
+
   /// Abridor seguro `https://` do site oficial de tutoriais. Nulo: oculto.
   final AbridorDeSiteTutorial? abridorSiteTutorial;
 
@@ -74,6 +81,7 @@ class TelaAjuda extends StatelessWidget {
     required this.aoAbrirAssunto,
     required this.aoVoltar,
     this.aoVerApresentacao,
+    this.aoVerificarGolpe,
     this.abridorSiteTutorial,
     super.key,
   });
@@ -155,6 +163,36 @@ class TelaAjuda extends StatelessWidget {
                                 aoTocar: () => aoAbrirAssunto(assuntos[i]),
                                 mostrarDivisorInferior:
                                     i < assuntos.length - 1 ||
+                                    aoVerificarGolpe != null ||
+                                    aoVerApresentacao != null,
+                              ),
+                            if (aoVerificarGolpe != null)
+                              LinhaDeLista(
+                                key: chaveVerificarGolpe,
+                                titulo: TextosAntigolpe.portaTitulo,
+                                subtitulo: TextosAntigolpe.portaDescricao,
+                                esquerda: ocultarVisuais
+                                    ? null
+                                    : Container(
+                                        width:
+                                            MemoraDimensoes.badgeAtalhoRapido,
+                                        height:
+                                            MemoraDimensoes.badgeAtalhoRapido,
+                                        decoration: BoxDecoration(
+                                          color: cores.destaque,
+                                          borderRadius: BorderRadius.circular(
+                                            MemoraRaio.badge,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.verified_user_rounded,
+                                          size: MemoraDimensoes.iconePadrao,
+                                          color: cores.primaria,
+                                        ),
+                                      ),
+                                aoTocar: aoVerificarGolpe,
+                                mostrarDivisorInferior:
                                     aoVerApresentacao != null,
                               ),
                             if (aoVerApresentacao != null)

@@ -32,6 +32,12 @@ final Guia guiaWhatsapp = Guia(
       texto: TextosGuias.whatsappPasso4,
       descricaoDaCaptura: TextosGuias.whatsappCaptura4,
     ),
+    Passo(
+      captura: CapturaDoGuia.whatsapp5,
+      destaque: RegiaoRelativa(x: 0.04, y: 0.88, largura: 0.92, altura: 0.08),
+      texto: TextosGuias.whatsappPasso5,
+      descricaoDaCaptura: TextosGuias.whatsappCaptura5,
+    ),
   ],
 );
 

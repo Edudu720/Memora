@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: Memora — Contrato de Análise Antigolpes (021)
+  version: 1.0.0
+  description: >
+    Contrato REST do endpoint autenticado de análise de links e mensagens estranhas contra golpes.
+    Não persiste nem registra o conteúdo analisado em banco ou logs, não envia dados pessoais da
+    conta ao provedor externo de IA e garante piso monotônico determinístico.
+paths:
+  /v1/golpes/analisar:
+    post:
+      operationId: analisarGolpe
+      summary: Analisa uma mensagem ou link recebido quanto a sinais de golpe
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalisarGolpeRequest"
+      responses:
+        "200":
+          description: Resultado estruturado e sanitizado da análise antigolpe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalisarGolpeResponse"
+        "400":
+          description: Conteúdo ausente, em branco ou com mais de 2000 caracteres
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+        "401":
+          description: Token JWT ausente, inválido ou conta não ativa (SESSAO_EXPIRADA)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+        "429":
+          description: Limite de análises por conta excedido (20/hora ou 60/dia)
+          headers:
+            Retry-After:
+              description: Segundos (arredondados para cima) até a liberação da janela
+              schema:
+                type: integer
+                minimum: 1
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Erro"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AnalisarGolpeRequest:
+      type: object
+      required:
+        - conteudo
+      properties:
+        conteudo:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Mensagem ou link colado pela pessoa para verificação
+    AnalisarGolpeResponse:
+      type: object
+      required:
+        - risco
+        - titulo
+        - explicacao
+        - orientacoes
+        - sinaisDetectados
+        - analisadoPorIa
+      properties:
+        risco:
+          type: string
+          enum:
+            - BAIXO
+            - MEDIO
+            - ALTO
+        titulo:
+          type: string
+          description: Veredito em até 2 frases curtas, sem emojis nem links
+        explicacao:
+          type: string
+          description: Explicação em linguagem comum em até 2 frases curtas, sem emojis nem links
+        orientacoes:
+          type: array
+          items:
+            type: string
+          description: Passos práticos de segurança para o momento
+        sinaisDetectados:
+          type: array
+          items:
+            type: string
+          description: Sinais objetivos observados na mensagem ou endereço
+        analisadoPorIa:
+          type: boolean
+          description: >
+            True somente quando o texto final foi produzido pela IA e aprovado pelo sanitizador;
+            false quando avaliado apenas pelo motor determinístico de regras.
+    Erro:
+      type: object
+      required:
+        - codigo
+        - mensagem
+      properties:
+        codigo:
+          type: string
+          example: LIMITE_DE_CONVERSAS
+        mensagem:
+          type: string
+        tentar_novamente_em_segundos:
+          type: integer
+          minimum: 1

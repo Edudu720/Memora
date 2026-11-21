@@ -91,6 +91,32 @@ void main() {
       expect(find.byType(LinhaDeLista), findsNothing);
       expect(find.byKey(TelaInicio.chaveSaudacao), findsOneWidget);
     });
+
+    testWidgets('quinto atalho (Verificar golpe) ocupa a largura total da linha sem card órfão pela metade', (
+      WidgetTester t,
+    ) async {
+      vestir(t, referencia);
+      await t.pumpWidget(
+        app(
+          TelaInicio(
+            nome: 'Dona Ana',
+            aoConversar: () {},
+            aoVerTudo: () {},
+            aoAbrirAplicativos: () {},
+            aoAbrirServicos: () {},
+            aoAbrirCuidado: () {},
+            aoAbrirAjuda: () {},
+            aoVerificarGolpe: () {},
+          ),
+        ),
+      );
+
+      final Rect rectHeroi = t.getRect(find.byKey(TelaInicio.chaveConversar));
+      final Rect rectGolpe = t.getRect(
+        find.byKey(TelaInicio.chaveVerificarGolpe),
+      );
+      expect(rectGolpe.width, closeTo(rectHeroi.width, 0.5));
+    });
   });
 
   group('A Memora ensina a tela — R2, regra 9, e é a anfitriã (T053)', () {

@@ -5,6 +5,7 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
+import 'package:memora/features/antigolpe/presentation/telas/tela_analise_golpe.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
 import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
@@ -117,6 +118,12 @@ void main() {
   final Finder doLocalizador = find.byKey(
     TelaHub.chaveDaPorta('Localizador de Serviços'),
   );
+  final Finder doAntigolpeInicio = find.byKey(
+    TelaInicio.chaveVerificarGolpe,
+  );
+  final Finder doAntigolpeAjuda = find.byKey(
+    TelaAjuda.chaveVerificarGolpe,
+  );
   final Finder doHub = find.byKey(TelaInicio.chaveVerTudo);
 
   /// Todas as partes do aplicativo e o caminho até cada uma.
@@ -188,6 +195,18 @@ void main() {
       parte: 'localizador de serviços',
       toques: <Finder>[doHub, doLocalizador],
       chegada: find.byType(TelaLocalizador),
+      via: null,
+    ),
+    (
+      parte: 'verificar golpe (pelo atalho do Início)',
+      toques: <Finder>[doAntigolpeInicio],
+      chegada: find.byType(TelaAnaliseGolpe),
+      via: null,
+    ),
+    (
+      parte: 'verificar golpe (pela Ajuda)',
+      toques: <Finder>[doHub, daAjuda, doAntigolpeAjuda],
+      chegada: find.byType(TelaAnaliseGolpe),
       via: null,
     ),
     (

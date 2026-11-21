@@ -13,6 +13,9 @@ enum TomBadgeStatus {
   /// Estado saudável, concluído ou ativo.
   positivo,
 
+  /// Alerta moderado que pede cautela sem o preenchimento sólido de erro.
+  aviso,
+
   /// Atenção ou erro com destaque de alto contraste.
   atencao,
 
@@ -54,10 +57,19 @@ class BadgeDeStatus extends StatelessWidget {
 
     final (Color fundo, Color textoCor) = switch (tom) {
       TomBadgeStatus.positivo => (cores.saudeSuave, cores.sucessoTexto),
+      TomBadgeStatus.aviso => (cores.superficie, cores.perigo),
       TomBadgeStatus.atencao => (cores.perigo, cores.sobrePerigo),
       TomBadgeStatus.informativo => (cores.destaque, cores.primaria),
       TomBadgeStatus.neutro => (cores.superficieSutil, cores.texto),
     };
+    final Color corBorda = switch (tom) {
+      TomBadgeStatus.aviso => cores.perigo,
+      _ => ehAltoContraste ? cores.borda : cores.bordaSutil,
+    };
+    final double larguraBorda =
+        ehAltoContraste || tom == TomBadgeStatus.aviso
+            ? MemoraDimensoes.bordaEnfase
+            : MemoraDimensoes.espessuraBordaSutil;
 
     return Semantics(
       button: false,
@@ -73,10 +85,8 @@ class BadgeDeStatus extends StatelessWidget {
             color: fundo,
             borderRadius: BorderRadius.circular(MemoraRaio.badge),
             border: Border.all(
-              color: ehAltoContraste ? cores.borda : cores.bordaSutil,
-              width: ehAltoContraste
-                  ? MemoraDimensoes.bordaEnfase
-                  : MemoraDimensoes.espessuraBordaSutil,
+              color: corBorda,
+              width: larguraBorda,
             ),
           ),
           child: Row(

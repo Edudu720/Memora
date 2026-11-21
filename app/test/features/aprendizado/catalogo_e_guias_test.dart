@@ -668,7 +668,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
         // ignore: invalid_use_of_visible_for_testing_member
         const CapturaDoGuia alemDoLimite = CapturaDoGuia.paraTeste(
           'whatsapp',
-          5,
+          6,
           formato: FormatoDaCaptura.jpg,
         );
 
@@ -753,7 +753,7 @@ texto solto | com barra
 /// quando suas capturas forem substituídas por prints com o destaque desenhado
 /// pelo aplicativo. Motivo: legado #71, substituir.
 const Map<String, int> capturasLegadasDaPr71 = <String, int>{
-  'whatsapp': 4,
+  'whatsapp': 5,
   'facebook': 10,
   'telegram': 8,
   'gov-br': 24,

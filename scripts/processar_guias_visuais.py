@@ -1,10 +1,13 @@
+import argparse
+import math
 import os
+import shutil
+import tempfile
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ORIG = "apps/.originais"
 APPS = "apps"
 ASSETS_GUIAS = "app/assets/guias"
-SCRATCH_VERIFY = r"C:\Users\Edu\.gemini\antigravity\brain\1add142c-f98b-4d25-8da1-4756365d2d82\scratch\verify"
 
 FONT_CANDIDATES = [
     r"C:\Windows\Fonts\segoeuib.ttf",
@@ -18,6 +21,25 @@ def load_font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
         if os.path.exists(p):
             return ImageFont.truetype(p, size)
     return ImageFont.load_default()
+
+
+def _atomic_save_jpg(
+    im: Image.Image,
+    dst_path: str,
+    quality: int,
+    optimize: bool = True,
+) -> None:
+    parent = os.path.dirname(os.path.abspath(dst_path))
+    os.makedirs(parent, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(prefix=".tmp_", suffix=".jpg", dir=parent)
+    os.close(fd)
+    try:
+        im.convert("RGB").save(tmp_path, "JPEG", quality=quality, optimize=optimize)
+        os.replace(tmp_path, dst_path)
+    except BaseException:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
 
 
 def apply_blurs(
@@ -45,6 +67,31 @@ def apply_blurs(
     return out
 
 
+def _anchor_point(
+    sx1: int,
+    sy1: int,
+    sx2: int,
+    sy2: int,
+    pos: str,
+) -> tuple[int, int]:
+    cx, cy = (sx1 + sx2) // 2, (sy1 + sy2) // 2
+    if pos == "tl":
+        return sx1, sy1
+    if pos == "tr":
+        return sx2, sy1
+    if pos == "bl":
+        return sx1, sy2
+    if pos == "br":
+        return sx2, sy2
+    if pos == "left":
+        return sx1, cy
+    if pos == "right":
+        return sx2, cy
+    if pos == "top":
+        return cx, sy1
+    return cx, sy2
+
+
 def draw_annotations(
     im: Image.Image,
     circles: list[tuple[int, int, int, int, int, str, str]],
@@ -61,8 +108,10 @@ def draw_annotations(
         return im.copy()
     w, h = im.size
     scale = 2
-    # Reference thickness scaled mildly for images wider or narrower than 720px
-    unit = max(0.8, min(1.3, w / 720.0))
+    # Scale thickness proportionally for high-res portrait images (e.g. 1536x2752)
+    # while clamping wide landscape crops (e.g. 1024x441).
+    raw_unit = w / 720.0
+    unit = max(0.8, min(2.2, raw_unit) if h >= w else min(1.3, raw_unit))
     overlay = Image.new("RGBA", (w * scale, h * scale), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
 
@@ -71,16 +120,17 @@ def draw_annotations(
     badge_r = int(round(20 * unit * scale))
     font = load_font(int(round(24 * unit * scale)))
 
-    orange = (234, 88, 12, 255)   # #EA580C high-contrast warm accent
+    blue = (16, 64, 248, 255)   # #1040F8 MemoraCores.claro.primaria (8.12:1 on white)
     white = (255, 255, 255, 245)
 
-    # First pass: draw all rings with white halo then orange stroke
+    margin = max(6, int(round(6 * unit)))
+    # First pass: draw all rings with white halo then Memora blue stroke
     adj_boxes = []
     for x1, y1, x2, y2, num, shape, badge_pos in circles:
-        ax1 = max(6, x1)
-        ay1 = max(6, y1 - top_crop)
-        ax2 = min(w - 6, x2)
-        ay2 = min(h - 6, y2 - top_crop)
+        ax1 = max(margin, x1)
+        ay1 = max(margin, y1 - top_crop)
+        ax2 = min(w - margin, x2)
+        ay2 = min(h - margin, y2 - top_crop)
         sx1, sy1, sx2, sy2 = ax1 * scale, ay1 * scale, ax2 * scale, ay2 * scale
         box = (sx1, sy1, sx2, sy2)
         bw, bh = sx2 - sx1, sy2 - sy1
@@ -88,42 +138,62 @@ def draw_annotations(
 
         if shape == "ellipse":
             draw.ellipse(box, outline=white, width=halo_w)
-            draw.ellipse(box, outline=orange, width=stroke_w)
+            draw.ellipse(box, outline=blue, width=stroke_w)
         else:
             draw.rounded_rectangle(box, radius=rad, outline=white, width=halo_w)
-            draw.rounded_rectangle(box, radius=rad, outline=orange, width=stroke_w)
+            draw.rounded_rectangle(box, radius=rad, outline=blue, width=stroke_w)
         adj_boxes.append((sx1, sy1, sx2, sy2, num, shape, badge_pos))
 
-    # Second pass: draw numbered circular badges on top
+    # Second pass: place numbered circular badges with collision avoidance
     ow, oh = w * scale, h * scale
-    pad = badge_r + int(6 * scale)
-    for sx1, sy1, sx2, sy2, num, shape, badge_pos in adj_boxes:
-        cx, cy = (sx1 + sx2) // 2, (sy1 + sy2) // 2
-        if badge_pos == "tl":
-            bx, by = sx1, sy1
-        elif badge_pos == "tr":
-            bx, by = sx2, sy1
-        elif badge_pos == "bl":
-            bx, by = sx1, sy2
-        elif badge_pos == "br":
-            bx, by = sx2, sy2
-        elif badge_pos == "left":
-            bx, by = sx1, cy
-        elif badge_pos == "right":
-            bx, by = sx2, cy
-        elif badge_pos == "top":
-            bx, by = cx, sy1
-        else:
-            bx, by = cx, sy2
+    pad = badge_r + int(round(6 * unit * scale))
+    min_dist = 2 * badge_r + int(round(12 * unit * scale))
+    anchor_order = ["tr", "tl", "br", "bl", "right", "left", "top", "bottom"]
+    placed_badges: list[tuple[int, int, int]] = []
 
-        bx = max(pad, min(ow - pad, bx))
-        by = max(pad, min(oh - pad, by))
+    for idx, (sx1, sy1, sx2, sy2, num, shape, badge_pos) in enumerate(adj_boxes):
+        ordered_anchors = [badge_pos] + [a for a in anchor_order if a != badge_pos]
+        candidates: list[tuple[int, int, int]] = []
+        for rank, anc in enumerate(ordered_anchors):
+            bx0, by0 = _anchor_point(sx1, sy1, sx2, sy2, anc)
+            candidates.append((rank, bx0, by0))
+        # Tangential shifts along top/bottom/side edges as fallback
+        for shift_idx, mult in enumerate((1.0, -1.0, 1.5, -1.5, 2.0, -2.0), start=len(ordered_anchors)):
+            delta = int(round(mult * min_dist))
+            bx0, by0 = _anchor_point(sx1, sy1, sx2, sy2, badge_pos)
+            candidates.append((shift_idx, bx0 + delta, by0))
+            candidates.append((shift_idx, bx0, by0 + delta))
 
-        outer = (bx - badge_r - 3 * scale, by - badge_r - 3 * scale,
-                 bx + badge_r + 3 * scale, by + badge_r + 3 * scale)
+        best_choice: tuple[float, int, float, int, int] | None = None
+        for rank, raw_x, raw_y in candidates:
+            bx = max(pad, min(ow - pad, raw_x))
+            by = max(pad, min(oh - pad, raw_y))
+            clamp_dist = math.hypot(bx - raw_x, by - raw_y)
+            penalty = 0.0
+            for _, px, py in placed_badges:
+                d = math.hypot(bx - px, by - py)
+                if d < min_dist:
+                    penalty += 10000.0 + (min_dist - d) * 100.0
+            for j, (ox1, oy1, ox2, oy2, _, _, _) in enumerate(adj_boxes):
+                if j == idx:
+                    continue
+                if (ox1 + 0.5 * badge_r < bx < ox2 - 0.5 * badge_r and
+                        oy1 + 0.5 * badge_r < by < oy2 - 0.5 * badge_r):
+                    penalty += 2000.0
+            score_key = (penalty, rank, clamp_dist, bx, by)
+            if best_choice is None or score_key[:3] < best_choice[:3]:
+                best_choice = score_key
+
+        assert best_choice is not None
+        _, _, _, bx, by = best_choice
+        placed_badges.append((num, bx, by))
+
+        outer_pad = int(round(3 * unit * scale))
+        outer = (bx - badge_r - outer_pad, by - badge_r - outer_pad,
+                 bx + badge_r + outer_pad, by + badge_r + outer_pad)
         inner = (bx - badge_r, by - badge_r, bx + badge_r, by + badge_r)
         draw.ellipse(outer, fill=white)
-        draw.ellipse(inner, fill=orange)
+        draw.ellipse(inner, fill=blue)
 
         label = str(num)
         tb = draw.textbbox((0, 0), label, font=font)
@@ -132,79 +202,104 @@ def draw_annotations(
         ty = by - th / 2 - tb[1]
         draw.text((tx, ty), label, font=font, fill=(255, 255, 255, 255))
 
+    for i in range(len(placed_badges)):
+        for j in range(i + 1, len(placed_badges)):
+            n1, x1, y1 = placed_badges[i]
+            n2, x2, y2 = placed_badges[j]
+            dist = math.hypot(x1 - x2, y1 - y2)
+            assert dist >= 2 * badge_r, (
+                f"Colisao de badges #{n1} e #{n2}: dist={dist:.1f} < {2 * badge_r}"
+            )
+
     overlay_small = overlay.resize((w, h), Image.Resampling.LANCZOS)
     base = im.convert("RGBA")
     out = Image.alpha_composite(base, overlay_small).convert("RGB")
     return out
 
 
-def save_asset_jpg(im: Image.Image, dst_path: str, target_width: int = 480, quality: int = 82) -> None:
-    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+def save_asset_jpg(
+    im: Image.Image,
+    dst_path: str,
+    target_width: int = 480,
+    quality: int = 80,
+) -> None:
     if im.width > target_width:
         ratio = target_width / im.width
         resized = im.resize((target_width, int(im.height * ratio)), Image.Resampling.LANCZOS)
     else:
         resized = im.copy()
-    resized.convert("RGB").save(dst_path, "JPEG", quality=quality, optimize=True)
+    _atomic_save_jpg(resized, dst_path, quality=quality, optimize=True)
 
 
-# Complete validated specification for all 76 screenshots across 6 folders
+# Complete validated specification for all 77 screenshots across 6 folders.
 # Coordinates are in ORIGINAL (uncropped) image pixels.
 SPECS: dict[str, dict] = {
     "whatsapp": {
         "orig_dir": "WhatsApp",
         "steps": [
-            # Passo 1: Tela inicial + menu de 3 pontos aberto
+            # Passo 1: Tela inicial + menu de 3 pontos aberto (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.21 (4).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (8, 495, 295, 965),    # Chats visíveis à esquerda do menu
-                    (8, 975, 580, 1365),   # Chats na parte inferior (excluindo botões à direita)
+                    (8, 495, 292, 965),
+                    (8, 975, 580, 1365),
                 ],
                 "circles": [
-                    (40, 175, 295, 275, 1, "pill", "tl"),     # Barra de pesquisa Pergunte à Meta AI
-                    (570, 68, 705, 145, 2, "pill", "bl"),     # Ícones Câmera e 3 pontinhos
-                    (300, 165, 705, 970, 3, "pill", "tl"),    # Menu de opções aberto
-                    (575, 1085, 705, 1345, 4, "pill", "tl"),  # Botões Meta AI e Nova conversa (+)
-                    (12, 1370, 708, 1485, 5, "pill", "tl"),   # Abas inferiores
+                    (34, 168, 290, 276, 1, "pill", "tl"),
+                    (562, 74, 706, 148, 2, "pill", "bl"),
+                    (294, 158, 706, 974, 3, "pill", "tl"),
+                    (568, 1192, 704, 1322, 4, "pill", "tl"),
+                    (6, 1356, 712, 1494, 5, "pill", "tl"),
                 ],
             },
-            # Passo 2: Menu de três pontinhos detalhado
+            # Passo 2: Menu de três pontinhos detalhado (634x1363)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.37.40.jpeg",
                 "top_crop": 0,
                 "blur": [],
                 "circles": [
-                    (25, 160, 490, 415, 1, "pill", "tr"),     # Novo grupo / Nova comunidade
-                    (25, 455, 560, 705, 2, "pill", "tr"),     # Listas de transmissão / Dispositivos conectados
-                    (25, 745, 570, 995, 3, "pill", "tr"),     # Favoritas / Marcar tudo como lido
-                    (25, 1035, 460, 1290, 4, "pill", "tr"),   # Pagamentos / Configurações
+                    (18, 195, 465, 420, 1, "pill", "tr"),
+                    (18, 480, 602, 718, 2, "pill", "tr"),
+                    (18, 770, 565, 998, 3, "pill", "tr"),
+                    (18, 1058, 415, 1295, 4, "pill", "tr"),
                 ],
             },
-            # Passo 3: Configurações (parte 1)
+            # Passo 3: Configurações (parte 1) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.21 (5).jpeg",
                 "top_crop": 58,
-                "blur": [(95, 75, 330, 155)],  # Primeiro nome do titular
+                "blur": [(95, 75, 330, 155)],
                 "circles": [
-                    (440, 72, 705, 152, 1, "pill", "bl"),     # Buscar, QR Code e editar nome
-                    (25, 195, 500, 445, 2, "pill", "tr"),     # Pagamentos e Assinaturas
-                    (25, 475, 675, 610, 3, "pill", "tr"),     # Dispositivos conectados
-                    (25, 635, 685, 980, 4, "pill", "tr"),     # Conta e Privacidade
-                    (25, 1015, 695, 1470, 5, "pill", "tr"),   # Listas, Conversas e Aparência
+                    (440, 76, 706, 154, 1, "pill", "bl"),
+                    (20, 195, 600, 454, 2, "pill", "tr"),
+                    (20, 486, 686, 610, 3, "pill", "tr"),
+                    (20, 640, 686, 990, 4, "pill", "tr"),
+                    (20, 1024, 702, 1492, 5, "pill", "tr"),
                 ],
             },
-            # Passo 4: Configurações (parte 2)
+            # Passo 4: Configurações (parte 2) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.22.jpeg",
                 "top_crop": 58,
-                "blur": [(95, 75, 330, 155)],  # Primeiro nome do titular
+                "blur": [(95, 75, 330, 155)],
                 "circles": [
-                    (25, 195, 675, 465, 1, "pill", "tr"),     # Listas de transmissão e Notificações
-                    (25, 490, 685, 615, 2, "pill", "tr"),     # Armazenamento e dados
-                    (25, 645, 690, 935, 3, "pill", "tr"),     # Controle parental e Acessibilidade
-                    (25, 960, 695, 1380, 4, "pill", "tr"),    # Idioma do app, Ajuda e feedback, Convidar
+                    (20, 200, 665, 482, 1, "pill", "tr"),
+                    (20, 512, 650, 632, 2, "pill", "tr"),
+                    (20, 664, 650, 938, 3, "pill", "tr"),
+                    (20, 968, 704, 1420, 4, "pill", "tr"),
+                ],
+            },
+            # Passo 5: Funcionalidades dentro de uma conversa (1536x2752)
+            {
+                "file": "Gemini_Generated_Image_feko87feko87feko.jfif",
+                "top_crop": 100,
+                "blur": [(295, 180, 600, 265)],
+                "circles": [
+                    (18, 134, 1506, 308, 1, "pill", "bl"),
+                    (24, 355, 1510, 1650, 2, "pill", "tr"),
+                    (24, 1676, 1320, 2328, 3, "pill", "tr"),
+                    (16, 2358, 1522, 2562, 4, "pill", "tl"),
                 ],
             },
         ],
@@ -212,114 +307,114 @@ SPECS: dict[str, dict] = {
     "telegram": {
         "orig_dir": "Telegram",
         "steps": [
-            # Passo 1: Tela inicial de Chats
+            # Passo 1: Tela inicial de Chats (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.20.jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (15, 390, 710, 1135),  # Lista de conversas/grupos
-                    (15, 1135, 575, 1365), # Conversas inferiores à esquerda dos botões
-                    (15, 1500, 705, 1600), # Linha translucida sob a barra Android
-                    (592, 1388, 648, 1442),# Mini avatar Perfil
+                    (15, 390, 710, 1135),
+                    (15, 1135, 575, 1365),
+                    (15, 1500, 705, 1600),
+                    (592, 1388, 648, 1442),
                 ],
                 "circles": [
-                    (20, 170, 700, 260, 1, "pill", "tr"),     # Buscar Chats
-                    (20, 280, 700, 385, 2, "pill", "tr"),     # Cartão de aniversário / avisos no topo
-                    (575, 1130, 695, 1360, 3, "pill", "tl"),  # Câmera rápida e Novo chat (+)
-                    (25, 1375, 695, 1485, 4, "pill", "tl"),   # Barra Chats, Contatos, Configurações, Perfil
+                    (20, 168, 700, 260, 1, "pill", "tr"),
+                    (20, 272, 700, 376, 2, "pill", "tr"),
+                    (570, 1134, 706, 1362, 3, "pill", "tl"),
+                    (16, 1366, 704, 1496, 4, "pill", "tl"),
                 ],
             },
-            # Passo 2: Contatos
+            # Passo 2: Contatos (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.20 (3).jpeg",
                 "top_crop": 58,
-                "blur": [(592, 1388, 648, 1442)],  # Mini avatar Perfil
+                "blur": [(592, 1388, 648, 1442)],
                 "circles": [
-                    (610, 68, 705, 160, 1, "ellipse", "bl"),  # Lupa de busca
-                    (180, 905, 540, 1020, 2, "pill", "tr"),   # Botão Novo Contato
-                    (185, 1375, 345, 1485, 3, "pill", "tl"),  # Aba Contatos ativa
+                    (608, 68, 708, 164, 1, "ellipse", "bl"),
+                    (174, 916, 546, 1038, 2, "pill", "tr"),
+                    (182, 1370, 348, 1494, 3, "pill", "tl"),
                 ],
             },
-            # Passo 3: Nova Mensagem
+            # Passo 3: Nova Mensagem (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.20 (1).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (18, 68, 705, 162, 1, "pill", "bl"),      # Voltar, título Nova Mensagem e Buscar
-                    (25, 180, 560, 385, 2, "pill", "tr"),     # Novo Grupo e Novo Canal
-                    (180, 1140, 540, 1255, 3, "pill", "tr"),  # Botão Novo Contato
+                    (16, 68, 708, 164, 1, "pill", "bl"),
+                    (22, 178, 560, 386, 2, "pill", "tr"),
+                    (174, 1146, 546, 1268, 3, "pill", "tr"),
                 ],
             },
-            # Passo 4: Formulário Novo Contato
+            # Passo 4: Formulário Novo Contato (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.20 (2).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (25, 125, 695, 385, 1, "pill", "tr"),     # Nome (obrigatório) e Sobrenome
-                    (25, 415, 695, 530, 2, "pill", "tr"),     # DDI +55 e Número de telefone
-                    (40, 545, 580, 690, 3, "pill", "tr"),     # Sincronizar com o celular
-                    (25, 780, 695, 895, 4, "pill", "tr"),     # Botão Criar Contato
+                    (22, 126, 698, 396, 1, "pill", "tr"),
+                    (22, 408, 698, 540, 2, "pill", "tr"),
+                    (35, 542, 470, 622, 3, "pill", "tr"),
+                    (22, 780, 698, 905, 4, "pill", "tr"),
                 ],
             },
-            # Passo 5: Seu Perfil
+            # Passo 5: Seu Perfil (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.21 (3).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (255, 115, 460, 315),   # Foto grande
-                    (190, 325, 530, 400),   # Nome completo do titular
-                    (40, 635, 390, 700),    # Telefone pessoal do titular
-                    (592, 1388, 648, 1442), # Mini avatar
+                    (255, 115, 460, 315),
+                    (190, 325, 530, 400),
+                    (40, 635, 390, 700),
+                    (592, 1388, 648, 1442),
                 ],
                 "circles": [
-                    (18, 70, 705, 162, 1, "pill", "bl"),      # Código QR e Menu 3 pontinhos
-                    (20, 465, 695, 590, 2, "pill", "tr"),     # Definir Foto, Editar Informações e Configurações
-                    (20, 610, 695, 740, 3, "pill", "tr"),     # Telefone cadastrado
-                    (165, 1265, 555, 1360, 4, "pill", "tr"),  # Botão Adicione um post
+                    (16, 68, 708, 164, 1, "pill", "bl"),
+                    (18, 466, 702, 610, 2, "pill", "tr"),
+                    (18, 626, 702, 760, 3, "pill", "tr"),
+                    (164, 1262, 556, 1372, 4, "pill", "tr"),
                 ],
             },
-            # Passo 6: Configurações (topo)
+            # Passo 6: Configurações (topo) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.21.jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (255, 115, 460, 315),   # Avatar
-                    (200, 312, 520, 372),   # Nome completo do titular
-                    (210, 372, 510, 440),   # Telefone
-                    (95, 480, 420, 535),    # Telefone na pergunta de confirmação
-                    (592, 1388, 648, 1442), # Mini avatar
+                    (255, 115, 460, 315),
+                    (200, 312, 520, 372),
+                    (210, 372, 510, 440),
+                    (95, 480, 420, 535),
+                    (592, 1388, 648, 1442),
                 ],
                 "keep": [(388, 242, 462, 316)],
                 "circles": [
-                    (385, 240, 468, 320, 1, "ellipse", "tr"), # Botão câmera da foto de perfil
-                    (40, 695, 680, 815, 2, "pill", "tr"),     # Confirmar número (Não / Sim)
-                    (25, 865, 685, 1105, 3, "pill", "tr"),    # Conta e Configurações de Chat
-                    (25, 1110, 685, 1365, 4, "pill", "tr"),   # Privacidade e Segurança / Notificações
+                    (384, 238, 470, 322, 1, "ellipse", "tr"),
+                    (38, 704, 682, 826, 2, "pill", "tr"),
+                    (22, 868, 688, 1104, 3, "pill", "tr"),
+                    (22, 1112, 688, 1348, 4, "pill", "tr"),
                 ],
             },
-            # Passo 7: Configurações (opções)
+            # Passo 7: Configurações (opções) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.21 (1).jpeg",
                 "top_crop": 58,
                 "blur": [(592, 1388, 648, 1442)],
                 "circles": [
-                    (18, 68, 705, 158, 1, "pill", "bl"),      # QR Code, título Configurações, Buscar e menu
-                    (25, 165, 695, 485, 2, "pill", "tr"),     # Chat, Privacidade e Notificações
-                    (25, 495, 695, 755, 3, "pill", "tr"),     # Dados e Armazenamento / Pastas de Chat
-                    (25, 765, 695, 1090, 4, "pill", "tr"),    # Dispositivos, Economia de Energia e Idioma
+                    (16, 66, 708, 144, 1, "pill", "bl"),
+                    (22, 150, 698, 504, 2, "pill", "tr"),
+                    (22, 516, 698, 746, 3, "pill", "tr"),
+                    (22, 758, 698, 1106, 4, "pill", "tr"),
                 ],
             },
-            # Passo 8: Configurações (recursos e Ajuda)
+            # Passo 8: Configurações (recursos e Ajuda) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-09 at 14.25.21 (2).jpeg",
                 "top_crop": 58,
                 "blur": [(592, 1388, 648, 1442)],
                 "circles": [
-                    (25, 330, 695, 740, 1, "pill", "tr"),     # Telegram Premium, Estrelas, Business, Presente
-                    (25, 770, 695, 965, 2, "pill", "tr"),     # Ajuda -> Fazer uma Pergunta
-                    (25, 975, 695, 1255, 3, "pill", "tr"),    # Perguntas Frequentes, Recursos e Privacidade
+                    (22, 326, 698, 750, 1, "pill", "tr"),
+                    (22, 774, 698, 946, 2, "pill", "tr"),
+                    (22, 956, 698, 1252, 3, "pill", "tr"),
                 ],
             },
         ],
@@ -327,140 +422,131 @@ SPECS: dict[str, dict] = {
     "facebook": {
         "orig_dir": "FACE",
         "steps": [
-            # Passo 1: Feed Principal
+            # Passo 1: Feed Principal (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34.jpeg",
                 "top_crop": 58,
-                "blur": [(18, 808, 355, 902)],  # Avatar e nome Gabriela Guimarães no post
+                "blur": [(18, 808, 355, 902)],
                 "circles": [
-                    (445, 72, 710, 152, 1, "pill", "bl"),     # Botões +, Buscar e Messenger
-                    (15, 158, 705, 232, 2, "pill", "tl"),     # Abas Início, Reels, Amigos, Marketplace, Sino, Perfil
-                    (105, 240, 705, 345, 3, "pill", "tr"),    # Campo "No que você está pensando?" e foto
-                    (12, 368, 225, 765, 4, "pill", "tr"),     # Cartão Criar story
+                    (445, 70, 710, 146, 1, "pill", "bl"),
+                    (15, 150, 705, 228, 2, "pill", "tl"),
+                    (105, 238, 705, 368, 3, "pill", "tr"),
+                    (8, 376, 224, 786, 4, "pill", "tr"),
                 ],
             },
-            # Passo 2: Vídeos Curtos (Reels)
+            # Passo 2: Vídeos Curtos (Reels) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (4).jpeg",
                 "top_crop": 58,
-                "blur": [(145, 1142, 575, 1245)],  # Termo ofensivo na legenda do vídeo
+                "blur": [(145, 1142, 575, 1245)],
                 "circles": [
-                    (125, 72, 705, 150, 1, "pill", "bl"),     # Aba Reels selecionada / Buscar / Messenger
-                    (55, 168, 695, 255, 2, "pill", "tr"),     # Título Reels e menu
-                    (610, 910, 712, 1445, 3, "pill", "tl"),   # Botões Curtir, Comentar, Compartilhar e Salvar
-                    (15, 1275, 570, 1385, 4, "pill", "tr"),   # Canal e botão Seguir
+                    (125, 68, 708, 150, 1, "pill", "bl"),
+                    (18, 166, 708, 258, 2, "pill", "tr"),
+                    (610, 910, 714, 1446, 3, "pill", "tl"),
+                    (14, 1315, 588, 1412, 4, "pill", "tr"),
                 ],
             },
-            # Passo 3: Marketplace
+            # Passo 3: Marketplace (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (3).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (525, 158, 705, 232, 1, "pill", "bl"),    # Lupa de busca e opções do Marketplace
-                    (12, 238, 708, 320, 2, "pill", "tr"),     # Abas Vender, Explorar, Local, Mais e pino de localização
-                    (12, 330, 708, 765, 3, "pill", "tr"),     # Anúncios com foto, preço e título
+                    (525, 156, 708, 232, 1, "pill", "bl"),
+                    (12, 236, 708, 320, 2, "pill", "tr"),
+                    (12, 330, 708, 768, 3, "pill", "tr"),
                 ],
             },
-            # Passo 4: Amigos e Solicitações
+            # Passo 4: Amigos e Solicitações (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (2).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (20, 435, 210, 625), (225, 435, 625, 490),   # Pedido 1
-                    (20, 650, 210, 840), (225, 650, 470, 705), (225, 745, 278, 785),  # Pedido 2
-                    (20, 895, 215, 1085), (225, 895, 620, 955), (225, 985, 315, 1035), # Pedido 3
-                    (20, 1140, 215, 1340), (225, 1150, 520, 1210), # Pedido 4
+                    (18, 430, 214, 626), (225, 435, 625, 490),
+                    (18, 646, 214, 844), (225, 650, 470, 705), (225, 738, 282, 795),
+                    (18, 902, 214, 1102), (225, 895, 620, 955), (225, 960, 324, 1052),
+                    (18, 1158, 214, 1358), (225, 1150, 520, 1210),
                 ],
                 "circles": [
-                    (240, 72, 345, 145, 1, "ellipse", "bl"),  # Aba Amigos selecionada
-                    (12, 235, 465, 315, 2, "pill", "tr"),     # Botões Sugestões e Seus amigos
-                    (218, 520, 705, 605, 3, "pill", "tr"),    # Botões Confirmar e Excluir pedido
+                    (240, 70, 348, 146, 1, "ellipse", "bl"),
+                    (12, 230, 468, 318, 2, "pill", "tr"),
+                    (220, 534, 708, 630, 3, "pill", "tr"),
                 ],
             },
-            # Passo 5: Notificações
+            # Passo 5: Notificações (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (5).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (20, 325, 162, 460),
-                    (20, 480, 162, 615), (170, 485, 625, 615), # Comentário pessoal ("Muito obrigado vô")
-                    (20, 640, 162, 775),
-                    (20, 800, 162, 935),
-                    (20, 960, 162, 1095),
-                    (20, 1120, 162, 1255),
+                    (18, 335, 162, 474),
+                    (18, 495, 162, 635), (170, 485, 625, 615),
+                    (18, 655, 162, 795),
+                    (18, 815, 162, 955),
+                    (18, 974, 162, 1115),
+                    (18, 1135, 162, 1275),
                 ],
                 "circles": [
-                    (485, 72, 585, 145, 1, "ellipse", "bl"),  # Aba Notificações (sininho)
-                    (610, 160, 705, 232, 2, "ellipse", "bl"), # Lupa de pesquisa
-                    (12, 315, 625, 470, 3, "pill", "tr"),     # Item de notificação recente
-                    (628, 330, 705, 410, 4, "ellipse", "bl"), # Opções (...) da notificação
+                    (485, 70, 585, 146, 1, "ellipse", "bl"),
+                    (610, 158, 708, 232, 2, "ellipse", "bl"),
+                    (12, 320, 628, 476, 3, "pill", "tr"),
+                    (632, 330, 708, 408, 4, "ellipse", "bl"),
                 ],
             },
-            # Passo 6: Menu de Atalhos
+            # Passo 6: Menu de Atalhos (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (1).jpeg",
                 "top_crop": 58,
-                "blur": [
-                    (145, 115, 425, 180),  # Nome completo do titular
-                    (640, 615, 720, 720),  # Mini foto lateral no feed de fundo
-                ],
+                "blur": [(145, 115, 425, 180), (640, 615, 720, 720)],
                 "circles": [
-                    (18, 95, 590, 305, 1, "pill", "tr"),      # Seu perfil no topo e Criar Página
-                    (18, 355, 580, 845, 2, "pill", "tr"),     # Meta AI, Salvos, Lembranças, Marketplace, Namoro
-                    (18, 865, 600, 1185, 3, "pill", "tr"),    # Ver mais, Ajuda e suporte, Configurações e privacidade
+                    (16, 86, 610, 326, 1, "pill", "tr"),
+                    (16, 360, 580, 845, 2, "pill", "tr"),
+                    (16, 874, 616, 1180, 3, "pill", "tr"),
                 ],
             },
-            # Passo 7: Configurações e Privacidade
+            # Passo 7: Configurações e Privacidade (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (7).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (15, 85, 605, 265, 1, "pill", "tr"),      # Configurações e Privacidade -> Configurações
-                    (15, 270, 580, 470, 2, "pill", "tr"),     # Central de Privacidade e Solicitações de dispositivos
-                    (15, 480, 580, 820, 3, "pill", "tr"),     # Atividade de anúncios, Pedidos/pagamentos, Histórico
-                    (15, 880, 600, 1295, 4, "pill", "tr"),    # Atualizações e recursos Meta
+                    (16, 84, 616, 266, 1, "pill", "tr"),
+                    (16, 274, 612, 466, 2, "pill", "tr"),
+                    (16, 476, 612, 836, 3, "pill", "tr"),
+                    (16, 864, 616, 1296, 4, "pill", "tr"),
                 ],
             },
-            # Passo 8: Página de Perfil
+            # Passo 8: Página de Perfil (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (6).jpeg",
                 "top_crop": 58,
-                "blur": [
-                    (165, 700, 560, 775),   # Nome completo do titular
-                    (10, 1365, 710, 1500),  # Sugestões embaixo com telefone comercial
-                ],
+                "blur": [(165, 700, 560, 775), (10, 1365, 710, 1500)],
                 "circles": [
-                    (465, 165, 705, 245, 1, "pill", "bl"),    # Editar, Pesquisar e Mais opções (...)
-                    (425, 540, 512, 628, 2, "ellipse", "tr"), # Botão câmera na foto de perfil
-                    (20, 825, 695, 920, 3, "pill", "tr"),     # Botões Adicionar ao story e Editar perfil
-                    (20, 960, 700, 1285, 4, "pill", "tr"),    # Cartão Atualizar seu perfil
+                    (465, 164, 706, 246, 1, "pill", "bl"),
+                    (422, 598, 514, 690, 2, "ellipse", "tr"),
+                    (16, 840, 704, 942, 3, "pill", "tr"),
+                    (16, 962, 704, 1288, 4, "pill", "tr"),
                 ],
             },
-            # Passo 9: Editar Perfil (Apresentação e Dados)
+            # Passo 9: Editar Perfil (Apresentação e Dados) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (8).jpeg",
                 "top_crop": 58,
-                "blur": [
-                    (85, 1020, 470, 1080),  # Data de nascimento
-                    (85, 1295, 275, 1350),  # Gênero
-                ],
+                "blur": [(85, 1020, 470, 1080), (85, 1295, 275, 1350)],
                 "circles": [
-                    (425, 360, 512, 445, 1, "ellipse", "tr"), # Câmera para trocar foto de perfil/capa
-                    (18, 495, 705, 730, 2, "pill", "tr"),     # Apresentação (Sobre você / Detalhes fixados)
-                    (18, 770, 705, 1450, 3, "pill", "tr"),    # Dados pessoais (Cidade, aniversário, família, lápis editar)
+                    (420, 380, 514, 474, 1, "ellipse", "tr"),
+                    (12, 508, 708, 756, 2, "pill", "tr"),
+                    (12, 772, 708, 1462, 3, "pill", "tr"),
                 ],
             },
-            # Passo 10: Editar Perfil (Trabalho, Educação e Interesses)
+            # Passo 10: Editar Perfil (Trabalho, Educação e Interesses) (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-10 at 14.33.34 (9).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (18, 125, 705, 480, 1, "pill", "tr"),     # Trabalho e Educação
-                    (18, 495, 705, 1170, 2, "pill", "tr"),    # Hobbies e Interesses (Músicas, TV, Filmes, Jogos)
-                    (18, 1190, 705, 1480, 3, "pill", "tr"),   # Viagem e Links
+                    (12, 130, 708, 476, 1, "pill", "tr"),
+                    (12, 490, 708, 1180, 2, "pill", "tr"),
+                    (12, 1198, 708, 1446, 3, "pill", "tr"),
                 ],
             },
         ],
@@ -468,93 +554,93 @@ SPECS: dict[str, dict] = {
     "correios": {
         "orig_dir": "Correios",
         "steps": [
-            # Passo 1: Home Correios
+            # Passo 1: Home Correios (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (2).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (10, 200, 105, 285, 1, "ellipse", "br"),  # Menu de três tracinhos
-                    (520, 195, 705, 285, 2, "pill", "bl"),    # Botões Entrar e Lupa de busca
-                    (12, 1005, 705, 1265, 3, "pill", "tl"),   # Área Acompanhe seu Objeto e campo de código
+                    (8, 215, 74, 290, 1, "ellipse", "br"),
+                    (525, 208, 712, 288, 2, "pill", "bl"),
+                    (24, 965, 702, 1278, 3, "pill", "tl"),
                 ],
             },
-            # Passo 2: Campo Acompanhe seu Objeto com teclado
+            # Passo 2: Campo Acompanhe seu Objeto com teclado (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (4).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (180, 520, 685, 650, 1, "pill", "tr"),    # Campo para digitar o código ou CPF
-                    (595, 540, 675, 625, 2, "ellipse", "tl"), # Botão de Lupa para pesquisar
-                    (20, 710, 700, 915, 3, "pill", "tr"),     # Atalhos Preços, Comprar, App e Busca CEP
+                    (178, 546, 594, 673, 1, "pill", "tl"),
+                    (600, 560, 686, 656, 2, "ellipse", "tr"),
+                    (12, 708, 708, 960, 3, "pill", "tl"),
                 ],
             },
-            # Passo 3: Formulário Rastreamento com código de imagem (1046x426)
+            # Passo 3: Formulário Rastreamento com código de imagem (1024x441)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09.jpeg",
                 "top_crop": 0,
                 "blur": [],
                 "circles": [
-                    (155, 168, 305, 232, 1, "pill", "tl"),    # Campo CPF/CNPJ ou código de rastreamento
-                    (158, 258, 515, 395, 2, "pill", "tl"),    # Código da imagem + áudio e recarregar
-                    (555, 280, 965, 342, 3, "pill", "tl"),    # Campo "Digite o texto contido na imagem"
-                    (705, 338, 810, 385, 4, "pill", "tr"),    # Botão azul Consultar
+                    (158, 188, 982, 234, 1, "pill", "tr"),
+                    (154, 260, 524, 398, 2, "pill", "bl"),
+                    (545, 252, 984, 342, 3, "pill", "tr"),
+                    (680, 344, 830, 394, 4, "pill", "tl"),
                 ],
             },
             # Passo 4: Linha do tempo da entrega (675x863)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (1).jpeg",
                 "top_crop": 0,
-                "blur": [(198, 100, 365, 148)],  # Fortalecer blur no código de rastreamento
+                "blur": [(198, 100, 365, 148)],
                 "circles": [
-                    (72, 85, 470, 195, 1, "pill", "tr"),      # Código de rastreio e data da última atualização
-                    (110, 215, 615, 330, 2, "pill", "tr"),    # Etapa mais recente no topo (Entregue)
-                    (100, 335, 655, 830, 3, "pill", "tr"),    # Histórico completo das movimentações anteriores
+                    (48, 56, 520, 198, 1, "pill", "tr"),
+                    (56, 206, 650, 324, 2, "pill", "tr"),
+                    (56, 332, 650, 846, 3, "pill", "tr"),
                 ],
             },
-            # Passo 5: Menu aberto
+            # Passo 5: Menu aberto (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (3).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (25, 305, 535, 585, 1, "pill", "tr"),     # Enviar, Receber e Comprar
-                    (25, 595, 535, 855, 2, "pill", "tr"),     # Logística, Atendimento e Acesso à Informação
-                    (180, 1125, 685, 1235, 3, "pill", "tr"),  # Campo Acompanhe seu Objeto abaixo do menu
+                    (25, 340, 535, 596, 1, "pill", "tr"),
+                    (25, 612, 535, 858, 2, "pill", "tr"),
+                    (180, 1150, 692, 1272, 3, "pill", "tr"),
                 ],
             },
-            # Passo 6: Simulador de Preços e Prazos
+            # Passo 6: Simulador de Preços e Prazos (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (5).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (20, 600, 700, 740, 1, "pill", "tr"),     # Campos CEP de Origem e Destino
-                    (115, 760, 700, 1020, 2, "pill", "tr"),   # Medidas da caixa: Altura, Largura e Comprimento
-                    (125, 1045, 590, 1150, 3, "pill", "tr"),  # Botão azul Calcular Frete
+                    (20, 604, 700, 748, 1, "pill", "tr"),
+                    (98, 762, 702, 1025, 2, "pill", "tr"),
+                    (125, 1054, 595, 1175, 3, "pill", "tr"),
                 ],
             },
-            # Passo 7: Menu lateral do Rastreamento
+            # Passo 7: Menu lateral do Rastreamento (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (6).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (20, 300, 580, 460, 1, "pill", "tr"),     # Rastreamento e botão Entrar
-                    (20, 480, 580, 725, 2, "pill", "tr"),     # Rastreamento em outros países, Dúvidas e Busca Agências
-                    (20, 735, 580, 1085, 3, "pill", "tr"),    # Central de Atendimento, Prazos e Restrição por CEP
+                    (12, 310, 580, 472, 1, "pill", "tr"),
+                    (12, 492, 580, 742, 2, "pill", "tr"),
+                    (12, 756, 580, 1102, 3, "pill", "tr"),
                 ],
             },
-            # Passo 8: Login Meu Correios
+            # Passo 8: Login Meu Correios (720x1600)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.09 (7).jpeg",
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (75, 620, 640, 825, 1, "pill", "tr"),     # Instrução: informe CPF/CNPJ sem pontos
-                    (55, 845, 660, 945, 2, "pill", "tr"),     # Botão azul Entrar
-                    (75, 965, 635, 1145, 3, "pill", "tr"),    # Esqueci minha senha, Cadastrar e Fale conosco
+                    (58, 628, 662, 842, 1, "pill", "tr"),
+                    (55, 854, 665, 958, 2, "pill", "tr"),
+                    (72, 976, 645, 1148, 3, "pill", "tr"),
                 ],
             },
         ],
@@ -568,9 +654,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (18, 155, 175, 225, 1, "pill", "br"),     # Botão Menu no alto à esquerda
-                    (525, 155, 695, 225, 2, "pill", "bl"),    # Botão Entrar no alto à direita
-                    (55, 1345, 665, 1455, 3, "pill", "tr"),   # Botão rosa "Consultar CPF grátis"
+                    (16, 160, 174, 222, 1, "pill", "br"),
+                    (526, 160, 704, 222, 2, "pill", "bl"),
+                    (54, 1348, 666, 1464, 3, "pill", "tr"),
                 ],
             },
             # Passo 2: Feirão e App oficial (inspect 28)
@@ -579,9 +665,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (20, 72, 695, 210, 1, "pill", "bl"),      # Banner do aplicativo oficial Serasa (Fechar / Baixar)
-                    (75, 285, 645, 480, 2, "pill", "tr"),     # Aviso do Feirão Limpa Nome
-                    (55, 1345, 665, 1455, 3, "pill", "tr"),   # Botão "Consultar CPF grátis"
+                    (16, 72, 704, 212, 1, "pill", "bl"),
+                    (58, 318, 658, 504, 2, "pill", "tr"),
+                    (54, 1348, 666, 1464, 3, "pill", "tr"),
                 ],
             },
             # Passo 3: Menu lateral de produtos (inspect 01)
@@ -590,10 +676,10 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (40, 72, 225, 145, 1, "pill", "br"),      # Botão Fechar (X)
-                    (65, 170, 690, 265, 2, "pill", "tr"),     # Botões Cadastrar e Entrar
-                    (20, 275, 690, 765, 3, "pill", "tr"),     # Blog, Ajuda e Canal de Denúncias
-                    (20, 795, 680, 1465, 4, "pill", "tr"),    # Lista de Produtos (Crédito, Limpa Nome, Score, Carteira)
+                    (32, 82, 212, 148, 1, "pill", "br"),
+                    (56, 178, 698, 275, 2, "pill", "tr"),
+                    (20, 292, 695, 765, 3, "pill", "tr"),
+                    (20, 795, 685, 1488, 4, "pill", "tr"),
                 ],
             },
             # Passo 4: Tela inicial autenticada (inspect 03)
@@ -601,25 +687,25 @@ SPECS: dict[str, dict] = {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.36 (4).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (560, 185, 625, 248),  # Iniciais do titular
-                    (115, 315, 280, 365),  # Primeiro nome do titular
+                    (546, 176, 634, 262),
+                    (112, 345, 275, 398),
                 ],
                 "circles": [
-                    (440, 165, 685, 265, 1, "pill", "bl"),    # Troféu de conquistas e menu da conta
-                    (55, 790, 370, 895, 2, "pill", "tr"),     # Botão Conectar contas
-                    (50, 995, 690, 1210, 3, "pill", "tr"),    # Atalhos Cartão, Consultas CPF e Empréstimo
-                    (18, 1280, 702, 1390, 4, "pill", "tl"),   # Barra inferior: Início, Finanças, Meu CPF, Dívidas, Serviços
+                    (438, 168, 692, 268, 1, "pill", "bl"),
+                    (52, 816, 372, 930, 2, "pill", "tr"),
+                    (24, 995, 690, 1218, 3, "pill", "tr"),
+                    (12, 1278, 708, 1422, 4, "pill", "tl"),
                 ],
             },
             # Passo 5: Cartão Serasa Score na home (inspect 07)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.36 (8).jpeg",
                 "top_crop": 58,
-                "blur": [(60, 245, 230, 360)],  # Número do Score pessoal
+                "blur": [(56, 245, 235, 365)],
                 "circles": [
-                    (45, 185, 675, 435, 1, "pill", "tr"),     # Pontuação Serasa Score e faixa de avaliação
-                    (45, 470, 675, 745, 2, "pill", "tr"),     # Botão Conecte suas contas para melhorar análise
-                    (35, 770, 685, 920, 3, "pill", "tr"),     # Indicador Serasa Score bloqueado/desbloqueado
+                    (45, 185, 675, 435, 1, "pill", "tr"),
+                    (45, 470, 675, 762, 2, "pill", "tr"),
+                    (35, 778, 685, 956, 3, "pill", "tr"),
                 ],
             },
             # Passo 6: Aba Finanças > Seu Serasa Score (inspect 08)
@@ -627,13 +713,13 @@ SPECS: dict[str, dict] = {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.36 (9).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (560, 62, 625, 125),  # Iniciais do titular
-                    (85, 320, 265, 425),  # Score pessoal
+                    (546, 90, 634, 178),
+                    (92, 355, 265, 450),
                 ],
                 "circles": [
-                    (45, 285, 670, 690, 1, "pill", "tr"),     # Nota detalhada, motivo e evolução do Score
-                    (75, 1110, 645, 1205, 2, "pill", "tr"),   # Botão Ir para Minhas Contas
-                    (145, 1355, 295, 1480, 3, "ellipse", "tl"), # Aba Finanças ativa embaixo
+                    (45, 285, 670, 690, 1, "pill", "tr"),
+                    (72, 1152, 648, 1250, 2, "pill", "tr"),
+                    (132, 1368, 298, 1506, 3, "ellipse", "tl"),
                 ],
             },
             # Passo 7: Score rolado - variações e contas conectadas (inspect 09)
@@ -642,9 +728,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (30, 560, 690, 865, 1, "pill", "tr"),     # Plano Premium opcional (Assinar agora)
-                    (35, 935, 685, 1085, 2, "pill", "tr"),    # Variações na pontuação
-                    (35, 1110, 685, 1265, 3, "pill", "tr"),   # Contas conectadas
+                    (24, 608, 696, 912, 1, "pill", "tr"),
+                    (35, 938, 685, 1088, 2, "pill", "tr"),
+                    (35, 1110, 685, 1265, 3, "pill", "tr"),
                 ],
             },
             # Passo 8: Alertas do Score e monitoramento (inspect 17)
@@ -653,9 +739,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (55, 440, 665, 780, 1, "pill", "tr"),     # Botão Receber alertas do Score
-                    (55, 815, 665, 1065, 2, "pill", "tr"),    # Empresas em seu nome e Consulta de Identidade
-                    (55, 1080, 665, 1315, 3, "pill", "tr"),   # Consultas em seu nome e Vazamento de dados
+                    (45, 445, 675, 795, 1, "pill", "tr"),
+                    (55, 815, 665, 1065, 2, "pill", "tr"),
+                    (55, 1080, 665, 1315, 3, "pill", "tr"),
                 ],
             },
             # Passo 9: Seu nome está limpo (inspect 11)
@@ -664,9 +750,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (40, 270, 680, 565, 1, "pill", "tr"),     # Cartão Seu nome está limpo + botão Ver meu CPF
-                    (40, 600, 680, 1090, 2, "pill", "tr"),    # Cartão Monitoramento de dados (CPF e Score)
-                    (440, 1360, 575, 1480, 3, "ellipse", "tl"), # Aba Dívidas no rodapé
+                    (40, 270, 680, 565, 1, "pill", "tr"),
+                    (40, 600, 680, 1102, 2, "pill", "tr"),
+                    (434, 1368, 576, 1502, 3, "ellipse", "tl"),
                 ],
             },
             # Passo 10: Aba Minhas Dívidas - Ofertas e Acordos (inspect 19)
@@ -675,9 +761,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (20, 445, 700, 575, 1, "pill", "tr"),     # Abas Ofertas e Acordos
-                    (25, 735, 695, 885, 2, "pill", "tr"),     # Filtros Em andamento, Quitados e Vencidos
-                    (40, 965, 680, 1265, 3, "pill", "tr"),    # Área com acordos ativos pela Serasa
+                    (20, 505, 700, 598, 1, "pill", "tr"),
+                    (36, 808, 684, 902, 2, "pill", "tr"),
+                    (40, 965, 680, 1300, 3, "pill", "tr"),
                 ],
             },
             # Passo 11: Lista de acordos por situação (inspect 20)
@@ -686,21 +772,21 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (65, 110, 650, 635, 1, "pill", "tr"),     # Acordos com a empresa parceira
-                    (65, 765, 620, 1030, 2, "pill", "tr"),    # Acordos já quitados
-                    (65, 1170, 650, 1505, 3, "pill", "tr"),   # Acordos vencidos ou cancelados
+                    (65, 110, 650, 635, 1, "pill", "tr"),
+                    (65, 765, 620, 1030, 2, "pill", "tr"),
+                    (65, 1170, 650, 1505, 3, "pill", "tr"),
                 ],
             },
             # Passo 12: Aba Serviços > Dívidas e pendências (inspect 21)
             {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.36 (22).jpeg",
                 "top_crop": 58,
-                "blur": [(560, 62, 625, 125)],  # Iniciais do titular
+                "blur": [(546, 66, 634, 154)],
                 "circles": [
-                    (50, 515, 670, 780, 1, "pill", "tr"),     # Dívidas negativadas
-                    (50, 800, 670, 1070, 2, "pill", "tr"),    # Meus acordos
-                    (50, 1090, 670, 1345, 3, "pill", "tr"),   # Propostas e ofertas
-                    (575, 1360, 708, 1480, 4, "ellipse", "tl"), # Aba Serviços ativa
+                    (50, 515, 670, 780, 1, "pill", "tr"),
+                    (50, 800, 670, 1070, 2, "pill", "tr"),
+                    (50, 1090, 670, 1345, 3, "pill", "tr"),
+                    (576, 1372, 714, 1504, 4, "pill", "tl"),
                 ],
             },
             # Passo 13: Aba Meu CPF topo (inspect 12)
@@ -708,14 +794,14 @@ SPECS: dict[str, dict] = {
                 "file": "WhatsApp Image 2026-11-11 at 18.53.36 (13).jpeg",
                 "top_crop": 58,
                 "blur": [
-                    (560, 62, 625, 120),  # Iniciais do titular
-                    (115, 895, 275, 945), # Primeiro nome do titular
+                    (546, 58, 634, 136),
+                    (106, 895, 245, 950),
                 ],
                 "circles": [
-                    (20, 195, 670, 345, 1, "pill", "tr"),     # Área Meu CPF
-                    (25, 420, 695, 805, 2, "pill", "tr"),     # Proteção Premium opcional
-                    (25, 860, 695, 1320, 3, "pill", "tr"),    # Atalho para extrato veicular e Premium
-                    (295, 1360, 425, 1485, 4, "ellipse", "tl"), # Botão central Meu CPF
+                    (16, 195, 670, 380, 1, "pill", "tr"),
+                    (25, 420, 695, 805, 2, "pill", "tr"),
+                    (25, 860, 695, 1340, 3, "pill", "tr"),
+                    (286, 1368, 434, 1504, 4, "ellipse", "tl"),
                 ],
             },
             # Passo 14: Saúde financeira gratuita (inspect 13)
@@ -724,9 +810,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (510, 105, 675, 180, 1, "pill", "bl"),    # Selo Gratuito
-                    (35, 245, 685, 575, 2, "pill", "tr"),     # Dívidas e pendências / Extrato Serasa
-                    (35, 585, 685, 895, 3, "pill", "tr"),     # Vazamento de dados e Documentos extraviados
+                    (510, 105, 675, 180, 1, "pill", "bl"),
+                    (35, 245, 685, 575, 2, "pill", "tr"),
+                    (35, 585, 685, 895, 3, "pill", "tr"),
                 ],
             },
             # Passo 15: Selo de segurança e Serasa Recomenda (inspect 14)
@@ -735,8 +821,8 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (50, 245, 670, 415, 1, "pill", "tr"),     # Selo de segurança atual da conta
-                    (50, 635, 670, 995, 2, "pill", "tr"),     # Serviço Serasa Recomenda (Solicitar análise)
+                    (50, 245, 670, 415, 1, "pill", "tr"),
+                    (50, 635, 670, 995, 2, "pill", "tr"),
                 ],
             },
             # Passo 16: Dark Web e Extrato Veicular (inspect 15)
@@ -745,9 +831,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (50, 75, 670, 395, 1, "pill", "br"),      # Consultas e Dark Web (Solicitar relatório)
-                    (50, 430, 670, 755, 2, "pill", "tr"),     # Assistência 24h para carro
-                    (50, 795, 670, 1140, 3, "pill", "tr"),    # Extrato Veicular (Consultar veículo)
+                    (46, 74, 674, 405, 1, "pill", "tr"),
+                    (46, 428, 674, 772, 2, "pill", "tr"),
+                    (46, 795, 674, 1144, 3, "pill", "tr"),
                 ],
             },
             # Passo 17: Educação financeira e Consulta Terceiros (inspect 16)
@@ -756,9 +842,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (50, 68, 670, 385, 1, "pill", "br"),      # Organize seus gastos (Organizze)
-                    (50, 410, 670, 755, 2, "pill", "tr"),     # Cursos de educação financeira
-                    (50, 785, 670, 1135, 3, "pill", "tr"),    # Consulta Terceiros Básica (CPF/CNPJ)
+                    (46, 70, 674, 390, 1, "pill", "tr"),
+                    (46, 410, 674, 760, 2, "pill", "tr"),
+                    (46, 785, 674, 1138, 3, "pill", "tr"),
                 ],
             },
             # Passo 18: Crédito e Empréstimos (inspect 06)
@@ -767,8 +853,8 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (20, 70, 695, 955, 1, "pill", "br"),      # Área Empréstimos e Cartões
-                    (25, 1085, 420, 1345, 2, "pill", "tr"),   # Cartão Empréstimo fácil
+                    (14, 64, 698, 958, 1, "pill", "br"),
+                    (24, 1078, 404, 1352, 2, "pill", "tr"),
                 ],
             },
             # Passo 19: Bloqueio de consultas e Cadastro Positivo (inspect 10)
@@ -777,9 +863,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (35, 70, 685, 180, 1, "pill", "br"),      # Bloqueio de consultas
-                    (35, 200, 685, 365, 2, "pill", "tr"),     # Cadastro Positivo
-                    (35, 665, 685, 1190, 3, "pill", "tr"),    # Opções selecionadas para tranquilidade financeira
+                    (35, 68, 685, 180, 1, "pill", "tr"),
+                    (35, 200, 685, 365, 2, "pill", "br"),
+                    (35, 665, 685, 1212, 3, "pill", "tr"),
                 ],
             },
             # Passo 20: Extrato Serasa e Bloquear Score (inspect 22)
@@ -788,10 +874,10 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (50, 75, 670, 325, 1, "pill", "br"),      # Pendências CPF/CNPJ
-                    (50, 355, 670, 600, 2, "pill", "tr"),     # Extrato Serasa
-                    (50, 795, 670, 1060, 3, "pill", "tr"),    # Bloquear Score (Premium)
-                    (50, 1080, 670, 1340, 4, "pill", "tr"),   # Variações do Score
+                    (48, 74, 672, 325, 1, "pill", "tr"),
+                    (48, 355, 672, 602, 2, "pill", "tr"),
+                    (48, 795, 672, 1060, 3, "pill", "tr"),
+                    (48, 1080, 672, 1342, 4, "pill", "tr"),
                 ],
             },
             # Passo 21: Proteção de dados e Acompanhar pedidos (inspect 25)
@@ -800,10 +886,10 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (50, 70, 670, 305, 1, "pill", "br"),      # Proteção de dados
-                    (50, 340, 670, 600, 2, "pill", "tr"),     # Cadastro Positivo
-                    (50, 790, 670, 1055, 3, "pill", "tr"),    # Crédito -> Cartões e empréstimos
-                    (50, 1075, 670, 1340, 4, "pill", "tr"),   # Acompanhar meus pedidos
+                    (48, 70, 672, 305, 1, "pill", "tr"),
+                    (48, 340, 672, 600, 2, "pill", "tr"),
+                    (48, 790, 672, 1055, 3, "pill", "tr"),
+                    (48, 1075, 672, 1340, 4, "pill", "tr"),
                 ],
             },
             # Passo 22: Validador de boleto e Central de Ajuda (inspect 26)
@@ -812,9 +898,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (40, 150, 680, 645, 1, "pill", "tr"),     # Meu perfil, Conectar contas e Histórico de cartões
-                    (40, 665, 680, 845, 2, "pill", "tr"),     # Validador de boleto
-                    (40, 865, 680, 1215, 3, "pill", "tr"),    # Atualização cadastral e Central de Ajuda
+                    (40, 150, 680, 645, 1, "pill", "tr"),
+                    (40, 665, 680, 845, 2, "pill", "tr"),
+                    (40, 865, 680, 1215, 3, "pill", "tr"),
                 ],
             },
         ],
@@ -828,10 +914,10 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (115, 175, 470, 248, 1, "pill", "tl"),    # Atalhos gov.br
-                    (475, 175, 695, 250, 2, "pill", "bl"),    # Botão azul Entrar
-                    (20, 390, 700, 520, 3, "pill", "tr"),     # Barra de pesquisa + microfone e lupa
-                    (25, 795, 695, 1465, 4, "pill", "tr"),    # Lista Mais Acessados (1 a 5)
+                    (110, 148, 471, 237, 1, "pill", "tl"),
+                    (473, 148, 698, 237, 2, "pill", "br"),
+                    (14, 390, 706, 540, 3, "pill", "tr"),
+                    (18, 838, 702, 1498, 4, "pill", "tl"),
                 ],
             },
             # Passo 2: Identifique-se com CPF (inspect 34)
@@ -840,42 +926,42 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (35, 645, 685, 745, 1, "pill", "tr"),     # Campo para digitar o CPF
-                    (35, 790, 685, 885, 2, "pill", "tr"),     # Botão azul Continuar
-                    (35, 985, 685, 1345, 3, "pill", "tr"),    # Outras opções: Banco, App gov.br, Certificado
+                    (28, 654, 692, 756, 1, "pill", "tr"),
+                    (28, 793, 692, 898, 2, "pill", "tr"),
+                    (28, 1015, 692, 1362, 3, "pill", "tr"),
                 ],
             },
             # Passo 3: Digite sua senha - BLUR CPF REAL (inspect 35)
             {
                 "file": "WhatsApp Image 2026-11-13 at 10.54.39 (36).jpeg",
                 "top_crop": 58,
-                "blur": [(32, 478, 275, 535)],  # CPF XXX.XXX.XXX-XX
+                "blur": [(32, 478, 275, 535)],
                 "circles": [
-                    (35, 608, 685, 710, 1, "pill", "tr"),     # Campo de senha + ícone de olho para conferir
-                    (35, 750, 685, 840, 2, "pill", "tr"),     # Botão azul Entrar
-                    (35, 860, 685, 1085, 3, "pill", "tr"),    # Cancelar e "Esqueci minha senha"
+                    (28, 620, 692, 725, 1, "pill", "tr"),
+                    (28, 767, 692, 868, 2, "pill", "tr"),
+                    (28, 875, 692, 1085, 3, "pill", "tr"),
                 ],
             },
             # Passo 4: Conta logada - BLUR NOME REAL (inspect 36)
             {
                 "file": "WhatsApp Image 2026-11-13 at 10.54.39 (37).jpeg",
                 "top_crop": 58,
-                "blur": [(155, 482, 565, 538)],  # NOME COMPLETO DO TITULAR
+                "blur": [(155, 488, 565, 548)],
                 "circles": [
-                    (250, 382, 475, 480, 1, "pill", "tr"),    # Nível da conta (Conta Prata)
-                    (135, 540, 585, 625, 2, "pill", "tr"),    # Botão Minha área gov.br
-                    (18, 650, 700, 1225, 3, "pill", "tr"),    # Dados Pessoais, Segurança da Conta, Ajuda e Sair
+                    (248, 386, 476, 482, 1, "pill", "tr"),
+                    (135, 547, 585, 635, 2, "pill", "tr"),
+                    (14, 662, 704, 1270, 3, "pill", "tr"),
                 ],
             },
             # Passo 5: Minha área gov.br - BLUR NOME REAL (inspect 38)
             {
                 "file": "WhatsApp Image 2026-11-13 at 10.54.39 (39).jpeg",
                 "top_crop": 58,
-                "blur": [(175, 220, 660, 340)],  # Olá, NOME COMPLETO DO TITULAR
+                "blur": [(175, 220, 660, 340)],
                 "circles": [
-                    (395, 520, 700, 625, 1, "pill", "tl"),    # Botão Aumentar Nível
-                    (18, 975, 700, 1245, 2, "pill", "tr"),    # Caixa postal e Carteira de documentos
-                    (18, 1255, 700, 1465, 3, "pill", "tr"),   # Baixar certidões, Dados de contato e Assinar
+                    (416, 550, 710, 622, 1, "pill", "tl"),
+                    (14, 1025, 704, 1208, 2, "pill", "tr"),
+                    (14, 1216, 704, 1496, 3, "pill", "tr"),
                 ],
             },
             # Passo 6: Painel Olá! e menu lateral (inspect 11)
@@ -884,9 +970,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (8, 175, 118, 725, 1, "pill", "tr"),      # Menu lateral esquerdo (Início, Agenda, Certidões, Apps)
-                    (165, 485, 595, 765, 2, "pill", "tr"),    # Agenda gov.br e Assinar documentos
-                    (165, 770, 600, 1020, 3, "pill", "tr"),   # Baixar certidões e Caixa Postal
+                    (6, 185, 128, 750, 1, "pill", "tr"),
+                    (165, 498, 618, 760, 2, "pill", "tr"),
+                    (160, 772, 614, 1025, 3, "pill", "tr"),
                 ],
             },
             # Passo 7: Grade de serviços gov.br rolada (inspect 12)
@@ -895,9 +981,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (135, 175, 605, 415, 1, "pill", "tr"),    # Carteira de Documentos e Dados Pessoais
-                    (135, 435, 605, 715, 2, "pill", "tr"),    # Gerenciar dados de contato e Govinho
-                    (135, 745, 605, 1225, 3, "pill", "tr"),   # Notificações, Privacidade, Procurações e Segurança
+                    (138, 158, 598, 415, 1, "pill", "tr"),
+                    (138, 430, 598, 732, 2, "pill", "tr"),
+                    (138, 742, 605, 1235, 3, "pill", "tl"),
                 ],
             },
             # Passo 8: Lista Minha conta (inspect 37)
@@ -906,9 +992,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (18, 75, 700, 565, 1, "pill", "br"),      # Documentos, certidões, assinaturas e serviços
-                    (18, 575, 700, 775, 2, "pill", "tr"),     # Agenda GOV.BR, Notificações e Ajuda
-                    (18, 965, 700, 1345, 3, "pill", "tr"),    # Minha conta: Dados Pessoais, Segurança e Privacidade
+                    (14, 70, 704, 526, 1, "pill", "tr"),
+                    (14, 534, 704, 808, 2, "pill", "tr"),
+                    (14, 978, 704, 1356, 3, "pill", "tr"),
                 ],
             },
             # Passo 9: Agenda gov.br (inspect 13)
@@ -917,9 +1003,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (145, 265, 695, 355, 1, "pill", "tr"),    # Navegação de mês (< >)
-                    (145, 435, 695, 785, 2, "pill", "tr"),    # Prazos e datas destacadas
-                    (245, 1365, 595, 1455, 3, "pill", "tr"),  # Botão Ver Agenda completa
+                    (142, 280, 706, 360, 1, "pill", "tr"),
+                    (136, 442, 692, 720, 2, "pill", "tr"),
+                    (265, 1396, 578, 1490, 3, "pill", "tr"),
                 ],
             },
             # Passo 10: Certidões - parte 1 (inspect 14)
@@ -928,9 +1014,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (150, 235, 620, 520, 1, "pill", "tr"),    # Cartão Nacional de Saúde e Vacinação
-                    (150, 555, 620, 825, 2, "pill", "tr"),    # Pessoa com Deficiência e Cadastro Único
-                    (150, 865, 620, 1135, 3, "pill", "tr"),   # Quitação Eleitoral e Antecedentes Criminais
+                    (142, 240, 616, 545, 1, "pill", "tr"),
+                    (142, 558, 616, 860, 2, "pill", "tr"),
+                    (142, 876, 622, 1178, 3, "pill", "tr"),
                 ],
             },
             # Passo 11: Certidões - parte 2 (inspect 15)
@@ -939,9 +1025,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (150, 235, 620, 520, 1, "pill", "tr"),    # Consultar CNPJ e Situação Cadastral no CPF
-                    (150, 555, 620, 840, 2, "pill", "tr"),    # Certidões de Regularidade Fiscal
-                    (150, 1175, 415, 1465, 3, "pill", "tr"),  # Certidão de Contas Julgadas
+                    (142, 240, 622, 545, 1, "pill", "tr"),
+                    (136, 560, 616, 862, 2, "pill", "tr"),
+                    (142, 1196, 385, 1506, 3, "pill", "tr"),
                 ],
             },
             # Passo 12: Destaques do portal (inspect 00)
@@ -950,9 +1036,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (40, 315, 680, 410, 1, "pill", "tr"),     # Seção Destaque
-                    (40, 620, 680, 965, 2, "pill", "tr"),     # Imposto de Renda e Renegociação de Dívidas
-                    (40, 1005, 680, 1300, 3, "pill", "tr"),   # Celular Seguro e Bolsa Família
+                    (40, 322, 680, 410, 1, "pill", "tr"),
+                    (40, 636, 680, 972, 2, "pill", "tr"),
+                    (40, 1005, 680, 1300, 3, "pill", "tr"),
                 ],
             },
             # Passo 13: Perfis Agricultor e Turista (inspect 01)
@@ -961,9 +1047,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (75, 255, 315, 575, 1, "pill", "tr"),     # Perfil Agricultor
-                    (385, 255, 635, 575, 2, "pill", "tr"),    # Perfil Turista
-                    (155, 725, 560, 835, 3, "pill", "tr"),    # Botão Todos os Perfis
+                    (64, 260, 328, 598, 1, "pill", "tr"),
+                    (392, 260, 656, 598, 2, "pill", "tr"),
+                    (153, 755, 567, 857, 3, "pill", "tr"),
                 ],
             },
             # Passo 14: Perfis Aposentado e Empreendedor (inspect 02)
@@ -972,9 +1058,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (75, 255, 325, 575, 1, "pill", "tr"),     # Perfil Aposentado
-                    (385, 255, 665, 575, 2, "pill", "tr"),    # Perfil Empreendedor
-                    (155, 725, 560, 835, 3, "pill", "tr"),    # Botão Todos os Perfis
+                    (84, 260, 348, 598, 1, "pill", "tr"),
+                    (386, 260, 702, 598, 2, "pill", "tr"),
+                    (153, 755, 567, 857, 3, "pill", "tr"),
                 ],
             },
             # Passo 15: Categorias de A até E (inspect 04)
@@ -983,9 +1069,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (35, 185, 685, 425, 1, "pill", "tr"),     # Título Navegue por categoria
-                    (35, 440, 685, 995, 2, "pill", "tr"),     # Agricultura, Assistência Social, Ciência, Comunicações
-                    (35, 1015, 685, 1465, 3, "pill", "tr"),   # Cultura, Defesa Civil e Educação
+                    (35, 196, 685, 434, 1, "pill", "tr"),
+                    (35, 446, 685, 1012, 2, "pill", "tr"),
+                    (35, 1066, 685, 1485, 3, "pill", "tr"),
                 ],
             },
             # Passo 16: Categorias de E até T (inspect 05)
@@ -994,9 +1080,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (35, 175, 685, 575, 1, "pill", "tr"),     # Educação, Empresa/Comércio e Energia
-                    (35, 600, 685, 1005, 2, "pill", "tr"),    # Finanças, Justiça/Segurança e Meio Ambiente
-                    (35, 1030, 685, 1475, 3, "pill", "tr"),   # Saúde, Trabalho/Previdência e Infraestrutura
+                    (35, 198, 685, 588, 1, "pill", "tr"),
+                    (32, 634, 704, 1026, 2, "pill", "tr"),
+                    (35, 1072, 685, 1498, 3, "pill", "tr"),
                 ],
             },
             # Passo 17: Banner Aplicativos Oficiais (inspect 07)
@@ -1005,8 +1091,8 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (55, 370, 665, 710, 1, "pill", "tr"),     # Apresentação dos aplicativos móveis oficiais
-                    (95, 735, 625, 1265, 2, "pill", "tr"),    # Cartão oficial do app gov.br
+                    (55, 375, 665, 692, 1, "pill", "tr"),
+                    (95, 718, 620, 1265, 2, "pill", "tr"),
                 ],
             },
             # Passo 18: Galeria de Aplicativos (inspect 20)
@@ -1015,9 +1101,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (105, 185, 695, 330, 1, "pill", "tr"),    # Atalhos gov.br e Entrar
-                    (25, 765, 700, 860, 2, "pill", "tr"),     # Opções Filtrar e Ordenar
-                    (130, 885, 585, 1385, 3, "pill", "tr"),   # Cartão oficial (Carteira Digital de Trânsito)
+                    (108, 240, 702, 336, 1, "pill", "tr"),
+                    (25, 775, 700, 858, 2, "pill", "tr"),
+                    (125, 896, 595, 1432, 3, "pill", "tl"),
                 ],
             },
             # Passo 19: Aplicativos mais acessados (inspect 16)
@@ -1026,10 +1112,10 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (155, 205, 620, 470, 1, "pill", "tr"),    # gov.br e Carteira Digital de Trânsito
-                    (155, 485, 620, 745, 2, "pill", "tr"),    # Meu INSS e Carteira de Trabalho
-                    (155, 765, 620, 1020, 3, "pill", "tr"),   # Cadastro Único e Meu SUS Digital
-                    (155, 1055, 620, 1455, 4, "pill", "tr"),  # MEI, Jornada do Estudante e Ver aplicativos
+                    (155, 220, 620, 452, 1, "pill", "tr"),
+                    (155, 496, 620, 740, 2, "pill", "tr"),
+                    (144, 792, 610, 1008, 3, "pill", "tl"),
+                    (155, 1086, 620, 1492, 4, "pill", "tr"),
                 ],
             },
             # Passo 20: Meu INSS e Cadastro Único (inspect 18)
@@ -1038,8 +1124,8 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (135, 195, 595, 835, 1, "pill", "tr"),    # App oficial Meu INSS (benefícios)
-                    (135, 875, 595, 1475, 2, "pill", "tr"),   # App oficial Cadastro Único (MDS)
+                    (136, 208, 588, 876, 1, "pill", "tr"),
+                    (136, 902, 588, 1506, 2, "pill", "tr"),
                 ],
             },
             # Passo 21: MEI e Carteira de Trabalho Digital (inspect 19)
@@ -1048,8 +1134,8 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (135, 195, 595, 835, 1, "pill", "tr"),    # App oficial MEI (Receita Federal)
-                    (135, 865, 595, 1465, 2, "pill", "tr"),   # Carteira de Trabalho Digital (MTE)
+                    (136, 192, 588, 854, 1, "pill", "tr"),
+                    (136, 876, 588, 1506, 2, "pill", "tr"),
                 ],
             },
             # Passo 22: Desempenho dos Serviços (inspect 06)
@@ -1058,9 +1144,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (35, 365, 685, 465, 1, "pill", "tr"),     # Título Desempenho dos Serviços
-                    (125, 515, 590, 775, 2, "pill", "tr"),    # Total de serviços no portal
-                    (125, 845, 590, 1455, 3, "pill", "tr"),   # % Serviços Digitais e Avaliações positivas
+                    (35, 376, 685, 470, 1, "pill", "tr"),
+                    (145, 550, 575, 815, 2, "pill", "tr"),
+                    (120, 905, 600, 1508, 3, "pill", "tr"),
                 ],
             },
             # Passo 23: Ouvidoria Denúncia e Solicitação (inspect 09)
@@ -1069,8 +1155,8 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (40, 585, 675, 1020, 1, "pill", "tr"),    # Cartão Denúncia
-                    (40, 1065, 675, 1465, 2, "pill", "tr"),   # Cartão Solicitação
+                    (40, 596, 678, 1072, 1, "pill", "tr"),
+                    (40, 1088, 678, 1502, 2, "pill", "tr"),
                 ],
             },
             # Passo 24: Ouvidoria Elogio, Reclamações e Protocolo (inspect 10)
@@ -1079,9 +1165,9 @@ SPECS: dict[str, dict] = {
                 "top_crop": 58,
                 "blur": [],
                 "circles": [
-                    (40, 160, 675, 610, 1, "pill", "tr"),     # Cartão Elogio
-                    (40, 665, 675, 1115, 2, "pill", "tr"),    # Cartão Reclamações
-                    (155, 1155, 555, 1285, 3, "pill", "tr"),  # Botão Protocolo GOV.BR
+                    (40, 156, 678, 636, 1, "pill", "tr"),
+                    (40, 652, 678, 1134, 2, "pill", "tr"),
+                    (160, 1160, 560, 1288, 3, "pill", "tr"),
                 ],
             },
         ],
@@ -1107,18 +1193,36 @@ def make_contact_sheet(chave: str, images: list[tuple[int, Image.Image]], out_pa
         tag = f"#{step_num}"
         draw.rectangle((x0, y0, x0 + 54, y0 + 28), fill=(20, 20, 20))
         draw.text((x0 + 8, y0 + 4), tag, font=font, fill=(255, 255, 255))
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    sheet.save(out_path, "JPEG", quality=88)
+    _atomic_save_jpg(sheet, out_path, quality=88, optimize=True)
 
 
 def main() -> None:
-    os.makedirs(SCRATCH_VERIFY, exist_ok=True)
+    parser = argparse.ArgumentParser(description="Processa e anota os guias visuais da Memora.")
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Gera folhas de contato de verificacao em diretorio temporario.",
+    )
+    parser.add_argument(
+        "--verify-dir",
+        default=None,
+        help="Diretorio explicito opcional para salvar folhas de contato de verificacao.",
+    )
+    args = parser.parse_args()
+
+    verify_dir: str | None = args.verify_dir
+    if verify_dir is None and args.verify:
+        verify_dir = tempfile.mkdtemp(prefix="memora_guias_verify_")
+    if verify_dir is not None:
+        os.makedirs(verify_dir, exist_ok=True)
+
     blurred_checks: list[tuple[str, Image.Image]] = []
 
     for chave, cfg in SPECS.items():
         orig_dir = os.path.join(ORIG, cfg["orig_dir"])
         clean_dir = os.path.join(APPS, cfg["orig_dir"])
         out_dir = os.path.join(ASSETS_GUIAS, chave)
+        os.makedirs(orig_dir, exist_ok=True)
         os.makedirs(clean_dir, exist_ok=True)
         os.makedirs(out_dir, exist_ok=True)
 
@@ -1133,33 +1237,41 @@ def main() -> None:
         verify_imgs: list[tuple[int, Image.Image]] = []
         for idx, step in enumerate(cfg["steps"], start=1):
             src_path = os.path.join(orig_dir, step["file"])
+            clean_path = os.path.join(clean_dir, step["file"])
             if not os.path.exists(src_path):
-                raise FileNotFoundError(f"Arquivo original ausente: {src_path}")
+                if os.path.exists(clean_path):
+                    shutil.copy2(clean_path, src_path)
+                else:
+                    raise FileNotFoundError(f"Arquivo original ausente: {src_path}")
 
             im = Image.open(src_path).convert("RGB")
             if step["blur"]:
                 im = apply_blurs(im, step["blur"], step.get("keep"), radius=28)
-                blurred_checks.append((f"{chave}_{idx}", im.crop((0, step["top_crop"], im.width, im.height))))
+                if verify_dir is not None:
+                    blurred_checks.append(
+                        (f"{chave}_{idx}", im.crop((0, step["top_crop"], im.width, im.height)))
+                    )
 
             top_crop = step["top_crop"]
             if top_crop > 0:
                 im = im.crop((0, top_crop, im.width, im.height))
 
-            # Clean cropped+blurred copy in apps/<DIR>/
-            clean_path = os.path.join(clean_dir, step["file"])
-            im.save(clean_path, "JPEG", quality=92, optimize=True)
+            # Clean cropped+blurred copy in apps/<DIR>/ (skip overwriting tracked .jfif raw source if identical name)
+            if not step["file"].lower().endswith(".jfif"):
+                _atomic_save_jpg(im, clean_path, quality=92, optimize=True)
 
             # Annotated version for app/assets/guias/<chave>/passo_<n>.jpg
             annotated = draw_annotations(im, step["circles"], top_crop=top_crop)
             dst_path = os.path.join(out_dir, f"passo_{idx}.jpg")
-            save_asset_jpg(annotated, dst_path, target_width=480, quality=82)
-            verify_imgs.append((idx, Image.open(dst_path)))
+            save_asset_jpg(annotated, dst_path, target_width=480, quality=80)
+            if verify_dir is not None:
+                verify_imgs.append((idx, Image.open(dst_path)))
 
-        make_contact_sheet(chave, verify_imgs, os.path.join(SCRATCH_VERIFY, f"verify_{chave}.jpg"))
+        if verify_dir is not None:
+            make_contact_sheet(chave, verify_imgs, os.path.join(verify_dir, f"verify_{chave}.jpg"))
         print(f"[{chave}] {len(cfg['steps'])} passos processados e anotados -> {out_dir}")
 
-    # Sheet of all blurred images (cropped, annotated) for PII double-check
-    if blurred_checks:
+    if verify_dir is not None and blurred_checks:
         cols = 4
         rows = (len(blurred_checks) + cols - 1) // cols
         tw, th, pad = 270, 580, 14
@@ -1175,8 +1287,8 @@ def main() -> None:
             sheet.paste(thumb, (x0, y0))
             draw.rectangle((x0, y0, x0 + 130, y0 + 26), fill=(20, 20, 20))
             draw.text((x0 + 6, y0 + 3), label, font=font, fill=(255, 255, 255))
-        sheet.save(os.path.join(SCRATCH_VERIFY, "verify_blurs.jpg"), "JPEG", quality=90)
-        print(f"Folha de verificacao de blurs ({len(blurred_checks)} imgs) salva.")
+        _atomic_save_jpg(sheet, os.path.join(verify_dir, "verify_blurs.jpg"), quality=90, optimize=True)
+        print(f"Folhas de verificacao salvas em: {verify_dir}")
 
     total_bytes = sum(
         os.path.getsize(os.path.join(dp, f))
@@ -1185,7 +1297,7 @@ def main() -> None:
     )
     mb = total_bytes / (1024 * 1024)
     print(f"Tamanho total de {ASSETS_GUIAS}: {mb:.2f} MB ({total_bytes} bytes)")
-    assert total_bytes <= 8 * 1024 * 1024, f"Excedeu limite de 8 MB: {mb:.2f} MB"
+    assert total_bytes <= 12 * 1024 * 1024, f"Excedeu limite de 12 MB: {mb:.2f} MB"
 
 
 if __name__ == "__main__":

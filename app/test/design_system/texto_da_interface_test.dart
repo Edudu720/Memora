@@ -262,6 +262,7 @@ const List<String> arquivosVarridos = <String>[
   'textos_abertura.dart',
   'textos_ajuda.dart',
   'textos_anfitria.dart',
+  'textos_antigolpe.dart',
   'textos_apresentacao.dart',
   'textos_assistente.dart',
   'textos_atalhos_aplicativos.dart',

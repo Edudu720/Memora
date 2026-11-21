@@ -109,6 +109,56 @@ class PassoIlustrado extends StatelessWidget {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final bool eUltimoPasso = posicao == total;
+    final double escala = MediaQuery.textScalerOf(
+      context,
+    ).scale(MemoraDimensoes.escalaTextoMin);
+    final bool empilharMascote = escala >= MemoraDimensoes.escalaTextoAlta;
+    final List<String> linhasDaLegenda = passo.texto
+        .split('\n')
+        .map((String linha) => linha.trim())
+        .where((String linha) => linha.isNotEmpty)
+        .toList(growable: false);
+
+    final Widget colunaAvisoSenha = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        TextoMemora(
+          TextosGuias.tituloAvisoSenha,
+          estilo: EstiloTexto.corpoForte,
+          cor: cores.perigo,
+        ),
+        const SizedBox(height: MemoraEspacamento.xs),
+        TextoMemora(TextosGuias.avisoSenha, cor: cores.texto),
+      ],
+    );
+
+    final Widget colunaLegenda = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        if (eUltimoPasso) ...<Widget>[
+          TextoMemora(
+            TextosGuias.parabens,
+            estilo: EstiloTexto.destaque,
+            cor: cores.primaria,
+          ),
+          const SizedBox(height: MemoraEspacamento.sm),
+        ],
+        if (linhasDaLegenda.isEmpty)
+          TextoMemora(passo.texto, estilo: EstiloTexto.corpoForte)
+        else
+          for (int i = 0; i < linhasDaLegenda.length; i++) ...<Widget>[
+            if (i > 0) const SizedBox(height: MemoraEspacamento.sm),
+            TextoMemora(linhasDaLegenda[i], estilo: EstiloTexto.corpoForte),
+          ],
+      ],
+    );
+
+    final Widget mascoteLegenda = MemoraPersonagem(
+      expressao: eUltimoPasso
+          ? ExpressaoDaMemora.comemorando
+          : ExpressaoDaMemora.falando,
+      tamanho: MemoraDimensoes.alvoMinimo,
+    );
 
     final Widget conteudo = Padding(
       padding: const EdgeInsets.all(MemoraEspacamento.lg),
@@ -141,67 +191,54 @@ class PassoIlustrado extends StatelessWidget {
                   ),
                   boxShadow: MemoraElevacao.listaSombrasCartao(cores),
                 ),
-                padding: const EdgeInsets.all(MemoraEspacamento.md),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const MemoraPersonagem(
-                      expressao: ExpressaoDaMemora.preocupada,
-                      tamanho: MemoraDimensoes.alvoMinimo,
-                    ),
-                    const SizedBox(width: MemoraEspacamento.md),
-                    Expanded(
-                      child: Column(
+                padding: const EdgeInsets.all(MemoraEspacamento.lg),
+                child: empilharMascote
+                    ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          TextoMemora(
-                            TextosGuias.tituloAvisoSenha,
-                            estilo: EstiloTexto.corpoForte,
-                            cor: cores.perigo,
+                          const MemoraPersonagem(
+                            expressao: ExpressaoDaMemora.preocupada,
+                            tamanho: MemoraDimensoes.alvoMinimo,
                           ),
-                          const SizedBox(height: MemoraEspacamento.xs),
-                          TextoMemora(TextosGuias.avisoSenha, cor: cores.texto),
+                          const SizedBox(height: MemoraEspacamento.sm),
+                          colunaAvisoSenha,
+                        ],
+                      )
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          const MemoraPersonagem(
+                            expressao: ExpressaoDaMemora.preocupada,
+                            tamanho: MemoraDimensoes.alvoMinimo,
+                          ),
+                          const SizedBox(width: MemoraEspacamento.md),
+                          Expanded(child: colunaAvisoSenha),
                         ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
-            const SizedBox(height: MemoraEspacamento.md),
+            const SizedBox(height: MemoraEspacamento.lg),
           ],
 
           // 4. Cartão editorial da instrução da Memora (informação acolhedora)
           Cartao(
-            padding: const EdgeInsets.all(MemoraEspacamento.md),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                MemoraPersonagem(
-                  expressao: eUltimoPasso
-                      ? ExpressaoDaMemora.comemorando
-                      : ExpressaoDaMemora.falando,
-                  tamanho: MemoraDimensoes.alvoMinimo,
-                ),
-                const SizedBox(width: MemoraEspacamento.md),
-                Expanded(
-                  child: Column(
+            child: empilharMascote
+                ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if (eUltimoPasso) ...<Widget>[
-                        TextoMemora(
-                          TextosGuias.parabens,
-                          estilo: EstiloTexto.destaque,
-                          cor: cores.primaria,
-                        ),
-                        const SizedBox(height: MemoraEspacamento.xs),
-                      ],
-                      TextoMemora(passo.texto, estilo: EstiloTexto.corpoForte),
+                      mascoteLegenda,
+                      const SizedBox(height: MemoraEspacamento.sm),
+                      colunaLegenda,
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      mascoteLegenda,
+                      const SizedBox(width: MemoraEspacamento.md),
+                      Expanded(child: colunaLegenda),
                     ],
                   ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: MemoraEspacamento.xl),
 
@@ -335,7 +372,7 @@ class _EstadoDaCapturaDoPasso extends State<_CapturaDoPasso> {
             child: GestureDetector(onTap: _ampliar, child: moldura),
           ),
         if (!_pendente) ...<Widget>[
-          const SizedBox(height: MemoraEspacamento.sm),
+          const SizedBox(height: MemoraEspacamento.md),
           BotaoTerciario(
             key: PassoIlustrado.chaveVerImagemMaior,
             rotulo: TextosGuias.verImagemMaior,

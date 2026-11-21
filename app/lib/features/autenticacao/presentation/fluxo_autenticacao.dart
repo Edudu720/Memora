@@ -19,6 +19,10 @@ import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_de_volta.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../antigolpe/data/repositorios/repositorio_analise_golpe_simulado.dart';
+import '../../antigolpe/domain/repositorios/repositorio_analise_golpe.dart';
+import '../../antigolpe/presentation/controladores/controlador_analise_golpe.dart';
+import '../../antigolpe/presentation/telas/tela_analise_golpe.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
 import '../../apresentacao/presentation/fluxo_apresentacao.dart';
 import '../../ajuda/data/abridor_site_tutorial.dart';
@@ -103,6 +107,9 @@ class FluxoAutenticacao extends StatefulWidget {
   /// no Hub — é a FR-003 de novo: porta que não abre nada é pior que porta que
   /// não existe, e sem repositório não há o que listar.
   final RepositorioAssistente? assistente;
+
+  /// Repositório de análise de links e mensagens contra golpes.
+  final RepositorioAnaliseGolpe? analiseGolpe;
 
   /// Onde o Localizador consulta serviços próximos (FR-006).
   ///
@@ -203,6 +210,7 @@ class FluxoAutenticacao extends StatefulWidget {
   const FluxoAutenticacao({
     required this.repositorio,
     this.assistente,
+    this.analiseGolpe,
     this.localizador,
     this.emergenciaSos,
     this.contatoEmergencia,
@@ -743,6 +751,21 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
     );
   }
 
+  /// Abre a tela dedicada de análise de mensagens e links suspeitos contra golpes.
+  void _abrirAnaliseGolpe() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => _DonoDaAnaliseGolpe(
+          criar: () => ControladorAnaliseGolpe(
+            repositorio:
+                widget.analiseGolpe ?? const RepositorioAnaliseGolpeSimulado(),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
   /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
   void _abrirDispositivoCuidado() {
     _empilhar(
@@ -807,6 +830,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoVerApresentacao: vistas == null || _pessoa == null
               ? null
               : () => _reverApresentacao(vistas),
+          aoVerificarGolpe: _abrirAnaliseGolpe,
           abridorSiteTutorial: widget.abridorSiteTutorial,
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
@@ -1215,6 +1239,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             aoAbrirAjuda: widget.assistente == null
                 ? null
                 : () => _abrirAjuda(widget.assistente!),
+            aoVerificarGolpe: _abrirAnaliseGolpe,
           ),
           DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',
@@ -1320,6 +1345,38 @@ class _DonoDosAtalhosAplicativosState extends State<_DonoDosAtalhosAplicativos> 
   @override
   Widget build(BuildContext context) {
     return TelaAtalhosAplicativos(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorAnaliseGolpe] e o descarta quando a rota sai.
+class _DonoDaAnaliseGolpe extends StatefulWidget {
+  final ControladorAnaliseGolpe Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonoDaAnaliseGolpe({
+    required this.criar,
+    required this.aoVoltar,
+  });
+
+  @override
+  State<_DonoDaAnaliseGolpe> createState() => _DonoDaAnaliseGolpeState();
+}
+
+class _DonoDaAnaliseGolpeState extends State<_DonoDaAnaliseGolpe> {
+  late final ControladorAnaliseGolpe _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaAnaliseGolpe(
       controlador: _controlador,
       aoVoltar: widget.aoVoltar,
     );

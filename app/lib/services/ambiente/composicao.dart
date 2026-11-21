@@ -4,6 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
 import '../../features/ajuda/data/abridor_site_tutorial.dart';
+import '../../features/antigolpe/data/repositorios/repositorio_analise_golpe_api.dart';
+import '../../features/antigolpe/data/repositorios/repositorio_analise_golpe_simulado.dart';
+import '../../features/antigolpe/domain/repositorios/repositorio_analise_golpe.dart';
 import '../../features/assistente/data/aceite_do_aviso.dart';
 import '../../features/assistente/data/chamada_com_renovacao.dart';
 import '../../features/assistente/data/repositorio_assistente_api.dart';
@@ -68,6 +71,10 @@ class Composicao {
   /// A assistente: real quando há servidor, simulada quando não.
   final RepositorioAssistente assistente;
 
+  /// Análise antigolpe de links e mensagens: integrada à API com fallback
+  /// local offline quando há servidor real, ou simulada no modo demonstração.
+  final RepositorioAnaliseGolpe? analiseGolpe;
+
   /// O Localizador de Serviços: conectado à API quando há servidor real,
   /// ou exemplos seguros de demonstração offline quando não há.
   final RepositorioLocalizador? localizador;
@@ -123,6 +130,7 @@ class Composicao {
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
+    this.analiseGolpe,
     this.localizador,
     this.emergenciaSos,
     this.contatoEmergencia,
@@ -183,6 +191,7 @@ class Composicao {
     final SessaoPerdida sessaoPerdida = SessaoPerdida();
     final RepositorioAutenticacao autenticacao;
     final RepositorioAssistente assistente;
+    final RepositorioAnaliseGolpe analiseGolpe;
     final RepositorioLocalizador localizador;
     final RepositorioEmergenciaSos emergenciaSos;
     final RepositorioContatoEmergenciaLocal contatoEmergencia =
@@ -207,6 +216,10 @@ class Composicao {
         cliente: cliente,
         chamadas: chamadas,
       );
+      analiseGolpe = RepositorioAnaliseGolpeApi(
+        dio: cliente.dio,
+        chamadas: chamadas,
+      );
       localizador = RepositorioLocalizadorApi(
         fonte: FonteLocalizadorApi(cliente.dio, chamadas: chamadas),
       );
@@ -219,6 +232,7 @@ class Composicao {
         preferencias: preferencias,
       );
       assistente = RepositorioAssistenteSimulado();
+      analiseGolpe = const RepositorioAnaliseGolpeSimulado();
       localizador = RepositorioLocalizadorSimulado();
       emergenciaSos = RepositorioEmergenciaSosSimulado();
     }
@@ -231,6 +245,7 @@ class Composicao {
       // o `main.dart` o liga. Ele NÃO entra em `dadosLocais` — não é da pessoa.
       // Envolve a assistente escolhida acima, real ou simulada.
       assistente: guardarCatalogo ? CatalogoGuardado(assistente) : assistente,
+      analiseGolpe: analiseGolpe,
       localizador: localizador,
       emergenciaSos: emergenciaSos,
       contatoEmergencia: contatoEmergencia,

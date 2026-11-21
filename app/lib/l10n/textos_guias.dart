@@ -208,6 +208,21 @@ abstract final class TextosGuias {
   /// Descrição da captura do passo 4 do WhatsApp.
   static const String whatsappCaptura4 =
       'Segunda metade das Configurações do WhatsApp com quatro blocos numerados sobre notificações, espaço, acessibilidade e ajuda.';
+  /// Título do passo 5 do WhatsApp (funcionalidades dentro da conversa).
+  static const String whatsappPasso5Titulo =
+      'Dentro de uma conversa do WhatsApp';
+  /// Passo 5 do WhatsApp.
+  static const String whatsappPasso5 =
+      'Dentro de uma conversa do WhatsApp:\n'
+      '1) No alto: voltar, contato, chamada de vídeo, ligação por voz e menu de 3 pontinhos;\n'
+      '2) No centro: balões com mensagens trocadas e foto com botão de encaminhar;\n'
+      '3) Abaixo das fotos: mensagens com links recebidos na conversa;\n'
+      '4) Barra inferior: figurinhas, campo Mensagem, clipe para anexar, câmera e microfone para áudio.';
+  /// Texto do passo 5 do WhatsApp.
+  static const String whatsappPasso5Texto = whatsappPasso5;
+  /// Descrição da captura do passo 5 do WhatsApp.
+  static const String whatsappCaptura5 =
+      'Conversa aberta no WhatsApp com quatro áreas numeradas: topo de chamadas, mensagens e foto, links recebidos e barra inferior com anexos e áudio.';
 
   // Instagram (T071; refeito na T135 com imagens recriadas por IA, em cinco
   // seções — ver a linha do Instagram no CAPTURAS.md)
