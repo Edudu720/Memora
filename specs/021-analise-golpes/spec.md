@@ -1,6 +1,6 @@
 # Especificação da Funcionalidade: Análise Antigolpes de Links e Mensagens Estranhas
 
-**Feature Branch**: `feature/016-analise-golpes`
+**Feature Branch**: `feature/016-analise-golpes` (`specs/021-analise-golpes`)
 
 **Created**: 2026-11-21
 

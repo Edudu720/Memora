@@ -1,10 +1,10 @@
 ---
-description: "Lista de tarefas da funcionalidade 016 — Análise Antigolpes de Links e Mensagens Estranhas"
+description: "Lista de tarefas da funcionalidade 021 — Análise Antigolpes de Links e Mensagens Estranhas"
 ---
 
 # Tasks: Análise Antigolpes de Links e Mensagens Estranhas
 
-**Input**: Documentos de design em `/specs/016-analise-golpes/` (`spec.md`, `plan.md`)
+**Input**: Documentos de design em `/specs/021-analise-golpes/` (`spec.md`, `plan.md`)
 
 **Prerequisites**: `plan.md` (obrigatório), `spec.md` (obrigatório para histórias de usuário)
 
@@ -23,9 +23,9 @@ description: "Lista de tarefas da funcionalidade 016 — Análise Antigolpes de 
 
 **Purpose**: Estruturação da documentação SpecKit e organização dos pacotes da feature
 
-- [X] T001 Criar especificação da funcionalidade com cenários de uso, requisitos funcionais e Threat Modeling em `specs/016-analise-golpes/spec.md`
-- [X] T002 [P] Criar plano de implementação com arquitetura, contrato REST e Constitution Check em `specs/016-analise-golpes/plan.md`
-- [X] T003 [P] Criar lista de tarefas rastreável por história de usuário em `specs/016-analise-golpes/tasks.md`
+- [X] T001 Criar especificação da funcionalidade com cenários de uso, requisitos funcionais e Threat Modeling em `specs/021-analise-golpes/spec.md`
+- [X] T002 [P] Criar plano de implementação com arquitetura, contrato REST e Constitution Check em `specs/021-analise-golpes/plan.md`
+- [X] T003 [P] Criar lista de tarefas rastreável por história de usuário em `specs/021-analise-golpes/tasks.md`
 
 ---
 

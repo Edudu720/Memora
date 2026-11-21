@@ -2,11 +2,11 @@
 
 **Branch**: `feature/016-analise-golpes` | **Date**: 2026-11-21 | **Spec**: [spec.md](./spec.md)
 
-**Input**: Especificação da funcionalidade em `/specs/016-analise-golpes/spec.md`
+**Input**: Especificação da funcionalidade em `/specs/021-analise-golpes/spec.md`
 
 ## Summary
 
-Implementar no aplicativo Memora (Flutter) e na API (Spring Boot) uma funcionalidade dedicada de análise de links e mensagens estranhas contra golpes (`016-analise-golpes`). A entrega combina uma tela acessível em 1 toque a partir do Início (e também pela Ajuda, preservando o Hub com 7 portas), um endpoint autenticado `POST /v1/golpes/analisar` com motor heurístico determinístico, integração com Gemini REST (`ADR 002`) protegida por sanitizador pós-IA de piso monotônico e limite de taxa por conta, além de fallback local offline automático no aplicativo (`AnalisadorLocalDeGolpes`) quando não há conexão ou o servidor está indisponível.
+Implementar no aplicativo Memora (Flutter) e na API (Spring Boot) uma funcionalidade dedicada de análise de links e mensagens estranhas contra golpes (`021-analise-golpes`). A entrega combina uma tela acessível em 1 toque a partir do Início (e também pela Ajuda, preservando o Hub com 7 portas), um endpoint autenticado `POST /v1/golpes/analisar` com motor heurístico determinístico, integração com Gemini REST (`ADR 002`) protegida por sanitizador pós-IA de piso monotônico e limite de taxa por conta, além de fallback local offline automático no aplicativo (`AnalisadorLocalDeGolpes`) quando não há conexão ou o servidor está indisponível.
 
 ## Technical Context
 
@@ -48,7 +48,7 @@ Implementar no aplicativo Memora (Flutter) e na API (Spring Boot) uma funcionali
 | **I. Segurança Acima de Tudo & Emenda 1** | APROVADO | Endpoint `POST /v1/golpes/analisar` protegido por JWT (`FiltroDeTokenDeAcesso`) e verificação de conta ativa; `LimitadorAnaliseGolpe` por conta (20/h, 60/dia); zero persistência ou log de `conteudo`; zero envio de PII da pessoa ao Gemini. |
 | **II. Segurança Contra Engenharia Social** | APROVADO | Nenhum link colado ou retornado na análise é clicável; linguagem literal e direta em `TextosAntigolpe`; aviso explícito quando o resultado vem do modo local sem internet (`TextosAntigolpe.avisoOffline`). |
 | **III. Acessibilidade como Requisito** | APROVADO | Contraste WCAG 2.2 AA via tokens `MemoraCores`; alvos `>= 48x48 dp`; risco comunicado por cor + ícone + selo + expressão da Memora; `Semantics(liveRegion: true)` no resultado; aprovado na matriz 4×3×3 (até 200%). |
-| **IV. Especificação Antes de Código** | APROVADO | Especificação, Threat Model, contrato JSON e tarefas documentados em `specs/016-analise-golpes/{spec.md,plan.md,tasks.md}`. |
+| **IV. Especificação Antes de Código** | APROVADO | Especificação, Threat Model, contrato JSON e tarefas documentados em `specs/021-analise-golpes/{spec.md,plan.md,tasks.md}`. |
 | **V. Arquitetura Limpa e Feature-First** | APROVADO | Separação estrita `domain/` (entidades, contrato de repositório, `AnalisadorLocalDeGolpes`), `data/` (`RepositorioAnaliseGolpeApi`, `RepositorioAnaliseGolpeSimulado`) e `presentation/` (`ControladorAnaliseGolpe`, `TelaAnaliseGolpe`), injetados via `Composicao.resolver()`. |
 | **VI. A IA Nunca Age Sozinha** | APROVADO | A IA apenas classifica e explica; `AnalisadorDeterministicoDeGolpes` roda antes da IA e `SanitizadorRespostaAntigolpe` impõe piso monotônico `max(preCheck, ia)` e sanitização de texto. |
 | **VII. Ensinar, Não Substituir** | APROVADO | Cada análise explica **quais sinais** chamaram atenção ("O que chamou atenção") e **como agir** com segurança ("O que fazer agora"), ensinando a pessoa a reconhecer padrões de golpe. |
@@ -58,7 +58,7 @@ Implementar no aplicativo Memora (Flutter) e na API (Spring Boot) uma funcionali
 ### Documentation (this feature)
 
 ```text
-specs/016-analise-golpes/
+specs/021-analise-golpes/
 ├── spec.md              # Especificação da feature, histórias de usuário, requisitos e Threat Model
 ├── plan.md              # Plano técnico, arquitetura, contratos e Constitution Check
 └── tasks.md             # Lista de tarefas ordenada por dependências com status de execução
