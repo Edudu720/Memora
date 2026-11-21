@@ -8,8 +8,9 @@ CPU) e medir.
 | Peça | Onde | Custo |
 |---|---|---|
 | Backend (Docker) | Render, plano **Free**, região **Virginia** | US$ 0 |
+| Site tutorial (`site/`) | Render, **Static Site** (CDN, não dorme) | US$ 0 |
 | Banco PostgreSQL | **Neon**, plano Free, região **AWS us-east-1** | US$ 0 |
-| Manter acordado | ping externo a cada 10 min | US$ 0 |
+| Manter acordado | ping externo a cada 10 min (apenas no backend) | US$ 0 |
 | IA | Gemini, nível gratuito (ADR-002, Emenda 1) | US$ 0 |
 
 ---
@@ -104,6 +105,33 @@ curl.exe https://<servico>.onrender.com/actuator/health/liveness
 
 Deve responder `{"status":"UP"}`. O `/actuator/health` (com o banco) também
 responde, mas não o use para o ping.
+
+## 2b. Site tutorial estático (`memora-site`)
+
+O mesmo [`render.yaml`](../../render.yaml) declara o serviço `memora-site`
+(`runtime: static`, `staticPublishPath: site`, sem etapa de build). Por ser
+hospedagem estática no Render, **ele não dorme** e não precisa de ping externo;
+além disso, possui `buildFilter` próprio (`site/**` e `render.yaml`) para não
+reconstruir quando apenas o backend ou o app mudarem.
+
+1. Depois do merge na branch configurada do Blueprint (`develop`), confirme no
+   painel do Render se o serviço `memora-site` foi criado/sincronizado.
+2. Copie a URL oficial gerada em `https://` no painel (ex.:
+   `https://memora-site-xxxx.onrender.com` — **atenção**: o subdomínio exato
+   `https://memora-site.onrender.com` já pertence a outro projeto externo no
+   Render e não deve ser usado).
+3. Confira que os cabeçalhos de segurança estão ativos:
+
+```powershell
+curl.exe -I https://<site-memora>.onrender.com/
+```
+
+Deve responder `200 OK` com `Content-Security-Policy`, `X-Frame-Options: DENY`,
+`X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` e
+`Permissions-Policy`.
+
+4. Registre a URL `https://` oficial na **Issue #106** para desbloquear o
+   botão do site na tela de Ajuda do aplicativo (**Item 11**, spec `012`).
 
 ## 3. Ping a cada 10 minutos
 
