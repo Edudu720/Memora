@@ -87,6 +87,7 @@ O que o `render.yaml` já define, e não precisa de mão:
 | `MEMORA_CHAVE_ORIGEM` | `generateValue` | Fixa entre reinícios; sem ela, a contagem por origem da R4 zera |
 | `MEMORA_ASSISTENTE_PROVEDOR` | `gemini` | Vazio cairia no simulado |
 | `MEMORA_ASSISTENTE_GEMINI_MODELO` | `gemini-3.6-flash` | O `3.8` deu 503 por sobrecarga em 2026-10-21 (ADR-002) |
+| `MEMORA_ASSISTENTE_GEMINI_MODELO_RESERVA` | `gemini-3.5-flash-lite` | Reserva automática antes do 1º trecho quando o principal sofre `429` ou `5xx` persistente |
 
 ⚠️ **Não ponha `SPRING_PROFILES_ACTIVE=producao`.** Esse perfil não tem
 `EnviadorDeCodigo` (T065a) e a aplicação não sobe, de propósito. Sem ele, os

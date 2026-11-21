@@ -38,10 +38,13 @@ class ClienteDaAssistenteGeminiRealTest {
         try (ClienteDaAssistenteGemini cliente =
                 new ClienteDaAssistenteGemini(
                         System.getenv("GEMINI_API_KEY"),
-                        "gemini-3.8-flash",
+                        "gemini-3.6-flash",
+                        "gemini-3.5-flash-lite",
                         ClienteDaAssistenteGemini.URL_BASE_PADRAO,
                         Duration.ofSeconds(10),
-                        Duration.ofSeconds(60))) {
+                        Duration.ofSeconds(60),
+                        2,
+                        Duration.ofMillis(500))) {
 
             List<String> trechos = new ArrayList<>();
             ClienteDaAssistente.Resposta resposta =
