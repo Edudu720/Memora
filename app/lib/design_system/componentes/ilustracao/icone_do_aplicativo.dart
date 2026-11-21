@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -34,9 +33,9 @@ class IconeDoAplicativo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    final String normalizada = (chave.isNotEmpty ? chave : (nome ?? ''))
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final String normalizada = _normalizarChave(
+      chave.isNotEmpty ? chave : (nome ?? ''),
+    );
 
     return MediaQuery.withNoTextScaling(
       child: ClipRRect(
@@ -50,8 +49,8 @@ class IconeDoAplicativo extends StatelessWidget {
     );
   }
 
-  /// Mapa constante dos 7 ícones vetoriais compartilhados em `assets/icones_apps/`
-  /// (Feature 016, Issue #106 Item 6).
+  /// Mapa constante dos 10 ícones vetoriais compartilhados em
+  /// `assets/icones_apps/` (Feature 016 Item 6 + Feature 019 Item 13).
   static const Map<String, String> _iconesSvgPorChave = <String, String>{
     'youtube': 'assets/icones_apps/youtube.svg',
     'tiktok': 'assets/icones_apps/tiktok.svg',
@@ -60,6 +59,9 @@ class IconeDoAplicativo extends StatelessWidget {
     'poupatempo': 'assets/icones_apps/poupatempo.svg',
     'carteiradigital': 'assets/icones_apps/carteira-digital.svg',
     'carteiradetrabalho': 'assets/icones_apps/carteira-de-trabalho.svg',
+    'instagram': 'assets/icones_apps/instagram.svg',
+    'etitulo': 'assets/icones_apps/e-titulo.svg',
+    'fgts': 'assets/icones_apps/fgts.svg',
   };
 
   static String? _buscarSvgPorChave(String normalizada) {
@@ -87,6 +89,15 @@ class IconeDoAplicativo extends StatelessWidget {
     if (normalizada.contains('poupatempo')) {
       return _iconesSvgPorChave['poupatempo'];
     }
+    if (normalizada.contains('instagram')) {
+      return _iconesSvgPorChave['instagram'];
+    }
+    if (normalizada.contains('titulo')) {
+      return _iconesSvgPorChave['etitulo'];
+    }
+    if (normalizada.contains('fgts')) {
+      return _iconesSvgPorChave['fgts'];
+    }
     return null;
   }
 
@@ -113,33 +124,6 @@ class IconeDoAplicativo extends StatelessWidget {
         width: tamanho,
         height: tamanho,
         fit: BoxFit.contain,
-      );
-    }
-
-    // 3. Instagram (reservado para Item 13 — @Henrique-Sandrini)
-    if (normalizada.contains('instagram')) {
-      return Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(-0.8, 0.8),
-            radius: 1.25,
-            colors: <Color>[
-              Color(0xFFFFDC80),
-              Color(0xFFF77737),
-              Color(0xFFF56040),
-              Color(0xFFFD1D1D),
-              Color(0xFFE1306C),
-              Color(0xFFC13584),
-              Color(0xFF833AB4),
-              Color(0xFF5851DB),
-            ],
-          ),
-        ),
-        alignment: Alignment.center,
-        child: CustomPaint(
-          size: Size(tamanho * 0.65, tamanho * 0.65),
-          painter: _CameraInstagramPainter(),
-        ),
       );
     }
 
@@ -173,19 +157,6 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 10. E-Título (Verde Eleitoral — reservado para Item 13)
-    if (normalizada.contains('titulo')) {
-      return Container(
-        color: const Color(0xFF0E5E35),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.how_to_vote_rounded,
-          color: const Color(0xFFFFDF00),
-          size: tamanho * 0.62,
-        ),
-      );
-    }
-
     // 11. Serasa (logo oficial fornecida)
     if (normalizada.contains('serasa')) {
       return Image.asset(
@@ -193,31 +164,6 @@ class IconeDoAplicativo extends StatelessWidget {
         width: tamanho,
         height: tamanho,
         fit: BoxFit.contain,
-      );
-    }
-
-    // 12. FGTS (Azul Caixa com Laranja — reservado para Item 13)
-    if (normalizada.contains('fgts')) {
-      return Container(
-        color: const Color(0xFF005CA9),
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: tamanho * 0.28,
-              child: Container(color: const Color(0xFFF26522)),
-            ),
-            Icon(
-              Icons.savings_rounded,
-              color: Colors.white,
-              size: tamanho * 0.60,
-            ),
-          ],
-        ),
       );
     }
 
@@ -242,37 +188,16 @@ class IconeDoAplicativo extends StatelessWidget {
       ),
     );
   }
-}
 
-/// Desenha a silhueta da câmera do Instagram (quadrado arredondado + círculo + ponto).
-class _CameraInstagramPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint strokePaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(2.0, size.width * 0.08);
-
-    final Paint fillPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    // Moldura arredondada
-    final RRect rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Radius.circular(size.width * 0.28),
-    );
-    canvas.drawRRect(rrect, strokePaint);
-
-    // Lente circular central
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    canvas.drawCircle(center, size.width * 0.22, strokePaint);
-
-    // Ponto de flash
-    final Offset flash = Offset(size.width * 0.78, size.height * 0.22);
-    canvas.drawCircle(flash, size.width * 0.05, fillPaint);
+  static String _normalizarChave(String entrada) {
+    final String semAcento = entrada
+        .toLowerCase()
+        .replaceAll(RegExp(r'[áàãâä]'), 'a')
+        .replaceAll(RegExp(r'[éèêë]'), 'e')
+        .replaceAll(RegExp(r'[íìîï]'), 'i')
+        .replaceAll(RegExp(r'[óòõôö]'), 'o')
+        .replaceAll(RegExp(r'[úùûü]'), 'u')
+        .replaceAll('ç', 'c');
+    return semAcento.replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
