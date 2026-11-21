@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_anfitria.dart';
+import '../../../l10n/textos_antigolpe.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_casca.dart';
 
@@ -49,6 +50,9 @@ class TelaInicio extends StatefulWidget {
   /// Contêiner semântico da área "Ver tudo o que eu faço".
   static const Key chaveCaixaVerTudo = Key('inicio.caixaVerTudo');
 
+  /// Atalho para abrir o verificador de links e mensagens contra golpes.
+  static const Key chaveVerificarGolpe = Key('inicio.verificarGolpe');
+
   /// Nome de tratamento exibido na saudação.
   final String nome;
 
@@ -76,6 +80,9 @@ class TelaInicio extends StatefulWidget {
   /// Abre a tela de ajuda.
   final VoidCallback? aoAbrirAjuda;
 
+  /// Abre a tela dedicada de análise de links e mensagens contra golpes.
+  final VoidCallback? aoVerificarGolpe;
+
   /// Cria a tela inicial da pessoa autenticada.
   const TelaInicio({
     required this.nome,
@@ -87,6 +94,7 @@ class TelaInicio extends StatefulWidget {
     this.aoAbrirServicoEspecifico,
     this.aoAbrirCuidado,
     this.aoAbrirAjuda,
+    this.aoVerificarGolpe,
     super.key,
   });
 
@@ -112,6 +120,7 @@ class _TelaInicioState extends State<TelaInicio> {
   VoidCallback? get aoAbrirRegistro => widget.aoAbrirRegistro;
   VoidCallback? get aoAbrirCuidado => widget.aoAbrirCuidado;
   VoidCallback? get aoAbrirAjuda => widget.aoAbrirAjuda;
+  VoidCallback? get aoVerificarGolpe => widget.aoVerificarGolpe;
 
   List<_AcaoRapida> _montarAtalhos() {
     return <_AcaoRapida>[
@@ -150,6 +159,14 @@ class _TelaInicioState extends State<TelaInicio> {
           titulo: TextosAssistente.portaAjuda,
           variacao: VarianteBadge.neutro,
           aoTocar: aoAbrirAjuda ?? aoVerTudo,
+        ),
+      if (aoVerificarGolpe != null)
+        _AcaoRapida(
+          chave: TelaInicio.chaveVerificarGolpe,
+          icone: Icons.verified_user_rounded,
+          titulo: TextosAntigolpe.portaTitulo,
+          variacao: VarianteBadge.primario,
+          aoTocar: aoVerificarGolpe,
         ),
     ];
   }
@@ -380,6 +397,7 @@ class _TileAtalho extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TileAcaoRapida(
+      key: atalho.chave,
       icone: atalho.icone,
       titulo: atalho.titulo,
       variacao: atalho.variacao,
@@ -389,12 +407,14 @@ class _TileAtalho extends StatelessWidget {
 }
 
 class _AcaoRapida {
+  final Key? chave;
   final IconData icone;
   final String titulo;
   final VarianteBadge variacao;
   final VoidCallback? aoTocar;
 
   const _AcaoRapida({
+    this.chave,
     required this.icone,
     required this.titulo,
     required this.variacao,

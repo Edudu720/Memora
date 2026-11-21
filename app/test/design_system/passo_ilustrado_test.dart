@@ -171,6 +171,55 @@ void main() {
       expect(find.text(TextosGuias.voltarAoHub), findsOneWidget);
       expect(find.text(TextosGuias.parabens), findsOneWidget);
     });
+
+    testWidgets(
+      'separa itens de legenda com quebra de linha usando espaçamento vertical adequado '
+      'e empilha a mascote em escalaTextoAlta',
+      (WidgetTester t) async {
+        const Passo passoMultilinha = Passo(
+          captura: CapturaDoGuia.whatsapp5,
+          destaque: RegiaoRelativa(x: 0.04, y: 0.88, largura: 0.92, altura: 0.08),
+          texto: TextosGuias.whatsappPasso5,
+          descricaoDaCaptura: TextosGuias.whatsappCaptura5,
+        );
+
+        await t.pumpWidget(
+          app(
+            const PassoIlustrado(
+              passo: passoMultilinha,
+              posicao: 5,
+              total: 5,
+            ),
+            escala: MemoraDimensoes.escalaTextoMax,
+          ),
+        );
+
+        final List<String> linhas = TextosGuias.whatsappPasso5
+            .split('\n')
+            .map((String l) => l.trim())
+            .where((String l) => l.isNotEmpty)
+            .toList();
+
+        for (final String linha in linhas) {
+          expect(find.text(linha), findsOneWidget);
+        }
+
+        // Verifica que cada linha numerada fica abaixo da anterior com espaçamento >= MemoraEspacamento.sm
+        for (int i = 1; i < linhas.length; i++) {
+          final Rect anterior = t.getRect(find.text(linhas[i - 1]));
+          final Rect atual = t.getRect(find.text(linhas[i]));
+          expect(
+            atual.top - anterior.bottom,
+            greaterThanOrEqualTo(MemoraEspacamento.sm),
+          );
+        }
+
+        // Em escalaTextoMax (2.0 >= escalaTextoAlta), a mascote fica empilhada acima da legenda
+        final Rect rectMascote = t.getRect(find.byType(MemoraPersonagem).last);
+        final Rect rectPrimeiraLinha = t.getRect(find.text(linhas.first));
+        expect(rectPrimeiraLinha.top, greaterThanOrEqualTo(rectMascote.bottom));
+      },
+    );
   });
 
   group('PassoIlustrado — Matriz completa (FR-044)', () {

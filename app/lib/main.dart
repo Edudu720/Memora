@@ -203,6 +203,7 @@ class AplicativoMemora extends StatelessWidget {
               apresentacaoVista: composicao.apresentacaoVista,
               sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
+              analiseGolpe: composicao.analiseGolpe,
               localizador: composicao.localizador,
               emergenciaSos: composicao.emergenciaSos,
               contatoEmergencia: composicao.contatoEmergencia,

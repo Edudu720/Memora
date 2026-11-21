@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../l10n/textos_ajuda.dart';
+import '../../../l10n/textos_antigolpe.dart';
 import '../domain/assunto_de_ajuda.dart';
 
 /// A Ajuda: os assuntos do wireframe que funcionam, cada um com desenho e nome
@@ -33,6 +34,9 @@ class TelaAjuda extends StatelessWidget {
   /// Chave da porta "Ver a apresentação de novo", para os testes.
   static const Key chaveReverApresentacao = Key('ajuda.rever_apresentacao');
 
+  /// Chave da porta "Verificar golpe", para os testes.
+  static const Key chaveVerificarGolpe = Key('ajuda.verificar_golpe');
+
   /// Os assuntos que existem agora.
   final List<AssuntoDeAjuda> assuntos;
 
@@ -41,6 +45,9 @@ class TelaAjuda extends StatelessWidget {
 
   /// Rever a apresentação inicial (FR-013). Nulo: a porta não existe.
   final VoidCallback? aoVerApresentacao;
+
+  /// Abre o verificador de links e mensagens contra golpes. Nulo: a porta não existe.
+  final VoidCallback? aoVerificarGolpe;
 
   /// Volta à tela de onde a Ajuda foi aberta.
   final VoidCallback aoVoltar;
@@ -51,6 +58,7 @@ class TelaAjuda extends StatelessWidget {
     required this.aoAbrirAssunto,
     required this.aoVoltar,
     this.aoVerApresentacao,
+    this.aoVerificarGolpe,
     super.key,
   });
 
@@ -131,6 +139,36 @@ class TelaAjuda extends StatelessWidget {
                                 aoTocar: () => aoAbrirAssunto(assuntos[i]),
                                 mostrarDivisorInferior:
                                     i < assuntos.length - 1 ||
+                                    aoVerificarGolpe != null ||
+                                    aoVerApresentacao != null,
+                              ),
+                            if (aoVerificarGolpe != null)
+                              LinhaDeLista(
+                                key: chaveVerificarGolpe,
+                                titulo: TextosAntigolpe.portaTitulo,
+                                subtitulo: TextosAntigolpe.portaDescricao,
+                                esquerda: ocultarVisuais
+                                    ? null
+                                    : Container(
+                                        width:
+                                            MemoraDimensoes.badgeAtalhoRapido,
+                                        height:
+                                            MemoraDimensoes.badgeAtalhoRapido,
+                                        decoration: BoxDecoration(
+                                          color: cores.destaque,
+                                          borderRadius: BorderRadius.circular(
+                                            MemoraRaio.badge,
+                                          ),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Icon(
+                                          Icons.verified_user_rounded,
+                                          size: MemoraDimensoes.iconePadrao,
+                                          color: cores.primaria,
+                                        ),
+                                      ),
+                                aoTocar: aoVerificarGolpe,
+                                mostrarDivisorInferior:
                                     aoVerApresentacao != null,
                               ),
                             if (aoVerApresentacao != null)

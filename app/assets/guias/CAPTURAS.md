@@ -26,7 +26,7 @@ Resumo de [contracts/guias.md](../../../specs/004-redesenho-das-telas/contracts/
 
 | Chave | Capturado em | Versão do aplicativo | Aparelho | Quem capturou |
 |---|---|---|---|---|
-| whatsapp | 2026-11-13 | 2026.11 | Android (JPG + Blur + Numerado) — legado #71: marcação pintada na imagem, substituir | Equipe Memora (4 capturas) |
+| whatsapp | 2026-11-13 | 2026.11 | Android (JPG + Blur + Numerado) — legado #71: marcação pintada na imagem, substituir | Equipe Memora (5 capturas) |
 | instagram | 2026-11-13 | a confirmar | Galaxy S20 FE — prints com os dados pessoais trocados por dados fictícios gerados por IA (interface original do aparelho) | Henrique Sandrini |
 | youtube | 2026-10-01 | 19.38.0 | Galaxy A14 | Equipe Memora |
 | facebook | 2026-11-13 | 2026.11 | Android (JPG + Blur + Numerado) — legado #71: marcação pintada na imagem, substituir | Equipe Memora (10 capturas) |

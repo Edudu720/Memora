@@ -115,6 +115,13 @@ final class CapturaDoGuia {
     FormatoDaCaptura.jpg,
   );
 
+  /// Captura 5 do WhatsApp.
+  static const CapturaDoGuia whatsapp5 = CapturaDoGuia._(
+    'whatsapp',
+    5,
+    FormatoDaCaptura.jpg,
+  );
+
   // Instagram (T071)
   /// Captura 1 do Instagram.
   static const CapturaDoGuia instagram1 = CapturaDoGuia._('instagram', 1);
