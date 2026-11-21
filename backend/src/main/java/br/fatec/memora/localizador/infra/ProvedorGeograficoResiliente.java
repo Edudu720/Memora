@@ -150,8 +150,16 @@ public class ProvedorGeograficoResiliente implements ProvedorGeografico {
                         falhaGeoapify.getMessage());
             }
         }
-        return provedorOverpass.buscarPorCoordenadas(
-                latitude, longitude, raioMetros, categoria, termoFiltro);
+        try {
+            return provedorOverpass.buscarPorCoordenadas(
+                    latitude, longitude, raioMetros, categoria, termoFiltro);
+        } catch (ProvedorGeograficoIndisponivelException falhaOverpass) {
+            LOG.warn(
+                    "Overpass indisponível ({}). Recorrendo à busca regional via Nominatim.",
+                    falhaOverpass.getMessage());
+            return provedorOverpass.buscarPorCoordenadasViaNominatim(
+                    latitude, longitude, raioMetros, categoria, termoFiltro);
+        }
     }
 
     private CoordenadasGeo consultarGeocodeAoVivo(String regiaoManual) {

@@ -51,6 +51,11 @@ public class ProvedorGeoapify implements ProvedorGeografico {
             @Value("${memora.localizador.geoapify.places-url:" + PLACES_URL_PADRAO + "}") String placesUrl,
             @Value("${memora.localizador.geoapify.geocode-url:" + GEOCODE_URL_PADRAO + "}") String geocodeUrl) {
         this(jsonMapper, apiKey, placesUrl, geocodeUrl, TIMEOUT_PADRAO);
+        if (estaConfigurado()) {
+            LOG.info("Localizador configurado com provedor principal Geoapify e fallback OpenStreetMap (Overpass/Nominatim).");
+        } else {
+            LOG.info("Localizador sem chave Geoapify configurada (MEMORA_LOCALIZADOR_GEOAPIFY_API_KEY); usando OpenStreetMap (Overpass/Nominatim).");
+        }
     }
 
     ProvedorGeoapify(

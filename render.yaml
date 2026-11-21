@@ -40,6 +40,8 @@ services:
         value: gemini-3.5-flash-lite
       - key: GEMINI_API_KEY
         sync: false
+      - key: MEMORA_LOCALIZADOR_GEOAPIFY_API_KEY
+        sync: false
       - key: MEMORA_TOKEN_SEGREDO
         generateValue: true
       - key: MEMORA_CHAVE_ORIGEM
