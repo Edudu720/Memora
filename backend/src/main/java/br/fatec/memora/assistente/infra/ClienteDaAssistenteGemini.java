@@ -266,10 +266,11 @@ public class ClienteDaAssistenteGemini implements ClienteDaAssistente, AutoClose
                         endereco, corpoJson, aoReceberTrecho, enviouTrecho);
             } catch (AssistenteIndisponivel falha) {
                 ultimaFalha = falha;
-                if (enviouTrecho.get()
-                        || Thread.currentThread().isInterrupted()
-                        || !ehElegivelFallback(falha.motivo())) {
+                if (enviouTrecho.get() || !ehElegivelFallback(falha.motivo())) {
                     throw falha;
+                }
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
                 }
                 if (falha.motivo() == Motivo.COTA_ESGOTADA) {
                     if (enderecoReserva != null) {

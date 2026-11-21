@@ -952,6 +952,7 @@ class ClienteDaAssistenteGeminiTest {
 
                 assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
                 assertThat(((AssistenteIndisponivel) lancada).motivo()).isEqualTo(Motivo.REDE);
+                assertThat(Thread.currentThread().isInterrupted()).isTrue();
                 assertThat(capturadas).hasSize(1);
             } finally {
                 Thread.interrupted();
@@ -963,8 +964,8 @@ class ClienteDaAssistenteGeminiTest {
             Thread threadChamadora = Thread.currentThread();
             roteiro =
                     troca -> {
-                        erro(troca, 503);
                         threadChamadora.interrupt();
+                        erro(troca, 503);
                     };
 
             try (ClienteDaAssistenteGemini resiliente =
@@ -974,8 +975,8 @@ class ClienteDaAssistenteGeminiTest {
                                 () -> resiliente.conversar(pedido("Oi"), t -> {}));
 
                 assertThat(lancada).isInstanceOf(AssistenteIndisponivel.class);
-                assertThat(((AssistenteIndisponivel) lancada).motivo())
-                        .isIn(Motivo.REDE, Motivo.FALHA_DO_PROVEDOR);
+                assertThat(((AssistenteIndisponivel) lancada).motivo()).isEqualTo(Motivo.REDE);
+                assertThat(Thread.currentThread().isInterrupted()).isTrue();
                 assertThat(capturadas).hasSize(1);
             } finally {
                 Thread.interrupted();
