@@ -9,9 +9,9 @@
 Implementar integralmente o Item 14a da Issue #106 sem quebrar contratos de acessibilidade, privacidade (`FR-042a/b`) nem fluxos existentes:
 1. Estender `ProgressoDeAprendizado` (`data`) com stream broadcast `alteracoes` (emitida após gravação em `registrarConclusao` e remoção em `apagar`) e leituras locais `ordensDeConclusao` / `ultimoConcluido`.
 2. Criar funções puras de domínio em `app/lib/features/aprendizado/domain/estado_do_modulo.dart` (`moduloConcluido` e `chaveDoUltimoModuloConcluido`) garantindo que módulos divididos em seções só sejam considerados concluídos quando **todas** as seções tiverem conclusão registrada, usando a maior `ordem` entre suas seções para desempate cronológico.
-3. Atualizar `TelaCatalogo` (conectada a `progresso` e `idDaConta` em `FluxoAutenticacao._abrirCatalogo`) para exibir o `BadgeDeStatus` informativo `"Concluído"` quando o módulo estiver completo e reagir a `alteracoes`.
+3. Atualizar `TelaCatalogo` (conectada a `progresso` e `idDaConta` em `FluxoAutenticacao._abrirCatalogo`, alimentada por `progresso: composicao.progresso` em `app/lib/main.dart`) para exibir o `BadgeDeStatus` informativo `"Concluído"` quando o módulo estiver completo e reagir a `alteracoes`.
 4. Atualizar `TelaSeletorDeSecao` para exibir o checkbox verde arredondado construído estritamente com tokens do Design System (`cores.sucesso`, `MemoraDimensoes.iconeDestaque`, `MemoraRaio.balaoPonta`, `Icons.check_rounded` com contraste > 6,5:1 nos três temas), combinado com texto `Já aprendeu`, semântica TalkBack `"Concluído."` e atualização ao vivo via `alteracoes`.
-5. Atualizar `TelaPerfil` com o `CampoInformacao` puramente informativo `TelaPerfil.chaveUltimoAprendido` (`"Último aprendizado"`), preservando `TelaPerfil.chaveMaisAprendido`, compartilhando helper de resolução de nome legível e atualizando ao vivo dentro da `CascaInterna`.
+5. Atualizar `TelaPerfil` com o `CampoInformacao` puramente informativo `TelaPerfil.chaveUltimoAprendido` (`"Último aprendizado"`) dentro da seção *Seu aprendizado* (`016`), unificando a reserva provisória (`chaveUltimoModulo`), preservando `TelaPerfil.chaveMaisAprendido`, `_nomesDoCatalogo`, `_versaoCarga`, `TextosPerfil.carregandoAprendizado`, `try/catch` resiliente e atualização ao vivo dentro da `CascaInterna`.
 
 ## Technical Context
 
@@ -63,6 +63,7 @@ specs/020-modulo-concluido-e-ultimo-aprendido/
 ```text
 app/
 ├── lib/
+│   ├── main.dart                                      # Liga `composicao.progresso` ao `FluxoAutenticacao`
 │   ├── features/
 │   │   ├── aprendizado/
 │   │   │   ├── data/
@@ -85,6 +86,8 @@ app/
 │       └── textos_perfil.dart
 └── test/
     └── features/
+        ├── abertura/
+        │   └── raiz_do_memora_test.dart               # Valida `fluxo.progresso` ligado na subida
         ├── aprendizado/
         │   ├── progresso_de_aprendizado_test.dart
         │   └── tela_seletor_de_secao_test.dart

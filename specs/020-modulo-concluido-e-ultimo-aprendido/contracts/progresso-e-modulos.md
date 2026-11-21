@@ -23,7 +23,7 @@
 - Nova chave de teste estática:
   - `static Key chaveConcluidoDoItem(String chave) => Key('catalogo.concluido.$chave');`
 - Regra visual: dentro de `_ItemDoCatalogo`, o selo de capacidade existente e o selo condicional `BadgeDeStatus(key: TelaCatalogo.chaveConcluidoDoItem(servico.chave), rotulo: TextosGuias.moduloConcluido, icone: Icons.check_circle_rounded, tom: TomBadgeStatus.positivo)` ficam agrupados em `Wrap(spacing: MemoraEspacamento.xs, runSpacing: MemoraEspacamento.xs, ...)`. O selo `"Concluído"` só é renderizado quando `guia != null && moduloConcluido(guia, _concluidos)`.
-- Conexão no fluxo principal (`FluxoAutenticacao._abrirCatalogo`): passa `progresso: widget.progresso` e `idDaConta: _pessoa?.id`.
+- Conexão no fluxo principal (`main.dart` -> `FluxoAutenticacao` -> `_abrirCatalogo`): `AplicativoMemora` repassa `progresso: composicao.progresso` para `FluxoAutenticacao`, que passa `progresso: widget.progresso` e `idDaConta: _pessoa?.id` para `TelaCatalogo` (e `TelaPerfil` na `CascaInterna`).
 
 ### `TelaSeletorDeSecao` (`app/lib/features/aprendizado/presentation/tela_seletor_de_secao.dart`)
 - Nova chave de teste estática:
@@ -39,11 +39,11 @@
 ### `TelaPerfil` (`app/lib/features/perfil/presentation/tela_perfil.dart`)
 - Nova chave de teste estática:
   - `static const Key chaveUltimoAprendido = Key('perfil.ultimo_aprendido');`
-- Ordem dentro de `ListaInformacao`:
-  1. `TelaPerfil.chaveNome`
-  2. `TelaPerfil.chaveCanal` (quando presente)
-  3. `TelaPerfil.chaveMaisAprendido` (`O que você mais aprendeu` — preservado)
-  4. `TelaPerfil.chaveUltimoAprendido` (`Último aprendizado` — novo, valor `_carregouProgresso ? (_ultimoAprendidoNome ?? TextosPerfil.ultimoAprendidoVazio) : '...'`, nunca clicável).
+- Organização em cartões conciliada com `016` (unificando a reserva `chaveUltimoModulo` / `ultimoModuloConcluido` no campo definitivo):
+  - **Bloco 2 (`Sua conta`)**: `TelaPerfil.chaveNome`, `TelaPerfil.chaveCanal` (quando presente).
+  - **Bloco 3 (`TelaPerfil.chaveSecaoAprendizado`, cabeçalho `"Seu aprendizado"`)**:
+    1. `TelaPerfil.chaveMaisAprendido` (`O que você mais aprendeu` — preservado, valor `_carregouProgresso ? (_maisAprendidoNome ?? TextosPerfil.maisAprendidoVazio) : TextosPerfil.carregandoAprendizado`, nunca clicável).
+    2. `TelaPerfil.chaveUltimoAprendido` (`Último aprendizado` — novo, valor `_carregouProgresso ? (_ultimoAprendidoNome ?? TextosPerfil.ultimoAprendidoVazio) : TextosPerfil.carregandoAprendizado`, nunca clicável).
 
 ## 3. Contrato de Copy (`app/lib/l10n/`)
 - `TextosGuias.moduloConcluido = 'Concluído'`

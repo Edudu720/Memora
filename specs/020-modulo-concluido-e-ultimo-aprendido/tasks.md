@@ -87,3 +87,10 @@
 ## Phase 7: Ajuste de Rótulo no Perfil
 
 - [X] T015 [US3] Renomear rótulo `TextosPerfil.rotuloUltimoAprendido` para `'Último aprendizado'` em `app/lib/l10n/textos_perfil.dart`, validar em `app/test/features/perfil/tela_perfil_test.dart` e sincronizar `CHANGELOG.md` e artefatos da feature 020
+
+---
+
+## Phase 8: Conciliação com 016 e Ligação em Produção (Revisão PR #111)
+
+- [X] T016 [US1/US3] Repassar `progresso: composicao.progresso` para `FluxoAutenticacao` em `app/lib/main.dart` e validar ligação em `app/test/features/abertura/raiz_do_memora_test.dart`
+- [X] T017 [US3] Conciliar `TelaPerfil`, `TextosPerfil` e `app/test/features/perfil/tela_perfil_test.dart` com a feature `016` (seção *Seu aprendizado*, remoção da reserva provisória `chaveUltimoModulo`/`ultimoModuloConcluido`, `_nomesDoCatalogo`, `_versaoCarga`, `TextosPerfil.carregandoAprendizado`), atualizar `CHANGELOG.md` e artefatos da feature `020` e revalidar suíte completa

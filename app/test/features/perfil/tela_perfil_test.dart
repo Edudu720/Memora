@@ -428,9 +428,9 @@ void main() {
     }
   });
 
-  group('Feature 016 / US4 — Organização, otimização e slot Item 14', () {
+  group('Feature 016 + 020 / US4 — Organização, otimização e Último aprendizado', () {
     testWidgets(
-      'agrupa em cartões com Semantics(header: true) e omite ultimoModuloConcluido quando nulo ou vazio',
+      'agrupa em cartões com Semantics(header: true) e exibe ultimo aprendido acolhedor quando vazio',
       (WidgetTester t) async {
         final SemanticsHandle handle = t.ensureSemantics();
         await t.pumpWidget(
@@ -442,14 +442,33 @@ void main() {
               progresso: progresso,
               dataDeNascimento: datas,
               idDaConta: 'conta-123',
-              ultimoModuloConcluido: '   ',
             ),
           ),
         );
         await t.pumpAndSettle();
 
         expect(find.byKey(TelaPerfil.chaveSecaoAprendizado), findsOneWidget);
-        expect(find.byKey(TelaPerfil.chaveUltimoModulo), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveSecaoAprendizado),
+            matching: find.byKey(TelaPerfil.chaveMaisAprendido),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveSecaoAprendizado),
+            matching: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text(TextosPerfil.ultimoAprendidoVazio),
+          ),
+          findsOneWidget,
+        );
         for (final String cabecalho in <String>[
           TextosPerfil.secaoRetrato,
           TextosPerfil.secaoConta,
@@ -469,9 +488,13 @@ void main() {
     );
 
     testWidgets(
-      'renderiza ultimoModuloConcluido apenas como informação quando preenchido',
+      'renderiza chaveUltimoAprendido dentro de chaveSecaoAprendizado apenas como informação quando há módulo concluído',
       (WidgetTester t) async {
         final SemanticsHandle handle = t.ensureSemantics();
+        await progresso.registrarConclusao(
+          idDaConta: 'conta-123',
+          chave: 'youtube',
+        );
         await t.pumpWidget(
           MaterialApp(
             theme: TemasMemora.claro,
@@ -480,21 +503,32 @@ void main() {
               canal: Future<String?>.value('ana@exemplo.com'),
               progresso: progresso,
               idDaConta: 'conta-123',
-              ultimoModuloConcluido: 'WhatsApp: Mandar foto',
             ),
           ),
         );
         await t.pumpAndSettle();
 
-        expect(find.byKey(TelaPerfil.chaveUltimoModulo), findsOneWidget);
-        expect(find.text('WhatsApp: Mandar foto'), findsOneWidget);
         expect(
-          t.getSemantics(find.byKey(TelaPerfil.chaveUltimoModulo)),
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveSecaoAprendizado),
+            matching: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('YouTube'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          t.getSemantics(find.byKey(TelaPerfil.chaveUltimoAprendido)),
           isSemantics(isButton: false, hasTapAction: false),
         );
         expect(
           find.descendant(
-            of: find.byKey(TelaPerfil.chaveUltimoModulo),
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
             matching: find.byType(InkWell),
           ),
           findsNothing,
@@ -521,18 +555,39 @@ void main() {
         await t.pumpWidget(buildComConta('conta-a'));
         await t.pump();
         expect(find.text('...'), findsNothing);
-        expect(find.text(TextosPerfil.carregandoAprendizado), findsOneWidget);
+        expect(find.text(TextosPerfil.carregandoAprendizado), findsNWidgets(2));
 
         await t.pumpWidget(buildComConta('conta-b'));
         await t.pump();
 
-        controlado.completar('conta-a', 'youtube');
+        controlado.completar(
+          'conta-a',
+          'youtube',
+          ordens: const <String, int>{'youtube': 1},
+        );
         await t.pump();
         expect(find.text('YouTube'), findsNothing);
 
-        controlado.completar('conta-b', 'meu-inss');
+        controlado.completar(
+          'conta-b',
+          'meu-inss',
+          ordens: const <String, int>{'whatsapp': 2},
+        );
         await t.pumpAndSettle();
-        expect(find.text('Meu INSS'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveMaisAprendido),
+            matching: find.text('Meu INSS'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('WhatsApp'),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('YouTube'), findsNothing);
       },
     );
@@ -555,6 +610,7 @@ void main() {
 
         expect(find.text(TextosPerfil.carregandoAprendizado), findsNothing);
         expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+        expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsOneWidget);
       },
     );
   });
@@ -562,7 +618,20 @@ void main() {
 
 class _ProgressoQueFalha implements ProgressoDeAprendizado {
   @override
+  Stream<void> get alteracoes => const Stream<void>.empty();
+
+  @override
   Future<String?> aplicativoMaisAprendido(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<String?> ultimoConcluido(String idDaConta) async {
     throw StateError('Falha simulada na leitura local');
   }
 
@@ -592,8 +661,18 @@ class _ProgressoQueFalha implements ProgressoDeAprendizado {
 class _ProgressoComAtraso implements ProgressoDeAprendizado {
   final Map<String, Completer<String?>> _pendentes =
       <String, Completer<String?>>{};
+  final Map<String, Map<String, int>> _ordensPorConta =
+      <String, Map<String, int>>{};
 
-  void completar(String idDaConta, String? chave) {
+  @override
+  Stream<void> get alteracoes => const Stream<void>.empty();
+
+  void completar(
+    String idDaConta,
+    String? chave, {
+    Map<String, int> ordens = const <String, int>{},
+  }) {
+    _ordensPorConta[idDaConta] = ordens;
     _pendentes.remove(idDaConta)?.complete(chave);
   }
 
@@ -603,6 +682,13 @@ class _ProgressoComAtraso implements ProgressoDeAprendizado {
         .putIfAbsent(idDaConta, () => Completer<String?>())
         .future;
   }
+
+  @override
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async =>
+      _ordensPorConta[idDaConta] ?? const <String, int>{};
+
+  @override
+  Future<String?> ultimoConcluido(String idDaConta) async => null;
 
   @override
   Future<void> apagar() async {}
