@@ -210,6 +210,7 @@ class AplicativoMemora extends StatelessWidget {
               aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoPorCanal(),
               consultaAplicativos: ConsultaDeAplicativosPorCanal(),
+              abridorSiteTutorial: composicao.abridorSiteTutorial,
             ),
           );
         },

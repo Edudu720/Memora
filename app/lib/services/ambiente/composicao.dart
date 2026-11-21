@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
+import '../../features/ajuda/data/abridor_site_tutorial.dart';
 import '../../features/assistente/data/aceite_do_aviso.dart';
 import '../../features/assistente/data/chamada_com_renovacao.dart';
 import '../../features/assistente/data/repositorio_assistente_api.dart';
@@ -112,6 +113,11 @@ class Composicao {
   /// criar um para cada lado seria a sessão perdida sem ninguém ouvir.
   final SessaoPerdida sessaoPerdida;
 
+  /// Abridor seguro `https://` para o site oficial de tutoriais (Feature 016).
+  ///
+  /// Nulo enquanto `MEMORA_URL_SITE_TUTORIAL` não trouxer URL `https://` válida.
+  final AbridorDeSiteTutorial? abridorSiteTutorial;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
@@ -126,6 +132,7 @@ class Composicao {
     this.fotoDePerfil,
     this.apresentacaoVista,
     this.progresso,
+    this.abridorSiteTutorial,
     required this.sessaoPerdida,
   });
 
@@ -233,6 +240,7 @@ class Composicao {
       fotoDePerfil: fotos,
       apresentacaoVista: vistas,
       progresso: aprendizado,
+      abridorSiteTutorial: AbridorDeSiteTutorial.doAmbiente(ambiente),
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa

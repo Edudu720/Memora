@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
@@ -298,4 +300,202 @@ void main() {
       });
     }
   });
+
+  group('Feature 016 / US4 — Organização, otimização e slot Item 14', () {
+    testWidgets(
+      'agrupa em cartões com Semantics(header: true) e omite ultimoModuloConcluido quando nulo ou vazio',
+      (WidgetTester t) async {
+        final SemanticsHandle handle = t.ensureSemantics();
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: progresso,
+              dataDeNascimento: datas,
+              idDaConta: 'conta-123',
+              ultimoModuloConcluido: '   ',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(find.byKey(TelaPerfil.chaveSecaoAprendizado), findsOneWidget);
+        expect(find.byKey(TelaPerfil.chaveUltimoModulo), findsNothing);
+        for (final String cabecalho in <String>[
+          TextosPerfil.secaoRetrato,
+          TextosPerfil.secaoConta,
+          TextosPerfil.secaoAprendizado,
+        ]) {
+          final Finder textoHeader = find.text(cabecalho);
+          expect(textoHeader, findsOneWidget);
+          expect(
+            t.getSemantics(textoHeader),
+            isSemantics(isHeader: true),
+            reason: '$cabecalho deve ter semântica de cabeçalho',
+          );
+        }
+        expect(find.text('Dona Ana'), findsOneWidget);
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'renderiza ultimoModuloConcluido apenas como informação quando preenchido',
+      (WidgetTester t) async {
+        final SemanticsHandle handle = t.ensureSemantics();
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: progresso,
+              idDaConta: 'conta-123',
+              ultimoModuloConcluido: 'WhatsApp: Mandar foto',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(find.byKey(TelaPerfil.chaveUltimoModulo), findsOneWidget);
+        expect(find.text('WhatsApp: Mandar foto'), findsOneWidget);
+        expect(
+          t.getSemantics(find.byKey(TelaPerfil.chaveUltimoModulo)),
+          isSemantics(isButton: false, hasTapAction: false),
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoModulo),
+            matching: find.byType(InkWell),
+          ),
+          findsNothing,
+        );
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'troca rápida de idDaConta descarta resposta assíncrona obsoleta e não mostra "..."',
+      (WidgetTester t) async {
+        final _ProgressoComAtraso controlado = _ProgressoComAtraso();
+
+        Widget buildComConta(String conta) => MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaPerfil(
+            nome: 'Dona Ana',
+            canal: Future<String?>.value('ana@exemplo.com'),
+            progresso: controlado,
+            idDaConta: conta,
+          ),
+        );
+
+        await t.pumpWidget(buildComConta('conta-a'));
+        await t.pump();
+        expect(find.text('...'), findsNothing);
+        expect(find.text(TextosPerfil.carregandoAprendizado), findsOneWidget);
+
+        await t.pumpWidget(buildComConta('conta-b'));
+        await t.pump();
+
+        controlado.completar('conta-a', 'youtube');
+        await t.pump();
+        expect(find.text('YouTube'), findsNothing);
+
+        controlado.completar('conta-b', 'meu-inss');
+        await t.pumpAndSettle();
+        expect(find.text('Meu INSS'), findsOneWidget);
+        expect(find.text('YouTube'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'recupera com segurança quando leitura do progresso local lança erro',
+      (WidgetTester t) async {
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: _ProgressoQueFalha(),
+              idDaConta: 'conta-123',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(find.text(TextosPerfil.carregandoAprendizado), findsNothing);
+        expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+      },
+    );
+  });
+}
+
+class _ProgressoQueFalha implements ProgressoDeAprendizado {
+  @override
+  Future<String?> aplicativoMaisAprendido(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<void> apagar() async {}
+
+  @override
+  Future<Map<String, int>> concluidos(String idDaConta) async =>
+      const <String, int>{};
+
+  @override
+  Future<bool> registrarChegadaAoPasso({
+    required String idDaConta,
+    required String chave,
+    required int numeroDoPasso,
+    required int totalDePassos,
+  }) async =>
+      false;
+
+  @override
+  Future<void> registrarConclusao({
+    required String idDaConta,
+    required String chave,
+  }) async {}
+}
+
+class _ProgressoComAtraso implements ProgressoDeAprendizado {
+  final Map<String, Completer<String?>> _pendentes =
+      <String, Completer<String?>>{};
+
+  void completar(String idDaConta, String? chave) {
+    _pendentes.remove(idDaConta)?.complete(chave);
+  }
+
+  @override
+  Future<String?> aplicativoMaisAprendido(String idDaConta) {
+    return _pendentes
+        .putIfAbsent(idDaConta, () => Completer<String?>())
+        .future;
+  }
+
+  @override
+  Future<void> apagar() async {}
+
+  @override
+  Future<Map<String, int>> concluidos(String idDaConta) async =>
+      const <String, int>{};
+
+  @override
+  Future<bool> registrarChegadaAoPasso({
+    required String idDaConta,
+    required String chave,
+    required int numeroDoPasso,
+    required int totalDePassos,
+  }) async =>
+      false;
+
+  @override
+  Future<void> registrarConclusao({
+    required String idDaConta,
+    required String chave,
+  }) async {}
 }

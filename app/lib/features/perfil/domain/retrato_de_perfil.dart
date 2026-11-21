@@ -25,13 +25,7 @@ enum AvatarIlustrado {
   memoraComemorando(chave: 'memora_comemorando'),
 
   /// Memora com escudo protetor.
-  memoraProtegendo(chave: 'memora_protegendo'),
-
-  /// Casal acolhedor em ícone arredondado.
-  casalIdoso(chave: 'casal_idoso'),
-
-  /// Pessoa com celular em ícone arredondado.
-  pessoaComCelular(chave: 'pessoa_com_celular');
+  memoraProtegendo(chave: 'memora_protegendo');
 
   /// Identificador estável persistido no índice local.
   final String chave;
@@ -45,8 +39,6 @@ enum AvatarIlustrado {
         AvatarIlustrado.memoraComemorando =>
           TextosPerfil.avatarMemoraComemorando,
         AvatarIlustrado.memoraProtegendo => TextosPerfil.avatarMemoraProtegendo,
-        AvatarIlustrado.casalIdoso => TextosPerfil.avatarCasalIdoso,
-        AvatarIlustrado.pessoaComCelular => TextosPerfil.avatarPessoaComCelular,
       };
 
   /// Recupera o avatar pelo identificador persistido, ou `null` se inválido.
