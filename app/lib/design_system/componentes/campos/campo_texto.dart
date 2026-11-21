@@ -52,6 +52,12 @@ class CampoTexto extends StatelessWidget {
   /// Habilita ou desabilita a edição.
   final bool habilitado;
 
+  /// Quantidade mínima de linhas visíveis quando o campo é multilinha.
+  final int? minLines;
+
+  /// Quantidade máxima de linhas visíveis (`1` por padrão para campos comuns).
+  final int? maxLines;
+
   /// Cria um campo de texto.
   const CampoTexto({
     required this.rotulo,
@@ -64,6 +70,8 @@ class CampoTexto extends StatelessWidget {
     this.ocultarConteudo = false,
     this.sufixo,
     this.habilitado = true,
+    this.minLines,
+    this.maxLines = 1,
     super.key,
   });
 
@@ -97,6 +105,8 @@ class CampoTexto extends StatelessWidget {
               keyboardType: tipoTeclado,
               inputFormatters: formatadores,
               enabled: habilitado,
+              minLines: minLines,
+              maxLines: maxLines,
               style: MemoraTipografia.corpo.copyWith(color: cores.texto),
               decoration: InputDecoration(
                 filled: true,

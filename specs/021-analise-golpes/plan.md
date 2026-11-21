@@ -59,9 +59,11 @@ Implementar no aplicativo Memora (Flutter) e na API (Spring Boot) uma funcionali
 
 ```text
 specs/021-analise-golpes/
-├── spec.md              # Especificação da feature, histórias de usuário, requisitos e Threat Model
-├── plan.md              # Plano técnico, arquitetura, contratos e Constitution Check
-└── tasks.md             # Lista de tarefas ordenada por dependências com status de execução
+├── spec.md                           # Especificação da feature, histórias de usuário, requisitos e Threat Model
+├── plan.md                           # Plano técnico, arquitetura, contratos e Constitution Check
+├── tasks.md                          # Lista de tarefas ordenada por dependências com status de execução
+└── contracts/
+    └── antigolpe-openapi.yaml        # Contrato OpenAPI 3.0.3 do endpoint POST /v1/golpes/analisar
 ```
 
 ### Source Code (repository root)
@@ -97,6 +99,7 @@ backend/
     │   └── SegurancaAntigolpeWebMvcTest.java
     ├── aplicacao/
     │   ├── AnalisadorDeterministicoDeGolpesTest.java
+    │   ├── SanitizadorRespostaAntigolpeTest.java
     │   └── ServicoAnaliseGolpeTest.java
     ├── infra/
     │   ├── ClienteAnaliseGolpeGeminiTest.java

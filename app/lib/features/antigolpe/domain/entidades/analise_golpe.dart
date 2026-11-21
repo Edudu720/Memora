@@ -28,6 +28,9 @@ enum OrigemAnalise {
   /// Análise realizada pelo backend com inteligência artificial.
   servidorIa,
 
+  /// Análise determinística realizada pelo backend sem IA.
+  servidorRegras,
+
   /// Análise determinística local feita no aparelho sem depender do servidor.
   localOffline,
 }

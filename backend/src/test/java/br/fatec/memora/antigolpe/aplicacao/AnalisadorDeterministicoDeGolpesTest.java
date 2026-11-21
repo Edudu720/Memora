@@ -151,6 +151,100 @@ class AnalisadorDeterministicoDeGolpesTest {
         validarRegrasDeTexto(resultado);
     }
 
+    @Test
+    @DisplayName("desofusca [:] e [/] antes de hxxp/hxxps e detecta barra invertida na autoridade")
+    void desofuscaEsquemaComColchetesEDetectaBarraInvertidaNaAutoridade() {
+        ResultadoAnaliseGolpe hxxpColchetesArroba =
+                analisador.analisar("Acesse hxxp[:]//bb.com.br@evil.site/login");
+        assertThat(hxxpColchetesArroba.risco()).isEqualTo(NivelRiscoGolpe.ALTO);
+        assertThat(hxxpColchetesArroba.sinaisDetectados())
+                .contains(AnalisadorDeterministicoDeGolpes.SINAL_ARROBA);
+
+        ResultadoAnaliseGolpe barraInvertidaFalsaMarca =
+                analisador.analisar("Confira em https://evil.site\\.bb.com.br/login");
+        assertThat(barraInvertidaFalsaMarca.risco()).isEqualTo(NivelRiscoGolpe.ALTO);
+        assertThat(barraInvertidaFalsaMarca.sinaisDetectados())
+                .contains(AnalisadorDeterministicoDeGolpes.SINAL_LINK_SUSPEITO);
+    }
+
+    @Test
+    @DisplayName("negação de credencial em uma frase não suprime pedido de senha ou APK/acesso remoto em outra cláusula")
+    void negacaoPorClausulaNaoSuprimePedidoDeSenhaOuAcessoRemoto() {
+        List<String> golpesComNegacaoParcial =
+                List.of(
+                        "Não compartilhe sua senha com terceiros. Baixe o app AnyDesk.apk e digite sua senha e código SMS.",
+                        "O banco nunca pede sua senha por telefone, mas informe o código SMS que chegou para validar.",
+                        "Nunca compartilhe sua senha; instale o QuickSupport ou Supremo para o suporte ajudar.");
+
+        for (String entrada : golpesComNegacaoParcial) {
+            ResultadoAnaliseGolpe resultado = analisador.analisar(entrada);
+            assertThat(resultado.risco()).as("Entrada: %s", entrada).isEqualTo(NivelRiscoGolpe.ALTO);
+            assertThat(resultado.sinaisDetectados())
+                    .contains(AnalisadorDeterministicoDeGolpes.SINAL_CREDENCIAL_OU_ACESSO);
+            validarRegrasDeTexto(resultado);
+        }
+
+        ResultadoAnaliseGolpe avisoLegitimo =
+                analisador.analisar("O banco nunca pede sua senha nem código de verificação.");
+        assertThat(avisoLegitimo.risco()).isEqualTo(NivelRiscoGolpe.BAIXO);
+    }
+
+    @Test
+    @DisplayName("detecta marcas compostas sem hífen no host (govbr, correiosbr, meuinss, nubankbr, receitafederal)")
+    void detectaMarcasCompostasSemHifenNoHost() {
+        List<String> urlsFalsas =
+                List.of(
+                        "Acesse https://govbr.com",
+                        "Rastreie em https://correiosbr.com",
+                        "Consulte seu benefício em https://meuinss.com",
+                        " Veja sua fatura em https://nubankbr.com",
+                        "Regularize em https://receitafederal.com");
+
+        for (String entrada : urlsFalsas) {
+            ResultadoAnaliseGolpe resultado = analisador.analisar(entrada);
+            assertThat(resultado.risco()).as("Entrada: %s", entrada).isEqualTo(NivelRiscoGolpe.ALTO);
+            assertThat(resultado.sinaisDetectados())
+                    .contains(AnalisadorDeterministicoDeGolpes.SINAL_MARCA_FALSA);
+            validarRegrasDeTexto(resultado);
+        }
+    }
+
+    @Test
+    @DisplayName("elimina falsos positivos em e-mails, ponto sem espaço, links oficiais com WhatsApp/múltiplos e palavras comuns no host")
+    void eliminaFalsosPositivosEmMensagensLegitimas() {
+        List<String> mensagensBaixoRisco =
+                List.of(
+                        "Envie o comprovante para maria.caixa@gmail.com quando puder.",
+                        "Recebi no WhatsApp o link do INSS: https://www.gov.br/inss",
+                        "Consulte https://www.gov.br e https://www.caixa.gov.br para informações oficiais.",
+                        "Assista à transmissão em https://ao-vivo.globo.com agora.",
+                        "Veja a receita de bolo de milho em https://receita.globo.com e https://receitas.globo.com.");
+
+        for (String entrada : mensagensBaixoRisco) {
+            ResultadoAnaliseGolpe resultado = analisador.analisar(entrada);
+            assertThat(resultado.risco())
+                    .as("Não deve gerar falso positivo: %s", entrada)
+                    .isEqualTo(NivelRiscoGolpe.BAIXO);
+            validarRegrasDeTexto(resultado);
+        }
+
+        // Frase com ponto sem espaço ('cancelada.Amanha') não extrai URL falsa nem sobe para ALTO.
+        ResultadoAnaliseGolpe pontoSemEspaco =
+                analisador.analisar("Consulta cancelada.Amanha remarcamos com a clínica.");
+        assertThat(pontoSemEspaco.risco()).isNotEqualTo(NivelRiscoGolpe.ALTO);
+        assertThat(pontoSemEspaco.sinaisDetectados())
+                .doesNotContain(AnalisadorDeterministicoDeGolpes.SINAL_PRESSA_E_PAGAMENTO);
+
+        // Urgência acompanhada exclusivamente de URL oficial verificada não sobe para ALTO.
+        ResultadoAnaliseGolpe urgenciaComLinkOficial =
+                analisador.analisar(
+                        "INSS: faça sua prova de vida urgente em https://www.gov.br/inss");
+        assertThat(urgenciaComLinkOficial.risco()).isEqualTo(NivelRiscoGolpe.MEDIO);
+        assertThat(urgenciaComLinkOficial.sinaisDetectados())
+                .doesNotContain(AnalisadorDeterministicoDeGolpes.SINAL_PRESSA_E_PAGAMENTO)
+                .doesNotContain(AnalisadorDeterministicoDeGolpes.SINAL_MARCA_FALSA);
+    }
+
     private static void validarRegrasDeTexto(ResultadoAnaliseGolpe resultado) {
         assertThat(contarFrases(resultado.titulo())).isBetween(1, 2);
         assertThat(contarFrases(resultado.explicacao())).isBetween(1, 2);

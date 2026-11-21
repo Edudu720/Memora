@@ -30,7 +30,8 @@ import tools.jackson.databind.json.JsonMapper;
 class ClienteAnaliseGolpeGeminiTest {
 
     private static final String CHAVE = "chave-falsa-antigolpe-0123456789";
-    private static final String MODELO = "gemini-3.8-flash";
+    private static final String MODELO = "gemini-3.6-flash";
+    private static final String MODELO_RESERVA = "gemini-3.5-flash-lite";
     private static final String TEXTO_DO_ERRO_DO_GOOGLE = "DETALHE-INTERNO-DO-GOOGLE-NAO-VAZAR";
     private static final JsonMapper JSON = JsonMapper.builder().build();
 
@@ -253,6 +254,120 @@ class ClienteAnaliseGolpeGeminiTest {
                                         Duration.ofSeconds(5)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("modelo invalido");
+
+        assertThatThrownBy(
+                        () ->
+                                new ClienteAnaliseGolpeGemini(
+                                        CHAVE,
+                                        MODELO,
+                                        "reserva/invalida",
+                                        ClienteAnaliseGolpeGemini.URL_BASE_PADRAO,
+                                        Duration.ofSeconds(2),
+                                        Duration.ofSeconds(5)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("modelo-reserva invalido");
+
+        assertThatThrownBy(
+                        () ->
+                                new ClienteAnaliseGolpeGemini(
+                                        CHAVE,
+                                        MODELO,
+                                        "ftp://generativelanguage.googleapis.com",
+                                        Duration.ofSeconds(2),
+                                        Duration.ofSeconds(5)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("url-base invalida");
+
+        assertThatThrownBy(
+                        () ->
+                                new ClienteAnaliseGolpeGemini(
+                                        CHAVE,
+                                        MODELO,
+                                        ClienteAnaliseGolpeGemini.URL_BASE_PADRAO,
+                                        Duration.ZERO,
+                                        Duration.ofSeconds(5)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("timeout-conexao-segundos invalido");
+
+        assertThatThrownBy(
+                        () ->
+                                new ClienteAnaliseGolpeGemini(
+                                        CHAVE,
+                                        MODELO,
+                                        ClienteAnaliseGolpeGemini.URL_BASE_PADRAO,
+                                        Duration.ofSeconds(2),
+                                        Duration.ofSeconds(-1)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("timeout-leitura-segundos invalido");
+    }
+
+    @Test
+    @DisplayName("faz 1 retentativa no modelo primário e cai para o modelo reserva em falha transitória (429/503)")
+    void retentaPrimarioECaiParaModeloReservaEmFalhaTransitoria() throws Exception {
+        String respostaInterna =
+                """
+                {
+                  "risco": "MEDIO",
+                  "titulo": "Atenção com o pedido.",
+                  "explicacao": "Confirme por outro canal antes de agir.",
+                  "orientacoes": ["Não toque no link."],
+                  "sinaisDetectados": ["Link encurtado."]
+                }
+                """;
+        String envelopeSucesso =
+                "{\"candidates\":[{\"content\":{\"role\":\"model\",\"parts\":[{\"text\":"
+                        + JSON.writeValueAsString(respostaInterna)
+                        + "}]}}]}";
+
+        ClienteAnaliseGolpeGemini clienteComReserva =
+                new ClienteAnaliseGolpeGemini(
+                        CHAVE,
+                        MODELO,
+                        MODELO_RESERVA,
+                        "http://127.0.0.1:" + servidor.getAddress().getPort() + "/v1beta",
+                        Duration.ofSeconds(2),
+                        Duration.ofSeconds(5),
+                        Duration.ofMillis(10));
+        try {
+            roteiro =
+                    troca -> {
+                        if (capturadas.size() <= 2) {
+                            responderErroGoogle(troca, 503);
+                        } else {
+                            responderJson(troca, 200, envelopeSucesso);
+                        }
+                    };
+
+            ResultadoAnaliseGolpe resultado = clienteComReserva.analisar("Veja https://bit.ly/abc");
+
+            assertThat(resultado.risco()).isEqualTo(NivelRiscoGolpe.MEDIO);
+            assertThat(resultado.analisadoPorIa()).isTrue();
+            assertThat(capturadas).hasSize(3);
+            assertThat(capturadas.get(0).caminhoEConsulta())
+                    .isEqualTo("/v1beta/models/" + MODELO + ":generateContent");
+            assertThat(capturadas.get(1).caminhoEConsulta())
+                    .isEqualTo("/v1beta/models/" + MODELO + ":generateContent");
+            assertThat(capturadas.get(2).caminhoEConsulta())
+                    .isEqualTo("/v1beta/models/" + MODELO_RESERVA + ":generateContent");
+        } finally {
+            clienteComReserva.close();
+        }
+    }
+
+    @Test
+    @DisplayName("interrupção da thread aborta retentativa/fallback com Motivo.REDE")
+    void interrupcaoDaThreadAbortaRetentativa() {
+        Thread.currentThread().interrupt();
+        try {
+            assertThatThrownBy(() -> cliente.analisar("Teste interrompido"))
+                    .isInstanceOf(AssistenteIndisponivel.class)
+                    .satisfies(
+                            ex ->
+                                    assertThat(((AssistenteIndisponivel) ex).motivo())
+                                            .isEqualTo(Motivo.REDE));
+        } finally {
+            Thread.interrupted();
+        }
     }
 
     private static void responderJson(HttpExchange troca, int status, String json)

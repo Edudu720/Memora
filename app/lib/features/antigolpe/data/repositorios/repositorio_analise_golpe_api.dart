@@ -9,11 +9,11 @@ import '../../domain/servicos/analisador_local_de_golpes.dart';
 
 /// Repositório remoto para análise de risco de golpes via `POST /v1/golpes/analisar`,
 /// com fallback automático para [AnalisadorLocalDeGolpes] quando não há conexão,
-/// ocorre timeout ou o servidor está indisponível.
+/// ocorre timeout ou o servidor está indisponível (`5xx`).
 ///
 /// Nunca aciona fallback local quando a sessão expirou
-/// ([FalhaDaAssistente.sessaoExpirada]), permitindo que `SessaoPerdida`
-/// conduza a pessoa de volta à entrada.
+/// ([FalhaDaAssistente.sessaoExpirada]) nem quando o limite de uso foi atingido
+/// (`429 Too Many Requests`).
 class RepositorioAnaliseGolpeApi implements RepositorioAnaliseGolpe {
   final Dio _dio;
   final ChamadaComRenovacao? _chamadas;
@@ -78,16 +78,26 @@ class RepositorioAnaliseGolpeApi implements RepositorioAnaliseGolpe {
       }
       return _analisadorLocal.analisar(textoLimpo);
     } on DioException catch (e) {
+      final int? status = e.response?.statusCode;
+      final int? espera = _extrairEsperaEmSegundos(e.response);
       soltarCorpoDaResposta(e);
       if (e.type == DioExceptionType.cancel) {
         rethrow;
+      }
+      if (status == 429) {
+        throw FalhaAnaliseGolpe(
+          FalhaAnaliseGolpeTipo.limiteExcedido,
+          mensagem: TextosAntigolpe.erroLimiteAnalises,
+          esperaEmSegundos: espera,
+          statusCode: 429,
+        );
       }
       if (_deveUsarFallbackOffline(e)) {
         return _analisadorLocal.analisar(textoLimpo);
       }
       throw ErroRequisicaoAnaliseException(
         TextosAntigolpe.erroInesperado,
-        statusCode: e.response?.statusCode,
+        statusCode: status,
       );
     } on FormatException {
       return _analisadorLocal.analisar(textoLimpo);
@@ -112,11 +122,13 @@ class RepositorioAnaliseGolpeApi implements RepositorioAnaliseGolpe {
     final List<String> sinaisDetectados = _lerListaDeTextos(
       dados['sinaisDetectados'],
     );
-    final bool analisadoPorIa = dados['analisadoPorIa'] as bool? ?? true;
+    final bool analisadoPorIa = dados['analisadoPorIa'] as bool? ?? false;
 
     return AnaliseGolpe(
       risco: risco,
-      origem: OrigemAnalise.servidorIa,
+      origem: analisadoPorIa
+          ? OrigemAnalise.servidorIa
+          : OrigemAnalise.servidorRegras,
       titulo: titulo,
       explicacao: explicacao,
       orientacoes: orientacoes,
@@ -137,11 +149,37 @@ class RepositorioAnaliseGolpeApi implements RepositorioAnaliseGolpe {
     );
   }
 
+  int? _extrairEsperaEmSegundos(Response<dynamic>? resposta) {
+    if (resposta == null) return null;
+    final Object? corpo = resposta.data;
+    if (corpo is Map) {
+      for (final String chave in <String>[
+        'esperaEmSegundos',
+        'tentarNovamenteEmSegundos',
+        'retryAfter',
+      ]) {
+        final Object? valor = corpo[chave];
+        if (valor is int && valor > 0) return valor;
+        if (valor is num && valor > 0) return valor.ceil();
+        if (valor is String) {
+          final int? lido = int.tryParse(valor.trim());
+          if (lido != null && lido > 0) return lido;
+        }
+      }
+    }
+    final String? cabecalho = resposta.headers.value('retry-after');
+    if (cabecalho != null) {
+      final int? lido = int.tryParse(cabecalho.trim());
+      if (lido != null && lido > 0) return lido;
+    }
+    return null;
+  }
+
   bool _deveUsarFallbackOffline(DioException e) {
     if (e.response == null) {
       return true;
     }
     final int status = e.response!.statusCode ?? 0;
-    return status >= 500 || status == 429;
+    return status >= 500;
   }
 }

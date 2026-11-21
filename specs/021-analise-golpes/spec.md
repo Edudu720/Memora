@@ -44,7 +44,7 @@ Quando o aplicativo está conectado ao servidor real (`POST /v1/golpes/analisar`
 
 ### User Story 3 - Continuidade com Fallback Local Offline Automático (Priority: P2)
 
-Se a pessoa estiver sem internet, ocorrer *timeout* de rede ou o servidor retornar falha temporária (`5xx` ou `429`), o aplicativo não deixa a pessoa desamparada diante de um golpe urgente: o `RepositorioAnaliseGolpeApi` aciona automaticamente o `AnalisadorLocalDeGolpes` no aparelho, exibe a classificação determinística de risco com o selo honesto `Análise local sem internet` e o aviso explicativo de que a verificação foi feita localmente sem conexão com o servidor.
+Se a pessoa estiver sem internet, ocorrer *timeout* de rede ou o servidor retornar falha temporária (`5xx`), o aplicativo não deixa a pessoa desamparada diante de um golpe urgente: o `RepositorioAnaliseGolpeApi` aciona automaticamente o `AnalisadorLocalDeGolpes` no aparelho, exibe a classificação determinística de risco com o selo honesto `Análise local sem internet` e o aviso explicativo de que a verificação foi feita localmente sem conexão com o servidor. Quando o limite de análises por período é atingido (`429`), o aplicativo apresenta uma mensagem calma de limite de uso (`TextosAntigolpe.erroLimiteAnalises`) sem afirmar que o aparelho está sem internet.
 
 **Why this priority**: Golpes exigem decisão imediata ("pague agora", "envie o código em 5 minutos"). Garantir avaliação local offline preserva a proteção mesmo quando o celular está sem sinal ou o servidor está indisponível.
 
@@ -81,14 +81,14 @@ Se a pessoa estiver sem internet, ocorrer *timeout* de rede ou o servidor retorn
 - **FR-010**: O backend NUNCA MUST persistir o `conteudo` analisado em banco de dados, NUNCA MUST registrá-lo em logs e NUNCA MUST enviar dados cadastrais da pessoa (`id`, `nome`, `email`, telefone) ao provedor Gemini (conformidade com Princípio I e Emenda 1 v1.1.0).
 - **FR-011**: Quando o provedor Gemini estiver indisponível (`AssistenteIndisponivel`) ou quando o backend rodar em modo simulado (`ClienteAnaliseGolpeSimulado`), `POST /v1/golpes/analisar` MUST responder `200 OK` com a avaliação determinística e `analisadoPorIa: false`.
 - **FR-012**: No aplicativo Flutter, `RepositorioAnaliseGolpeApi` MUST utilizar `ChamadaComRenovacao` para renovar silenciosamente o token em caso de `401`; se a renovação for recusada pelo servidor (`FalhaDaAssistente.sessaoExpirada`), MUST propagar a falha para `SessaoPerdida` sem acionar fallback offline.
-- **FR-013**: Em falhas de conexão, *timeout*, erro HTTP `5xx`/`429` ou resposta malformada, `RepositorioAnaliseGolpeApi` MUST acionar automaticamente o `AnalisadorLocalDeGolpes` e retornar `AnaliseGolpe` com `OrigemAnalise.localOffline` (`analisadoPorIa: false`).
+- **FR-013**: Em falhas de conexão, *timeout*, erro HTTP `5xx` ou resposta malformada, `RepositorioAnaliseGolpeApi` MUST acionar automaticamente o `AnalisadorLocalDeGolpes` e retornar `AnaliseGolpe` com `OrigemAnalise.localOffline` (`analisadoPorIa: false`). Em caso de HTTP `429 Too Many Requests`, MUST lançar `FalhaAnaliseGolpe(FalhaAnaliseGolpeTipo.limiteExcedido)` para que a tela oriente a pessoa a aguardar alguns minutos sem confundir limite de uso com falta de conexão.
 - **FR-014**: O cartão de resultado na `TelaAnaliseGolpe` MUST comunicar o nível de risco por múltiplos sinais simultâneos (cor da borda + ícone + texto do selo `BadgeDeStatus` + expressão da `MemoraPersonagem`), e nunca apenas pela cor (Princípio III).
 - **FR-015**: Toda a implementação Flutter MUST utilizar exclusivamente tokens do Design System (`MemoraCores`, `MemoraTipografia`, `MemoraEspacamento`, `MemoraDimensoes`, `MemoraRaio`, `MemoraElevacao`), passando em `validar_tokens.py` com zero literais visuais.
 
 ### Key Entities
 
 - **`NivelRisco` / `NivelRiscoGolpe`**: Enumeração dos níveis de risco (`seguro` / `BAIXO`, `atencao` / `MEDIO`, `altoRisco` / `ALTO`).
-- **`OrigemAnalise`**: Indica se o veredito apresentado à pessoa veio do servidor (`servidorIa`) ou da verificação determinística no aparelho sem conexão (`localOffline`).
+- **`OrigemAnalise`**: Indica se o veredito apresentado à pessoa veio do servidor com IA (`servidorIa`, quando `analisadoPorIa: true`), do motor determinístico do servidor (`servidorRegras`, quando `200 OK` com `analisadoPorIa: false`) ou da verificação determinística no aparelho sem conexão (`localOffline`).
 - **`AnaliseGolpe` / `ResultadoAnaliseGolpe`**: Entidade imutável contendo `risco`, `origem`, `titulo`, `explicacao`, `orientacoes` (lista de passos acionáveis), `sinaisDetectados` (lista de indícios concretos encontrados no texto) e `analisadoPorIa`.
 
 ## Threat Modeling & Segurança Contra Engenharia Social *(Princípios I, II e VI da Constituição v1.1.0)*

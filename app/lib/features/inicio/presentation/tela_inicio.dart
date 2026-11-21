@@ -366,19 +366,20 @@ class _GradeAtalhosRapidos extends StatelessWidget {
     for (int i = 0; i < atalhos.length; i += 2) {
       if (i > 0) linhas.add(const SizedBox(height: MemoraEspacamento.sm));
       final bool temPar = i + 1 < atalhos.length;
-      linhas.add(
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(child: _TileAtalho(atalho: atalhos[i])),
-            if (temPar) ...<Widget>[
+      if (temPar) {
+        linhas.add(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Expanded(child: _TileAtalho(atalho: atalhos[i])),
               const SizedBox(width: MemoraEspacamento.sm),
               Expanded(child: _TileAtalho(atalho: atalhos[i + 1])),
-            ] else
-              const Spacer(),
-          ],
-        ),
-      );
+            ],
+          ),
+        );
+      } else {
+        linhas.add(_TileAtalho(atalho: atalhos[i]));
+      }
     }
 
     return Column(

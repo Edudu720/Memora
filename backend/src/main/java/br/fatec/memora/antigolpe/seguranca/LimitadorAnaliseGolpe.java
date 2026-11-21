@@ -76,14 +76,42 @@ public class LimitadorAnaliseGolpe {
         Objects.requireNonNull(pessoaId, "pessoaId");
         Objects.requireNonNull(agora, "agora");
 
-        Deque<Instant> historico = porConta.computeIfAbsent(pessoaId, ignored -> new ArrayDeque<>());
-        synchronized (this) {
-            long espera = calcularEspera(historico, agora);
-            if (espera > 0L) {
-                return Decisao.bloqueado(espera);
-            }
-            historico.addLast(agora);
-            return Decisao.liberado();
+        expurgarContasInativas(agora);
+
+        Decisao[] decisao = new Decisao[1];
+        porConta.compute(
+                pessoaId,
+                (id, historicoAtual) -> {
+                    Deque<Instant> historico =
+                            historicoAtual != null ? historicoAtual : new ArrayDeque<>();
+                    long espera = calcularEspera(historico, agora);
+                    if (espera > 0L) {
+                        decisao[0] = Decisao.bloqueado(espera);
+                        return historico.isEmpty() ? null : historico;
+                    }
+                    historico.addLast(agora);
+                    decisao[0] = Decisao.liberado();
+                    return historico;
+                });
+        return decisao[0];
+    }
+
+    int contasRastreadas() {
+        return porConta.size();
+    }
+
+    private void expurgarContasInativas(Instant agora) {
+        Instant corteDia = agora.minus(JANELA_DIA);
+        for (UUID id : porConta.keySet()) {
+            porConta.computeIfPresent(
+                    id,
+                    (chave, historico) -> {
+                        while (!historico.isEmpty()
+                                && !historico.peekFirst().isAfter(corteDia)) {
+                            historico.removeFirst();
+                        }
+                        return historico.isEmpty() ? null : historico;
+                    });
         }
     }
 
@@ -95,7 +123,7 @@ public class LimitadorAnaliseGolpe {
 
         if (historico.size() >= maximoPorDia) {
             Instant maisAntigoDia = historico.peekFirst();
-            return Math.max(1L, Duration.between(agora, maisAntigoDia.plus(JANELA_DIA)).toSeconds());
+            return segundosArredondadosParaCima(agora, maisAntigoDia.plus(JANELA_DIA));
         }
 
         Instant corteHora = agora.minus(JANELA_HORA);
@@ -110,8 +138,12 @@ public class LimitadorAnaliseGolpe {
             }
         }
         if (naUltimaHora >= maximoPorHora && maisAntigoHora != null) {
-            return Math.max(1L, Duration.between(agora, maisAntigoHora.plus(JANELA_HORA)).toSeconds());
+            return segundosArredondadosParaCima(agora, maisAntigoHora.plus(JANELA_HORA));
         }
         return 0L;
+    }
+
+    private static long segundosArredondadosParaCima(Instant agora, Instant limite) {
+        return Math.max(1L, (Duration.between(agora, limite).toMillis() + 999L) / 1000L);
     }
 }

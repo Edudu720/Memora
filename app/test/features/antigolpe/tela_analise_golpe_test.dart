@@ -26,7 +26,7 @@ class _RepositorioDeTeste implements RepositorioAnaliseGolpe {
 
 void main() {
   group('TelaAnaliseGolpe — fluxos online, offline, colar e segurança', () {
-    testWidgets('colar da área de transferência preenche o campo e limpar apaga', (
+    testWidgets('configura CampoTexto multilinha (minLines: 3, maxLines: 6) e colar/limpar funciona', (
       WidgetTester t,
     ) async {
       const String textoCopiado = 'Acesse https://bit.ly/golpe urgente';
@@ -65,6 +65,8 @@ void main() {
           matching: find.byType(TextField),
         ),
       );
+      expect(campo.minLines, 3);
+      expect(campo.maxLines, 6);
       expect(campo.controller?.text, textoCopiado);
 
       await t.tap(find.byKey(TelaAnaliseGolpe.chaveBotaoLimpar));
@@ -72,11 +74,26 @@ void main() {
       expect(campo.controller?.text, isEmpty);
     });
 
-    testWidgets('analisa mensagem segura e suspeita no modo online/IA', (
+    testWidgets('diferencia origemServidorIa, origemServidorRegras e TomBadgeStatus.aviso vs informativo', (
       WidgetTester t,
     ) async {
+      bool usarIa = true;
+      NivelRisco risco = NivelRisco.atencao;
+
       final ControladorAnaliseGolpe c = ControladorAnaliseGolpe(
-        repositorio: const RepositorioAnaliseGolpeSimulado(),
+        repositorio: _RepositorioDeTeste(
+          (_) async => AnaliseGolpe(
+            risco: risco,
+            origem: usarIa
+                ? OrigemAnalise.servidorIa
+                : OrigemAnalise.servidorRegras,
+            titulo: 'Verifique com atenção',
+            explicacao: 'Há um sinal que merece cautela.',
+            orientacoes: const <String>['Confirme no canal oficial.'],
+            sinaisDetectados: const <String>['Sinal de atenção.'],
+            analisadoPorIa: usarIa,
+          ),
+        ),
       );
       addTearDown(c.dispose);
 
@@ -92,32 +109,98 @@ void main() {
         matching: find.byType(TextField),
       );
 
-      // Mensagem segura
-      await t.enterText(campo, 'Oi mãe, tudo bem? Chego às 16 horas.');
+      await t.enterText(campo, 'Você ganhou um brinde no sorteio');
       await t.pump();
       await t.ensureVisible(find.byKey(TelaAnaliseGolpe.chaveBotaoAnalisar));
       await t.tap(find.byKey(TelaAnaliseGolpe.chaveBotaoAnalisar));
       await t.pump();
 
       expect(find.byKey(TelaAnaliseGolpe.chaveCartaoResultado), findsOneWidget);
-      expect(find.text(TextosAntigolpe.riscoSeguro), findsOneWidget);
+      expect(find.text(TextosAntigolpe.riscoAtencao), findsOneWidget);
       expect(find.text(TextosAntigolpe.origemServidorIa), findsOneWidget);
-      expect(find.byKey(TelaAnaliseGolpe.chaveAvisoOffline), findsNothing);
 
-      // Mensagem e link suspeito
-      await t.enterText(
-        campo,
-        'Último aviso: conta bloqueada, envie senha em https://bb.com.br@evil.xyz/entrar',
+      final BadgeDeStatus badgeRisco = t.widget<BadgeDeStatus>(
+        find.byKey(TelaAnaliseGolpe.chaveBadgeRisco),
       );
+      final BadgeDeStatus badgeOrigem = t.widget<BadgeDeStatus>(
+        find.byKey(TelaAnaliseGolpe.chaveBadgeOrigem),
+      );
+      expect(badgeRisco.tom, TomBadgeStatus.aviso);
+      expect(badgeOrigem.tom, TomBadgeStatus.informativo);
+      expect(badgeRisco.tom, isNot(equals(badgeOrigem.tom)));
+
+      // Editar o texto limpa imediatamente o resultado anterior da tela
+      await t.enterText(campo, 'Outro texto para analisar');
+      await t.pump();
+      expect(find.byKey(TelaAnaliseGolpe.chaveCartaoResultado), findsNothing);
+
+      // Quando analisadoPorIa == false (servidorRegras), mostra origemServidorRegras
+      usarIa = false;
+      risco = NivelRisco.altoRisco;
+      await c.analisar('Outro texto para analisar');
+      await t.pump();
+
+      expect(find.text(TextosAntigolpe.riscoAlto), findsOneWidget);
+      expect(find.text(TextosAntigolpe.origemServidorRegras), findsOneWidget);
+      expect(find.text(TextosAntigolpe.origemServidorIa), findsNothing);
+    });
+
+    testWidgets('oculta "Tentar de novo" em sessaoExpirada e exibe erroLimiteAnalises no HTTP 429', (
+      WidgetTester t,
+    ) async {
+      bool erro429 = false;
+      final ControladorAnaliseGolpe c = ControladorAnaliseGolpe(
+        repositorio: _RepositorioDeTeste((_) async {
+          if (erro429) {
+            throw const FalhaAnaliseGolpe(
+              FalhaAnaliseGolpeTipo.limiteExcedido,
+              mensagem: TextosAntigolpe.erroLimiteAnalises,
+              esperaEmSegundos: 60,
+              statusCode: 429,
+            );
+          }
+          throw const FalhaDeChamadaDaAssistente(
+            FalhaDaAssistente.sessaoExpirada,
+          );
+        }),
+      );
+      addTearDown(c.dispose);
+
+      await t.pumpWidget(
+        MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaAnaliseGolpe(controlador: c, aoVoltar: () {}),
+        ),
+      );
+
+      final Finder campo = find.descendant(
+        of: find.byKey(TelaAnaliseGolpe.chaveCampo),
+        matching: find.byType(TextField),
+      );
+      await t.enterText(campo, 'Mensagem suspeita');
       await t.pump();
       await t.ensureVisible(find.byKey(TelaAnaliseGolpe.chaveBotaoAnalisar));
       await t.tap(find.byKey(TelaAnaliseGolpe.chaveBotaoAnalisar));
       await t.pump();
 
-      expect(find.text(TextosAntigolpe.riscoAlto), findsOneWidget);
-      expect(find.text(TextosAntigolpe.origemServidorIa), findsOneWidget);
-      expect(find.text(TextosAntigolpe.tituloSinais), findsOneWidget);
-      expect(find.text(TextosAntigolpe.tituloOrientacoes), findsOneWidget);
+      // Em sessaoExpirada, não há callback aoTentarNovamente
+      final MensagemErro msgSessao = t.widget<MensagemErro>(
+        find.byKey(TelaAnaliseGolpe.chaveErro),
+      );
+      expect(msgSessao.mensagem, TextosAntigolpe.sessaoExpirada);
+      expect(msgSessao.aoTentarNovamente, isNull);
+
+      // Em HTTP 429, mostra erroLimiteAnalises (sem falar que está sem internet) e permite tentar novamente
+      erro429 = true;
+      await c.analisar('Mensagem suspeita 2');
+      await t.pump();
+
+      final MensagemErro msg429 = t.widget<MensagemErro>(
+        find.byKey(TelaAnaliseGolpe.chaveErro),
+      );
+      expect(msg429.mensagem, TextosAntigolpe.erroLimiteAnalises);
+      expect(msg429.aoTentarNovamente, isNotNull);
+      expect(find.byKey(TelaAnaliseGolpe.chaveAvisoOffline), findsNothing);
     });
 
     testWidgets('exibe selo e aviso honesto quando resultado vem do fallback offline', (
@@ -130,7 +213,7 @@ void main() {
 
       await t.pumpWidget(
         MaterialApp(
-          theme: TemasMemora.claro,
+          theme: TemasMemora.altoContraste,
           home: TelaAnaliseGolpe(controlador: c, aoVoltar: () {}),
         ),
       );
@@ -153,6 +236,14 @@ void main() {
       expect(find.text(TextosAntigolpe.origemLocalOffline), findsOneWidget);
       expect(find.byKey(TelaAnaliseGolpe.chaveAvisoOffline), findsOneWidget);
       expect(find.text(TextosAntigolpe.avisoOffline), findsOneWidget);
+
+      final Container avisoContainer = t.widget<Container>(
+        find.byKey(TelaAnaliseGolpe.chaveAvisoOffline),
+      );
+      final BoxDecoration decoracao =
+          avisoContainer.decoration! as BoxDecoration;
+      final Border borda = decoracao.border! as Border;
+      expect(borda.top.width, MemoraDimensoes.bordaEnfase);
     });
 
     testWidgets('NUNCA renderiza links clicáveis no resultado mesmo com URLs no texto', (
@@ -297,7 +388,7 @@ void main() {
   });
 
   group('TelaAnaliseGolpe — acessibilidade e diretrizes WCAG / TalkBack', () {
-    testWidgets('atende alvos de toque, rótulos e não usa gestos complexos', (
+    testWidgets('atende alvos de toque, rótulos, liveRegion com label explícito e sem gestos complexos', (
       WidgetTester t,
     ) async {
       final SemanticsHandle handle = t.ensureSemantics();
@@ -323,6 +414,19 @@ void main() {
 
       await expectLater(t, meetsGuideline(androidTapTargetGuideline));
       await expectLater(t, meetsGuideline(labeledTapTargetGuideline));
+
+      final Semantics semanticaResultado = t.widget<Semantics>(
+        find.descendant(
+          of: find.byKey(TelaAnaliseGolpe.chaveCartaoResultado),
+          matching: find.byWidgetPredicate(
+            (Widget w) => w is Semantics && (w.properties.liveRegion ?? false),
+          ),
+        ),
+      );
+      expect(
+        semanticaResultado.properties.label,
+        '${c.resultado!.titulo} ${c.resultado!.explicacao}',
+      );
 
       for (final GestureDetector gd in t.widgetList<GestureDetector>(
         find.byType(GestureDetector),

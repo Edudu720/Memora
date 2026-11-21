@@ -77,6 +77,27 @@ void main() {
       expect(alto.risco, NivelRisco.altoRisco);
     });
 
+    test('mapeia origem para servidorRegras quando analisadoPorIa é false na resposta do servidor', () async {
+      final AdaptadorFalso adaptador = AdaptadorFalso(
+        (RequestOptions op, int n) async => respostaJson(
+          200,
+          payloadApi(analisadoPorIa: false),
+        ),
+      );
+      final api.MemoraApi cliente = clienteFalso(adaptador);
+      final RepositorioAnaliseGolpeApi repo = RepositorioAnaliseGolpeApi(
+        dio: cliente.dio,
+      );
+
+      final AnaliseGolpe resultado = await repo.analisar(
+        'Acesse http://192.168.0.1/banco',
+      );
+
+      expect(resultado.analisadoPorIa, isFalse);
+      expect(resultado.origem, OrigemAnalise.servidorRegras);
+      expect(resultado.ehOffline, isFalse);
+    });
+
     test('usa /v1/golpes/analisar quando baseUrl não termina em /v1', () async {
       final AdaptadorFalso adaptador = AdaptadorFalso(
         (RequestOptions op, int n) async =>
@@ -163,7 +184,7 @@ void main() {
     });
   });
 
-  group('RepositorioAnaliseGolpeApi — fallback local offline automático', () {
+  group('RepositorioAnaliseGolpeApi — fallback local offline e HTTP 429', () {
     test('cai para fallback local em erro de conexão para mensagem segura e suspeita', () async {
       final AdaptadorFalso adaptador = AdaptadorFalso((
         RequestOptions op,
@@ -225,6 +246,45 @@ void main() {
       }
     });
 
+    test('NÃO mascara HTTP 429 como offline: lança FalhaAnaliseGolpe(limiteExcedido) com esperaEmSegundos', () async {
+      final AdaptadorFalso adaptador = AdaptadorFalso(
+        (RequestOptions op, int n) async => ResponseBody.fromString(
+          '{"erro":"LIMITE_EXCEDIDO","tentarNovamenteEmSegundos":42}',
+          429,
+          headers: <String, List<String>>{
+            Headers.contentTypeHeader: <String>[Headers.jsonContentType],
+            'retry-after': <String>['42'],
+          },
+        ),
+      );
+      final api.MemoraApi cliente = clienteFalso(adaptador);
+      final RepositorioAnaliseGolpeApi repo = RepositorioAnaliseGolpeApi(
+        dio: cliente.dio,
+      );
+
+      await expectLater(
+        repo.analisar('Mensagem qualquer'),
+        throwsA(
+          isA<FalhaAnaliseGolpe>()
+              .having(
+                (FalhaAnaliseGolpe e) => e.tipo,
+                'tipo',
+                FalhaAnaliseGolpeTipo.limiteExcedido,
+              )
+              .having(
+                (FalhaAnaliseGolpe e) => e.esperaEmSegundos,
+                'esperaEmSegundos',
+                42,
+              )
+              .having(
+                (FalhaAnaliseGolpe e) => e.statusCode,
+                'statusCode',
+                429,
+              ),
+        ),
+      );
+    });
+
     test('cai para fallback local quando renovação falha por semRede', () async {
       final CofreEmMemoria cofre = CofreEmMemoria(acesso: 'token-vencido');
       final RenovadorFalso renovador = RenovadorFalso(cofre, semRede: true);
@@ -267,7 +327,7 @@ void main() {
   });
 
   group('RepositorioAnaliseGolpeSimulado', () {
-    test('diferencia modo online simulado de modo offline simulado', () async {
+    test('diferencia modo online simulado (servidorRegras) de modo offline simulado (localOffline)', () async {
       const RepositorioAnaliseGolpeSimulado online =
           RepositorioAnaliseGolpeSimulado();
       const RepositorioAnaliseGolpeSimulado offline =
@@ -280,8 +340,8 @@ void main() {
         'Urgente: envie seu código de 6 dígitos no link https://bit.ly/abc',
       );
 
-      expect(rOnline.origem, OrigemAnalise.servidorIa);
-      expect(rOnline.analisadoPorIa, isTrue);
+      expect(rOnline.origem, OrigemAnalise.servidorRegras);
+      expect(rOnline.analisadoPorIa, isFalse);
       expect(rOnline.risco, NivelRisco.altoRisco);
 
       expect(rOffline.origem, OrigemAnalise.localOffline);

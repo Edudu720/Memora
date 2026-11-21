@@ -4,6 +4,8 @@ import br.fatec.memora.antigolpe.dominio.NivelRiscoGolpe;
 import br.fatec.memora.antigolpe.dominio.ResultadoAnaliseGolpe;
 import br.fatec.memora.assistente.infra.AssistenteIndisponivel;
 import br.fatec.memora.assistente.infra.AssistenteIndisponivel.Motivo;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -26,14 +30,17 @@ import tools.jackson.databind.node.ObjectNode;
  *
  * <p>Usa JDK {@link HttpClient} e Jackson 3 ({@link JsonMapper}), envia a chave exclusivamente no
  * cabeçalho {@code x-goog-api-key}, separa {@code systemInstruction} do conteúdo do usuário e
- * descarta o corpo de erro do provedor externo.
+ * descarta o corpo de erro do provedor externo sem carregá-lo em memória.
  */
 public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoCloseable {
 
     public static final String URL_BASE_PADRAO =
             "https://generativelanguage.googleapis.com/v1beta";
+    public static final String MODELO_RESERVA_PADRAO = "gemini-3.5-flash-lite";
 
     static final String CABECALHO_DA_CHAVE = "x-goog-api-key";
+
+    private static final Logger LOG = LoggerFactory.getLogger(ClienteAnaliseGolpeGemini.class);
 
     private static final Pattern FORMATO_DO_MODELO = Pattern.compile("[A-Za-z0-9._-]+");
     private static final Pattern FORMATO_DA_CHAVE = Pattern.compile("[\\x21-\\x7E]+");
@@ -41,11 +48,43 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
     private final JsonMapper json = JsonMapper.builder().build();
     private final HttpClient http;
     private final String chave;
+    private final String modelo;
+    private final String modeloReserva;
     private final URI endereco;
+    private final URI enderecoReserva;
     private final Duration leitura;
+    private final Duration esperaEntreTentativas;
 
     public ClienteAnaliseGolpeGemini(
             String chave, String modelo, String urlBase, Duration conexao, Duration leitura) {
+        this(chave, modelo, MODELO_RESERVA_PADRAO, urlBase, conexao, leitura);
+    }
+
+    public ClienteAnaliseGolpeGemini(
+            String chave,
+            String modelo,
+            String modeloReserva,
+            String urlBase,
+            Duration conexao,
+            Duration leitura) {
+        this(
+                chave,
+                modelo,
+                modeloReserva,
+                urlBase,
+                conexao,
+                leitura,
+                Duration.ofMillis(100));
+    }
+
+    ClienteAnaliseGolpeGemini(
+            String chave,
+            String modelo,
+            String modeloReserva,
+            String urlBase,
+            Duration conexao,
+            Duration leitura,
+            Duration esperaEntreTentativas) {
         if (chave == null || chave.isBlank()) {
             throw new IllegalStateException(
                     "GEMINI_API_KEY nao configurada: o provedor 'gemini' precisa da chave da API "
@@ -64,14 +103,61 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
         if (urlBase == null || urlBase.isBlank()) {
             throw new IllegalStateException("memora.assistente.gemini.url-base nao pode ser vazia.");
         }
-
-        this.chave = chave.strip();
         String base = urlBase.strip();
         if (base.endsWith("/")) {
             base = base.substring(0, base.length() - 1);
         }
-        this.endereco = URI.create(base + "/models/" + modelo.strip() + ":generateContent");
+        URI uriBase;
+        try {
+            uriBase = URI.create(base);
+        } catch (IllegalArgumentException invalida) {
+            throw new IllegalStateException(
+                    "memora.assistente.gemini.url-base invalida: formato de URI incorreto.");
+        }
+        String esquema = uriBase.getScheme();
+        if (esquema == null
+                || (!esquema.equalsIgnoreCase("http") && !esquema.equalsIgnoreCase("https"))
+                || uriBase.getHost() == null
+                || uriBase.getHost().isBlank()) {
+            throw new IllegalStateException(
+                    "memora.assistente.gemini.url-base invalida: use http ou https com host valido.");
+        }
+        if (conexao == null || conexao.isZero() || conexao.isNegative()) {
+            throw new IllegalStateException(
+                    "memora.assistente.gemini.timeout-conexao-segundos invalido: deve ser maior que zero.");
+        }
+        if (leitura == null || leitura.isZero() || leitura.isNegative()) {
+            throw new IllegalStateException(
+                    "memora.assistente.gemini.timeout-leitura-segundos invalido: deve ser maior que zero.");
+        }
+
+        String modeloPrincipal = modelo.strip();
+        String reservaNormalizada = null;
+        URI reservaUri = null;
+        if (modeloReserva != null && !modeloReserva.isBlank()) {
+            String candidatoReserva = modeloReserva.strip();
+            if (!FORMATO_DO_MODELO.matcher(candidatoReserva).matches()) {
+                throw new IllegalStateException(
+                        "memora.assistente.gemini.modelo-reserva invalido: use so letras, "
+                                + "numeros, ponto, hifen e sublinhado.");
+            }
+            if (!candidatoReserva.equals(modeloPrincipal)) {
+                reservaNormalizada = candidatoReserva;
+                reservaUri =
+                        URI.create(base + "/models/" + candidatoReserva + ":generateContent");
+            }
+        }
+
+        this.chave = chave.strip();
+        this.modelo = modeloPrincipal;
+        this.modeloReserva = reservaNormalizada;
+        this.endereco = URI.create(base + "/models/" + modeloPrincipal + ":generateContent");
+        this.enderecoReserva = reservaUri;
         this.leitura = leitura;
+        this.esperaEntreTentativas =
+                esperaEntreTentativas != null && !esperaEntreTentativas.isNegative()
+                        ? esperaEntreTentativas
+                        : Duration.ZERO;
         this.http =
                 HttpClient.newBuilder()
                         .connectTimeout(conexao)
@@ -79,40 +165,121 @@ public class ClienteAnaliseGolpeGemini implements ClienteAnaliseGolpe, AutoClose
                         .build();
     }
 
+    String modelo() {
+        return modelo;
+    }
+
+    String modeloReserva() {
+        return modeloReserva;
+    }
+
+    Duration leitura() {
+        return leitura;
+    }
+
     @Override
     public ResultadoAnaliseGolpe analisar(String conteudo) {
+        String corpoRequisicao = montarCorpo(conteudo);
+        AssistenteIndisponivel ultimaFalha = null;
+
+        for (int tentativa = 1; tentativa <= 2; tentativa++) {
+            try {
+                return executarRequisicao(endereco, corpoRequisicao);
+            } catch (AssistenteIndisponivel falha) {
+                ultimaFalha = falha;
+                if (!ehFalhaTransitoria(falha.motivo())) {
+                    throw falha;
+                }
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
+                }
+                if (tentativa == 1) {
+                    LOG.warn(
+                            "Tentativa 1/2 na analise antigolpe com modelo {} falhou ({}); repetindo.",
+                            modelo,
+                            falha.motivo());
+                    aguardarRetentativa();
+                }
+            }
+        }
+
+        if (enderecoReserva != null) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
+            }
+            LOG.warn(
+                    "Modelo principal {} falhou apos 2 tentativas ({}); acionando reserva {}.",
+                    modelo,
+                    ultimaFalha.motivo(),
+                    modeloReserva);
+            return executarRequisicao(enderecoReserva, corpoRequisicao);
+        }
+
+        throw ultimaFalha;
+    }
+
+    private ResultadoAnaliseGolpe executarRequisicao(URI destino, String corpoRequisicao) {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
+        }
         HttpRequest requisicao =
-                HttpRequest.newBuilder(endereco)
+                HttpRequest.newBuilder(destino)
                         .timeout(leitura)
                         .header("Content-Type", "application/json")
                         .header(CABECALHO_DA_CHAVE, chave)
                         .POST(
                                 HttpRequest.BodyPublishers.ofString(
-                                        montarCorpo(conteudo), StandardCharsets.UTF_8))
+                                        corpoRequisicao, StandardCharsets.UTF_8))
                         .build();
 
-        HttpResponse<String> resposta;
+        HttpResponse<InputStream> resposta;
         try {
-            resposta =
-                    http.send(
-                            requisicao,
-                            HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            resposta = http.send(requisicao, HttpResponse.BodyHandlers.ofInputStream());
         } catch (HttpTimeoutException estourou) {
             throw new AssistenteIndisponivel(Motivo.PRAZO, "tempo esgotado");
-        } catch (java.io.IOException falhou) {
+        } catch (IOException falhou) {
             throw new AssistenteIndisponivel(Motivo.REDE, falhou.getClass().getSimpleName());
         } catch (InterruptedException interrompido) {
             Thread.currentThread().interrupt();
             throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
         }
 
-        int status = resposta.statusCode();
-        if (status != 200) {
-            // Descarta o corpo de erro do Google propositalmente (FR-041 / ADR-002).
-            throw porStatus(status);
+        String corpoTexto;
+        try (InputStream corpo = resposta.body()) {
+            int status = resposta.statusCode();
+            if (status != 200) {
+                // Descarta e fecha o fluxo de erro sem carregar string em memória (FR-041 / ADR-002).
+                throw porStatus(status);
+            }
+            corpoTexto = new String(corpo.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException aoLerOuFechar) {
+            throw new AssistenteIndisponivel(
+                    Motivo.REDE, aoLerOuFechar.getClass().getSimpleName());
         }
 
-        return interpretarResposta(resposta.body());
+        return interpretarResposta(corpoTexto);
+    }
+
+    private static boolean ehFalhaTransitoria(Motivo motivo) {
+        return motivo == Motivo.COTA_ESGOTADA
+                || motivo == Motivo.FALHA_DO_PROVEDOR
+                || motivo == Motivo.PRAZO
+                || motivo == Motivo.REDE;
+    }
+
+    private void aguardarRetentativa() {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
+        }
+        if (esperaEntreTentativas.isZero()) {
+            return;
+        }
+        try {
+            Thread.sleep(esperaEntreTentativas.toMillis());
+        } catch (InterruptedException interrompido) {
+            Thread.currentThread().interrupt();
+            throw new AssistenteIndisponivel(Motivo.REDE, "interrompido");
+        }
     }
 
     @Override

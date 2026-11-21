@@ -51,18 +51,27 @@ class ConfiguracaoAnaliseGolpeIaTest {
     }
 
     @Test
-    @DisplayName("provedor=gemini com chave: seleciona Gemini e exclui simulado")
+    @DisplayName("provedor=gemini com chave: seleciona Gemini com gemini-3.6-flash, reserva gemini-3.5-flash-lite e timeout <= 25s")
     void geminiComChave() {
         contexto()
                 .withPropertyValues(
                         "memora.assistente.provedor=gemini",
-                        "memora.assistente.gemini.chave=" + CHAVE)
+                        "memora.assistente.gemini.chave=" + CHAVE,
+                        "memora.assistente.gemini.timeout-leitura-segundos=60")
                 .run(
                         c -> {
                             assertThat(c).hasNotFailed();
                             assertThat(c).hasSingleBean(ClienteAnaliseGolpe.class);
                             assertThat(c).hasSingleBean(ClienteAnaliseGolpeGemini.class);
                             assertThat(c).doesNotHaveBean(ClienteAnaliseGolpeSimulado.class);
+                            ClienteAnaliseGolpeGemini bean =
+                                    c.getBean(ClienteAnaliseGolpeGemini.class);
+                            assertThat(bean.modelo()).isEqualTo("gemini-3.6-flash");
+                            assertThat(bean.modeloReserva()).isEqualTo("gemini-3.5-flash-lite");
+                            assertThat(bean.leitura().toSeconds())
+                                    .isEqualTo(
+                                            ConfiguracaoAnaliseGolpeIa
+                                                    .TIMEOUT_LEITURA_MAXIMO_SEGUNDOS);
                         });
     }
 

@@ -16,28 +16,39 @@ import org.springframework.context.annotation.Configuration;
 public class ConfiguracaoAnaliseGolpeIa {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfiguracaoAnaliseGolpeIa.class);
+    static final long TIMEOUT_LEITURA_MAXIMO_SEGUNDOS = 25L;
 
     @Bean
     @Conditional(CondicaoProvedorAntigolpe.EhGemini.class)
     ClienteAnaliseGolpeGemini clienteAnaliseGolpeGemini(
             @Value("${memora.assistente.gemini.chave:}") String chave,
-            @Value("${memora.assistente.gemini.modelo:gemini-3.8-flash}") String modelo,
+            @Value("${memora.assistente.gemini.modelo:gemini-3.6-flash}") String modelo,
+            @Value("${memora.assistente.gemini.modelo-reserva:gemini-3.5-flash-lite}")
+                    String modeloReserva,
             @Value("${memora.assistente.gemini.url-base:"
                             + ClienteAnaliseGolpeGemini.URL_BASE_PADRAO
                             + "}")
                     String urlBase,
             @Value("${memora.assistente.gemini.timeout-conexao-segundos:10}") long conexao,
-            @Value("${memora.assistente.gemini.timeout-leitura-segundos:60}") long leitura) {
+            @Value("${memora.antigolpe.gemini.timeout-leitura-segundos:${memora.assistente.gemini.timeout-leitura-segundos:20}}")
+                    long leitura) {
+
+        long leituraEfetiva =
+                leitura > 0 ? Math.min(leitura, TIMEOUT_LEITURA_MAXIMO_SEGUNDOS) : leitura;
 
         ClienteAnaliseGolpeGemini cliente =
                 new ClienteAnaliseGolpeGemini(
                         chave,
                         modelo,
+                        modeloReserva,
                         urlBase,
                         Duration.ofSeconds(conexao),
-                        Duration.ofSeconds(leitura));
+                        Duration.ofSeconds(leituraEfetiva));
 
-        LOG.info("Analise antigolpe configurada com provedor gemini, modelo {}.", modelo);
+        LOG.info(
+                "Analise antigolpe configurada com provedor gemini, modelo {} (reserva: {}).",
+                modelo,
+                modeloReserva);
         return cliente;
     }
 }

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/features/antigolpe/domain/entidades/analise_golpe.dart';
 import 'package:memora/features/antigolpe/domain/repositorios/repositorio_analise_golpe.dart';
 import 'package:memora/features/antigolpe/domain/servicos/analisador_local_de_golpes.dart';
+import 'package:memora/l10n/textos_antigolpe.dart';
 
 void main() {
   const AnalisadorLocalDeGolpes analisador = AnalisadorLocalDeGolpes();
@@ -30,7 +31,7 @@ void main() {
     });
   });
 
-  group('AnalisadorLocalDeGolpes — mensagens e links seguros', () {
+  group('AnalisadorLocalDeGolpes — mensagens e links seguros (zero falsos positivos)', () {
     test('classifica mensagem cotidiana comum como seguro', () {
       final AnaliseGolpe resultado = analisador.analisar(
         'Bom dia! Vou passar aí às 15 horas para tomarmos um café.',
@@ -52,6 +53,100 @@ void main() {
       expect(resultado.origem, OrigemAnalise.localOffline);
       expect(resultado.analisadoPorIa, isFalse);
     });
+
+    test('reconhece domínios oficiais sincronizados com o backend', () {
+      for (final String url in <String>[
+        'https://www.bancodobrasil.com.br',
+        'https://www.caixa.com.br',
+        'https://banco.bradesco',
+        'https://nu.com.br',
+        'https://wa.me/5511999999999',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(
+          'Acesse o canal oficial: $url',
+        );
+        expect(resultado.risco, NivelRisco.seguro, reason: url);
+        expect(resultado.sinaisDetectados, isEmpty, reason: url);
+      }
+    });
+
+    test('não dispara marca falsa em link oficial citado com WhatsApp ou múltiplos links oficiais', () {
+      final AnaliseGolpe r1 = analisador.analisar(
+        'Recebi no WhatsApp o link do INSS: https://www.gov.br/inss',
+      );
+      expect(r1.risco, NivelRisco.seguro);
+      expect(r1.sinaisDetectados, isEmpty);
+
+      final AnaliseGolpe r2 = analisador.analisar(
+        'Consulte https://www.gov.br e https://www.caixa.gov.br',
+      );
+      expect(r2.risco, NivelRisco.seguro);
+      expect(r2.sinaisDetectados, isEmpty);
+    });
+
+    test('não escala urgência com link oficial para altoRisco', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'INSS: faça sua prova de vida urgente em https://www.gov.br/inss',
+      );
+      expect(resultado.risco, isNot(NivelRisco.altoRisco));
+    });
+
+    test('ignora endereços de e-mail comuns sem confundi-los com domínios ou @ userinfo', () {
+      for (final String texto in <String>[
+        'Meu e-mail novo é carlos.me@gmail.com para contato.',
+        'Envie a confirmação para maria.caixa@gmail.com quando puder.',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(texto);
+        expect(resultado.risco, NivelRisco.seguro, reason: texto);
+        expect(resultado.sinaisDetectados, isEmpty, reason: texto);
+      }
+    });
+
+    test('não confunde frase com ponto sem espaço ("Consulta cancelada.Amanha") com URL', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Oi Maria, tudo bem.Amanha passo ai para conversar.',
+      );
+      expect(resultado.risco, NivelRisco.seguro);
+      expect(resultado.sinaisDetectados, isEmpty);
+
+      final AnaliseGolpe comCancelada = analisador.analisar(
+        'Consulta cancelada.Amanha remarcamos no posto.',
+      );
+      expect(
+        comCancelada.sinaisDetectados,
+        isNot(contains(TextosAntigolpe.sinalTldSuspeito)),
+      );
+    });
+
+    test('não acusa falso positivo em receitas.globo.com, receita.globo.com ou ao-vivo.globo.com', () {
+      for (final String url in <String>[
+        'https://receitas.globo.com/bolo-de-fuba',
+        'https://receita.globo.com/alerta-culinaria',
+        'https://ao-vivo.globo.com/jornal',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(
+          'Veja esta matéria: $url',
+        );
+        expect(resultado.risco, NivelRisco.seguro, reason: url);
+        expect(resultado.sinaisDetectados, isEmpty, reason: url);
+      }
+    });
+
+    test('respeita fronteira de palavra para não confundir desenha com senha nem pixel com pix', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Minha neta desenha muito bem e a tela tem um pixel brilhante.',
+      );
+      expect(resultado.risco, NivelRisco.seguro);
+      expect(resultado.sinaisDetectados, isEmpty);
+    });
+
+    test('não penaliza lembrete puramente protetivo sobre nunca compartilhar senha', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Nunca compartilhe sua senha nem código de verificação com ninguém.',
+      );
+      expect(resultado.risco, NivelRisco.seguro);
+      expect(resultado.sinaisDetectados, isEmpty);
+    });
   });
 
   group('AnalisadorLocalDeGolpes — links e mensagens suspeitas/golpes', () {
@@ -63,18 +158,123 @@ void main() {
       expect(resultado.risco, NivelRisco.altoRisco);
       expect(resultado.origem, OrigemAnalise.localOffline);
       expect(resultado.analisadoPorIa, isFalse);
-      expect(resultado.sinaisDetectados, isNotEmpty);
+      expect(resultado.sinaisDetectados, contains(TextosAntigolpe.sinalIp));
     });
 
-    test('detecta disfarce com @ (userinfo) no link como altoRisco', () {
-      final AnaliseGolpe resultado = analisador.analisar(
+    test('detecta disfarce com @ (userinfo e @ no início da autoridade) como altoRisco', () {
+      final AnaliseGolpe r1 = analisador.analisar(
         'Acesse https://bb.com.br@golpe-falso.xyz/entrar agora',
+      );
+      expect(r1.risco, NivelRisco.altoRisco);
+      expect(r1.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
+
+      final AnaliseGolpe r2 = analisador.analisar(
+        'Confira em https://@golpe.xyz/login',
+      );
+      expect(r2.risco, NivelRisco.altoRisco);
+      expect(r2.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
+    });
+
+    test('detecta barra invertida na autoridade da URL (https://evil.site\\.bb.com.br)', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        r'Acesse https://evil.site\.bb.com.br/login',
+      );
+
+      expect(resultado.risco, NivelRisco.altoRisco);
+      expect(resultado.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
+      expect(
+        resultado.sinaisDetectados,
+        contains(TextosAntigolpe.sinalMarcaFalsa),
+      );
+    });
+
+    test('detecta desofuscação de hxxp[:]//bb.com.br@evil.site antes do esquema', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Acesse hxxp[:]//bb.com.br@evil.site para liberar',
+      );
+
+      expect(resultado.risco, NivelRisco.altoRisco);
+      expect(resultado.sinaisDetectados, contains(TextosAntigolpe.sinalArroba));
+    });
+
+    test('detecta homógrafo cirílico / não-ASCII no domínio (https://itаu.com.br)', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Acesse https://it\u0430u.com.br para atualizar',
       );
 
       expect(resultado.risco, NivelRisco.altoRisco);
       expect(
-        resultado.sinaisDetectados.any((String s) => s.contains('@')),
-        isTrue,
+        resultado.sinaisDetectados,
+        contains(TextosAntigolpe.sinalHomografo),
+      );
+    });
+
+    test('remove caracteres invisíveis zero-width e marcas combinantes na análise', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Urg\u200Bente: conta blo\u00ADqueada! Envie sua se\uFEFFnha e co\u0301digo de 6 digitos.',
+      );
+
+      expect(resultado.risco, NivelRisco.altoRisco);
+      expect(
+        resultado.sinaisDetectados,
+        contains(TextosAntigolpe.sinalUrgencia),
+      );
+      expect(
+        resultado.sinaisDetectados,
+        contains(TextosAntigolpe.sinalCredencialOuDinheiro),
+      );
+    });
+
+    test('detecta domínios impostores compostos (govbr.com, correiosbr.com, meuinss.com, nubankbr.com, caixabr.com, receitafederal.com)', () {
+      for (final String host in <String>[
+        'https://govbr.com',
+        'https://correiosbr.com',
+        'https://meuinss.com',
+        'https://nubankbr.com',
+        'https://caixabr.com',
+        'https://receitafederal.com',
+      ]) {
+        final AnaliseGolpe resultado = analisador.analisar(
+          'Confira sua situação em $host',
+        );
+        expect(resultado.risco, NivelRisco.altoRisco, reason: host);
+        expect(
+          resultado.sinaisDetectados,
+          contains(TextosAntigolpe.sinalMarcaFalsa),
+          reason: host,
+        );
+      }
+    });
+
+    test('detecta acesso remoto, .apk e golpe do número novo', () {
+      final AnaliseGolpe rRemoto = analisador.analisar(
+        'Suporte do banco: instale o AnyDesk ou baixe modulo-seguranca.apk para verificar sua conta.',
+      );
+      expect(rRemoto.risco, NivelRisco.altoRisco);
+      expect(
+        rRemoto.sinaisDetectados,
+        contains(TextosAntigolpe.sinalAcessoRemotoOuApk),
+      );
+
+      final AnaliseGolpe rNumeroNovo = analisador.analisar(
+        'Oi mãe, troquei de número! Agenda esse número novo e me faz um PIX urgente para pagar um boleto.',
+      );
+      expect(rNumeroNovo.risco, NivelRisco.altoRisco);
+      expect(
+        rNumeroNovo.sinaisDetectados,
+        contains(TextosAntigolpe.sinalTrocaDeNumero),
+      );
+    });
+
+    test('negação por cláusula não desativa detecção quando seguida por pedido real de senha', () {
+      final AnaliseGolpe resultado = analisador.analisar(
+        'Aviso: nunca compartilhe sua senha com estranhos. Sua conta foi bloqueada, acesse https://golpe.xyz e digite sua senha para liberar conta.',
+      );
+
+      expect(resultado.risco, NivelRisco.altoRisco);
+      expect(
+        resultado.sinaisDetectados,
+        contains(TextosAntigolpe.sinalCredencialOuDinheiro),
       );
     });
 
@@ -94,8 +294,8 @@ void main() {
 
       expect(resultado.risco, NivelRisco.altoRisco);
       expect(
-        resultado.sinaisDetectados.any((String s) => s.contains('encurtado')),
-        isTrue,
+        resultado.sinaisDetectados,
+        contains(TextosAntigolpe.sinalEncurtador),
       );
     });
 

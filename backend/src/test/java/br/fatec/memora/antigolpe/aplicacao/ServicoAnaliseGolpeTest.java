@@ -128,6 +128,7 @@ class ServicoAnaliseGolpeTest {
         AnalisarGolpeResponse resposta = servico.analisar(UUID.randomUUID(), conteudo);
 
         assertThat(resposta.risco()).isEqualTo(NivelRiscoGolpe.ALTO);
+        assertThat(resposta.analisadoPorIa()).isFalse();
         assertThat(resposta.titulo()).isEqualTo(AnalisadorDeterministicoDeGolpes.TITULO_ALTO);
         assertThat(resposta.explicacao())
                 .isEqualTo(AnalisadorDeterministicoDeGolpes.EXPLICACAO_ALTO)

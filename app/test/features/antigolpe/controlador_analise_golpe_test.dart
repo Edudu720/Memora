@@ -71,10 +71,59 @@ void main() {
       expect(c.resultado, resultadoExemplo);
     });
 
-    test('expõe mensagem amigável quando a sessão expira', () async {
+    test('limpa resultado antigo ao iniciar nova análise, ao falhar ou ao editar o texto', () async {
+      bool falhar = false;
+      final Completer<AnaliseGolpe> segundaAnalise = Completer<AnaliseGolpe>();
+      int tentativa = 0;
+
+      final _RepositorioFalso repo = _RepositorioFalso((_) {
+        tentativa++;
+        if (tentativa == 1) {
+          return Future<AnaliseGolpe>.value(resultadoExemplo);
+        }
+        if (falhar) {
+          return Future<AnaliseGolpe>.error(Exception('Falha inesperada'));
+        }
+        return segundaAnalise.future;
+      });
+
+      final ControladorAnaliseGolpe c = ControladorAnaliseGolpe(
+        repositorio: repo,
+      );
+      addTearDown(c.dispose);
+
+      await c.analisar('Primeira mensagem');
+      expect(c.resultado, resultadoExemplo);
+
+      // Ao iniciar uma segunda análise, o resultado anterior some imediatamente.
+      final Future<void> emAndamento = c.analisar('Segunda mensagem');
+      expect(c.carregando, isTrue);
+      expect(c.resultado, isNull);
+
+      segundaAnalise.complete(resultadoExemplo);
+      await emAndamento;
+      expect(c.resultado, resultadoExemplo);
+
+      // Editar o texto limpa o resultado obsoleto.
+      c.aoAlterarTexto('Segunda mensagem editada');
+      expect(c.resultado, isNull);
+
+      // Se uma nova análise falha após um sucesso, o resultado antigo não permanece.
+      tentativa = 0;
+      await c.analisar('Mensagem ok');
+      expect(c.resultado, resultadoExemplo);
+
+      falhar = true;
+      await c.analisar('Mensagem que dará erro');
+      expect(c.resultado, isNull);
+      expect(c.erro, TextosAntigolpe.erroInesperado);
+    });
+
+    test('expõe mensagem amigável e marca ultimoErroEhSessaoExpirada quando a sessão expira', () async {
       final _RepositorioFalso repo = _RepositorioFalso(
-        (_) async =>
-            throw const FalhaDeChamadaDaAssistente(FalhaDaAssistente.sessaoExpirada),
+        (_) async => throw const FalhaDeChamadaDaAssistente(
+          FalhaDaAssistente.sessaoExpirada,
+        ),
       );
       final ControladorAnaliseGolpe c = ControladorAnaliseGolpe(
         repositorio: repo,
@@ -85,6 +134,29 @@ void main() {
 
       expect(c.carregando, isFalse);
       expect(c.erro, TextosAntigolpe.sessaoExpirada);
+      expect(c.ultimoErroEhSessaoExpirada, isTrue);
+      expect(c.resultado, isNull);
+    });
+
+    test('trata FalhaAnaliseGolpeTipo.limiteExcedido (HTTP 429) sem dizer que está sem internet', () async {
+      final _RepositorioFalso repo = _RepositorioFalso(
+        (_) async => throw const FalhaAnaliseGolpe(
+          FalhaAnaliseGolpeTipo.limiteExcedido,
+          mensagem: TextosAntigolpe.erroLimiteAnalises,
+          esperaEmSegundos: 30,
+          statusCode: 429,
+        ),
+      );
+      final ControladorAnaliseGolpe c = ControladorAnaliseGolpe(
+        repositorio: repo,
+      );
+      addTearDown(c.dispose);
+
+      await c.analisar('Texto qualquer');
+
+      expect(c.carregando, isFalse);
+      expect(c.erro, TextosAntigolpe.erroLimiteAnalises);
+      expect(c.ultimoErroEhSessaoExpirada, isFalse);
       expect(c.resultado, isNull);
     });
 

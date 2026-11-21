@@ -94,6 +94,10 @@ class MemoraCores {
   /// Texto de selos positivos sobre [superficie] e [saudeSuave] (`>= 4.5:1`).
   final Color sucessoTexto;
 
+  /// Verdadeiro quando este conjunto corresponde ao tema de alto contraste.
+  bool get ehAltoContraste =>
+      fundo == altoContraste.fundo && borda == altoContraste.borda;
+
   /// Cria um conjunto de cores semânticas.
   const MemoraCores({
     required this.fundo,

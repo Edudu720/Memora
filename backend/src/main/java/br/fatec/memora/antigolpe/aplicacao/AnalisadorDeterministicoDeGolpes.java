@@ -2,7 +2,6 @@ package br.fatec.memora.antigolpe.aplicacao;
 
 import br.fatec.memora.antigolpe.dominio.NivelRiscoGolpe;
 import br.fatec.memora.antigolpe.dominio.ResultadoAnaliseGolpe;
-import java.net.URI;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -74,15 +73,20 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static final Pattern CARACTERES_INVISIVEIS =
             Pattern.compile("[\\u200B-\\u200D\\uFEFF\\u00AD\\u2060]");
-    private static final Pattern ESPACOS_MULTIPLOS = Pattern.compile("\\s+");
+    private static final Pattern QUEBRA_DE_LINHA_CR = Pattern.compile("\\r\\n?");
+    private static final Pattern ESPACOS_HORIZONTAIS = Pattern.compile("[\\t\\x0B\\f ]+");
     private static final Pattern ACENTOS = Pattern.compile("\\p{M}+");
 
-    private static final Pattern HXXPS = Pattern.compile("(?i)hxxps://");
-    private static final Pattern HXXP = Pattern.compile("(?i)hxxp://");
-    private static final Pattern PONTO_OFUSCADO =
-            Pattern.compile("(?i)\\[\\.\\]|\\(\\.\\)|\\{\\.\\}|\\[dot\\]|\\(dot\\)");
     private static final Pattern DOIS_PONTOS_OFUSCADO = Pattern.compile("\\[:\\]|\\(:\\)");
     private static final Pattern BARRA_OFUSCADA = Pattern.compile("\\[/\\]|\\(/\\)");
+    private static final Pattern PONTO_OFUSCADO =
+            Pattern.compile("(?i)\\[\\.\\]|\\(\\.\\)|\\{\\.\\}|\\[dot\\]|\\(dot\\)");
+    private static final Pattern HXXPS = Pattern.compile("(?i)\\bhxxps(?=://)");
+    private static final Pattern HXXP = Pattern.compile("(?i)\\bhxxp(?=://)");
+
+    private static final Pattern EMAIL =
+            Pattern.compile(
+                    "(?i)(?<![:/a-z0-9._%+-])(?!www\\.)[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}(?![/\\\\])");
 
     private static final Pattern EXTRATOR_URL =
             Pattern.compile(
@@ -119,98 +123,152 @@ public class AnalisadorDeterministicoDeGolpes {
                     "xyz", "top", "click", "icu", "vip", "tk", "ml", "ga", "cf", "gq", "work",
                     "buzz", "loan", "win", "support");
 
+    private static final Set<String> TLDS_VALIDOS_SEM_ESQUEMA =
+            Set.of(
+                    "br", "com", "org", "net", "gov", "edu", "mil", "int", "io", "me", "co",
+                    "app", "dev", "ai", "xyz", "top", "site", "online", "store", "tech", "info",
+                    "biz", "link", "click", "live", "shop", "club", "vip", "icu", "buzz", "work",
+                    "loan", "win", "support", "ly", "gl", "to", "is", "at", "cc", "tv", "uk",
+                    "us", "pt", "es", "ar", "cl", "py", "uy", "cn", "ru", "de", "fr", "it", "tk",
+                    "ml", "ga", "cf", "gq");
+
+    private static final Pattern CANAL_WHATSAPP_NO_TEXTO =
+            Pattern.compile(
+                    "\\b(?:no|pelo|via|pelo\\s+meu|no\\s+meu)\\s+(?:whatsapp|zap)\\b");
+
     private static final List<RegraMarca> MARCAS =
             List.of(
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "bb",
                             List.of("banco do brasil", "bancodobrasil"),
-                            List.of("bb"),
+                            List.of("bb", "bancodobrasil", "bbbr"),
                             List.of("bb.com.br", "bancodobrasil.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "itau",
                             List.of("itau"),
-                            List.of("itau"),
+                            List.of("itau", "itaubr", "bancoitau"),
                             List.of("itau.com.br", "itau.com")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "bradesco",
                             List.of("bradesco"),
-                            List.of("bradesco"),
+                            List.of("bradesco", "bradescobr", "bancobradesco"),
                             List.of("bradesco.com.br", "banco.bradesco", "bradesco.com")),
-                    new RegraMarca(
-                            List.of("caixa economica", "caixa tem", "banco caixa", "loterias caixa"),
-                            List.of("caixa"),
+                    RegraMarca.criar(
+                            "caixa",
+                            List.of(
+                                    "caixa economica",
+                                    "caixa tem",
+                                    "banco caixa",
+                                    "loterias caixa"),
+                            List.of("caixa", "caixabr", "caixatem", "caixaeconomica"),
                             List.of("caixa.gov.br", "caixa.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "santander",
                             List.of("santander"),
-                            List.of("santander"),
+                            List.of("santander", "santanderbr", "bancosantander"),
                             List.of("santander.com.br", "santander.com")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "nubank",
                             List.of("nubank", "nu bank", "roxinho"),
-                            List.of("nubank"),
+                            List.of("nubank", "nubankbr"),
                             List.of("nubank.com.br", "nu.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "inter",
                             List.of("banco inter", "conta inter"),
                             List.of("bancointer", "inter"),
                             List.of("bancointer.com.br", "inter.co")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "picpay",
                             List.of("picpay", "pic pay"),
-                            List.of("picpay"),
+                            List.of("picpay", "picpaybr"),
                             List.of("picpay.com", "picpay.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "mercadopago",
                             List.of("mercadopago", "mercado pago"),
-                            List.of("mercadopago"),
+                            List.of("mercadopago", "mercadopagobr"),
                             List.of("mercadopago.com.br", "mercadopago.com")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "mercadolivre",
                             List.of("mercadolivre", "mercado livre"),
-                            List.of("mercadolivre", "mercadolibre"),
+                            List.of("mercadolivre", "mercadolibre", "mercadolivrebr"),
                             List.of("mercadolivre.com.br", "mercadolibre.com")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "correios",
                             List.of("correios"),
-                            List.of("correios"),
+                            List.of("correios", "correiosbr"),
                             List.of("correios.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "gov",
                             List.of("gov.br", "governo federal", "meu gov"),
-                            List.of("gov"),
+                            List.of("gov", "govbr", "meugov", "meugovbr"),
                             List.of("gov.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "inss",
                             List.of("inss", "meu inss"),
-                            List.of("inss"),
+                            List.of("inss", "meuinss", "inssbr", "meuinssbr"),
                             List.of("gov.br", "inss.gov.br")),
-                    new RegraMarca(
-                            List.of("receita federal", "receita fazenda"),
-                            List.of("receita"),
+                    RegraMarca.criar(
+                            "receita",
+                            List.of(
+                                    "receita federal",
+                                    "receita fazenda",
+                                    "imposto de renda",
+                                    "malha fina",
+                                    "cpf irregular"),
+                            List.of(
+                                    "receitafederal",
+                                    "receita-federal",
+                                    "receitafederalbr",
+                                    "irpf",
+                                    "malhafina",
+                                    "malha-fina"),
                             List.of("gov.br", "fazenda.gov.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "serasa",
                             List.of("serasa"),
-                            List.of("serasa"),
+                            List.of("serasa", "serasabr", "serasaexperian"),
                             List.of("serasa.com.br", "serasaexperian.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "whatsapp",
                             List.of("whatsapp", "zap"),
-                            List.of("whatsapp"),
+                            List.of("whatsapp", "whatsappbr"),
                             List.of("whatsapp.com", "whatsapp.net", "wa.me")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "vivo",
                             List.of("operadora vivo", "meu vivo", "fatura vivo", "vivo fibra"),
-                            List.of("vivo"),
+                            List.of("vivo", "vivobr", "meuvivo"),
                             List.of("vivo.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "claro",
                             List.of("operadora claro", "minha claro", "fatura claro"),
-                            List.of("claro"),
+                            List.of("claro", "clarobr", "minhaclaro"),
                             List.of("claro.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "tim",
                             List.of("operadora tim", "meu tim", "fatura tim"),
-                            List.of("tim"),
+                            List.of("tim", "timbr", "meutim"),
                             List.of("tim.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "netflix",
                             List.of("netflix"),
-                            List.of("netflix"),
+                            List.of("netflix", "netflixbr"),
                             List.of("netflix.com", "netflix.com.br")),
-                    new RegraMarca(
+                    RegraMarca.criar(
+                            "amazon",
                             List.of("amazon"),
-                            List.of("amazon"),
+                            List.of("amazon", "amazonbr"),
                             List.of("amazon.com.br", "amazon.com", "a.co")));
 
     private static final Set<String> DOMINIOS_OFICIAIS = criarConjuntoOficiais();
+    private static final Pattern PADRAO_BB_TEXTO = compilarPalavraTexto("bb");
+
+    private static final Pattern ACESSO_REMOTO_OU_APK =
+            Pattern.compile(
+                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|\\bsupremo\\b|\\bquicksupport\\b|\\.apk\\b|\\bfora da loja\\b)");
 
     private static final Pattern PEDIDO_CREDENCIAL_DIRETA =
             Pattern.compile(
-                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|\\.apk\\b|\\bfora da loja\\b"
+                    "(?:\\banydesk\\b|\\bteamviewer\\b|\\brustdesk\\b|\\bsupremo\\b|\\bquicksupport\\b|\\.apk\\b|\\bfora da loja\\b"
                             + "|\\bcvv\\b"
                             + "|codigo\\s+(?:de\\s+)?(?:6\\s+digitos|verificacao|seguranca|sms|que\\s+chegou)"
                             + "|(?:envie|informe|digite|passe|mande|confirme|atualize|forneca|insira|coloque|me\\s+diga|me\\s+passa).{0,30}(?:senha|codigo|pin|cvv|cartao)"
@@ -218,107 +276,133 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static final Pattern NEGACAO_CREDENCIAL =
             Pattern.compile(
-                    "(?:nunca\\s+peco|nao\\s+peco|nao\\s+compartilhe|nao\\s+passe|nao\\s+envie|jamais\\s+informe).{0,25}(?:senha|codigo|pin|cvv)");
+                    "(?:nunca\\s+peco|nao\\s+peco|nunca\\s+pede|nao\\s+pede|nunca\\s+pedimos|nao\\s+pedimos|nao\\s+compartilhe|nunca\\s+compartilhe|nao\\s+passe|nunca\\s+passe|nao\\s+envie|nunca\\s+envie|nao\\s+informe|jamais\\s+informe|nao\\s+forneca|jamais\\s+forneca).{0,25}(?:senha|codigo|pin|cvv|cartao)");
 
-    private static final List<String> TERMOS_URGENCIA =
-            List.of(
-                    "urgente",
-                    "imediatamente",
-                    "ultimo aviso",
-                    "conta bloqueada",
-                    "sera bloqueada",
-                    "bloqueio",
-                    "suspensa",
-                    "suspenso",
-                    "cancelada",
-                    "cancelado",
-                    "encomenda retida",
-                    "objeto retido",
-                    "taxa pendente",
-                    "multa",
-                    "ganhou",
-                    "premio",
-                    "sorteio",
-                    "resgate",
-                    "valor a receber",
-                    "prova de vida",
-                    "24 horas",
-                    "expira hoje",
-                    "so hoje",
-                    "agora mesmo");
+    private static final Pattern SEPARADOR_CLAUSULAS =
+            Pattern.compile(
+                    "(?:[.!?;\\n]+|\\b(?:mas|porem|contudo|entretanto|todavia|agora)\\b)");
 
-    private static final List<String> TERMOS_FINANCEIROS =
-            List.of(
-                    "pix",
-                    "transferir",
-                    "transferencia",
-                    "boleto",
-                    "taxa",
-                    "pagamento",
-                    "pagar",
-                    "cartao",
-                    "cpf",
-                    "vale-presente",
-                    "vale presente",
-                    "gift card",
-                    "atualizar cadastro",
-                    "confirmar dados",
-                    "deposito",
-                    "dinheiro");
+    private static final List<Pattern> PADROES_URGENCIA =
+            compilarListaPalavrasTexto(
+                    List.of(
+                            "urgente",
+                            "imediatamente",
+                            "ultimo aviso",
+                            "conta bloqueada",
+                            "sera bloqueada",
+                            "bloqueio",
+                            "suspensa",
+                            "suspenso",
+                            "cancelada",
+                            "cancelado",
+                            "encomenda retida",
+                            "objeto retido",
+                            "taxa pendente",
+                            "multa",
+                            "ganhou",
+                            "premio",
+                            "sorteio",
+                            "resgate",
+                            "valor a receber",
+                            "prova de vida",
+                            "24 horas",
+                            "expira hoje",
+                            "so hoje",
+                            "agora mesmo"));
 
-    private static final List<String> TERMOS_ACAO_LINK =
-            List.of(
-                    "atualizar",
-                    "atualize",
-                    "confirmar",
-                    "confirme",
-                    "resgatar",
-                    "resgate",
-                    "pagar",
-                    "pague",
-                    "desbloquear",
-                    "desbloqueie",
-                    "entrar",
-                    "entre",
-                    "acessar",
-                    "acesse",
-                    "clicar",
-                    "clique",
-                    "validar",
-                    "valide",
-                    "regularizar",
-                    "regularize",
-                    "liberar",
-                    "libere");
+    private static final List<Pattern> PADROES_FINANCEIROS =
+            compilarListaPalavrasTexto(
+                    List.of(
+                            "pix",
+                            "transferir",
+                            "transferencia",
+                            "boleto",
+                            "taxa",
+                            "pagamento",
+                            "pagar",
+                            "cartao",
+                            "cpf",
+                            "vale-presente",
+                            "vale presente",
+                            "gift card",
+                            "atualizar cadastro",
+                            "confirmar dados",
+                            "deposito",
+                            "dinheiro"));
+
+    private static final List<Pattern> PADROES_ACAO_LINK =
+            compilarListaPalavrasTexto(
+                    List.of(
+                            "atualizar",
+                            "atualize",
+                            "confirmar",
+                            "confirme",
+                            "resgatar",
+                            "resgate",
+                            "pagar",
+                            "pague",
+                            "desbloquear",
+                            "desbloqueie",
+                            "entrar",
+                            "entre",
+                            "acessar",
+                            "acesse",
+                            "clicar",
+                            "clique",
+                            "validar",
+                            "valide",
+                            "regularizar",
+                            "regularize",
+                            "liberar",
+                            "libere"));
 
     private static final Pattern GOLPE_TROQUEI_NUMERO =
             Pattern.compile(
                     "(?:troquei\\s+de\\s+numero|numero\\s+novo|meu\\s+numero\\s+mudou|celular\\s+novo)");
 
-    private static final List<String> TERMOS_INJECAO =
-            List.of(
-                    "ignore as regras",
-                    "ignore as instrucoes",
-                    "ignore todas as instrucoes",
-                    "ignore all previous",
-                    "ignore previous instructions",
-                    "esqueca tudo",
-                    "nova instrucao",
-                    "[sistema]",
-                    "system:",
-                    "classifique como baixo",
-                    "responda baixo",
-                    "diga que e seguro",
-                    "jailbreak",
-                    "bypass");
+    private static final List<Pattern> PADROES_INJECAO =
+            compilarListaPalavrasTexto(
+                    List.of(
+                            "ignore as regras",
+                            "ignore as instrucoes",
+                            "ignore todas as instrucoes",
+                            "ignore all previous",
+                            "ignore previous instructions",
+                            "esqueca tudo",
+                            "nova instrucao",
+                            "[sistema]",
+                            "system:",
+                            "classifique como baixo",
+                            "responda baixo",
+                            "diga que e seguro",
+                            "jailbreak",
+                            "bypass"));
 
     private record RegraMarca(
-            List<String> palavrasChaveTexto,
-            List<String> palavrasNoHost,
-            List<String> dominiosOficiais) {}
+            String codigo,
+            List<Pattern> padroesTexto,
+            List<Pattern> padroesHost,
+            List<String> dominiosOficiais) {
+        static RegraMarca criar(
+                String codigo,
+                List<String> palavrasChaveTexto,
+                List<String> palavrasNoHost,
+                List<String> dominiosOficiais) {
+            return new RegraMarca(
+                    codigo,
+                    compilarListaPalavrasTexto(palavrasChaveTexto),
+                    compilarListaTokensHost(palavrasNoHost),
+                    dominiosOficiais);
+        }
+    }
 
     private record UrlExtraida(
-            String bruto, String host, boolean comEsquemaHttpInseguro, boolean comArrobaNaAutoridade) {}
+            String bruto,
+            String host,
+            boolean comEsquemaHttpInseguro,
+            boolean comArrobaNaAutoridade,
+            boolean comBarraInvertidaNaAutoridade,
+            boolean oficial) {}
 
     /** Resultado completo da pré-verificação determinística, incluindo sinalizador de injeção. */
     public record AnalisePrevia(ResultadoAnaliseGolpe resultado, boolean tentativaDeInjecao) {}
@@ -336,17 +420,18 @@ public class AnalisadorDeterministicoDeGolpes {
 
         String limpo = limparTexto(conteudo);
         String textoDobrado = dobrarSemAcentos(limpo);
-        String textoDesofuscado = desofuscarUrls(limpo);
+        String textoDesofuscado = normalizarParaAnalise(limpo);
         List<UrlExtraida> urls = extrairUrls(textoDesofuscado);
 
         NivelRiscoGolpe risco = NivelRiscoGolpe.BAIXO;
         Set<String> sinais = new LinkedHashSet<>();
 
-        boolean temUrgencia = contemAlgumTermo(textoDobrado, TERMOS_URGENCIA);
-        boolean temFinanceiro = contemAlgumTermo(textoDobrado, TERMOS_FINANCEIROS);
-        boolean temAcaoLink = contemAlgumTermo(textoDobrado, TERMOS_ACAO_LINK);
+        boolean temUrgencia = contemAlgumPadrao(textoDobrado, PADROES_URGENCIA);
+        boolean temFinanceiro = contemAlgumPadrao(textoDobrado, PADROES_FINANCEIROS);
+        boolean temAcaoLink = contemAlgumPadrao(textoDobrado, PADROES_ACAO_LINK);
         boolean temCredencialOuAcesso = detectarCredencialOuAcesso(textoDobrado);
         boolean mencionaMarca = algumaMarcaMencionada(textoDobrado, urls);
+        boolean temUrlNaoOficial = false;
 
         if (temCredencialOuAcesso) {
             risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.ALTO);
@@ -362,10 +447,17 @@ public class AnalisadorDeterministicoDeGolpes {
         boolean temLinkInseguroOuArriscado = false;
 
         for (UrlExtraida url : urls) {
+            if (!url.oficial()) {
+                temUrlNaoOficial = true;
+            }
             String host = url.host();
             if (url.comArrobaNaAutoridade()) {
                 risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.ALTO);
                 sinais.add(SINAL_ARROBA);
+            }
+            if (url.comBarraInvertidaNaAutoridade()) {
+                risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.ALTO);
+                sinais.add(SINAL_LINK_SUSPEITO);
             }
             if (ehIp(host)) {
                 risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.ALTO);
@@ -384,7 +476,7 @@ public class AnalisadorDeterministicoDeGolpes {
                     risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.MEDIO);
                 }
             } else if ((ehTldArriscado(host) || url.comEsquemaHttpInseguro())
-                    && !ehDominioOficial(host)) {
+                    && !url.oficial()) {
                 temLinkInseguroOuArriscado = true;
                 if (temAcaoLink || temUrgencia || temFinanceiro) {
                     sinais.add(SINAL_LINK_SUSPEITO);
@@ -405,7 +497,7 @@ public class AnalisadorDeterministicoDeGolpes {
             sinais.add(SINAL_MARCA_FALSA);
         }
 
-        if (temUrgencia && (temFinanceiro || !urls.isEmpty())) {
+        if (temUrgencia && (temFinanceiro || temUrlNaoOficial)) {
             risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.ALTO);
             sinais.add(SINAL_PRESSA_E_PAGAMENTO);
         } else if (temUrgencia || temFinanceiro || (temLinkInseguroOuArriscado && !temEncurtador)) {
@@ -415,7 +507,7 @@ public class AnalisadorDeterministicoDeGolpes {
             }
         }
 
-        boolean tentativaInjecao = contemAlgumTermo(textoDobrado, TERMOS_INJECAO);
+        boolean tentativaInjecao = contemAlgumPadrao(textoDobrado, PADROES_INJECAO);
         if (tentativaInjecao) {
             risco = NivelRiscoGolpe.max(risco, NivelRiscoGolpe.MEDIO);
             sinais.add(SINAL_INJECAO);
@@ -459,7 +551,8 @@ public class AnalisadorDeterministicoDeGolpes {
     private static String limparTexto(String entrada) {
         String nfkc = Normalizer.normalize(entrada, Normalizer.Form.NFKC);
         String semInvisiveis = CARACTERES_INVISIVEIS.matcher(nfkc).replaceAll("");
-        return ESPACOS_MULTIPLOS.matcher(semInvisiveis).replaceAll(" ").trim();
+        String quebrasNormalizadas = QUEBRA_DE_LINHA_CR.matcher(semInvisiveis).replaceAll("\n");
+        return ESPACOS_HORIZONTAIS.matcher(quebrasNormalizadas).replaceAll(" ").trim();
     }
 
     private static String dobrarSemAcentos(String texto) {
@@ -468,19 +561,20 @@ public class AnalisadorDeterministicoDeGolpes {
         return semAcento.toLowerCase(Locale.ROOT);
     }
 
-    private static String desofuscarUrls(String texto) {
-        String res = HXXPS.matcher(texto).replaceAll("https://");
-        res = HXXP.matcher(res).replaceAll("http://");
-        res = PONTO_OFUSCADO.matcher(res).replaceAll(".");
-        res = DOIS_PONTOS_OFUSCADO.matcher(res).replaceAll(":");
+    private static String normalizarParaAnalise(String texto) {
+        String res = DOIS_PONTOS_OFUSCADO.matcher(texto).replaceAll(":");
         res = BARRA_OFUSCADA.matcher(res).replaceAll("/");
+        res = PONTO_OFUSCADO.matcher(res).replaceAll(".");
+        res = HXXPS.matcher(res).replaceAll("https");
+        res = HXXP.matcher(res).replaceAll("http");
         return res;
     }
 
     private static List<UrlExtraida> extrairUrls(String texto) {
+        String semEmails = EMAIL.matcher(texto).replaceAll(" ");
         List<UrlExtraida> lista = new ArrayList<>();
         Set<String> vistos = new LinkedHashSet<>();
-        Matcher matcher = EXTRATOR_URL.matcher(texto);
+        Matcher matcher = EXTRATOR_URL.matcher(semEmails);
         while (matcher.find()) {
             String bruto = limparPontuacaoFinal(matcher.group());
             if (bruto.isBlank() || !vistos.add(bruto)) {
@@ -521,10 +615,14 @@ public class AnalisadorDeterministicoDeGolpes {
         int barra = semEsquema.indexOf('/');
         int interrogacao = semEsquema.indexOf('?');
         int cerquilha = semEsquema.indexOf('#');
-        int corte = semEsquema.length();
-        if (barra >= 0) corte = Math.min(corte, barra);
-        if (interrogacao >= 0) corte = Math.min(corte, interrogacao);
-        if (cerquilha >= 0) corte = Math.min(corte, cerquilha);
+        int cortePadrao = semEsquema.length();
+        if (barra >= 0) cortePadrao = Math.min(cortePadrao, barra);
+        if (interrogacao >= 0) cortePadrao = Math.min(cortePadrao, interrogacao);
+        if (cerquilha >= 0) cortePadrao = Math.min(cortePadrao, cerquilha);
+
+        int barraInvertida = semEsquema.indexOf('\\');
+        boolean comBarraInvertida = barraInvertida >= 0 && barraInvertida < cortePadrao;
+        int corte = comBarraInvertida ? barraInvertida : cortePadrao;
 
         String autoridade = semEsquema.substring(0, corte);
         if (autoridade.isBlank()) {
@@ -542,12 +640,34 @@ public class AnalisadorDeterministicoDeGolpes {
             return null;
         }
 
-        // Evita falsos positivos de numeros ou siglas caso nao seja IPv4/IPv6 e nao tenha esquema.
-        if (!temEsquema && !ehIp(host) && !host.contains(".")) {
+        boolean ehEnderecoIp = ehIp(host);
+        if (!temEsquema && !ehEnderecoIp && !host.contains(".")) {
             return null;
         }
 
-        return new UrlExtraida(bruto, host, httpInseguro, comArroba);
+        if (!temEsquema && !lower.startsWith("www.") && !ehEnderecoIp) {
+            if (!ehTldValidoParaUrlSemEsquema(host)) {
+                return null;
+            }
+        }
+
+        boolean oficial =
+                !comArroba
+                        && !comBarraInvertida
+                        && !ehEnderecoIp
+                        && !ehPunycodeOuHomografo(host)
+                        && ehHostEmQualquerDominioOficial(host);
+
+        return new UrlExtraida(bruto, host, httpInseguro, comArroba, comBarraInvertida, oficial);
+    }
+
+    private static boolean ehTldValidoParaUrlSemEsquema(String host) {
+        int ultimoPonto = host.lastIndexOf('.');
+        if (ultimoPonto < 0 || ultimoPonto == host.length() - 1) {
+            return false;
+        }
+        String tld = host.substring(ultimoPonto + 1);
+        return tld.startsWith("xn--") || TLDS_VALIDOS_SEM_ESQUEMA.contains(tld);
     }
 
     private static String removerPorta(String hostComPorta) {
@@ -608,7 +728,7 @@ public class AnalisadorDeterministicoDeGolpes {
         return TLDS_ARRISCADOS.contains(tld);
     }
 
-    private static boolean ehDominioOficial(String host) {
+    static boolean ehHostEmQualquerDominioOficial(String host) {
         return correspondeASufixo(host, DOMINIOS_OFICIAIS);
     }
 
@@ -623,22 +743,19 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static boolean detectarImpersonacaoDeMarca(
             String textoDobrado, List<UrlExtraida> urls) {
-        if (urls.isEmpty()) {
+        List<UrlExtraida> urlsNaoOficiais = new ArrayList<>();
+        for (UrlExtraida url : urls) {
+            if (!url.oficial() && !ehEncurtador(url.host())) {
+                urlsNaoOficiais.add(url);
+            }
+        }
+        if (urlsNaoOficiais.isEmpty()) {
             return false;
         }
+
         for (RegraMarca marca : MARCAS) {
-            boolean mencionada = marcaMencionada(marca, textoDobrado, urls);
-            if (!mencionada) {
-                continue;
-            }
-            for (UrlExtraida url : urls) {
-                String host = url.host();
-                if (ehEncurtador(host)) {
-                    continue;
-                }
-                if (!correspondeASufixo(host, marca.dominiosOficiais())) {
-                    return true;
-                }
+            if (marcaMencionada(marca, textoDobrado, urlsNaoOficiais, true)) {
+                return true;
             }
         }
         return false;
@@ -646,7 +763,7 @@ public class AnalisadorDeterministicoDeGolpes {
 
     private static boolean algumaMarcaMencionada(String textoDobrado, List<UrlExtraida> urls) {
         for (RegraMarca marca : MARCAS) {
-            if (marcaMencionada(marca, textoDobrado, urls)) {
+            if (marcaMencionada(marca, textoDobrado, urls, false)) {
                 return true;
             }
         }
@@ -654,55 +771,97 @@ public class AnalisadorDeterministicoDeGolpes {
     }
 
     private static boolean marcaMencionada(
-            RegraMarca marca, String textoDobrado, List<UrlExtraida> urls) {
-        for (String kw : marca.palavrasChaveTexto()) {
-            if (contemPalavra(textoDobrado, kw)) {
+            RegraMarca marca,
+            String textoDobrado,
+            List<UrlExtraida> urls,
+            boolean ignorarCanalWhatsappNoTexto) {
+        for (UrlExtraida url : urls) {
+            if (urlMencionaMarcaNoHost(marca, url)) {
+                return true;
+            }
+        }
+
+        String textoParaBusca =
+                ignorarCanalWhatsappNoTexto && "whatsapp".equals(marca.codigo())
+                        ? CANAL_WHATSAPP_NO_TEXTO.matcher(textoDobrado).replaceAll(" ")
+                        : textoDobrado;
+
+        for (Pattern padraoTexto : marca.padroesTexto()) {
+            if (padraoTexto.matcher(textoParaBusca).find()) {
                 return true;
             }
         }
         // Para 'bb' no texto, exige contexto bancario para evitar falsos positivos.
-        if (marca.dominiosOficiais().contains("bb.com.br")
-                && contemPalavra(textoDobrado, "bb")
-                && (textoDobrado.contains("banco")
-                        || textoDobrado.contains("conta")
-                        || textoDobrado.contains("cartao")
-                        || textoDobrado.contains("pix"))) {
+        if ("bb".equals(marca.codigo())
+                && PADRAO_BB_TEXTO.matcher(textoParaBusca).find()
+                && (textoParaBusca.contains("banco")
+                        || textoParaBusca.contains("conta")
+                        || textoParaBusca.contains("cartao")
+                        || textoParaBusca.contains("pix"))) {
             return true;
         }
-        for (UrlExtraida url : urls) {
-            String hostDobrado = dobrarSemAcentos(url.host());
-            for (String tokenHost : marca.palavrasNoHost()) {
-                if (Pattern.compile("(?<![a-z0-9])" + Pattern.quote(tokenHost) + "(?![a-z0-9])")
-                        .matcher(hostDobrado)
-                        .find()) {
-                    return true;
-                }
+        return false;
+    }
+
+    private static boolean urlMencionaMarcaNoHost(RegraMarca marca, UrlExtraida url) {
+        String hostDobrado = dobrarSemAcentos(url.host());
+        if ("vivo".equals(marca.codigo())) {
+            hostDobrado = hostDobrado.replace("ao-vivo", "").replace("aovivo", "");
+        }
+        for (Pattern padraoHost : marca.padroesHost()) {
+            if (padraoHost.matcher(hostDobrado).find()) {
+                return true;
             }
         }
         return false;
     }
 
     private static boolean detectarCredencialOuAcesso(String textoDobrado) {
-        if (NEGACAO_CREDENCIAL.matcher(textoDobrado).find()) {
-            return false;
+        if (ACESSO_REMOTO_OU_APK.matcher(textoDobrado).find()) {
+            return true;
         }
-        return PEDIDO_CREDENCIAL_DIRETA.matcher(textoDobrado).find();
-    }
-
-    private static boolean contemAlgumTermo(String textoDobrado, List<String> termos) {
-        for (String termo : termos) {
-            if (contemPalavra(textoDobrado, termo)) {
+        String[] clausulas = SEPARADOR_CLAUSULAS.split(textoDobrado);
+        for (String clausula : clausulas) {
+            if (clausula.isBlank()) {
+                continue;
+            }
+            if (PEDIDO_CREDENCIAL_DIRETA.matcher(clausula).find()
+                    && !NEGACAO_CREDENCIAL.matcher(clausula).find()) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean contemPalavra(String textoDobrado, String termo) {
+    private static boolean contemAlgumPadrao(String textoDobrado, List<Pattern> padroes) {
+        for (Pattern padrao : padroes) {
+            if (padrao.matcher(textoDobrado).find()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<Pattern> compilarListaPalavrasTexto(List<String> termos) {
+        List<Pattern> padroes = new ArrayList<>(termos.size());
+        for (String termo : termos) {
+            padroes.add(compilarPalavraTexto(termo));
+        }
+        return List.copyOf(padroes);
+    }
+
+    private static Pattern compilarPalavraTexto(String termo) {
         return Pattern.compile(
-                        "(?<![\\p{L}\\p{N}])" + Pattern.quote(termo) + "(?![\\p{L}\\p{N}])")
-                .matcher(textoDobrado)
-                .find();
+                "(?<![\\p{L}\\p{N}])" + Pattern.quote(termo) + "(?![\\p{L}\\p{N}])");
+    }
+
+    private static List<Pattern> compilarListaTokensHost(List<String> tokensHost) {
+        List<Pattern> padroes = new ArrayList<>(tokensHost.size());
+        for (String token : tokensHost) {
+            padroes.add(
+                    Pattern.compile("(?<![a-z0-9])" + Pattern.quote(token) + "(?![a-z0-9])"));
+        }
+        return List.copyOf(padroes);
     }
 
     private static Set<String> criarConjuntoOficiais() {
@@ -711,15 +870,5 @@ public class AnalisadorDeterministicoDeGolpes {
             todos.addAll(marca.dominiosOficiais());
         }
         return Set.copyOf(todos);
-    }
-
-    /** Verifica se uma URL extraída aponta para um domínio oficial conhecido. */
-    static boolean ehHostOficial(String host) {
-        try {
-            URI.create("https://" + host);
-        } catch (IllegalArgumentException ignorado) {
-            return false;
-        }
-        return ehDominioOficial(host);
     }
 }

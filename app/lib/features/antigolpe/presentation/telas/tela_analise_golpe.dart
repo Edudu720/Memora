@@ -35,7 +35,7 @@ class TelaAnaliseGolpe extends StatefulWidget {
   /// Chave do selo de risco.
   static const Key chaveBadgeRisco = Key('antigolpe.badge_risco');
 
-  /// Chave do selo de origem (IA do servidor ou verificação local).
+  /// Chave do selo de origem (IA do servidor, regras ou verificação local).
   static const Key chaveBadgeOrigem = Key('antigolpe.badge_origem');
 
   /// Chave do aviso exibido no modo offline.
@@ -136,12 +136,14 @@ class _TelaAnaliseGolpeState extends State<TelaAnaliseGolpe> {
                           erro: c.erroCampo,
                           habilitado: !c.carregando,
                           tipoTeclado: TextInputType.multiline,
+                          minLines: 3,
+                          maxLines: 6,
                           formatadores: <TextInputFormatter>[
                             LengthLimitingTextInputFormatter(
                               AnalisadorLocalDeGolpes.limiteCaracteres,
                             ),
                           ],
-                          aoMudar: (_) => c.aoAlterarTexto(),
+                          aoMudar: c.aoAlterarTexto,
                         ),
                         const SizedBox(height: MemoraEspacamento.md),
                         Wrap(
@@ -191,7 +193,9 @@ class _TelaAnaliseGolpeState extends State<TelaAnaliseGolpe> {
                     MensagemErro(
                       key: TelaAnaliseGolpe.chaveErro,
                       mensagem: c.erro!,
-                      aoTentarNovamente: _analisar,
+                      aoTentarNovamente: c.ultimoErroEhSessaoExpirada
+                          ? null
+                          : _analisar,
                     )
                   else if (c.resultado != null)
                     _CartaoResultado(
@@ -269,7 +273,20 @@ class _CartaoDicaSeguranca extends StatelessWidget {
 
     return Semantics(
       container: true,
-      child: Cartao(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(MemoraEspacamento.lg),
+        decoration: BoxDecoration(
+          color: cores.superficie,
+          borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+          border: Border.all(
+            color: cores.ehAltoContraste ? cores.borda : cores.bordaSutil,
+            width: cores.ehAltoContraste
+                ? MemoraDimensoes.bordaEnfase
+                : MemoraDimensoes.espessuraBordaSutil,
+          ),
+          boxShadow: MemoraElevacao.listaSombrasCartao(cores),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -310,6 +327,9 @@ class _CartaoResultado extends StatelessWidget {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
     final bool ehOffline = resultado.ehOffline;
+    final bool ehServidorIa =
+        resultado.origem == OrigemAnalise.servidorIa &&
+        resultado.analisadoPorIa;
 
     final (
       TomBadgeStatus tomRisco,
@@ -326,7 +346,7 @@ class _CartaoResultado extends StatelessWidget {
         cores.sucesso,
       ),
       NivelRisco.atencao => (
-        TomBadgeStatus.informativo,
+        TomBadgeStatus.aviso,
         TextosAntigolpe.riscoAtencao,
         Icons.warning_amber_rounded,
         ExpressaoDaMemora.preocupada,
@@ -341,9 +361,32 @@ class _CartaoResultado extends StatelessWidget {
       ),
     };
 
+    final (
+      String rotuloOrigem,
+      IconData iconeOrigem,
+      TomBadgeStatus tomOrigem,
+    ) = switch (resultado.origem) {
+      OrigemAnalise.localOffline => (
+        TextosAntigolpe.origemLocalOffline,
+        Icons.wifi_off_rounded,
+        TomBadgeStatus.neutro,
+      ),
+      OrigemAnalise.servidorIa when ehServidorIa => (
+        TextosAntigolpe.origemServidorIa,
+        Icons.auto_awesome_rounded,
+        TomBadgeStatus.informativo,
+      ),
+      OrigemAnalise.servidorIa || OrigemAnalise.servidorRegras => (
+        TextosAntigolpe.origemServidorRegras,
+        Icons.shield_rounded,
+        TomBadgeStatus.neutro,
+      ),
+    };
+
     return Semantics(
       container: true,
       liveRegion: true,
+      label: '${resultado.titulo} ${resultado.explicacao}',
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(MemoraEspacamento.lg),
@@ -372,13 +415,9 @@ class _CartaoResultado extends StatelessWidget {
                 ),
                 BadgeDeStatus(
                   key: TelaAnaliseGolpe.chaveBadgeOrigem,
-                  rotulo: ehOffline
-                      ? TextosAntigolpe.origemLocalOffline
-                      : TextosAntigolpe.origemServidorIa,
-                  icone: ehOffline
-                      ? Icons.wifi_off_rounded
-                      : Icons.auto_awesome_rounded,
-                  tom: ehOffline ? TomBadgeStatus.neutro : TomBadgeStatus.informativo,
+                  rotulo: rotuloOrigem,
+                  icone: iconeOrigem,
+                  tom: tomOrigem,
                 ),
               ],
             ),
@@ -403,7 +442,12 @@ class _CartaoResultado extends StatelessWidget {
                   color: cores.superficieSutil,
                   borderRadius: BorderRadius.circular(MemoraRaio.padrao),
                   border: Border.all(
-                    color: cores.bordaSutil,
+                    color: cores.ehAltoContraste
+                        ? cores.borda
+                        : cores.bordaSutil,
+                    width: cores.ehAltoContraste
+                        ? MemoraDimensoes.bordaEnfase
+                        : MemoraDimensoes.espessuraBordaSutil,
                   ),
                 ),
                 child: Row(

@@ -62,4 +62,32 @@ class LimitadorAnaliseGolpeTest {
         // Após 24h desde t0, volta a liberar.
         assertThat(limitador.avaliarERegistrar(pessoa, t0.plusSeconds(86401)).permitido()).isTrue();
     }
+
+    @Test
+    @DisplayName("arredonda Retry-After para cima em segundos e expurga contas inativas após 24h sem vazar memória")
+    void arredondaRetryAfterParaCimaEExpurgaContasInativas() {
+        Instant t0 = Instant.parse("2026-11-21T10:00:00Z");
+        LimitadorAnaliseGolpe limitador =
+                new LimitadorAnaliseGolpe(Clock.fixed(t0, ZoneOffset.UTC), 1, 5);
+
+        UUID contaEfemera1 = UUID.randomUUID();
+        UUID contaEfemera2 = UUID.randomUUID();
+        UUID contaAtiva = UUID.randomUUID();
+
+        assertThat(limitador.avaliarERegistrar(contaEfemera1, t0).permitido()).isTrue();
+        assertThat(limitador.avaliarERegistrar(contaEfemera2, t0.plusMillis(100)).permitido())
+                .isTrue();
+        assertThat(limitador.contasRastreadas()).isEqualTo(2);
+
+        // Faltando 1500 ms (1,5 s) para completar 1h de contaEfemera1, deve arredondar para cima (2 s).
+        LimitadorAnaliseGolpe.Decisao bloqueioFracionado =
+                limitador.avaliarERegistrar(contaEfemera1, t0.plusSeconds(3598).plusMillis(500));
+        assertThat(bloqueioFracionado.permitido()).isFalse();
+        assertThat(bloqueioFracionado.tentarNovamenteEmSegundos()).isEqualTo(2L);
+
+        // Após > 24h, uma nova chamada de contaAtiva expurga as contas efêmeras expiradas do mapa.
+        Instant apos24h = t0.plusSeconds(86405);
+        assertThat(limitador.avaliarERegistrar(contaAtiva, apos24h).permitido()).isTrue();
+        assertThat(limitador.contasRastreadas()).isEqualTo(1);
+    }
 }

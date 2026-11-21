@@ -7,7 +7,8 @@ import '../../domain/servicos/analisador_local_de_golpes.dart';
 ///
 /// Usa a classificação determinística de [AnalisadorLocalDeGolpes] para
 /// produzir respostas realistas tanto no modo simulado online
-/// ([OrigemAnalise.servidorIa]) quanto no modo offline ([OrigemAnalise.localOffline]).
+/// ([OrigemAnalise.servidorRegras]) quanto no modo offline
+/// ([OrigemAnalise.localOffline]).
 class RepositorioAnaliseGolpeSimulado implements RepositorioAnaliseGolpe {
   /// Atraso opcional para exercitar estados de carregamento em testes.
   final Duration atraso;
@@ -37,12 +38,12 @@ class RepositorioAnaliseGolpeSimulado implements RepositorioAnaliseGolpe {
 
     return AnaliseGolpe(
       risco: base.risco,
-      origem: OrigemAnalise.servidorIa,
+      origem: OrigemAnalise.servidorRegras,
       titulo: base.titulo,
       explicacao: base.explicacao,
       orientacoes: base.orientacoes,
       sinaisDetectados: base.sinaisDetectados,
-      analisadoPorIa: true,
+      analisadoPorIa: false,
     );
   }
 }

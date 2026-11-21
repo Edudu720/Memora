@@ -25,6 +25,8 @@ public class SanitizadorRespostaAntigolpe {
     private static final Pattern PICTOGRAMA =
             Pattern.compile("[\\p{IsExtended_Pictographic}\\uFE0E\\uFE0F\\u200D]");
     private static final Pattern LINK_MARKDOWN = Pattern.compile("\\[([^\\]]+)\\]\\([^)]+\\)");
+    private static final Pattern URL_BRUTA =
+            Pattern.compile("(?i)\\b(?:https?://|www\\.)\\S+");
     private static final Pattern FIM_DE_FRASE = Pattern.compile("(\\.\\.\\.|[.!?…]+)(?=\\s|$)");
     private static final List<String> ABREVIACOES = List.of("Sr", "Sra", "Dr", "Dra", "nº");
 
@@ -52,10 +54,10 @@ public class SanitizadorRespostaAntigolpe {
                             "(?<![\\p{L}])tranquil[oa]s?(?![\\p{L}])",
                             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE),
                     Pattern.compile(
-                            "(?<![\\p{L}])chamad[oa]s?(?![\\p{L}])",
+                            "(?<![\\p{L}])ser\\s+chamad[oa]s?(?![\\p{L}])",
                             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE),
                     Pattern.compile(
-                            "(?<![\\p{L}])(?:phishing|malware|ransomware|punycode|hom[óo]grafo|jailbreak|otp)(?![\\p{L}])",
+                            "(?<![\\p{L}])(?:phishing|malware|ransomware|punycode|hom[óo]grafo|jailbreak|otp|urls?|tokens?)(?![\\p{L}])",
                             Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE),
                     Pattern.compile(
                             "(?:[ée]\\s+dif[íi]cil\\s+para\\s+(?:voc[êe]|a\\s+senhora|o\\s+senhor)|n[ãa]o\\s+se\\s+preocupe\\s+se\\s+n[ãa]o\\s+entender|at[ée]\\s+voc[êe]\\s+consegue)",
@@ -74,61 +76,74 @@ public class SanitizadorRespostaAntigolpe {
         NivelRiscoGolpe riscoPre = baseDeterministica.risco();
         NivelRiscoGolpe riscoIa = respostaProvedor.risco();
         NivelRiscoGolpe riscoFinal = NivelRiscoGolpe.max(riscoPre, riscoIa);
-        boolean analisadoPorIa = respostaProvedor.analisadoPorIa();
 
         ResultadoAnaliseGolpe padraoFinal =
                 AnalisadorDeterministicoDeGolpes.resultadoPara(
                         riscoFinal, baseDeterministica.sinaisDetectados());
 
         boolean iaRebaixouRisco = riscoIa.ordinal() < riscoPre.ordinal();
+        boolean descartarTextoIa = iaRebaixouRisco || preCheck.tentativaDeInjecao();
 
-        String titulo;
-        String explicacao;
-        if (iaRebaixouRisco) {
-            titulo = padraoFinal.titulo();
-            explicacao = padraoFinal.explicacao();
-        } else {
-            titulo =
-                    sanitizarBlocoCurto(
-                            respostaProvedor.titulo(), padraoFinal.titulo(), 120);
-            explicacao =
-                    sanitizarBlocoCurto(
-                            respostaProvedor.explicacao(), padraoFinal.explicacao(), 260);
+        if (descartarTextoIa) {
+            List<String> sinaisDeterministicos =
+                    mesclarSinais(baseDeterministica.sinaisDetectados(), List.of());
+            return new ResultadoAnaliseGolpe(
+                    riscoFinal,
+                    padraoFinal.titulo(),
+                    padraoFinal.explicacao(),
+                    padraoFinal.orientacoes(),
+                    sinaisDeterministicos,
+                    false);
         }
 
+        String tituloSanitizado = tentarSanitizarBlocoCurto(respostaProvedor.titulo(), 120);
+        String explicacaoSanitizada =
+                tentarSanitizarBlocoCurto(respostaProvedor.explicacao(), 260);
+        List<String> orientacoesSanitizadas =
+                tentarSanitizarLista(respostaProvedor.orientacoes());
+
+        boolean tudoCaiuNoPadrao =
+                tituloSanitizado == null
+                        && explicacaoSanitizada == null
+                        && orientacoesSanitizadas == null;
+
+        String titulo = tituloSanitizado != null ? tituloSanitizado : padraoFinal.titulo();
+        String explicacao =
+                explicacaoSanitizada != null ? explicacaoSanitizada : padraoFinal.explicacao();
         List<String> orientacoes =
-                iaRebaixouRisco
-                        ? padraoFinal.orientacoes()
-                        : sanitizarLista(
-                                respostaProvedor.orientacoes(), padraoFinal.orientacoes());
+                orientacoesSanitizadas != null
+                        ? orientacoesSanitizadas
+                        : padraoFinal.orientacoes();
 
         List<String> sinais =
                 mesclarSinais(
                         baseDeterministica.sinaisDetectados(),
-                        iaRebaixouRisco ? List.of() : respostaProvedor.sinaisDetectados());
+                        tudoCaiuNoPadrao ? List.of() : respostaProvedor.sinaisDetectados());
+
+        boolean analisadoPorIa = respostaProvedor.analisadoPorIa() && !tudoCaiuNoPadrao;
 
         return new ResultadoAnaliseGolpe(
                 riscoFinal, titulo, explicacao, orientacoes, sinais, analisadoPorIa);
     }
 
-    private static String sanitizarBlocoCurto(String texto, String fallback, int tamanhoMaximo) {
+    private static String tentarSanitizarBlocoCurto(String texto, int tamanhoMaximo) {
         String limpo = limparTextoBruto(texto);
         if (limpo.isEmpty() || contemTermoProibido(limpo)) {
-            return fallback;
+            return null;
         }
         String limitadoFrases = limitarDuasFrases(limpo);
         if (limitadoFrases.isEmpty() || contemTermoProibido(limitadoFrases)) {
-            return fallback;
+            return null;
         }
         if (limitadoFrases.length() > tamanhoMaximo) {
-            return fallback;
+            return null;
         }
         return limitadoFrases;
     }
 
-    private static List<String> sanitizarLista(List<String> itens, List<String> fallback) {
+    private static List<String> tentarSanitizarLista(List<String> itens) {
         if (itens == null || itens.isEmpty()) {
-            return fallback;
+            return null;
         }
         List<String> limpos = new ArrayList<>();
         Set<String> vistos = new LinkedHashSet<>();
@@ -142,7 +157,7 @@ public class SanitizadorRespostaAntigolpe {
                 limpos.add(limpo);
             }
         }
-        return limpos.isEmpty() ? fallback : List.copyOf(limpos);
+        return limpos.isEmpty() ? null : List.copyOf(limpos);
     }
 
     private static List<String> mesclarSinais(
@@ -174,8 +189,9 @@ public class SanitizadorRespostaAntigolpe {
         if (texto == null) {
             return "";
         }
-        String semLinks = LINK_MARKDOWN.matcher(texto).replaceAll("$1");
-        String semEmoji = PICTOGRAMA.matcher(semLinks).replaceAll("");
+        String semLinksMarkdown = LINK_MARKDOWN.matcher(texto).replaceAll("$1");
+        String semUrlsBrutas = URL_BRUTA.matcher(semLinksMarkdown).replaceAll("");
+        String semEmoji = PICTOGRAMA.matcher(semUrlsBrutas).replaceAll("");
         return semEmoji.replaceAll("\\s+", " ").trim();
     }
 
