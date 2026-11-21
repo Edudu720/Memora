@@ -1297,7 +1297,7 @@ def main() -> None:
     )
     mb = total_bytes / (1024 * 1024)
     print(f"Tamanho total de {ASSETS_GUIAS}: {mb:.2f} MB ({total_bytes} bytes)")
-    assert total_bytes <= 8 * 1024 * 1024, f"Excedeu limite de 8 MB: {mb:.2f} MB"
+    assert total_bytes <= 12 * 1024 * 1024, f"Excedeu limite de 12 MB: {mb:.2f} MB"
 
 
 if __name__ == "__main__":

@@ -45,21 +45,35 @@ public class ConfiguracaoDoProvedorDeIa {
     @Conditional(ProvedorEscolhido.EhGemini.class)
     ClienteDaAssistenteGemini clienteDaAssistenteGemini(
             @Value("${memora.assistente.gemini.chave:}") String chave,
-            @Value("${memora.assistente.gemini.modelo:gemini-3.8-flash}") String modelo,
+            @Value("${memora.assistente.gemini.modelo:gemini-3.6-flash}") String modelo,
+            @Value("${memora.assistente.gemini.modelo-reserva:gemini-3.5-flash-lite}")
+                    String modeloReserva,
             @Value("${memora.assistente.gemini.url-base:" + ClienteDaAssistenteGemini.URL_BASE_PADRAO + "}")
                     String urlBase,
             @Value("${memora.assistente.gemini.timeout-conexao-segundos:10}") long conexao,
-            @Value("${memora.assistente.gemini.timeout-leitura-segundos:60}") long leitura) {
+            @Value("${memora.assistente.gemini.timeout-leitura-segundos:60}") long leitura,
+            @Value("${memora.assistente.gemini.tentativas-primario:2}") int tentativasPrimario,
+            @Value("${memora.assistente.gemini.espera-retentativa-ms:500}")
+                    long esperaRetentativaMs) {
 
         ClienteDaAssistenteGemini cliente =
                 new ClienteDaAssistenteGemini(
                         chave,
                         modelo,
+                        modeloReserva,
                         urlBase,
                         Duration.ofSeconds(conexao),
-                        Duration.ofSeconds(leitura));
+                        Duration.ofSeconds(leitura),
+                        tentativasPrimario,
+                        Duration.ofMillis(esperaRetentativaMs));
 
-        LOG.info("Provedor de IA: gemini, modelo {}.", modelo);
+        String modeloLimpo = modelo == null ? "" : modelo.strip();
+        String reservaLimpa = modeloReserva == null ? "" : modeloReserva.strip();
+        String reservaLog =
+                reservaLimpa.isEmpty() || reservaLimpa.equals(modeloLimpo)
+                        ? "nenhum"
+                        : reservaLimpa;
+        LOG.info("Provedor de IA: gemini, modelo {} (reserva: {}).", modeloLimpo, reservaLog);
         // O nivel gratuito do Gemini deixa o Google usar o conteudo para melhorar
         // os produtos dele e revisores humanos podem le-lo. Desde 2026-10-03 isso
         // e RISCO ACEITO, nao violacao: a FR-051 foi reescrita e a Emenda 1 ao

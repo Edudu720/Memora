@@ -175,10 +175,10 @@ class RetratoDoPerfil extends StatelessWidget {
 
 /// Desenho vetorial (013) para cada opção de [AvatarIlustrado].
 ///
-/// Usa a `MemoraAnimada` nas poses da Memora e ícones arredondados do Material
-/// sobre `cores.medalhao` para as opções de pessoas, substituindo os PNGs e SVGs
-/// legados (T081). Em miniaturas da folha de escolha (`animado: false`), mantém
-/// a pose parada para evitar múltiplos tickers na tela (`FR-006`).
+/// Usa a `MemoraAnimada` nas quatro poses oficiais da Memora, substituindo os
+/// PNGs e SVGs legados (T081, feature 016). Em miniaturas da folha de escolha
+/// (`animado: false`), mantém a pose parada para evitar múltiplos tickers na
+/// tela (`FR-006`).
 class DesenhoAvatarIlustrado extends StatelessWidget {
   /// Avatar a desenhar.
   final AvatarIlustrado avatar;
@@ -199,37 +199,22 @@ class DesenhoAvatarIlustrado extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraTheme tema = context.memora;
-    final MemoraCores cores = tema.cores;
-    final Color corIcone =
-        tema.id == MemoraTemaId.claro ? cores.primaria : cores.sobrePrimaria;
-
-    final PoseDaMemora? pose = switch (avatar) {
+    final PoseDaMemora pose = switch (avatar) {
       AvatarIlustrado.memoraAcenando => PoseDaMemora.acenando,
       AvatarIlustrado.memoraPensando => PoseDaMemora.pensando,
       AvatarIlustrado.memoraComemorando => PoseDaMemora.comemorando,
       AvatarIlustrado.memoraProtegendo => PoseDaMemora.preocupada,
-      AvatarIlustrado.casalIdoso || AvatarIlustrado.pessoaComCelular => null,
     };
 
-    if (pose != null) {
-      final Widget desenho = MemoraAnimada(
-        expressao: pose,
-        tamanho: tamanho,
-        reageAoToque: false,
-      );
-      if (animado) return desenho;
-      return MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: true),
-        child: desenho,
-      );
-    }
-
-    final IconData icone = switch (avatar) {
-      AvatarIlustrado.casalIdoso => Icons.people_rounded,
-      AvatarIlustrado.pessoaComCelular => Icons.smartphone_rounded,
-      _ => Icons.person_rounded,
-    };
-    return Icon(icone, size: tamanho * 0.64, color: corIcone);
+    final Widget desenho = MemoraAnimada(
+      expressao: pose,
+      tamanho: tamanho,
+      reageAoToque: false,
+    );
+    if (animado) return desenho;
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(disableAnimations: true),
+      child: desenho,
+    );
   }
 }

@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_perfil.dart';
 import '../../aprendizado/data/guias/guias.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
-import '../../aprendizado/domain/guia.dart';
+import '../../aprendizado/domain/estado_do_modulo.dart';
 import '../../assistente/data/repositorio_assistente_simulado.dart';
 import '../../assistente/domain/assistente.dart';
 import '../data/data_de_nascimento_local.dart';
@@ -41,6 +43,12 @@ class TelaPerfil extends StatefulWidget {
 
   /// Chave do campo com o aplicativo mais aprendido.
   static const Key chaveMaisAprendido = Key('perfil.mais_aprendido');
+
+  /// Chave da seção de aprendizado local (Feature 016).
+  static const Key chaveSecaoAprendizado = Key('perfil.secao_aprendizado');
+
+  /// Chave do campo com o último módulo concluído (`020`).
+  static const Key chaveUltimoAprendido = Key('perfil.ultimo_aprendido');
 
   /// Chave do desenho da Memora.
   static const Key chaveDesenho = Key('perfil.desenho');
@@ -87,15 +95,25 @@ class TelaPerfil extends StatefulWidget {
 }
 
 class _TelaPerfilState extends State<TelaPerfil> {
+  static final Map<String, String> _nomesDoCatalogo = <String, String>{
+    for (final ServicoDoCatalogo servico
+        in RepositorioAssistenteSimulado.catalogoDaDemonstracao)
+      servico.chave: servico.nomeExibido,
+  };
+
   String? _maisAprendidoNome;
-  bool _carregouMaisAprendido = false;
+  String? _ultimoAprendidoNome;
+  bool _carregouProgresso = false;
+  int _versaoCarga = 0;
+  StreamSubscription<void>? _assinaturaProgresso;
   late ArmazenamentoDeFotoDePerfil _fotosEfetivo =
       widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
 
   @override
   void initState() {
     super.initState();
-    _carregarMaisAprendido();
+    _inscreverProgresso();
+    _carregarProgresso();
   }
 
   @override
@@ -104,47 +122,80 @@ class _TelaPerfilState extends State<TelaPerfil> {
     if (antiga.fotoDePerfil != widget.fotoDePerfil) {
       _fotosEfetivo = widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
     }
-    if (antiga.idDaConta != widget.idDaConta || antiga.progresso != widget.progresso) {
-      _carregarMaisAprendido();
+    if (antiga.progresso != widget.progresso) {
+      _inscreverProgresso();
+    }
+    if (antiga.idDaConta != widget.idDaConta ||
+        antiga.progresso != widget.progresso) {
+      _maisAprendidoNome = null;
+      _ultimoAprendidoNome = null;
+      _carregouProgresso = false;
+      _carregarProgresso();
     }
   }
 
-  Future<void> _carregarMaisAprendido() async {
+  @override
+  void dispose() {
+    _assinaturaProgresso?.cancel();
+    super.dispose();
+  }
+
+  void _inscreverProgresso() {
+    _assinaturaProgresso?.cancel();
+    _assinaturaProgresso = widget.progresso?.alteracoes.listen((_) {
+      _carregarProgresso();
+    });
+  }
+
+  static String? _resolverNomeExibido(String? chave) {
+    if (chave == null || chave.isEmpty) return null;
+    return _nomesDoCatalogo[chave] ?? guiaDe(chave)?.titulo ?? chave;
+  }
+
+  Future<void> _carregarProgresso() async {
+    final int versao = ++_versaoCarga;
     final ProgressoDeAprendizado? prog = widget.progresso;
     final String? id = widget.idDaConta;
     if (prog == null || id == null || id.trim().isEmpty) {
-      if (mounted) setState(() => _carregouMaisAprendido = true);
+      _maisAprendidoNome = null;
+      _ultimoAprendidoNome = null;
+      _carregouProgresso = true;
       return;
     }
 
-    final String? bruta = await prog.aplicativoMaisAprendido(id);
-    // O progresso de um guia em seções é por `<guia>:<seção>` (FR-028d): o
-    // nome que se mostra é o do guia.
-    final String? chave = bruta?.split(':').first;
-    if (!mounted) return;
-
-    String? nomeExibido;
-    if (chave != null) {
-      for (final ServicoDoCatalogo s
-          in RepositorioAssistenteSimulado.catalogoDaDemonstracao) {
-        if (s.chave == chave) {
-          nomeExibido = s.nomeExibido;
-          break;
-        }
-      }
-      if (nomeExibido == null) {
-        final Guia? guia = guiaDe(chave);
-        if (guia != null) {
-          nomeExibido = guia.titulo;
-        } else {
-          nomeExibido = chave;
-        }
-      }
+    final String contaAlvo = id;
+    String? brutaMais;
+    Map<String, int> ordens = const <String, int>{};
+    try {
+      brutaMais = await prog.aplicativoMaisAprendido(contaAlvo);
+    } catch (_) {
+      brutaMais = null;
+    }
+    if (!mounted || versao != _versaoCarga || widget.idDaConta != contaAlvo) {
+      return;
     }
 
+    try {
+      ordens = await prog.ordensDeConclusao(contaAlvo);
+    } catch (_) {
+      ordens = const <String, int>{};
+    }
+    if (!mounted || versao != _versaoCarga || widget.idDaConta != contaAlvo) {
+      return;
+    }
+
+    // O progresso de um guia em seções é por `<guia>:<seção>` (FR-028d): o
+    // nome que se mostra no mais aprendido é o do guia.
+    final String? chaveMais = brutaMais?.split(':').first;
+    final String? chaveUltimo = chaveDoUltimoModuloConcluido(
+      ordens,
+      todosOsGuias,
+    );
+
     setState(() {
-      _maisAprendidoNome = nomeExibido;
-      _carregouMaisAprendido = true;
+      _maisAprendidoNome = _resolverNomeExibido(chaveMais);
+      _ultimoAprendidoNome = _resolverNomeExibido(chaveUltimo);
+      _carregouProgresso = true;
     });
   }
 
@@ -152,9 +203,12 @@ class _TelaPerfilState extends State<TelaPerfil> {
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
 
-    final String textoMaisAprendido = _maisAprendidoNome != null
-        ? _maisAprendidoNome!
-        : TextosPerfil.maisAprendidoVazio;
+    final String textoMaisAprendido = _carregouProgresso
+        ? (_maisAprendidoNome ?? TextosPerfil.maisAprendidoVazio)
+        : TextosPerfil.carregandoAprendizado;
+    final String textoUltimoAprendido = _carregouProgresso
+        ? (_ultimoAprendidoNome ?? TextosPerfil.ultimoAprendidoVazio)
+        : TextosPerfil.carregandoAprendizado;
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -165,30 +219,44 @@ class _TelaPerfilState extends State<TelaPerfil> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              // Título e retrato pessoal dedicado da pessoa usuária (FR-001, 011)
-              // A bolinha do SOS fica à direita do título (feature 014).
+              // Título da tela com o botão SOS à direita (feature 014).
               const TituloComSos(titulo: TextosPerfil.tituloPerfil),
               const SizedBox(height: MemoraEspacamento.lg),
-              if (widget.idDaConta != null && widget.idDaConta!.trim().isNotEmpty)
-                SecaoFotoPerfil(
-                  chaveDoRetrato: TelaPerfil.chaveDesenho,
-                  nome: widget.nome,
-                  armazenamento: _fotosEfetivo,
-                  idDaConta: widget.idDaConta!,
-                  seletor: widget.seletorDeFoto,
-                  processador: widget.processadorDeFoto ??
-                      const ProcessadorDeImagemDePerfil(),
-                )
-              else
-                Center(
-                  child: RetratoDoPerfil(
-                    chaveDoRetrato: TelaPerfil.chaveDesenho,
-                    nome: widget.nome,
-                  ),
-                ),
+
+              // Bloco 1: Seu retrato (FR-001, 011, Feature 016)
+              Semantics(
+                header: true,
+                child: const TextoMemora.tituloSecao(TextosPerfil.secaoRetrato),
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
+              Cartao(
+                padding: const EdgeInsets.all(MemoraEspacamento.md),
+                child: widget.idDaConta != null &&
+                        widget.idDaConta!.trim().isNotEmpty
+                    ? SecaoFotoPerfil(
+                        chaveDoRetrato: TelaPerfil.chaveDesenho,
+                        nome: widget.nome,
+                        armazenamento: _fotosEfetivo,
+                        idDaConta: widget.idDaConta!,
+                        seletor: widget.seletorDeFoto,
+                        processador: widget.processadorDeFoto ??
+                            const ProcessadorDeImagemDePerfil(),
+                      )
+                    : Center(
+                        child: RetratoDoPerfil(
+                          chaveDoRetrato: TelaPerfil.chaveDesenho,
+                          nome: widget.nome,
+                        ),
+                      ),
+              ),
               const SizedBox(height: MemoraEspacamento.xl),
 
-              // Informações da pessoa e da conta (sem parecer botão, FR-012 da 002)
+              // Bloco 2: Sua conta (informação, nunca botão — FR-012 da 002)
+              Semantics(
+                header: true,
+                child: const TextoMemora.tituloSecao(TextosPerfil.secaoConta),
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
               FutureBuilder<String?>(
                 future: widget.canal,
                 builder: (BuildContext _, AsyncSnapshot<String?> snapshotCanal) {
@@ -205,20 +273,43 @@ class _TelaPerfilState extends State<TelaPerfil> {
                           rotulo: TextosPerfil.rotuloCanal,
                           valor: snapshotCanal.data!,
                         ),
-                      CampoInformacao(
-                        key: TelaPerfil.chaveMaisAprendido,
-                        rotulo: TextosPerfil.rotuloMaisAprendido,
-                        valor: _carregouMaisAprendido
-                            ? textoMaisAprendido
-                            : '...',
-                      ),
                     ],
                   );
                 },
               ),
               const SizedBox(height: MemoraEspacamento.xl),
 
-              // Seção de Idade (opcional, só neste aparelho, FR-042c)
+              // Bloco 3: Seu aprendizado local (FR-042a, Feature 016 + 020)
+              Column(
+                key: TelaPerfil.chaveSecaoAprendizado,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Semantics(
+                    header: true,
+                    child: const TextoMemora.tituloSecao(
+                      TextosPerfil.secaoAprendizado,
+                    ),
+                  ),
+                  const SizedBox(height: MemoraEspacamento.sm),
+                  ListaInformacao(
+                    campos: <CampoInformacao>[
+                      CampoInformacao(
+                        key: TelaPerfil.chaveMaisAprendido,
+                        rotulo: TextosPerfil.rotuloMaisAprendido,
+                        valor: textoMaisAprendido,
+                      ),
+                      CampoInformacao(
+                        key: TelaPerfil.chaveUltimoAprendido,
+                        rotulo: TextosPerfil.rotuloUltimoAprendido,
+                        valor: textoUltimoAprendido,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: MemoraEspacamento.xl),
+
+              // Bloco 4: Seção de Idade (opcional, só neste aparelho, FR-042c)
               if (widget.dataDeNascimento != null &&
                   widget.idDaConta != null &&
                   widget.idDaConta!.trim().isNotEmpty)

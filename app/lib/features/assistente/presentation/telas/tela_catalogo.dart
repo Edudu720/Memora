@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_assistente.dart';
 import '../../../../l10n/textos_atalhos_aplicativos.dart';
+import '../../../../l10n/textos_guias.dart';
 import '../../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../aprendizado/data/guias/guias.dart';
+import '../../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../../aprendizado/domain/busca.dart';
+import '../../../aprendizado/domain/estado_do_modulo.dart';
 import '../../../aprendizado/domain/guia.dart';
 import '../../domain/assistente.dart';
 
@@ -24,6 +29,10 @@ class TelaCatalogo extends StatefulWidget {
 
   /// Chave de um item, pelo nome do serviço.
   static Key chaveDoItem(String nome) => Key('catalogo.item.$nome');
+
+  /// Chave do selo de módulo concluído, pela `chave` do serviço (`020`).
+  static Key chaveConcluidoDoItem(String chave) =>
+      Key('catalogo.concluido.$chave');
 
   /// Chave do botão para entrar na lista de abertura direta (`015`).
   static const Key chaveAtalhosDiretos = Key('catalogo.atalhos_diretos');
@@ -53,6 +62,12 @@ class TelaCatalogo extends StatefulWidget {
   /// Abre a tela dedicada para abrir um aplicativo direto (`015`).
   final VoidCallback? aoAbrirAtalhosDiretos;
 
+  /// Progresso local para marcar módulos totalmente concluídos (`020`).
+  final ProgressoDeAprendizado? progresso;
+
+  /// Identificador da conta conectada para leitura do progresso local (`020`).
+  final String? idDaConta;
+
   /// Volta ao início.
   final VoidCallback? aoVoltar;
 
@@ -68,6 +83,8 @@ class TelaCatalogo extends StatefulWidget {
     this.aoAbrirGuia,
     this.consultaAplicativos,
     this.aoAbrirAtalhosDiretos,
+    this.progresso,
+    this.idDaConta,
     this.aoVoltar,
     this.estadoDeTeste,
     super.key,
@@ -80,6 +97,8 @@ class TelaCatalogo extends StatefulWidget {
 class _TelaCatalogoState extends State<TelaCatalogo> {
   List<ServicoDoCatalogo>? _todosServicos;
   Map<String, bool> _instalacaoPorChave = const <String, bool>{};
+  Map<String, int> _concluidos = const <String, int>{};
+  StreamSubscription<void>? _assinaturaProgresso;
   late CategoriaDoServico _categoriaAtiva;
   bool _falhou = false;
   String _busca = '';
@@ -88,6 +107,8 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
   void initState() {
     super.initState();
     _categoriaAtiva = widget.categoria;
+    _inscreverProgresso();
+    _carregarProgresso();
     _carregar();
   }
 
@@ -97,9 +118,48 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
     if (antigo.categoria != widget.categoria) {
       _categoriaAtiva = widget.categoria;
     }
+    if (antigo.progresso != widget.progresso) {
+      _inscreverProgresso();
+    }
+    if (antigo.progresso != widget.progresso ||
+        antigo.idDaConta != widget.idDaConta) {
+      _carregarProgresso();
+    }
     if (antigo.repositorio != widget.repositorio ||
         antigo.consultaAplicativos != widget.consultaAplicativos) {
       _carregar();
+    }
+  }
+
+  @override
+  void dispose() {
+    _assinaturaProgresso?.cancel();
+    super.dispose();
+  }
+
+  void _inscreverProgresso() {
+    _assinaturaProgresso?.cancel();
+    _assinaturaProgresso = widget.progresso?.alteracoes.listen((_) {
+      _carregarProgresso();
+    });
+  }
+
+  Future<void> _carregarProgresso() async {
+    final ProgressoDeAprendizado? prog = widget.progresso;
+    final String? id = widget.idDaConta;
+    if (prog == null || id == null || id.trim().isEmpty) {
+      if (mounted && _concluidos.isNotEmpty) {
+        setState(() => _concluidos = const <String, int>{});
+      }
+      return;
+    }
+
+    try {
+      final Map<String, int> mapa = await prog.concluidos(id);
+      if (!mounted) return;
+      setState(() => _concluidos = mapa);
+    } catch (_) {
+      // Falha silenciosa: erro local não impede exibir o catálogo.
     }
   }
 
@@ -303,17 +363,7 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
                 )
               else
                 for (final ServicoDoCatalogo servico in exibidos) ...<Widget>[
-                  _ItemDoCatalogo(
-                    servico: servico,
-                    temGuia: guiaDe(servico.chave) != null,
-                    instalado: _instalacaoPorChave[servico.chave] ?? true,
-                    habilitado:
-                        widget.aoEscolher != null || widget.aoAbrirGuia != null,
-                    aoAcionarPadrao: () => _acionarPadrao(servico),
-                    aoPedirAbrir: widget.aoPedirParaAbrir != null
-                        ? () => widget.aoPedirParaAbrir!(servico)
-                        : null,
-                  ),
+                  _construirItem(servico),
                   const SizedBox(height: MemoraEspacamento.md),
                 ],
             ],
@@ -322,12 +372,28 @@ class _TelaCatalogoState extends State<TelaCatalogo> {
       ),
     );
   }
+
+  Widget _construirItem(ServicoDoCatalogo servico) {
+    final Guia? guia = guiaDe(servico.chave);
+    return _ItemDoCatalogo(
+      servico: servico,
+      temGuia: guia != null,
+      concluido: guia != null && moduloConcluido(guia, _concluidos),
+      instalado: _instalacaoPorChave[servico.chave] ?? true,
+      habilitado: widget.aoEscolher != null || widget.aoAbrirGuia != null,
+      aoAcionarPadrao: () => _acionarPadrao(servico),
+      aoPedirAbrir: widget.aoPedirParaAbrir != null
+          ? () => widget.aoPedirParaAbrir!(servico)
+          : null,
+    );
+  }
 }
 
 /// Cartão horizontal informativo com ações explícitas de ensinar ou abrir.
 class _ItemDoCatalogo extends StatelessWidget {
   final ServicoDoCatalogo servico;
   final bool temGuia;
+  final bool concluido;
   final bool instalado;
   final bool habilitado;
   final VoidCallback aoAcionarPadrao;
@@ -336,6 +402,7 @@ class _ItemDoCatalogo extends StatelessWidget {
   const _ItemDoCatalogo({
     required this.servico,
     required this.temGuia,
+    required this.concluido,
     required this.instalado,
     required this.habilitado,
     required this.aoAcionarPadrao,
@@ -391,16 +458,34 @@ class _ItemDoCatalogo extends StatelessWidget {
                     const SizedBox(height: MemoraEspacamento.xs),
                     TextoMemora.apoio(servico.descricaoCurta),
                     const SizedBox(height: MemoraEspacamento.sm),
-                    BadgeDeStatus(
-                      rotulo: marcadoComoNaoInstalado
-                          ? TextosAssistente.soEnsinaNaoInstalado
-                          : servico.categoria.oQueAMemoraFaz,
-                      icone: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
-                          ? Icons.check_circle_outline_rounded
-                          : Icons.school_rounded,
-                      tom: (servico.memoraPodeAbrir && !marcadoComoNaoInstalado)
-                          ? TomBadgeStatus.positivo
-                          : TomBadgeStatus.informativo,
+                    Wrap(
+                      spacing: MemoraEspacamento.xs,
+                      runSpacing: MemoraEspacamento.xs,
+                      children: <Widget>[
+                        BadgeDeStatus(
+                          rotulo: marcadoComoNaoInstalado
+                              ? TextosAssistente.soEnsinaNaoInstalado
+                              : servico.categoria.oQueAMemoraFaz,
+                          icone:
+                              (servico.memoraPodeAbrir &&
+                                  !marcadoComoNaoInstalado)
+                              ? Icons.check_circle_outline_rounded
+                              : Icons.school_rounded,
+                          tom:
+                              (servico.memoraPodeAbrir &&
+                                  !marcadoComoNaoInstalado)
+                              ? TomBadgeStatus.positivo
+                              : TomBadgeStatus.informativo,
+                        ),
+                        if (concluido)
+                          BadgeDeStatus(
+                            key: TelaCatalogo.chaveConcluidoDoItem(
+                              servico.chave,
+                            ),
+                            rotulo: TextosGuias.moduloConcluido,
+                            icone: Icons.check_circle_rounded,
+                          ),
+                      ],
                     ),
                   ],
                 ),

@@ -325,7 +325,7 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
     );
 
     test(
-      'o tamanho total de assets/guias/ não passa de 8 MB (T084, contracts/guias.md)',
+      'o tamanho total de assets/guias/ não passa de 12 MB (contracts/guias.md, spec 016)',
       () {
         final Directory pastaGuias = Directory('assets/guias');
         expect(
@@ -343,12 +343,12 @@ VALUES (gen_random_uuid(), lower('Tiktok'));
           }
         }
 
-        const int limite8MB = 8 * 1024 * 1024;
+        const int limite12MB = 12 * 1024 * 1024;
         expect(
           tamanhoTotalEmBytes,
-          lessThanOrEqualTo(limite8MB),
+          lessThanOrEqualTo(limite12MB),
           reason:
-              'A pasta assets/guias/ ultrapassou o limite de 8 MB: '
+              'A pasta assets/guias/ ultrapassou o limite de 12 MB: '
               '${(tamanhoTotalEmBytes / (1024 * 1024)).toStringAsFixed(2)} MB.',
         );
       },

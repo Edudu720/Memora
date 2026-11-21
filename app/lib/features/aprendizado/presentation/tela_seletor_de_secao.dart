@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
@@ -25,6 +27,9 @@ class TelaSeletorDeSecao extends StatefulWidget {
 
   /// Chave de uma seção, pela sua `chave`.
   static Key chaveDaSecao(String chave) => Key('seletor_secao.item.$chave');
+
+  /// Chave do checkbox verde arredondado de seção concluída (`020`).
+  static Key chaveCheckDaSecao(String chave) => Key('seletor_secao.check.$chave');
 
   /// Guia seccionado a ser exibido.
   final Guia guia;
@@ -65,17 +70,50 @@ class TelaSeletorDeSecao extends StatefulWidget {
 
 class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
   final Set<String> _concluidas = <String>{};
+  StreamSubscription<void>? _assinaturaProgresso;
 
   @override
   void initState() {
     super.initState();
+    _inscreverProgresso();
     _carregarProgresso();
+  }
+
+  @override
+  void didUpdateWidget(covariant TelaSeletorDeSecao antigo) {
+    super.didUpdateWidget(antigo);
+    if (antigo.progresso != widget.progresso) {
+      _inscreverProgresso();
+    }
+    if (antigo.progresso != widget.progresso ||
+        antigo.idDaConta != widget.idDaConta ||
+        antigo.guia.chave != widget.guia.chave) {
+      _carregarProgresso();
+    }
+  }
+
+  @override
+  void dispose() {
+    _assinaturaProgresso?.cancel();
+    super.dispose();
+  }
+
+  void _inscreverProgresso() {
+    _assinaturaProgresso?.cancel();
+    _assinaturaProgresso = widget.progresso?.alteracoes.listen((_) {
+      _carregarProgresso();
+    });
   }
 
   Future<void> _carregarProgresso() async {
     final ProgressoDeAprendizado? prog = widget.progresso;
     final String? id = widget.idDaConta;
-    if (prog == null || id == null || id.trim().isEmpty) return;
+    if (prog == null || id == null || id.trim().isEmpty) {
+      if (mounted && _concluidas.isNotEmpty) {
+        setState(_concluidas.clear);
+      }
+      return;
+    }
 
     try {
       final Map<String, int> concluidos = await prog.concluidos(id);
@@ -85,8 +123,13 @@ class _TelaSeletorDeSecaoState extends State<TelaSeletorDeSecao> {
           if ((concluidos['${widget.guia.chave}:${secao.chave}'] ?? 0) > 0)
             secao.chave,
       };
-      if (feitos.isNotEmpty) {
-        setState(() => _concluidas.addAll(feitos));
+      if (feitos.length != _concluidas.length ||
+          !_concluidas.containsAll(feitos)) {
+        setState(() {
+          _concluidas
+            ..clear()
+            ..addAll(feitos);
+        });
       }
     } catch (_) {
       // Falha silenciosa: erro local não impede escolher a seção.
@@ -228,11 +271,17 @@ class _CartaoSecao extends StatelessWidget {
     // duplo toque não faz nada), foco e pressão visíveis por mais de um sinal.
     return LinhaDeLista(
       key: TelaSeletorDeSecao.chaveDaSecao(secao.chave),
-      rotuloDoLeitor: TextosGuias.secaoDescrita(
-        secao.titulo,
-        secao.subtitulo,
-        textoMeta,
-      ),
+      rotuloDoLeitor: concluida
+          ? TextosGuias.secaoConcluidaDescrita(
+              secao.titulo,
+              secao.subtitulo,
+              textoMeta,
+            )
+          : TextosGuias.secaoDescrita(
+              secao.titulo,
+              secao.subtitulo,
+              textoMeta,
+            ),
       esquerda: Container(
         padding: const EdgeInsets.all(MemoraEspacamento.sm),
         decoration: BoxDecoration(
@@ -253,6 +302,11 @@ class _CartaoSecao extends StatelessWidget {
       ),
       titulo: secao.titulo,
       subtitulo: secao.subtitulo,
+      direita: concluida
+          ? _CheckboxVerdeConcluido(
+              key: TelaSeletorDeSecao.chaveCheckDaSecao(secao.chave),
+            )
+          : null,
       rodape: Row(
         children: <Widget>[
           if (concluida) ...<Widget>[
@@ -273,6 +327,41 @@ class _CartaoSecao extends StatelessWidget {
         ],
       ),
       aoTocar: aoTocar,
+    );
+  }
+}
+
+class _CheckboxVerdeConcluido extends StatelessWidget {
+  const _CheckboxVerdeConcluido({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehClaro = tema.id == MemoraTemaId.claro;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+
+    return ExcludeSemantics(
+      child: Container(
+        width: MemoraDimensoes.iconeDestaque,
+        height: MemoraDimensoes.iconeDestaque,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: cores.sucesso,
+          borderRadius: BorderRadius.circular(MemoraRaio.balaoPonta),
+          border: ehAltoContraste
+              ? Border.all(
+                  color: cores.borda,
+                  width: MemoraDimensoes.bordaEnfase,
+                )
+              : null,
+        ),
+        child: Icon(
+          Icons.check_rounded,
+          size: MemoraDimensoes.iconePequeno,
+          color: ehClaro ? cores.superficie : cores.fundo,
+        ),
+      ),
     );
   }
 }

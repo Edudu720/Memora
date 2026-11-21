@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -37,6 +38,10 @@ class ProgressoDeAprendizado implements DadoLocalDaPessoa {
   final Future<Directory> Function() _diretorio;
 
   Future<void> _fila = Future<void>.value();
+  final StreamController<void> _alteracoes = StreamController<void>.broadcast();
+
+  /// Notifica quando o progresso local muda (nova conclusão ou limpeza).
+  Stream<void> get alteracoes => _alteracoes.stream;
 
   /// Cria o armazenamento do progresso.
   ProgressoDeAprendizado({Future<Directory> Function()? diretorio})
@@ -92,6 +97,7 @@ class ProgressoDeAprendizado implements DadoLocalDaPessoa {
 
       await _gravar(tudo);
     });
+    _notificarAlteracao();
   }
 
   /// Quantas vezes [idDaConta] concluiu cada guia. Vazio quando nenhuma.
@@ -105,6 +111,35 @@ class ProgressoDeAprendizado implements DadoLocalDaPessoa {
           e.key: e.value.vezes,
       };
     });
+  }
+
+  /// Ordem monotônica da conclusão mais recente de cada chave para [idDaConta].
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async {
+    if (_semValor(idDaConta)) return const <String, int>{};
+    return _naFila(() async {
+      final Map<String, _Entrada>? daConta = (await _ler())[idDaConta];
+      if (daConta == null) return const <String, int>{};
+      return <String, int>{
+        for (final MapEntry<String, _Entrada> e in daConta.entries)
+          e.key: e.value.ordem,
+      };
+    });
+  }
+
+  /// Chave concluída por último por [idDaConta], ou `null` quando vazia.
+  Future<String?> ultimoConcluido(String idDaConta) async {
+    if (_semValor(idDaConta)) return null;
+    final Map<String, int> ordens = await ordensDeConclusao(idDaConta);
+    if (ordens.isEmpty) return null;
+    String? recente;
+    int maior = -1;
+    for (final MapEntry<String, int> e in ordens.entries) {
+      if (e.value > maior) {
+        maior = e.value;
+        recente = e.key;
+      }
+    }
+    return recente;
   }
 
   /// A `chave` do guia mais concluído por [idDaConta], ou `null` quando ela
@@ -138,20 +173,27 @@ class ProgressoDeAprendizado implements DadoLocalDaPessoa {
   /// segue para os outros itens, e silenciar daria à pessoa a falsa certeza de
   /// que o que ela aprendeu saiu do aparelho.
   @override
-  Future<void> apagar() => _naFila(() async {
-    final File arquivo = await _arquivo();
-    // O temporário também: se o processo morreu entre gravar e renomear, ele
-    // guarda o progresso de todas as contas e sobreviveria à saída.
-    for (final File f in <File>[arquivo, File('${arquivo.path}.tmp')]) {
-      try {
-        await f.delete();
-      } on PathNotFoundException {
-        // Já não existe: é o resultado que se queria.
+  Future<void> apagar() async {
+    await _naFila(() async {
+      final File arquivo = await _arquivo();
+      // O temporário também: se o processo morreu entre gravar e renomear, ele
+      // guarda o progresso de todas as contas e sobreviveria à saída.
+      for (final File f in <File>[arquivo, File('${arquivo.path}.tmp')]) {
+        try {
+          await f.delete();
+        } on PathNotFoundException {
+          // Já não existe: é o resultado que se queria.
+        }
       }
-    }
-  });
+    });
+    _notificarAlteracao();
+  }
 
   // ---------------------------------------------------------------------------
+
+  void _notificarAlteracao() {
+    if (!_alteracoes.isClosed) _alteracoes.add(null);
+  }
 
   static bool _semValor(String texto) => texto.trim().isEmpty;
 

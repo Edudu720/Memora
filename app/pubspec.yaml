@@ -71,7 +71,7 @@ dependencies:
   dio: ^5.7.0
 
   # Cliente MQTT para recepção de telemetria e alertas em tempo real do
-  # Dispositivo de Cuidado (ESP32 / Wokwi) (FR-013).
+  # Dispositivo de Cuidado (ESP32 físico) (FR-013).
   mqtt_client: ^10.3.3
 
   # Ditado de voz opcional na conversa, preenchendo somente o rascunho antes
@@ -125,6 +125,7 @@ flutter:
 
   assets:
     - assets/ilustracoes/
+    - assets/icones_apps/
     # A licença da fonte vai junto, e aparece em "Licenças" do aplicativo.
     - assets/fontes/atkinson_hyperlegible_next/OFL.txt
     # Guias de aplicativos cotidianos (T071, T072)

@@ -25,6 +25,7 @@ import '../../antigolpe/presentation/controladores/controlador_analise_golpe.dar
 import '../../antigolpe/presentation/telas/tela_analise_golpe.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
 import '../../apresentacao/presentation/fluxo_apresentacao.dart';
+import '../../ajuda/data/abridor_site_tutorial.dart';
 import '../../ajuda/data/compartilhar.dart';
 import '../../ajuda/domain/assunto_de_ajuda.dart';
 import '../../ajuda/presentation/ajuda_guiada_da_conversa.dart';
@@ -179,6 +180,11 @@ class FluxoAutenticacao extends StatefulWidget {
   /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
   final Compartilhador? compartilhador;
 
+  /// Abridor seguro `https://` do site oficial de tutoriais (Feature 016).
+  ///
+  /// Quando `null`, o botão do site oficial fica oculto na tela de Ajuda.
+  final AbridorDeSiteTutorial? abridorSiteTutorial;
+
   /// Onde o progresso nos guias de aprendizado e guardado (FR-042a).
   final ProgressoDeAprendizado? progresso;
 
@@ -224,6 +230,7 @@ class FluxoAutenticacao extends StatefulWidget {
     this.seletorDeFoto,
     this.apresentacaoVista,
     this.compartilhador,
+    this.abridorSiteTutorial,
     this.progresso,
   });
 
@@ -763,8 +770,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   void _abrirDispositivoCuidado() {
     _empilhar(
       _rota(
-        builder: (BuildContext contexto) => TelaDispositivoCuidado(
-          controlador: ControladorDispositivoCuidado(
+        builder: (BuildContext contexto) => _DonoDoDispositivoCuidado(
+          criar: () => ControladorDispositivoCuidado(
             repositorioContato: _contatoEmergencia,
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
@@ -824,6 +831,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
               ? null
               : () => _reverApresentacao(vistas),
           aoVerificarGolpe: _abrirAnaliseGolpe,
+          abridorSiteTutorial: widget.abridorSiteTutorial,
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
       ),
@@ -900,6 +908,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           repositorio: assistente,
           categoria: categoria,
           consultaAplicativos: widget.consultaAplicativos,
+          progresso: widget.progresso,
+          idDaConta: _pessoa?.id,
           aoAbrirAtalhosDiretos: () => _abrirAtalhosAplicativos(assistente),
           // Se o item tiver guia de passo a passo embarcado, abre o guia;
           // caso contrário, vai para a conversa já perguntando (T069, FR-027).
@@ -1369,6 +1379,43 @@ class _DonoDaAnaliseGolpeState extends State<_DonoDaAnaliseGolpe> {
     return TelaAnaliseGolpe(
       controlador: _controlador,
       aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorDispositivoCuidado] e o descarta quando a tela sai
+/// (inclusive por logout/expiração forçada de sessão e após a animação).
+class _DonoDoDispositivoCuidado extends StatefulWidget {
+  final ControladorDispositivoCuidado Function() criar;
+  final VoidCallback aoVoltar;
+  final String nomePessoaIdosa;
+
+  const _DonoDoDispositivoCuidado({
+    required this.criar,
+    required this.aoVoltar,
+    required this.nomePessoaIdosa,
+  });
+
+  @override
+  State<_DonoDoDispositivoCuidado> createState() =>
+      _DonoDoDispositivoCuidadoState();
+}
+
+class _DonoDoDispositivoCuidadoState extends State<_DonoDoDispositivoCuidado> {
+  late final ControladorDispositivoCuidado _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaDispositivoCuidado(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+      nomePessoaIdosa: widget.nomePessoaIdosa,
     );
   }
 }

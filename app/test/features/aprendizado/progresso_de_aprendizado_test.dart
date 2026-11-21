@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/features/aprendizado/data/guias/guias.dart';
 import 'package:memora/features/aprendizado/data/progresso_de_aprendizado.dart';
+import 'package:memora/features/aprendizado/domain/estado_do_modulo.dart';
+import 'package:memora/features/aprendizado/domain/guia.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/autenticacao/domain/autenticacao.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
@@ -156,6 +160,107 @@ void main() {
         isNull,
         reason: 'o progresso da bia não é o da ana',
       );
+    });
+  });
+
+  group('último concluído, ordens e stream de alterações (020)', () {
+    test('ultimoConcluido e ordensDeConclusao seguem a ordem monotônica', () async {
+      expect(await progresso.ultimoConcluido(' '), isNull);
+      expect(await progresso.ordensDeConclusao(' '), isEmpty);
+      expect(await progresso.ultimoConcluido('ana'), isNull);
+
+      await concluir('ana', 'tiktok');
+      await concluir('ana', 'whatsapp');
+      expect(await progresso.ultimoConcluido('ana'), 'whatsapp');
+
+      await concluir('ana', 'tiktok');
+      expect(await progresso.ultimoConcluido('ana'), 'tiktok');
+      final Map<String, int> ordens = await progresso.ordensDeConclusao('ana');
+      expect(ordens['tiktok'], greaterThan(ordens['whatsapp']!));
+    });
+
+    test('alteracoes emite após registrar e apagar sem travar a fila', () async {
+      final List<Map<String, int>> instantaneos = <Map<String, int>>[];
+      Completer<void> proximoEvento = Completer<void>();
+      final StreamSubscription<void> sub = progresso.alteracoes.listen((_) async {
+        instantaneos.add(await progresso.concluidos('ana'));
+        if (!proximoEvento.isCompleted) proximoEvento.complete();
+      });
+      addTearDown(sub.cancel);
+
+      await concluir('ana', 'youtube');
+      await proximoEvento.future;
+      expect(instantaneos.last, <String, int>{'youtube': 1});
+
+      proximoEvento = Completer<void>();
+      await progresso.apagar();
+      await proximoEvento.future;
+      expect(instantaneos.last, isEmpty);
+    });
+
+    test('moduloConcluido e chaveDoUltimoModuloConcluido exigem todas as seções', () async {
+      final Guia telegram = guiaDe('telegram')!;
+      final Guia whatsapp = guiaDe('whatsapp')!;
+
+      expect(moduloConcluido(whatsapp, <String, int>{}), isFalse);
+      expect(moduloConcluido(whatsapp, <String, int>{'whatsapp': 1}), isTrue);
+
+      final SecaoDoGuia primeira = telegram.secoes.first;
+      expect(
+        moduloConcluido(
+          telegram,
+          <String, int>{'telegram:${primeira.chave}': 1},
+        ),
+        isFalse,
+      );
+
+      await concluir('ana', 'whatsapp');
+      await concluir('ana', 'telegram:${primeira.chave}');
+      expect(
+        chaveDoUltimoModuloConcluido(
+          await progresso.ordensDeConclusao('ana'),
+          todosOsGuias,
+        ),
+        'whatsapp',
+      );
+
+      for (final SecaoDoGuia s in telegram.secoes.skip(1)) {
+        await concluir('ana', 'telegram:${s.chave}');
+      }
+      final Map<String, int> ordensCompletas =
+          await progresso.ordensDeConclusao('ana');
+      expect(
+        moduloConcluido(telegram, await progresso.concluidos('ana')),
+        isTrue,
+      );
+      expect(
+        chaveDoUltimoModuloConcluido(ordensCompletas, todosOsGuias),
+        'telegram',
+      );
+
+      // Refazer seção de módulo completo e posteriormente superado coloca-o no topo.
+      await concluir('ana', 'whatsapp');
+      expect(
+        chaveDoUltimoModuloConcluido(
+          await progresso.ordensDeConclusao('ana'),
+          todosOsGuias,
+        ),
+        'whatsapp',
+      );
+      await concluir('ana', 'telegram:${primeira.chave}');
+      expect(
+        chaveDoUltimoModuloConcluido(
+          await progresso.ordensDeConclusao('ana'),
+          todosOsGuias,
+        ),
+        'telegram',
+      );
+
+      expect(
+        chaveDoUltimoModuloConcluido(<String, int>{'guia-avulso': 5}, todosOsGuias),
+        'guia-avulso',
+      );
+      expect(chaveDoUltimoModuloConcluido(<String, int>{}, todosOsGuias), isNull);
     });
   });
 

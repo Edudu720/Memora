@@ -23,7 +23,7 @@ de **produção** do conteúdo, que é trabalho da equipe e não do código.
    moldura são do aplicativo (R6). Captura com círculo vermelho pintado é
    recusada na revisão.
 4. **Serviço sensível**: a captura da tela de senha mostra o campo **vazio**.
-5. **Formato e tamanho**: **WebP** (sem perda, ou com qualidade 90 ou mais); **PNG só na captura cujo texto borra ao ampliar** em WebP, declarada na constante dela (`FormatoDaCaptura.png`). O total de `assets/guias/` não passa de 8 MB, e nenhuma imagem fica na pasta sem passo que a use.
+5. **Formato e tamanho**: **WebP** (sem perda, ou com qualidade 90 ou mais); **PNG só na captura cujo texto borra ao ampliar** em WebP, declarada na constante dela (`FormatoDaCaptura.png`). O total de `assets/guias/` não passa de 12 MB (teto ajustado na spec 016 para comportar os 16 guias com capturas reais legíveis), e nenhuma imagem fica na pasta sem passo que a use.
 
 ## Regras de texto
 

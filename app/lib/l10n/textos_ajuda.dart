@@ -278,4 +278,38 @@ abstract final class TextosAjuda {
   /// Aviso de que o que vem a seguir é só exemplo, e não há o que digitar.
   static const String guiadaSoExemplo =
       'É só um exemplo. Aqui você não precisa escrever nada.';
+
+  // ---------------------------------------------------------------------------
+  // Site oficial de tutoriais (Feature 016, Issue #106 Item 11)
+  // ---------------------------------------------------------------------------
+
+  /// Título do cartão para abrir o site oficial de tutoriais.
+  static const String siteTutorialTitulo = 'Site oficial de tutoriais';
+
+  /// Explicação curta do cartão do site oficial de tutoriais.
+  static const String siteTutorialExplicacao =
+      'Você também pode ler os guias com calma no nosso site oficial. '
+      'Ele abre no navegador do aparelho.';
+
+  /// Rótulo do botão principal do cartão.
+  static const String siteTutorialBotao = 'Abrir site oficial de tutoriais';
+
+  /// Título do diálogo de confirmação antes de sair do aplicativo.
+  static const String siteTutorialModalTitulo =
+      'Sair do Memora para o site oficial?';
+
+  /// Mensagem anti-phishing exibida acima do endereço oficial.
+  static const String siteTutorialModalMensagem =
+      'Você vai sair do Memora e abrir o navegador neste endereço oficial. '
+      'Confira o endereço abaixo antes de continuar.';
+
+  /// Rótulo do botão de confirmação do diálogo modal.
+  static const String siteTutorialConfirmar = 'Sim, abrir o site';
+
+  /// Rótulo do botão para cancelar e ficar no Memora.
+  static const String siteTutorialCancelar = 'Agora não';
+
+  /// Aviso exibido se o aparelho não conseguir abrir o navegador externo.
+  static const String siteTutorialErro =
+      'Não consegui abrir o site agora. Tente de novo em alguns instantes.';
 }

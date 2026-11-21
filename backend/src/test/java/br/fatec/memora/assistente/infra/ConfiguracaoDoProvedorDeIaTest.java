@@ -2,8 +2,12 @@ package br.fatec.memora.assistente.infra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
 /**
@@ -157,6 +161,84 @@ class ConfiguracaoDoProvedorDeIaTest {
                             assertThat(c).hasFailed();
                             assertThat(rootCause(c.getStartupFailure()).getMessage())
                                     .doesNotContain("segredo-do-teste");
+                        });
+    }
+
+    @Test
+    @DisplayName("sobe com reserva desativada quando modelo-reserva esta vazio")
+    void reservaVaziaAceita() {
+        contexto()
+                .withPropertyValues(
+                        "memora.assistente.provedor=gemini",
+                        "memora.assistente.gemini.chave=" + CHAVE,
+                        "memora.assistente.gemini.modelo=gemini-3.6-flash",
+                        "memora.assistente.gemini.modelo-reserva=",
+                        "memora.assistente.gemini.tentativas-primario=2",
+                        "memora.assistente.gemini.espera-retentativa-ms=0")
+                .run(
+                        c -> {
+                            assertThat(c).hasNotFailed();
+                            assertThat(c).hasSingleBean(ClienteDaAssistenteGemini.class);
+                        });
+    }
+
+    @Test
+    @DisplayName("reserva igual ao modelo principal registra (reserva: nenhum) no log de subida")
+    void reservaIgualAoPrincipalRegistraNenhumNoLog() {
+        Logger logger = (Logger) LoggerFactory.getLogger(ConfiguracaoDoProvedorDeIa.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            contexto()
+                    .withPropertyValues(
+                            "memora.assistente.provedor=gemini",
+                            "memora.assistente.gemini.chave=" + CHAVE,
+                            "memora.assistente.gemini.modelo=gemini-3.6-flash",
+                            "memora.assistente.gemini.modelo-reserva=gemini-3.6-flash")
+                    .run(
+                            c -> {
+                                assertThat(c).hasNotFailed();
+                                assertThat(appender.list)
+                                        .extracting(ILoggingEvent::getFormattedMessage)
+                                        .anyMatch(
+                                                msg ->
+                                                        msg.contains("modelo gemini-3.6-flash")
+                                                                && msg.contains("(reserva: nenhum)"));
+                            });
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
+    @DisplayName("modelo-reserva malformado ou tentativas invalidas derrubam subida sem vazar chave")
+    void resilienciaInvalidaFalhaNaSubida() {
+        contexto()
+                .withPropertyValues(
+                        "memora.assistente.provedor=gemini",
+                        "memora.assistente.gemini.chave=" + CHAVE,
+                        "memora.assistente.gemini.modelo-reserva=gemini/../invalido")
+                .run(
+                        c -> {
+                            assertThat(c).hasFailed();
+                            assertThat(rootCause(c.getStartupFailure()).getMessage())
+                                    .contains("modelo-reserva")
+                                    .doesNotContain(CHAVE);
+                        });
+
+        contexto()
+                .withPropertyValues(
+                        "memora.assistente.provedor=gemini",
+                        "memora.assistente.gemini.chave=" + CHAVE,
+                        "memora.assistente.gemini.tentativas-primario=0")
+                .run(
+                        c -> {
+                            assertThat(c).hasFailed();
+                            assertThat(rootCause(c.getStartupFailure()).getMessage())
+                                    .contains("tentativas-primario")
+                                    .doesNotContain(CHAVE);
                         });
     }
 

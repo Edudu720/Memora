@@ -143,9 +143,19 @@ abstract final class TextosGuias {
       ? '$aprendidas de $total assuntos aprendidos'
       : '$total assuntos para aprender';
 
+  /// Marca de módulo concluído por inteiro no catálogo (020).
+  static const String moduloConcluido = 'Concluído';
+
   /// Leitura do cartão de seção pelo leitor de tela.
   static String secaoDescrita(String titulo, String subtitulo, String meta) =>
       '$titulo. $subtitulo. $meta.';
+
+  /// Leitura do cartão de seção concluída pelo leitor de tela.
+  static String secaoConcluidaDescrita(
+    String titulo,
+    String subtitulo,
+    String meta,
+  ) => '$titulo. $subtitulo. $meta. Concluído.';
 
   /// Saída do seletor para quem não achou o assunto: leva à conversa.
   ///
@@ -338,33 +348,51 @@ abstract final class TextosGuias {
   static const String instagramCaptura11 =
       'Um story de exemplo de um amigo cuidando do jardim, com a capa de uma música e o campo Enviar mensagem embaixo.';
 
-  // YouTube (T071)
+  // YouTube (T071 + Feature 016)
   /// Título do guia do YouTube.
   static const String tituloYoutube = 'Como assistir a vídeos no YouTube';
   /// Passo 1 do YouTube.
   static const String youtubePasso1 =
-      'Toque na lupa de pesquisa, no alto, à direita da tela.';
+      'Na tela inicial, toque na capa do vídeo no alto para começar a assistir.';
   /// Descrição da captura do passo 1 do YouTube.
   static const String youtubeCaptura1 =
-      'Tela inicial do YouTube mostrando vídeos recomendados e uma lupa no alto à direita.';
+      'Tela inicial do YouTube com vídeo educativo em destaque e enquete logo abaixo.';
   /// Passo 2 do YouTube.
   static const String youtubePasso2 =
-      'Digite o que você quer assistir na barra de pesquisa no alto e toque na lupa do teclado.';
+      'Quer procurar outro assunto? Toque na lupa, no canto alto à direita.';
   /// Descrição da captura do passo 2 do YouTube.
   static const String youtubeCaptura2 =
-      'Barra de pesquisa do YouTube no alto com sugestões de vídeos.';
+      'Aba Ao vivo do YouTube mostrando a lupa de pesquisa no topo à direita.';
   /// Passo 3 do YouTube.
   static const String youtubePasso3 =
-      'Toque na foto ou no título do vídeo escolhido na lista para começar a assistir.';
+      'Toque em "Shorts", na barra de baixo, para ver vídeos curtinhos em tela cheia.';
   /// Descrição da captura do passo 3 do YouTube.
   static const String youtubeCaptura3 =
-      'Lista de resultados de busca com miniaturas e títulos de vídeos.';
+      'Tela de vídeo curto vertical do YouTube com a aba Shorts destacada embaixo.';
   /// Passo 4 do YouTube.
   static const String youtubePasso4 =
-      'Toque no meio do vídeo a qualquer momento para pausar ou continuar. Parabéns, agora você assiste ao que quiser no YouTube.';
+      'Toque em "Inscrições", no alto à esquerda, para ver novos vídeos dos seus canais.';
   /// Descrição da captura do passo 4 do YouTube.
   static const String youtubeCaptura4 =
-      'Vídeo em reprodução no YouTube com os botões de pausar e tela cheia.';
+      'Guia Inscrições do YouTube listando canais salvos e envios recentes.';
+  /// Passo 5 do YouTube.
+  static const String youtubePasso5 =
+      'Na aba "Você", no canto de baixo à direita, veja seu histórico e playlists salvas.';
+  /// Descrição da captura do passo 5 do YouTube.
+  static const String youtubeCaptura5 =
+      'Tela de biblioteca do YouTube com o bloco Histórico no centro.';
+  /// Passo 6 do YouTube.
+  static const String youtubePasso6 =
+      'Ao abrir um canal, use as abas no meio da tela para escolher entre Início, Vídeos e Playlists.';
+  /// Descrição da captura do passo 6 do YouTube.
+  static const String youtubeCaptura6 =
+      'Página de perfil de um canal no YouTube exibindo as abas de conteúdo no meio.';
+  /// Passo 7 do YouTube.
+  static const String youtubePasso7 =
+      'Toque em "Mais", no alto à direita, para explorar filmes, músicas e podcasts. Agora você já navega pelo YouTube!';
+  /// Descrição da captura do passo 7 do YouTube.
+  static const String youtubeCaptura7 =
+      'Menu da aba Mais no YouTube listando Filmes, Podcasts e outras categorias.';
 
   // Facebook (T072)
   /// Título do guia do Facebook.
@@ -481,33 +509,33 @@ abstract final class TextosGuias {
   static const String facebookCaptura10 =
       'Segunda parte de Editar Perfil do Facebook com três blocos numerados sobre trabalho, interesses e viagens.';
 
-  // Google Fotos (T072)
+  // Google Fotos (T072 + Feature 016)
   /// Título do guia do Google Fotos.
   static const String tituloGoogleFotos = 'Como rever suas fotos no Google Fotos';
   /// Passo 1 do Google Fotos.
   static const String googleFotosPasso1 =
-      'Toque no botão \'Fotos\' com o catavento colorido, embaixo, à esquerda.';
+      'Toque em "Fotos", na barra de baixo à esquerda, para ver todas as suas imagens.';
   /// Descrição da captura do passo 1 do Google Fotos.
   static const String googleFotosCaptura1 =
-      'Tela do Google Fotos com a aba Fotos selecionada na barra inferior.';
+      'Grade principal de fotos do Google Fotos com a aba Fotos destacada embaixo.';
   /// Passo 2 do Google Fotos.
   static const String googleFotosPasso2 =
-      'Deslize para cima para navegar pelos dias e meses e ver fotos antigas.';
+      'Toque em "Álbuns", na barra de baixo no meio, para encontrar fotos guardadas por tema.';
   /// Descrição da captura do passo 2 do Google Fotos.
   static const String googleFotosCaptura2 =
-      'Mosaico organizado por datas com miniaturas das fotos da pessoa.';
+      'Tela Álbuns do Google Fotos exibindo coleções organizadas e a aba destacada embaixo.';
   /// Passo 3 do Google Fotos.
   static const String googleFotosPasso3 =
-      'Toque em cima de qualquer foto para abrir ela grande na tela inteira.';
+      'Toque em "Criar", na barra de baixo à direita, para montar colagens ou vídeos com suas fotos.';
   /// Descrição da captura do passo 3 do Google Fotos.
   static const String googleFotosCaptura3 =
-      'Foto aberta ocupando toda a tela com botões de compartilhar e editar embaixo.';
+      'Tela Criar do Google Fotos com opções de colagem e vídeo e a aba destacada embaixo.';
   /// Passo 4 do Google Fotos.
   static const String googleFotosPasso4 =
-      'Toque na setinha no alto, à esquerda, para voltar à galeria. Parabéns, suas lembranças estão sempre guardadas aqui.';
+      'Ao tocar na sua inicial no alto à direita, confira se "Backup concluído" aparece na conta. Suas lembranças estão protegidas.';
   /// Descrição da captura do passo 4 do Google Fotos.
   static const String googleFotosCaptura4 =
-      'Foto em tela cheia com seta de voltar no canto superior esquerdo.';
+      'Painel da conta no Google Fotos mostrando o aviso Backup concluído.';
 
   // Telegram (T072)
   /// Título do guia do Telegram.
@@ -601,33 +629,45 @@ abstract final class TextosGuias {
   static const String telegramCaptura8 =
       'Parte inferior das Configurações do Telegram com três blocos numerados explicando recursos extras e Ajuda.';
 
-  // TikTok (T070)
+  // TikTok (T070 + Feature 016)
   /// Título do guia do TikTok.
   static const String tituloTiktok = 'Como assistir e buscar vídeos no TikTok';
   /// Passo 1 do TikTok.
   static const String tiktokPasso1 =
-      'Abra o TikTok. Você verá vídeos passando um após o outro na sua tela.';
+      'Na tela inicial, use os botões à direita para curtir, comentar, salvar ou compartilhar o vídeo.';
   /// Descrição da captura do passo 1 do TikTok.
   static const String tiktokCaptura1 =
-      'Tela principal do TikTok com um vídeo ocupando a tela inteira e opções de interação à direita.';
+      'Tela inicial do TikTok com um vídeo ilustrado e a coluna de botões de interação à direita.';
   /// Passo 2 do TikTok.
   static const String tiktokPasso2 =
-      'Deslize o dedo de baixo para cima para trocar de vídeo e ver o próximo.';
+      'Toque em "Amigos", na barra de baixo à esquerda, para ver apenas vídeos de quem você acompanha.';
   /// Descrição da captura do passo 2 do TikTok.
   static const String tiktokCaptura2 =
-      'Gesto de deslizar o dedo na tela para avançar ao próximo vídeo.';
+      'Aba Amigos do TikTok com o ícone destacado na barra inferior.';
   /// Passo 3 do TikTok.
   static const String tiktokPasso3 =
-      'Para procurar um assunto específico, toque na lupa de busca no canto superior.';
+      'Quer gravar algo? Toque no "+" da barra de baixo e depois no botão redondo central embaixo para começar.';
   /// Descrição da captura do passo 3 do TikTok.
   static const String tiktokCaptura3 =
-      'Ícone de lupa no topo da tela para abrir o campo de busca.';
+      'Tela da câmera do TikTok mostrando o botão redondo central de gravação na parte inferior.';
   /// Passo 4 do TikTok.
   static const String tiktokPasso4 =
-      'Digite o que deseja encontrar (como receitas ou artesanato) e toque no vídeo que gostar.';
+      'Toque em "Loja", na parte de cima da tela, para conhecer produtos e ofertas com calma.';
   /// Descrição da captura do passo 4 do TikTok.
   static const String tiktokCaptura4 =
-      'Resultados de busca no TikTok organizados em lista de vídeos.';
+      'Guia Loja do TikTok com vitrine de produtos e a aba Loja destacada no alto.';
+  /// Passo 5 do TikTok.
+  static const String tiktokPasso5 =
+      'Toque em "Mensagens", embaixo à direita do "+", para ler recados e avisos importantes.';
+  /// Descrição da captura do passo 5 do TikTok.
+  static const String tiktokCaptura5 =
+      'Caixa de Mensagens do TikTok com lista de conversas e a aba destacada embaixo.';
+  /// Passo 6 do TikTok.
+  static const String tiktokPasso6 =
+      'Toque em "Perfil", no canto de baixo à direita, para ver os vídeos que você publicou ou curtiu. Agora você já navega pelo TikTok!';
+  /// Descrição da captura do passo 6 do TikTok.
+  static const String tiktokCaptura6 =
+      'Tela de perfil do TikTok exibindo dados de exemplo e o ícone Perfil destacado embaixo.';
 
   // Gov.br (006-guias-servicos-sociais)
   /// Título do guia do Gov.br.
@@ -877,33 +917,143 @@ abstract final class TextosGuias {
   static const String govBrCaptura24 =
       'Opções da Ouvidoria Gov.br com três marcações numeradas para Elogio, Reclamações e Protocolo.';
 
-  // Meu INSS (T079)
+  // Meu INSS (T079 + Feature 016 Seções)
   /// Título do guia do Meu INSS.
   static const String tituloMeuInss = 'Como consultar benefícios no Meu INSS';
-  /// Passo 1 do Meu INSS.
-  static const String meuInssPasso1 =
-      'Toque no botão azul "Entrar com gov.br", embaixo, para se conectar.';
-  /// Descrição da captura do passo 1 do Meu INSS.
+  /// Título da seção Entrar do Meu INSS.
+  static const String meuInssSecaoEntrar = 'Entrar e autorizar o acesso';
+  /// Subtítulo da seção Entrar do Meu INSS.
+  static const String meuInssSecaoEntrarSubtitulo =
+      'Como avançar na abertura e entrar com a conta gov.br.';
+  /// Passo 1 de Entrar no Meu INSS.
+  static const String meuInssEntrar1 =
+      'Na primeira tela de boas-vindas, toque no botão "Avançar", bem embaixo.';
+  /// Passo 2 de Entrar no Meu INSS.
+  static const String meuInssEntrar2 =
+      'Depois de ler a política de privacidade, toque no botão azul "Aceitar", bem embaixo.';
+  /// Passo 3 de Entrar no Meu INSS.
+  static const String meuInssEntrar3 =
+      'Toque no botão azul "Entrar com gov.br", na parte de cima, para conectar sua conta oficial.';
+  /// Passo 4 de Entrar no Meu INSS.
+  static const String meuInssEntrar4 =
+      'Quando o gov.br pedir permissão para o Meu INSS, toque no botão azul "Autorizar", embaixo à direita.';
+  /// Passo 5 de Entrar no Meu INSS.
+  static const String meuInssEntrar5 =
+      'Escolha "Sim" se quiser entrar com a digital ou "Não", embaixo, para usar só a senha.';
+  /// Passo 6 de Entrar no Meu INSS.
+  static const String meuInssEntrar6 =
+      'Escolha "Sim" para receber avisos do INSS no celular ou toque em "Não", embaixo.';
+  /// Título da seção Início e Busca do Meu INSS.
+  static const String meuInssSecaoInicio = 'Tela inicial, busca e letra';
+  /// Subtítulo da seção Início e Busca do Meu INSS.
+  static const String meuInssSecaoInicioSubtitulo =
+      'Onde achar serviços, avisos e o ajuste de tamanho da fonte.';
+  /// Passo 1 de Início e Busca no Meu INSS.
+  static const String meuInssInicio1 =
+      'Logo ao entrar, toque nos cartões em "Serviços para você", no alto da tela.';
+  /// Passo 2 de Início e Busca no Meu INSS.
+  static const String meuInssInicio2 =
+      'Tocando nas três barrinhas no alto à esquerda, você abre o menu completo para navegar por categorias.';
+  /// Passo 3 de Início e Busca no Meu INSS.
+  static const String meuInssInicio3 =
+      'Na barra "Do que você precisa?", no alto da tela, digite o nome do serviço que procura.';
+  /// Passo 4 de Início e Busca no Meu INSS.
+  static const String meuInssInicio4 =
+      'Tocando no sininho no alto à direita, você lê avisos e mensagens importantes do INSS.';
+  /// Passo 5 de Início e Busca no Meu INSS.
+  static const String meuInssInicio5 =
+      'Dentro do seu perfil, toque em "Tamanho da Fonte", no meio da lista, para deixar as letras maiores.';
+  /// Título da seção Extratos e Pedidos do Meu INSS.
+  static const String meuInssSecaoExtratos = 'Extratos e novos pedidos';
+  /// Subtítulo da seção Extratos e Pedidos do Meu INSS.
+  static const String meuInssSecaoExtratosSubtitulo =
+      'Como baixar o CNIS e acompanhar pedidos ou benefícios.';
+  /// Passo 1 de Extratos e Pedidos no Meu INSS.
+  static const String meuInssExtratos1 =
+      'Em "Extratos e Comprovantes", escolha entre "Extratos", "Comprovantes" ou "Outros Documentos" na lista.';
+  /// Passo 2 de Extratos e Pedidos no Meu INSS.
+  static const String meuInssExtratos2 =
+      'No Extrato de Contribuições, toque no botão azul "Baixar Documento", bem embaixo, para salvar uma cópia.';
+  /// Passo 3 de Extratos e Pedidos no Meu INSS.
+  static const String meuInssExtratos3 =
+      'Em "Benefícios por Incapacidade", toque na primeira linha no alto se precisar pedir um novo benefício.';
+  /// Passo 4 de Extratos e Pedidos no Meu INSS.
+  static const String meuInssExtratos4 =
+      'Leia a explicação do benefício com calma e, quando estiver tudo certo, toque em "Avançar", bem embaixo.';
+  /// Passo 5 de Extratos e Pedidos no Meu INSS.
+  static const String meuInssExtratos5 =
+      'Se não encontrou o serviço na tela "Novo Pedido", toque em "Todos os Serviços", bem embaixo.';
+  /// Título da seção Mais Serviços e Ajuda do Meu INSS.
+  static const String meuInssSecaoAjuda = 'Mais serviços e ajuda';
+  /// Subtítulo da seção Mais Serviços e Ajuda do Meu INSS.
+  static const String meuInssSecaoAjudaSubtitulo =
+      'Outros atalhos, assistente Helô e telefone oficial 135.';
+  /// Passo 1 de Mais Serviços e Ajuda no Meu INSS.
+  static const String meuInssAjuda1 =
+      'Em "Mais Serviços", você encontra cartões para simular aposentadoria, Prova de Vida e calendário de benefícios.';
+  /// Passo 2 de Mais Serviços e Ajuda no Meu INSS.
+  static const String meuInssAjuda2 =
+      'Para tirar dúvidas na hora, toque no botão azul "Iniciar Atendimento" na janela da Helô, embaixo.';
+  /// Passo 3 de Mais Serviços e Ajuda no Meu INSS.
+  static const String meuInssAjuda3 =
+      'Na tela "Ajuda", você também encontra os canais oficiais, como "Ligue INSS (135)".';
+  /// Descrição da captura 1 do Meu INSS.
   static const String meuInssCaptura1 =
-      'Tela inicial do Meu INSS com opção de acesso pelo Gov.br.';
-  /// Passo 2 do Meu INSS.
-  static const String meuInssPasso2 =
-      'Digite seu CPF e senha da conta gov.br oficial na tela de acesso.';
-  /// Descrição da captura do passo 2 do Meu INSS.
+      'Tela de boas-vindas do Meu INSS com o botão Avançar na parte de baixo.';
+  /// Descrição da captura 2 do Meu INSS.
   static const String meuInssCaptura2 =
-      'Tela oficial de login com campos de CPF e senha vazios.';
-  /// Passo 3 do Meu INSS.
-  static const String meuInssPasso3 =
-      'Toque no cartão "Extrato de Benefício", no alto da tela inicial.';
-  /// Descrição da captura do passo 3 do Meu INSS.
+      'Política de Privacidade do Meu INSS com os botões Sair e Aceitar embaixo.';
+  /// Descrição da captura 3 do Meu INSS.
   static const String meuInssCaptura3 =
-      'Painel do Meu INSS mostrando os atalhos de extrato e agendamentos.';
-  /// Passo 4 do Meu INSS.
-  static const String meuInssPasso4 =
-      'Veja o extrato com o valor e a data do seu benefício. Parabéns, você já sabe conferir seu benefício.';
-  /// Descrição da captura do passo 4 do Meu INSS.
+      'Tela do Meu INSS destacando o botão azul Entrar com gov.br no alto.';
+  /// Descrição da captura 4 do Meu INSS.
   static const String meuInssCaptura4 =
-      'Demonstrativo detalhado do benefício no Meu INSS.';
+      'Tela oficial de autorização gov.br com os botões Negar e Autorizar embaixo.';
+  /// Descrição da captura 5 do Meu INSS.
+  static const String meuInssCaptura5 =
+      'Pergunta sobre acesso por biometria com opções Não e Sim embaixo.';
+  /// Descrição da captura 6 do Meu INSS.
+  static const String meuInssCaptura6 =
+      'Pergunta sobre notificações no celular com botões Não e Sim embaixo.';
+  /// Descrição da captura 7 do Meu INSS.
+  static const String meuInssCaptura7 =
+      'Tela inicial do Meu INSS exibindo cartões em Serviços para você e atalho da Helô.';
+  /// Descrição da captura 8 do Meu INSS.
+  static const String meuInssCaptura8 =
+      'Janela da assistente Helô aberta na base da tela com botão Iniciar Atendimento.';
+  /// Descrição da captura 9 do Meu INSS.
+  static const String meuInssCaptura9 =
+      'Menu lateral aberto no Meu INSS com lista vertical de serviços.';
+  /// Descrição da captura 10 do Meu INSS.
+  static const String meuInssCaptura10 =
+      'Tela Buscar Serviço do Meu INSS com campo de pesquisa no topo.';
+  /// Descrição da captura 11 do Meu INSS.
+  static const String meuInssCaptura11 =
+      'Lista de notificações recebidas no Meu INSS.';
+  /// Descrição da captura 12 do Meu INSS.
+  static const String meuInssCaptura12 =
+      'Tela Meu Perfil do Meu INSS com opção Tamanho da Fonte no meio da lista.';
+  /// Descrição da captura 13 do Meu INSS.
+  static const String meuInssCaptura13 =
+      'Tela Extratos e Comprovantes com opções Extratos, Comprovantes e Outros Documentos.';
+  /// Descrição da captura 14 do Meu INSS.
+  static const String meuInssCaptura14 =
+      'Extrato de Contribuições CNIS com vínculos de exemplo e botão Baixar Documento.';
+  /// Descrição da captura 15 do Meu INSS.
+  static const String meuInssCaptura15 =
+      'Tela explicativa de benefício especial com botões Voltar e Avançar embaixo.';
+  /// Descrição da captura 16 do Meu INSS.
+  static const String meuInssCaptura16 =
+      'Lista de opções em Benefícios por Incapacidade no Meu INSS.';
+  /// Descrição da captura 17 do Meu INSS.
+  static const String meuInssCaptura17 =
+      'Tela Novo Pedido listando pedidos comuns e botão Todos os Serviços na base.';
+  /// Descrição da captura 18 do Meu INSS.
+  static const String meuInssCaptura18 =
+      'Grade completa de Mais Serviços com blocos em Destaque e Benefícios.';
+  /// Descrição da captura 19 do Meu INSS.
+  static const String meuInssCaptura19 =
+      'Tela Ajuda do Meu INSS listando Perguntas Frequentes, Helô e Ligue INSS 135.';
 
   // e-Título (T081; refeito em 2026-11-12 com as capturas reais: entrar com a
   // biometria e um passeio pelas abas)
@@ -1288,61 +1438,153 @@ abstract final class TextosGuias {
   static const String fgtsCaptura12 =
       'Tela Optar pelo Saque-Aniversário, com a explicação e o quadro O que muda se eu fizer a opção.';
 
-  // Poupatempo (T081)
+  // Poupatempo (T081 + Feature 016 Seções)
   /// Título do guia do Poupatempo.
   static const String tituloPoupatempo = 'Como agendar serviços no Poupatempo';
-  /// Passo 1 do Poupatempo.
-  static const String poupatempoPasso1 =
-      'Toque no botão "Entrar com gov.br" no alto da tela inicial.';
-  /// Descrição da captura do passo 1 do Poupatempo.
+  /// Título da seção Entrar e Serviços do Poupatempo.
+  static const String poupatempoSecaoEntrar = 'Entrar e explorar serviços';
+  /// Subtítulo da seção Entrar e Serviços do Poupatempo.
+  static const String poupatempoSecaoEntrarSubtitulo =
+      'Como entrar pelo gov.br e abrir as categorias iniciais.';
+  /// Passo 1 de Entrar no Poupatempo.
+  static const String poupatempoEntrar1 =
+      'Na tela inicial do Poupatempo, toque no botão azul "Entrar com o gov.br", no meio para baixo.';
+  /// Passo 2 de Entrar no Poupatempo.
+  static const String poupatempoEntrar2 =
+      'Digite apenas os números do seu CPF na caixinha em branco e toque em "Continuar", logo abaixo.';
+  /// Passo 3 de Entrar no Poupatempo.
+  static const String poupatempoEntrar3 =
+      'Digite a sua senha da conta gov.br só no aplicativo oficial e toque em "Entrar", logo abaixo.';
+  /// Passo 4 de Entrar no Poupatempo.
+  static const String poupatempoEntrar4 =
+      'Já conectado, deslize pelos cartões de "Serviços mais acessados", no meio da tela, para pedir RG ou CNH.';
+  /// Passo 5 de Entrar no Poupatempo.
+  static const String poupatempoEntrar5 =
+      'Abaixo dos destaques, toque em qualquer quadrinho de "Categorias disponíveis" para ver serviços por tema.';
+  /// Título da seção Buscar, Agendar e Carteira do Poupatempo.
+  static const String poupatempoSecaoAgenda = 'Buscar, agendar e documentos';
+  /// Subtítulo da seção Buscar, Agendar e Carteira do Poupatempo.
+  static const String poupatempoSecaoAgendaSubtitulo =
+      'Como pesquisar, ver sua agenda mensal e abrir documentos.';
+  /// Passo 1 de Agenda e Carteira no Poupatempo.
+  static const String poupatempoAgenda1 =
+      'Toque na aba "Pesquisa", embaixo no meio, e escreva o nome do serviço na barra do alto.';
+  /// Passo 2 de Agenda e Carteira no Poupatempo.
+  static const String poupatempoAgenda2 =
+      'Toque em "Agendar" para marcar novo atendimento ou em "Consultar" para conferir horários já marcados.';
+  /// Passo 3 de Agenda e Carteira no Poupatempo.
+  static const String poupatempoAgenda3 =
+      'Na aba "Agenda", embaixo à esquerda do meio, veja no calendário os dias com atendimento marcado.';
+  /// Passo 4 de Agenda e Carteira no Poupatempo.
+  static const String poupatempoAgenda4 =
+      'Em "Serviços mais solicitados", toque direto no serviço que você precisa, como CNH ou carteira de identidade.';
+  /// Passo 5 de Agenda e Carteira no Poupatempo.
+  static const String poupatempoAgenda5 =
+      'Na aba "Carteira", embaixo à direita, toque no cartão "Documentos" para ver seus documentos guardados.';
+  /// Descrição da captura 1 do Poupatempo.
   static const String poupatempoCaptura1 =
-      'Tela inicial do Poupatempo SP com opção de acesso pelo Gov.br.';
-  /// Passo 2 do Poupatempo.
-  static const String poupatempoPasso2 =
-      'Informe seu CPF e senha da conta gov.br no ambiente oficial.';
-  /// Descrição da captura do passo 2 do Poupatempo.
+      'Tela de entrada do Poupatempo com botão azul Entrar com o gov.br.';
+  /// Descrição da captura 2 do Poupatempo.
   static const String poupatempoCaptura2 =
-      'Ambiente oficial de identificação com campo de senha vazio.';
-  /// Passo 3 do Poupatempo.
-  static const String poupatempoPasso3 =
-      'Toque em "Serviços" e escolha o documento que precisa agendar.';
-  /// Descrição da captura do passo 3 do Poupatempo.
+      'Tela oficial do gov.br pedindo o CPF no campo em branco.';
+  /// Descrição da captura 3 do Poupatempo.
   static const String poupatempoCaptura3 =
-      'Lista de serviços disponíveis para agendamento no Poupatempo.';
-  /// Passo 4 do Poupatempo.
-  static const String poupatempoPasso4 =
-      'Escolha o dia, horário e posto de atendimento mais próximo. Parabéns, seu agendamento está concluído.';
-  /// Descrição da captura do passo 4 do Poupatempo.
+      'Tela oficial do gov.br com campo de senha vazio e botão Entrar.';
+  /// Descrição da captura 4 do Poupatempo.
   static const String poupatempoCaptura4 =
-      'Confirmação do agendamento com data, hora e endereço do posto Poupatempo.';
+      'Tela inicial do Poupatempo exibindo atalhos em Serviços mais acessados.';
+  /// Descrição da captura 5 do Poupatempo.
+  static const String poupatempoCaptura5 =
+      'Grade de Categorias disponíveis na página inicial do Poupatempo.';
+  /// Descrição da captura 6 do Poupatempo.
+  static const String poupatempoCaptura6 =
+      'Tela Buscar do Poupatempo com campo de pesquisa no alto e lista de categorias.';
+  /// Descrição da captura 7 do Poupatempo.
+  static const String poupatempoCaptura7 =
+      'Tela de Agendamento com os dois cartões grandes Agendar e Consultar.';
+  /// Descrição da captura 8 do Poupatempo.
+  static const String poupatempoCaptura8 =
+      'Calendário mensal na aba Agenda mostrando o resumo de agendamentos.';
+  /// Descrição da captura 9 do Poupatempo.
+  static const String poupatempoCaptura9 =
+      'Lista de Serviços mais solicitados para atendimento rápido no Poupatempo.';
+  /// Descrição da captura 10 do Poupatempo.
+  static const String poupatempoCaptura10 =
+      'Tela Carteira digital do Poupatempo com o cartão Documentos na parte inferior.';
 
-  // Carteira Digital (T082)
+  // Carteira Digital (T082 + Feature 016 Seções)
   /// Título do guia da Carteira Digital.
   static const String tituloCarteiraDigital = 'Como acessar seus documentos na Carteira Digital';
-  /// Passo 1 da Carteira Digital.
-  static const String carteiraDigitalPasso1 =
-      'Toque no botão "Entrar com gov.br" na tela principal.';
-  /// Descrição da captura do passo 1 da Carteira Digital.
+  /// Título da seção Habilitação e Credencial da Carteira Digital.
+  static const String carteiraDigitalSecaoCnh = 'Habilitação e credencial';
+  /// Subtítulo da seção Habilitação e Credencial da Carteira Digital.
+  static const String carteiraDigitalSecaoCnhSubtitulo =
+      'Como abrir a CNH digital, serviços e credencial de estacionamento.';
+  /// Passo 1 de CNH na Carteira Digital.
+  static const String carteiraDigitalCnh1 =
+      'Na tela inicial, toque no cartão "CONDUTOR", bem no alto, para ver sua habilitação.';
+  /// Passo 2 de CNH na Carteira Digital.
+  static const String carteiraDigitalCnh2 =
+      'Se precisar de ajuda, mensagens ou sair da conta, toque nas três barrinhas, no alto à esquerda.';
+  /// Passo 3 de CNH na Carteira Digital.
+  static const String carteiraDigitalCnh3 =
+      'Dentro de Condutor, toque no quadrinho "CNH", no meio à esquerda, para abrir o documento.';
+  /// Passo 4 de CNH na Carteira Digital.
+  static const String carteiraDigitalCnh4 =
+      'Veja sua CNH digital completa na tela e deslize para os lados para conferir o verso.';
+  /// Passo 5 de CNH na Carteira Digital.
+  static const String carteiraDigitalCnh5 =
+      'Em "Serviços para CNH", você pode acompanhar exames toxicológicos, cursos ou renovação.';
+  /// Passo 6 de CNH na Carteira Digital.
+  static const String carteiraDigitalCnh6 =
+      'Em "Credencial de estacionamento", escolha o tipo de credencial para emitir o documento de vaga preferencial.';
+  /// Título da seção Veículos e Infrações da Carteira Digital.
+  static const String carteiraDigitalSecaoVeiculos = 'Veículos, infrações e bom condutor';
+  /// Subtítulo da seção Veículos e Infrações da Carteira Digital.
+  static const String carteiraDigitalSecaoVeiculosSubtitulo =
+      'Como consultar seus veículos, multas e Cadastro Positivo.';
+  /// Passo 1 de Veículos na Carteira Digital.
+  static const String carteiraDigitalVeiculos1 =
+      'Na aba "VEÍCULOS", se a lista aparecer vazia, toque no botão "RECARREGAR LISTA DE VEÍCULOS", no meio.';
+  /// Passo 2 de Veículos na Carteira Digital.
+  static const String carteiraDigitalVeiculos2 =
+      'Em "INFRAÇÕES", escolha "Por Infrator" ou "Por Veículo" na lista para consultar multas.';
+  /// Passo 3 de Veículos na Carteira Digital.
+  static const String carteiraDigitalVeiculos3 =
+      'Na lista de infrações, toque na faixa amarela "Aderir ao SNE" no alto se quiser optar pelo sistema de notificação eletrônica.';
+  /// Passo 4 de Veículos na Carteira Digital.
+  static const String carteiraDigitalVeiculos4 =
+      'Em "CADASTRO POSITIVO", confira no cartão de cima se a sua autorização está ativa.';
+  /// Descrição da captura 1 da Carteira Digital.
   static const String carteiraDigitalCaptura1 =
-      'Tela de abertura da Carteira Digital com botão de conexão gov.br.';
-  /// Passo 2 da Carteira Digital.
-  static const String carteiraDigitalPasso2 =
-      'Digite o seu CPF e senha da conta gov.br no ambiente oficial protegido.';
-  /// Descrição da captura do passo 2 da Carteira Digital.
+      'Tela inicial da Carteira Digital com os cartões Condutor, Veículos, Infrações e Educação.';
+  /// Descrição da captura 2 da Carteira Digital.
   static const String carteiraDigitalCaptura2 =
-      'Tela de autenticação unificada do governo com campo de senha protegido e vazio.';
-  /// Passo 3 da Carteira Digital.
-  static const String carteiraDigitalPasso3 =
-      'Toque na aba "Documentos" no menu inferior para ver sua lista.';
-  /// Descrição da captura do passo 3 da Carteira Digital.
+      'Menu lateral aberto na Carteira Digital com links de mensagens, preferências e saída.';
+  /// Descrição da captura 3 da Carteira Digital.
   static const String carteiraDigitalCaptura3 =
-      'Aba Documentos exibindo miniaturas de RG e certidões cadastradas.';
-  /// Passo 4 da Carteira Digital.
-  static const String carteiraDigitalPasso4 =
-      'Toque no documento para abrir em tamanho legível. Parabéns, seus documentos oficiais estão sempre seguros com você.';
-  /// Descrição da captura do passo 4 da Carteira Digital.
+      'Tela Condutor com resumo da habilitação e atalhos CNH, Serviços e Credencial.';
+  /// Descrição da captura 4 da Carteira Digital.
   static const String carteiraDigitalCaptura4 =
-      'Documento digital oficial aberto com dados legíveis e código de autenticidade.';
+      'CNH digital de exemplo exibida na tela sem dados reais pessoais.';
+  /// Descrição da captura 5 da Carteira Digital.
+  static const String carteiraDigitalCaptura5 =
+      'Tela Serviços para CNH mostrando informações e atalhos na parte inferior.';
+  /// Descrição da captura 6 da Carteira Digital.
+  static const String carteiraDigitalCaptura6 =
+      'Tela Credencial de Estacionamento listando opções para vaga preferencial.';
+  /// Descrição da captura 7 da Carteira Digital.
+  static const String carteiraDigitalCaptura7 =
+      'Tela Veículos com botão azul Recarregar Lista de Veículos centralizado.';
+  /// Descrição da captura 8 da Carteira Digital.
+  static const String carteiraDigitalCaptura8 =
+      'Tela Infrações oferecendo consulta Por Infrator ou Por Veículo.';
+  /// Descrição da captura 9 da Carteira Digital.
+  static const String carteiraDigitalCaptura9 =
+      'Tela Infrações por Infrator com aviso amarelo Aderir ao SNE no topo.';
+  /// Descrição da captura 10 da Carteira Digital.
+  static const String carteiraDigitalCaptura10 =
+      'Tela Cadastro Positivo mostrando situação ativa e termos no alto.';
 
   // Correios (006-guias-servicos-sociais)
   /// Título do guia dos Correios.
@@ -1431,31 +1673,77 @@ abstract final class TextosGuias {
   static const String correiosCaptura8 =
       'Tela de login do Meu Correios com três áreas numeradas.';
 
-  // Carteira de Trabalho Digital (T082)
+  // Carteira de Trabalho Digital (T082 + Feature 016 Seções)
   /// Título do guia da Carteira de Trabalho Digital.
   static const String tituloCarteiraDeTrabalho = 'Como acessar a Carteira de Trabalho Digital';
-  /// Passo 1 da Carteira de Trabalho Digital.
-  static const String carteiraDeTrabalhoPasso1 =
-      'Toque no botão azul "Entrar com gov.br" no meio da tela.';
-  /// Descrição da captura do passo 1 da Carteira de Trabalho Digital.
+  /// Título da seção Entrar e Contratos da Carteira de Trabalho.
+  static const String carteiraDeTrabalhoSecaoContratos = 'Entrar e ver contratos';
+  /// Subtítulo da seção Entrar e Contratos da Carteira de Trabalho.
+  static const String carteiraDeTrabalhoSecaoContratosSubtitulo =
+      'Como conectar com o gov.br, consultar vínculos e gerar PDF.';
+  /// Passo 1 de Contratos na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoContratos1 =
+      'Na tela inicial, toque no botão azul "Entrar com gov.br", no meio da tela.';
+  /// Passo 2 de Contratos na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoContratos2 =
+      'Quando o gov.br pedir autorização de acesso, toque no botão azul "Autorizar", embaixo à direita.';
+  /// Passo 3 de Contratos na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoContratos3 =
+      'Já conectado, toque no quadrinho "Contratos de Trabalho Digitais", no meio à esquerda.';
+  /// Passo 4 de Contratos na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoContratos4 =
+      'Confira suas empresas e datas na lista. Você pode tocar no botão azul redondo no alto à direita para atualizar.';
+  /// Passo 5 de Contratos na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoContratos5 =
+      'Se abrir "Outros vínculos de trabalho" e não houver registros antigos, toque no botão azul "VOLTAR", embaixo.';
+  /// Passo 6 de Contratos na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoContratos6 =
+      'Em "Enviar Carteira de Trabalho Digital", marque os itens desejados e toque em "GERAR PDF", bem embaixo.';
+  /// Título da seção Benefícios e Menu da Carteira de Trabalho.
+  static const String carteiraDeTrabalhoSecaoBeneficios = 'Benefícios, empréstimos e menu';
+  /// Subtítulo da seção Benefícios e Menu da Carteira de Trabalho.
+  static const String carteiraDeTrabalhoSecaoBeneficiosSubtitulo =
+      'Onde consultar Abono Salarial, Seguro-Desemprego e opções do menu.';
+  /// Passo 1 de Benefícios na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoBeneficios1 =
+      'Toque na aba "Benefícios", embaixo à esquerda do meio, para consultar Abono Salarial e Seguro-Desemprego.';
+  /// Passo 2 de Benefícios na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoBeneficios2 =
+      'Na aba "Emprego", se pedir para confirmar seus dados, toque no botão azul "ATUALIZAR INFORMAÇÕES PESSOAIS".';
+  /// Passo 3 de Benefícios na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoBeneficios3 =
+      'Toque na aba "Empréstimos", embaixo à direita do meio, se quiser apenas simular ou acompanhar propostas.';
+  /// Passo 4 de Benefícios na Carteira de Trabalho.
+  static const String carteiraDeTrabalhoBeneficios4 =
+      'Na aba "Menu", bem no canto de baixo à direita, toque em "Sair" no meio da lista quando terminar.';
+  /// Descrição da captura 1 da Carteira de Trabalho Digital.
   static const String carteiraDeTrabalhoCaptura1 =
-      'Tela de apresentação da Carteira de Trabalho Digital com botão de acesso.';
-  /// Passo 2 da Carteira de Trabalho Digital.
-  static const String carteiraDeTrabalhoPasso2 =
-      'Digite o seu CPF e a senha oficial da sua conta gov.br.';
-  /// Descrição da captura do passo 2 da Carteira de Trabalho Digital.
+      'Tela de entrada da Carteira de Trabalho Digital com botão Entrar com gov.br.';
+  /// Descrição da captura 2 da Carteira de Trabalho Digital.
   static const String carteiraDeTrabalhoCaptura2 =
-      'Tela oficial de autenticação com campos de CPF e senha vazios.';
-  /// Passo 3 da Carteira de Trabalho Digital.
-  static const String carteiraDeTrabalhoPasso3 =
-      'Toque na aba "Contratos", embaixo, para ver seus registros de emprego.';
-  /// Descrição da captura do passo 3 da Carteira de Trabalho Digital.
+      'Tela oficial do gov.br pedindo autorização com botão azul Autorizar embaixo.';
+  /// Descrição da captura 3 da Carteira de Trabalho Digital.
   static const String carteiraDeTrabalhoCaptura3 =
-      'Menu Contratos mostrando a lista de empregos anteriores e atuais.';
-  /// Passo 4 da Carteira de Trabalho Digital.
-  static const String carteiraDeTrabalhoPasso4 =
-      'Confira as datas de admissão, cargo e anotações da empresa. Parabéns, seu histórico de trabalho está sempre acessível.';
-  /// Descrição da captura do passo 4 da Carteira de Trabalho Digital.
+      'Painel inicial da Carteira de Trabalho com atalho Contratos de Trabalho Digitais.';
+  /// Descrição da captura 4 da Carteira de Trabalho Digital.
   static const String carteiraDeTrabalhoCaptura4 =
-      'Detalhes de um contrato de trabalho com data de admissão e salário anotados.';
+      'Lista de contratos de trabalho com exemplos fictícios de empresas.';
+  /// Descrição da captura 5 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura5 =
+      'Tela Outros vínculos de trabalho sem registros extras e botão Voltar.';
+  /// Descrição da captura 6 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura6 =
+      'Tela Enviar Carteira de Trabalho Digital com caixas de seleção e botão Gerar PDF.';
+  /// Descrição da captura 7 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura7 =
+      'Aba Benefícios exibindo opções de Abono Salarial e Seguro-Desemprego.';
+  /// Descrição da captura 8 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura8 =
+      'Aba Emprego exibindo botão azul Atualizar Informações Pessoais.';
+  /// Descrição da captura 9 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura9 =
+      'Aba Empréstimos mostrando atalhos do Crédito do Trabalhador.';
+  /// Descrição da captura 10 da Carteira de Trabalho Digital.
+  static const String carteiraDeTrabalhoCaptura10 =
+      'Aba Menu da Carteira de Trabalho exibindo opção Sair e versão do aplicativo.';
 }

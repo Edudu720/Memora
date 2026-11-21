@@ -156,7 +156,7 @@ final class CapturaDoGuia {
   /// Captura 11 do Instagram (um story).
   static const CapturaDoGuia instagram11 = CapturaDoGuia._('instagram', 11);
 
-  // YouTube (T071)
+  // YouTube (T071 + Feature 016)
   /// Captura 1 do YouTube.
   static const CapturaDoGuia youtube1 = CapturaDoGuia._('youtube', 1);
 
@@ -168,6 +168,15 @@ final class CapturaDoGuia {
 
   /// Captura 4 do YouTube.
   static const CapturaDoGuia youtube4 = CapturaDoGuia._('youtube', 4);
+
+  /// Captura 5 do YouTube.
+  static const CapturaDoGuia youtube5 = CapturaDoGuia._('youtube', 5);
+
+  /// Captura 6 do YouTube.
+  static const CapturaDoGuia youtube6 = CapturaDoGuia._('youtube', 6);
+
+  /// Captura 7 do YouTube.
+  static const CapturaDoGuia youtube7 = CapturaDoGuia._('youtube', 7);
 
   // Facebook (T072)
   /// Captura 1 do Facebook.
@@ -310,7 +319,7 @@ final class CapturaDoGuia {
     FormatoDaCaptura.jpg,
   );
 
-  // TikTok (T070)
+  // TikTok (T070 + Feature 016)
   /// Captura 1 do TikTok.
   static const CapturaDoGuia tiktok1 = CapturaDoGuia._('tiktok', 1);
 
@@ -322,6 +331,12 @@ final class CapturaDoGuia {
 
   /// Captura 4 do TikTok.
   static const CapturaDoGuia tiktok4 = CapturaDoGuia._('tiktok', 4);
+
+  /// Captura 5 do TikTok.
+  static const CapturaDoGuia tiktok5 = CapturaDoGuia._('tiktok', 5);
+
+  /// Captura 6 do TikTok.
+  static const CapturaDoGuia tiktok6 = CapturaDoGuia._('tiktok', 6);
 
   // Gov.br (T078 + Feature 006 Seções)
   /// Captura 1 do Gov.br.
@@ -492,11 +507,11 @@ final class CapturaDoGuia {
     FormatoDaCaptura.jpg,
   );
 
-  // Meu INSS (T079)
+  // Meu INSS (T079 + Feature 016 Seções)
   /// Captura 1 do Meu INSS.
   static const CapturaDoGuia meuInss1 = CapturaDoGuia._('meu-inss', 1);
 
-  /// Captura 2 do Meu INSS (com tela de senha oficial vazia).
+  /// Captura 2 do Meu INSS.
   static const CapturaDoGuia meuInss2 = CapturaDoGuia._('meu-inss', 2);
 
   /// Captura 3 do Meu INSS.
@@ -504,6 +519,51 @@ final class CapturaDoGuia {
 
   /// Captura 4 do Meu INSS.
   static const CapturaDoGuia meuInss4 = CapturaDoGuia._('meu-inss', 4);
+
+  /// Captura 5 do Meu INSS.
+  static const CapturaDoGuia meuInss5 = CapturaDoGuia._('meu-inss', 5);
+
+  /// Captura 6 do Meu INSS.
+  static const CapturaDoGuia meuInss6 = CapturaDoGuia._('meu-inss', 6);
+
+  /// Captura 7 do Meu INSS.
+  static const CapturaDoGuia meuInss7 = CapturaDoGuia._('meu-inss', 7);
+
+  /// Captura 8 do Meu INSS.
+  static const CapturaDoGuia meuInss8 = CapturaDoGuia._('meu-inss', 8);
+
+  /// Captura 9 do Meu INSS.
+  static const CapturaDoGuia meuInss9 = CapturaDoGuia._('meu-inss', 9);
+
+  /// Captura 10 do Meu INSS.
+  static const CapturaDoGuia meuInss10 = CapturaDoGuia._('meu-inss', 10);
+
+  /// Captura 11 do Meu INSS.
+  static const CapturaDoGuia meuInss11 = CapturaDoGuia._('meu-inss', 11);
+
+  /// Captura 12 do Meu INSS.
+  static const CapturaDoGuia meuInss12 = CapturaDoGuia._('meu-inss', 12);
+
+  /// Captura 13 do Meu INSS.
+  static const CapturaDoGuia meuInss13 = CapturaDoGuia._('meu-inss', 13);
+
+  /// Captura 14 do Meu INSS.
+  static const CapturaDoGuia meuInss14 = CapturaDoGuia._('meu-inss', 14);
+
+  /// Captura 15 do Meu INSS.
+  static const CapturaDoGuia meuInss15 = CapturaDoGuia._('meu-inss', 15);
+
+  /// Captura 16 do Meu INSS.
+  static const CapturaDoGuia meuInss16 = CapturaDoGuia._('meu-inss', 16);
+
+  /// Captura 17 do Meu INSS.
+  static const CapturaDoGuia meuInss17 = CapturaDoGuia._('meu-inss', 17);
+
+  /// Captura 18 do Meu INSS.
+  static const CapturaDoGuia meuInss18 = CapturaDoGuia._('meu-inss', 18);
+
+  /// Captura 19 do Meu INSS.
+  static const CapturaDoGuia meuInss19 = CapturaDoGuia._('meu-inss', 19);
 
   // e-Título (T081)
   /// Captura 1 do e-Título (a entrada, com biometria).
@@ -716,27 +776,45 @@ final class CapturaDoGuia {
   /// Captura 12 do FGTS.
   static const CapturaDoGuia fgts12 = CapturaDoGuia._('fgts', 12);
 
-  // Poupatempo (T081)
+  // Poupatempo (T081 + Feature 016 Seções)
   /// Captura 1 do Poupatempo.
   static const CapturaDoGuia poupatempo1 = CapturaDoGuia._('poupatempo', 1);
 
-  /// Captura 2 do Poupatempo (com campo de senha oficial vazio).
+  /// Captura 2 do Poupatempo.
   static const CapturaDoGuia poupatempo2 = CapturaDoGuia._('poupatempo', 2);
 
-  /// Captura 3 do Poupatempo.
+  /// Captura 3 do Poupatempo (com campo de senha oficial vazio).
   static const CapturaDoGuia poupatempo3 = CapturaDoGuia._('poupatempo', 3);
 
   /// Captura 4 do Poupatempo.
   static const CapturaDoGuia poupatempo4 = CapturaDoGuia._('poupatempo', 4);
 
-  // Carteira Digital (T082)
+  /// Captura 5 do Poupatempo.
+  static const CapturaDoGuia poupatempo5 = CapturaDoGuia._('poupatempo', 5);
+
+  /// Captura 6 do Poupatempo.
+  static const CapturaDoGuia poupatempo6 = CapturaDoGuia._('poupatempo', 6);
+
+  /// Captura 7 do Poupatempo.
+  static const CapturaDoGuia poupatempo7 = CapturaDoGuia._('poupatempo', 7);
+
+  /// Captura 8 do Poupatempo.
+  static const CapturaDoGuia poupatempo8 = CapturaDoGuia._('poupatempo', 8);
+
+  /// Captura 9 do Poupatempo.
+  static const CapturaDoGuia poupatempo9 = CapturaDoGuia._('poupatempo', 9);
+
+  /// Captura 10 do Poupatempo.
+  static const CapturaDoGuia poupatempo10 = CapturaDoGuia._('poupatempo', 10);
+
+  // Carteira Digital (T082 + Feature 016 Seções)
   /// Captura 1 da Carteira Digital.
   static const CapturaDoGuia carteiraDigital1 = CapturaDoGuia._(
     'carteira-digital',
     1,
   );
 
-  /// Captura 2 da Carteira Digital (com campo de senha oficial Gov.br vazio).
+  /// Captura 2 da Carteira Digital.
   static const CapturaDoGuia carteiraDigital2 = CapturaDoGuia._(
     'carteira-digital',
     2,
@@ -752,6 +830,42 @@ final class CapturaDoGuia {
   static const CapturaDoGuia carteiraDigital4 = CapturaDoGuia._(
     'carteira-digital',
     4,
+  );
+
+  /// Captura 5 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital5 = CapturaDoGuia._(
+    'carteira-digital',
+    5,
+  );
+
+  /// Captura 6 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital6 = CapturaDoGuia._(
+    'carteira-digital',
+    6,
+  );
+
+  /// Captura 7 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital7 = CapturaDoGuia._(
+    'carteira-digital',
+    7,
+  );
+
+  /// Captura 8 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital8 = CapturaDoGuia._(
+    'carteira-digital',
+    8,
+  );
+
+  /// Captura 9 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital9 = CapturaDoGuia._(
+    'carteira-digital',
+    9,
+  );
+
+  /// Captura 10 da Carteira Digital.
+  static const CapturaDoGuia carteiraDigital10 = CapturaDoGuia._(
+    'carteira-digital',
+    10,
   );
 
   // Correios (T082 + Feature 006 Seções)
@@ -811,14 +925,14 @@ final class CapturaDoGuia {
     FormatoDaCaptura.jpg,
   );
 
-  // Carteira de Trabalho Digital (T082)
+  // Carteira de Trabalho Digital (T082 + Feature 016 Seções)
   /// Captura 1 da Carteira de Trabalho Digital.
   static const CapturaDoGuia carteiraDeTrabalho1 = CapturaDoGuia._(
     'carteira-de-trabalho',
     1,
   );
 
-  /// Captura 2 da Carteira de Trabalho Digital (com campo de senha Gov.br vazio).
+  /// Captura 2 da Carteira de Trabalho Digital.
   static const CapturaDoGuia carteiraDeTrabalho2 = CapturaDoGuia._(
     'carteira-de-trabalho',
     2,
@@ -834,6 +948,42 @@ final class CapturaDoGuia {
   static const CapturaDoGuia carteiraDeTrabalho4 = CapturaDoGuia._(
     'carteira-de-trabalho',
     4,
+  );
+
+  /// Captura 5 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho5 = CapturaDoGuia._(
+    'carteira-de-trabalho',
+    5,
+  );
+
+  /// Captura 6 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho6 = CapturaDoGuia._(
+    'carteira-de-trabalho',
+    6,
+  );
+
+  /// Captura 7 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho7 = CapturaDoGuia._(
+    'carteira-de-trabalho',
+    7,
+  );
+
+  /// Captura 8 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho8 = CapturaDoGuia._(
+    'carteira-de-trabalho',
+    8,
+  );
+
+  /// Captura 9 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho9 = CapturaDoGuia._(
+    'carteira-de-trabalho',
+    9,
+  );
+
+  /// Captura 10 da Carteira de Trabalho Digital.
+  static const CapturaDoGuia carteiraDeTrabalho10 = CapturaDoGuia._(
+    'carteira-de-trabalho',
+    10,
   );
 
   // As capturas entram aqui, uma `static const` por imagem, junto com o guia

@@ -201,6 +201,7 @@ class AplicativoMemora extends StatelessWidget {
               dataDeNascimento: composicao.dataDeNascimento,
               fotoDePerfil: composicao.fotoDePerfil,
               apresentacaoVista: composicao.apresentacaoVista,
+              progresso: composicao.progresso,
               sessaoPerdida: composicao.sessaoPerdida,
               assistente: composicao.assistente,
               analiseGolpe: composicao.analiseGolpe,
@@ -211,6 +212,7 @@ class AplicativoMemora extends StatelessWidget {
               aceiteDoAviso: composicao.aceiteDoAviso,
               abridor: const AbridorDeAplicativoPorCanal(),
               consultaAplicativos: ConsultaDeAplicativosPorCanal(),
+              abridorSiteTutorial: composicao.abridorSiteTutorial,
             ),
           );
         },

@@ -30,6 +30,6 @@ enum ModoOperacaoIot {
   /// Geração simulada em memória para demonstração e testes offline.
   simulado,
 
-  /// Conexão em tempo real com broker MQTT (Wokwi ou ESP32 físico).
+  /// Conexão em tempo real com broker MQTT para o ESP32 físico.
   mqtt,
 }

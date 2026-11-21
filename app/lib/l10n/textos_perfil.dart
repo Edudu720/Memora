@@ -23,6 +23,25 @@ abstract final class TextosPerfil {
   /// Frase na voz da Memora quando a pessoa ainda não concluiu nenhum passo a passo.
   static const String maisAprendidoVazio = 'Ainda vamos aprender juntos!';
 
+  /// Título da seção do retrato pessoal (Feature 016).
+  static const String secaoRetrato = 'Seu retrato';
+
+  /// Título da seção com os dados da conta (Feature 016).
+  static const String secaoConta = 'Sua conta';
+
+  /// Título da seção de aprendizado local (Feature 016).
+  static const String secaoAprendizado = 'Seu aprendizado';
+
+  /// Rótulo do último módulo concluído por completo (020).
+  static const String rotuloUltimoAprendido = 'Último aprendizado';
+
+  /// Frase quando a pessoa ainda não concluiu nenhum módulo por completo (020).
+  static const String ultimoAprendidoVazio = 'Ainda vamos concluir o primeiro!';
+
+  /// Estado inicial discreto enquanto o progresso local carrega (Feature 016).
+  static const String carregandoAprendizado =
+      'Consultando seu progresso neste aparelho';
+
   // ---------------------------------------------------------------------------
   // A idade no Perfil
   // ---------------------------------------------------------------------------
@@ -250,10 +269,4 @@ abstract final class TextosPerfil {
 
   /// Rótulo acessível do avatar "Memora com escudo".
   static const String avatarMemoraProtegendo = 'Memora com escudo';
-
-  /// Rótulo acessível do avatar "Casal acolhedor".
-  static const String avatarCasalIdoso = 'Casal acolhedor';
-
-  /// Rótulo acessível do avatar "Pessoa com celular".
-  static const String avatarPessoaComCelular = 'Pessoa com celular';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/ajuda/data/abridor_site_tutorial.dart';
 import 'package:memora/features/ajuda/data/compartilhar.dart';
 import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/ajuda_guiada_da_conversa.dart';
@@ -867,6 +868,141 @@ void main() {
         );
       });
     }
+  });
+
+  group('US5 (016) — Site oficial de tutoriais com confirmação modal', () {
+    const String urlTutoriais = 'https://tutoriais.memora.fatec.example';
+
+    testWidgets(
+      'fica totalmente oculto quando abridorSiteTutorial é nulo ou URL inválida',
+      (WidgetTester t) async {
+        await t.pumpWidget(app(ajuda()));
+        await t.pumpAndSettle();
+
+        expect(find.byKey(TelaAjuda.chaveAbrirSiteTutorial), findsNothing);
+        expect(find.text(TextosAjuda.siteTutorialBotao), findsNothing);
+        expect(find.byType(CaixaDeEtapa), findsOneWidget);
+
+        for (final String urlInvalida in <String>[
+          '',
+          'http://tutoriais.memora.fatec.example',
+          'https://usuario@tutoriais.memora.fatec.example',
+          'https://tutoriais.memora.fatec.example/com espaco',
+        ]) {
+          expect(
+            AbridorDeSiteTutorial.doAmbiente(
+              Ambiente(
+                urlBase: 'https://api.memora.fatec.example',
+                usaServidorReal: false,
+                urlSiteTutorial: urlInvalida,
+              ),
+            ),
+            isNull,
+          );
+        }
+      },
+    );
+
+    testWidgets(
+      'exige diálogo modal com o endereço oficial antes de abrir e trata cancelar/confirmar/falha',
+      (WidgetTester t) async {
+        final SemanticsHandle handle = t.ensureSemantics();
+        final AbridorDeSiteTutorialSimulado abridor =
+            AbridorDeSiteTutorialSimulado(urlTutoriais);
+
+        await t.pumpWidget(
+          app(
+            TelaAjuda(
+              assuntos: AssuntoDeAjuda.disponiveis(podeCompartilhar: false),
+              aoAbrirAssunto: (AssuntoDeAjuda _) {},
+              aoVoltar: () {},
+              abridorSiteTutorial: abridor,
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        final Finder botaoAbrir = find.byKey(TelaAjuda.chaveAbrirSiteTutorial);
+        expect(botaoAbrir, findsOneWidget);
+        expect(t.getSize(botaoAbrir).height, greaterThanOrEqualTo(56));
+        expect(find.byType(CaixaDeEtapa), findsOneWidget);
+
+        // 1) Abrir diálogo e cancelar -> 0 aberturas
+        await tocar(t, botaoAbrir);
+        expect(find.text(TextosAjuda.siteTutorialModalTitulo), findsOneWidget);
+        expect(find.text(urlTutoriais), findsOneWidget);
+        expect(abridor.abertos, isEmpty);
+
+        await tocar(t, find.byKey(TelaAjuda.chaveCancelarSiteTutorial));
+        expect(find.text(TextosAjuda.siteTutorialModalTitulo), findsNothing);
+        expect(abridor.abertos, isEmpty);
+
+        // 2) Abrir diálogo e confirmar -> 1 abertura
+        await tocar(t, botaoAbrir);
+        await tocar(t, find.byKey(TelaAjuda.chaveConfirmarSiteTutorial));
+        expect(abridor.abertos, <String>[urlTutoriais]);
+        expect(find.byKey(TelaAjuda.chaveErroSiteTutorial), findsNothing);
+
+        // 3) Falha ao abrir -> aviso calmo com liveRegion: true
+        abridor.falharNoProximo = true;
+        await tocar(t, botaoAbrir);
+        await tocar(t, find.byKey(TelaAjuda.chaveConfirmarSiteTutorial));
+
+        final Finder avisoErro = find.byKey(TelaAjuda.chaveErroSiteTutorial);
+        expect(avisoErro, findsOneWidget);
+        expect(find.text(TextosAjuda.siteTutorialErro), findsOneWidget);
+        expect(
+          t.getSemantics(avisoErro),
+          isSemantics(isLiveRegion: true),
+        );
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'diálogo modal não estoura em 320x568 com 200% e reduzir movimento ativo',
+      (WidgetTester t) async {
+        final AbridorDeSiteTutorialSimulado abridor =
+            AbridorDeSiteTutorialSimulado(urlTutoriais);
+        const Size pequeno = Size(320, 568);
+        vestir(t, pequeno);
+        await t.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              size: pequeno,
+              textScaler: TextScaler.linear(2.0),
+              disableAnimations: true,
+            ),
+            child: MaterialApp(
+              theme: TemasMemora.altoContraste,
+              home: TelaAjuda(
+                assuntos: AssuntoDeAjuda.disponiveis(podeCompartilhar: false),
+                aoAbrirAssunto: (AssuntoDeAjuda _) {},
+                aoVoltar: () {},
+                abridorSiteTutorial: abridor,
+              ),
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        await tocar(t, find.byKey(TelaAjuda.chaveAbrirSiteTutorial));
+        expect(t.takeException(), isNull);
+        expect(find.text(urlTutoriais), findsOneWidget);
+        expect(
+          find.byKey(TelaAjuda.chaveConfirmarSiteTutorial),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(TelaAjuda.chaveCancelarSiteTutorial),
+          findsOneWidget,
+        );
+
+        await t.ensureVisible(find.byKey(TelaAjuda.chaveConfirmarSiteTutorial));
+        await t.ensureVisible(find.byKey(TelaAjuda.chaveCancelarSiteTutorial));
+        expect(t.takeException(), isNull);
+      },
+    );
   });
 }
 

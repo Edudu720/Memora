@@ -41,6 +41,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
   late final TextEditingController _controladorBroker;
   late final TextEditingController _controladorTopico;
   bool _painelConexaoAberto = false;
+  bool _verificacaoQuedaAberta = false;
 
   @override
   void initState() {
@@ -56,6 +57,15 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
   }
 
   @override
+  void didUpdateWidget(covariant TelaDispositivoCuidado oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlador != widget.controlador) {
+      oldWidget.controlador.removeListener(_verificarQuedaAtiva);
+      widget.controlador.addListener(_verificarQuedaAtiva);
+    }
+  }
+
+  @override
   void dispose() {
     widget.controlador.removeListener(_verificarQuedaAtiva);
     _controladorBroker.dispose();
@@ -67,6 +77,7 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
     final EventoQueda? queda = widget.controlador.quedaAtiva;
     if (queda != null && mounted) {
       widget.controlador.limparQuedaAtiva();
+      if (_verificacaoQuedaAberta) return;
       _abrirTelaVerificacaoQueda(queda);
     }
   }
@@ -85,16 +96,22 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
       },
     );
 
-    Navigator.of(context).push<void>(
-      // Uma pergunta que cobre tudo: sobe por cima, e a tela de trás fica
-      // onde está (FR-010).
-      RotaMemora<void>(
-        fullscreenDialog: true,
-        direcao: DirecaoDaTransicao.sobrepor,
-        builder: (BuildContext ctx) =>
-            TelaVerificacaoQueda(controlador: ctrlQueda),
-      ),
-    );
+    _verificacaoQuedaAberta = true;
+    Navigator.of(context)
+        .push<void>(
+          // Uma pergunta que cobre tudo: sobe por cima, e a tela de trás fica
+          // onde está (FR-010).
+          RotaMemora<void>(
+            fullscreenDialog: true,
+            direcao: DirecaoDaTransicao.sobrepor,
+            builder: (BuildContext ctx) =>
+                TelaVerificacaoQueda(controlador: ctrlQueda),
+          ),
+        )
+        .whenComplete(() {
+          ctrlQueda.dispose();
+          _verificacaoQuedaAberta = false;
+        });
   }
 
   void _abrirDialogoContato() {
