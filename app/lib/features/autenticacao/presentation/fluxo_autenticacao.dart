@@ -884,6 +884,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           repositorio: assistente,
           categoria: categoria,
           consultaAplicativos: widget.consultaAplicativos,
+          progresso: widget.progresso,
+          idDaConta: _pessoa?.id,
           aoAbrirAtalhosDiretos: () => _abrirAtalhosAplicativos(assistente),
           // Se o item tiver guia de passo a passo embarcado, abre o guia;
           // caso contrário, vai para a conversa já perguntando (T069, FR-027).

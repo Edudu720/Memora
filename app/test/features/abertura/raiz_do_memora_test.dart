@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/abertura/presentation/abertura_memora.dart';
+import 'package:memora/features/aprendizado/data/progresso_de_aprendizado.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
 import 'package:memora/features/autenticacao/data/repositorio_autenticacao_simulado.dart';
+import 'package:memora/features/autenticacao/presentation/fluxo_autenticacao.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_boas_vindas.dart';
 import 'package:memora/main.dart';
 import 'package:memora/services/ambiente/ambiente.dart';
@@ -32,6 +34,7 @@ void main() {
         autenticacao: RepositorioAutenticacaoSimulado(demora: Duration.zero),
         assistente: RepositorioAssistenteSimulado(demora: Duration.zero),
         aceiteDoAviso: AceiteEmMemoria(),
+        progresso: ProgressoDeAprendizado(),
         sessaoPerdida: SessaoPerdida(),
         limpeza: LimpezaDeSessao(
           cofre: CofreQueRegistra(),
@@ -79,5 +82,9 @@ void main() {
     expect(app.controlador, same(c.controlador));
     expect(app.ultimoAcesso, same(c.ultimoAcesso));
     expect(app.composicao, same(c.composicao));
+    final FluxoAutenticacao fluxo = t.widget<FluxoAutenticacao>(
+      find.byType(FluxoAutenticacao),
+    );
+    expect(fluxo.progresso, same(c.composicao.progresso));
   });
 }

@@ -32,8 +32,11 @@ abstract final class TextosPerfil {
   /// Título da seção de aprendizado local (Feature 016).
   static const String secaoAprendizado = 'Seu aprendizado';
 
-  /// Rótulo do último módulo concluído (Feature 016 / reserva Item 14).
-  static const String rotuloUltimoModulo = 'Último módulo concluído';
+  /// Rótulo do último módulo concluído por completo (020).
+  static const String rotuloUltimoAprendido = 'Último aprendizado';
+
+  /// Frase quando a pessoa ainda não concluiu nenhum módulo por completo (020).
+  static const String ultimoAprendidoVazio = 'Ainda vamos concluir o primeiro!';
 
   /// Estado inicial discreto enquanto o progresso local carrega (Feature 016).
   static const String carregandoAprendizado =

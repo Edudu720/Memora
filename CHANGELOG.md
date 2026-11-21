@@ -2,6 +2,20 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Feature `020-modulo-concluido-e-ultimo-aprendido`
+
+### Adicionado
+- **Módulo concluído no Catálogo (`TelaCatalogo`, `estado_do_modulo.dart`)**:
+  - Função pura de domínio `moduloConcluido` que marca módulos com selo informativo `"Concluído"` (`BadgeDeStatus` `readOnly`) somente após todas as seções (em guias seccionados) ou o guia inteiro (em guias diretos) serem concluídos.
+  - Integração de `progresso` e `idDaConta` em `FluxoAutenticacao._abrirCatalogo` com atualização ao vivo via `ProgressoDeAprendizado.alteracoes`.
+- **Checkbox verde arredondado no seletor de seções (`TelaSeletorDeSecao`)**:
+  - Cada seção concluída passa a exibir um checkbox verde arredondado à direita construído exclusivamente com tokens do Design System (`cores.sucesso`, `MemoraDimensoes.iconeDestaque`, `MemoraRaio.balaoPonta`, `Icons.check_rounded`), combinado com o texto `"Já aprendeu"` e anúncio `"Concluído."` no TalkBack (`secaoConcluidaDescrita`).
+- **Ligação de progresso na subida do app (`main.dart`)**:
+  - `AplicativoMemora` passa a repassar `progresso: composicao.progresso` diretamente para `FluxoAutenticacao`, habilitando em produção o selo `"Concluído"` no catálogo e os indicadores locais de aprendizado no Perfil.
+- **Campo `"Último aprendizado"` em Meu Perfil (`TelaPerfil`)**:
+  - Novo `CampoInformacao` puramente informativo (`TelaPerfil.chaveUltimoAprendido`) calculado 100% localmente a partir de `ProgressoDeAprendizado.ordensDeConclusao` e `chaveDoUltimoModuloConcluido`, respeitando `FR-042a` (zero rede) e `FR-042b` (limpeza ao sair), com atualização reativa dentro da `CascaInterna`.
+  - Conciliado com o redesenho semântico da feature `016` dentro da seção dedicada *Seu aprendizado* (`TelaPerfil.chaveSecaoAprendizado`, `Semantics(header: true)`), substituindo o slot provisório (`chaveUltimoModulo` / `ultimoModuloConcluido`), usando busca de nomes em `O(1)` (`_nomesDoCatalogo`), guarda de corrida `_versaoCarga`, tratamento `try/catch` e carregamento acessível (`TextosPerfil.carregandoAprendizado` em vez de `'...'`).
+
 ## [Unreleased] — Feature `019-icones-svg-tutoriais`
 
 ### Alterado

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -169,7 +170,8 @@ void main() {
     });
 
     testWidgets('a seção cujo último passo a pessoa já alcançou diz '
-        '"Já aprendeu"', (WidgetTester t) async {
+        '"Já aprendeu" e exibe checkbox verde arredondado', (WidgetTester t) async {
+      final SemanticsHandle h = t.ensureSemantics();
       await t.pumpWidget(
         MaterialApp(
           theme: TemasMemora.claro,
@@ -187,9 +189,81 @@ void main() {
         ),
         findsOneWidget,
       );
-      // As outras seções não ganham a marca.
+      // As outras seções não ganham a marca nem o checkbox.
       expect(find.textContaining('Já aprendeu'), findsOneWidget);
+      expect(
+        find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('certidoes')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('entrar')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('perfil')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('certidoes')),
+          matching: find.byIcon(Icons.check_rounded),
+        ),
+        findsOneWidget,
+      );
+
+      // Leitor de tela anuncia explicitamente "Concluído." além da cor verde.
+      expect(
+        find.bySemanticsLabel(
+          TextosGuias.secaoConcluidaDescrita(
+            'Baixar Certidões',
+            'Emitir documentos e comprovantes oficiais.',
+            TextosGuias.secaoJaAprendida(TextosGuias.quantidadeDePassos(5)),
+          ),
+        ),
+        findsOneWidget,
+      );
+      h.dispose();
     });
+
+    testWidgets(
+      'checkbox verde arredondado adapta contraste nos 3 temas e atualiza ao vivo',
+      (WidgetTester t) async {
+        final _ProgressoFalso prog = _ProgressoFalso(<String, int>{});
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.altoContraste,
+            home: tela(progresso: prog, idDaConta: 'ana'),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(
+          find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('entrar')),
+          findsNothing,
+        );
+
+        await prog.registrarConclusao(
+          idDaConta: 'ana',
+          chave: 'gov-br:entrar',
+        );
+        await t.pumpAndSettle();
+
+        expect(
+          find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('entrar')),
+          findsOneWidget,
+        );
+        expect(find.text('1 de 3 assuntos aprendidos'), findsOneWidget);
+
+        await prog.apagar();
+        await t.pumpAndSettle();
+
+        expect(
+          find.byKey(TelaSeletorDeSecao.chaveCheckDaSecao('entrar')),
+          findsNothing,
+        );
+        expect(find.text('3 assuntos para aprender'), findsOneWidget);
+      },
+    );
 
     // A matriz inteira: aparelho x escala x tema. O seletor tem um cartão por
     // seção e a saída para a conversa no fim; todos precisam poder ser
@@ -212,6 +286,11 @@ void main() {
           naCombinacao(
             c,
             tela(
+              progresso: _ProgressoFalso(<String, int>{
+                'gov-br:entrar': 1,
+                'gov-br:certidoes': 1,
+              }),
+              idDaConta: 'ana',
               aoEscolher: (SecaoDoGuia s) => escolhida = s,
               aoConversar: () => conversou = true,
             ),
@@ -292,10 +371,31 @@ Future<void> _tocarNoPedacoVisivel(
 /// completa dentro de `testWidgets`).
 class _ProgressoFalso extends ProgressoDeAprendizado {
   final Map<String, int> _valores;
+  final StreamController<void> _ctrl = StreamController<void>.broadcast();
 
-  _ProgressoFalso(this._valores)
-    : super(diretorio: () async => Directory.systemTemp);
+  _ProgressoFalso(Map<String, int> iniciais)
+    : _valores = Map<String, int>.from(iniciais),
+      super(diretorio: () async => Directory.systemTemp);
 
   @override
-  Future<Map<String, int>> concluidos(String idDaConta) async => _valores;
+  Stream<void> get alteracoes => _ctrl.stream;
+
+  @override
+  Future<void> registrarConclusao({
+    required String idDaConta,
+    required String chave,
+  }) async {
+    _valores[chave] = (_valores[chave] ?? 0) + 1;
+    _ctrl.add(null);
+  }
+
+  @override
+  Future<void> apagar() async {
+    _valores.clear();
+    _ctrl.add(null);
+  }
+
+  @override
+  Future<Map<String, int>> concluidos(String idDaConta) async =>
+      Map<String, int>.from(_valores);
 }
