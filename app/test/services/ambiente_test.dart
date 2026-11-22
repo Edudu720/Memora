@@ -287,7 +287,24 @@ void main() {
     });
 
     test('urlSiteTutorial e AbridorDeSiteTutorial validam protocolo estrito https://', () {
-      expect(Ambiente.doAmbiente().urlSiteTutorial, isNull);
+      expect(
+        Ambiente.doAmbiente().urlSiteTutorial,
+        Ambiente.urlSiteTutorialPadrao,
+      );
+      expect(
+        AbridorDeSiteTutorial.doAmbiente(Ambiente.doAmbiente())?.endereco,
+        'https://memora-site-thf2.onrender.com/',
+      );
+      expect(
+        AbridorDeSiteTutorial.doAmbiente(
+          const Ambiente(
+            urlBase: 'https://api.memora.fatec.example',
+            usaServidorReal: false,
+            urlSiteTutorial: '',
+          ),
+        ),
+        isNull,
+      );
       expect(
         AbridorDeSiteTutorial.doAmbiente(
           const Ambiente(

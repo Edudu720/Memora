@@ -55,10 +55,12 @@ class Ambiente {
   final String? urlDownload;
 
   /// Endereço oficial `https://` do site de tutoriais exibido na Ajuda
-  /// (Issue #106 Item 11, feature 016), ou nulo enquanto não publicado.
+  /// (Issue #106 Item 11, features 016 e 017), ou nulo quando explicitamente
+  /// desabilitado.
   ///
-  /// Vem exclusivamente de `--dart-define=MEMORA_URL_SITE_TUTORIAL` e passa
-  /// por [enderecoOficial]: nunca aceita `http://`, usuário em URL nem texto
+  /// Usa [urlSiteTutorialPadrao] por padrão e pode ser sobrescrito ou limpo
+  /// via `--dart-define=MEMORA_URL_SITE_TUTORIAL=...`, passando sempre por
+  /// [enderecoOficial]: nunca aceita `http://`, usuário em URL nem texto
   /// digitado pela pessoa usuária.
   final String? urlSiteTutorial;
 
@@ -100,6 +102,10 @@ class Ambiente {
   /// Padrão de desenvolvimento: o hospedeiro do emulador Android.
   static const String urlBasePadrao = 'http://10.0.2.2:8080/v1';
 
+  /// Endereço oficial publicado do site de tutoriais no Render (Issue #106).
+  static const String urlSiteTutorialPadrao =
+      'https://memora-site-thf2.onrender.com/';
+
   /// Lê a configuração passada na linha de comando.
   ///
   /// ```powershell
@@ -120,6 +126,7 @@ class Ambiente {
     const String download = String.fromEnvironment('MEMORA_URL_DOWNLOAD');
     const String siteTutorial = String.fromEnvironment(
       'MEMORA_URL_SITE_TUTORIAL',
+      defaultValue: urlSiteTutorialPadrao,
     );
 
     return Ambiente(
