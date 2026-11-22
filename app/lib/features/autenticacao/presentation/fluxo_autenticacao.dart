@@ -1051,6 +1051,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             return controlador;
           },
           aoVoltar: () => Navigator.of(contexto).pop(),
+          fotoDePerfil: _fotos,
+          idDaConta: _pessoa?.id,
+          nomeDaPessoa: _pessoa?.nomeTratamento,
         ),
       ),
     );
@@ -1280,6 +1283,9 @@ class _AceiteSoNaMemoria implements AceiteDoAviso {
 class _DonaDaConversa extends StatefulWidget {
   final ControladorConversa Function() criar;
   final VoidCallback aoVoltar;
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+  final String? idDaConta;
+  final String? nomeDaPessoa;
 
   /// Avisam o fluxo de que há uma conversa aberta, e de quando ela fecha.
   final void Function(ControladorConversa) aoAbrir;
@@ -1290,6 +1296,9 @@ class _DonaDaConversa extends StatefulWidget {
     required this.aoVoltar,
     required this.aoAbrir,
     required this.aoFechar,
+    this.fotoDePerfil,
+    this.idDaConta,
+    this.nomeDaPessoa,
   });
 
   @override
@@ -1314,7 +1323,13 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
 
   @override
   Widget build(BuildContext context) {
-    return TelaConversa(controlador: _controlador, aoVoltar: widget.aoVoltar);
+    return TelaConversa(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+      fotoDePerfil: widget.fotoDePerfil,
+      idDaConta: widget.idDaConta,
+      nomeDaPessoa: widget.nomeDaPessoa,
+    );
   }
 }
 

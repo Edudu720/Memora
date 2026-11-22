@@ -13,10 +13,11 @@ import '../../suporte/aceite_em_memoria.dart';
 import '../../suporte/aparelhos.dart';
 import '../../suporte/movimento.dart';
 
-/// A Memora pequena no topo da conversa — T059, US4, FR-025 e FR-042.
+/// A Memora pequena no topo da conversa — T059, US4, FR-025 e rev. 022.
 ///
-/// - **uma só**, na barra do topo (que já existe: não toma altura da lista) e
-///   nenhuma ao lado dos balões;
+/// - **uma só** Memora animada/falando, na barra do topo (que já existe: não
+///   toma altura da lista), enquanto nos balões os rostos permanecem
+///   estáticos (`rostoAnimado: false`) e recuam em ampliações `>= 175%`;
 /// - **falando** enquanto a resposta aparece letra a letra, e **de volta ao
 ///   repouso** quando termina;
 /// - parada em repouso com "reduzir movimento" e **decorativa** para o leitor
@@ -158,12 +159,15 @@ void main() {
       await montar(t);
 
       expect(doTopo(), findsOneWidget);
-      // Fora o rosto do convite, não há outra.
+      // Fora o rosto estático do convite, há apenas a Memora viva do topo.
       final Finder doConvite = find.descendant(
         of: find.byKey(TelaConversa.chaveConvite),
         matching: find.byType(MemoraAnimada),
       );
       expect(doConvite, findsOneWidget);
+      final Element conviteEl = doConvite.evaluate().single;
+      expect((conviteEl.widget as MemoraAnimada).reageAoToque, isFalse);
+      expect(MediaQuery.disableAnimationsOf(conviteEl), isTrue);
       expect(find.byType(MemoraAnimada), findsNWidgets(2));
       // Acima das mensagens: não ocupa o espaço delas.
       expect(
@@ -178,7 +182,7 @@ void main() {
     });
 
     testWidgets('o convite, antes da primeira mensagem, leva o rosto dela '
-        '(FR-042, rev. 2026-11-18)', (WidgetTester t) async {
+        'estático (FR-042, rev. 2026-11-22)', (WidgetTester t) async {
       await montar(t);
 
       final BalaoDeFala convite = t.widget<BalaoDeFala>(
@@ -186,6 +190,7 @@ void main() {
       );
       expect(convite.autor, AutorDoBalao.memora);
       expect(convite.comRosto, isTrue);
+      expect(convite.rostoAnimado, isFalse);
       expect(
         find.descendant(
           of: find.byKey(TelaConversa.chaveConvite),
@@ -195,48 +200,110 @@ void main() {
       );
     });
 
-    testWidgets('continua uma só depois de várias falas, e nenhum balão traz '
-        'rosto', (WidgetTester t) async {
-      await montar(
-        t,
-        guardadas: <MensagemDaConversa>[
-          MensagemDaConversa(
-            autor: AutorDaMensagem.pessoa,
-            texto: 'oi',
-            momento: DateTime(2026),
-          ),
-          MensagemDaConversa(
-            autor: AutorDaMensagem.memora,
-            texto: _antiga,
-            momento: DateTime(2026),
-          ),
-        ],
-      );
-      await perguntar(t);
-      await responder(t, 'Ok.');
-      await t.pump(const Duration(seconds: 5));
-
-      expect(find.byType(MemoraAnimada), findsOneWidget);
-      expect(find.byType(BalaoDeFala), findsWidgets);
-      for (final Element balao in find.byType(BalaoDeFala).evaluate()) {
-        final Finder dele = find.byWidget(balao.widget);
-        expect(
-          find.descendant(of: dele, matching: find.byType(MemoraPersonagem)),
-          findsNothing,
+    testWidgets(
+      'continua uma só Memora animada no topo depois de várias falas, com marcadores estáticos nos balões (022)',
+      (WidgetTester t) async {
+        await montar(
+          t,
+          guardadas: <MensagemDaConversa>[
+            MensagemDaConversa(
+              autor: AutorDaMensagem.pessoa,
+              texto: 'oi',
+              momento: DateTime(2026),
+            ),
+            MensagemDaConversa(
+              autor: AutorDaMensagem.memora,
+              texto: _antiga,
+              momento: DateTime(2026),
+            ),
+          ],
         );
+        await perguntar(t);
+        await responder(t, 'Ok.');
+        await t.pump(const Duration(seconds: 5));
+
+        expect(doTopo(), findsOneWidget);
+        final Finder nosBaloes = find.descendant(
+          of: find.byType(BalaoDeFala),
+          matching: find.byType(MemoraAnimada),
+        );
+        expect(nosBaloes, findsWidgets);
+        for (final Element el in nosBaloes.evaluate()) {
+          expect((el.widget as MemoraAnimada).reageAoToque, isFalse);
+          expect(MediaQuery.disableAnimationsOf(el), isTrue);
+        }
         expect(
-          find.descendant(of: dele, matching: find.byType(MemoraAnimada)),
+          find.byType(MemoraAnimada).evaluate().length -
+              nosBaloes.evaluate().length,
+          1,
+        );
+
+        expect(find.byType(BalaoDeFala), findsWidgets);
+        for (final Element balaoEl in find.byType(BalaoDeFala).evaluate()) {
+          final BalaoDeFala balao = balaoEl.widget as BalaoDeFala;
+          final Finder dele = find.byWidget(balao);
+          expect(balao.comRosto, isTrue);
+          expect(balao.rostoAnimado, isFalse);
+          if (balao.autor == AutorDoBalao.memora) {
+            final Finder personagem = find.descendant(
+              of: dele,
+              matching: find.byType(MemoraPersonagem),
+            );
+            expect(personagem, findsOneWidget);
+            expect(t.widget<MemoraPersonagem>(personagem).reageAoToque, isFalse);
+          } else {
+            expect(
+              find.descendant(
+                of: dele,
+                matching: find.byIcon(Icons.person_rounded),
+              ),
+              findsOneWidget,
+            );
+          }
+        }
+      },
+    );
+
+    testWidgets(
+      'escala >= 175% (200%) oculta os rostos laterais dos balões para preservar leitura',
+      (WidgetTester t) async {
+        await montar(
+          t,
+          escala: 2.0,
+          guardadas: <MensagemDaConversa>[
+            MensagemDaConversa(
+              autor: AutorDaMensagem.pessoa,
+              texto: 'oi',
+              momento: DateTime(2026),
+            ),
+            MensagemDaConversa(
+              autor: AutorDaMensagem.memora,
+              texto: _antiga,
+              momento: DateTime(2026),
+            ),
+          ],
+        );
+
+        expect(find.byType(BalaoDeFala), findsWidgets);
+        for (final Element balaoEl in find.byType(BalaoDeFala).evaluate()) {
+          expect((balaoEl.widget as BalaoDeFala).comRosto, isFalse);
+        }
+        expect(
+          find.descendant(
+            of: find.byType(BalaoDeFala),
+            matching: find.byType(MemoraPersonagem),
+          ),
           findsNothing,
         );
         expect(
           find.descendant(
-            of: dele,
+            of: find.byType(BalaoDeFala),
             matching: find.byIcon(Icons.person_rounded),
           ),
           findsNothing,
         );
-      }
-    });
+      },
+    );
 
     testWidgets('a explicação do aceite não traz uma segunda Memora', (
       WidgetTester t,
