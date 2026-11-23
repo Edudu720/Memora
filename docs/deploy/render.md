@@ -117,22 +117,23 @@ reconstruir quando apenas o backend ou o app mudarem.
 
 1. Depois do merge na branch configurada do Blueprint (`develop`), confirme no
    painel do Render se o serviço `memora-site` foi criado/sincronizado.
-2. Copie a URL oficial gerada em `https://` no painel (ex.:
-   `https://memora-site-xxxx.onrender.com` — **atenção**: o subdomínio exato
-   `https://memora-site.onrender.com` já pertence a outro projeto externo no
-   Render e não deve ser usado).
+2. URL oficial publicada em produção:
+   **`https://memora-site-thf2.onrender.com/`**
+   (**atenção**: o subdomínio exato `https://memora-site.onrender.com` pertence
+   a outro projeto externo no Render e não deve ser usado).
 3. Confira que os cabeçalhos de segurança estão ativos:
 
 ```powershell
-curl.exe -I https://<site-memora>.onrender.com/
+curl.exe -I https://memora-site-thf2.onrender.com/
 ```
 
 Deve responder `200 OK` com `Content-Security-Policy`, `X-Frame-Options: DENY`,
 `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` e
 `Permissions-Policy`.
 
-4. Registre a URL `https://` oficial na **Issue #106** para desbloquear o
-   botão do site na tela de Ajuda do aplicativo (**Item 11**, spec `012`).
+4. A URL oficial `https://memora-site-thf2.onrender.com/` já está configurada
+   como padrão em `Ambiente.urlSiteTutorialPadrao` (`MEMORA_URL_SITE_TUTORIAL`)
+   para habilitar o botão do site na tela de Ajuda (**Issue #106 — Item 11**).
 
 ## 3. Ping a cada 10 minutos
 
@@ -160,6 +161,10 @@ Pendências antes de mandar o APK para alguém de fora:
 ```powershell
 $env:TEMP="C:\memora-tmp"; $env:TMP="C:\memora-tmp"; cd app; flutter build apk --release --dart-define=MEMORA_URL_BASE=https://<servico>.onrender.com/v1 --dart-define=MEMORA_SERVIDOR_REAL=true
 ```
+
+*(O endereço oficial do site de tutoriais `https://memora-site-thf2.onrender.com/`
+já é assumido por padrão via `Ambiente.urlSiteTutorialPadrao`, podendo ser
+sobrescrito com `--dart-define=MEMORA_URL_SITE_TUTORIAL=...` se necessário.)*
 
 Na máquina do Henrique, reverta `app/pubspec.lock` e
 `app/android/gradle.properties` depois do build.

@@ -120,9 +120,10 @@ class Composicao {
   /// criar um para cada lado seria a sessão perdida sem ninguém ouvir.
   final SessaoPerdida sessaoPerdida;
 
-  /// Abridor seguro `https://` para o site oficial de tutoriais (Feature 016).
+  /// Abridor seguro `https://` para o site oficial de tutoriais (Features 016 e 017).
   ///
-  /// Nulo enquanto `MEMORA_URL_SITE_TUTORIAL` não trouxer URL `https://` válida.
+  /// Assume [Ambiente.urlSiteTutorialPadrao] por padrão (`memora-site` no
+  /// Render), podendo ser sobrescrito ou limpo via `MEMORA_URL_SITE_TUTORIAL`.
   final AbridorDeSiteTutorial? abridorSiteTutorial;
 
   /// Cria a composição já resolvida.

@@ -12,6 +12,11 @@ Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste ar
   - Os balões `"Você"` passam a exibir à direita o retrato circular (`40 dp`, `MemoraDimensoes.pisoDeIlustracao`) idêntico ao selecionado em **Meu Perfil** — foto própria local, um dos 4 avatares ilustrados ou padrão neutro com iniciais/silhueta — 100% local, isolado por conta, com atualização ao vivo via fluxo broadcast `alteracoes` e guarda anti-corrida (`_versaoRetrato`).
   - Em ampliações `>= 175%` (`MemoraDimensoes.escalaTextoAlta`), os avatares laterais dos balões recuam para preservar a largura útil de leitura até `200%`; `RetratoDoPerfil._padraoNeutro` protege iniciais largas (`"WM"`) com `FittedBox(fit: BoxFit.scaleDown)` e os avatares no chat permanecem silenciosos no TalkBack (`ExcludeSemantics`).
 
+## [Unreleased] — URL Oficial do Site Tutorial (`#106` Item 11)
+
+### Alterado
+- **Endereço oficial do site tutorial na Ajuda (`Ambiente.urlSiteTutorialPadrao`, `docs/deploy/render.md`)**: definida a URL publicada no Render (`https://memora-site-thf2.onrender.com/`) como padrão de `MEMORA_URL_SITE_TUTORIAL` em `Ambiente.doAmbiente()`, habilitando o botão e diálogo de confirmação anti-phishing na `TelaAjuda` em builds padrão enquanto preserva a validação estrita `https://` e sobrescrita por `--dart-define`.
+
 ## [Unreleased] — Feature `021-analise-golpes`
 
 ### Adicionado
