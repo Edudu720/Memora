@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -206,6 +207,88 @@ void main() {
 
       await composicao.limpeza.executar(esquecerTudo: true);
       expect(await storage.ler('conta-1'), isNull);
+    });
+  });
+
+  group('Fluxo reativo de alterações — 022-avatares-no-chat', () {
+    late Directory tempDir;
+    late SharedPreferences prefs;
+
+    setUp(() async {
+      tempDir = await Directory.systemTemp.createTemp('memora_foto_stream_');
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      prefs = await SharedPreferences.getInstance();
+    });
+
+    tearDown(() async {
+      if (tempDir.existsSync()) {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    Future<void> validarFluxo({
+      required ArmazenamentoDeFotoDePerfil storage,
+      required Future<void> Function() esquecer,
+    }) async {
+      int eventosOuvinte1 = 0;
+      int eventosOuvinte2 = 0;
+      final StreamSubscription<void> sub1 =
+          storage.alteracoes.listen((_) => eventosOuvinte1++);
+      final StreamSubscription<void> sub2 =
+          storage.alteracoes.listen((_) => eventosOuvinte2++);
+      addTearDown(sub1.cancel);
+      addTearDown(sub2.cancel);
+
+      await storage.salvarFoto('conta-1', Uint8List.fromList(<int>[1, 2, 3]));
+      await Future<void>.delayed(Duration.zero);
+      expect(eventosOuvinte1, 1);
+      expect(eventosOuvinte2, 1);
+
+      await storage.salvarAvatar('conta-1', AvatarIlustrado.memoraAcenando);
+      await Future<void>.delayed(Duration.zero);
+      expect(eventosOuvinte1, 2);
+      expect(eventosOuvinte2, 2);
+
+      // Conta vazia em apagar não emite alteração espúria.
+      await storage.apagar('   ');
+      await Future<void>.delayed(Duration.zero);
+      expect(eventosOuvinte1, 2);
+      expect(eventosOuvinte2, 2);
+
+      await storage.apagar('conta-1');
+      await Future<void>.delayed(Duration.zero);
+      expect(eventosOuvinte1, 3);
+      expect(eventosOuvinte2, 3);
+
+      await storage.salvarAvatar('conta-2', AvatarIlustrado.memoraPensando);
+      await Future<void>.delayed(Duration.zero);
+      expect(eventosOuvinte1, 4);
+
+      await esquecer();
+      await Future<void>.delayed(Duration.zero);
+      expect(eventosOuvinte1, 5);
+      expect(eventosOuvinte2, 5);
+    }
+
+    test('FotoDePerfilLocal emite em salvarFoto, salvarAvatar, apagar e esquecerDoAparelho',
+        () async {
+      final FotoDePerfilLocal storage = FotoDePerfilLocal(
+        prefs,
+        diretorioBase: () async => tempDir,
+      );
+      await validarFluxo(
+        storage: storage,
+        esquecer: storage.esquecerDoAparelho,
+      );
+    });
+
+    test('FotoDePerfilEmMemoria emite em salvarFoto, salvarAvatar, apagar e esquecerDoAparelho',
+        () async {
+      final FotoDePerfilEmMemoria storage = FotoDePerfilEmMemoria();
+      await validarFluxo(
+        storage: storage,
+        esquecer: storage.esquecerDoAparelho,
+      );
     });
   });
 }

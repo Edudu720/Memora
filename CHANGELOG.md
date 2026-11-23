@@ -2,6 +2,16 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Feature `022-avatares-no-chat`
+
+### Corrigido / Adicionado
+- **Avatares laterais estáticos nos balões do chat (`TelaConversa`, `BalaoDeFala`, `specs/022-avatares-no-chat/`)**:
+  - Todos os balões da conversa (convite, histórico, `escrevendo…` e resposta em streaming) exibem o rosto mini estático da Memora à esquerda (`rostoAnimado: false`, `reageAoToque: false`, `MediaQuery.disableAnimations: true`), alinhado ao modelo visual da ajuda guiada (*Passo 2 de 5*), preservando a `BarraSuperior` como a única Memora animada/falando da tela (`FR-025`).
+  - `BalaoDeFala` ganha os parâmetros opcionais `avatarPessoa` e `rostoAnimado`, mantendo o `design_system/` desacoplado de `features/`.
+- **Sincronização fiel com o retrato de Meu Perfil (`ArmazenamentoDeFotoDePerfil.alteracoes`, `FluxoAutenticacao`, `RetratoDoPerfil`)**:
+  - Os balões `"Você"` passam a exibir à direita o retrato circular (`40 dp`, `MemoraDimensoes.pisoDeIlustracao`) idêntico ao selecionado em **Meu Perfil** — foto própria local, um dos 4 avatares ilustrados ou padrão neutro com iniciais/silhueta — 100% local, isolado por conta, com atualização ao vivo via fluxo broadcast `alteracoes` e guarda anti-corrida (`_versaoRetrato`).
+  - Em ampliações `>= 175%` (`MemoraDimensoes.escalaTextoAlta`), os avatares laterais dos balões recuam para preservar a largura útil de leitura até `200%`; `RetratoDoPerfil._padraoNeutro` protege iniciais largas (`"WM"`) com `FittedBox(fit: BoxFit.scaleDown)` e os avatares no chat permanecem silenciosos no TalkBack (`ExcludeSemantics`).
+
 ## [Unreleased] — URL Oficial do Site Tutorial (`#106` Item 11)
 
 ### Alterado

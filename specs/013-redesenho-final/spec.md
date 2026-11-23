@@ -504,7 +504,10 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
   MUST exibir no máximo o primeiro.
 - **FR-025**: A Memora animada MUST aparecer uma vez na conversa, pequena e no
   topo (FR-042), e reagir às respostas dela (falando enquanto a resposta
-  aparece) sem se repetir a cada balão (FR-006).
+  aparece) sem se repetir a cada balão (FR-006). *(rev. 2026-11-22: ver
+  [`specs/022-avatares-no-chat/spec.md`](../022-avatares-no-chat/spec.md) — os
+  balões da conversa trazem rosto mini estático e sem toque enquanto a
+  `BarraSuperior` mantém a única Memora animada/falando).*
 - **FR-026**: O aviso antigolpe da conversa MUST manter o comportamento atual:
   encolhe, não some, e não é dispensável.
 
@@ -575,7 +578,11 @@ ela é anunciada como "Outra dica da Memora" e a dica não troca sozinha. Com
   MUST NOT ocupar o espaço das mensagens; as respostas dela não levam o rosto
   dela ao lado de cada balão. O convite, o balão que aparece antes da primeira
   mensagem, MUST levar o rosto dela ao lado (rev. 2026-11-18): sem ele, o
-  balão parece solto.
+  balão parece solto. *(rev. 2026-11-22: superado parcialmente por
+  [`specs/022-avatares-no-chat/spec.md`](../022-avatares-no-chat/spec.md) —
+  todos os balões do chat exibem avatar lateral estático até `150%`, com rosto
+  mini da Memora à esquerda e retrato do Perfil da pessoa à direita, recuando a
+  partir de `175%`, enquanto a `BarraSuperior` preserva a única Memora animada).*
 - **FR-043**: A conversa MUST mostrar só o essencial: cabeçalho, aviso
   antigolpe compacto, mensagens e o campo de escrever. Sugestões aparecem só
   antes da primeira mensagem; nenhum elemento decorativo além da Memora.

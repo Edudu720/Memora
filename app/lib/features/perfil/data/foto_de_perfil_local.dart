@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,6 +11,10 @@ import '../domain/retrato_de_perfil.dart';
 
 /// Onde a foto de perfil (ou avatar escolhido) fica guardada por conta (FR-006).
 abstract interface class ArmazenamentoDeFotoDePerfil {
+  /// Fluxo broadcast disparado sempre que o retrato de qualquer conta é
+  /// alterado, removido ou expurgado neste aparelho (`022-avatares-no-chat`).
+  Stream<void> get alteracoes;
+
   /// O retrato salvo para [idDaConta], ou `null` quando ausente ou ilegível.
   Future<RetratoDePerfil?> ler(String idDaConta);
 
@@ -48,6 +53,7 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
   final SharedPreferences _preferencias;
   final Future<Directory> Function() _diretorioBase;
   final DateTime Function() _agora;
+  final StreamController<void> _alteracoes = StreamController<void>.broadcast();
 
   /// Cria o armazenamento real (com [diretorioBase] e [agora] injetáveis).
   FotoDePerfilLocal(
@@ -56,6 +62,15 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
     DateTime Function()? agora,
   })  : _diretorioBase = diretorioBase ?? getApplicationSupportDirectory,
         _agora = agora ?? DateTime.now;
+
+  @override
+  Stream<void> get alteracoes => _alteracoes.stream;
+
+  void _notificarAlteracao() {
+    if (!_alteracoes.isClosed) {
+      _alteracoes.add(null);
+    }
+  }
 
   static bool _semConta(String idDaConta) => idDaConta.trim().isEmpty;
 
@@ -163,6 +178,7 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
       await _apagarArquivoSeExistir(dir, arquivoAnterior);
     }
 
+    _notificarAlteracao();
     return FotoPropriaDePerfil(
       caminhoDoArquivo: destino.path,
       atualizadaEm: agora,
@@ -188,6 +204,7 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
       await _apagarArquivoSeExistir(dir, arquivoAnterior);
     }
 
+    _notificarAlteracao();
     return AvatarIlustradoDePerfil(avatar);
   }
 
@@ -202,6 +219,7 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
       final Directory dir = await _garantirDiretorioFotos();
       await _apagarArquivoSeExistir(dir, arquivoAtual);
     }
+    _notificarAlteracao();
   }
 
   @override
@@ -220,6 +238,7 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
     if (dir.existsSync()) {
       await dir.delete(recursive: true);
     }
+    _notificarAlteracao();
   }
 
   String _nomeArquivoAtual(String idDaConta) {
@@ -259,10 +278,20 @@ class FotoDePerfilLocal implements FotoDePerfilDoAparelho {
 class FotoDePerfilEmMemoria implements FotoDePerfilDoAparelho {
   final Map<String, RetratoDePerfil> _retratos = <String, RetratoDePerfil>{};
   final DateTime Function() _agora;
+  final StreamController<void> _alteracoes = StreamController<void>.broadcast();
 
   /// Cria o armazenamento em memória.
   FotoDePerfilEmMemoria({DateTime Function()? agora})
       : _agora = agora ?? DateTime.now;
+
+  @override
+  Stream<void> get alteracoes => _alteracoes.stream;
+
+  void _notificarAlteracao() {
+    if (!_alteracoes.isClosed) {
+      _alteracoes.add(null);
+    }
+  }
 
   @override
   Future<RetratoDePerfil?> ler(String idDaConta) async {
@@ -284,6 +313,7 @@ class FotoDePerfilEmMemoria implements FotoDePerfilDoAparelho {
       bytesEmMemoria: Uint8List.fromList(bytesJpegSanitizados),
     );
     _retratos[chave] = salvo;
+    _notificarAlteracao();
     return salvo;
   }
 
@@ -296,6 +326,7 @@ class FotoDePerfilEmMemoria implements FotoDePerfilDoAparelho {
     FotoDePerfilLocal.contaSegura(chave);
     final AvatarIlustradoDePerfil salvo = AvatarIlustradoDePerfil(avatar);
     _retratos[chave] = salvo;
+    _notificarAlteracao();
     return salvo;
   }
 
@@ -303,10 +334,12 @@ class FotoDePerfilEmMemoria implements FotoDePerfilDoAparelho {
   Future<void> apagar(String idDaConta) async {
     if (FotoDePerfilLocal._semConta(idDaConta)) return;
     _retratos.remove(idDaConta.trim());
+    _notificarAlteracao();
   }
 
   @override
   Future<void> esquecerDoAparelho() async {
     _retratos.clear();
+    _notificarAlteracao();
   }
 }

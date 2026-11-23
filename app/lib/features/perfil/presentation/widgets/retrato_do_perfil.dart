@@ -151,22 +151,30 @@ class RetratoDoPerfil extends StatelessWidget {
   Widget _padraoNeutro(MemoraCores cores) {
     final String? iniciais = iniciaisDe(nome);
     if (iniciais == null) {
-      return Icon(
-        Icons.person_outline_rounded,
-        size: tamanho * 0.5,
-        color: cores.sobrePrimaria,
+      return Container(
+        color: cores.primaria,
+        alignment: Alignment.center,
+        child: Icon(
+          Icons.person_outline_rounded,
+          size: tamanho * 0.5,
+          color: cores.sobrePrimaria,
+        ),
       );
     }
     return Container(
       color: cores.primaria,
       alignment: Alignment.center,
-      child: Text(
-        iniciais,
-        maxLines: 1,
-        style: TextStyle(
-          fontSize: tamanho * 0.34,
-          fontWeight: FontWeight.w700,
-          color: cores.sobrePrimaria,
+      padding: const EdgeInsets.all(MemoraEspacamento.xs),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          iniciais,
+          maxLines: 1,
+          style: TextStyle(
+            fontSize: tamanho * 0.34,
+            fontWeight: FontWeight.w700,
+            color: cores.sobrePrimaria,
+          ),
         ),
       ),
     );

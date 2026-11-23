@@ -194,7 +194,7 @@ void main() {
   });
 
   group('Quem disse o que — FR-020', () {
-    testWidgets('cada fala e um balao com posicao e nome, sem rosto ao lado', (
+    testWidgets('cada fala e um balao com posicao, rosto estatico e nome', (
       WidgetTester t,
     ) async {
       final ControladorConversa c = controladorCom();
@@ -224,22 +224,35 @@ void main() {
       expect(nomeDela, findsOneWidget);
       expect(nomeDaPessoa, findsOneWidget);
 
-      // Sem rosto ao lado do balao (FR-042, FR-043): a Memora desta tela e a
-      // do topo, uma so (T059, ver memora_no_topo_da_conversa_test.dart).
-      for (final Finder balao in <Finder>[dela, daPessoa]) {
-        expect(
-          find.descendant(of: balao, matching: find.byType(MemoraPersonagem)),
-          findsNothing,
-        );
-        expect(
-          find.descendant(of: balao, matching: find.byType(MemoraAnimada)),
-          findsNothing,
-        );
-        expect(
-          find.descendant(of: balao, matching: find.byIcon(Icons.person_rounded)),
-          findsNothing,
-        );
-      }
+      // Rosto estatico nos baloes (022-avatares-no-chat): Memora mini estatica
+      // a esquerda e desenho da pessoa (padrao quando sem conta) a direita.
+      expect(t.widget<BalaoDeFala>(dela).comRosto, isTrue);
+      expect(t.widget<BalaoDeFala>(dela).rostoAnimado, isFalse);
+      expect(t.widget<BalaoDeFala>(daPessoa).comRosto, isTrue);
+      expect(t.widget<BalaoDeFala>(daPessoa).rostoAnimado, isFalse);
+
+      final Finder rostoDela = find.descendant(
+        of: dela,
+        matching: find.byType(MemoraPersonagem),
+      );
+      expect(rostoDela, findsOneWidget);
+      expect(t.getCenter(rostoDela).dx, lessThan(t.getCenter(nomeDela).dx));
+      final Element memoraNoBalaoEl = find
+          .descendant(of: dela, matching: find.byType(MemoraAnimada))
+          .evaluate()
+          .single;
+      expect((memoraNoBalaoEl.widget as MemoraAnimada).reageAoToque, isFalse);
+      expect(MediaQuery.disableAnimationsOf(memoraNoBalaoEl), isTrue);
+
+      final Finder rostoDaPessoa = find.descendant(
+        of: daPessoa,
+        matching: find.byIcon(Icons.person_rounded),
+      );
+      expect(rostoDaPessoa, findsOneWidget);
+      expect(
+        t.getCenter(rostoDaPessoa).dx,
+        greaterThan(t.getCenter(nomeDaPessoa).dx),
+      );
 
       // Posicao: a Memora a esquerda, a pessoa a direita.
       expect(t.getCenter(nomeDaPessoa).dx, greaterThan(t.getCenter(nomeDela).dx));

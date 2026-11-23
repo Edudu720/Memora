@@ -150,17 +150,20 @@ void main() {
         await t.pump(const Duration(milliseconds: 50));
       }
 
-      // O rosto do convite é a voz dela e não conta (FR-006 e FR-042, rev.
-      // 2026-11-18); fora dele, no máximo uma.
-      final int doConvite = find
-          .descendant(
-            of: find.byKey(TelaConversa.chaveConvite),
-            matching: find.byType(MemoraAnimada),
-          )
-          .evaluate()
-          .length;
+      // Nos balões da conversa (inclusive no convite), qualquer MemoraAnimada
+      // permanece estática e sem toque (022-avatares-no-chat); fora de
+      // BalaoDeFala há no máximo uma (na BarraSuperior).
+      final Finder nosBaloes = find.descendant(
+        of: find.byType(BalaoDeFala),
+        matching: find.byType(MemoraAnimada),
+      );
+      for (final Element el in nosBaloes.evaluate()) {
+        expect((el.widget as MemoraAnimada).reageAoToque, isFalse);
+        expect(MediaQuery.disableAnimationsOf(el), isTrue);
+      }
       expect(
-        find.byType(MemoraAnimada).evaluate().length - doConvite,
+        find.byType(MemoraAnimada).evaluate().length -
+            nosBaloes.evaluate().length,
         lessThanOrEqualTo(1),
       );
     });

@@ -87,11 +87,16 @@ const String _antiga =
     'Esta é uma resposta antiga da Memora, que estava guardada no aparelho '
     'e precisa aparecer inteira, sem ninguém escrevê-la de novo.';
 
-/// Quantos relógios as Memoras na tela mantêm ligados: um por `MemoraAnimada`
-/// (feature 013), que repete o dela enquanto houver movimento. É o único
-/// `Ticker` que **pode** sobrar depois da escrita.
-int relogiosDaMemora(WidgetTester t) =>
-    find.byType(MemoraAnimada).evaluate().length;
+/// Quantos relógios as Memoras animadas na tela mantêm ligados: um por
+/// `MemoraAnimada` com movimento ativo (na conversa, apenas a da `BarraSuperior`;
+/// os rostos dos balões são estáticos sob `disableAnimations: true`, rev.
+/// `022-avatares-no-chat`). É o único `Ticker` que **pode** sobrar depois da
+/// escrita.
+int relogiosDaMemora(WidgetTester t) => find
+    .byType(MemoraAnimada)
+    .evaluate()
+    .where((Element el) => !MediaQuery.disableAnimationsOf(el))
+    .length;
 
 void main() {
   late _Repositorio repositorio;
@@ -252,8 +257,8 @@ void main() {
       expect(
         t.binding.transientCallbackCount,
         relogiosDaMemora(t),
-        reason: 'terminada a escrita, nenhum relógio fica ligado: só os das '
-            'Memoras que estão nos balões, que não param',
+        reason: 'terminada a escrita, nenhum relógio fica ligado: só o da '
+            'Memora animada do topo',
       );
     });
 
@@ -393,8 +398,8 @@ void main() {
       );
 
       expect(visivel(t), _antiga, reason: 'inteira, já no primeiro quadro');
-      // A chegada da Memora do balão leva um quadro; depois só sobra o relógio
-      // dela, e nenhum de escrita.
+      // Só sobra o relógio da Memora animada do topo, e nenhum de escrita ou
+      // dos balões estáticos.
       await t.pump(const Duration(seconds: 1));
       expect(t.binding.transientCallbackCount, relogiosDaMemora(t));
     });

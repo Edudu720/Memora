@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../../../../design_system/componentes/toque/superficie_tocavel.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_assistente.dart';
+import '../../../perfil/data/foto_de_perfil_local.dart';
+import '../../../perfil/domain/retrato_de_perfil.dart';
+import '../../../perfil/presentation/widgets/retrato_do_perfil.dart';
 import '../../domain/assistente.dart';
 import '../../domain/leitor_de_voz.dart';
 import '../controladores/controlador_conversa.dart';
@@ -67,8 +72,11 @@ import '../controladores/controlador_conversa.dart';
 /// 2. Após o aceite e sem histórico, recebe com `ExpressaoDaMemora.falando`,
 ///    convite editorial e grade 2x2 responsiva de sugestões de pergunta.
 /// 3. Na conversa ativa, mantém `AvisoCompacto` permanente no topo, balões
-///    limpos e barra inferior elevada com campo de texto, ditado por voz
-///    opcional no rascunho (FR-013) e botão manual `"Perguntar"`.
+///    identificados por posição, nome escrito e avatares laterais estáticos
+///    (`rostoAnimado: false` — rosto mini da Memora à esquerda e retrato local
+///    do perfil da pessoa à direita, recuando acima de `175%`), além da barra
+///    inferior elevada com campo de texto, ditado por voz opcional no rascunho
+///    (FR-013) e botão manual `"Perguntar"`.
 class TelaConversa extends StatefulWidget {
   /// Chave do balão de convite, o primeiro, com o rosto da Memora (FR-042).
   static const Key chaveConvite = Key('conversa.convite');
@@ -130,8 +138,24 @@ class TelaConversa extends StatefulWidget {
   /// Volta ao Hub ou Início.
   final VoidCallback? aoVoltar;
 
+  /// Armazenamento local do retrato selecionado em Meu Perfil (`022-avatares-no-chat`).
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+
+  /// Identificador da conta ativa usado para ler o retrato local.
+  final String? idDaConta;
+
+  /// Nome de tratamento usado nas iniciais quando o usuário não tem foto nem avatar.
+  final String? nomeDaPessoa;
+
   /// Cria a tela de conversa.
-  const TelaConversa({required this.controlador, this.aoVoltar, super.key});
+  const TelaConversa({
+    required this.controlador,
+    this.aoVoltar,
+    this.fotoDePerfil,
+    this.idDaConta,
+    this.nomeDaPessoa,
+    super.key,
+  });
 
   @override
   State<TelaConversa> createState() => _TelaConversaState();
@@ -146,21 +170,89 @@ class _TelaConversaState extends State<TelaConversa>
   );
   final ScrollController _rolagem = ScrollController();
 
+  RetratoDePerfil? _retrato;
+  int _versaoRetrato = 0;
+  StreamSubscription<void>? _assinaturaFoto;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     widget.controlador.addListener(_aoMudar);
     widget.controlador.iniciar();
+    _inscreverFoto();
+    unawaited(_carregarRetrato());
+  }
+
+  @override
+  void didUpdateWidget(covariant TelaConversa oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.fotoDePerfil != widget.fotoDePerfil) {
+      _inscreverFoto();
+    }
+    if (oldWidget.fotoDePerfil != widget.fotoDePerfil ||
+        oldWidget.idDaConta != widget.idDaConta) {
+      if (oldWidget.idDaConta != widget.idDaConta && _retrato != null) {
+        _retrato = null;
+      }
+      unawaited(_carregarRetrato());
+    }
   }
 
   @override
   void dispose() {
+    _assinaturaFoto?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     widget.controlador.removeListener(_aoMudar);
     _campo.dispose();
     _rolagem.dispose();
     super.dispose();
+  }
+
+  void _inscreverFoto() {
+    _assinaturaFoto?.cancel();
+    _assinaturaFoto = widget.fotoDePerfil?.alteracoes.listen((_) {
+      unawaited(_carregarRetrato());
+    });
+  }
+
+  Future<void> _carregarRetrato() async {
+    final int versao = ++_versaoRetrato;
+    final ArmazenamentoDeFotoDePerfil? storage = widget.fotoDePerfil;
+    final String? conta = widget.idDaConta?.trim();
+    if (storage == null || conta == null || conta.isEmpty) {
+      if (mounted && versao == _versaoRetrato && _retrato != null) {
+        setState(() => _retrato = null);
+      }
+      return;
+    }
+    try {
+      final RetratoDePerfil? lido = await storage.ler(conta);
+      if (!mounted || versao != _versaoRetrato) return;
+      if (_retrato != lido) {
+        setState(() => _retrato = lido);
+      }
+    } catch (_) {
+      if (!mounted || versao != _versaoRetrato) return;
+      if (_retrato != null) {
+        setState(() => _retrato = null);
+      }
+    }
+  }
+
+  Widget? _avatarPessoa() {
+    final bool temConta =
+        widget.fotoDePerfil != null &&
+        (widget.idDaConta?.trim().isNotEmpty ?? false);
+    final bool temNome = widget.nomeDaPessoa?.trim().isNotEmpty ?? false;
+    if (!temConta && !temNome) return null;
+    return ExcludeSemantics(
+      child: RetratoDoPerfil(
+        nome: widget.nomeDaPessoa ?? '',
+        retrato: _retrato,
+        tamanho: MemoraDimensoes.pisoDeIlustracao,
+      ),
+    );
   }
 
   /// O teclado subindo ou descendo muda a altura da lista: sem rolar de novo,
@@ -299,7 +391,11 @@ class _TelaConversaState extends State<TelaConversa>
   Key _chaveDaEscrita(int indice) => ValueKey<String>('conversa.fala.$indice');
 
   /// A fala `indice` da conversa.
-  Widget _fala(ControladorConversa c, int indice) {
+  Widget _fala(
+    ControladorConversa c,
+    int indice, {
+    required bool mostrarRosto,
+  }) {
     final MensagemDaConversa m = c.mensagens[indice];
     final bool daMemora = m.autor == AutorDaMensagem.memora;
     // Só a fala que acabou de chegar, e só enquanto é a última: ao mandar a
@@ -315,7 +411,9 @@ class _TelaConversaState extends State<TelaConversa>
       key: escrevendo ? _chaveDaEscrita(indice) : null,
       autor: daMemora ? AutorDoBalao.memora : AutorDoBalao.pessoa,
       texto: m.texto,
-      comRosto: false,
+      comRosto: mostrarRosto,
+      rostoAnimado: false,
+      avatarPessoa: daMemora ? null : _avatarPessoa(),
       escreverAosPoucos: escrevendo,
       aoEscrever: escrevendo ? _rolarParaOFim : null,
       // Sempre, para a Memora: se a fala deixar de ser a que escreve no meio
@@ -345,16 +443,16 @@ class _TelaConversaState extends State<TelaConversa>
         final bool tecladoAberto =
             MediaQueryData.fromView(View.of(context)).viewInsets.bottom > 0;
         final double escala = MediaQuery.textScalerOf(context).scale(1);
+        final bool mostrarRosto = escala < MemoraDimensoes.escalaTextoAlta;
 
         return Scaffold(
           backgroundColor: cores.fundo,
           appBar: BarraSuperior(
             titulo: TextosAssistente.tituloConversa,
             aoVoltar: widget.aoVoltar,
-            // A Memora desta tela é esta, pequena e no topo: as respostas não
-            // levam rosto (FR-025, FR-042). Só o convite, antes da primeira
-            // mensagem, leva o rosto dela (rev. 2026-11-18). Fala enquanto a
-            // resposta aparece, e volta ao repouso quando termina.
+            // A única Memora animada/falando desta tela é a do topo (FR-025).
+            // Os balões da conversa exibem marcadores laterais estáticos
+            // (`rostoAnimado: false`) e recuam acima de 175% (022-avatares-no-chat).
             memora: ExpressaoDaMemora.neutra,
             memoraFalando:
                 (c.respondendo && c.trechoEmCurso.isNotEmpty) ||
@@ -527,10 +625,12 @@ class _TelaConversaState extends State<TelaConversa>
                             // parecia solto. O rosto do balão é a voz dela,
                             // e não uma segunda Memora (FR-006).
                             if (primeiraVez) ...<Widget>[
-                              const BalaoDeFala(
+                              BalaoDeFala(
                                 key: TelaConversa.chaveConvite,
                                 autor: AutorDoBalao.memora,
                                 texto: TextosAssistente.convite,
+                                comRosto: mostrarRosto,
+                                rostoAnimado: false,
                               ),
                               if (!c.respondendo &&
                                   c.mensagemDeErro == null) ...<Widget>[
@@ -544,13 +644,16 @@ class _TelaConversaState extends State<TelaConversa>
                             ],
 
                             for (int i = 0; i < c.mensagens.length; i++) ...<Widget>[
-                              _fala(c, i),
+                              _fala(c, i, mostrarRosto: mostrarRosto),
                               const SizedBox(height: MemoraEspacamento.md),
                             ],
 
                             if (c.respondendo) ...<Widget>[
                               if (c.trechoEmCurso.isEmpty)
-                                const BalaoDeFala.escrevendo(comRosto: false)
+                                BalaoDeFala.escrevendo(
+                                  comRosto: mostrarRosto,
+                                  rostoAnimado: false,
+                                )
                               else
                                 // A mesma chave da mensagem em que este texto
                                 // vai se transformar: a posição que ela terá.
@@ -558,7 +661,8 @@ class _TelaConversaState extends State<TelaConversa>
                                   key: _chaveDaEscrita(c.mensagens.length),
                                   autor: AutorDoBalao.memora,
                                   texto: c.trechoEmCurso,
-                                  comRosto: false,
+                                  comRosto: mostrarRosto,
+                                  rostoAnimado: false,
                                   escreverAosPoucos: true,
                                   emAndamento: true,
                                   aoEscrever: _rolarParaOFim,
