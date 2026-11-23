@@ -2,6 +2,11 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — URL Oficial do Site Tutorial (`#106` Item 11)
+
+### Alterado
+- **Endereço oficial do site tutorial na Ajuda (`Ambiente.urlSiteTutorialPadrao`, `docs/deploy/render.md`)**: definida a URL publicada no Render (`https://memora-site-thf2.onrender.com/`) como padrão de `MEMORA_URL_SITE_TUTORIAL` em `Ambiente.doAmbiente()`, habilitando o botão e diálogo de confirmação anti-phishing na `TelaAjuda` em builds padrão enquanto preserva a validação estrita `https://` e sobrescrita por `--dart-define`.
+
 ## [Unreleased] — Feature `021-analise-golpes`
 
 ### Adicionado
