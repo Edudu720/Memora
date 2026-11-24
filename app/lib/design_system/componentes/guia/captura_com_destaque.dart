@@ -209,7 +209,9 @@ class _EstadoDaCapturaComDestaque extends State<CapturaComDestaque> {
 
         final Size imagem = _tamanhoDaImagem(caixa, proporcao);
         final RegiaoRelativa regiao = widget.passo.destaque;
-        final bool pintada = widget.passo.captura.formato.temMarcacaoPintada;
+        final bool pintada =
+            widget.passo.captura.temMarcacaoPintada ||
+            widget.passo.captura.formato.temMarcacaoPintada;
 
         return SizedBox.fromSize(
           size: caixa,

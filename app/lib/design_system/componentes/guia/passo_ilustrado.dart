@@ -363,7 +363,9 @@ class _EstadoDaCapturaDoPasso extends State<_CapturaDoPasso> {
           Semantics(
             key: PassoIlustrado.chaveCapturaTocavel,
             button: true,
-            label: widget.passo.captura.formato.temMarcacaoPintada
+            label:
+                (widget.passo.captura.temMarcacaoPintada ||
+                    widget.passo.captura.formato.temMarcacaoPintada)
                 ? widget.passo.descricaoDaCaptura
                 : '${widget.passo.descricaoDaCaptura}. ${TextosGuias.areaDestacada}',
             hint: TextosGuias.dicaAmpliar,
