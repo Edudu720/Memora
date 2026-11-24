@@ -7,13 +7,16 @@ import br.fatec.memora.localizador.dominio.FonteDados;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.function.LongSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +35,22 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
     public static final long INTERVALO_MINIMO_NOMINATIM_MS = 1000L;
     public static final Duration TIMEOUT_NOMINATIM_PADRAO = Duration.ofSeconds(5);
     public static final Duration TIMEOUT_OVERPASS_PADRAO = Duration.ofSeconds(6);
+    public static final Duration ORCAMENTO_MAXIMO_OVERPASS = Duration.ofSeconds(10);
 
     private static final Logger LOG = LoggerFactory.getLogger(ProvedorOpenStreetMapOverpass.class);
+    private static final Set<String> ROTULOS_GENERICOS_CATEGORIA = Set.of(
+            "saúde",
+            "saude",
+            "posto de saúde",
+            "posto de saude",
+            "serviços públicos",
+            "servicos publicos",
+            "serviços ao cidadão",
+            "servicos ao cidadao",
+            "emergência",
+            "emergencia",
+            "serviços cotidianos",
+            "servicos cotidianos");
     private static final String OVERPASS_URL_PADRAO = "https://overpass-api.de/api/interpreter";
     public static final List<String> OVERPASS_URLS_PADRAO = List.of(
             OVERPASS_URL_PADRAO,
@@ -169,8 +186,17 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
 
         String queryOverpass = construirQueryOverpass(latitude, longitude, raioMetros, categoria);
         ProvedorGeograficoIndisponivelException ultimaFalha = null;
+        long inicioNano = System.nanoTime();
 
         for (String urlAtual : overpassUrls) {
+            if (ultimaFalha != null
+                    && Duration.ofNanos(System.nanoTime() - inicioNano).compareTo(ORCAMENTO_MAXIMO_OVERPASS) >= 0) {
+                LOG.warn(
+                        "Orçamento total de tempo do Overpass ({}s) esgotado; interrompendo tentativa em {}.",
+                        ORCAMENTO_MAXIMO_OVERPASS.toSeconds(),
+                        urlAtual);
+                break;
+            }
             try {
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(urlAtual))
@@ -212,6 +238,83 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
                 ? ultimaFalha
                 : new ProvedorGeograficoIndisponivelException(
                         "Não foi possível consultar o serviço de mapas no momento.");
+    }
+
+    /**
+     * Busca estabelecimentos delimitados por viewbox no Nominatim como contingência rápida
+     * quando as instâncias públicas do Overpass estão indisponíveis ou lentas.
+     */
+    public List<Estabelecimento> buscarPorCoordenadasViaNominatim(
+            double latitude,
+            double longitude,
+            int raioMetros,
+            CategoriaServico categoria,
+            String termoFiltro) {
+        CategoriaServico categoriaEfetiva = categoria != null ? categoria : CategoriaServico.SAUDE;
+        int raioEfetivo = raioMetros > 0 ? raioMetros : 5000;
+
+        double dLat = raioEfetivo / 111320.0;
+        double cosLat = Math.max(0.1, Math.cos(Math.toRadians(latitude)));
+        double dLon = raioEfetivo / (111320.0 * cosLat);
+        double sul = latitude - dLat;
+        double norte = latitude + dLat;
+        double oeste = longitude - dLon;
+        double leste = longitude + dLon;
+
+        List<String> termosBusca = resolverTermosNominatim(categoriaEfetiva, termoFiltro);
+
+        for (String termoBusca : termosBusca) {
+            try {
+                aguardarJanelaNominatim();
+                String url = String.format(
+                        Locale.US,
+                        "%s?q=%s&format=json&limit=20&addressdetails=1&extratags=1&countrycodes=br&viewbox=%.5f,%.5f,%.5f,%.5f&bounded=1",
+                        nominatimUrl,
+                        URLEncoder.encode(termoBusca, StandardCharsets.UTF_8),
+                        oeste,
+                        norte,
+                        leste,
+                        sul);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .timeout(timeoutNominatim)
+                        .header("User-Agent", USER_AGENT_PROJETO)
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response =
+                        httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    LOG.warn(
+                            "Nominatim busca regional retornou HTTP {} sem fallback fictício.",
+                            response.statusCode());
+                    throw new ProvedorGeograficoIndisponivelException(
+                            "Serviço público de mapas retornou status HTTP " + response.statusCode());
+                }
+
+                List<Estabelecimento> encontrados =
+                        parsearElementosNominatim(response.body(), categoriaEfetiva);
+                if (!encontrados.isEmpty()) {
+                    return encontrados;
+                }
+            } catch (ProvedorGeograficoIndisponivelException e) {
+                throw e;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ProvedorGeograficoIndisponivelException(
+                        "Consulta ao serviço público de mapas interrompida.", e);
+            } catch (Exception e) {
+                LOG.warn(
+                        "Falha ao consultar busca regional no Nominatim ({}): {}",
+                        e.getClass().getSimpleName(),
+                        e.getMessage());
+                throw new ProvedorGeograficoIndisponivelException(
+                        "Não foi possível consultar o serviço de mapas no momento.", e);
+            }
+        }
+
+        return List.of();
     }
 
     @Override
@@ -374,5 +477,157 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
             sb.append(cidade);
         }
         return sb.isEmpty() ? "Endereço cadastrado no OpenStreetMap" : sb.toString();
+    }
+
+    private List<String> resolverTermosNominatim(CategoriaServico categoria, String termoFiltro) {
+        if (termoFiltro != null && !termoFiltro.trim().isBlank()) {
+            String limpo = termoFiltro.trim();
+            String minusculo = limpo.toLowerCase(Locale.ROOT);
+            if (!ROTULOS_GENERICOS_CATEGORIA.contains(minusculo)) {
+                if (minusculo.contains("farmácia") || minusculo.contains("farmacia")) {
+                    return List.of("farmacia");
+                }
+                if (minusculo.contains("supermercado") || minusculo.contains("mercado")) {
+                    return List.of("supermercado");
+                }
+                if (minusculo.contains("banco") || minusculo.contains("lotérica") || minusculo.contains("loterica")) {
+                    return List.of("banco");
+                }
+                if (minusculo.contains("correio")) {
+                    return List.of("correios");
+                }
+                return List.of(limpo);
+            }
+        }
+        return switch (categoria) {
+            case SAUDE -> List.of("hospital", "farmacia");
+            case SERVICOS_PUBLICOS -> List.of("correios", "prefeitura");
+            case EMERGENCIA -> List.of("policia", "hospital");
+            case COTIDIANO -> List.of("supermercado", "banco");
+        };
+    }
+
+    private List<Estabelecimento> parsearElementosNominatim(String json, CategoriaServico categoriaEfetiva) {
+        List<Estabelecimento> lista = new ArrayList<>();
+        try {
+            JsonNode array = jsonMapper.readTree(json);
+            if (array.isArray()) {
+                for (JsonNode el : array) {
+                    JsonNode address = el.path("address");
+                    String nome = textoOuNull(el, "name");
+                    if (nome == null) {
+                        nome = primeiroNaoNulo(
+                                textoOuNull(address, "amenity"),
+                                textoOuNull(address, "shop"),
+                                extrairPrimeiroSegmento(textoOuNull(el, "display_name")));
+                    }
+                    if (nome == null) {
+                        continue;
+                    }
+
+                    double lat = el.path("lat").asDouble(Double.NaN);
+                    double lon = el.path("lon").asDouble(Double.NaN);
+                    if (Double.isNaN(lat) || Double.isNaN(lon)) {
+                        continue;
+                    }
+
+                    String placeId = textoOuNull(el, "place_id");
+                    String id = "osm:nominatim:" + (placeId != null ? placeId : Math.abs(nome.hashCode()));
+
+                    String logradouro = primeiroNaoNulo(
+                            textoOuNull(address, "road"),
+                            textoOuNull(address, "pedestrian"),
+                            textoOuNull(address, "street"));
+                    String numero = textoOuNull(address, "house_number");
+                    String bairro = primeiroNaoNulo(
+                            textoOuNull(address, "suburb"),
+                            textoOuNull(address, "neighbourhood"),
+                            textoOuNull(address, "quarter"));
+                    String cidade = primeiroNaoNulo(
+                            textoOuNull(address, "city"),
+                            textoOuNull(address, "town"),
+                            textoOuNull(address, "municipality"),
+                            textoOuNull(address, "village"));
+                    String estado = extrairEstadoNominatim(address);
+                    String cep = textoOuNull(address, "postcode");
+
+                    String formatado = construirTextoFormatado(logradouro, numero, bairro, cidade);
+                    Endereco end = new Endereco(logradouro, numero, bairro, cidade, estado, cep, formatado);
+
+                    JsonNode extratags = el.path("extratags");
+                    String fone = primeiroNaoNulo(
+                            textoOuNull(extratags, "phone"),
+                            textoOuNull(extratags, "contact:phone"));
+                    String horario = textoOuNull(extratags, "opening_hours");
+                    boolean horarioConf = horario != null && !horario.isBlank();
+
+                    String aviso = (!horarioConf && fone == null)
+                            ? "Telefone e horários não confirmados na base pública. Recomendamos ligar antes se possível."
+                            : null;
+
+                    String tipo = textoOuNull(el, "type");
+                    String subtitulo = tipo != null ? tipo : categoriaEfetiva.getRotulo();
+
+                    lista.add(new Estabelecimento(
+                            id,
+                            nome,
+                            categoriaEfetiva,
+                            subtitulo,
+                            end,
+                            lat,
+                            lon,
+                            null,
+                            null,
+                            fone,
+                            horario,
+                            horarioConf,
+                            FonteDados.OPEN_STREET_MAP,
+                            aviso));
+                }
+            }
+        } catch (Exception e) {
+            LOG.warn("Erro ao fazer parse dos elementos Nominatim: {}", e.getMessage());
+            throw new ProvedorGeograficoIndisponivelException(
+                    "Resposta inválida do serviço público de mapas.", e);
+        }
+        return lista;
+    }
+
+    private String extrairEstadoNominatim(JsonNode address) {
+        String iso = textoOuNull(address, "ISO3166-2-lvl4");
+        if (iso != null && iso.startsWith("BR-") && iso.length() > 3) {
+            return iso.substring(3);
+        }
+        return primeiroNaoNulo(textoOuNull(address, "state_code"), textoOuNull(address, "state"));
+    }
+
+    private String extrairPrimeiroSegmento(String displayName) {
+        if (displayName == null) {
+            return null;
+        }
+        int idx = displayName.indexOf(',');
+        String primeiro = (idx >= 0 ? displayName.substring(0, idx) : displayName).trim();
+        return primeiro.isEmpty() ? null : primeiro;
+    }
+
+    private String textoOuNull(JsonNode node, String campo) {
+        if (node == null || node.isMissingNode() || node.isNull()) {
+            return null;
+        }
+        JsonNode alvo = node.path(campo);
+        if (alvo.isMissingNode() || alvo.isNull()) {
+            return null;
+        }
+        String valor = alvo.asText("").trim();
+        return valor.isEmpty() ? null : valor;
+    }
+
+    private String primeiroNaoNulo(String... valores) {
+        for (String v : valores) {
+            if (v != null && !v.isBlank()) {
+                return v;
+            }
+        }
+        return null;
     }
 }

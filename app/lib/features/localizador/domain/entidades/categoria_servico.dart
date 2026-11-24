@@ -25,15 +25,24 @@ enum CategoriaServico {
 
   const CategoriaServico(this.rotulo, this.descricao, this.icone);
 
+  /// Código da categoria no contrato da API (`CategoriaServico` do backend).
+  ///
+  /// Não usar `name.toUpperCase()`: `servicosPublicos` viraria
+  /// `SERVICOSPUBLICOS`, que o servidor não reconhece e troca por SAUDE.
+  String get codigo => switch (this) {
+    CategoriaServico.saude => 'SAUDE',
+    CategoriaServico.servicosPublicos => 'SERVICOS_PUBLICOS',
+    CategoriaServico.emergencia => 'EMERGENCIA',
+    CategoriaServico.cotidiano => 'COTIDIANO',
+  };
+
   /// Converte o código recebido da API para o valor do enum, se válido.
   static CategoriaServico? porCodigo(String? codigo) {
     if (codigo == null) return null;
-    return switch (codigo.toUpperCase()) {
-      'SAUDE' => CategoriaServico.saude,
-      'SERVICOS_PUBLICOS' => CategoriaServico.servicosPublicos,
-      'EMERGENCIA' => CategoriaServico.emergencia,
-      'COTIDIANO' => CategoriaServico.cotidiano,
-      _ => null,
-    };
+    final String procurado = codigo.toUpperCase();
+    for (final CategoriaServico categoria in CategoriaServico.values) {
+      if (categoria.codigo == procurado) return categoria;
+    }
+    return null;
   }
 }

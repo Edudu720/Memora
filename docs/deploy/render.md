@@ -75,7 +75,8 @@ este passo pode exigir o Eduardo.
    e escolha `Edudu720/Memora`. O Render lê o [`render.yaml`](../../render.yaml).
 2. Ele vai pedir os valores marcados `sync: false`:
    - `DATABASE_URL`: a URL direta do Neon do passo 1;
-   - `GEMINI_API_KEY`: a chave do Gemini.
+   - `GEMINI_API_KEY`: a chave do Gemini;
+   - `MEMORA_LOCALIZADOR_GEOAPIFY_API_KEY`: a chave da Geoapify para o Localizador de Serviços (opcional, mas recomendada no Render para busca rápida via Places/Geocoding; quando vazia, o backend usa as instâncias públicas do Overpass com fallback de busca delimitada por viewbox no Nominatim).
 3. **Apply.** O build leva alguns minutos, e a primeira subida, ~3,5 min. O
    Flyway aplica as migrations no Neon.
 

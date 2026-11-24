@@ -345,4 +345,51 @@ class ProvedorOpenStreetMapOverpassTest {
         assertEquals("Farmácia Rodízio", resultado.get(0).nome());
         assertEquals(1, userAgentsOverpass.size());
     }
+
+    @Test
+    @DisplayName("Busca regional via Nominatim viewbox extrai estabelecimentos, estado ISO3166-2 e extratags")
+    void buscarPorCoordenadasViaNominatimExtraiEstabelecimentosReais() {
+        statusNominatim = 200;
+        bodyNominatim = """
+                [
+                  {
+                    "place_id": 987654,
+                    "lat": "-22.7412",
+                    "lon": "-47.3318",
+                    "name": "Hospital Municipal Dr. Waldemar Tebaldi",
+                    "type": "hospital",
+                    "display_name": "Hospital Municipal Dr. Waldemar Tebaldi, Avenida da Saúde, Americana, SP, Brasil",
+                    "address": {
+                      "road": "Avenida da Saúde",
+                      "house_number": "415",
+                      "suburb": "Jardim Nossa Senhora de Fátima",
+                      "city": "Americana",
+                      "state": "São Paulo",
+                      "ISO3166-2-lvl4": "BR-SP",
+                      "postcode": "13478-640"
+                    },
+                    "extratags": {
+                      "phone": "+55 19 3471-6750",
+                      "opening_hours": "24/7"
+                    }
+                  }
+                ]
+                """;
+
+        ProvedorOpenStreetMapOverpass provedor = criarProvedor();
+        var lista = provedor.buscarPorCoordenadasViaNominatim(
+                -22.74, -47.33, 5000, CategoriaServico.SAUDE, "Saúde");
+
+        assertEquals(1, lista.size());
+        var est = lista.get(0);
+        assertEquals("osm:nominatim:987654", est.id());
+        assertEquals("Hospital Municipal Dr. Waldemar Tebaldi", est.nome());
+        assertEquals("hospital", est.subtituloTipo());
+        assertEquals("SP", est.endereco().estado());
+        assertEquals("Avenida da Saúde, 415 - Jardim Nossa Senhora de Fátima, Americana", est.endereco().textoFormatado());
+        assertEquals("+55 19 3471-6750", est.telefone());
+        assertEquals("24/7", est.horarioFuncionamento());
+        assertTrue(est.horarioConfirmado());
+        assertNull(est.avisoTransparencia());
+    }
 }

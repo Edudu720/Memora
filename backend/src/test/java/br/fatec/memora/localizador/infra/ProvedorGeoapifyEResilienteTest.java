@@ -33,11 +33,15 @@ class ProvedorGeoapifyEResilienteTest {
     private volatile String bodyGeocode = "{\"type\":\"FeatureCollection\",\"features\":[]}";
     private volatile int statusOverpass = 200;
     private volatile String bodyOverpass = "{\"elements\":[]}";
+    private volatile int statusNominatim = 503;
+    private volatile String bodyNominatim = "[]";
 
     private final AtomicInteger chamadasPlaces = new AtomicInteger();
     private final AtomicInteger chamadasGeocode = new AtomicInteger();
     private final AtomicInteger chamadasOverpass = new AtomicInteger();
+    private final AtomicInteger chamadasNominatim = new AtomicInteger();
     private final List<String> queriesPlaces = new CopyOnWriteArrayList<>();
+    private final List<String> queriesNominatim = new CopyOnWriteArrayList<>();
 
     @BeforeEach
     void setUp() throws IOException {
@@ -63,6 +67,15 @@ class ProvedorGeoapifyEResilienteTest {
             chamadasOverpass.incrementAndGet();
             byte[] bytes = bodyOverpass.getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(statusOverpass, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        server.createContext("/nominatim", exchange -> {
+            chamadasNominatim.incrementAndGet();
+            queriesNominatim.add(exchange.getRequestURI().getQuery());
+            byte[] bytes = bodyNominatim.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(statusNominatim, bytes.length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(bytes);
             }
@@ -315,6 +328,57 @@ class ProvedorGeoapifyEResilienteTest {
         assertEquals("UBS Direto Overpass", locais.get(0).nome());
         assertEquals(0, chamadasPlaces.get(), "Não deve chamar Geoapify sem chave configurada");
         assertEquals(1, chamadasOverpass.get());
+    }
+
+    @Test
+    @DisplayName("Quando Overpass falha com 503/timeout, recorre à busca regional delimitada via Nominatim viewbox")
+    void quandoOverpassFalhaRecorreABuscaRegionalViaNominatim() {
+        statusOverpass = 503;
+        bodyOverpass = "Service Unavailable";
+        statusNominatim = 200;
+        bodyNominatim = """
+                [
+                  {
+                    "place_id": 445566,
+                    "lat": "-22.7395",
+                    "lon": "-47.3310",
+                    "name": "Drogasil Centro Americana",
+                    "type": "pharmacy",
+                    "address": {
+                      "road": "Rua Trinta de Julho",
+                      "house_number": "120",
+                      "suburb": "Centro",
+                      "city": "Americana",
+                      "ISO3166-2-lvl4": "BR-SP",
+                      "postcode": "13465-500"
+                    },
+                    "extratags": {
+                      "phone": "+55 19 3461-0000"
+                    }
+                  }
+                ]
+                """;
+
+        ProvedorGeograficoResiliente resiliente = new ProvedorGeograficoResiliente(
+                criarGeoapify(""),
+                criarOverpass(),
+                System::currentTimeMillis,
+                Duration.ofHours(24));
+
+        List<Estabelecimento> locais =
+                resiliente.buscarPorCoordenadas(-22.739, -47.331, 5000, CategoriaServico.SAUDE, "farmácia");
+
+        assertEquals(1, locais.size());
+        Estabelecimento est = locais.get(0);
+        assertEquals("osm:nominatim:445566", est.id());
+        assertEquals("Drogasil Centro Americana", est.nome());
+        assertEquals("SP", est.endereco().estado());
+        assertEquals("Rua Trinta de Julho, 120 - Centro, Americana", est.endereco().textoFormatado());
+        assertEquals("+55 19 3461-0000", est.telefone());
+        assertEquals(1, chamadasOverpass.get());
+        assertEquals(1, chamadasNominatim.get());
+        assertTrue(queriesNominatim.get(0).contains("bounded=1"));
+        assertTrue(queriesNominatim.get(0).contains("viewbox="));
     }
 
     @Test
