@@ -231,6 +231,59 @@ def save_asset_jpg(
     _atomic_save_jpg(resized, dst_path, quality=quality, optimize=True)
 
 
+def _atomic_save_webp(
+    im: Image.Image,
+    dst_path: str,
+    quality: int = 80,
+) -> None:
+    parent = os.path.dirname(os.path.abspath(dst_path))
+    os.makedirs(parent, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(prefix=".tmp_", suffix=".webp", dir=parent)
+    os.close(fd)
+    try:
+        im.convert("RGB").save(tmp_path, "WEBP", quality=quality, method=6)
+        os.replace(tmp_path, dst_path)
+    except BaseException:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        raise
+
+
+def save_asset_webp(
+    im: Image.Image,
+    dst_path: str,
+    target_width: int = 636,
+    quality: int = 80,
+) -> None:
+    if im.width > target_width:
+        ratio = target_width / im.width
+        resized = im.resize((target_width, int(im.height * ratio)), Image.Resampling.LANCZOS)
+    else:
+        resized = im.copy()
+    _atomic_save_webp(resized, dst_path, quality=quality)
+
+
+def _sanitize_instagram_clean(step_idx: int, im: Image.Image) -> Image.Image:
+    """Remove termos etaristas nas imagens do Instagram preservando a tipografia."""
+    if step_idx == 5:
+        out = im.copy()
+        d = ImageDraw.Draw(out)
+        bg = out.getpixel((150, 220))
+        d.rectangle((228, 260, 555, 304), fill=bg)
+        f_b = ImageFont.truetype(r"C:\Windows\Fonts\segoeuib.ttf", 30)
+        d.text((232, 260), "clube_jardim_e_vida", font=f_b, fill=(242, 244, 248))
+        return out
+    if step_idx == 8:
+        out = im.copy()
+        d = ImageDraw.Draw(out)
+        bg = out.getpixel((150, 1300))
+        d.rectangle((200, 1295, 650, 1345), fill=bg)
+        f_r = ImageFont.truetype(r"C:\Windows\Fonts\segoeui.ttf", 34)
+        d.text((206, 1294), "saude e bem estar em casa", font=f_r, fill=(242, 244, 248))
+        return out
+    return im
+
+
 # Complete validated specification for all 77 screenshots across 6 folders.
 # Coordinates are in ORIGINAL (uncropped) image pixels.
 SPECS: dict[str, dict] = {
@@ -1175,6 +1228,814 @@ SPECS: dict[str, dict] = {
 }
 
 
+# Complete validated specification for the 10 WebP guides (95 screenshots).
+# Coordinates are in the clean image's pixel space (top_crop=0).
+WEBP_SPECS: dict[str, dict] = {
+    "youtube": {
+        "orig_dir": "YouTube",
+        "steps": [
+            {
+                "file": "01_inicio_enquete.jpg",
+                "circles": [
+                    (8, 10, 628, 535, 1, "pill", "br"),
+                    (8, 565, 628, 1095, 2, "pill", "tr"),
+                    (8, 1185, 628, 1254, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "02_inicio_ao_vivo.jpg",
+                "circles": [
+                    (418, 12, 628, 66, 1, "pill", "bl"),
+                    (8, 84, 485, 142, 2, "pill", "br"),
+                    (8, 152, 628, 622, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "03_shorts.jpg",
+                "circles": [
+                    (495, 10, 628, 66, 1, "pill", "bl"),
+                    (538, 665, 628, 1020, 2, "pill", "tl"),
+                    (10, 1035, 385, 1100, 3, "pill", "tr"),
+                    (115, 1185, 225, 1254, 4, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "04_inscricoes.jpg",
+                "circles": [
+                    (88, 84, 212, 142, 1, "pill", "br"),
+                    (8, 152, 628, 295, 2, "pill", "br"),
+                    (8, 308, 628, 1175, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "05_voce_historico.jpg",
+                "circles": [
+                    (8, 88, 628, 255, 1, "pill", "br"),
+                    (8, 295, 628, 575, 2, "pill", "tr"),
+                    (8, 600, 628, 965, 3, "pill", "tr"),
+                    (505, 1185, 615, 1254, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "06_canal_perfil.jpg",
+                "circles": [
+                    (8, 105, 628, 360, 1, "pill", "br"),
+                    (8, 548, 485, 606, 2, "pill", "tr"),
+                    (8, 616, 628, 1180, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "07_menu_mais.jpg",
+                "circles": [
+                    (415, 84, 495, 142, 1, "pill", "bl"),
+                    (8, 152, 420, 560, 2, "pill", "tr"),
+                    (8, 590, 420, 825, 3, "pill", "tr"),
+                ],
+            },
+        ],
+    },
+    "google-fotos": {
+        "orig_dir": "GoogleFotos",
+        "steps": [
+            {
+                "file": "01_fotos.jpg",
+                "circles": [
+                    (10, 14, 624, 92, 1, "pill", "bl"),
+                    (12, 110, 624, 472, 2, "pill", "tr"),
+                    (6, 495, 630, 1140, 3, "pill", "tr"),
+                    (112, 1156, 522, 1236, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "02_albuns.jpg",
+                "circles": [
+                    (12, 108, 624, 710, 1, "pill", "tr"),
+                    (12, 745, 624, 1055, 2, "pill", "tr"),
+                    (212, 1156, 336, 1236, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "03_criar.jpg",
+                "circles": [
+                    (14, 108, 624, 680, 1, "pill", "tr"),
+                    (14, 725, 624, 1055, 2, "pill", "tr"),
+                    (328, 1156, 434, 1236, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "04_conta.jpg",
+                "circles": [
+                    (22, 96, 614, 302, 1, "pill", "br"),
+                    (22, 415, 614, 618, 2, "pill", "tr"),
+                    (22, 635, 614, 735, 3, "pill", "tr"),
+                    (22, 922, 614, 1098, 4, "pill", "tr"),
+                ],
+            },
+        ],
+    },
+    "tiktok": {
+        "orig_dir": "TikTok",
+        "steps": [
+            {
+                "file": "01_inicio_para_voce.jpg",
+                "circles": [
+                    (8, 16, 626, 78, 1, "pill", "bl"),
+                    (544, 648, 626, 1175, 2, "pill", "tl"),
+                    (12, 1055, 520, 1165, 3, "pill", "tr"),
+                    (8, 1184, 628, 1250, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "02_amigos.jpg",
+                "circles": [
+                    (12, 18, 624, 78, 1, "pill", "bl"),
+                    (544, 648, 626, 1175, 2, "pill", "tl"),
+                    (120, 1184, 240, 1250, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "03_criar_camera.jpg",
+                "circles": [
+                    (16, 48, 626, 200, 1, "pill", "bl"),
+                    (40, 945, 455, 1002, 2, "pill", "tl"),
+                    (245, 1010, 390, 1148, 3, "ellipse", "tl"),
+                ],
+            },
+            {
+                "file": "04_loja.jpg",
+                "circles": [
+                    (380, 16, 628, 74, 1, "pill", "bl"),
+                    (12, 78, 624, 132, 2, "pill", "br"),
+                    (8, 650, 628, 1175, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "05_mensagens.jpg",
+                "circles": [
+                    (12, 16, 624, 78, 1, "pill", "bl"),
+                    (12, 84, 440, 278, 2, "pill", "br"),
+                    (10, 505, 626, 1125, 3, "pill", "tr"),
+                    (385, 1184, 512, 1250, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "06_perfil.jpg",
+                "circles": [
+                    (14, 16, 624, 74, 1, "pill", "bl"),
+                    (12, 95, 624, 275, 2, "pill", "br"),
+                    (20, 302, 616, 360, 3, "pill", "br"),
+                    (520, 1184, 628, 1250, 4, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+    "poupatempo": {
+        "orig_dir": "Poupatempo",
+        "steps": [
+            {
+                "file": "01_boas_vindas.jpg",
+                "circles": [
+                    (36, 480, 600, 668, 1, "pill", "tr"),
+                    (38, 725, 598, 810, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "02_login_cpf.jpg",
+                "circles": [
+                    (72, 425, 566, 515, 1, "pill", "tr"),
+                    (72, 535, 566, 610, 2, "pill", "tr"),
+                    (72, 650, 566, 925, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "03_login_senha.jpg",
+                "circles": [
+                    (72, 400, 566, 495, 1, "pill", "tr"),
+                    (72, 515, 566, 650, 2, "pill", "tr"),
+                    (200, 680, 440, 730, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "04_inicio.jpg",
+                "circles": [
+                    (12, 435, 624, 650, 1, "pill", "tr"),
+                    (12, 690, 624, 980, 2, "pill", "tr"),
+                    (8, 1150, 628, 1232, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "05_categorias.jpg",
+                "circles": [
+                    (10, 14, 626, 210, 1, "pill", "br"),
+                    (12, 222, 624, 685, 2, "pill", "tr"),
+                    (12, 695, 624, 1140, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "06_buscar.jpg",
+                "circles": [
+                    (22, 85, 614, 165, 1, "pill", "br"),
+                    (12, 185, 624, 1140, 2, "pill", "tr"),
+                    (248, 1150, 388, 1232, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "07_agendamento.jpg",
+                "circles": [
+                    (24, 98, 612, 265, 1, "pill", "tr"),
+                    (24, 278, 612, 445, 2, "pill", "tr"),
+                    (125, 1150, 250, 1232, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "08_agenda_mensal.jpg",
+                "circles": [
+                    (18, 20, 618, 86, 1, "pill", "br"),
+                    (18, 92, 618, 455, 2, "pill", "tr"),
+                    (18, 520, 618, 640, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "09_servicos_solicitados.jpg",
+                "circles": [
+                    (8, 82, 628, 302, 1, "pill", "tr"),
+                    (8, 308, 628, 635, 2, "pill", "tr"),
+                    (8, 642, 628, 1140, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "10_carteira_digital.jpg",
+                "circles": [
+                    (20, 215, 616, 488, 1, "pill", "tr"),
+                    (20, 575, 616, 795, 2, "pill", "tr"),
+                    (505, 1150, 628, 1232, 3, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+    "carteira-digital": {
+        "orig_dir": "CNH",
+        "steps": [
+            {
+                "file": "01_inicio.jpg",
+                "circles": [
+                    (8, 8, 628, 82, 1, "pill", "bl"),
+                    (12, 105, 624, 282, 2, "pill", "tr"),
+                    (12, 298, 624, 650, 3, "pill", "tr"),
+                    (12, 662, 624, 835, 4, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "02_menu_lateral.jpg",
+                "circles": [
+                    (12, 18, 415, 190, 1, "pill", "br"),
+                    (12, 200, 415, 660, 2, "pill", "tr"),
+                    (12, 668, 415, 865, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "03_condutor_resumo.jpg",
+                "circles": [
+                    (18, 105, 618, 560, 1, "pill", "tr"),
+                    (18, 595, 618, 775, 2, "pill", "tr"),
+                    (18, 790, 618, 975, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "04_habilitacao_digital.jpg",
+                "circles": [
+                    (20, 88, 616, 145, 1, "pill", "br"),
+                    (10, 152, 626, 1015, 2, "pill", "tr"),
+                    (18, 1020, 618, 1175, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "05_condutor_servicos.jpg",
+                "circles": [
+                    (18, 105, 618, 405, 1, "pill", "tr"),
+                    (18, 560, 618, 748, 2, "pill", "tr"),
+                    (18, 765, 618, 955, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "06_credencial_estacionamento.jpg",
+                "circles": [
+                    (18, 105, 618, 495, 1, "pill", "tr"),
+                    (18, 505, 618, 682, 2, "pill", "tr"),
+                    (18, 692, 618, 885, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "07_veiculos.jpg",
+                "circles": [
+                    (12, 8, 520, 86, 1, "pill", "br"),
+                    (110, 560, 526, 760, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "08_infracoes_menu.jpg",
+                "circles": [
+                    (18, 240, 618, 368, 1, "pill", "tr"),
+                    (18, 385, 618, 515, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "09_infracoes_lista.jpg",
+                "circles": [
+                    (4, 8, 632, 178, 1, "pill", "br"),
+                    (6, 182, 630, 316, 2, "pill", "br"),
+                    (18, 690, 618, 865, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "10_cadastro_positivo.jpg",
+                "circles": [
+                    (18, 115, 618, 390, 1, "pill", "tr"),
+                    (18, 398, 618, 540, 2, "pill", "tr"),
+                    (18, 558, 618, 920, 3, "pill", "tr"),
+                ],
+            },
+        ],
+    },
+    "carteira-de-trabalho": {
+        "orig_dir": "CLT",
+        "steps": [
+            {
+                "file": "01_entrar_gov_br.jpg",
+                "circles": [
+                    (40, 48, 596, 580, 1, "pill", "tr"),
+                    (18, 705, 618, 790, 2, "pill", "tr"),
+                    (10, 915, 626, 1155, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "02_autorizar_compartilhamento.jpg",
+                "circles": [
+                    (38, 150, 598, 680, 1, "pill", "tr"),
+                    (92, 1105, 552, 1192, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "03_carteira_inicio.jpg",
+                "circles": [
+                    (8, 8, 628, 175, 1, "pill", "bl"),
+                    (16, 555, 620, 745, 2, "pill", "tr"),
+                    (16, 755, 315, 935, 3, "pill", "tr"),
+                    (8, 1175, 628, 1250, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "04_contratos_trabalho.jpg",
+                "circles": [
+                    (10, 12, 628, 228, 1, "pill", "bl"),
+                    (18, 255, 618, 650, 2, "pill", "tr"),
+                    (20, 1105, 616, 1218, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "05_outros_vinculos.jpg",
+                "circles": [
+                    (10, 185, 626, 615, 1, "pill", "tr"),
+                    (18, 710, 618, 800, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "06_enviar_carteira.jpg",
+                "circles": [
+                    (14, 130, 622, 505, 1, "pill", "tr"),
+                    (14, 515, 622, 795, 2, "pill", "tr"),
+                    (18, 1150, 618, 1235, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "07_beneficios.jpg",
+                "circles": [
+                    (16, 98, 620, 305, 1, "pill", "tr"),
+                    (16, 315, 620, 520, 2, "pill", "tr"),
+                    (16, 530, 620, 1155, 3, "pill", "tr"),
+                    (130, 1175, 255, 1250, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "08_emprego.jpg",
+                "circles": [
+                    (18, 725, 618, 855, 1, "pill", "tr"),
+                    (20, 875, 616, 1020, 2, "pill", "tr"),
+                    (256, 1175, 380, 1250, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "09_emprestimos.jpg",
+                "circles": [
+                    (12, 130, 420, 365, 1, "pill", "tr"),
+                    (14, 880, 622, 1140, 2, "pill", "tl"),
+                    (385, 1175, 510, 1250, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "10_menu.jpg",
+                "circles": [
+                    (12, 95, 624, 675, 1, "pill", "tr"),
+                    (12, 682, 624, 765, 2, "pill", "tr"),
+                    (512, 1175, 628, 1250, 3, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+    "meu-inss": {
+        "orig_dir": "INSS",
+        "steps": [
+            {
+                "file": "01_boas_vindas.jpg",
+                "circles": [
+                    (24, 150, 612, 480, 1, "pill", "tr"),
+                    (18, 1152, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "02_politica_privacidade.jpg",
+                "circles": [
+                    (18, 20, 618, 1020, 1, "pill", "tr"),
+                    (18, 1070, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "03_entrar_gov_br.jpg",
+                "circles": [
+                    (62, 290, 574, 378, 1, "pill", "tr"),
+                    (14, 675, 622, 1245, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "04_autorizar_compartilhamento.jpg",
+                "circles": [
+                    (36, 150, 600, 665, 1, "pill", "tr"),
+                    (92, 1105, 552, 1192, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "05_acesso_biometria.jpg",
+                "circles": [
+                    (10, 110, 626, 615, 1, "pill", "tr"),
+                    (18, 1075, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "06_notificacao_celular.jpg",
+                "circles": [
+                    (10, 110, 626, 600, 1, "pill", "tr"),
+                    (18, 1075, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "07_inicio.jpg",
+                "circles": [
+                    (4, 4, 632, 78, 1, "pill", "bl"),
+                    (18, 195, 618, 605, 2, "pill", "tr"),
+                    (18, 635, 618, 945, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "08_chat_helo.jpg",
+                "circles": [
+                    (4, 578, 632, 650, 1, "pill", "tr"),
+                    (110, 665, 526, 1025, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "09_menu_lateral.jpg",
+                "circles": [
+                    (4, 86, 630, 385, 1, "pill", "tr"),
+                    (4, 392, 630, 705, 2, "pill", "tr"),
+                    (4, 712, 630, 1185, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "10_buscar_servico.jpg",
+                "circles": [
+                    (22, 86, 614, 165, 1, "pill", "br"),
+                    (18, 185, 618, 1235, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "11_notificacoes.jpg",
+                "circles": [
+                    (18, 175, 618, 1045, 1, "pill", "tr"),
+                    (18, 1075, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "12_meu_perfil.jpg",
+                "circles": [
+                    (20, 86, 520, 175, 1, "pill", "br"),
+                    (22, 185, 614, 490, 2, "pill", "tr"),
+                    (22, 498, 614, 625, 3, "pill", "tr"),
+                    (18, 1152, 618, 1236, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "13_extratos_e_comprovantes.jpg",
+                "circles": [
+                    (22, 185, 614, 260, 1, "pill", "br"),
+                    (22, 275, 614, 520, 2, "pill", "tr"),
+                    (18, 1152, 618, 1236, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "14_extrato_contribuicoes_cnis.jpg",
+                "circles": [
+                    (20, 280, 616, 800, 1, "pill", "tr"),
+                    (20, 815, 616, 1055, 2, "pill", "tr"),
+                    (18, 1075, 618, 1236, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "15_beneficio_afastamento_protetivo.jpg",
+                "circles": [
+                    (18, 175, 618, 515, 1, "pill", "tr"),
+                    (18, 1075, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "16_beneficios_por_incapacidade.jpg",
+                "circles": [
+                    (22, 185, 614, 260, 1, "pill", "br"),
+                    (22, 275, 614, 685, 2, "pill", "tr"),
+                    (22, 695, 614, 1135, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "17_novo_pedido.jpg",
+                "circles": [
+                    (20, 125, 616, 650, 1, "pill", "tr"),
+                    (18, 1075, 618, 1236, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "18_mais_servicos.jpg",
+                "circles": [
+                    (22, 86, 614, 165, 1, "pill", "br"),
+                    (18, 190, 618, 705, 2, "pill", "tr"),
+                    (18, 720, 618, 1145, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "19_ajuda.jpg",
+                "circles": [
+                    (20, 150, 616, 330, 1, "pill", "tr"),
+                    (20, 338, 616, 418, 2, "pill", "tr"),
+                    (20, 425, 616, 585, 3, "pill", "tr"),
+                    (18, 1152, 618, 1236, 4, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+    "e-titulo": {
+        "orig_dir": "ETitulo",
+        "steps": [
+            {
+                "file": "passo_1.webp",
+                "circles": [
+                    (135, 195, 585, 815, 1, "pill", "tr"),
+                    (50, 845, 490, 945, 2, "pill", "tr"),
+                    (12, 1345, 708, 1435, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_2.webp",
+                "circles": [
+                    (45, 135, 468, 575, 1, "pill", "tr"),
+                    (18, 585, 488, 905, 2, "pill", "tr"),
+                    (8, 925, 501, 1018, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_3.webp",
+                "circles": [
+                    (12, 68, 494, 625, 1, "pill", "tr"),
+                    (12, 635, 494, 920, 2, "pill", "tr"),
+                    (8, 928, 498, 1018, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_4.webp",
+                "circles": [
+                    (28, 125, 745, 690, 1, "pill", "tr"),
+                    (18, 1360, 780, 1480, 2, "pill", "tl"),
+                    (475, 1490, 628, 1590, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_5.webp",
+                "circles": [
+                    (18, 150, 780, 885, 1, "pill", "tr"),
+                    (632, 1490, 790, 1590, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_6.webp",
+                "circles": [
+                    (18, 165, 774, 595, 1, "pill", "tr"),
+                    (18, 635, 774, 975, 2, "pill", "tr"),
+                    (18, 1020, 774, 1485, 3, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+    "fgts": {
+        "orig_dir": "FGTS",
+        "steps": [
+            {
+                "file": "passo_1.webp",
+                "circles": [
+                    (80, 215, 714, 655, 1, "pill", "tr"),
+                    (24, 1055, 770, 1185, 2, "pill", "tr"),
+                    (130, 1280, 665, 1365, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_2.webp",
+                "circles": [
+                    (45, 455, 748, 560, 1, "pill", "tr"),
+                    (45, 570, 748, 675, 2, "pill", "tr"),
+                    (160, 690, 635, 845, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_3.webp",
+                "circles": [
+                    (18, 60, 776, 1245, 1, "pill", "tr"),
+                    (115, 1300, 680, 1385, 2, "pill", "tl"),
+                    (24, 1430, 770, 1555, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_4.webp",
+                "circles": [
+                    (18, 885, 772, 1090, 1, "pill", "tr"),
+                    (18, 1275, 772, 1515, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_5.webp",
+                "circles": [
+                    (18, 400, 772, 1185, 1, "pill", "tr"),
+                    (18, 1255, 772, 1510, 2, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_6.webp",
+                "circles": [
+                    (18, 108, 520, 275, 1, "pill", "br"),
+                    (24, 335, 770, 910, 2, "pill", "tr"),
+                    (24, 935, 770, 1485, 3, "pill", "tr"),
+                    (8, 1500, 787, 1610, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_7.webp",
+                "circles": [
+                    (18, 365, 778, 580, 1, "pill", "tr"),
+                    (18, 595, 778, 795, 2, "pill", "tr"),
+                    (195, 1500, 395, 1595, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_8.webp",
+                "circles": [
+                    (18, 345, 782, 855, 1, "pill", "tr"),
+                    (18, 870, 782, 1345, 2, "pill", "tr"),
+                    (18, 1360, 782, 1585, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_9.webp",
+                "circles": [
+                    (18, 115, 788, 435, 1, "pill", "tr"),
+                    (18, 450, 788, 635, 2, "pill", "tr"),
+                    (18, 650, 788, 825, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_10.webp",
+                "circles": [
+                    (28, 445, 774, 710, 1, "pill", "tr"),
+                    (68, 935, 734, 1055, 2, "pill", "tr"),
+                    (68, 1070, 734, 1185, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_11.webp",
+                "circles": [
+                    (18, 115, 778, 495, 1, "pill", "tr"),
+                    (18, 508, 778, 1030, 2, "pill", "tr"),
+                    (18, 1040, 778, 1485, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_12.webp",
+                "circles": [
+                    (45, 215, 756, 975, 1, "pill", "tr"),
+                    (45, 1020, 756, 1520, 2, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+    "instagram": {
+        "orig_dir": "Instagram",
+        "steps": [
+            {
+                "file": "passo_1.webp",
+                "circles": [
+                    (14, 140, 1066, 455, 1, "pill", "br"),
+                    (800, 18, 940, 120, 2, "ellipse", "bl"),
+                    (18, 1715, 340, 1820, 3, "pill", "tr"),
+                    (14, 1825, 1066, 1928, 4, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_2.webp",
+                "circles": [
+                    (260, 18, 820, 118, 1, "pill", "br"),
+                    (910, 880, 1068, 1550, 2, "pill", "tl"),
+                    (20, 1570, 720, 1775, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_3.webp",
+                "circles": [
+                    (24, 160, 1056, 375, 1, "pill", "br"),
+                    (14, 495, 355, 1055, 2, "pill", "tr"),
+                    (362, 495, 1066, 1620, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_4.webp",
+                "circles": [
+                    (955, 18, 1068, 720, 1, "pill", "bl"),
+                    (24, 1800, 480, 1925, 2, "pill", "tr"),
+                    (495, 1800, 1062, 1925, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_5.webp",
+                "circles": [
+                    (14, 165, 1066, 575, 1, "pill", "tr"),
+                    (14, 585, 1066, 755, 2, "pill", "tr"),
+                    (14, 765, 1066, 1750, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_6.webp",
+                "circles": [
+                    (24, 145, 1056, 238, 1, "pill", "br"),
+                    (18, 248, 1062, 522, 2, "pill", "br"),
+                    (14, 535, 1066, 1780, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_7.webp",
+                "circles": [
+                    (18, 12, 950, 115, 1, "pill", "bl"),
+                    (10, 125, 1070, 1810, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_8.webp",
+                "circles": [
+                    (120, 12, 1060, 115, 1, "pill", "bl"),
+                    (14, 155, 1066, 1465, 2, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_9.webp",
+                "circles": [
+                    (14, 12, 1066, 125, 1, "pill", "bl"),
+                    (14, 150, 1066, 625, 2, "pill", "br"),
+                    (14, 915, 1066, 2060, 3, "pill", "tr"),
+                ],
+            },
+            {
+                "file": "passo_10.webp",
+                "circles": [
+                    (14, 115, 782, 495, 1, "pill", "br"),
+                    (14, 520, 782, 1110, 2, "pill", "tr"),
+                    (14, 1460, 782, 1590, 3, "pill", "tl"),
+                ],
+            },
+            {
+                "file": "passo_11.webp",
+                "circles": [
+                    (18, 25, 1062, 145, 1, "pill", "bl"),
+                    (20, 185, 1060, 1740, 2, "pill", "tr"),
+                    (14, 1785, 1066, 1925, 3, "pill", "tl"),
+                ],
+            },
+        ],
+    },
+}
+
+
 def make_contact_sheet(chave: str, images: list[tuple[int, Image.Image]], out_path: str) -> None:
     cols = 4
     rows = (len(images) + cols - 1) // cols
@@ -1270,6 +2131,47 @@ def main() -> None:
         if verify_dir is not None:
             make_contact_sheet(chave, verify_imgs, os.path.join(verify_dir, f"verify_{chave}.jpg"))
         print(f"[{chave}] {len(cfg['steps'])} passos processados e anotados -> {out_dir}")
+
+    for chave, cfg in WEBP_SPECS.items():
+        orig_dir = os.path.join(ORIG, cfg["orig_dir"])
+        clean_dir = os.path.join(APPS, cfg["orig_dir"])
+        out_dir = os.path.join(ASSETS_GUIAS, chave)
+        os.makedirs(clean_dir, exist_ok=True)
+        os.makedirs(out_dir, exist_ok=True)
+
+        expected = {f"passo_{i}.webp" for i in range(1, len(cfg["steps"]) + 1)}
+        for existing in os.listdir(out_dir):
+            if existing == ".gitkeep":
+                continue
+            if existing not in expected:
+                os.remove(os.path.join(out_dir, existing))
+
+        verify_imgs_webp: list[tuple[int, Image.Image]] = []
+        for idx, step in enumerate(cfg["steps"], start=1):
+            clean_path = os.path.join(clean_dir, step["file"])
+            orig_path = os.path.join(orig_dir, step["file"])
+            if os.path.exists(clean_path):
+                src_path = clean_path
+            elif os.path.exists(orig_path):
+                src_path = orig_path
+                shutil.copy2(orig_path, clean_path)
+            else:
+                raise FileNotFoundError(f"Arquivo base ausente: {clean_path}")
+
+            im = Image.open(src_path).convert("RGB")
+            if chave == "instagram":
+                im = _sanitize_instagram_clean(idx, im)
+                _atomic_save_webp(im, clean_path, quality=90)
+
+            annotated = draw_annotations(im, step["circles"], top_crop=0)
+            dst_path = os.path.join(out_dir, f"passo_{idx}.webp")
+            save_asset_webp(annotated, dst_path, target_width=636, quality=80)
+            if verify_dir is not None:
+                verify_imgs_webp.append((idx, Image.open(dst_path)))
+
+        if verify_dir is not None:
+            make_contact_sheet(chave, verify_imgs_webp, os.path.join(verify_dir, f"verify_{chave}.jpg"))
+        print(f"[{chave}] {len(cfg['steps'])} passos WebP processados e anotados -> {out_dir}")
 
     if verify_dir is not None and blurred_checks:
         cols = 4
