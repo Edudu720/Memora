@@ -1057,7 +1057,7 @@ abstract final class TextosGuias {
   static const String meuInssEntrar3 =
       'Tela de acesso ao Meu INSS:\n'
       '1) Toque no botão azul "Entrar com gov.br" para acessar todos os seus benefícios.\n'
-      '2) Área "Serviços sem senha" abaixo, com Novo Pedido, Taxas de Consignado e Calendário de Pagamento.';
+      '2) Área "Serviços sem senha" abaixo, com Novo Pedido, Taxas de Consignado e Calendário de Benefícios.';
   /// Passo 4 de Entrar no Meu INSS.
   static const String meuInssEntrar4 =
       'Autorização da conta gov.br:\n'
@@ -1149,7 +1149,7 @@ abstract final class TextosGuias {
   static const String meuInssAjuda1 =
       'Grade completa em "Mais Serviços":\n'
       '1) Barra "Do que você precisa?" para pesquisar qualquer serviço.\n'
-      '2) Bloco "Destaques": Simular Aposentadoria, Prova de Vida, Carteira do Beneficiário, Meus Benefícios e Calendário de Pagamento.\n'
+      '2) Bloco "Destaques": Simular Aposentadoria, Prova de Vida, Carteira do Beneficiário, Meus Benefícios e Calendário de Benefícios.\n'
       '3) Bloco "Benefícios": Aposentadorias, Incapacidade, Assistenciais e Salário-Maternidade.';
   /// Passo 2 de Mais Serviços e Ajuda no Meu INSS.
   static const String meuInssAjuda2 =
