@@ -38,7 +38,7 @@ class FonteLocalizadorApi {
     final Map<String, dynamic> corpo = <String, dynamic>{
       if (consulta != null && consulta.trim().isNotEmpty)
         'consulta': consulta.trim(),
-      if (categoria != null) 'categoria': categoria.name.toUpperCase(),
+      if (categoria != null) 'categoria': categoria.codigo,
       if (latitude != null && longitude != null)
         'localizacao': <String, dynamic>{
           'latitude': latitude,

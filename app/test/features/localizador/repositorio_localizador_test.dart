@@ -126,6 +126,33 @@ void main() {
       expect(adaptador.pedidos.single.path, '/api/v1/servicos/buscar');
     });
 
+    test('envia o código de categoria que o servidor reconhece (SERVICOS_PUBLICOS com sublinhado)', () async {
+      const Map<CategoriaServico, String> esperado = <CategoriaServico, String>{
+        CategoriaServico.saude: 'SAUDE',
+        CategoriaServico.servicosPublicos: 'SERVICOS_PUBLICOS',
+        CategoriaServico.emergencia: 'EMERGENCIA',
+        CategoriaServico.cotidiano: 'COTIDIANO',
+      };
+      final AdaptadorFalso adaptador = AdaptadorFalso(
+        (RequestOptions op, int n) async => respostaJson(200, payloadSucesso()),
+      );
+      final Dio dio = Dio(BaseOptions(baseUrl: 'http://servidor.teste/v1'))
+        ..httpClientAdapter = adaptador;
+      final FonteLocalizadorApi fonte = FonteLocalizadorApi(dio);
+
+      for (final CategoriaServico categoria in CategoriaServico.values) {
+        await fonte.buscarServicos(categoria: categoria, regiaoManual: 'Campinas, SP');
+      }
+
+      final List<Object?> enviados = adaptador.pedidos
+          .map((RequestOptions p) => (p.data as Map<String, dynamic>)['categoria'])
+          .toList();
+      expect(enviados, CategoriaServico.values.map((CategoriaServico c) => esperado[c]).toList());
+      for (final CategoriaServico categoria in CategoriaServico.values) {
+        expect(CategoriaServico.porCodigo(esperado[categoria]), categoria);
+      }
+    });
+
     test('propaga erro sem acionar dados fictícios simulados quando servidor retorna 503', () async {
       final AdaptadorFalso adaptador = AdaptadorFalso(
         (RequestOptions op, int n) async => respostaJson(503, <String, Object>{
