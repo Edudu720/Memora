@@ -2,6 +2,12 @@
 
 Todas as mudanças notáveis do aplicativo **Memora** são documentadas neste arquivo.
 
+## [Unreleased] — Localizador estável (Issue `#81`)
+
+### Corrigido
+- **Fallback Nominatim do Localizador chega à `develop` (`ProvedorGeograficoResiliente`, `ProvedorOpenStreetMapOverpass`)**: o commit `414c807` foi feito na branch da PR #112 depois do merge e nunca entrou na `develop`/Render. Em produção, sem a chave Geoapify carregada, a busca dependia só das 3 instâncias públicas do Overpass, todas fora do ar (502 / timeout), e devolvia 503. Agora, se o Overpass falha, a busca regional via Nominatim (viewbox) assume; a chave também é aceita como `GEOAPIFY_API_KEY`.
+- **Chip "Serviços públicos" buscava Saúde (`CategoriaServico.codigo`, `FonteLocalizadorApi`)**: o app enviava `name.toUpperCase()` (`SERVICOSPUBLICOS`), que o backend não reconhece e troca por `SAUDE`. O app passa a enviar o código do contrato (`SERVICOS_PUBLICOS`), com teste cobrindo as 4 categorias.
+
 ## [Unreleased] — Feature `022-avatares-no-chat`
 
 ### Corrigido / Adicionado
