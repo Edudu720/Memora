@@ -65,10 +65,14 @@ final class CapturaDoGuia {
   /// `FormatoDaCaptura.png` como terceiro argumento da constante dela.
   final FormatoDaCaptura formato;
 
+  /// A imagem embarcada já traz as marcações azuis numeradas pintadas nela?
+  final bool temMarcacaoPintada;
+
   const CapturaDoGuia._(
     this.chave,
     this.numero, [
     this.formato = FormatoDaCaptura.webp,
+    this.temMarcacaoPintada = true,
   ]);
 
   /// Só para o teste montar de propósito um guia errado e provar que o portão
@@ -78,7 +82,7 @@ final class CapturaDoGuia {
     String chave,
     int numero, {
     FormatoDaCaptura formato = FormatoDaCaptura.webp,
-  }) : this._(chave, numero, formato);
+  }) : this._(chave, numero, formato, formato == FormatoDaCaptura.jpg);
 
   /// O caminho do asset, relativo à raiz do aplicativo.
   String get caminho => 'assets/guias/$chave/passo_$numero.${formato.extensao}';
