@@ -392,4 +392,60 @@ class ProvedorOpenStreetMapOverpassTest {
         assertTrue(est.horarioConfirmado());
         assertNull(est.avisoTransparencia());
     }
+
+    @Test
+    @DisplayName("Nominatim normaliza 'Americana, Centro' para 'Centro, Americana' e prioriza bairro/cidade sobre comércio em MG")
+    void nominatimPriorizaBairroECidadeSobreComercioHomonimoEmMinasGerais() {
+        assertEquals(
+                "Centro, Americana",
+                ProvedorOpenStreetMapOverpass.normalizarOrdemCidadeBairroParaNominatim("Americana, Centro"));
+        assertEquals(
+                "Jardim Ipiranga, Americana",
+                ProvedorOpenStreetMapOverpass.normalizarOrdemCidadeBairroParaNominatim("Americana, Jardim Ipiranga"));
+        assertEquals(
+                "Americana, SP",
+                ProvedorOpenStreetMapOverpass.normalizarOrdemCidadeBairroParaNominatim("Americana, SP"));
+
+        statusNominatim = 200;
+        bodyNominatim = """
+                [
+                  {
+                    "class": "amenity",
+                    "type": "pharmacy",
+                    "lat": "-21.1203930",
+                    "lon": "-42.9393766",
+                    "importance": 0.0000627,
+                    "display_name": "Americana, Praça da Independência, Centro, Ubá, Minas Gerais, Brasil",
+                    "address": {
+                      "suburb": "Centro",
+                      "city": "Ubá",
+                      "state": "Minas Gerais",
+                      "ISO3166-2-lvl4": "BR-MG"
+                    }
+                  },
+                  {
+                    "class": "place",
+                    "type": "suburb",
+                    "lat": "-22.7399748",
+                    "lon": "-47.3300552",
+                    "importance": 0.146729,
+                    "display_name": "Centro, Americana, São Paulo, Região Sudeste, 13465-279, Brasil",
+                    "address": {
+                      "suburb": "Centro",
+                      "city": "Americana",
+                      "state": "São Paulo",
+                      "ISO3166-2-lvl4": "BR-SP"
+                    }
+                  }
+                ]
+                """;
+
+        ProvedorOpenStreetMapOverpass provedor = criarProvedor();
+        var coords = provedor.geocodificarRegiao("Americana, Centro");
+
+        assertNotNull(coords);
+        assertEquals("Centro, Americana, São Paulo, Região Sudeste, 13465-279, Brasil", coords.nomeExibido());
+        assertEquals(-22.7399748, coords.latitude(), 0.0001);
+        assertEquals(-47.3300552, coords.longitude(), 0.0001);
+    }
 }

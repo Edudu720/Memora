@@ -325,8 +325,9 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
 
         try {
             aguardarJanelaNominatim();
-            String encoded = java.net.URLEncoder.encode(regiaoManual + ", Brasil", java.nio.charset.StandardCharsets.UTF_8);
-            String url = nominatimUrl + "?q=" + encoded + "&format=json&limit=1&addressdetails=1";
+            String consultaOtimizada = normalizarOrdemCidadeBairroParaNominatim(regiaoManual.trim());
+            String encoded = URLEncoder.encode(consultaOtimizada + ", Brasil", StandardCharsets.UTF_8);
+            String url = nominatimUrl + "?q=" + encoded + "&format=json&limit=10&countrycodes=br&addressdetails=1";
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -339,11 +340,13 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
             if (response.statusCode() == 200) {
                 JsonNode array = jsonMapper.readTree(response.body());
                 if (array.isArray() && !array.isEmpty()) {
-                    JsonNode primeiro = array.get(0);
-                    double lat = primeiro.get("lat").asDouble();
-                    double lon = primeiro.get("lon").asDouble();
-                    String nome = primeiro.path("display_name").asText(regiaoManual);
-                    return new CoordenadasGeo(lat, lon, nome);
+                    JsonNode melhor = escolherMelhorItemNominatim(array, regiaoManual);
+                    if (melhor != null) {
+                        double lat = melhor.get("lat").asDouble();
+                        double lon = melhor.get("lon").asDouble();
+                        String nome = melhor.path("display_name").asText(regiaoManual);
+                        return new CoordenadasGeo(lat, lon, nome);
+                    }
                 }
                 return null;
             }
@@ -361,6 +364,132 @@ public class ProvedorOpenStreetMapOverpass implements ProvedorGeografico {
             throw new ProvedorGeograficoIndisponivelException(
                     "Não foi possível consultar o serviço de geocodificação no momento.", e);
         }
+    }
+
+    private static final List<String> PREFIXOS_BAIRRO = List.of(
+            "centro",
+            "jardim",
+            "jd ",
+            "jd.",
+            "vila",
+            "parque",
+            "pq ",
+            "pq.",
+            "bairro",
+            "conjunto",
+            "chacara",
+            "recanto",
+            "residencial",
+            "bosque",
+            "portal",
+            "morada",
+            "distrito");
+
+    static String normalizarOrdemCidadeBairroParaNominatim(String regiaoManual) {
+        String[] segmentos = regiaoManual.split(",");
+        if (segmentos.length == 2) {
+            String primeiro = segmentos[0].trim();
+            String segundo = segmentos[1].trim();
+            String primeiroNorm = ProvedorGeoapify.normalizarTexto(primeiro);
+            String segundoNorm = ProvedorGeoapify.normalizarTexto(segundo);
+            if (!primeiroNorm.isEmpty()
+                    && !segundoNorm.isEmpty()
+                    && pareceBairro(segundoNorm)
+                    && !pareceBairro(primeiroNorm)) {
+                return segundo + ", " + primeiro;
+            }
+        }
+        return regiaoManual;
+    }
+
+    private static boolean pareceBairro(String textoNorm) {
+        for (String prefixo : PREFIXOS_BAIRRO) {
+            if (textoNorm.equals(prefixo) || textoNorm.startsWith(prefixo + " ")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private JsonNode escolherMelhorItemNominatim(JsonNode array, String regiaoManual) {
+        List<String> partes = ProvedorGeoapify.extrairPartesNormalizadas(regiaoManual);
+        JsonNode melhor = null;
+        double maiorNota = Double.NEGATIVE_INFINITY;
+
+        for (JsonNode item : array) {
+            if (!item.hasNonNull("lat") || !item.hasNonNull("lon")) {
+                continue;
+            }
+            double nota = calcularNotaItemNominatim(item, partes);
+            if (nota > maiorNota) {
+                maiorNota = nota;
+                melhor = item;
+            }
+        }
+        return melhor;
+    }
+
+    private double calcularNotaItemNominatim(JsonNode item, List<String> partes) {
+        double nota = 0.0;
+        String classe = ProvedorGeoapify.normalizarTexto(textoOuNull(item, "class"));
+        String tipo = ProvedorGeoapify.normalizarTexto(textoOuNull(item, "type"));
+
+        if ("place".equals(classe) || "boundary".equals(classe) || "highway".equals(classe)) {
+            nota += 100.0;
+            if (partes.size() >= 2
+                    && ("suburb".equals(tipo)
+                            || "neighbourhood".equals(tipo)
+                            || "quarter".equals(tipo)
+                            || "city_district".equals(tipo))) {
+                nota += 30.0;
+            } else if ("administrative".equals(tipo) || "city".equals(tipo) || "town".equals(tipo) || "municipality".equals(tipo)) {
+                nota += 15.0;
+            }
+        }
+
+        JsonNode address = item.path("address");
+        String cidade = ProvedorGeoapify.normalizarTexto(primeiroNaoNulo(
+                textoOuNull(address, "city"),
+                textoOuNull(address, "town"),
+                textoOuNull(address, "municipality"),
+                textoOuNull(address, "village"),
+                ("city".equals(tipo) || "town".equals(tipo) || "municipality".equals(tipo) || "administrative".equals(tipo))
+                        ? textoOuNull(item, "name")
+                        : null));
+        String bairro = ProvedorGeoapify.normalizarTexto(primeiroNaoNulo(
+                textoOuNull(address, "suburb"),
+                textoOuNull(address, "neighbourhood"),
+                textoOuNull(address, "quarter"),
+                textoOuNull(address, "city_district"),
+                ("suburb".equals(tipo) || "neighbourhood".equals(tipo) || "quarter".equals(tipo))
+                        ? textoOuNull(item, "name")
+                        : null));
+        String estado = ProvedorGeoapify.normalizarTexto(textoOuNull(address, "state"));
+        String uf = ProvedorGeoapify.normalizarTexto(extrairEstadoNominatim(address));
+
+        int idxCidade = ProvedorGeoapify.indiceParteCasada(partes, cidade);
+        int idxBairro = ProvedorGeoapify.indiceParteCasada(partes, bairro);
+        int idxEstado = ProvedorGeoapify.indiceParteCasada(partes, estado, uf);
+
+        if (idxCidade >= 0) {
+            nota += 80.0;
+        }
+        if (idxBairro >= 0) {
+            nota += 80.0;
+        }
+        if (idxEstado >= 0) {
+            nota += 60.0;
+        }
+        if (idxCidade >= 0 && idxBairro >= 0 && idxCidade != idxBairro) {
+            nota += 200.0;
+        }
+        if (idxCidade >= 0 && idxEstado >= 0 && idxCidade != idxEstado) {
+            nota += 120.0;
+        }
+
+        double importance = item.path("importance").asDouble(0.0);
+        nota += Math.max(0.0, importance) * 20.0;
+        return nota;
     }
 
     private void aguardarJanelaNominatim() throws InterruptedException {

@@ -110,7 +110,9 @@ class ControladorLocalizador extends ChangeNotifier {
 
   /// Define a cidade ou bairro manual e dispara nova busca na região informada.
   void definirRegiaoManual(String regiao) {
-    _regiaoManual = regiao;
+    final String limpa = regiao.trim();
+    if (limpa.isEmpty) return;
+    _regiaoManual = limpa;
     _precisaExplicarPermissao = false;
     buscar();
   }
@@ -142,12 +144,20 @@ class ControladorLocalizador extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final bool usarRegiaoManual = _regiaoManual.trim().isNotEmpty;
+      final double? latEnvio = usarRegiaoManual
+          ? null
+          : (_posicaoAtual?.latitude ?? _latitudeRegiao);
+      final double? lonEnvio = usarRegiaoManual
+          ? null
+          : (_posicaoAtual?.longitude ?? _longitudeRegiao);
+
       final ResultadoBuscaServicos resultado = await repositorio.buscarServicos(
-        consulta: _consultaTexto.isNotEmpty ? _consultaTexto : null,
+        consulta: _consultaTexto.trim().isNotEmpty ? _consultaTexto.trim() : null,
         categoria: _categoriaAtiva,
-        latitude: _posicaoAtual?.latitude,
-        longitude: _posicaoAtual?.longitude,
-        regiaoManual: _regiaoManual.isNotEmpty ? _regiaoManual : null,
+        latitude: latEnvio,
+        longitude: lonEnvio,
+        regiaoManual: usarRegiaoManual ? _regiaoManual.trim() : null,
       );
 
       _estabelecimentos = resultado.estabelecimentos;

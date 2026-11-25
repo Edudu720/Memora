@@ -10,10 +10,12 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -151,7 +153,7 @@ public class ProvedorGeoapify implements ProvedorGeografico {
         String chaveCodificada = URLEncoder.encode(apiKey, StandardCharsets.UTF_8);
         String url = String.format(
                 Locale.US,
-                "%s?text=%s&filter=countrycode:br&limit=1&lang=pt&apiKey=%s",
+                "%s?text=%s&filter=countrycode:br&limit=10&lang=pt&apiKey=%s",
                 geocodeUrl,
                 textoCodificado,
                 chaveCodificada);
@@ -169,11 +171,11 @@ public class ProvedorGeoapify implements ProvedorGeografico {
                 JsonNode root = jsonMapper.readTree(response.body());
                 JsonNode features = root.path("features");
                 if (features.isArray() && !features.isEmpty()) {
-                    JsonNode props = features.get(0).path("properties");
-                    if (props.hasNonNull("lat") && props.hasNonNull("lon")) {
-                        double lat = props.get("lat").asDouble();
-                        double lon = props.get("lon").asDouble();
-                        String nome = textoOuNull(props, "formatted");
+                    JsonNode melhorProps = escolherMelhorFeatureGeocode(features, regiaoManual);
+                    if (melhorProps != null) {
+                        double lat = melhorProps.get("lat").asDouble();
+                        double lon = melhorProps.get("lon").asDouble();
+                        String nome = textoOuNull(melhorProps, "formatted");
                         return new CoordenadasGeo(lat, lon, nome != null ? nome : regiaoManual.trim());
                     }
                 }
@@ -196,6 +198,121 @@ public class ProvedorGeoapify implements ProvedorGeografico {
             throw new ProvedorGeograficoIndisponivelException(
                     "Não foi possível consultar o serviço de geocodificação no momento.", e);
         }
+    }
+
+    private static final Set<String> TIPOS_REGIAO_GEOAPIFY = Set.of(
+            "suburb", "district", "neighbourhood", "city", "municipality", "locality", "county", "postcode", "street");
+
+    private JsonNode escolherMelhorFeatureGeocode(JsonNode features, String regiaoManual) {
+        List<String> partes = extrairPartesNormalizadas(regiaoManual);
+        JsonNode melhor = null;
+        double maiorNota = Double.NEGATIVE_INFINITY;
+
+        for (JsonNode feature : features) {
+            JsonNode props = feature.path("properties");
+            if (!props.hasNonNull("lat") || !props.hasNonNull("lon")) {
+                continue;
+            }
+            double nota = calcularNotaFeatureGeocode(props, partes);
+            if (nota > maiorNota) {
+                maiorNota = nota;
+                melhor = props;
+            }
+        }
+        return melhor;
+    }
+
+    private double calcularNotaFeatureGeocode(JsonNode props, List<String> partes) {
+        double nota = 0.0;
+        String tipo = normalizarTexto(textoOuNull(props, "result_type"));
+        if (TIPOS_REGIAO_GEOAPIFY.contains(tipo)) {
+            nota += 100.0;
+            if (partes.size() >= 2 && ("suburb".equals(tipo) || "district".equals(tipo) || "neighbourhood".equals(tipo))) {
+                nota += 30.0;
+            } else if ("city".equals(tipo) || "municipality".equals(tipo)) {
+                nota += 15.0;
+            }
+        }
+
+        String cidade = normalizarTexto(primeiroNaoNulo(
+                textoOuNull(props, "city"),
+                textoOuNull(props, "municipality"),
+                textoOuNull(props, "county")));
+        String bairro = normalizarTexto(primeiroNaoNulo(
+                textoOuNull(props, "suburb"),
+                textoOuNull(props, "district"),
+                textoOuNull(props, "neighbourhood")));
+        String estado = normalizarTexto(textoOuNull(props, "state"));
+        String uf = normalizarTexto(textoOuNull(props, "state_code"));
+
+        int idxCidade = indiceParteCasada(partes, cidade);
+        int idxBairro = indiceParteCasada(partes, bairro);
+        int idxEstado = indiceParteCasada(partes, estado, uf);
+
+        if (idxCidade >= 0) {
+            nota += 80.0;
+        }
+        if (idxBairro >= 0) {
+            nota += 80.0;
+        }
+        if (idxEstado >= 0) {
+            nota += 60.0;
+        }
+        if (idxCidade >= 0 && idxBairro >= 0 && idxCidade != idxBairro) {
+            nota += 200.0;
+        }
+        if (idxCidade >= 0 && idxEstado >= 0 && idxCidade != idxEstado) {
+            nota += 120.0;
+        }
+
+        double importance = props.path("rank").path("importance").asDouble(0.0);
+        nota += Math.max(0.0, importance) * 20.0;
+        return nota;
+    }
+
+    static List<String> extrairPartesNormalizadas(String regiaoManual) {
+        List<String> partes = new ArrayList<>();
+        if (regiaoManual == null) {
+            return partes;
+        }
+        for (String bruta : regiaoManual.split("[,;\\-/]+")) {
+            String norm = normalizarTexto(bruta);
+            if (!norm.isEmpty() && !"brasil".equals(norm)) {
+                partes.add(norm);
+            }
+        }
+        return partes;
+    }
+
+    static int indiceParteCasada(List<String> partes, String... candidatosAlvo) {
+        for (int i = 0; i < partes.size(); i++) {
+            String parte = partes.get(i);
+            if (parte.isEmpty()) continue;
+            for (String alvo : candidatosAlvo) {
+                if (alvo == null || alvo.isEmpty()) continue;
+                if (alvo.equals(parte) || alvo.contains(parte) || parte.contains(alvo)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    static String normalizarTexto(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return "";
+        }
+        String nfd = Normalizer.normalize(texto.trim().toLowerCase(Locale.ROOT), Normalizer.Form.NFD);
+        return nfd.replaceAll("\\p{M}+", "").replaceAll("\\s+", " ").trim();
+    }
+
+    private String primeiroNaoNulo(String... valores) {
+        for (String v : valores) {
+            if (v != null && !v.isBlank()) {
+                return v;
+            }
+        }
+        return null;
     }
 
     private List<Estabelecimento> parsearPlaces(String json, CategoriaServico categoria) {

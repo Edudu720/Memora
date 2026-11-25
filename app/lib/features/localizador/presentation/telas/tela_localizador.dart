@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../design_system/design_system.dart';
+import '../../domain/entidades/categoria_servico.dart';
 import '../../domain/entidades/estabelecimento_servico.dart';
 import '../controladores/controlador_localizador.dart';
 import '../widgets/cartao_estabelecimento.dart';
@@ -112,10 +114,37 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
     } catch (_) {}
   }
 
+  void _fecharTeclado([BuildContext? contextoDialogo]) {
+    if (contextoDialogo != null) {
+      FocusScope.of(contextoDialogo).unfocus();
+    }
+    if (mounted) {
+      FocusScope.of(context).unfocus();
+    }
+    FocusManager.instance.primaryFocus?.unfocus();
+    SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        FocusScope.of(context).unfocus();
+      }
+      FocusManager.instance.primaryFocus?.unfocus();
+      SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    });
+  }
+
   void _solicitarRegiaoManual(BuildContext context) {
     final TextEditingController campoRegiao = TextEditingController(
       text: widget.controlador.regiaoManual,
     );
+
+    void confirmarRegiao(BuildContext ctx) {
+      final String texto = campoRegiao.text.trim();
+      _fecharTeclado(ctx);
+      Navigator.of(ctx).pop();
+      if (texto.isNotEmpty) {
+        widget.controlador.definirRegiaoManual(texto);
+      }
+    }
 
     DialogoMemora.mostrarConteudo<void>(
       context,
@@ -146,6 +175,8 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                 rotulo: 'Cidade ou bairro',
                 textoAjuda: 'Exemplo: Americana, Centro',
                 controlador: campoRegiao,
+                acaoTeclado: TextInputAction.search,
+                aoSubmeter: (_) => confirmarRegiao(ctx),
               ),
             ],
           ),
@@ -153,15 +184,15 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
           actions: <Widget>[
             BotaoSecundario(
               rotulo: 'Cancelar',
-              aoTocar: () => Navigator.of(ctx).pop(),
+              aoTocar: () {
+                _fecharTeclado(ctx);
+                Navigator.of(ctx).pop();
+              },
             ),
             BotaoPrimario(
               key: const Key('localizador.confirmar_regiao_manual'),
               rotulo: 'Atualizar região',
-              aoTocar: () {
-                Navigator.of(ctx).pop();
-                widget.controlador.definirRegiaoManual(campoRegiao.text);
-              },
+              aoTocar: () => confirmarRegiao(ctx),
             ),
           ],
         );
@@ -170,6 +201,11 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
   }
 
   LatLng _centroMapa(ControladorLocalizador c) {
+    if (c.regiaoManual.trim().isNotEmpty &&
+        c.latitudeRegiao != null &&
+        c.longitudeRegiao != null) {
+      return LatLng(c.latitudeRegiao!, c.longitudeRegiao!);
+    }
     if (c.posicaoAtual != null) {
       return LatLng(c.posicaoAtual!.latitude, c.posicaoAtual!.longitude);
     }
@@ -272,13 +308,21 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                         textoAjuda: 'Ex: farmácia, vacina, médico, correios',
                         controlador: _campoBusca,
                         aoMudar: c.definirConsultaTexto,
+                        acaoTeclado: TextInputAction.search,
+                        aoSubmeter: (_) {
+                          _fecharTeclado();
+                          c.buscar();
+                        },
                       ),
                       const SizedBox(height: MemoraEspacamento.sm),
                       BotaoPrimario(
                         key: TelaLocalizador.chaveBotaoBuscar,
                         rotulo: 'Buscar serviços',
                         icone: Icons.search_rounded,
-                        aoTocar: c.buscar,
+                        aoTocar: () {
+                          _fecharTeclado();
+                          c.buscar();
+                        },
                       ),
                     ],
                   ),
@@ -303,7 +347,10 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                       BotaoTerciario(
                         key: TelaLocalizador.chaveBotaoRegiaoManual,
                         rotulo: 'Mudar região',
-                        aoTocar: () => _solicitarRegiaoManual(context),
+                        aoTocar: () {
+                          _fecharTeclado();
+                          _solicitarRegiaoManual(context);
+                        },
                       ),
                     ],
                   ),
@@ -312,7 +359,10 @@ class _TelaLocalizadorState extends State<TelaLocalizador> {
                 // Filtro em pílulas de categorias essenciais
                 SeletorCategoriasChips(
                   categoriaSelecionada: c.categoriaAtiva,
-                  aoSelecionar: c.selecionarCategoria,
+                  aoSelecionar: (CategoriaServico cat) {
+                    _fecharTeclado();
+                    c.selecionarCategoria(cat);
+                  },
                 ),
 
                 // Feedback explicativo ou erro
