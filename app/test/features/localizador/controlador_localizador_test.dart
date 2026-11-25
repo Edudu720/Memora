@@ -155,6 +155,73 @@ void main() {
     expect(ctrlComSinal.posicaoAtual?.latitude, -25.4284);
     expect(espiao.chamadas, 1);
   });
+
+  test('Mudar para região manual após autorizar GPS envia regiaoManual sem coordenadas antigas do GPS', () async {
+    double? ultimaLat;
+    double? ultimaLon;
+    String? ultimaRegiao;
+
+    final ControladorLocalizador ctrl = ControladorLocalizador(
+      repositorio: _RepositorioCapturador(
+        aoBuscar: (double? lat, double? lon, String? regiao) {
+          ultimaLat = lat;
+          ultimaLon = lon;
+          ultimaRegiao = regiao;
+        },
+      ),
+      servicoGeo: _ServicoGeoFalso(
+        StatusPermissaoLocalizacao.concedida,
+        posicao: const PosicaoSimples(-23.5505, -46.6333),
+      ),
+    );
+    addTearDown(ctrl.dispose);
+
+    await ctrl.autorizarPermissaoEBuscar();
+    expect(ultimaLat, -23.5505);
+    expect(ultimaLon, -46.6333);
+    expect(ultimaRegiao, isNull);
+
+    ctrl.definirRegiaoManual('Americana, Centro');
+    await Future<void>.delayed(Duration.zero);
+
+    expect(ultimaLat, isNull);
+    expect(ultimaLon, isNull);
+    expect(ultimaRegiao, 'Americana, Centro');
+
+    ctrl.selecionarCategoria(CategoriaServico.servicosPublicos);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(ultimaLat, isNull);
+    expect(ultimaLon, isNull);
+    expect(ultimaRegiao, 'Americana, Centro');
+    expect(ctrl.mensagemErro, isNull);
+  });
+}
+
+class _RepositorioCapturador implements RepositorioLocalizador {
+  final void Function(double? lat, double? lon, String? regiao) aoBuscar;
+
+  _RepositorioCapturador({required this.aoBuscar});
+
+  @override
+  Future<ResultadoBuscaServicos> buscarServicos({
+    String? consulta,
+    CategoriaServico? categoria,
+    double? latitude,
+    double? longitude,
+    String? regiaoManual,
+    int? raioMetros,
+  }) async {
+    aoBuscar(latitude, longitude, regiaoManual);
+    return RepositorioLocalizadorSimulado().buscarServicos(
+      consulta: consulta,
+      categoria: categoria,
+      latitude: latitude,
+      longitude: longitude,
+      regiaoManual: regiaoManual,
+      raioMetros: raioMetros,
+    );
+  }
 }
 
 class _ServicoGeoFalso extends ServicoGeolocalizacaoDispositivo {

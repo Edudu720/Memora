@@ -43,6 +43,12 @@ class CampoTexto extends StatelessWidget {
   /// Chamada a cada alteração.
   final ValueChanged<String>? aoMudar;
 
+  /// Ação exibida no botão principal do teclado virtual (ex: buscar, concluir).
+  final TextInputAction? acaoTeclado;
+
+  /// Chamada quando a pessoa confirma a ação do teclado virtual.
+  final ValueChanged<String>? aoSubmeter;
+
   /// Oculta o conteúdo digitado.
   final bool ocultarConteudo;
 
@@ -67,6 +73,8 @@ class CampoTexto extends StatelessWidget {
     this.tipoTeclado = TextInputType.text,
     this.formatadores,
     this.aoMudar,
+    this.acaoTeclado,
+    this.aoSubmeter,
     this.ocultarConteudo = false,
     this.sufixo,
     this.habilitado = true,
@@ -101,6 +109,10 @@ class CampoTexto extends StatelessWidget {
             child: TextField(
               controller: controlador,
               onChanged: aoMudar,
+              onSubmitted: aoSubmeter,
+              textInputAction: acaoTeclado,
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               obscureText: ocultarConteudo,
               keyboardType: tipoTeclado,
               inputFormatters: formatadores,

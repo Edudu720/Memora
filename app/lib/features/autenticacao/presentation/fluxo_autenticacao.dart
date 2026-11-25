@@ -741,8 +741,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   void _abrirLocalizadorServicos() {
     _empilhar(
       _rota(
-        builder: (BuildContext contexto) => TelaLocalizador(
-          controlador: ControladorLocalizador(
+        builder: (BuildContext contexto) => _DonoDoLocalizador(
+          criar: () => ControladorLocalizador(
             repositorio: widget.localizador ?? RepositorioLocalizadorSimulado(),
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
@@ -1360,6 +1360,39 @@ class _DonoDosAtalhosAplicativosState extends State<_DonoDosAtalhosAplicativos> 
   @override
   Widget build(BuildContext context) {
     return TelaAtalhosAplicativos(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorLocalizador] uma única vez por abertura da rota e o
+/// descarta somente quando a rota sai da pilha.
+class _DonoDoLocalizador extends StatefulWidget {
+  final ControladorLocalizador Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonoDoLocalizador({
+    required this.criar,
+    required this.aoVoltar,
+  });
+
+  @override
+  State<_DonoDoLocalizador> createState() => _DonoDoLocalizadorState();
+}
+
+class _DonoDoLocalizadorState extends State<_DonoDoLocalizador> {
+  late final ControladorLocalizador _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaLocalizador(
       controlador: _controlador,
       aoVoltar: widget.aoVoltar,
     );

@@ -119,4 +119,27 @@ class ServicoLocalizadorTest {
         assertEquals("REGIAO_MANUAL", response.regiaoOrigem().modo());
         assertEquals("Centro, Americana - SP", response.regiaoOrigem().descricao());
     }
+
+    @Test
+    @DisplayName("Prioriza regiaoManual quando o usuario altera a regiao mesmo com coordenadas GPS anteriores")
+    void priorizaRegiaoManualSobreCoordenadasGps() {
+        when(provedorGeografico.geocodificarRegiao("Americana, Centro"))
+                .thenReturn(new ProvedorGeografico.CoordenadasGeo(-22.7403, -47.3305, "Centro, Americana - SP"));
+        when(provedorGeografico.buscarPorCoordenadas(anyDouble(), anyDouble(), anyInt(), any(), any()))
+                .thenReturn(List.of());
+
+        BuscarServicosRequest request = new BuscarServicosRequest(
+                null,
+                "SAUDE",
+                new BuscarServicosRequest.CoordenadaRequest(-23.5505, -46.6333),
+                "Americana, Centro",
+                5000);
+
+        BuscarServicosResponse response = servicoLocalizador.buscar(request);
+
+        assertEquals("REGIAO_MANUAL", response.regiaoOrigem().modo());
+        assertEquals("Centro, Americana - SP", response.regiaoOrigem().descricao());
+        assertEquals(-22.7403, response.regiaoOrigem().latitude(), 0.0001);
+        verify(provedorGeografico).geocodificarRegiao("Americana, Centro");
+    }
 }

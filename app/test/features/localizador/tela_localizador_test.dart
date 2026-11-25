@@ -374,4 +374,36 @@ void main() {
     await tester.pump();
     expect(animacao.value, 1.0);
   });
+
+  testWidgets('Confirmar região manual fecha o diálogo, recolhe o foco do teclado e atualiza a região', (WidgetTester tester) async {
+    final RepositorioLocalizadorSimulado repo = RepositorioLocalizadorSimulado();
+    final ControladorLocalizador c = ControladorLocalizador(repositorio: repo);
+    addTearDown(c.dispose);
+
+    await tester.pumpWidget(montar(c));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Não agora (pesquisar manual)'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(TelaLocalizador.chaveBotaoRegiaoManual));
+    await tester.pumpAndSettle();
+
+    final Finder campoRegiao = find.byKey(const Key('localizador.campo_regiao_manual'));
+    expect(campoRegiao, findsOneWidget);
+
+    await tester.enterText(campoRegiao, 'Americana, Centro');
+    await tester.pump();
+
+    await tester.tap(find.byKey(const Key('localizador.confirmar_regiao_manual')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(c.regiaoManual, 'Americana, Centro');
+    expect(tester.testTextInput.isVisible, isFalse);
+    expect(
+      FocusManager.instance.primaryFocus?.context?.widget,
+      isNot(isA<EditableText>()),
+    );
+  });
 }

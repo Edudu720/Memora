@@ -184,6 +184,52 @@ class ProvedorGeoapifyEResilienteTest {
     }
 
     @Test
+    @DisplayName("Geoapify escolhe o bairro Centro em Americana-SP em vez de comércio homônimo em Ubá-MG para 'Americana, Centro'")
+    void geoapifyPriorizaBairroECidadeSobreComercioHomonimoEmOutroEstado() {
+        bodyGeocode = """
+                {
+                  "type": "FeatureCollection",
+                  "features": [
+                    {
+                      "type": "Feature",
+                      "properties": {
+                        "result_type": "amenity",
+                        "formatted": "Americana, Praça da Independência, Centro, Ubá - MG, 36500-017, Brasil",
+                        "city": "Ubá",
+                        "suburb": "Centro",
+                        "state_code": "MG",
+                        "lat": -21.120393,
+                        "lon": -42.9393766,
+                        "rank": {"importance": 0.0000627, "confidence": 0.5}
+                      }
+                    },
+                    {
+                      "type": "Feature",
+                      "properties": {
+                        "result_type": "suburb",
+                        "formatted": "Centro, Americana - SP, 13465-279, Brasil",
+                        "city": "Americana",
+                        "suburb": "Centro",
+                        "state_code": "SP",
+                        "lat": -22.7403644,
+                        "lon": -47.3305045,
+                        "rank": {"importance": 0.146729, "confidence": 0.0}
+                      }
+                    }
+                  ]
+                }
+                """;
+
+        ProvedorGeoapify geoapify = criarGeoapify("chave-teste");
+        var coords = geoapify.geocodificarRegiao("Americana, Centro");
+
+        assertNotNull(coords);
+        assertEquals("Centro, Americana - SP, 13465-279, Brasil", coords.nomeExibido());
+        assertEquals(-22.7403644, coords.latitude(), 0.0001);
+        assertEquals(-47.3305045, coords.longitude(), 0.0001);
+    }
+
+    @Test
     @DisplayName("Duas buscas seguidas na mesma região usam cache de 24h sem rechamar o servidor")
     void cacheEvitaNovaChamadaEmBuscasNaMesmaRegiao() {
         bodyPlaces = """

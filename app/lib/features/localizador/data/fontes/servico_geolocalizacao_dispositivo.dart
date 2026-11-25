@@ -31,31 +31,41 @@ enum StatusPermissaoLocalizacao {
 class ServicoGeolocalizacaoDispositivo {
   /// Verifica o status atual de permissão e serviço de localização.
   Future<StatusPermissaoLocalizacao> verificarPermissao() async {
-    final bool servicoHabilitado = await Geolocator.isLocationServiceEnabled();
-    if (!servicoHabilitado) {
-      return StatusPermissaoLocalizacao.desativadaNoAparelho;
-    }
+    try {
+      final bool servicoHabilitado =
+          await Geolocator.isLocationServiceEnabled();
+      if (!servicoHabilitado) {
+        return StatusPermissaoLocalizacao.desativadaNoAparelho;
+      }
 
-    final LocationPermission permissao = await Geolocator.checkPermission();
-    if (permissao == LocationPermission.denied) {
+      final LocationPermission permissao = await Geolocator.checkPermission();
+      if (permissao == LocationPermission.denied) {
+        return StatusPermissaoLocalizacao.negada;
+      }
+      if (permissao == LocationPermission.deniedForever) {
+        return StatusPermissaoLocalizacao.bloqueadaPermanente;
+      }
+      return StatusPermissaoLocalizacao.concedida;
+    } catch (_) {
       return StatusPermissaoLocalizacao.negada;
     }
-    if (permissao == LocationPermission.deniedForever) {
-      return StatusPermissaoLocalizacao.bloqueadaPermanente;
-    }
-    return StatusPermissaoLocalizacao.concedida;
   }
 
   /// Solicita a permissão de localização ao sistema operacional.
   Future<StatusPermissaoLocalizacao> solicitarPermissao() async {
-    final LocationPermission permissao = await Geolocator.requestPermission();
-    if (permissao == LocationPermission.always || permissao == LocationPermission.whileInUse) {
-      return StatusPermissaoLocalizacao.concedida;
+    try {
+      final LocationPermission permissao = await Geolocator.requestPermission();
+      if (permissao == LocationPermission.always ||
+          permissao == LocationPermission.whileInUse) {
+        return StatusPermissaoLocalizacao.concedida;
+      }
+      if (permissao == LocationPermission.deniedForever) {
+        return StatusPermissaoLocalizacao.bloqueadaPermanente;
+      }
+      return StatusPermissaoLocalizacao.negada;
+    } catch (_) {
+      return StatusPermissaoLocalizacao.negada;
     }
-    if (permissao == LocationPermission.deniedForever) {
-      return StatusPermissaoLocalizacao.bloqueadaPermanente;
-    }
-    return StatusPermissaoLocalizacao.negada;
   }
 
   /// Obtém a posição atual com precisão média e tempo limite de 7 segundos.
@@ -69,6 +79,12 @@ class ServicoGeolocalizacaoDispositivo {
       );
       return PosicaoSimples(posicao.latitude, posicao.longitude);
     } catch (_) {
+      try {
+        final Position? ultima = await Geolocator.getLastKnownPosition();
+        if (ultima != null) {
+          return PosicaoSimples(ultima.latitude, ultima.longitude);
+        }
+      } catch (_) {}
       return null;
     }
   }

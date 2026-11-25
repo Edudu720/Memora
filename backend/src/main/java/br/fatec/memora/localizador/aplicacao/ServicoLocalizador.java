@@ -45,12 +45,7 @@ public class ServicoLocalizador {
         String descricaoRegiao;
         String modoOrigem;
 
-        if (request.temLocalizacaoValida()) {
-            latitudeOrigem = request.localizacao().latitude();
-            longitudeOrigem = request.localizacao().longitude();
-            descricaoRegiao = "Sua localização atual";
-            modoOrigem = "GPS_DISPOSITIVO";
-        } else {
+        if (request.temRegiaoManualValida()) {
             var coords = provedorGeografico.geocodificarRegiao(request.regiaoManual());
             if (coords == null) {
                 throw new IllegalArgumentException(
@@ -60,6 +55,11 @@ public class ServicoLocalizador {
             longitudeOrigem = coords.longitude();
             descricaoRegiao = coords.nomeExibido();
             modoOrigem = "REGIAO_MANUAL";
+        } else {
+            latitudeOrigem = request.localizacao().latitude();
+            longitudeOrigem = request.localizacao().longitude();
+            descricaoRegiao = "Sua localização atual";
+            modoOrigem = "GPS_DISPOSITIVO";
         }
 
         int raio = (request.raioMetros() != null && request.raioMetros() > 0)
