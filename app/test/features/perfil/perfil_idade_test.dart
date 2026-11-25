@@ -227,6 +227,11 @@ void main() {
       expect(find.text(TextosPerfil.rotuloDia), findsOneWidget);
       expect(find.text(TextosPerfil.rotuloMes), findsOneWidget);
       expect(find.text(TextosPerfil.rotuloAno), findsOneWidget);
+      expect(
+        find.byType(CaixaDeEtapa),
+        findsNWidgets(2),
+        reason: 'FR-002a (T125b): campos e ações separados em CaixaDeEtapa',
+      );
     });
 
     testWidgets('guardar mostra a idade na seção', (t) async {

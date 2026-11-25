@@ -38,6 +38,7 @@ class _RepositorioQueFalha implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async {
     mensagens.add(mensagem);
     return AssistenteFalhou(falha);

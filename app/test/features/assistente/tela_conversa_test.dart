@@ -194,7 +194,7 @@ void main() {
   });
 
   group('Quem disse o que — FR-020', () {
-    testWidgets('cada fala e um balao com posicao, rosto e nome', (
+    testWidgets('cada fala e um balao com posicao, rosto estatico e nome', (
       WidgetTester t,
     ) async {
       final ControladorConversa c = controladorCom();
@@ -224,18 +224,34 @@ void main() {
       expect(nomeDela, findsOneWidget);
       expect(nomeDaPessoa, findsOneWidget);
 
-      // Desenho: o rosto da Memora de um lado, o da pessoa do outro.
-      expect(
-        find.descendant(of: dela, matching: find.byType(MemoraPersonagem)),
-        findsOneWidget,
+      // Rosto estatico nos baloes (022-avatares-no-chat): Memora mini estatica
+      // a esquerda e desenho da pessoa (padrao quando sem conta) a direita.
+      expect(t.widget<BalaoDeFala>(dela).comRosto, isTrue);
+      expect(t.widget<BalaoDeFala>(dela).rostoAnimado, isFalse);
+      expect(t.widget<BalaoDeFala>(daPessoa).comRosto, isTrue);
+      expect(t.widget<BalaoDeFala>(daPessoa).rostoAnimado, isFalse);
+
+      final Finder rostoDela = find.descendant(
+        of: dela,
+        matching: find.byType(MemoraPersonagem),
       );
-      expect(
-        find.descendant(of: daPessoa, matching: find.byType(MemoraPersonagem)),
-        findsNothing,
+      expect(rostoDela, findsOneWidget);
+      expect(t.getCenter(rostoDela).dx, lessThan(t.getCenter(nomeDela).dx));
+      final Element memoraNoBalaoEl = find
+          .descendant(of: dela, matching: find.byType(MemoraAnimada))
+          .evaluate()
+          .single;
+      expect((memoraNoBalaoEl.widget as MemoraAnimada).reageAoToque, isFalse);
+      expect(MediaQuery.disableAnimationsOf(memoraNoBalaoEl), isTrue);
+
+      final Finder rostoDaPessoa = find.descendant(
+        of: daPessoa,
+        matching: find.byIcon(Icons.person_rounded),
       );
+      expect(rostoDaPessoa, findsOneWidget);
       expect(
-        find.descendant(of: daPessoa, matching: find.byIcon(Icons.person)),
-        findsOneWidget,
+        t.getCenter(rostoDaPessoa).dx,
+        greaterThan(t.getCenter(nomeDaPessoa).dx),
       );
 
       // Posicao: a Memora a esquerda, a pessoa a direita.

@@ -12,7 +12,7 @@ abstract final class TextosPerfil {
   static const String tituloPerfil = 'Meu perfil';
 
   /// Rótulo do nome.
-  static const String rotuloNome = 'Como você quer ser chamada';
+  static const String rotuloNome = 'Como posso te chamar';
 
   /// Rótulo do canal de contato.
   static const String rotuloCanal = 'E-mail ou telefone da conta';
@@ -22,6 +22,25 @@ abstract final class TextosPerfil {
 
   /// Frase na voz da Memora quando a pessoa ainda não concluiu nenhum passo a passo.
   static const String maisAprendidoVazio = 'Ainda vamos aprender juntos!';
+
+  /// Título da seção do retrato pessoal (Feature 016).
+  static const String secaoRetrato = 'Seu retrato';
+
+  /// Título da seção com os dados da conta (Feature 016).
+  static const String secaoConta = 'Sua conta';
+
+  /// Título da seção de aprendizado local (Feature 016).
+  static const String secaoAprendizado = 'Seu aprendizado';
+
+  /// Rótulo do último módulo concluído por completo (020).
+  static const String rotuloUltimoAprendido = 'Último aprendizado';
+
+  /// Frase quando a pessoa ainda não concluiu nenhum módulo por completo (020).
+  static const String ultimoAprendidoVazio = 'Ainda vamos concluir o primeiro!';
+
+  /// Estado inicial discreto enquanto o progresso local carrega (Feature 016).
+  static const String carregandoAprendizado =
+      'Consultando seu progresso neste aparelho';
 
   // ---------------------------------------------------------------------------
   // A idade no Perfil
@@ -38,8 +57,8 @@ abstract final class TextosPerfil {
 
   /// Convite, quando a pessoa ainda não informou.
   static const String convite =
-      'Se quiser, conte quando você nasceu e eu mostro a sua idade aqui. '
-      'Fica só neste aparelho. Você não precisa informar.';
+      'Se quiser, conte quando você nasceu e eu mostro a sua idade aqui — '
+      'fica só neste aparelho. Você não precisa informar.';
 
   /// Abre a tela de entrada, quando ainda não há data.
   static const String botaoInformar = 'Contar quando nasci';
@@ -70,6 +89,14 @@ abstract final class TextosPerfil {
 
   /// Título da tela.
   static const String tituloEntrada = 'Quando você nasceu';
+
+  /// Instrução da caixa de preenchimento da data (FR-002a).
+  static const String instrucaoCamposData =
+      'Escreva o dia, o mês e o ano em que você nasceu.';
+
+  /// Instrução da caixa de ações da data (FR-002a).
+  static const String instrucaoAcoesData =
+      'Quando terminar de preencher, toque em guardar.';
 
   /// Rótulo do dia.
   static const String rotuloDia = 'Dia';
@@ -117,4 +144,129 @@ abstract final class TextosPerfil {
   /// Data de mais de 120 anos.
   static const String erroAntiga =
       'Essa data ficou longe demais. Confira o ano.';
+
+  // ---------------------------------------------------------------------------
+  // Foto de perfil e avatares (feature 011, US1–US3)
+  // ---------------------------------------------------------------------------
+
+  /// Ação principal quando ainda não há retrato escolhido.
+  static const String botaoColocarFoto = 'Colocar foto de perfil';
+
+  /// Ação para substituir a foto ou avatar atual.
+  static const String botaoTrocarFoto = 'Trocar foto';
+
+  /// Ação para retirar a foto ou avatar atual.
+  static const String botaoRemoverFoto = 'Remover foto';
+
+  /// Título da folha inferior de escolha de origem.
+  static const String tituloEscolherOrigemFoto = 'Escolher foto de perfil';
+
+  /// Explicação integrada de privacidade antes de tocar em qualquer opção (FR-004).
+  static const String avisoPrivacidadeFoto =
+      'O Memora só vê a foto que você escolher, e ela fica guardada só neste '
+      'aparelho. Se preferir, escolha um avatar sem usar câmera nem fotos.';
+
+  /// Opção de escolher imagem da galeria do celular.
+  static const String opcaoGaleriaFoto = 'Escolher da galeria';
+
+  /// Opção de tirar uma foto nova com a câmera.
+  static const String opcaoCameraFoto = 'Tirar foto agora';
+
+  /// Opção de escolher um avatar ilustrado da Memora sem permissões.
+  static const String opcaoAvataresFoto = 'Escolher avatar da Memora';
+
+  /// Título da grade de avatares ilustrados.
+  static const String tituloAvataresFoto = 'Escolha um desenho para você';
+
+  /// Apoio curto na grade de avatares.
+  static const String apoioAvataresFoto =
+      'Você não precisa dar nenhuma permissão e pode trocar quando quiser.';
+
+  /// Título da tela de pré-visualização após escolher foto (FR-005).
+  static const String tituloPreVisualizacaoFoto = 'Ficou boa assim?';
+
+  /// Texto de apoio na pré-visualização.
+  static const String apoioPreVisualizacaoFoto =
+      'Veja como a sua foto vai aparecer no seu perfil.';
+
+  /// Botão de confirmação na pré-visualização.
+  static const String botaoUsarEstaFoto = 'Usar esta foto';
+
+  /// Botão para voltar e escolher outra opção/imagem.
+  static const String botaoEscolherOutraFoto = 'Escolher outra';
+
+  /// Pergunta de confirmação antes de remover o retrato atual (FR-008).
+  static const String perguntaRemoverFoto = 'Tirar a foto do seu perfil?';
+
+  /// Aviso do que acontece ao remover a foto.
+  static const String avisoRemoverFoto =
+      'O seu perfil volta a mostrar o retrato inicial. Você pode colocar outra '
+      'foto quando quiser.';
+
+  /// Confirma remoção da foto atual.
+  static const String botaoConfirmarRemoverFoto = 'Sim, remover a foto';
+
+  /// Cancela remoção e mantém o retrato atual.
+  static const String botaoManterFoto = 'Não, deixar como está';
+
+  /// Confirmação curta após salvar foto ou avatar.
+  static const String fotoAtualizadaComSucesso =
+      'Pronto! Sua foto de perfil foi atualizada.';
+
+  /// Confirmação curta após remover foto ou avatar.
+  static const String fotoRemovidaComSucesso =
+      'Sua foto foi removida do perfil.';
+
+  /// Orientação empática quando a permissão de câmera é recusada (FR-011).
+  static const String erroPermissaoCamera =
+      'Para tirar uma foto agora, o celular precisa liberar a câmera para o '
+      'Memora. Se preferir, você pode abrir os ajustes ou escolher um avatar.';
+
+  /// Orientação empática quando a permissão de fotos é recusada (FR-011).
+  static const String erroPermissaoGaleria =
+      'Para escolher uma imagem da sua galeria, o celular precisa liberar o '
+      'acesso à foto escolhida. Você pode abrir os ajustes ou usar um avatar.';
+
+  /// Botão para abrir as configurações de permissão do aplicativo no aparelho.
+  static const String botaoAbrirAjustesAparelho = 'Abrir ajustes do aparelho';
+
+  /// Mensagem calma quando a imagem ultrapassa 15 MB.
+  static const String erroImagemMuitoGrande =
+      'Essa foto é grande demais para este aparelho. Escolha uma imagem menor '
+      'ou um avatar da Memora.';
+
+  /// Mensagem calma quando o arquivo não é JPEG, PNG ou WebP estático válido.
+  static const String erroImagemFormatoInvalido =
+      'Não consegui abrir esse arquivo como foto. Escolha uma foto comum da '
+      'galeria ou um avatar da Memora.';
+
+  /// Mensagem calma para falha inesperada na leitura/gravação.
+  static const String erroFotoGeral =
+      'Não consegui usar essa imagem agora. Tente escolher outra foto ou um '
+      'avatar da Memora.';
+
+  /// Indicação curta enquanto a foto selecionada está sendo preparada.
+  static const String preparandoFoto = 'Preparando a sua foto...';
+
+  /// Descrição semântica quando a pessoa tem foto própria salva.
+  static const String semanticaFotoPropria = 'Sua foto de perfil';
+
+  /// Descrição semântica quando nenhuma foto nem avatar foi escolhido.
+  static const String semanticaSemFoto = 'Nenhuma foto de perfil escolhida';
+
+  /// Descrição semântica para avatar ilustrado escolhido.
+  static String semanticaAvatarEscolhido(String rotuloAvatar) =>
+      'Avatar de perfil escolhido: $rotuloAvatar';
+
+  /// Rótulo acessível do avatar "Memora acenando".
+  static const String avatarMemoraAcenando = 'Memora acenando';
+
+  /// Rótulo acessível do avatar "Memora pensando".
+  static const String avatarMemoraPensando = 'Memora pensando';
+
+  /// Rótulo acessível do avatar "Memora comemorando".
+  static const String avatarMemoraComemorando = 'Memora comemorando';
+
+  /// Rótulo acessível do avatar "Memora com escudo".
+  static const String avatarMemoraProtegendo = 'Memora com escudo';
 }

@@ -8,7 +8,11 @@ import '../../assistente/domain/assistente.dart';
 import '../data/progresso_de_aprendizado.dart';
 import '../domain/guia.dart';
 
-/// A tela que guia a pessoa passo a passo por um aplicativo ou serviço (T066, US4, FR-026, FR-027).
+/// A tela que guia a pessoa passo a passo por um aplicativo ou serviço (`T054`, `T066`, `US4`).
+///
+/// Integra [CabecalhoDeTela], [PassoIlustrado] protagonista com tipografia
+/// editorial e barra fixa inferior em `cores.superficieBarra` com ações rápidas
+/// `"Anterior"` e `"Próximo"`.
 ///
 /// ## Princípios aplicados
 ///
@@ -33,6 +37,10 @@ class TelaPassoAPasso extends StatefulWidget {
   /// O guia a ser percorrido.
   final Guia guia;
 
+  /// A seção que a pessoa escolheu, nos guias extensos (FR-028d). Com ela, a
+  /// tela percorre só os passos da seção.
+  final SecaoDoGuia? secao;
+
   /// Os dados do catálogo correspondentes ao serviço (se houver).
   final ServicoDoCatalogo? servico;
 
@@ -48,7 +56,7 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Repositório da assistente, usado para conferir a origem se não fornecida.
   final RepositorioAssistente? repositorioAssistente;
 
-  /// Armazenamento do progresso local no aparelho (FR-042a/b).
+  /// Armazenamento do progresso local no aparelho (`FR-042a/b`).
   final ProgressoDeAprendizado? progresso;
 
   /// Identificador da conta conectada.
@@ -60,10 +68,10 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Chamado ao tocar em "Voltar ao Hub" na etapa de parabéns.
   final VoidCallback? aoVoltarAoHub;
 
-  /// Chamado ao tocar em "Sair do passo a passo" (FR-026).
+  /// Chamado ao tocar em "Sair do passo a passo" (`FR-026`).
   final VoidCallback? aoSair;
 
-  /// Chamado ao tocar em "Peça à Memora para abrir" (FR-027).
+  /// Chamado ao tocar em "Peça à Memora para abrir" (`FR-027`).
   final void Function(String pedido)? aoPedirParaAbrir;
 
   /// Chamado para ir à conversa ao relatar tela diferente.
@@ -72,12 +80,13 @@ class TelaPassoAPasso extends StatefulWidget {
   /// Chamado ao tocar em "Ficou com alguma dúvida? Pode perguntar" no último passo.
   final void Function(String duvida)? aoTirarDuvida;
 
-  /// Estado inicial fixado para testes de estado (FR-006).
+  /// Estado inicial fixado para testes de estado (`FR-006`).
   final String? estadoDeTeste;
 
   /// Cria a tela de passo a passo.
   const TelaPassoAPasso({
     required this.guia,
+    this.secao,
     this.servico,
     this.pacoteAndroid,
     this.consultaAplicativos,
@@ -169,7 +178,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
         ),
       );
     }
-    lista.addAll(widget.guia.passos);
+    lista.addAll(widget.secao?.passos ?? widget.guia.passos);
 
     if (!mounted || _descartado) return;
     setState(() {
@@ -189,10 +198,15 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
     final String? id = widget.idDaConta;
     if (prog == null || id == null || id.trim().isEmpty) return;
 
+    // O progresso de um guia em seções é por seção: `<guia>:<seção>`.
+    final String chaveDoProgresso = widget.secao != null
+        ? '${widget.guia.chave}:${widget.secao!.chave}'
+        : widget.guia.chave;
+
     try {
       await prog.registrarChegadaAoPasso(
         idDaConta: id,
-        chave: widget.guia.chave,
+        chave: chaveDoProgresso,
         numeroDoPasso: _posicao,
         totalDePassos: total,
       );
@@ -206,7 +220,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
       setState(() => _posicao++);
       _registrarSeUltimo();
     } else {
-      // Último passo: voltar ao hub
+      // Último passo: voltar ao início
       _voltarAoHub();
     }
   }
@@ -278,7 +292,11 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
 
     // Suporte aos estados de tela da FR-006 (para testes de acessibilidade e segurança)
     if (widget.estadoDeTeste == 'carregando' || _inicializando) {
@@ -344,7 +362,7 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
                   child: EstadoVazio(
                     titulo: 'Nenhum passo disponível',
                     explicacao: 'Este guia ainda não tem etapas cadastradas.',
-                    icone: Icons.school_outlined,
+                    icone: Icons.school_rounded,
                   ),
                 ),
               ),
@@ -358,50 +376,105 @@ class _TelaPassoAPassoState extends State<TelaPassoAPasso> {
     final Passo passoAtual = _passos[indiceAtual];
     final bool eUltimo = _posicao == _passos.length;
 
+    final Widget botaoAnterior = BotaoSecundario(
+      rotulo: 'Anterior',
+      icone: compacto ? null : Icons.arrow_back_rounded,
+      aoTocar: _posicao > 1 ? _retroceder : null,
+    );
+
+    final Widget botaoProximo = BotaoPrimario(
+      rotulo: 'Próximo',
+      icone: compacto ? null : Icons.arrow_forward_rounded,
+      aoTocar: _avancar,
+    );
+
     return Scaffold(
       backgroundColor: cores.fundo,
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            CabecalhoDeTela(
-              titulo: widget.guia.titulo,
-              aoVoltar: _retroceder,
-            ),
-            PassoIlustrado(
-              key: ValueKey<int>(_posicao),
-              rolar: false,
-              passo: passoAtual,
-              posicao: _posicao,
-              total: _passos.length,
-              aoContinuar: _avancar,
-              aoVoltar: _posicao > 1 ? _retroceder : null,
-              aoSair: _sairDoPassoAPasso,
-              aoTelaDiferente: _mostrarDialogoTelaDiferente,
-              aoPedirParaAbrir: eUltimo && _podePedirParaAbrir
-                  ? () => widget.aoPedirParaAbrir!(
-                        TextosGuias.pedidoParaAbrir(
-                          widget.servico?.nomeExibido ?? widget.guia.titulo,
-                        ),
-                      )
-                  : null,
-              aoTirarDuvida: eUltimo &&
-                      (widget.aoTirarDuvida != null ||
-                          widget.aoConversarSobreDiferenca != null)
-                  ? () {
-                      if (widget.aoTirarDuvida != null) {
-                        widget.aoTirarDuvida!(
-                          TextosGuias.rascunhoDuvida(
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.only(bottom: MemoraEspacamento.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              CabecalhoDeTela(
+                titulo: widget.secao?.titulo ?? widget.guia.titulo,
+                aoVoltar: _retroceder,
+              ),
+              TrocaDePasso(
+                posicao: _posicao,
+                child: PassoIlustrado(
+                  key: ValueKey<int>(_posicao),
+                  rolar: false,
+                  passo: passoAtual,
+                  posicao: _posicao,
+                  total: _passos.length,
+                  aoContinuar: _avancar,
+                  aoVoltar: _posicao > 1 ? _retroceder : null,
+                  aoSair: _sairDoPassoAPasso,
+                  aoTelaDiferente: _mostrarDialogoTelaDiferente,
+                  aoPedirParaAbrir: eUltimo && _podePedirParaAbrir
+                      ? () => widget.aoPedirParaAbrir!(
+                          TextosGuias.pedidoParaAbrir(
                             widget.servico?.nomeExibido ?? widget.guia.titulo,
                           ),
-                        );
-                      } else {
-                        widget.aoConversarSobreDiferenca!();
-                      }
-                    }
-                  : null,
+                        )
+                      : null,
+                  aoTirarDuvida:
+                      eUltimo &&
+                          (widget.aoTirarDuvida != null ||
+                              widget.aoConversarSobreDiferenca != null)
+                      ? () {
+                          if (widget.aoTirarDuvida != null) {
+                            final String nomeBase =
+                                widget.servico?.nomeExibido ??
+                                widget.guia.titulo;
+                            widget.aoTirarDuvida!(
+                              TextosGuias.rascunhoDuvida(
+                                widget.secao != null
+                                    ? '$nomeBase (${widget.secao!.titulo})'
+                                    : nomeBase,
+                              ),
+                            );
+                          } else {
+                            widget.aoConversarSobreDiferenca!();
+                          }
+                        }
+                      : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: BoxDecoration(
+          color: cores.superficieBarra,
+          border: Border(
+            top: BorderSide(
+              color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+              width: ehAltoContraste
+                  ? MemoraDimensoes.bordaEnfase
+                  : MemoraDimensoes.espessuraBordaSutil,
             ),
-          ],
+          ),
+          boxShadow: MemoraElevacao.listaSombrasBarra(cores),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: MemoraEspacamento.lg,
+              vertical: MemoraEspacamento.sm,
+            ),
+            child: Row(
+              children: <Widget>[
+                Expanded(child: botaoAnterior),
+                const SizedBox(width: MemoraEspacamento.sm),
+                Expanded(child: botaoProximo),
+              ],
+            ),
+          ),
         ),
       ),
     );

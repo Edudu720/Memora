@@ -4,7 +4,173 @@
 > sessão consiga continuar o trabalho sem repetir decisões já tomadas nem refazer
 > análises já feitas.
 
-**Última sessão**: 2026-10-21 — **a assistente real chega à `master` e é
+**Última sessão**: 2026-11-16 (noite) — **o redesenho 013 avança nas três frentes**, pelo
+Henrique (Opus orquestrando, agentes Sonnet nas branches de trabalho).
+Parada a **81% do uso**, de propósito (regra: a 95% toda a operação para).
+
+> 🌿 **Branches.** `develop` = `f7e67ed` (#71 a #77 dentro). A branch comum
+> **`redesign-final`** (publicada, issue **#78**, guia
+> `specs/013-redesenho-final/COMO-TRABALHAR.md`) tem a divisão: **Henrique** =
+> Memora/animações/Início/barra; **Eduardo Juncker** = textos, conversa,
+> ícones, Localizador, validação; **Trevisan** = o site (spec 012,
+> `specs/012-site-tutorial-idoso/tarefas-do-redesenho.md`). O trabalho do
+> Henrique está na branch **local `redesign/animacoes`** (`b2082e8`, **sem
+> push**), saída da `redesign-final`.
+>
+> ✅ **Feito na `redesign/animacoes`** (verificado junto: analyze limpo, só os
+> 5 vermelhos de propósito do `texto_da_interface_test.dart`, que a #79 do
+> Eduardo resolve): transições com direção (T019–T027, T049, T050), a
+> abertura com a Memora acenando (T035–T038), a Memora vetorial em todo o app
+> e a **anfitriã** no topo do Início (T047, T048, T051–T053, T083–T090 — a
+> T090 foi aprovada pelo Henrique no celular). O "Memora (teste)" (depuração,
+> `br.fatec.memora.debug`, servidor simulado) está no S20 FE com isso tudo.
+>
+> 📋 **Fila (nesta ordem)** — também em `memory/divisao-redesign-final.md`:
+> 1. **T092** — a abertura com a **anfitriã segurando a barra de carregamento**
+>    (o aceno durava pouco); a abertura nativa do Android fica como está.
+> 2. **T054** — **decisão do Henrique**: o Início passou a rolar por causa do
+>    balão da anfitriã (134 dp). Encurtar as dicas longas ou aceitar a rolagem
+>    (aí revisar FR-040/US7). O agente afrouxou o `inicio_ocupa_a_altura_test`
+>    à espera dessa decisão.
+> 3. **Barra inferior** (T055–T057): retomar do commit WIP `4ddff4e` em
+>    `redesign/animacoes-barra` (worktree `C:/memora-tmp/wt-barra`).
+> 4. **Revisar as PRs do Eduardo**: **#79** (textos em duas frases — deixa o CI
+>    verde), **#82** (conversa limpa, ícones, voz), **#80** (botão SOS,
+>    feature 014 nova). Revisão nunca é de quem escreveu.
+> 5. T039 (medir a abertura no celular), **T091** (dois `showDialog` crus que
+>    ignoram "reduzir movimento"), as **duas Memoras nas boas-vindas** (FR-006).
+> 6. PR `redesign/animacoes` → `redesign-final`.
+>
+> ⚠️ **Os testes começam com "reduzir movimento" ligado**
+> (`app/test/flutter_test_config.dart`): a Memora anima para sempre e travava
+> o `pumpAndSettle`. Quem prova movimento chama `movimentoLiberado()` ou
+> `liberarMovimento(t)` (`test/suporte/movimento.dart`).
+>
+> 🔴 **Localizador quebrado em produção — issue #81 (Eduardo).** O
+> `ProvedorOpenStreetMapOverpass` depende do Overpass público, lotado ("all
+> query workers are busy"); o `null` do log é a mensagem vazia da exceção. O
+> Eduardo vai conectar uma API com chave: ela entra no `render.yaml` com
+> `sync: false` e o **valor** só no painel do Render (Environment). A IA
+> funciona: a falha de "internet" foi intermitente (Render dormindo/Gemini).
+>
+> 🧰 **Ambiente.** Flutter da máquina do Henrique agora é **3.47.7** (igual ao
+> CI; o `pubspec.lock` não é mais reescrito). APK de release mais recente:
+> **1.0.4+4** (`C:\memora-tmp\apk\`); o próximo precisa de versionCode ≥ 5. O
+> Render segue a **`develop`** e pode estar em rollback para a #76 — conferir
+> e religar o Auto-Deploy. O cópia isolada automática de agente falha nesta
+> máquina: criar worktree à mão em `C:/memora-tmp/`.
+
+Sessão anterior: 2026-11-15/16 — **a feature 013, o redesenho final**, pelo
+Henrique, na branch **`feature/013-redesenho-final`** (saiu da
+`feature/004-prints-e-zoom` atualizada com a `develop`; **nada tem push**).
+
+> 🔢 **A feature era 010 e virou 013** em 2026-11-16: a #71 trouxe a
+> `specs/010-revisao-pr71-localizador` para a `develop`. Commits antigos dizem
+> "010"; a branch agora é `feature/013-redesenho-final`.
+>
+> 🎨 **O que existe**: a skill `.claude/skills/memora-ux/` (regras de UI/UX,
+> leitura obrigatória antes de mexer em tela) e `specs/013-redesenho-final/`
+> completa até o `tasks` (79 tarefas). A 013 **continua** a 007 do Eduardo
+> (PR #71): substitui só a Memora em PNG e restringe a voz ao aparelho. Fase
+> **A** (T001–T046) independe da #71; fase **B** (T047–T079) espera a #71
+> entrar na `develop` e, antes, as tarefas dela são revistas contra o código.
+>
+> ✅ **Feito**: T001–T017 (a `MemoraAnimada`, vetorial 2.5D em camadas
+> pintadas pelo app, 8 poses, gestos, segue a paleta, decorativa para o
+> TalkBack, parada com "reduzir movimento", na galeria) e T028 (portão
+> `texto_da_interface_test.dart`, provado quebrando). **2488 testes + 1
+> pulado** antes do portão de texto.
+>
+> ⏸️ **Parado em**: **T018 — o Henrique ainda não aprovou a Memora**; vai
+> mostrar um vídeo à equipe em 2026-11-16 e voltar com o veredito. O
+> **portão de texto está vermelho de propósito** (15 blocos com mais de duas
+> frases ou com "😊" em ajuda, apresentação, autenticação, configurações e
+> perfil): a T029–T031 reescreve. O agente Fable foi **cancelado** pelo
+> Henrique antes de começar.
+>
+> 📱 **Versão de teste no S20 FE**: a depuração agora instala **ao lado** da
+> release (`br.fatec.memora.debug`, nome "Memora (teste)"); a galeria fica em
+> Ajustes. A release segue `br.fatec.memora` / "Memora" — o rótulo dela virou
+> placeholder no manifesto e **ainda não foi conferido num build de release**.
+>
+> ⚠️ **PR #71** (Eduardo, agora com o Trevisan consertando): *changes
+> requested* em nome do Henrique — CPF real em 8 arquivos (reescrever a
+> branch), voz sem `onDevice: true`, Localizador sempre no simulado. A **#72**
+> (capturas Meu INSS e TikTok, Trevisan) foi aprovada e mergeada na `develop`.
+
+Sessão anterior: 2026-11-13 — **FGTS e Instagram nos tutoriais, guias em
+seções e a revisão da #69**, pelo Henrique, na mesma branch
+**`feature/004-prints-e-zoom`** (os commits de hoje **não têm push**).
+
+> 📚 **Guias extensos viram seções** (FR-028d, clarify de 2026-11-13, T137):
+> o modelo `SecaoDoGuia` + `TelaSeletorDeSecao` veio da PR #67 do Eduardo,
+> **sem as imagens dela**, e cada seção tem 3 a 7 passos. **FGTS** (T138, 4
+> seções, 12 prints do S20 FE, v5.11.0) e **Instagram** (5 seções, 18
+> passos; **prints do S20 FE com os dados pessoais trocados por fictícios
+> gerados por IA** — a interface é a original; a capa de música do story é
+> obra publicada, não dado pessoal, decisão registrada na spec) estão prontos. Capturas
+> grandes vão em **WebP qualidade 92**, reduzidas a 1080 px: sem perda, o
+> FGTS sozinho ocupava 2,9 MB. `assets/guias/` está em **3,7 MB** de 8.
+> **Faltam Meu INSS e TikTok.** Para medir destaque: grade relativa sobre a
+> imagem, **sem faixa de legenda em cima** (ela deslocou as medidas uma vez).
+>
+> 🔴 **O destaque escondia o botão que destacava**: a `BoxShadow` opaca do
+> anel pinta um retângulo cheio. Corrigido (halo vira segunda borda), com
+> portão por pixel em `captura_com_destaque_test.dart`.
+>
+> ⚠️ **PR #69 (redesenho 007, Eduardo) — comentário de revisão publicado.**
+> Ela empilha os commits da #67 (fechada sem merge) e traz: ditado por voz
+> com `speech_to_text` **sem `onDevice: true`** (o áudio vai ao Google, contra
+> a decisão de 2026-10-03); o **CPF e o nome completo do Eduardo em 8
+> arquivos** (spec 006 e dois scripts); capturas JPEG com círculos pintados.
+> Merge de teste com a nossa branch: **8 conflitos, todos nos guias**. A
+> **#68** (Du3101) são imagens em `apps/` e fixa o Flutter do CI em 3.47.7.
+> ✅ **Validado no S20 FE em 2026-11-14** (APK 1.0.0+3, release apontando para o
+> Render, em `C:\memora-tmp\apk`): a Memora **abre** TikTok e Instagram, e as
+> seções, o zoom e o destaque funcionam. A `develop` continua com o abridor
+> quebrado até esta branch entrar.
+> Entrar numa seção custa o **4º toque** (SC-006 diz 3): lido como "chegar ao
+> guia em 3"; se a equipe discordar, a SC-006 precisa ser revista. 2444 testes.
+
+Sessão anterior: 2026-11-12 — **capturas reais nos tutoriais, zoom e o
+abridor de aplicativos**, pelo Henrique. Tudo na branch local
+**`feature/004-prints-e-zoom`** (saiu da **`develop`**, que está à frente da
+`master`). **Ninguém revisou ainda.**
+
+> 🖼️ **O que entrou** (clarificação de 2026-11-12 na spec da 004, T133-T136):
+> - **A Memora nunca abria aplicativo nenhum** (T136): o abridor mandava
+>   `action_main`, que o `android_intent_plus` não traduz, e conferia com
+>   `MATCH_DEFAULT_ONLY`. Hoje é o canal nativo `memora/abridor`
+>   (`CanalDoAbridor.kt`, `getLaunchIntentForPackage`). **Falta abrir TikTok e
+>   Instagram no S20 FE** — não foi conferido em aparelho.
+> - **Zoom da captura** (FR-028b, T134): `CapturaAmpliada`, com botões
+>   Aproximar/Afastar além da pinça (WCAG 2.5.1/2.5.7), selo "Exemplo" e
+>   destaque na imagem ampliada, anúncio ao leitor de tela por degrau.
+> - **O destaque cai sobre a imagem** (FR-028c, T133): `CapturaComDestaque`.
+>   Antes era posicionado sobre a moldura e desalinhava com print real.
+> - **Capturas em WebP**, PNG só na imagem que borrar no zoom
+>   (`FormatoDaCaptura`, decisão do Henrique). Portão novo: imagem na pasta de
+>   um guia sem passo que a use. Aparelho de referência: **Galaxy S20 FE**.
+> - **e-Título pronto** com 6 capturas reais (entrar com biometria, título,
+>   Onde votar, ChatVote, Notificações, Mais opções).
+>
+> **Próximo (T135)**: FGTS, Meu INSS, TikTok e Instagram. As imagens chegam em
+> `Documents\ProgramingProjects\Imagens Memora\<Sistema>\` (WebP ou JPEG; JPEG
+> vira WebP sem perda). Para cada uma: conferir dado pessoal e marcação pintada
+> (o contrato recusa), medir o destaque desenhando sobre a imagem, corrigir a
+> linha no `CAPTURAS.md` — as dos outros guias ainda dizem "Galaxy A14", e
+> **os `passo_N` deles são desenhos provisórios, não prints**. Depois: o
+> passo "baixe na loja oficial" não aparece no fluxo real (o `TelaPassoAPasso`
+> não recebe `consultaAplicativos` nem `pacoteAndroid`) e a captura `loja` não
+> existe. **Em seguida, a spec do redesign final do Memora.** 2391 testes.
+>
+> ⚠️ A PR **#66** (Facebook, do Eduardo) segue aberta e fora do contrato (nomes
+> `.jpeg`, destaque pintado). A imagem
+> `apps/WhatsApp/Gemini_Generated_Image_8iuf6u8iuf6u8iuf.jfif`, já na
+> `master`, tem nomes que parecem de pessoas reais (FR-028). O bump 1.0.0+2
+> do APK da `master` está num `git stash`.
+
+Sessão anterior: 2026-10-21 — **a assistente real chega à `master` e é
 testada no celular**, pelo Henrique. Entrou **direto na `master`, sem PR**, a
 pedido dele. **Ninguém revisou ainda.**
 
@@ -1758,6 +1924,9 @@ falha. Faça o mesmo ao criar qualquer novo portão.
 
 ## 9. Coisas que NÃO se faz neste projeto
 
+- ❌ Mexer em tela sem ler antes a skill **`memora-ux`**
+  (`.claude/skills/memora-ux/SKILL.md`): princípios, números, a Memora,
+  transições, voz do texto e o que nunca aparece na tela (feature 013)
 - ❌ Escrever cor, espaçamento ou tamanho literal fora dos tokens
 - ❌ Criar componente dentro de `features/` quando ele serve a mais de uma tela
 - ❌ Editar cliente de API gerado à mão

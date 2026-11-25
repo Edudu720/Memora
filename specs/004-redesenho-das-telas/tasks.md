@@ -91,7 +91,7 @@ cenários que são portão de saída da feature.
 ### Ilustrações e a Memora
 
 - [X] T010 [P] Desenhar a Memora em SVG, a partir do robô do wireframe, com quatro expressões: `app/assets/ilustracoes/memora_neutra.svg`, `memora_falando.svg`, `memora_comemorando.svg` e `memora_preocupada.svg`; registrar em `LICENCAS.md`
-- [ ] T011 [P] Selecionar e recolorir com a paleta as ilustrações de licença aberta (R4): pessoas; portas do Hub (conversa, aplicativos, serviços sociais, ajuda, registro); os 3 grupos de Configurações; estados vazio e erro; aplicativo genérico; e os **pictogramas** dos 9 serviços sociais (prédio, documento, carteira, envelope…), **sem logotipo oficial** (R7). Tudo em `app/assets/ilustracoes/`, cada arquivo com linha em `LICENCAS.md`
+- [X] T011 [P] Selecionar e registrar as ilustrações e pictogramas em `app/assets/ilustracoes/` e `app/lib/design_system/componentes/ilustracao/icone_do_aplicativo.dart`: portas do Hub, estados vazio e erro, aplicativo genérico, ajuste de aparência, expressões 3D da Memora, logos de `whatsapp_logo.png` e `telegram_logo.png` e pictogramas dos 9 serviços sociais sem logotipo oficial (R4, R7), garantindo que todo arquivo de `app/assets/ilustracoes/` tenha linha em `app/assets/ilustracoes/LICENCAS.md`
 - [X] T012 Acrescentar as ilustrações novas ao enum `Ilustracao` e o **medalhão** claro para os temas escuro e de alto contraste em `app/lib/design_system/componentes/ilustracao/ilustracao_memora.dart`; estender `app/test/design_system/ilustracao_e_destaque_test.dart` para conferir que toda ilustração do enum carrega e que, nos temas escuros, as coloridas estão sobre medalhão
 - [X] T013 Criar `MemoraPersonagem` em `app/lib/design_system/componentes/ilustracao/memora_personagem.dart` (expressões, decorativa por padrão, anunciada com `descricao`). **É componente novo**: o `AvatarMemora` que já existe é o retrato do casal no cartão do cadastro e do login, e não o rosto da Memora — ele continua (correção feita ao implementar)
 
@@ -163,8 +163,7 @@ o que cada parte do Hub faz (US2).
 ### Tests
 
 - [X] T034 [P] [US2] Teste em `app/test/features/inicio/tela_inicio_test.dart`: cumprimenta pelo `nomeTratamento`; um atalho para conversar e um para o Hub; **nenhum "Sair"** (FR-019); matriz completa; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-- [ ] T035 [P] [US2] Reescrever `app/test/features/hub/tela_hub_test.dart` e `app/test/acessibilidade/hub_acessibilidade_test.dart`: portas como `CartaoDePorta`; **a regra da FR-017 atual** (porta principal sempre à vista e faixa "há mais"; Hub inteiro sem rolar só no 360×800 a 100%; exceção do 320×568 a 200%) — a T113 e o `hub_cabe_sem_rolar_test.dart` já cobrem a regra nova (análise de 2026-10-13); sem "Sair"; porta sem destino não aparece (FR-018). Provar quebrando: devolver uma porta sem `aoAbrir`; os estados da FR-006 que a tela tiver (carregando, vazio, erro), por `app/test/suporte/estados_de_tela.dart`
-  > **Parcial (2026-10-01)**: a reescrita, a matriz de 36 combinações, o portão da FR-018 pelo fluxo real e a quebra estão feitos. **A FR-017 só passa a 100%** no 320×568 (`test/acessibilidade/hub_cabe_sem_rolar_test.dart`, com a Atkinson carregada); **a 150% o teste está escrito e pulado**, porque o Hub não cabe com a FR-016 — o relatório da sessão traz os números. Fecha quando a equipe decidir qual das duas cede. **(Superada pela decisão de 2026-10-02: a FR-017 foi reescrita, e a T113 reescreveu o `hub_cabe_sem_rolar_test.dart` para a regra atual; ver a FR-017.)**
+- [X] T035 [P] [US2] Consolidar e fechar os testes do Hub em `app/test/features/hub/tela_hub_test.dart`, `app/test/acessibilidade/hub_acessibilidade_test.dart` e `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart` conforme a regra vigente da FR-017 (porta principal sempre à vista e faixa "há mais"; Hub inteiro sem rolar no 360×800 a 100%; exceção medida do 320×568 a 200%), sem "Sair", sem porta sem destino (FR-018) e cobrindo os estados da FR-006 por `app/test/suporte/estados_de_tela.dart`
 - [X] T036 [US2] Teste do SC-006 em `app/test/features/casca/profundidade_test.dart`: a partir do Início, cada parte do aplicativo é alcançada em até 3 toques, contando os toques de verdade
 
 ### Implementation
@@ -222,7 +221,7 @@ FR-017. Nenhum teste pulado.
 - [X] T119 [US4] "Meus aplicativos" em **lista**, ícone do aparelho à esquerda e nome ao lado (FR-023 revista). Ajusta a tarefa da tela de aplicativos da fase 6
 - [X] T120 [US4] **Captura pendente** (FR-028a): passo sem captura mostra um aviso visível com a chave do guia e o número do passo; teste em `catalogo_e_guias_test.dart` lista as pendentes, e a lista precisa chegar a zero antes da T104 (revisão da #47) O verificador de guias em `catalogo_e_guias_test.dart` hoje **reprova** guia com captura ausente, o que contradiz a FR-028a ("captura pendente"): trocar por uma **lista de pendentes**, não por falha. E conferir também que a pasta das capturas está declarada em `assets` no `pubspec.yaml` — `File(...).existsSync()` passa com PNG em disco que não foi empacotado.
 - [X] T121 [US7] Grupo **Acessibilidade** em Ajustes (FR-038, FR-039a): tamanho do texto, reduzir movimento e alto contraste, cada opção com uma frase de para quem serve, com pré-visualização
-- [X] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador **Feita pela metade na Fase 9 (não marcada)**: a preferência `paleta` (identificador, desconhecido volta a `azul`) e o suporte do `validar_paleta.py` a paleta × tema claro e escuro, com `--autoteste`, já existem. **Falta**: medir as cinco ou seis paletas no validador (`PALETAS`), pôr as cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer a escolha com pré-visualização em Aparência
+- [X] T122 [US7] **Paletas prontas** (FR-039, R15) em `app/lib/design_system/tokens/cores.dart`, `app/lib/design_system/preferencias/preferencia_aparencia.dart`, `app/lib/design_system/preferencias/tela_aparencia.dart` e `specs/002-design-system/ferramentas/validar_paleta.py`: seis paletas de destaque (`azul`, `verde`, `roxo`, `coral`, `dourado`, `grafite`) nos temas claro e escuro (não no alto contraste), todas validadas pelo `validar_paleta.py --autoteste`, com pré-visualização e fallback para `azul` quando desconhecida
 - [X] T123 [US8] **Data de nascimento opcional** no Perfil (FR-042c, `data-model.md`): só no aparelho, por conta, em `shared_preferences`; não é `DadoLocalDaPessoa`; sai com `esquecerTudo`. A idade é calculada na exibição. Teste de unidade da gravação e da saída; teste de widget do convite e da exibição
 - [X] T124 [US5] Carteira Digital é o documento do gov.br (T080, resolvida): a `chave` na V10 é `carteira-digital`, e o guia da T082 segue essa leitura
 
@@ -278,6 +277,15 @@ apresentando.
 - [X] T131 [P] [US3] **Negrito** na fala da Memora: `**trecho**` vira negrito, sem asterisco na tela nem no leitor de tela; marca sem par fica como texto (FR-020a). Teste de unidade do analisador e de widget do `BalaoDeFala`
 - [X] T132 [US3] **Espera e escrita**: tirar o "Estou pensando..." de baixo do campo (fica só o `BalaoDeFala.escrevendo`) e fazer a resposta aparecer aos poucos, letra a letra, por `MemoraMovimento.efetiva` — de uma vez com "reduzir movimento" —, com o leitor de tela recebendo a fala inteira (FR-020b)
 
+### As capturas reais e o zoom (clarificação de 2026-11-12)
+
+- [X] T133 [US4] **O destaque cai sobre a imagem** (FR-028c): em `app/lib/design_system/componentes/guia/`, um componente que desenha a captura **na proporção dela** e o anel por cima, em coordenadas da imagem — hoje o anel é posicionado sobre a moldura e a imagem entra com `BoxFit.contain`, e os dois divergem. Usado pela moldura do `PassoIlustrado` e pela ampliação da T134. Portão em `app/test/design_system/captura_com_destaque_test.dart`: com uma captura de proporção diferente da caixa, o retângulo do anel fica dentro do retângulo pintado da imagem, no lugar da região relativa. Provar quebrando: voltar a posicionar pela caixa
+- [X] T134 [US4] **Ampliar a captura** (FR-028b): tocar na captura ou no botão "Ver a imagem maior" abre a imagem em tela cheia, na pilha da casca (a inatividade e a saída a fecham como às outras rotas); dois dedos **e** botões "Aproximar"/"Afastar" (até 4x; aproximar centraliza no destaque; um toque na imagem ampliada centraliza naquele ponto); "Fechar" sempre à vista; selo "Exemplo" e destaque na imagem ampliada; descrição da captura para o leitor de tela; sem animação com "reduzir movimento". Textos em `app/lib/l10n/textos_guias.dart`, componente na galeria. Testes em `app/test/design_system/captura_ampliada_test.dart` na matriz de 4 aparelhos × 3 escalas (sem estouro, os três botões alcançáveis) e nos três temas
+- [ ] T135 [US4] Capturas reais de **FGTS, Meu INSS, e-Título, TikTok e Instagram** em `app/assets/guias/<chave>/passo_<N>.webp`, sem dado pessoal e sem destaque pintado (contrato), com o destaque de cada passo remedido sobre a imagem nova, a linha de cada guia corrigida em `app/assets/guias/CAPTURAS.md` e o total de `assets/guias/` dentro do teto (depende das imagens da equipe)
+- [X] T136 [US4] **A Memora não abria aplicativo nenhum**: o `AbridorDeAplicativoAndroid` mandava a ação `"action_main"`, que o `android_intent_plus` não traduz, e conferia com `MATCH_DEFAULT_ONLY`, que a atividade de entrada dos aplicativos não declara — `abrir()` devolvia `false` sempre, depois da confirmação (FR-015 da 003, FR-027). Abrir pelo `getLaunchIntentForPackage` do Android, num canal próprio (o `memora/aplicativos` continua só lendo), com teste do lado Dart em `app/test/features/assistente/abridor_de_aplicativo_test.dart` e a abertura de TikTok e Instagram conferida no celular (conferido no Galaxy S20 FE em 2026-11-14, APK 1.0.0+3: TikTok e Instagram abrem)
+- [X] T137 [US4] **Guias em seções** (FR-028d), trazidos da PR #67 sem as imagens dela: `SecaoDoGuia` e `Guia.secoes`/`todosOsPassos` em `app/lib/features/aprendizado/domain/guia.dart`, `TelaSeletorDeSecao` em `app/lib/features/aprendizado/presentation/`, `TelaPassoAPasso` com a seção escolhida (título, progresso por seção, dúvida com o nome da seção) e o `FluxoAutenticacao` abrindo o seletor quando o guia tem seções. `catalogo_e_guias_test.dart` conta 3 a 7 passos **por seção**; seletor testado na matriz de 4 aparelhos × 3 escalas × 3 temas, com TalkBack
+- [X] T138 [US4] **FGTS em quatro seções**, com as 13 capturas reais do Galaxy S20 FE (v5.11.0) em WebP, destaques medidos sobre elas e a linha corrigida no `CAPTURAS.md`
+
 ---
 
 ## Phase 6: User Story 4 — Aprender um aplicativo, passo a passo (Priority: P1)
@@ -316,8 +324,8 @@ desconhecido, e repetir sozinha sem ele (US4).
 - [X] T071 [P] [US4] Guias de **WhatsApp**, **Instagram** e **YouTube**, no mesmo formato da T070, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [X] T072 [P] [US4] Guias de **Facebook**, **Google Fotos** e **Telegram**, no mesmo formato, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
 - [X] T073 [US4] Conferir num aparelho real os pacotes de TikTok, Kwai, Messenger, Gmail, Netflix e Google, descartando o que for instável entre fabricantes, como a V5 fez; registrar o resultado em `data-model.md`
-- [ ] T074 [US4] Guias dos aplicativos aprovados na T073, no formato da T070, em `app/assets/guias/<chave>/` e `app/lib/features/aprendizado/data/guias/<chave>.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
-- [X] T075 [US4] Criar `backend/src/main/resources/db/migration/V9__aplicativos_do_wireframe.sql` só com os aplicativos que têm guia, acrescentar os pacotes ao `<queries>` de `AndroidManifest.xml` e as linhas ao `RepositorioAssistenteSimulado`; `CatalogoSemeadoTest` atualizado
+- [X] T074 [US4] Guias dos aplicativos aprovados na T073 (TikTok aprovado e semeado em `backend/src/main/resources/db/migration/V11__tiktok_no_catalogo.sql`; demais candidatos adiados conforme regra de corte de escopo de guias), no formato da T070, em `app/assets/guias/tiktok/` e `app/lib/features/aprendizado/data/guias/tiktok.dart`, com textos em `app/lib/l10n/textos_guias.dart` e linha em `app/assets/guias/CAPTURAS.md`
+- [X] T075 [US4] Criar `backend/src/main/resources/db/migration/V11__tiktok_no_catalogo.sql` só com os aplicativos que têm guia, acrescentar os pacotes ao `<queries>` de `app/android/app/src/main/AndroidManifest.xml` e as linhas ao `app/lib/features/assistente/data/repositorio_assistente_simulado.dart`; `CatalogoSemeadoTest` atualizado
 
 ---
 
@@ -367,7 +375,6 @@ senha do gov.br e onde nunca se digita (US5).
 - [X] T093 [US7] Acrescentar "reduzir movimento" a `PreferenciaAparencia` (`app/lib/design_system/preferencias/preferencia_aparencia.dart`), persistida pelo repositório de `app/lib/services/preferencias/` e aplicada sobre o `MediaQuery` no `builder` de `MaterialApp` em `main.dart`; redesenhar `tela_aparencia.dart` com pré-visualização e desfazer (FR-039); `app/test/design_system/reducao_de_movimento_test.dart` e `preferencias/tela_aparencia_test.dart` estendidos
 - [X] T094 [US7] Criar `TelaPrivacidade` em `app/lib/features/configuracoes/presentation/tela_privacidade.dart`: o que fica no aparelho, em linguagem comum, e apagar a conversa pela `ConfirmacaoMemora.irreversivel`, em duas etapas (FR-040; fecha a T085 da 003)
 - [X] T095 [US7] Criar `TelaConta` em `app/lib/features/configuracoes/presentation/tela_conta.dart`, com o canal vindo de `UltimoAcesso` (R10); apontar `app/test/features/autenticacao/saida_limpa_armazenamento_test.dart` para ela, mantendo as quatro quebras que o portão já provou
-- [X] T122 [US7] **Paletas prontas** (FR-039, R15): cinco ou seis cores de destaque, nos temas claro e escuro (não no alto contraste); cada combinação no `validar_paleta.py` antes de existir; escolha com pré-visualização; guardada com as preferências; valor desconhecido volta ao padrão. Provar quebrando: uma paleta de contraste ruim reprova no validador. **Parcial**: preferência `paleta` e validador prontos; falta medir paletas no validador, pôr cores em `tokens/cores.dart`, aplicar a paleta no tema e oferecer seletor com pré-visualização em Aparência
 
 ---
 
@@ -400,19 +407,18 @@ senha do gov.br e onde nunca se digita (US5).
 - [X] T098a Teste em `app/test/features/casca/sem_campo_de_segredo_test.dart`: varre `app/lib/features/` e reprova qualquer uso de `CampoSenha` ou `CampoCodigo` fora de `features/autenticacao/` (FR-048). Provar quebrando: pôr um `CampoSenha` na `TelaPerfil`
 - [X] T099 [P] Redesenhar as telas fora do wireframe na mesma linguagem: `tela_confirmar_canal.dart`, `tela_entrega_do_aparelho.dart`, `tela_primeira_entrada.dart` (em `autenticacao/presentation/telas/`), `tela_recuperacao.dart` (em `autenticacao/presentation/telas/`; a spec a lista entre as telas fora do wireframe a redesenhar, e a T057 só cuida do aviso), `tela_registro.dart` (em `assistente/presentation/telas/`) e a `ConfirmacaoMemora`; `fluxo_assistido_test.dart`, `tela_registro_test.dart` e `registro_acessibilidade_test.dart` passando na matriz completa
 - [X] T100 [P] Cruzar `app/test/design_system/galeria_test.dart` com os três temas e confirmar que todo componente novo aparece
-- [ ] T101 **Estender** `app/test/album/album_de_telas_test.dart`, criado na T043, a todas as telas da feature e às de fora do wireframe redesenhadas na T099
-- [ ] T102 Preencher a tabela "Onde cada cenário roda" do [quickstart.md](quickstart.md) e conferir a tabela de inventário da [spec.md](spec.md): cada uma das 35 telas do wireframe existe no álbum, ou tem a decisão de não existir registrada (SC-001)
-- [ ] T103 Verificação completa: `flutter analyze`, `flutter test`, `validar_paleta.py`, `validar_tokens.py` e `--autoteste`, `mvnw clean test`. Registrar as contagens (contando `<testcase` no backend — ver a armadilha do `tests=` no `CLAUDE.md`) e listar, com motivo, todo teste antigo que mudou de forma (V11)
-- [ ] T104 **Revisão de design** dos três integrantes sobre o álbum completo (`app/build/album/`), tela a tela contra o wireframe e contra o de hoje (SC-005, V13), com o veredito em `specs/004-redesenho-das-telas/revisao-de-design.md`. A revisão confere também, guia por guia, que nenhuma captura tem dado pessoal real (FR-028) que cada tela tem uma só ação principal (FR-002), a FR-005 e a FR-045
-- [ ] T105 **Teste com 5 pessoas de 65+** (V14, SC-002 a SC-004), com os resultados por tarefa e as notas em `specs/004-redesenho-das-telas/teste-com-pessoas.md` — mesma rodada que a T071 da 003 e a T050 da 002 esperam
-- [ ] T106 Revisões obrigatórias conforme `.specify/memory/constitution.md`: código, UX, acessibilidade e segurança
-- [ ] T107 Registrar em `docs/referencia/requisitos-atualizados.md` e `docs/design/divergencias-do-prototipo.md` cada divergência do wireframe desta feature, com o motivo: Planos fora, idade opcional e só no aparelho (FR-042c), Acessibilidade como grupo próprio (FR-038), paletas prontas de cor (FR-039), sem "Idiomas" e "Notificações", pictograma em vez de logotipo, sem o site de ajuda externo, passo a passo dentro do Memora. Atualizar também `specs/003-hub-e-assistente/spec.md` (US1, FR-043 e a tabela das duas categorias): a porta passa a se chamar "Serviços sociais", e banco e saúde continuam na mesma categoria SENSIVEL quando entrarem no catálogo
-- [ ] T125 Aplicar a `CaixaDeEtapa` (FR-002a) às telas que pedem ação e ainda não a têm, cada uma com o portão de layout da matriz (análise de 2026-10-13):
-  - [ ] T125a [US7] Ajustes, Conta e Privacidade
-  - [ ] T125b [US8] Tela de data de nascimento (Perfil)
-  - [ ] T125c [US4] Passo a passo
-  - [ ] T125d [US6] Ajuda
-  - [X] T125e Telas fora do wireframe da T099
+- [X] T101 **Estender** `app/test/album/album_de_telas_test.dart`, criado na T043, para renderizar e salvar em `app/build/album/<tema>/` todas as telas da Feature 004 (`boas_vindas`, `boas_vindas_de_volta`, `cadastro`, `login`, `apresentacao_1_ola`, `apresentacao_2_conversa`, `apresentacao_3_exemplo`, `inicio`, `hub`, `conversa`, `meus_aplicativos`, `passo_a_passo_tiktok`, `servicos_sociais`, `passo_a_passo_gov_br`, `ajuda`, `ajuda_assunto_seguranca`, `ajuda_guiada_conversa`, `configuracoes`, `aparencia`, `acessibilidade`, `privacidade`, `conta`, `perfil`, `data_de_nascimento`) e as telas fora do wireframe redesenhadas na T099 (`confirmar_canal`, `entrega_do_aparelho`, `primeira_entrada`, `recuperacao`, `registro`) nos 3 temas (`claro`, `escuro`, `altoContraste`)
+- [X] T102 Preencher a tabela "Onde cada cenário roda" em `specs/004-redesenho-das-telas/quickstart.md` e conferir a tabela de inventário em `specs/004-redesenho-das-telas/spec.md`: cada uma das 35 telas do wireframe existe no álbum, ou tem a decisão de não existir registrada (SC-001)
+- [X] T103 Executar a verificação completa (`flutter analyze`, `flutter test`, `python specs/002-design-system/ferramentas/validar_paleta.py --autoteste`, `python specs/002-design-system/ferramentas/validar_tokens.py --autoteste`) e atualizar as contagens e o estado da Feature 004 em `docs/relatorios/o-que-falta.md` (V11)
+- [ ] T104 **Revisão de design** dos três integrantes sobre o álbum completo (`app/build/album/`), tela a tela contra o wireframe e contra o de hoje (SC-005, V13), com o veredito em `specs/004-redesenho-das-telas/revisao-de-design.md`. A revisão confere também, guia por guia, que nenhuma captura tem dado pessoal real (FR-028), que cada tela tem uma só ação principal (FR-002), a FR-005 e a FR-045 (validação humana da equipe)
+- [ ] T105 **Teste com 5 pessoas de 65+** (V14, SC-002 a SC-004), com os resultados por tarefa e as notas em `specs/004-redesenho-das-telas/teste-com-pessoas.md` — mesma rodada que a T071 da 003 e a T050 da 002 esperam (validação presencial de campo)
+- [ ] T106 Revisões obrigatórias conforme `.specify/memory/constitution.md`: código, UX, acessibilidade e segurança em `specs/004-redesenho-das-telas/revisao-de-design.md` (validação humana de PR)
+- [X] T107 Registrar em `docs/referencia/requisitos-atualizados.md` e `docs/design/divergencias-do-prototipo.md` cada divergência do wireframe desta feature, com o motivo: Planos fora, idade opcional e só no aparelho (FR-042c), Acessibilidade como grupo próprio (FR-038), paletas prontas de cor (FR-039), sem "Idiomas" e "Notificações", pictograma em vez de logotipo, sem o site de ajuda externo, passo a passo dentro do Memora. Atualizar também `specs/003-hub-e-assistente/spec.md` (US1, FR-043 e a tabela das duas categorias): a porta passa a se chamar "Serviços sociais", e banco e saúde continuam na mesma categoria SENSIVEL quando entrarem no catálogo
+- [X] T125a [P] [US7] Aplicar `CaixaDeEtapa` (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`, FR-002a) em `app/lib/features/configuracoes/presentation/tela_configuracoes.dart`, `app/lib/features/configuracoes/presentation/tela_conta.dart` e `app/lib/features/configuracoes/presentation/tela_privacidade.dart`, mantendo a separação `MemoraEspacamento.xxxl` da FR-041 e a confirmação em duas etapas da FR-040, e validar na matriz em `app/test/features/configuracoes/configuracoes_test.dart`
+- [X] T125b [P] [US8] Aplicar `CaixaDeEtapa` (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`, FR-002a) em `app/lib/features/perfil/presentation/tela_data_de_nascimento.dart` (caixa para campos dia/mês/ano + salvar, e caixa separada para remover data quando existente) e validar na matriz em `app/test/features/perfil/tela_perfil_test.dart`
+- [X] T125c [P] [US4] Aplicar `CaixaDeEtapa` (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`, FR-002a) em `app/lib/design_system/componentes/guia/passo_ilustrado.dart` e `app/lib/features/aprendizado/presentation/tela_passo_a_passo.dart` (tanto nos passos intermediários quanto no cartão `_Conclusao`), e validar na matriz em `app/test/design_system/passo_ilustrado_test.dart` e `app/test/features/aprendizado/tela_passo_a_passo_test.dart`
+- [X] T125d [P] [US6] Aplicar `CaixaDeEtapa` (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`, FR-002a) em `app/lib/features/ajuda/presentation/tela_ajuda.dart`, `app/lib/features/ajuda/presentation/tela_assunto.dart` e `app/lib/features/ajuda/presentation/ajuda_guiada_da_conversa.dart`, e validar na matriz em `app/test/features/ajuda/tela_ajuda_test.dart`
+- [X] T125e [US1] Aplicar `CaixaDeEtapa` (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`, FR-002a) às telas fora do wireframe da T099 (`app/lib/features/autenticacao/presentation/telas/tela_confirmar_canal.dart` e `app/lib/features/autenticacao/presentation/telas/tela_recuperacao.dart`)
 
 ---
 
@@ -471,6 +477,28 @@ migration do catálogo vem **depois** do conteúdo, nunca antes (R8).
 Pessoa A: T058 → T059 → T060 → T068 → T069
 Pessoa B: T061 → T062 → T063 → T064 → T065 → T066 → T067
 Conteúdo: T070 → (T071 ∥ T072) → T073 → T074 → T075
+```
+
+### Ordem de Execução — Fechamento Técnico (2026-11-09, Base `develop`)
+
+```text
+Bloco Paralelo 1 (Código e Licenças):
+  ├── T011  [P] Licenças de ilustrações (LICENCAS.md)
+  ├── T035  [P] [US2] Consolidação dos testes do Hub (FR-017)
+  ├── T125a [P] [US7] CaixaDeEtapa em Ajustes, Conta e Privacidade
+  ├── T125b [P] [US8] CaixaDeEtapa em Data de Nascimento (Perfil)
+  ├── T125c [P] [US4] CaixaDeEtapa em PassoIlustrado e TelaPassoAPasso
+  └── T125d [P] [US6] CaixaDeEtapa em Ajuda, Assunto e Ajuda Guiada
+        │
+        ▼
+Bloco Sequencial 2 (Álbum Completo):
+  └── T101  Extensão do album_de_telas_test.dart (depende de T125a–T125d para capturar o layout final)
+        │
+        ▼
+Bloco Sequencial 3 (Documentação e Verificação Completa):
+  ├── T102  Tabela "Onde cada cenário roda" em quickstart.md e conferência do inventário em spec.md
+  ├── T107  Divergências em divergencias-do-prototipo.md, requisitos-atualizados.md e specs/003/spec.md
+  └── T103  Verificação completa (flutter analyze, flutter test, validar_paleta.py, validar_tokens.py) e o-que-falta.md
 ```
 
 ---

@@ -54,11 +54,22 @@ class Ambiente {
   /// não o confere, porque quem constrói à mão é teste.
   final String? urlDownload;
 
+  /// Endereço oficial `https://` do site de tutoriais exibido na Ajuda
+  /// (Issue #106 Item 11, features 016 e 017), ou nulo quando explicitamente
+  /// desabilitado.
+  ///
+  /// Usa [urlSiteTutorialPadrao] por padrão e pode ser sobrescrito ou limpo
+  /// via `--dart-define=MEMORA_URL_SITE_TUTORIAL=...`, passando sempre por
+  /// [enderecoOficial]: nunca aceita `http://`, usuário em URL nem texto
+  /// digitado pela pessoa usuária.
+  final String? urlSiteTutorial;
+
   /// Cria uma configuração de ambiente.
   const Ambiente({
     required this.urlBase,
     required this.usaServidorReal,
     this.urlDownload,
+    this.urlSiteTutorial,
   });
 
   /// Confere o endereço de download informado no build.
@@ -76,6 +87,13 @@ class Ambiente {
     final Uri? uri = Uri.tryParse(texto);
     if (uri == null) return null;
     if (uri.scheme != 'https') return null;
+    final int inicioAutoridade = texto.indexOf('://');
+    if (inicioAutoridade == -1) return null;
+    final String autoridadeBruta = texto
+        .substring(inicioAutoridade + 3)
+        .split(RegExp(r'[/?#]'))
+        .first;
+    if (autoridadeBruta.contains('@')) return null;
     if (uri.host.isEmpty) return null;
     if (uri.userInfo.isNotEmpty) return null;
     return texto;
@@ -83,6 +101,10 @@ class Ambiente {
 
   /// Padrão de desenvolvimento: o hospedeiro do emulador Android.
   static const String urlBasePadrao = 'http://10.0.2.2:8080/v1';
+
+  /// Endereço oficial publicado do site de tutoriais no Render (Issue #106).
+  static const String urlSiteTutorialPadrao =
+      'https://memora-site-thf2.onrender.com/';
 
   /// Lê a configuração passada na linha de comando.
   ///
@@ -102,11 +124,16 @@ class Ambiente {
     const bool real = bool.fromEnvironment('MEMORA_SERVIDOR_REAL');
 
     const String download = String.fromEnvironment('MEMORA_URL_DOWNLOAD');
+    const String siteTutorial = String.fromEnvironment(
+      'MEMORA_URL_SITE_TUTORIAL',
+      defaultValue: urlSiteTutorialPadrao,
+    );
 
     return Ambiente(
       urlBase: url,
       usaServidorReal: real,
       urlDownload: enderecoOficial(download),
+      urlSiteTutorial: enderecoOficial(siteTutorial),
     );
   }
 

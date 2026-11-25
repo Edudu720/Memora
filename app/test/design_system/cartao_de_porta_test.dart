@@ -6,6 +6,7 @@ import 'package:memora/design_system/design_system.dart';
 
 import '../suporte/aparelhos.dart';
 import 'contraste_test.dart' show contraste;
+import '../suporte/movimento.dart';
 
 /// `CartaoDePorta` — T016, FR-002, FR-043 da feature 004.
 ///
@@ -16,6 +17,7 @@ import 'contraste_test.dart' show contraste;
 /// pela camada de cor do `InkWell`; estes testes exigem o segundo sinal, e é a
 /// `SuperficieTocavel` que o dá.
 void main() {
+  movimentoLiberado();
   Widget porta({VoidCallback? aoAbrir, bool principal = false}) =>
       CartaoDePorta(
         nome: 'Conversar com a Memora',
@@ -27,9 +29,13 @@ void main() {
 
   Widget app(Widget filho, {double escala = 1.0}) => MaterialApp(
     theme: TemasMemora.claro,
-    home: MediaQuery(
-      data: MediaQueryData(textScaler: TextScaler.linear(escala)),
-      child: Scaffold(body: Center(child: filho)),
+    home: Builder(
+      builder: (BuildContext context) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(escala)),
+        child: Scaffold(body: Center(child: filho)),
+      ),
     ),
   );
 

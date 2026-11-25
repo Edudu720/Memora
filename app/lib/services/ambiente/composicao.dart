@@ -3,6 +3,10 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:memora_api/memora_api.dart' as api;
 
+import '../../features/ajuda/data/abridor_site_tutorial.dart';
+import '../../features/antigolpe/data/repositorios/repositorio_analise_golpe_api.dart';
+import '../../features/antigolpe/data/repositorios/repositorio_analise_golpe_simulado.dart';
+import '../../features/antigolpe/domain/repositorios/repositorio_analise_golpe.dart';
 import '../../features/assistente/data/aceite_do_aviso.dart';
 import '../../features/assistente/data/chamada_com_renovacao.dart';
 import '../../features/assistente/data/repositorio_assistente_api.dart';
@@ -19,7 +23,16 @@ import '../../features/aprendizado/data/progresso_de_aprendizado.dart';
 import '../../features/autenticacao/data/ultimo_acesso_local.dart';
 import '../../features/apresentacao/data/apresentacao_vista.dart';
 import '../../features/cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import '../../features/cuidado/data/repositorios/repositorio_emergencia_sos_api.dart';
+import '../../features/cuidado/data/repositorios/repositorio_emergencia_sos_simulado.dart';
+import '../../features/cuidado/domain/repositorios/repositorio_contato_emergencia.dart';
+import '../../features/cuidado/domain/repositorios/repositorio_emergencia_sos.dart';
+import '../../features/localizador/data/fontes/fonte_localizador_api.dart';
+import '../../features/localizador/data/repositorios/repositorio_localizador_api.dart';
+import '../../features/localizador/data/repositorios/repositorio_localizador_simulado.dart';
+import '../../features/localizador/domain/repositorios/repositorio_localizador.dart';
 import '../../features/perfil/data/data_de_nascimento_local.dart';
+import '../../features/perfil/data/foto_de_perfil_local.dart';
 import '../seguranca/limpeza_de_sessao.dart';
 import '../seguranca/sessao_perdida.dart';
 
@@ -58,6 +71,20 @@ class Composicao {
   /// A assistente: real quando há servidor, simulada quando não.
   final RepositorioAssistente assistente;
 
+  /// Análise antigolpe de links e mensagens: integrada à API com fallback
+  /// local offline quando há servidor real, ou simulada no modo demonstração.
+  final RepositorioAnaliseGolpe? analiseGolpe;
+
+  /// O Localizador de Serviços: conectado à API quando há servidor real,
+  /// ou exemplos seguros de demonstração offline quando não há.
+  final RepositorioLocalizador? localizador;
+
+  /// Canal remoto ou simulado de pedidos de emergência SOS (Feature 014).
+  final RepositorioEmergenciaSos? emergenciaSos;
+
+  /// Contato de emergência salvo localmente no aparelho.
+  final RepositorioContatoEmergencia? contatoEmergencia;
+
   /// Se a pessoa já aceitou o aviso de privacidade da conversa (FR-051).
   ///
   /// É o **mesmo objeto** que a [limpeza] apaga na saída: criar um aqui e outro
@@ -71,6 +98,11 @@ class Composicao {
   ///
   /// É a mesma instância que a [limpeza] esquece no `esquecerTudo`.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
+  /// Onde o Perfil guarda a foto ou avatar escolhido, por conta (FR-006, 011).
+  ///
+  /// É a mesma instância que a [limpeza] esquece no `esquecerTudo` (FR-009).
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
 
   /// Quais contas já viram a apresentação inicial (FR-013, T048).
   ///
@@ -88,16 +120,28 @@ class Composicao {
   /// criar um para cada lado seria a sessão perdida sem ninguém ouvir.
   final SessaoPerdida sessaoPerdida;
 
+  /// Abridor seguro `https://` para o site oficial de tutoriais (Features 016 e 017).
+  ///
+  /// Assume [Ambiente.urlSiteTutorialPadrao] por padrão (`memora-site` no
+  /// Render), podendo ser sobrescrito ou limpo via `MEMORA_URL_SITE_TUTORIAL`.
+  final AbridorDeSiteTutorial? abridorSiteTutorial;
+
   /// Cria a composição já resolvida.
   const Composicao({
     required this.ambiente,
     required this.autenticacao,
     required this.assistente,
+    this.analiseGolpe,
+    this.localizador,
+    this.emergenciaSos,
+    this.contatoEmergencia,
     required this.aceiteDoAviso,
     required this.limpeza,
     this.dataDeNascimento,
+    this.fotoDePerfil,
     this.apresentacaoVista,
     this.progresso,
+    this.abridorSiteTutorial,
     required this.sessaoPerdida,
   });
 
@@ -128,6 +172,7 @@ class Composicao {
     required UltimoAcesso ultimoAcesso,
     required AceiteDoAviso aceiteDoAviso,
     DataDeNascimentoDoAparelho? dataDeNascimento,
+    FotoDePerfilDoAparelho? fotoDePerfil,
     ApresentacaoVistaDoAparelho? apresentacaoVista,
     ProgressoDeAprendizado? progresso,
     SharedPreferences? preferencias,
@@ -136,6 +181,8 @@ class Composicao {
   }) {
     final DataDeNascimentoDoAparelho datas =
         dataDeNascimento ?? DataDeNascimentoEmMemoria();
+    final FotoDePerfilDoAparelho fotos =
+        fotoDePerfil ?? FotoDePerfilEmMemoria();
     final ApresentacaoVistaDoAparelho vistas =
         apresentacaoVista ?? ApresentacaoVistaEmMemoria();
     final ProgressoDeAprendizado aprendizado =
@@ -145,6 +192,11 @@ class Composicao {
     final SessaoPerdida sessaoPerdida = SessaoPerdida();
     final RepositorioAutenticacao autenticacao;
     final RepositorioAssistente assistente;
+    final RepositorioAnaliseGolpe analiseGolpe;
+    final RepositorioLocalizador localizador;
+    final RepositorioEmergenciaSos emergenciaSos;
+    final RepositorioContatoEmergenciaLocal contatoEmergencia =
+        RepositorioContatoEmergenciaLocal(preferencias);
 
     if (ambiente.usaServidorReal) {
       // [dioDeTeste] existe para o teste trocar o transporte e provar a
@@ -154,21 +206,36 @@ class Composicao {
       );
       final RepositorioAutenticacaoApi autenticacaoReal =
           RepositorioAutenticacaoApi(cliente: cliente, cofre: cofre);
+      final ChamadaComRenovacao chamadas = ChamadaComRenovacao(
+        cliente: cliente,
+        cofre: cofre,
+        renovar: autenticacaoReal.renovarSessao,
+        sessaoPerdida: sessaoPerdida,
+      );
       autenticacao = autenticacaoReal;
       assistente = RepositorioAssistenteApi(
         cliente: cliente,
-        chamadas: ChamadaComRenovacao(
-          cliente: cliente,
-          cofre: cofre,
-          renovar: autenticacaoReal.renovarSessao,
-          sessaoPerdida: sessaoPerdida,
-        ),
+        chamadas: chamadas,
+      );
+      analiseGolpe = RepositorioAnaliseGolpeApi(
+        dio: cliente.dio,
+        chamadas: chamadas,
+      );
+      localizador = RepositorioLocalizadorApi(
+        fonte: FonteLocalizadorApi(cliente.dio, chamadas: chamadas),
+      );
+      emergenciaSos = RepositorioEmergenciaSosApi(
+        dio: cliente.dio,
+        chamadaAutenticada: chamadas,
       );
     } else {
       autenticacao = RepositorioAutenticacaoSimulado(
         preferencias: preferencias,
       );
       assistente = RepositorioAssistenteSimulado();
+      analiseGolpe = const RepositorioAnaliseGolpeSimulado();
+      localizador = RepositorioLocalizadorSimulado();
+      emergenciaSos = RepositorioEmergenciaSosSimulado();
     }
 
     return Composicao(
@@ -179,11 +246,17 @@ class Composicao {
       // o `main.dart` o liga. Ele NÃO entra em `dadosLocais` — não é da pessoa.
       // Envolve a assistente escolhida acima, real ou simulada.
       assistente: guardarCatalogo ? CatalogoGuardado(assistente) : assistente,
+      analiseGolpe: analiseGolpe,
+      localizador: localizador,
+      emergenciaSos: emergenciaSos,
+      contatoEmergencia: contatoEmergencia,
       aceiteDoAviso: aceiteDoAviso,
       sessaoPerdida: sessaoPerdida,
       dataDeNascimento: datas,
+      fotoDePerfil: fotos,
       apresentacaoVista: vistas,
       progresso: aprendizado,
+      abridorSiteTutorial: AbridorDeSiteTutorial.doAmbiente(ambiente),
       // O cofre tambem e limpo pelo `encerrarSessao` do repositorio, e
       // precisa ser: a ordem exige que o token que autentica a chamada de
       // saida so va embora depois que ela volta. Limpar duas vezes nao custa
@@ -206,9 +279,9 @@ class Composicao {
           ConversaLocal(),
           aprendizado,
           aceiteDoAviso,
-          RepositorioContatoEmergenciaLocal(preferencias),
+          contatoEmergencia,
         ],
-        dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas],
+        dadosDoAparelho: <DadoLocalDoAparelho>[datas, vistas, fotos],
       ),
     );
   }

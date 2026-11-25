@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-tema="claro" data-escala="padrao" data-movimento="normal">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guia do Memora — passo a passo, no seu ritmo</title>
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <script src="assets/memora/memora-dados.js" defer></script>
+  <script src="scripts/memora-personagem.js" defer></script>
+  <script src="scripts/tutorial.js" defer></script>
+</head>
+<body id="topo">
+  <a class="pular-conteudo" href="#conteudo-principal">Ir direto para o conteúdo principal</a>
+  <div id="anuncio-acessibilidade" class="somente-leitor" aria-live="polite"></div>
+
+  <header class="cabecalho-site">
+    <div class="conteiner">
+      <div class="barra-identidade">
+        <div class="marca-memora">
+          <span class="marca-selo">
+            <memora-personagem expressao="mini" aria-hidden="true"></memora-personagem>
+          </span>
+          <div>
+            <div>Guia do Memora</div>
+            <p class="marca-subtitulo">Aprenda a usar o celular no seu ritmo, sem pressa e sem medo</p>
+          </div>
+        </div>
+      </div>
+
+      <section class="painel-conforto" aria-label="Ajustes de leitura desta página">
+        <p class="painel-conforto-titulo">Deixe esta página do jeito mais confortável para os seus olhos:</p>
+        <div class="grupos-conforto">
+          <div class="grupo-controle" role="group" aria-label="Tamanho da letra">
+            <span class="grupo-legenda">Tamanho da letra</span>
+            <div class="linha-botoes">
+              <button type="button" class="botao-controle" data-acao-escala="padrao" aria-pressed="true">Letra normal</button>
+              <button type="button" class="botao-controle" data-acao-escala="grande" aria-pressed="false">Letra grande</button>
+              <button type="button" class="botao-controle" data-acao-escala="muito-grande" aria-pressed="false">Letra muito grande</button>
+            </div>
+          </div>
+
+          <div class="grupo-controle" role="group" aria-label="Cores e contraste da página">
+            <span class="grupo-legenda">Cores da página</span>
+            <div class="linha-botoes">
+              <button type="button" class="botao-controle" data-acao-tema="claro" aria-pressed="true">Fundo claro</button>
+              <button type="button" class="botao-controle" data-acao-tema="escuro" aria-pressed="false">Fundo escuro</button>
+              <button type="button" class="botao-controle" data-acao-tema="alto-contraste" aria-pressed="false">Alto contraste</button>
+            </div>
+          </div>
+
+          <div class="grupo-controle" role="group" aria-label="Movimento na página">
+            <span class="grupo-legenda">Movimento na página</span>
+            <div class="linha-botoes">
+              <button type="button" class="botao-controle" data-acao-movimento aria-pressed="false">Reduzir movimento</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <nav class="sumario-nav" aria-label="Sumário dos capítulos do tutorial">
+        <p class="sumario-titulo">Escolha o assunto que deseja ler agora:</p>
+        <ul class="sumario-lista">
+          <li><a class="link-sumario" data-link-capitulo href="#boas-vindas" aria-current="true">1. O que é o Memora</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#primeiros-passos">2. Entrar e sair sem medo</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#navegacao-3-toques">3. Os 3 botões principais</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#conversa-e-historico">4. Conversar e ver o histórico</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#aplicativos-e-servicos">5. Outros aplicativos</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#ajustes-e-foto">6. Ajustes e foto de perfil</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#pulseira-cuidado">7. Pulseira de cuidado</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#protecao-golpes">8. Proteção contra golpes</a></li>
+          <li><a class="link-sumario" data-link-capitulo href="#duvidas-frequentes">9. Dúvidas frequentes</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <aside class="anfitria-flutuante" data-anfitria-bloco data-anfitria-estado="expandida" aria-label="Dicas da Memora">
+    <div class="anfitria-cabecalho-flutuante">
+      <div class="medalhao-ilustracao anfitria-avatar">
+        <memora-personagem expressao="acenando" anfitria="true" data-memora-anfitria aria-hidden="true"></memora-personagem>
+      </div>
+      <button type="button" class="botao-controle botao-alternar-anfitria" data-acao-alternar-anfitria aria-expanded="true" aria-controls="anfitria-conteudo">Recolher dicas</button>
+    </div>
+    <div id="anfitria-conteudo" class="anfitria-corpo" data-anfitria-conteudo>
+      <p class="anfitria-balao" data-anfitria-balao>
+        Cada guia mostra a tela do celular, um passo de cada vez. Eu fico com você até o fim.
+      </p>
+      <button type="button" class="botao-controle botao-dica-anfitria" data-acao-outra-dica>Outra dica da Memora</button>
+    </div>
+  </aside>
+
+  <main id="conteudo-principal" class="conteudo-principal conteiner" tabindex="-1">
+    <!-- Capítulo 1: Boas-vindas e Propósito -->
+    <section id="boas-vindas" class="capitulo capitulo-hero" aria-labelledby="titulo-boas-vindas">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 1 de 9 · Boas-vindas</span>
+          <h1 id="titulo-boas-vindas" data-leitura-conteudo>O Memora ensina o caminho, no seu tempo</h1>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="boas-vindas" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="hero-grade">
+        <div>
+          <p class="texto-leitura" data-leitura-conteudo>
+            Muita gente sente receio de mexer no celular por medo de apagar algo importante ou apertar o botão errado. O Memora foi criado para acabar com esse medo: ele é um companheiro paciente de bolso feito para ajudar você a ganhar autonomia de verdade.
+          </p>
+          <p class="texto-leitura" data-leitura-conteudo>
+            Em vez de fazer tudo escondido no seu lugar, o aplicativo explica cada etapa em português simples e deixa você no comando o tempo inteiro.
+          </p>
+          <blockquote class="lema-memora" data-leitura-conteudo>
+            “Eu mostro o caminho e você faz. E não faço nada sem te avisar antes.”
+          </blockquote>
+        </div>
+      </div>
+
+      <div class="grade-tres-colunas" data-leitura-conteudo>
+        <article class="cartao-interno">
+          <h2>Sem pressa</h2>
+          <p>Você pode reler, voltar e pedir explicações quantas vezes precisar, sem ninguém apressar você.</p>
+        </article>
+        <article class="cartao-interno">
+          <h2>Letras claras e botões grandes</h2>
+          <p>Todo desenho tem legenda escrita em português e cada botão tem tamanho confortável para tocar com o dedo.</p>
+        </article>
+        <article class="cartao-interno">
+          <h2>Página apenas educativa</h2>
+          <p>Este site serve somente como guia de leitura: ele não pede cadastro, não pede senha e não acessa sua conta.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Capítulo 2: Primeiros Passos (Senha, Modo Assistido e Saída Segura) -->
+    <section id="primeiros-passos" class="capitulo" aria-labelledby="titulo-primeiros-passos">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 2 de 9 · Começando</span>
+          <h2 id="titulo-primeiros-passos" data-leitura-conteudo>Como entrar e sair da conta com tranquilidade</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="primeiros-passos" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <img src="assets/ilustracoes/pessoa_com_celular.svg" alt="Pessoa segurando um celular com expressão tranquila">
+            </span>
+            <h3>Entrada fácil com sua senha</h3>
+          </div>
+          <p class="texto-leitura">
+            Você não precisa decorar códigos cheios de símbolos difíceis. No Memora, você entra usando seu telefone ou e-mail e uma <strong>senha</strong> em forma de frase que só você sabe e que ninguém adivinharia.
+          </p>
+          <ol class="passos-lista">
+            <li><strong>Escolha como prefere entrar:</strong> toque no botão grande de entrar e informe seu telefone ou e-mail.</li>
+            <li><strong>Digite sua senha:</strong> escreva com calma; você pode tocar em “Mostrar senha” para conferir letra por letra antes de confirmar.</li>
+            <li><strong>Peça ajuda se quiser no começo:</strong> com o <em>Modo Assistido</em>, um familiar ajuda nos primeiros dados, mas na hora da senha devolve o celular para você criar sua senha sozinho, sem ninguém olhar.</li>
+            <li><strong>Sair sem acidentes:</strong> quando quiser sair da conta, o Memora pede uma confirmação calma para evitar que um toque sem querer desconecte você.</li>
+          </ol>
+        </div>
+
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de como a tela de entrada com senha aparece no aplicativo">
+          <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
+          <div class="mini-tela-moldura">
+            <p class="mini-tela-titulo">Que bom ver você por aqui</p>
+            <div class="mini-tela-balao">
+              <strong>Sua senha</strong><br>
+              Crie uma frase que só você sabe e que ninguém adivinharia. Toque em “Mostrar senha” para conferir as letras.
+            </div>
+            <div class="mini-botao-simulado">Entrar no Memora</div>
+            <div class="mini-botao-simulado mini-botao-secundario">Estou sendo ajudado por um familiar</div>
+          </div>
+          <figcaption class="mini-tela-legenda">
+            Demonstração visual: na tela real você pode conferir o que digitou antes de confirmar.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Capítulo 3: Navegação em até 3 toques -->
+    <section id="navegacao-3-toques" class="capitulo" aria-labelledby="titulo-3-toques">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 3 de 9 · Orientação simples</span>
+          <h2 id="titulo-3-toques" data-leitura-conteudo>Encontre qualquer coisa em até 3 toques</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="navegacao-3-toques" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div data-leitura-conteudo>
+          <p class="texto-leitura">
+            Você nunca fica perdido em menus escondidos. Na parte de baixo da tela principal existem apenas <strong>três botões bem separados</strong>, todos com desenho e nome escrito embaixo:
+          </p>
+          <ol class="passos-lista">
+            <li><strong>Ajustes:</strong> fica à esquerda. Serve para deixar as letras maiores, trocar as cores da tela ou sair da conta com segurança.</li>
+            <li><strong>Início:</strong> fica no centro. É a sua casa principal dentro do aplicativo, com o botão grande para conversar com a Memora e as portas para os aplicativos.</li>
+            <li><strong>Meu perfil:</strong> fica à direita. Mostra o seu nome, os seus dados de conta e o espaço para escolher sua foto ou avatar.</li>
+          </ol>
+        </div>
+
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo da barra inferior do aplicativo com três botões: Ajustes, Início e Meu perfil">
+          <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
+          <div class="mini-tela-moldura">
+            <p class="mini-tela-titulo">Oi! Em que posso ajudar hoje?</p>
+            <div class="mini-tela-balao">
+              Toque em qualquer um dos três botões de baixo para mudar de tela sem pressa.
+            </div>
+            <div class="mini-tela-barra-inferior">
+              <div class="mini-destino">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.74 0-1.25.4-1.51 1z"></path></svg>
+                <span>Ajustes</span>
+              </div>
+              <div class="mini-destino mini-destino-ativo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5"></path><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"></path></svg>
+                <span>Início</span>
+              </div>
+              <div class="mini-destino">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M5 20a7 7 0 0 1 14 0"></path></svg>
+                <span>Meu perfil</span>
+              </div>
+            </div>
+          </div>
+          <figcaption class="mini-tela-legenda">
+            A barra fica sempre no mesmo lugar para você saber onde está.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Capítulo 4: Conversar com a Memora e Histórico Transparente -->
+    <section id="conversa-e-historico" class="capitulo" aria-labelledby="titulo-conversa">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 4 de 9 · Aprender passo a passo</span>
+          <h2 id="titulo-conversa" data-leitura-conteudo>Conversar com a Memora e conferir o que foi feito</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="conversa-e-historico" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div class="cartao-interno" data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <img src="assets/ilustracoes/porta_conversa.svg" alt="Ícone ilustrado representando conversa amigável">
+            </span>
+            <h3>Conversar com a Memora</h3>
+          </div>
+          <p>
+            Tem uma dúvida sobre como mandar um áudio, achar uma foto da família ou silenciar uma notificação? Toque em <strong>Conversar com a Memora</strong> e pergunte com as suas próprias palavras.
+          </p>
+          <p>
+            Ela responde com frases curtas, em passos fáceis, sem palavras complicadas.
+          </p>
+        </div>
+
+        <div class="cartao-interno" data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <img src="assets/ilustracoes/porta_registro.svg" alt="Ícone ilustrado de caderno mostrando registro transparente">
+            </span>
+            <h3>Histórico “O que eu fiz por você”</h3>
+          </div>
+          <p>
+            Quer lembrar o que você aprendeu ou conferiu mais cedo? Na tela de <strong>Atividades</strong>, o Memora anota de forma clara tudo o que foi ensinado ou aberto, com data e horário, para você conferir quando quiser.
+          </p>
+        </div>
+      </div>
+
+      <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de conversa com a assistente explicando como enviar um áudio no WhatsApp">
+        <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
+        <div class="mini-tela-moldura">
+          <div class="mini-tela-balao">
+            <strong>Você perguntou:</strong> “Como mando um áudio no WhatsApp para minha filha?”
+          </div>
+          <div class="mini-tela-balao">
+            <strong>A Memora respondeu:</strong> Vamos juntos abrir a conversa com sua filha. Depois, segure o desenho do microfone no canto de baixo enquanto fala e solte ao terminar.
+          </div>
+        </div>
+        <figcaption class="mini-tela-legenda">
+          A assistente nunca mexe nas suas mensagens sem avisar e sempre ensina como você mesmo pode fazer.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- Capítulo 5: Aplicativos do Dia a Dia e Aviso Prévio -->
+    <section id="aplicativos-e-servicos" class="capitulo" aria-labelledby="titulo-aplicativos">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 5 de 9 · Aplicativos e serviços</span>
+          <h2 id="titulo-aplicativos" data-leitura-conteudo>Abrir outros aplicativos sem tomar susto</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="aplicativos-e-servicos" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div data-leitura-conteudo>
+          <div class="pilha-cartoes">
+            <div class="cartao-interno">
+              <div class="icone-com-legenda">
+                <span class="icone-moldura">
+                  <img src="assets/ilustracoes/porta_aplicativos.svg" alt="Ícone representando aplicativos do dia a dia">
+                </span>
+                <h3>Dia a dia</h3>
+              </div>
+              <p>Acesso organizado para conversar e ver lembranças em aplicativos como WhatsApp, Telefone e Fotos.</p>
+            </div>
+
+            <div class="cartao-interno">
+              <div class="icone-com-legenda">
+                <span class="icone-moldura">
+                  <img src="assets/ilustracoes/porta_servicos.svg" alt="Ícone representando serviços públicos e saúde">
+                </span>
+                <h3>Serviços e saúde</h3>
+              </div>
+              <p>Atalhos explicados passo a passo para Gov.br, serviços de aposentadoria e atendimentos de saúde.</p>
+            </div>
+          </div>
+
+          <p class="texto-leitura">
+            Antes de abrir qualquer aplicativo de fora, o Memora mostra uma tela calma de aviso explicando que você vai sair dele por um momento — assim a tela não muda de repente e você sabe sempre como voltar.
+          </p>
+        </div>
+
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo de tela de aviso mostrada antes de abrir o WhatsApp">
+          <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
+          <div class="mini-tela-moldura">
+            <p class="mini-tela-titulo">Você está indo para o WhatsApp</p>
+            <div class="mini-tela-balao">
+              O Memora vai abrir o aplicativo WhatsApp no seu celular. Quando terminar de usar, basta apertar o botão voltar para retornar ao Memora.
+            </div>
+            <div class="mini-botao-simulado">Abrir agora</div>
+            <div class="mini-botao-simulado mini-botao-secundario">Ficar aqui no Memora</div>
+          </div>
+          <figcaption class="mini-tela-legenda">
+            Você escolhe se quer realmente abrir ou continuar no Memora.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Capítulo 6: Ajustes e Foto de Perfil Local -->
+    <section id="ajustes-e-foto" class="capitulo" aria-labelledby="titulo-ajustes-foto">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 6 de 9 · Do seu jeito</span>
+          <h2 id="titulo-ajustes-foto" data-leitura-conteudo>Deixar o aplicativo confortável e colocar sua foto</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="ajustes-e-foto" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <img src="assets/ilustracoes/ajuste_aparencia.svg" alt="Ícone representando ajustes de cores e tamanho da letra">
+            </span>
+            <h3>Aparência em Ajustes</h3>
+          </div>
+          <p class="texto-leitura">
+            Na aba <strong>Ajustes</strong>, você aumenta o tamanho da letra, alterna entre fundo claro, escuro ou alto contraste e escolhe a cor que acha mais agradável — tudo parecido com os botões no topo deste guia.
+          </p>
+
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <memora-personagem expressao="neutra" aria-hidden="true"></memora-personagem>
+            </span>
+            <h3>Sua foto ou avatar em Meu perfil</h3>
+          </div>
+          <ol class="passos-lista">
+            <li>Toque em <strong>Meu perfil</strong> e escolha <strong>Colocar foto de perfil</strong> (ou <strong>Trocar foto</strong>).</li>
+            <li>Escolha entre <strong>Escolher da galeria</strong>, <strong>Tirar foto agora</strong> ou <strong>Escolher avatar da Memora</strong> (sem precisar dar nenhuma permissão de câmera ou fotos).</li>
+            <li>Confira na pré-visualização se gostou e toque em <strong>Usar esta foto</strong>. Ela fica guardada <strong>somente neste aparelho</strong> e pode ser removida a qualquer hora.</li>
+          </ol>
+        </div>
+
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo das opções para escolher foto de perfil ou avatar da Memora">
+          <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
+          <div class="mini-tela-moldura">
+            <p class="mini-tela-titulo">Escolher foto de perfil</p>
+            <div class="mini-tela-balao">
+              O Memora só vê a foto que você escolher, e ela fica guardada só neste aparelho.
+            </div>
+            <div class="mini-botao-simulado mini-botao-secundario">Escolher da galeria</div>
+            <div class="mini-botao-simulado mini-botao-secundario">Tirar foto agora</div>
+            <div class="mini-botao-simulado">Escolher avatar da Memora</div>
+          </div>
+          <figcaption class="mini-tela-legenda">
+            Se não quiser liberar a câmera nem fotos pessoais, os avatares da Memora funcionam mesmo sem internet.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Capítulo 7: Pulseira de Cuidado e Checagem em 45s -->
+    <section id="pulseira-cuidado" class="capitulo" aria-labelledby="titulo-pulseira">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 7 de 9 · Cuidado físico</span>
+          <h2 id="titulo-pulseira" data-leitura-conteudo>Pulseira de cuidado e pedido de ajuda sem pânico</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="pulseira-cuidado" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <img src="assets/ilustracoes/casal_idoso.svg" alt="Duas pessoas sorrindo com tranquilidade">
+            </span>
+            <h3>Proteção discreta no dia a dia</h3>
+          </div>
+          <p class="texto-leitura">
+            Quando usada com a pulseira de cuidado do projeto, a tela mostra seus batimentos em números grandes e fáceis de ler, dizendo com clareza se o ritmo está estável.
+          </p>
+          <ol class="passos-lista">
+            <li><strong>Se a pulseira perceber uma queda forte:</strong> o celular toca um aviso suave e mostra na hora a pergunta grande: <em>“Você está bem?”</em>.</li>
+            <li><strong>Você tem 45 segundos com calma:</strong> se foi só um esbarrão ou falso alarme, toque em <strong>Estou bem</strong>. O aviso desliga imediatamente sem assustar sua família.</li>
+            <li><strong>Se precisar de apoio ou não conseguir responder:</strong> ao tocar em <strong>Preciso de ajuda</strong> (ou acabar o tempo), o Memora abre a ligação para o seu contato de confiança e prepara a mensagem com o horário do ocorrido.</li>
+          </ol>
+        </div>
+
+        <figure class="mini-tela" role="img" aria-label="Exemplo ilustrativo da tela de checagem após possível queda com contagem de 45 segundos e botões Estou bem e Preciso de ajuda">
+          <span class="mini-tela-selo">Exemplo de como aparece no aplicativo</span>
+          <div class="mini-tela-moldura">
+            <p class="mini-tela-titulo">Você está bem? (45 segundos)</p>
+            <div class="mini-tela-balao">
+              Percebemos um movimento brusco. Toque em uma das opções abaixo:
+            </div>
+            <div class="mini-botao-simulado mini-botao-sucesso">Estou bem</div>
+            <div class="mini-botao-simulado mini-botao-perigo">Preciso de ajuda</div>
+          </div>
+          <figcaption class="mini-tela-legenda">
+            Se foi apenas um movimento comum, basta tocar em “Estou bem” para silenciar tudo na hora.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Capítulo 8: Proteção contra Golpes -->
+    <section id="protecao-golpes" class="capitulo" aria-labelledby="titulo-golpes">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 8 de 9 · Segurança em primeiro lugar</span>
+          <h2 id="titulo-golpes" data-leitura-conteudo>Proteção contra golpes: o que o Memora NUNCA faz</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="protecao-golpes" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <div class="grade-duas-colunas">
+        <div class="cartao-interno cartao-perigo" data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <memora-personagem expressao="preocupada" aria-hidden="true"></memora-personagem>
+            </span>
+            <h3>Sinais claros de alerta: desconfie na hora</h3>
+          </div>
+          <ul class="lista-garantias">
+            <li>
+              <span class="marca-texto marca-nunca">NUNCA</span>
+              <span><strong>Nunca pede senha de banco, cartão ou código por mensagem:</strong> se alguém disser que é do Memora pedindo número de cartão, senha bancária ou código de mensagem de texto, é golpe.</span>
+            </li>
+            <li>
+              <span class="marca-texto marca-nunca">NUNCA</span>
+              <span><strong>Nunca transfere dinheiro nem faz pagamentos:</strong> o aplicativo nunca movimenta valores financeiros e nunca assina serviços escondidos.</span>
+            </li>
+            <li>
+              <span class="marca-texto marca-nunca">NUNCA</span>
+              <span><strong>Nunca exige urgência por ameaça:</strong> desconfie de avisos dizendo que sua conta vai ser bloqueada hoje se você não clicar em um endereço estranho.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="cartao-interno cartao-sucesso" data-leitura-conteudo>
+          <div class="icone-com-legenda">
+            <span class="icone-moldura">
+              <memora-personagem expressao="dica" aria-hidden="true"></memora-personagem>
+            </span>
+            <h3>O que fazer diante de uma dúvida suspeita</h3>
+          </div>
+          <ul class="lista-garantias">
+            <li>
+              <span class="marca-texto marca-sempre">SEMPRE</span>
+              <span><strong>Pare e respire com calma:</strong> não clique em botões de mensagens desconhecidas nem passe códigos pelo telefone.</span>
+            </li>
+            <li>
+              <span class="marca-texto marca-sempre">SEMPRE</span>
+              <span><strong>Converse antes com alguém de confiança:</strong> desligue a ligação suspeita e ligue diretamente para um familiar ou pergunte no Memora antes de tomar qualquer atitude.</span>
+            </li>
+            <li>
+              <span class="marca-texto marca-sempre">SEMPRE</span>
+              <span><strong>Este site não pede dados:</strong> aqui no guia educativo nunca existem caixas para digitar senha, telefone ou documento.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Capítulo 9: Dúvidas Frequentes e Orientações para Familiares -->
+    <section id="duvidas-frequentes" class="capitulo" aria-labelledby="titulo-duvidas">
+      <div class="capitulo-cabecalho">
+        <div>
+          <span class="capitulo-etiqueta">Capítulo 9 de 9 · Perguntas e respostas</span>
+          <h2 id="titulo-duvidas" data-leitura-conteudo>Dúvidas comuns respondidas com tranquilidade</h2>
+        </div>
+        <button type="button" class="botao-ouvir" data-botao-ouvir data-leitura-alvo="duvidas-frequentes" aria-pressed="false" hidden>Ouvir este trecho</button>
+      </div>
+
+      <p class="texto-leitura" data-leitura-conteudo>
+        Toque em qualquer pergunta abaixo para abrir ou fechar a resposta. Não tenha receio: perguntar sempre ajuda a usar o celular com mais segurança.
+      </p>
+
+      <div class="lista-duvidas" data-leitura-conteudo>
+        <details class="duvida-item">
+          <summary class="duvida-pergunta">
+            <span>Posso apagar alguma coisa importante sem querer?</span>
+            <span class="duvida-indicador">Ver resposta</span>
+          </summary>
+          <p class="duvida-resposta">
+            Ações importantes — como apagar a foto, limpar conversas ou sair — sempre pedem confirmação na tela antes de acontecer. Se você tocar em “Não” ou cancelar, nada muda.
+          </p>
+        </details>
+
+        <details class="duvida-item">
+          <summary class="duvida-pergunta">
+            <span>Se eu recusar a câmera na foto de perfil, o aplicativo para de funcionar?</span>
+            <span class="duvida-indicador">Ver resposta</span>
+          </summary>
+          <p class="duvida-resposta">
+            O aplicativo continua funcionando normalmente sem usar câmera nem suas fotos. Se preferir, escolha na hora um dos avatares ilustrados da Memora ou deixe apenas as suas iniciais.
+          </p>
+        </details>
+
+        <details class="duvida-item">
+          <summary class="duvida-pergunta">
+            <span>Quem vê minha foto de perfil e os dados do meu aparelho?</span>
+            <span class="duvida-indicador">Ver resposta</span>
+          </summary>
+          <p class="duvida-resposta">
+            A foto ou o avatar que você escolhe em Meu perfil ficam guardados apenas dentro do próprio aparelho em que você está usando, vinculados somente à sua conta naquele celular.
+          </p>
+        </details>
+
+        <details class="duvida-item">
+          <summary class="duvida-pergunta">
+            <span>O aplicativo e este guia funcionam quando estou sem internet?</span>
+            <span class="duvida-indicador">Ver resposta</span>
+          </summary>
+          <p class="duvida-resposta">
+            Sim para os recursos locais: no aplicativo, você continua abrindo seus ajustes, seu perfil e seu avatar mesmo sem internet (apenas conversar com a assistente pede conexão). Já este guia de leitura aberto ou salvo no aparelho funciona inteiramente sem internet.
+          </p>
+        </details>
+
+        <details class="duvida-item">
+          <summary class="duvida-pergunta">
+            <span>Como encontro e instalo o aplicativo Memora no meu celular?</span>
+            <span class="duvida-indicador">Ver resposta</span>
+          </summary>
+          <p class="duvida-resposta">
+            Este guia é totalmente fechado e não abre páginas externas sozinho por segurança. Para começar a usar o aplicativo no celular, procure o ícone azul da assistente Memora na tela do seu aparelho ou peça a um familiar para instalar com você em um momento calmo.
+          </p>
+        </details>
+      </div>
+
+      <article class="cartao-interno cartao-destaque cartao-familiares" data-leitura-conteudo>
+        <div class="icone-com-legenda">
+          <span class="icone-moldura">
+            <memora-personagem expressao="comemorando" aria-hidden="true"></memora-personagem>
+          </span>
+          <h3>Para familiares e cuidadores que apoiam os primeiros passos</h3>
+        </div>
+        <p class="texto-leitura">
+          Deixe a pessoa segurar o celular e tocar na tela enquanto você acompanha ao lado. Na hora da senha, devolva o celular e deixe a pessoa criar a senha sozinha, sem olhar.
+        </p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="rodape-site">
+    <div class="conteiner rodape-conteudo">
+      <p class="rodape-aviso">
+        <strong>Memora — Guia do Usuário.</strong> Página estática puramente educativa e independente: sem formulários, sem coleta de dados pessoais e sem ligações com contas bancárias ou servidores externos.
+      </p>
+      <a class="botao-topo" href="#topo">↑ Voltar para o início da página</a>
+    </div>
+  </footer>
+
+  <div class="atalho-topo-fixo">
+    <a class="botao-topo" href="#topo" aria-label="Topo — voltar para o início da página"><span aria-hidden="true">↑</span> Topo</a>
+  </div>
+</body>
+</html>

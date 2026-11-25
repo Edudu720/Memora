@@ -10,6 +10,7 @@ import 'package:memora/features/assistente/presentation/controladores/controlado
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 
 import '../../suporte/aceite_em_memoria.dart';
+import '../../suporte/movimento.dart';
 
 /// A espera e a escrita da resposta, na tela de conversa — T132, FR-020b.
 ///
@@ -32,6 +33,7 @@ class _Repositorio implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) {
     this.aoReceberTrecho = aoReceberTrecho;
     resposta = Completer<RespostaDaAssistente>();
@@ -84,6 +86,17 @@ const String _respostaLimpa =
 const String _antiga =
     'Esta é uma resposta antiga da Memora, que estava guardada no aparelho '
     'e precisa aparecer inteira, sem ninguém escrevê-la de novo.';
+
+/// Quantos relógios as Memoras animadas na tela mantêm ligados: um por
+/// `MemoraAnimada` com movimento ativo (na conversa, apenas a da `BarraSuperior`;
+/// os rostos dos balões são estáticos sob `disableAnimations: true`, rev.
+/// `022-avatares-no-chat`). É o único `Ticker` que **pode** sobrar depois da
+/// escrita.
+int relogiosDaMemora(WidgetTester t) => find
+    .byType(MemoraAnimada)
+    .evaluate()
+    .where((Element el) => !MediaQuery.disableAnimationsOf(el))
+    .length;
 
 void main() {
   late _Repositorio repositorio;
@@ -224,6 +237,7 @@ void main() {
     testWidgets('a mensagem final vai aparecendo letra a letra, até o fim', (
       WidgetTester t,
     ) async {
+      liberarMovimento(t);
       await montar(t);
       await perguntar(t);
       await responder(t, _resposta);
@@ -242,8 +256,9 @@ void main() {
       expect(visivel(t), _respostaLimpa);
       expect(
         t.binding.transientCallbackCount,
-        0,
-        reason: 'terminada a escrita, nenhum relógio fica ligado',
+        relogiosDaMemora(t),
+        reason: 'terminada a escrita, nenhum relógio fica ligado: só o da '
+            'Memora animada do topo',
       );
     });
 
@@ -383,7 +398,10 @@ void main() {
       );
 
       expect(visivel(t), _antiga, reason: 'inteira, já no primeiro quadro');
-      expect(t.binding.transientCallbackCount, 0);
+      // Só sobra o relógio da Memora animada do topo, e nenhum de escrita ou
+      // dos balões estáticos.
+      await t.pump(const Duration(seconds: 1));
+      expect(t.binding.transientCallbackCount, relogiosDaMemora(t));
     });
 
     testWidgets('a falha que devolve a pergunta ao campo não faz uma fala '

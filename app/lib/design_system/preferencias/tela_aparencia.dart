@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../componentes/botoes/botao_primario.dart';
 import '../componentes/botoes/botao_secundario.dart';
 import '../componentes/botoes/botao_terciario.dart';
+import '../componentes/cartoes/cartao.dart';
 import '../componentes/ilustracao/ilustracao_memora.dart';
+import '../componentes/ilustracao/memora_personagem.dart';
+import '../componentes/informacao/badge_de_status.dart';
 import '../componentes/navegacao/cabecalho_de_tela.dart';
 import '../componentes/selecao/opcao_selecionavel.dart';
 import '../componentes/texto/texto_memora.dart';
@@ -11,6 +14,7 @@ import '../temas/memora_theme_extension.dart';
 import '../tokens/cores.dart';
 import '../tokens/dimensoes.dart';
 import '../tokens/espacamento.dart';
+import '../tokens/raio.dart';
 import 'controlador_aparencia.dart';
 import 'escopo_aparencia.dart';
 import 'preferencia_aparencia.dart';
@@ -110,7 +114,13 @@ class TelaAparencia extends StatelessWidget {
   Widget build(BuildContext context) {
     final ControladorAparencia controlador = EscopoAparencia.de(context);
     final PreferenciaAparencia atual = controlador.atual;
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
+    final double margem = compacto
+        ? MemoraEspacamento.lg
+        : MemoraEspacamento.xl;
 
     return Scaffold(
       backgroundColor: cores.fundo,
@@ -127,10 +137,10 @@ class TelaAparencia extends StatelessWidget {
                 ),
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                  MemoraEspacamento.xl,
-                  aoVoltar != null ? 0 : MemoraEspacamento.xl,
-                  MemoraEspacamento.xl,
-                  MemoraEspacamento.xl,
+                  margem,
+                  aoVoltar != null ? 0 : margem,
+                  margem,
+                  margem,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,16 +150,15 @@ class TelaAparencia extends StatelessWidget {
                       const SizedBox(height: MemoraEspacamento.sm),
                     ],
                     const TextoMemora.apoio(
-                      'Escolha e veja como fica. Só salva quando você '
-                      'confirmar 😊',
+                      'Escolha e veja como fica. Só salva quando você confirmar.',
                     ),
-                    ..._opcoes(controlador, atual),
+                    ..._opcoes(context, controlador, atual),
                     const SizedBox(height: MemoraEspacamento.xl),
                     if (controlador.temPreVisualizacao) ...<Widget>[
                       BotaoPrimario(
                         key: chaveSalvar,
                         rotulo: 'Salvar deste jeito',
-                        icone: Icons.check,
+                        icone: Icons.check_rounded,
                         aoTocar: controlador.confirmar,
                       ),
                       const SizedBox(height: MemoraEspacamento.md),
@@ -181,11 +190,16 @@ class TelaAparencia extends StatelessWidget {
   }
 
   List<Widget> _opcoes(
+    BuildContext context,
     ControladorAparencia controlador,
     PreferenciaAparencia atual,
   ) {
     return switch (grupo) {
-      GrupoDeAjusteVisual.aparencia => _opcoesDeAparencia(controlador, atual),
+      GrupoDeAjusteVisual.aparencia => _opcoesDeAparencia(
+        context,
+        controlador,
+        atual,
+      ),
       GrupoDeAjusteVisual.acessibilidade => _opcoesDeAcessibilidade(
         controlador,
         atual,
@@ -201,63 +215,210 @@ class TelaAparencia extends StatelessWidget {
     EscolhaDeTema.escuro,
   ];
 
-  static const List<({String id, String rotulo, String descricao})> _paletasDisponiveis =
-      <({String id, String rotulo, String descricao})>[
+  static const List<({String id, String rotulo, String descricao})>
+  _paletasDisponiveis = <({String id, String rotulo, String descricao})>[
     (id: 'azul', rotulo: 'Azul', descricao: 'A cor original do Memora'),
     (id: 'verde', rotulo: 'Verde', descricao: 'Tom suave de folha'),
     (id: 'roxo', rotulo: 'Roxo', descricao: 'Tom suave de violeta'),
-    (id: 'laranja-terra', rotulo: 'Laranja-terra', descricao: 'Tom acolhedor de cerâmica'),
+    (
+      id: 'laranja-terra',
+      rotulo: 'Laranja-terra',
+      descricao: 'Tom acolhedor de cerâmica',
+    ),
     (id: 'rosa', rotulo: 'Rosa', descricao: 'Tom suave de flor'),
     (id: 'grafite', rotulo: 'Grafite', descricao: 'Tom neutro e sóbrio'),
   ];
 
+  String _nomeDaPaleta(String id) {
+    for (final ({String id, String rotulo, String descricao}) p
+        in _paletasDisponiveis) {
+      if (p.id == id) return p.rotulo;
+    }
+    return id;
+  }
+
   List<Widget> _opcoesDeAparencia(
+    BuildContext context,
     ControladorAparencia controlador,
     PreferenciaAparencia atual,
   ) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool ocultarVisuais = escala >= MemoraDimensoes.escalaTextoAlta;
+
     return <Widget>[
-      const SizedBox(height: MemoraEspacamento.xxl),
-      const TextoMemora.tituloSecao('Cores'),
-      const SizedBox(height: MemoraEspacamento.md),
-      if (atual.tema == EscolhaDeTema.altoContraste) ...<Widget>[
-        const TextoMemora.apoio(
-          'Você está com "Mais contraste" ligado. Se escolher Claro ou '
-          'Escuro, ele desliga.',
+      const SizedBox(height: MemoraEspacamento.lg),
+      // Prévia interativa dos 3 temas x 6 paletas (sem toque, FR-012).
+      Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Wrap(
+              spacing: MemoraEspacamento.sm,
+              runSpacing: MemoraEspacamento.xs,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                const TextoMemora.tituloSecao('Como fica na tela'),
+                BadgeDeStatus(
+                  rotulo: ehAltoContraste
+                      ? EscolhaDeTema.altoContraste.rotulo
+                      : '${atual.tema.rotulo} • ${_nomeDaPaleta(atual.paleta)}',
+                  tom: TomBadgeStatus.informativo,
+                ),
+              ],
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            Container(
+              padding: const EdgeInsets.all(MemoraEspacamento.md),
+              decoration: BoxDecoration(
+                color: cores.fundo,
+                borderRadius: BorderRadius.circular(MemoraRaio.cartaoMedio),
+                border: Border.all(
+                  color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+                  width: ehAltoContraste
+                      ? MemoraDimensoes.bordaEnfase
+                      : MemoraDimensoes.espessuraBordaSutil,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(MemoraEspacamento.md),
+                    decoration: BoxDecoration(
+                      color: cores.gradienteHeroiInicio,
+                      gradient: ehAltoContraste
+                          ? null
+                          : LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: <Color>[
+                                cores.gradienteHeroiInicio,
+                                cores.gradienteHeroiFim,
+                              ],
+                            ),
+                      borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+                      border: ehAltoContraste
+                          ? Border.all(
+                              color: cores.borda,
+                            )
+                          : null,
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        if (!ocultarVisuais) ...<Widget>[
+                          const MemoraPersonagem(
+                            expressao: ExpressaoDaMemora.dica,
+                            tamanho: MemoraDimensoes.alvoMinimo,
+                          ),
+                          const SizedBox(width: MemoraEspacamento.sm),
+                        ],
+                        Expanded(
+                          child: TextoMemora(
+                            'Exemplo de painel',
+                            estilo: EstiloTexto.corpoForte,
+                            cor: cores.sobreGradienteHeroi,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: MemoraEspacamento.sm),
+                  Wrap(
+                    spacing: MemoraEspacamento.sm,
+                    runSpacing: MemoraEspacamento.xs,
+                    children: <Widget>[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: MemoraEspacamento.md,
+                          vertical: MemoraEspacamento.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: cores.primaria,
+                          borderRadius: BorderRadius.circular(
+                            MemoraRaio.pilula,
+                          ),
+                        ),
+                        child: TextoMemora(
+                          'Cor principal',
+                          estilo: EstiloTexto.apoio,
+                          cor: cores.sobrePrimaria,
+                        ),
+                      ),
+                      const BadgeDeStatus(
+                        rotulo: 'Saudável',
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: MemoraEspacamento.md),
-      ],
-      for (final EscolhaDeTema tema in _temasComuns) ...<Widget>[
-        OpcaoSelecionavel(
-          rotulo: tema.rotulo,
-          descricao: tema.descricao,
-          selecionada: atual.tema == tema,
-          aoSelecionar: () => controlador.preVisualizarTema(tema),
-        ),
-        const SizedBox(height: MemoraEspacamento.md),
-      ],
-      const SizedBox(height: MemoraEspacamento.xl),
-      const TextoMemora.tituloSecao('Cor de destaque'),
-      const SizedBox(height: MemoraEspacamento.sm),
-      const TextoMemora.apoio(
-        'Muda a cor dos botões principais e detalhes da tela.',
       ),
-      const SizedBox(height: MemoraEspacamento.md),
-      if (atual.tema == EscolhaDeTema.altoContraste) ...<Widget>[
-        const TextoMemora.apoio(
-          'No tema "Mais contraste", a cor de destaque fica desativada para manter o contraste máximo.',
+      const SizedBox(height: MemoraEspacamento.xl),
+      Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const TextoMemora.tituloSecao('Cores'),
+            const SizedBox(height: MemoraEspacamento.md),
+            if (atual.tema == EscolhaDeTema.altoContraste) ...<Widget>[
+              const TextoMemora.apoio(
+                'Você está com "Mais contraste" ligado. Se escolher Claro ou '
+                'Escuro, ele desliga.',
+              ),
+              const SizedBox(height: MemoraEspacamento.md),
+            ],
+            for (int i = 0; i < _temasComuns.length; i++) ...<Widget>[
+              OpcaoSelecionavel(
+                rotulo: _temasComuns[i].rotulo,
+                descricao: _temasComuns[i].descricao,
+                selecionada: atual.tema == _temasComuns[i],
+                aoSelecionar: () =>
+                    controlador.preVisualizarTema(_temasComuns[i]),
+              ),
+              if (i < _temasComuns.length - 1)
+                const SizedBox(height: MemoraEspacamento.md),
+            ],
+          ],
         ),
-        const SizedBox(height: MemoraEspacamento.md),
-      ] else
-        for (final ({String id, String rotulo, String descricao}) p in _paletasDisponiveis) ...<Widget>[
-          OpcaoSelecionavel(
-            key: Key('aparencia.paleta.${p.id}'),
-            rotulo: p.rotulo,
-            descricao: p.descricao,
-            selecionada: atual.paleta == p.id,
-            aoSelecionar: () => controlador.preVisualizarPaleta(p.id),
-          ),
-          const SizedBox(height: MemoraEspacamento.md),
-        ],
+      ),
+      const SizedBox(height: MemoraEspacamento.xl),
+      Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const TextoMemora.tituloSecao('Cor de destaque'),
+            const SizedBox(height: MemoraEspacamento.sm),
+            const TextoMemora.apoio(
+              'Muda a cor dos botões principais e detalhes da tela.',
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            if (atual.tema == EscolhaDeTema.altoContraste)
+              const TextoMemora.apoio(
+                'No tema "Mais contraste", a cor de destaque fica desativada para manter o contraste máximo.',
+              )
+            else
+              for (int i = 0; i < _paletasDisponiveis.length; i++) ...<Widget>[
+                OpcaoSelecionavel(
+                  key: Key('aparencia.paleta.${_paletasDisponiveis[i].id}'),
+                  rotulo: _paletasDisponiveis[i].rotulo,
+                  descricao: _paletasDisponiveis[i].descricao,
+                  selecionada: atual.paleta == _paletasDisponiveis[i].id,
+                  aoSelecionar: () => controlador.preVisualizarPaleta(
+                    _paletasDisponiveis[i].id,
+                  ),
+                ),
+                if (i < _paletasDisponiveis.length - 1)
+                  const SizedBox(height: MemoraEspacamento.md),
+              ],
+          ],
+        ),
+      ),
     ];
   }
 
@@ -268,75 +429,97 @@ class TelaAparencia extends StatelessWidget {
     final bool contrasteLigado = atual.tema == EscolhaDeTema.altoContraste;
 
     return <Widget>[
-      const SizedBox(height: MemoraEspacamento.xxl),
-      const TextoMemora.tituloSecao('Tamanho da letra'),
-      const SizedBox(height: MemoraEspacamento.sm),
-      const TextoMemora.apoio('Se as letras parecem pequenas, aumente aqui.'),
-      const SizedBox(height: MemoraEspacamento.md),
-      for (final TamanhoDeLetra tamanho in TamanhoDeLetra.values) ...<Widget>[
-        OpcaoSelecionavel(
-          rotulo: tamanho.rotulo,
-          selecionada:
-              TamanhoDeLetra.maisProximoDe(atual.escalaTexto) == tamanho,
-          aoSelecionar: () =>
-              controlador.preVisualizarEscalaTexto(tamanho.fator),
+      const SizedBox(height: MemoraEspacamento.lg),
+      Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const TextoMemora.tituloSecao('Tamanho da letra'),
+            const SizedBox(height: MemoraEspacamento.sm),
+            const TextoMemora.apoio(
+              'Se as letras parecem pequenas, aumente aqui.',
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            for (int i = 0; i < TamanhoDeLetra.values.length; i++) ...<Widget>[
+              OpcaoSelecionavel(
+                rotulo: TamanhoDeLetra.values[i].rotulo,
+                selecionada:
+                    TamanhoDeLetra.maisProximoDe(atual.escalaTexto) ==
+                    TamanhoDeLetra.values[i],
+                aoSelecionar: () => controlador.preVisualizarEscalaTexto(
+                  TamanhoDeLetra.values[i].fator,
+                ),
+              ),
+              if (i < TamanhoDeLetra.values.length - 1)
+                const SizedBox(height: MemoraEspacamento.md),
+            ],
+          ],
         ),
-        const SizedBox(height: MemoraEspacamento.md),
-      ],
-
+      ),
       const SizedBox(height: MemoraEspacamento.xl),
-      const TextoMemora.tituloSecao('Movimento'),
-      const SizedBox(height: MemoraEspacamento.sm),
-      const TextoMemora.apoio(
-        'Se o que se mexe na tela cansa ou distrai você, o Memora pode se '
-        'mexer menos.',
+      Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const TextoMemora.tituloSecao('Movimento'),
+            const SizedBox(height: MemoraEspacamento.sm),
+            const TextoMemora.apoio(
+              'Se o que se mexe na tela cansa ou distrai você, o Memora pode se '
+              'mexer menos.',
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            OpcaoSelecionavel(
+              rotulo: 'Igual ao meu celular',
+              descricao: 'O Memora segue o que o seu celular já tem escolhido',
+              selecionada: !atual.reduzirMovimento,
+              aoSelecionar: () =>
+                  controlador.preVisualizarReducaoDeMovimento(reduzir: false),
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            OpcaoSelecionavel(
+              rotulo: 'Menos movimento',
+              descricao: 'As coisas aparecem e mudam na hora, sem deslizar',
+              selecionada: atual.reduzirMovimento,
+              aoSelecionar: () =>
+                  controlador.preVisualizarReducaoDeMovimento(reduzir: true),
+            ),
+          ],
+        ),
       ),
-      const SizedBox(height: MemoraEspacamento.md),
-      OpcaoSelecionavel(
-        rotulo: 'Igual ao meu celular',
-        descricao: 'O Memora segue o que o seu celular já tem escolhido',
-        selecionada: !atual.reduzirMovimento,
-        aoSelecionar: () =>
-            controlador.preVisualizarReducaoDeMovimento(reduzir: false),
-      ),
-      const SizedBox(height: MemoraEspacamento.md),
-      OpcaoSelecionavel(
-        rotulo: 'Menos movimento',
-        descricao: 'As coisas aparecem e mudam na hora, sem deslizar',
-        selecionada: atual.reduzirMovimento,
-        aoSelecionar: () =>
-            controlador.preVisualizarReducaoDeMovimento(reduzir: true),
-      ),
-      const SizedBox(height: MemoraEspacamento.md),
-
       const SizedBox(height: MemoraEspacamento.xl),
-      const TextoMemora.tituloSecao('Contraste'),
-      const SizedBox(height: MemoraEspacamento.sm),
-      const TextoMemora.apoio(
-        'Se é difícil separar a letra do fundo, deixe as cores mais fortes.',
+      Cartao(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            const TextoMemora.tituloSecao('Contraste'),
+            const SizedBox(height: MemoraEspacamento.sm),
+            const TextoMemora.apoio(
+              'Se é difícil separar a letra do fundo, deixe as cores mais fortes.',
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            OpcaoSelecionavel(
+              rotulo: 'Cores do jeito normal',
+              selecionada: !contrasteLigado,
+              // Desligar volta a acompanhar o celular. Lembrar qual tema havia antes
+              // pediria guardar mais um estado, para um caso em que a pessoa pode
+              // escolher o tema de novo em Aparência.
+              aoSelecionar: () {
+                if (contrasteLigado) {
+                  controlador.preVisualizarTema(EscolhaDeTema.seguirSistema);
+                }
+              },
+            ),
+            const SizedBox(height: MemoraEspacamento.md),
+            OpcaoSelecionavel(
+              rotulo: EscolhaDeTema.altoContraste.rotulo,
+              descricao: EscolhaDeTema.altoContraste.descricao,
+              selecionada: contrasteLigado,
+              aoSelecionar: () =>
+                  controlador.preVisualizarTema(EscolhaDeTema.altoContraste),
+            ),
+          ],
+        ),
       ),
-      const SizedBox(height: MemoraEspacamento.md),
-      OpcaoSelecionavel(
-        rotulo: 'Cores do jeito normal',
-        selecionada: !contrasteLigado,
-        // Desligar volta a acompanhar o celular. Lembrar qual tema havia antes
-        // pediria guardar mais um estado, para um caso em que a pessoa pode
-        // escolher o tema de novo em Aparência.
-        aoSelecionar: () {
-          if (contrasteLigado) {
-            controlador.preVisualizarTema(EscolhaDeTema.seguirSistema);
-          }
-        },
-      ),
-      const SizedBox(height: MemoraEspacamento.md),
-      OpcaoSelecionavel(
-        rotulo: EscolhaDeTema.altoContraste.rotulo,
-        descricao: EscolhaDeTema.altoContraste.descricao,
-        selecionada: contrasteLigado,
-        aoSelecionar: () =>
-            controlador.preVisualizarTema(EscolhaDeTema.altoContraste),
-      ),
-      const SizedBox(height: MemoraEspacamento.md),
     ];
   }
 }

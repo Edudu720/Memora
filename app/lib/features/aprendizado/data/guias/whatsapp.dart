@@ -5,8 +5,8 @@ import '../../domain/guia.dart';
 final Guia guiaWhatsapp = Guia(
   chave: 'whatsapp',
   titulo: TextosGuias.tituloWhatsapp,
-  capturadoEm: DateTime(2026, 10),
-  versaoCapturada: '2.24.19',
+  capturadoEm: DateTime(2026, 11),
+  versaoCapturada: '2026.11',
   passos: const <Passo>[
     Passo(
       captura: CapturaDoGuia.whatsapp1,
@@ -31,6 +31,12 @@ final Guia guiaWhatsapp = Guia(
       destaque: RegiaoRelativa(x: 0.82, y: 0.9, largura: 0.15, altura: 0.08),
       texto: TextosGuias.whatsappPasso4,
       descricaoDaCaptura: TextosGuias.whatsappCaptura4,
+    ),
+    Passo(
+      captura: CapturaDoGuia.whatsapp5,
+      destaque: RegiaoRelativa(x: 0.04, y: 0.88, largura: 0.92, altura: 0.08),
+      texto: TextosGuias.whatsappPasso5,
+      descricaoDaCaptura: TextosGuias.whatsappCaptura5,
     ),
   ],
 );

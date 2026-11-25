@@ -4,69 +4,31 @@ import '../../../../design_system/design_system.dart';
 import '../../../../l10n/textos_casca.dart';
 import '../../domain/hub.dart';
 
-/// Todas as partes do Memora, numa tela (T038, FR-016 da feature 004).
+/// Hub completo do Memora: lista todas as áreas disponíveis (Feature 007).
 ///
-/// ## A tela que o Início abre
-///
-/// O Hub não é mais a raiz de nada: o Início cumprimenta e leva ao que a
-/// pessoa mais faz, e este é o "ver tudo". Por isso ele tem **"Voltar"** — a
-/// raiz de um destino é que não tem —, no mesmo canto de todas as outras
-/// telas (FR-001). O "Sair" que morava aqui foi para Ajustes → Conta
-/// (FR-019): quem queria o Hub para escolher uma parte do aplicativo encontrava
-/// ao lado dela a porta de saída, e um toque errado custava a sessão.
-///
-/// ## Ela mostra o que recebe, e só
-///
-/// A FR-003 da 003 e a FR-018 desta feature exigem que porta sem destino não
-/// apareça. A tela não decide isso: ela exibe a lista que lhe passam, e
-/// [PortaDoHub] torna o destino obrigatório. Quem sabe o que existe é quem
-/// monta o fluxo.
-///
-/// ## A porta principal sempre à vista, e o aviso de que há mais (FR-017)
-///
-/// A FR-017 foi reescrita em 2026-10-02. Em qualquer aparelho e em qualquer
-/// ampliação a porta principal (conversar com a Memora) aparece sem rolar; no
-/// aparelho mais comum (360×800), em 100% e 150%, o Hub inteiro cabe. Fora
-/// disso a lista rola — e **precisa dizer que rola**: uma porta cortada na
-/// dobra pode ser lida como "a tela acaba aqui", e quem nunca rolou uma
-/// lista não procura o que não sabe que existe.
-///
-/// Por isso, quando há portas abaixo da dobra, uma faixa com seta e a frase
-/// "Há mais abaixo" aparece no pé da lista, sobre um esmaecer, e some quando a
-/// pessoa chega ao fim. Ela é **informação**: não tem pílula, não tem
-/// preenchimento e não recebe toque (FR-012 da 002). O leitor de tela a lê
-/// com a frase inteira, gesto incluído ([TextosCasca.hubHaMaisLeitor]).
-///
-/// É uma faixa **sobreposta** (um `Stack`), e não uma linha a mais na coluna,
-/// de propósito: tirar altura da lista para mostrá-la mudaria o que cabe, e
-/// ela poderia ligar e desligar a si mesma no limite.
-///
-/// ## Porta é ação
-///
-/// Cada porta é um `CartaoDePorta`: pílula preenchida com desenho, nome e uma
-/// linha do que há do outro lado. Cartão comum, o `Cartao`, é informação e
-/// deliberadamente não aceita toque (FR-012 da 002).
+/// Destaca a ação principal ([PortaDoHub.principal]) com [CartaoHeroi] e exibe
+/// as demais portas em [CartaoDePorta] modernizados, mantendo o indicador de
+/// rolagem ([chaveHaMais]) quando o conteúdo excede a área visível.
 class TelaHub extends StatefulWidget {
-  /// Chave da lista de portas, para os testes.
+  /// Lista rolável das portas do Hub.
   static const Key chaveLista = Key('hub.lista');
 
-  /// Chave do estado vazio, para os testes.
+  /// Estado vazio exibido quando nenhuma porta foi construída.
   static const Key chaveVazio = Key('hub.vazio');
 
-  /// Chave da faixa "há mais abaixo", para os testes. Só existe na árvore
-  /// quando há portas abaixo da dobra.
+  /// Faixa indicadora de que existem mais opções abaixo da dobra.
   static const Key chaveHaMais = Key('hub.ha_mais');
 
-  /// Chave de uma porta, pelo rótulo.
+  /// Identificador estável de cada porta pelo rótulo.
   static Key chaveDaPorta(String rotulo) => Key('hub.porta.$rotulo');
 
-  /// As portas construídas. Ver a nota sobre a FR-003.
+  /// Portas disponíveis para a pessoa neste momento.
   final List<PortaDoHub> portas;
 
   /// Volta ao Início.
   final VoidCallback aoVoltar;
 
-  /// Cria o Hub.
+  /// Cria a tela do Hub.
   const TelaHub({required this.portas, required this.aoVoltar, super.key});
 
   @override
@@ -74,137 +36,156 @@ class TelaHub extends StatefulWidget {
 }
 
 class _TelaHubState extends State<TelaHub> {
-  /// O que sobra para rolar abaixo disto não conta como "há mais" (meio dp).
-  static const double _folgaMinima = 0.5;
+  final ScrollController _rolagem = ScrollController();
+  bool _haMaisAbaixo = false;
 
-  /// Há o que rolar para baixo. Falso até a primeira medição: o Hub nasce sem
-  /// a faixa, e ela aparece no quadro seguinte se for o caso.
-  bool _haMais = false;
+  @override
+  void initState() {
+    super.initState();
+    _rolagem.addListener(_atualizarIndicadorDeRolagem);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _atualizarIndicadorDeRolagem(),
+    );
+  }
 
-  /// Lê a posição da lista, tanto quando o conteúdo muda de tamanho (a janela
-  /// mudou, a ampliação mudou) quanto quando a pessoa rola.
-  bool _aoMedir(ScrollMetrics medidas) {
-    // Tolerância de ponto flutuante: ao fim de uma rolagem a posição pode
-    // ficar a 1e-13 do limite, e `> 0` deixaria a faixa ligada para sempre; e
-    // meio pixel de "mais" não é uma porta.
-    final bool haMais = medidas.extentAfter > _folgaMinima;
-    if (haMais != _haMais && mounted) {
-      setState(() => _haMais = haMais);
+  @override
+  void didUpdateWidget(covariant TelaHub oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.portas.length != widget.portas.length) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _atualizarIndicadorDeRolagem(),
+      );
     }
-    return false;
+  }
+
+  @override
+  void dispose() {
+    _rolagem
+      ..removeListener(_atualizarIndicadorDeRolagem)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _atualizarIndicadorDeRolagem() {
+    if (!mounted || !_rolagem.hasClients) return;
+    final ScrollPosition pos = _rolagem.position;
+    final bool podeRolarParaBaixo = pos.maxScrollExtent - pos.pixels > 0.1;
+    if (podeRolarParaBaixo != _haMaisAbaixo) {
+      setState(() => _haMaisAbaixo = podeRolarParaBaixo);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    final List<PortaDoHub> portas = widget.portas;
-    final double afastamento = CartaoDePorta.afastamentoEntrePortas(context);
 
     return Scaffold(
       backgroundColor: cores.fundo,
-      body: Stack(
-        children: <Widget>[
-          NotificationListener<ScrollMetricsNotification>(
-            onNotification: (ScrollMetricsNotification n) =>
-                _aoMedir(n.metrics),
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (ScrollNotification n) => _aoMedir(n.metrics),
-              child: SingleChildScrollView(
-                key: TelaHub.chaveLista,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    CabecalhoDeTela(
-                      titulo: TextosCasca.tituloHub,
-                      aoVoltar: widget.aoVoltar,
-                    ),
-                    if (portas.isEmpty)
-                      const EstadoVazio(
-                        key: TelaHub.chaveVazio,
-                        titulo: TextosCasca.hubVazioTitulo,
-                        explicacao: TextosCasca.hubVazioExplicacao,
-                      )
-                    else
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          MemoraEspacamento.lg,
-                          0,
-                          MemoraEspacamento.lg,
-                          MemoraEspacamento.lg,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            for (final PortaDoHub porta in portas) ...<Widget>[
-                              CartaoDePorta(
-                                key: TelaHub.chaveDaPorta(porta.rotulo),
-                                nome: porta.rotulo,
-                                explicacao: porta.descricao,
-                                ilustracao: porta.ilustracao,
-                                aoAbrir: porta.aoAbrir,
-                                principal: porta.principal,
-                              ),
-                              if (porta != portas.last)
-                                SizedBox(height: afastamento),
-                            ],
-                          ],
-                        ),
-                      ),
-                  ],
+      appBar: BarraSuperior(
+        titulo: TextosCasca.tituloHub,
+        aoVoltar: widget.aoVoltar,
+      ),
+      body: SafeArea(
+        top: false,
+        child: widget.portas.isEmpty
+            ? const Padding(
+                padding: EdgeInsets.all(MemoraEspacamento.lg),
+                child: EstadoVazio(
+                  key: TelaHub.chaveVazio,
+                  titulo: TextosCasca.hubVazioTitulo,
+                  explicacao: TextosCasca.hubVazioExplicacao,
                 ),
+              )
+            : Stack(
+                children: <Widget>[
+                  NotificationListener<ScrollMetricsNotification>(
+                    onNotification: (ScrollMetricsNotification _) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => _atualizarIndicadorDeRolagem(),
+                      );
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      key: TelaHub.chaveLista,
+                      controller: _rolagem,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: MemoraEspacamento.md,
+                        vertical: MemoraEspacamento.sm,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _construirPortas(),
+                      ),
+                    ),
+                  ),
+                  if (_haMaisAbaixo)
+                    const Align(
+                      alignment: Alignment.bottomCenter,
+                      child: _FaixaHaMais(key: TelaHub.chaveHaMais),
+                    ),
+                ],
               ),
-            ),
-          ),
-          if (_haMais)
-            // `Align` e não `Positioned`: o pé da lista, na largura toda.
-            const Align(
-              alignment: Alignment.bottomCenter,
-              child: SizedBox(
-                width: double.infinity,
-                child: _FaixaHaMais(key: TelaHub.chaveHaMais),
-              ),
-            ),
-        ],
       ),
     );
   }
+
+  List<Widget> _construirPortas() {
+    final List<Widget> widgets = <Widget>[];
+    bool principalUsada = false;
+
+    for (int i = 0; i < widget.portas.length; i++) {
+      if (i > 0) {
+        widgets.add(const SizedBox(height: MemoraEspacamento.sm));
+      }
+      final PortaDoHub porta = widget.portas[i];
+      if (porta.principal && !principalUsada) {
+        principalUsada = true;
+        widgets.add(
+          CartaoHeroi(
+            key: TelaHub.chaveDaPorta(porta.rotulo),
+            titulo: porta.rotulo,
+            subtitulo: porta.descricao,
+            rotuloAcao: TextosCasca.acaoComecarConversa,
+            icone: Icons.chat_bubble_outline_rounded,
+            aoTocar: porta.aoAbrir,
+          ),
+        );
+      } else {
+        widgets.add(
+          CartaoDePorta(
+            key: TelaHub.chaveDaPorta(porta.rotulo),
+            nome: porta.rotulo,
+            explicacao: porta.descricao,
+            ilustracao: porta.ilustracao,
+            aoAbrir: porta.aoAbrir,
+          ),
+        );
+      }
+    }
+    return widgets;
+  }
 }
 
-/// A faixa "Há mais abaixo": seta e frase sobre um esmaecer do fundo.
-///
-/// Não recebe toque — `IgnorePointer` deixa o dedo passar para a lista por
-/// baixo, que é onde a pessoa vai deslizar.
-///
-/// ## Só a seta, quando a ampliação é grande
-///
-/// A partir de [CartaoDePorta.ampliacaoQueTiraAIlustracao] a faixa perde a
-/// frase e o esmaecer, e fica só a seta. Num 360×640 a 200% a porta principal
-/// termina 27 dp acima da barra inferior: uma faixa de 86 dp (esmaecer, seta e
-/// uma linha de 36 sp ampliados) cobriria o pé dela, e a regra de que a
-/// principal aparece **inteira** sem rolar perderia para a regra de avisar que
-/// há mais. A seta cabe nos 27; a frase, o leitor de tela continua dizendo.
 class _FaixaHaMais extends StatelessWidget {
   const _FaixaHaMais({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-    final bool soASeta =
-        MediaQuery.textScalerOf(context).scale(1) >=
-        CartaoDePorta.ampliacaoQueTiraAIlustracao;
-    if (soASeta) {
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+
+    if (escala >= MemoraDimensoes.escalaTextoAlta) {
       return IgnorePointer(
         child: Semantics(
           container: true,
           label: TextosCasca.hubHaMaisLeitor,
           child: ExcludeSemantics(
-            // `Row` e não `Center`: o `Center` esticaria a faixa até a altura
-            // toda do `Align` que a segura.
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(
-                  Icons.keyboard_arrow_down,
+                  Icons.keyboard_arrow_down_rounded,
                   size: MemoraDimensoes.iconePadrao,
                   color: cores.primaria,
                 ),
@@ -214,6 +195,7 @@ class _FaixaHaMais extends StatelessWidget {
         ),
       );
     }
+
     return IgnorePointer(
       child: Semantics(
         container: true,
@@ -224,9 +206,6 @@ class _FaixaHaMais extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                // Esmaecer do próprio fundo, e não de `Colors.transparent`: a
-                // interpolação entre o preto transparente e uma cor opaca
-                // passa por um cinza sujo.
                 colors: <Color>[cores.fundo.withValues(alpha: 0), cores.fundo],
                 stops: const <double>[0, 0.5],
               ),
@@ -242,7 +221,7 @@ class _FaixaHaMais extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Icon(
-                    Icons.keyboard_arrow_down,
+                    Icons.keyboard_arrow_down_rounded,
                     size: MemoraDimensoes.iconePadrao,
                     color: cores.primaria,
                   ),

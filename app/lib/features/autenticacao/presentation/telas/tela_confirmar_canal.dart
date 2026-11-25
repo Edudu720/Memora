@@ -154,26 +154,21 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               // Cartão acolhedor com a assistente Memora
-              Container(
+              Cartao(
                 padding: const EdgeInsets.all(MemoraEspacamento.md),
-                decoration: BoxDecoration(
-                  color: cores.superficie,
-                  borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-                  border: Border.all(color: cores.borda),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: MemoraElevacao.sombra,
-                      blurRadius: MemoraElevacao.cartao,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
                 child: Row(
                   children: <Widget>[
-                    const MemoraPersonagem(
-                      expressao: ExpressaoDaMemora.falando,
-                      tamanho: MemoraDimensoes.alvoDecisao,
-                    ),
+                    // Uma Memora por tela (FR-006): enquanto a espera tem a
+                    // sua, esta cede o lugar (o espaço fica).
+                    if (_enviando)
+                      const SizedBox.square(
+                        dimension: MemoraDimensoes.alvoDecisao,
+                      )
+                    else
+                      const MemoraPersonagem(
+                        expressao: ExpressaoDaMemora.falando,
+                        tamanho: MemoraDimensoes.alvoDecisao,
+                      ),
                     const SizedBox(width: MemoraEspacamento.md),
                     Expanded(
                       child: TextoMemora(
@@ -221,7 +216,7 @@ class _TelaConfirmarCanalState extends State<TelaConfirmarCanal> {
                 BotaoPrimario(
                   key: TelaConfirmarCanal.chaveConfirmar,
                   rotulo: TextosAutenticacao.botaoConfirmarCodigo,
-                  icone: Icons.check,
+                  icone: Icons.check_rounded,
                   aoTocar: _podeConfirmar ? _confirmar : null,
                 ),
               const SizedBox(height: MemoraEspacamento.md),

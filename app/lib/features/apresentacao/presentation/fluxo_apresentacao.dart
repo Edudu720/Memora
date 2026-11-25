@@ -156,7 +156,12 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
+    final bool compacto = escala >= MemoraDimensoes.escalaColapsoGrade;
+    final bool ocultarVisuais = escala >= MemoraDimensoes.escalaTextoAlta;
     const int total = FluxoApresentacao.totalDeTelas;
 
     return PopScope(
@@ -166,12 +171,44 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
       },
       child: Scaffold(
         backgroundColor: cores.fundo,
+        bottomNavigationBar: DecoratedBox(
+          decoration: BoxDecoration(
+            color: cores.superficieBarra,
+            border: Border(
+              top: BorderSide(
+                color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+                width: ehAltoContraste
+                    ? MemoraDimensoes.bordaEnfase
+                    : MemoraDimensoes.espessuraBordaSutil,
+              ),
+            ),
+            boxShadow: MemoraElevacao.listaSombrasBarra(cores),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: MemoraEspacamento.lg,
+                vertical: compacto ? MemoraEspacamento.sm : MemoraEspacamento.md,
+              ),
+              child: BotaoPrimario(
+                key: FluxoApresentacao.chaveContinuar,
+                rotulo: TextosApresentacao.continuar,
+                icone: Icons.arrow_forward_rounded,
+                aoTocar: _continuar,
+              ),
+            ),
+          ),
+        ),
         body: SafeArea(
+          bottom: false,
           child: SingleChildScrollView(
             // Uma tela nova começa no topo: sem a chave, a rolagem da anterior
             // seguia valendo e a pessoa chegava no meio da seguinte.
             key: FluxoApresentacao.chaveDaTela(_indice),
-            padding: const EdgeInsets.all(MemoraEspacamento.xl),
+            padding: EdgeInsets.all(
+              compacto ? MemoraEspacamento.lg : MemoraEspacamento.xl,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
@@ -198,18 +235,41 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
                     ),
                   ],
                 ),
+                const SizedBox(height: MemoraEspacamento.sm),
+                // Indicadores editoriais de página em pílula.
+                Row(
+                  children: <Widget>[
+                    for (int i = 0; i < total; i++) ...<Widget>[
+                      Expanded(
+                        flex: i == _indice ? 2 : 1,
+                        child: Container(
+                          height: MemoraDimensoes.alturaIndicadorDePasso,
+                          decoration: BoxDecoration(
+                            color: i <= _indice
+                                ? cores.primaria
+                                : cores.destaque,
+                            borderRadius: BorderRadius.circular(
+                              MemoraRaio.pilula,
+                            ),
+                            border: ehAltoContraste && i > _indice
+                                ? Border.all(
+                                    color: cores.borda,
+                                  )
+                                : null,
+                          ),
+                        ),
+                      ),
+                      if (i < total - 1)
+                        const SizedBox(width: MemoraEspacamento.xs),
+                    ],
+                  ],
+                ),
                 const SizedBox(height: MemoraEspacamento.lg),
                 ...switch (_indice) {
-                  0 => _telaOla(),
+                  0 => _telaOla(ocultarVisuais),
                   1 => _telaConversa(),
-                  _ => _telaExemplo(),
+                  _ => _telaExemplo(ocultarVisuais),
                 },
-                const SizedBox(height: MemoraEspacamento.xl),
-                BotaoPrimario(
-                  key: FluxoApresentacao.chaveContinuar,
-                  rotulo: TextosApresentacao.continuar,
-                  aoTocar: _continuar,
-                ),
                 const SizedBox(height: MemoraEspacamento.lg),
               ],
             ),
@@ -219,10 +279,23 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
     );
   }
 
-  /// Tela 1: quem ela é e o que ninguém do Memora faz (FR-036a).
-  List<Widget> _telaOla() {
+  /// Tela 1: quem ela é, que só fala dentro do aplicativo (FR-035) e o que
+  /// ninguém do Memora faz (FR-036a).
+  List<Widget> _telaOla(bool ocultarVisuais) {
     return <Widget>[
-      TextoMemora.tituloTela(TextosApresentacao.tituloOla),
+      Row(
+        children: <Widget>[
+          Expanded(
+            child: TextoMemora.tituloTela(TextosApresentacao.tituloOla),
+          ),
+          if (!ocultarVisuais) ...<Widget>[
+            const SizedBox(width: MemoraEspacamento.md),
+            const MemoraPersonagem(
+              tamanho: MemoraDimensoes.alvoDecisao,
+            ),
+          ],
+        ],
+      ),
       const SizedBox(height: MemoraEspacamento.lg),
       BalaoDeFala(
         autor: AutorDoBalao.memora,
@@ -269,9 +342,22 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
   }
 
   /// Tela 3: a conversa por dentro, só de demonstração.
-  List<Widget> _telaExemplo() {
+  List<Widget> _telaExemplo(bool ocultarVisuais) {
     return <Widget>[
-      TextoMemora.tituloTela(TextosApresentacao.tituloExemplo),
+      Row(
+        children: <Widget>[
+          Expanded(
+            child: TextoMemora.tituloTela(TextosApresentacao.tituloExemplo),
+          ),
+          if (!ocultarVisuais) ...<Widget>[
+            const SizedBox(width: MemoraEspacamento.md),
+            const MemoraPersonagem(
+              expressao: ExpressaoDaMemora.dica,
+              tamanho: MemoraDimensoes.alvoDecisao,
+            ),
+          ],
+        ],
+      ),
       const SizedBox(height: MemoraEspacamento.sm),
       TextoMemora.apoio(TextosApresentacao.avisoDoExemplo),
       const SizedBox(height: MemoraEspacamento.lg),
@@ -285,7 +371,10 @@ class _FluxoApresentacaoState extends State<FluxoApresentacao> {
         texto: TextosApresentacao.exemploResposta,
       ),
       const SizedBox(height: MemoraEspacamento.lg),
-      const TextoMemora(TextosApresentacao.fechamento),
+      const Cartao(
+        padding: EdgeInsets.all(MemoraEspacamento.md),
+        child: TextoMemora(TextosApresentacao.fechamento),
+      ),
     ];
   }
 }

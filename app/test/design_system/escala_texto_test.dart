@@ -119,6 +119,87 @@ void main() {
         );
         expect(tester.takeException(), isNull);
       });
+
+      testWidgets('Blocos Memora 2.0 sobrevivem em escala $escala', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          _comEscala(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                const PainelHeroi(
+                  titulo: 'Monitoramento diário de saúde',
+                  valorDestaque: '74 bpm',
+                  badgeStatus: BadgeDeStatus(
+                    rotulo: 'Relógio conectado',
+                    icone: Icons.watch_rounded,
+                  ),
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                CartaoHeroi(
+                  titulo: 'Conversar com a Memora',
+                  subtitulo: 'Ajuda em passos simples para o dia a dia',
+                  rotuloAcao: 'Começar conversa',
+                  aoTocar: () {},
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                TileAcaoRapida(
+                  icone: Icons.apps_rounded,
+                  titulo: 'Aplicativos',
+                  subtitulo: 'WhatsApp, YouTube e banco',
+                  pistaAcao: 'Explorar',
+                  aoTocar: () {},
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                Wrap(
+                  spacing: MemoraEspacamento.sm,
+                  runSpacing: MemoraEspacamento.sm,
+                  children: <Widget>[
+                    ChipFiltro(
+                      rotulo: 'Todos os aplicativos',
+                      selecionado: true,
+                      aoTocar: () {},
+                    ),
+                    ChipFiltro(
+                      rotulo: 'Mensagens e áudio',
+                      selecionado: false,
+                      aoTocar: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                LinhaDeLista(
+                  titulo: 'Configurar preferência de texto ampliado',
+                  subtitulo: 'Ajuste para enxergar com conforto',
+                  aoTocar: () {},
+                ),
+                const SizedBox(height: MemoraEspacamento.md),
+                NavegacaoInferior(
+                  indiceAtivo: 1,
+                  aoSelecionar: (_) {},
+                  itens: const <ItemNavegacao>[
+                    ItemNavegacao(
+                      icone: IconeDeNavegacao.ajustes,
+                      rotulo: 'Ajustes',
+                    ),
+                    ItemNavegacao(
+                      icone: IconeDeNavegacao.inicio,
+                      rotulo: 'Início',
+                    ),
+                    ItemNavegacao(
+                      icone: IconeDeNavegacao.perfil,
+                      rotulo: 'Meu perfil',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            escala,
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      });
     }
   });
 

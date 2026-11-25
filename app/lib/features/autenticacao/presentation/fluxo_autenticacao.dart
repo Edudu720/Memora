@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../services/acessibilidade/memora_binding_atividade.dart';
+import '../../../services/aplicativos/consulta_de_aplicativos.dart';
 import '../../../l10n/textos_assistente.dart';
 import '../../../l10n/textos_autenticacao.dart';
 import '../../../l10n/textos_configuracoes.dart';
+import '../../../l10n/textos_guias.dart';
 import '../data/ultimo_acesso_local.dart';
 import '../domain/autenticacao.dart';
 import '../domain/monitor_de_sessao.dart';
@@ -17,8 +19,13 @@ import 'telas/tela_confirmar_canal.dart';
 import 'telas/tela_de_volta.dart';
 import 'telas/tela_entrega_do_aparelho.dart';
 import 'telas/tela_login.dart';
+import '../../antigolpe/data/repositorios/repositorio_analise_golpe_simulado.dart';
+import '../../antigolpe/domain/repositorios/repositorio_analise_golpe.dart';
+import '../../antigolpe/presentation/controladores/controlador_analise_golpe.dart';
+import '../../antigolpe/presentation/telas/tela_analise_golpe.dart';
 import '../../apresentacao/data/apresentacao_vista.dart';
 import '../../apresentacao/presentation/fluxo_apresentacao.dart';
+import '../../ajuda/data/abridor_site_tutorial.dart';
 import '../../ajuda/data/compartilhar.dart';
 import '../../ajuda/domain/assunto_de_ajuda.dart';
 import '../../ajuda/presentation/ajuda_guiada_da_conversa.dart';
@@ -27,6 +34,8 @@ import '../../ajuda/presentation/tela_assunto.dart';
 import '../../assistente/data/abridor_de_aplicativo.dart';
 import '../../assistente/data/aceite_do_aviso.dart';
 import '../../assistente/data/conversa_local.dart';
+import '../../assistente/data/leitor_de_voz_nativo.dart';
+import '../../assistente/domain/leitor_de_voz.dart';
 import '../../assistente/domain/assistente.dart';
 import '../../assistente/presentation/controladores/controlador_conversa.dart';
 import '../../assistente/presentation/telas/tela_catalogo.dart';
@@ -34,6 +43,8 @@ import '../../assistente/presentation/telas/tela_conversa.dart';
 import '../../assistente/presentation/telas/tela_registro.dart';
 import '../../hub/domain/hub.dart';
 import '../../perfil/data/data_de_nascimento_local.dart';
+import '../../perfil/data/foto_de_perfil_local.dart';
+import '../../perfil/data/seletor_de_imagem.dart';
 import '../../casca/casca_interna.dart';
 import '../../perfil/presentation/tela_perfil.dart';
 import '../../configuracoes/presentation/tela_configuracoes.dart';
@@ -44,12 +55,26 @@ import '../../inicio/presentation/tela_inicio.dart';
 import 'telas/tela_primeira_entrada.dart';
 import 'telas/tela_recuperacao.dart';
 import '../../cuidado/data/repositorios/repositorio_contato_emergencia_local.dart';
+import '../../cuidado/data/repositorios/repositorio_emergencia_sos_simulado.dart';
+import '../../cuidado/domain/entidades/evento_emergencia_sos.dart';
+import '../../cuidado/domain/repositorios/repositorio_contato_emergencia.dart';
+import '../../cuidado/domain/repositorios/repositorio_emergencia_sos.dart';
 import '../../cuidado/presentation/controladores/controlador_dispositivo_cuidado.dart';
+import '../../cuidado/presentation/controladores/controlador_sos_emergencia.dart';
+import '../../cuidado/presentation/telas/dialogo_sos_emergencia.dart';
 import '../../cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
+import '../../localizador/data/repositorios/repositorio_localizador_simulado.dart';
+import '../../localizador/domain/repositorios/repositorio_localizador.dart';
+import '../../localizador/presentation/controladores/controlador_localizador.dart';
+import '../../localizador/presentation/telas/tela_localizador.dart';
 import '../../../services/seguranca/limpeza_de_sessao.dart';
 import '../../aprendizado/data/progresso_de_aprendizado.dart';
 import '../../aprendizado/domain/guia.dart';
 import '../../aprendizado/presentation/tela_passo_a_passo.dart';
+import '../../aprendizado/presentation/tela_seletor_de_secao.dart';
+import '../../atalhos_aplicativos/data/repositorio_atalhos_aplicativos.dart';
+import '../../atalhos_aplicativos/presentation/controllers/atalhos_aplicativos_controller.dart';
+import '../../atalhos_aplicativos/presentation/telas/tela_atalhos_aplicativos.dart';
 import '../../../services/seguranca/sessao_perdida.dart';
 
 /// Liga as telas das User Stories 1 e 2.
@@ -83,6 +108,24 @@ class FluxoAutenticacao extends StatefulWidget {
   /// não existe, e sem repositório não há o que listar.
   final RepositorioAssistente? assistente;
 
+  /// Repositório de análise de links e mensagens contra golpes.
+  final RepositorioAnaliseGolpe? analiseGolpe;
+
+  /// Onde o Localizador consulta serviços próximos (FR-006).
+  ///
+  /// Opcional em testes isolados de widget; em produção a `Composicao` entrega
+  /// [RepositorioLocalizadorApi] quando `usaServidorReal` estiver ativo.
+  final RepositorioLocalizador? localizador;
+
+  /// Repositório de envio de pedidos manuais ou automáticos SOS (Feature 014).
+  final RepositorioEmergenciaSos? emergenciaSos;
+
+  /// Repositório do contato de emergência compartilhado entre Cuidado e SOS.
+  final RepositorioContatoEmergencia? contatoEmergencia;
+
+  /// Leitor opcional de localização autorizada para acompanhar pedidos SOS.
+  final Future<LocalizacaoSos?> Function()? obterLocalizacaoSos;
+
   /// O que a saída da conta tira do aparelho (FR-026, FR-048).
   ///
   /// Opcional porque o teste de widget que só exercita telas não precisa
@@ -96,6 +139,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// testes. Em produção a `Composicao` exige a guarda real e o `main.dart` a
   /// repassa aqui.
   final ArmazenamentoDaDataDeNascimento? dataDeNascimento;
+
+  /// Onde o Perfil guarda a foto ou avatar escolhido, por conta (FR-006, 011).
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+
+  /// Seletor de foto de galeria/câmera (injetável em testes).
+  final SeletorDeImagemDoAparelho? seletorDeFoto;
 
   /// Quais contas já viram a apresentação inicial (FR-013, T050).
   ///
@@ -117,6 +166,12 @@ class FluxoAutenticacao extends StatefulWidget {
   /// Opcional: sem ele a Memora conversa e ensina, e não abre nada.
   final AbridorDeAplicativo? abridor;
 
+  /// Consulta quais aplicativos estão instalados no aparelho (T089, FR-046).
+  ///
+  /// Opcional: quando ausente (por exemplo, em testes sem consulta), os
+  /// itens que sabem abrir mantêm o rótulo padrão sem bloquear testes antigos.
+  final ConsultaDeAplicativos? consultaAplicativos;
+
   /// Quem manda o endereço oficial de download para fora do aplicativo (T089).
   ///
   /// **Nulo é "o assunto Compartilhar da Ajuda não existe"** (R12, FR-018):
@@ -124,6 +179,11 @@ class FluxoAutenticacao extends StatefulWidget {
   /// o botão seria porta que não abre nada. Vem de
   /// `Compartilhador.doAmbiente`, a única porta de entrada do endereço.
   final Compartilhador? compartilhador;
+
+  /// Abridor seguro `https://` do site oficial de tutoriais (Feature 016).
+  ///
+  /// Quando `null`, o botão do site oficial fica oculto na tela de Ajuda.
+  final AbridorDeSiteTutorial? abridorSiteTutorial;
 
   /// Onde o progresso nos guias de aprendizado e guardado (FR-042a).
   final ProgressoDeAprendizado? progresso;
@@ -150,7 +210,13 @@ class FluxoAutenticacao extends StatefulWidget {
   const FluxoAutenticacao({
     required this.repositorio,
     this.assistente,
+    this.analiseGolpe,
+    this.localizador,
+    this.emergenciaSos,
+    this.contatoEmergencia,
+    this.obterLocalizacaoSos,
     this.abridor,
+    this.consultaAplicativos,
     this.conversaLocal = ConversaLocal.new,
     this.aceiteDoAviso,
     this.sessaoPerdida,
@@ -160,8 +226,11 @@ class FluxoAutenticacao extends StatefulWidget {
     super.key,
     this.limpeza,
     this.dataDeNascimento,
+    this.fotoDePerfil,
+    this.seletorDeFoto,
     this.apresentacaoVista,
     this.compartilhador,
+    this.abridorSiteTutorial,
     this.progresso,
   });
 
@@ -239,6 +308,18 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   late final ArmazenamentoDaDataDeNascimento _datas =
       widget.dataDeNascimento ?? DataDeNascimentoEmMemoria();
 
+  late final ArmazenamentoDeFotoDePerfil _fotos =
+      widget.fotoDePerfil ?? FotoDePerfilEmMemoria();
+
+  late final RepositorioEmergenciaSos _emergenciaSos =
+      widget.emergenciaSos ?? RepositorioEmergenciaSosSimulado();
+
+  late final RepositorioContatoEmergencia _contatoEmergencia =
+      widget.contatoEmergencia ?? RepositorioContatoEmergenciaLocal();
+
+  bool _sosNaTela = false;
+  ControladorSosEmergencia? _controladorSosAtivo;
+
   /// A casca de quem está dentro (R1 da feature 004). Toda tela que o fluxo
   /// abre vai para a pilha do destino à vista, por [_empilhar].
   final GlobalKey<CascaInternaState> _casca = GlobalKey<CascaInternaState>();
@@ -276,6 +357,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   void dispose() {
     _rastreadorGlobal.parar();
     widget.sessaoPerdida?.removeListener(_aoPerderASessao);
+    _controladorSosAtivo?.dispose();
     _cadastro.dispose();
     _login?.dispose();
     _recuperacao?.dispose();
@@ -377,6 +459,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// tempo de sessão como qualquer outro, e celular esquecido nela expira.
   void _entrou(PessoaAutenticada pessoa) {
     _expirando = false;
+    _sosNaTela = false;
+    _controladorSosAtivo?.dispose();
+    _controladorSosAtivo = null;
     final int geracao = ++_geracaoDaEntrada;
     final ApresentacaoVista? vistas = widget.apresentacaoVista;
     setState(() {
@@ -428,6 +513,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _etapaDeEntrada = _Etapa.boasVindas;
     }
     _fecharRotasAbertas();
+    _sosNaTela = false;
+    _controladorSosAtivo?.dispose();
+    _controladorSosAtivo = null;
     _irParaLogin();
   }
 
@@ -449,7 +537,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   /// por 28 minutos era expulso. Num lugar só continua valendo: toda tela que
   /// o fluxo abre nasce aqui.
   Route<void> _rota({required WidgetBuilder builder}) {
-    return MaterialPageRoute<void>(builder: builder);
+    return RotaMemora<void>(builder: builder);
   }
 
   /// Empilha [rota] no destino à vista da casca.
@@ -553,6 +641,9 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _avisoNaTela = false;
     }
     _fecharRotasAbertas();
+    _sosNaTela = false;
+    _controladorSosAtivo?.dispose();
+    _controladorSosAtivo = null;
     _irParaLogin();
   }
 
@@ -616,25 +707,110 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       PortaDoHub(
         rotulo: 'Dispositivo de Cuidado',
         descricao: 'Batimentos, movimento e alerta de queda',
-        ilustracao: Ilustracao.portaServicos,
+        ilustracao: Ilustracao.portaCuidado,
         aoAbrir: _abrirDispositivoCuidado,
       ),
+      PortaDoHub(
+        rotulo: 'Localizador de Serviços',
+        descricao: 'Postos de saúde e farmácias próximas',
+        ilustracao: Ilustracao.portaLocalizador,
+        aoAbrir: _abrirLocalizadorServicos,
+      ),
     ];
+  }
+
+  /// Abre a tela de atalhos diretos alimentada pelo catálogo do servidor (Feature 015).
+  void _abrirAtalhosAplicativos(RepositorioAssistente assistente) {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => _DonoDosAtalhosAplicativos(
+          criar: () => AtalhosAplicativosController(
+            repositorio: RepositorioAtalhosAplicativos(
+              assistente: assistente,
+              consulta: widget.consultaAplicativos,
+            ),
+            abridor: widget.abridor,
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre o Localizador de Serviços Essenciais (Feature 009 / 010).
+  void _abrirLocalizadorServicos() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => _DonoDoLocalizador(
+          criar: () => ControladorLocalizador(
+            repositorio: widget.localizador ?? RepositorioLocalizadorSimulado(),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Abre a tela dedicada de análise de mensagens e links suspeitos contra golpes.
+  void _abrirAnaliseGolpe() {
+    _empilhar(
+      _rota(
+        builder: (BuildContext contexto) => _DonoDaAnaliseGolpe(
+          criar: () => ControladorAnaliseGolpe(
+            repositorio:
+                widget.analiseGolpe ?? const RepositorioAnaliseGolpeSimulado(),
+          ),
+          aoVoltar: () => Navigator.of(contexto).pop(),
+        ),
+      ),
+    );
   }
 
   /// Abre a tela do Dispositivo de Cuidado (IoT / ESP32).
   void _abrirDispositivoCuidado() {
     _empilhar(
       _rota(
-        builder: (BuildContext contexto) => TelaDispositivoCuidado(
-          controlador: ControladorDispositivoCuidado(
-            repositorioContato: RepositorioContatoEmergenciaLocal(),
+        builder: (BuildContext contexto) => _DonoDoDispositivoCuidado(
+          criar: () => ControladorDispositivoCuidado(
+            repositorioContato: _contatoEmergencia,
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
           nomePessoaIdosa: _pessoa?.nomeTratamento ?? 'Usuário',
         ),
       ),
     );
+  }
+
+  /// Abre o diálogo de confirmação do Botão SOS Persistente (Feature 014)
+  /// preso ao navegador da aba ativa para fechar junto caso a sessão expire.
+  Future<void> _abrirDialogoSos() async {
+    if (!mounted || _etapa != _Etapa.dentro || _expirando || _sosNaTela) {
+      return;
+    }
+    final BuildContext? contextoAlvo = _casca.currentState?.contextoAtivo;
+    if (contextoAlvo == null || !contextoAlvo.mounted) return;
+
+    _sosNaTela = true;
+    final ControladorSosEmergencia controlador = ControladorSosEmergencia(
+      repositorioSos: _emergenciaSos,
+      repositorioContato: _contatoEmergencia,
+      obterLocalizacaoAutorizada: widget.obterLocalizacaoSos,
+      nomePessoa: _pessoa?.nomeTratamento ?? 'Usuário',
+    );
+    _controladorSosAtivo = controlador;
+
+    try {
+      await mostrarDialogoSosEmergencia(
+        context: contextoAlvo,
+        controlador: controlador,
+      );
+    } finally {
+      _sosNaTela = false;
+      if (identical(_controladorSosAtivo, controlador)) {
+        _controladorSosAtivo = null;
+      }
+      controlador.dispose();
+    }
   }
 
   /// A Ajuda, com os assuntos que existem agora (T087, FR-033).
@@ -654,6 +830,8 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoVerApresentacao: vistas == null || _pessoa == null
               ? null
               : () => _reverApresentacao(vistas),
+          aoVerificarGolpe: _abrirAnaliseGolpe,
+          abridorSiteTutorial: widget.abridorSiteTutorial,
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
       ),
@@ -729,6 +907,10 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => TelaCatalogo(
           repositorio: assistente,
           categoria: categoria,
+          consultaAplicativos: widget.consultaAplicativos,
+          progresso: widget.progresso,
+          idDaConta: _pessoa?.id,
+          aoAbrirAtalhosDiretos: () => _abrirAtalhosAplicativos(assistente),
           // Se o item tiver guia de passo a passo embarcado, abre o guia;
           // caso contrário, vai para a conversa já perguntando (T069, FR-027).
           aoAbrirGuia: (Guia guia, ServicoDoCatalogo servico) => _abrirGuia(
@@ -739,6 +921,13 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
           aoEscolher: (ServicoDoCatalogo servico) => _abrirConversa(
             assistente,
             rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+          ),
+          // O botão "Pedir para a Memora abrir" pede para abrir, como o do fim
+          // do passo a passo; reaproveitar o `aoEscolher` fazia a Memora
+          // ensinar em vez de abrir.
+          aoPedirParaAbrir: (ServicoDoCatalogo servico) => _abrirConversa(
+            assistente,
+            rascunho: TextosGuias.pedidoParaAbrir(servico.nomeExibido),
           ),
           aoVoltar: () => Navigator.of(contexto).pop(),
         ),
@@ -759,15 +948,53 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
   }
 
   /// Abre o guia de aprendizado passo a passo (FR-027).
+  ///
+  /// Quando o guia tem seções ([Guia.temSecoes], FR-028d), a pessoa escolhe
+  /// o assunto em [TelaSeletorDeSecao] antes do passo a passo.
   void _abrirGuia({
     required Guia guia,
     required ServicoDoCatalogo servico,
     required RepositorioAssistente assistente,
   }) {
+    if (guia.temSecoes) {
+      _empilhar(
+        _rota(
+          builder: (BuildContext contexto) => TelaSeletorDeSecao(
+            guia: guia,
+            servico: servico,
+            progresso: widget.progresso,
+            idDaConta: _pessoa?.id,
+            aoEscolherSecao: (SecaoDoGuia secao) => _abrirPassoAPasso(
+              guia: guia,
+              secao: secao,
+              servico: servico,
+              assistente: assistente,
+            ),
+            aoConversar: () => _abrirConversa(
+              assistente,
+              rascunho: TextosAssistente.perguntaSobre(servico.nomeExibido),
+            ),
+            aoVoltar: () => Navigator.of(contexto).pop(),
+          ),
+        ),
+      );
+      return;
+    }
+    _abrirPassoAPasso(guia: guia, servico: servico, assistente: assistente);
+  }
+
+  /// O passo a passo de um guia inteiro, ou só da [secao] escolhida.
+  void _abrirPassoAPasso({
+    required Guia guia,
+    required ServicoDoCatalogo servico,
+    required RepositorioAssistente assistente,
+    SecaoDoGuia? secao,
+  }) {
     _empilhar(
       _rota(
         builder: (BuildContext contexto) => TelaPassoAPasso(
           guia: guia,
+          secao: secao,
           servico: servico,
           repositorioAssistente: assistente,
           progresso: widget.progresso,
@@ -807,14 +1034,26 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
         builder: (BuildContext contexto) => _DonaDaConversa(
           aoAbrir: _conversasAbertas.add,
           aoFechar: _conversasAbertas.remove,
-          criar: () => ControladorConversa(
-            assistente,
-            widget.conversaLocal(),
-            aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
-            abridor: widget.abridor,
-            rascunhoInicial: rascunho,
-          ),
+          criar: () {
+            late final ControladorConversa controlador;
+            controlador = ControladorConversa(
+              assistente,
+              widget.conversaLocal(),
+              aceite: widget.aceiteDoAviso ?? _aceiteNestaExecucao,
+              abridor: widget.abridor,
+              consultaAplicativos: widget.consultaAplicativos,
+              leitorDeVoz: LeitorDeVozSpeechToText(
+                aoMudarEstado: (ResultadoDitado r) =>
+                    controlador.aplicarEstadoDitadoExterno(r),
+              ),
+              rascunhoInicial: rascunho,
+            );
+            return controlador;
+          },
           aoVoltar: () => Navigator.of(contexto).pop(),
+          fotoDePerfil: _fotos,
+          idDaConta: _pessoa?.id,
+          nomeDaPessoa: _pessoa?.nomeTratamento,
         ),
       ),
     );
@@ -964,6 +1203,7 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
       _Etapa.dentro => CascaInterna(
         key: _casca,
         aoRegistrarAtividade: _registrarAtividade,
+        aoAcionarSos: _abrirDialogoSos,
         raizes: <DestinoDaCasca, WidgetBuilder>{
           DestinoDaCasca.ajustes: (BuildContext _) => TelaConfiguracoes(
             aoAbrirAparencia: () =>
@@ -998,12 +1238,19 @@ class _FluxoAutenticacaoState extends State<FluxoAutenticacao> {
             aoAbrirRegistro: widget.assistente == null
                 ? null
                 : () => _abrirRegistro(widget.assistente!),
+            aoAbrirCuidado: _abrirDispositivoCuidado,
+            aoAbrirAjuda: widget.assistente == null
+                ? null
+                : () => _abrirAjuda(widget.assistente!),
+            aoVerificarGolpe: _abrirAnaliseGolpe,
           ),
           DestinoDaCasca.perfil: (BuildContext _) => TelaPerfil(
             nome: _pessoa?.nomeTratamento ?? '',
             canal: _canal,
             progresso: widget.progresso,
             dataDeNascimento: _datas,
+            fotoDePerfil: _fotos,
+            seletorDeFoto: widget.seletorDeFoto,
             idDaConta: _pessoa?.id,
           ),
         },
@@ -1036,6 +1283,9 @@ class _AceiteSoNaMemoria implements AceiteDoAviso {
 class _DonaDaConversa extends StatefulWidget {
   final ControladorConversa Function() criar;
   final VoidCallback aoVoltar;
+  final ArmazenamentoDeFotoDePerfil? fotoDePerfil;
+  final String? idDaConta;
+  final String? nomeDaPessoa;
 
   /// Avisam o fluxo de que há uma conversa aberta, e de quando ela fecha.
   final void Function(ControladorConversa) aoAbrir;
@@ -1046,6 +1296,9 @@ class _DonaDaConversa extends StatefulWidget {
     required this.aoVoltar,
     required this.aoAbrir,
     required this.aoFechar,
+    this.fotoDePerfil,
+    this.idDaConta,
+    this.nomeDaPessoa,
   });
 
   @override
@@ -1070,6 +1323,147 @@ class _DonaDaConversaState extends State<_DonaDaConversa> {
 
   @override
   Widget build(BuildContext context) {
-    return TelaConversa(controlador: _controlador, aoVoltar: widget.aoVoltar);
+    return TelaConversa(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+      fotoDePerfil: widget.fotoDePerfil,
+      idDaConta: widget.idDaConta,
+      nomeDaPessoa: widget.nomeDaPessoa,
+    );
+  }
+}
+
+/// Cria o [AtalhosAplicativosController] e o descarta quando a rota sai.
+class _DonoDosAtalhosAplicativos extends StatefulWidget {
+  final AtalhosAplicativosController Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonoDosAtalhosAplicativos({
+    required this.criar,
+    required this.aoVoltar,
+  });
+
+  @override
+  State<_DonoDosAtalhosAplicativos> createState() =>
+      _DonoDosAtalhosAplicativosState();
+}
+
+class _DonoDosAtalhosAplicativosState extends State<_DonoDosAtalhosAplicativos> {
+  late final AtalhosAplicativosController _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaAtalhosAplicativos(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorLocalizador] uma única vez por abertura da rota e o
+/// descarta somente quando a rota sai da pilha.
+class _DonoDoLocalizador extends StatefulWidget {
+  final ControladorLocalizador Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonoDoLocalizador({
+    required this.criar,
+    required this.aoVoltar,
+  });
+
+  @override
+  State<_DonoDoLocalizador> createState() => _DonoDoLocalizadorState();
+}
+
+class _DonoDoLocalizadorState extends State<_DonoDoLocalizador> {
+  late final ControladorLocalizador _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaLocalizador(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorAnaliseGolpe] e o descarta quando a rota sai.
+class _DonoDaAnaliseGolpe extends StatefulWidget {
+  final ControladorAnaliseGolpe Function() criar;
+  final VoidCallback aoVoltar;
+
+  const _DonoDaAnaliseGolpe({
+    required this.criar,
+    required this.aoVoltar,
+  });
+
+  @override
+  State<_DonoDaAnaliseGolpe> createState() => _DonoDaAnaliseGolpeState();
+}
+
+class _DonoDaAnaliseGolpeState extends State<_DonoDaAnaliseGolpe> {
+  late final ControladorAnaliseGolpe _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaAnaliseGolpe(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+    );
+  }
+}
+
+/// Cria o [ControladorDispositivoCuidado] e o descarta quando a tela sai
+/// (inclusive por logout/expiração forçada de sessão e após a animação).
+class _DonoDoDispositivoCuidado extends StatefulWidget {
+  final ControladorDispositivoCuidado Function() criar;
+  final VoidCallback aoVoltar;
+  final String nomePessoaIdosa;
+
+  const _DonoDoDispositivoCuidado({
+    required this.criar,
+    required this.aoVoltar,
+    required this.nomePessoaIdosa,
+  });
+
+  @override
+  State<_DonoDoDispositivoCuidado> createState() =>
+      _DonoDoDispositivoCuidadoState();
+}
+
+class _DonoDoDispositivoCuidadoState extends State<_DonoDoDispositivoCuidado> {
+  late final ControladorDispositivoCuidado _controlador = widget.criar();
+
+  @override
+  void dispose() {
+    _controlador.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TelaDispositivoCuidado(
+      controlador: _controlador,
+      aoVoltar: widget.aoVoltar,
+      nomePessoaIdosa: widget.nomePessoaIdosa,
+    );
   }
 }

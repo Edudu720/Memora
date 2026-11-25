@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import 'package:memora/features/aprendizado/data/guias/guias.dart';
 import 'package:memora/features/aprendizado/data/progresso_de_aprendizado.dart';
+import 'package:memora/features/aprendizado/domain/guia.dart';
 import 'package:memora/features/assistente/domain/assistente.dart';
 import 'package:memora/features/autenticacao/presentation/telas/tela_login.dart';
 import 'package:memora/features/casca/casca_interna.dart';
@@ -28,6 +32,7 @@ class _RepositorioEspiao implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async {
     chamadas++;
     return const AssistenteRespondeu('Resposta');
@@ -50,6 +55,12 @@ class _RepositorioEspiao implements RepositorioAssistente {
 
 class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   final Map<String, Map<String, int>> _dados = <String, Map<String, int>>{};
+  final Map<String, Map<String, int>> _ordens = <String, Map<String, int>>{};
+  int _ordemGlobal = 0;
+  final StreamController<void> _alteracoes = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get alteracoes => _alteracoes.stream;
 
   @override
   Future<bool> registrarChegadaAoPasso({
@@ -70,7 +81,11 @@ class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   }) async {
     final Map<String, int> daConta =
         _dados.putIfAbsent(idDaConta, () => <String, int>{});
+    final Map<String, int> ordensConta =
+        _ordens.putIfAbsent(idDaConta, () => <String, int>{});
     daConta[chave] = (daConta[chave] ?? 0) + 1;
+    ordensConta[chave] = ++_ordemGlobal;
+    _alteracoes.add(null);
   }
 
   @override
@@ -79,14 +94,38 @@ class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   }
 
   @override
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async {
+    return _ordens[idDaConta] ?? const <String, int>{};
+  }
+
+  @override
+  Future<String?> ultimoConcluido(String idDaConta) async {
+    final Map<String, int>? ordens = _ordens[idDaConta];
+    if (ordens == null || ordens.isEmpty) return null;
+    String? recente;
+    int maior = -1;
+    for (final MapEntry<String, int> e in ordens.entries) {
+      if (e.value > maior) {
+        maior = e.value;
+        recente = e.key;
+      }
+    }
+    return recente;
+  }
+
+  @override
   Future<String?> aplicativoMaisAprendido(String idDaConta) async {
     final Map<String, int>? daConta = _dados[idDaConta];
+    final Map<String, int>? ordens = _ordens[idDaConta];
     if (daConta == null || daConta.isEmpty) return null;
     String? melhor;
     int maxVezes = -1;
+    int maxOrdem = -1;
     for (final MapEntry<String, int> e in daConta.entries) {
-      if (e.value > maxVezes) {
+      final int ordem = ordens?[e.key] ?? 0;
+      if (e.value > maxVezes || (e.value == maxVezes && ordem > maxOrdem)) {
         maxVezes = e.value;
+        maxOrdem = ordem;
         melhor = e.key;
       }
     }
@@ -96,6 +135,9 @@ class _ProgressoEmMemoria implements ProgressoDeAprendizado {
   @override
   Future<void> apagar() async {
     _dados.clear();
+    _ordens.clear();
+    _ordemGlobal = 0;
+    _alteracoes.add(null);
   }
 }
 
@@ -147,16 +189,25 @@ void main() {
       expect(find.byKey(TelaPerfil.chaveNome), findsOneWidget);
       expect(find.byKey(TelaPerfil.chaveCanal), findsOneWidget);
       expect(find.byKey(TelaPerfil.chaveMaisAprendido), findsOneWidget);
+      expect(find.byKey(TelaPerfil.chaveUltimoAprendido), findsOneWidget);
       expect(find.byKey(TelaPerfil.chaveDesenho), findsOneWidget);
 
       expect(find.text('Dona Ana'), findsOneWidget);
       expect(find.text('ana@exemplo.com'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          matching: find.text('Último aprendizado'),
+        ),
+        findsOneWidget,
+      );
 
       // Informação nunca é botão (FR-012 da 002)
       for (final Key chave in <Key>[
         TelaPerfil.chaveNome,
         TelaPerfil.chaveCanal,
         TelaPerfil.chaveMaisAprendido,
+        TelaPerfil.chaveUltimoAprendido,
       ]) {
         expect(
           t.getSemantics(find.byKey(chave)),
@@ -171,15 +222,16 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('quando vazio, o mais aprendido diz que vamos aprender juntos',
+    testWidgets('quando vazio, mostra frases acolhedoras em mais e último aprendido',
         (WidgetTester t) async {
       await t.pumpWidget(montarTela());
       await t.pumpAndSettle();
 
       expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+      expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsOneWidget);
     });
 
-    testWidgets('quando há progresso, exibe o aplicativo mais aprendido',
+    testWidgets('quando há progresso, exibe o aplicativo mais aprendido e o último concluído',
         (WidgetTester t) async {
       await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
       await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
@@ -187,9 +239,87 @@ void main() {
       await t.pumpWidget(montarTela());
       await t.pumpAndSettle();
 
-      expect(find.text('WhatsApp'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(TelaPerfil.chaveMaisAprendido),
+          matching: find.text('WhatsApp'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          matching: find.text('WhatsApp'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text(TextosPerfil.maisAprendidoVazio), findsNothing);
+      expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsNothing);
     });
+
+    testWidgets(
+      'último módulo concluído distingue seccionado parcial/completo e atualiza ao vivo',
+      (WidgetTester t) async {
+        await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
+        await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'whatsapp');
+        await progresso.registrarConclusao(idDaConta: 'conta-123', chave: 'youtube');
+
+        await t.pumpWidget(montarTela());
+        await t.pumpAndSettle();
+
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveMaisAprendido),
+            matching: find.text('WhatsApp'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('YouTube'),
+          ),
+          findsOneWidget,
+        );
+
+        // Concluir apenas 1 seção do Telegram não o torna último módulo concluído.
+        final Guia telegram = guiaDe('telegram')!;
+        await progresso.registrarConclusao(
+          idDaConta: 'conta-123',
+          chave: 'telegram:${telegram.secoes.first.chave}',
+        );
+        await t.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('YouTube'),
+          ),
+          findsOneWidget,
+        );
+
+        // Ao completar as seções restantes do Telegram, o perfil atualiza ao vivo.
+        for (final SecaoDoGuia s in telegram.secoes.skip(1)) {
+          await progresso.registrarConclusao(
+            idDaConta: 'conta-123',
+            chave: 'telegram:${s.chave}',
+          );
+        }
+        await t.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('Telegram'),
+          ),
+          findsOneWidget,
+        );
+
+        // Ao sair (apagar), volta às mensagens acolhedoras sem vazar dados.
+        await progresso.apagar();
+        await t.pumpAndSettle();
+        expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+        expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsOneWidget);
+      },
+    );
 
     testWidgets('a idade aparece só como informação e apenas se informada (FR-042c)',
         (WidgetTester t) async {
@@ -297,4 +427,288 @@ void main() {
       });
     }
   });
+
+  group('Feature 016 + 020 / US4 — Organização, otimização e Último aprendizado', () {
+    testWidgets(
+      'agrupa em cartões com Semantics(header: true) e exibe ultimo aprendido acolhedor quando vazio',
+      (WidgetTester t) async {
+        final SemanticsHandle handle = t.ensureSemantics();
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: progresso,
+              dataDeNascimento: datas,
+              idDaConta: 'conta-123',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(find.byKey(TelaPerfil.chaveSecaoAprendizado), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveSecaoAprendizado),
+            matching: find.byKey(TelaPerfil.chaveMaisAprendido),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveSecaoAprendizado),
+            matching: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text(TextosPerfil.ultimoAprendidoVazio),
+          ),
+          findsOneWidget,
+        );
+        for (final String cabecalho in <String>[
+          TextosPerfil.secaoRetrato,
+          TextosPerfil.secaoConta,
+          TextosPerfil.secaoAprendizado,
+        ]) {
+          final Finder textoHeader = find.text(cabecalho);
+          expect(textoHeader, findsOneWidget);
+          expect(
+            t.getSemantics(textoHeader),
+            isSemantics(isHeader: true),
+            reason: '$cabecalho deve ter semântica de cabeçalho',
+          );
+        }
+        expect(find.text('Dona Ana'), findsOneWidget);
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'renderiza chaveUltimoAprendido dentro de chaveSecaoAprendizado apenas como informação quando há módulo concluído',
+      (WidgetTester t) async {
+        final SemanticsHandle handle = t.ensureSemantics();
+        await progresso.registrarConclusao(
+          idDaConta: 'conta-123',
+          chave: 'youtube',
+        );
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: progresso,
+              idDaConta: 'conta-123',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveSecaoAprendizado),
+            matching: find.byKey(TelaPerfil.chaveUltimoAprendido),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('YouTube'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          t.getSemantics(find.byKey(TelaPerfil.chaveUltimoAprendido)),
+          isSemantics(isButton: false, hasTapAction: false),
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.byType(InkWell),
+          ),
+          findsNothing,
+        );
+        handle.dispose();
+      },
+    );
+
+    testWidgets(
+      'troca rápida de idDaConta descarta resposta assíncrona obsoleta e não mostra "..."',
+      (WidgetTester t) async {
+        final _ProgressoComAtraso controlado = _ProgressoComAtraso();
+
+        Widget buildComConta(String conta) => MaterialApp(
+          theme: TemasMemora.claro,
+          home: TelaPerfil(
+            nome: 'Dona Ana',
+            canal: Future<String?>.value('ana@exemplo.com'),
+            progresso: controlado,
+            idDaConta: conta,
+          ),
+        );
+
+        await t.pumpWidget(buildComConta('conta-a'));
+        await t.pump();
+        expect(find.text('...'), findsNothing);
+        expect(find.text(TextosPerfil.carregandoAprendizado), findsNWidgets(2));
+
+        await t.pumpWidget(buildComConta('conta-b'));
+        await t.pump();
+
+        controlado.completar(
+          'conta-a',
+          'youtube',
+          ordens: const <String, int>{'youtube': 1},
+        );
+        await t.pump();
+        expect(find.text('YouTube'), findsNothing);
+
+        controlado.completar(
+          'conta-b',
+          'meu-inss',
+          ordens: const <String, int>{'whatsapp': 2},
+        );
+        await t.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveMaisAprendido),
+            matching: find.text('Meu INSS'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(TelaPerfil.chaveUltimoAprendido),
+            matching: find.text('WhatsApp'),
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('YouTube'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'recupera com segurança quando leitura do progresso local lança erro',
+      (WidgetTester t) async {
+        await t.pumpWidget(
+          MaterialApp(
+            theme: TemasMemora.claro,
+            home: TelaPerfil(
+              nome: 'Dona Ana',
+              canal: Future<String?>.value('ana@exemplo.com'),
+              progresso: _ProgressoQueFalha(),
+              idDaConta: 'conta-123',
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+
+        expect(find.text(TextosPerfil.carregandoAprendizado), findsNothing);
+        expect(find.text(TextosPerfil.maisAprendidoVazio), findsOneWidget);
+        expect(find.text(TextosPerfil.ultimoAprendidoVazio), findsOneWidget);
+      },
+    );
+  });
+}
+
+class _ProgressoQueFalha implements ProgressoDeAprendizado {
+  @override
+  Stream<void> get alteracoes => const Stream<void>.empty();
+
+  @override
+  Future<String?> aplicativoMaisAprendido(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<String?> ultimoConcluido(String idDaConta) async {
+    throw StateError('Falha simulada na leitura local');
+  }
+
+  @override
+  Future<void> apagar() async {}
+
+  @override
+  Future<Map<String, int>> concluidos(String idDaConta) async =>
+      const <String, int>{};
+
+  @override
+  Future<bool> registrarChegadaAoPasso({
+    required String idDaConta,
+    required String chave,
+    required int numeroDoPasso,
+    required int totalDePassos,
+  }) async =>
+      false;
+
+  @override
+  Future<void> registrarConclusao({
+    required String idDaConta,
+    required String chave,
+  }) async {}
+}
+
+class _ProgressoComAtraso implements ProgressoDeAprendizado {
+  final Map<String, Completer<String?>> _pendentes =
+      <String, Completer<String?>>{};
+  final Map<String, Map<String, int>> _ordensPorConta =
+      <String, Map<String, int>>{};
+
+  @override
+  Stream<void> get alteracoes => const Stream<void>.empty();
+
+  void completar(
+    String idDaConta,
+    String? chave, {
+    Map<String, int> ordens = const <String, int>{},
+  }) {
+    _ordensPorConta[idDaConta] = ordens;
+    _pendentes.remove(idDaConta)?.complete(chave);
+  }
+
+  @override
+  Future<String?> aplicativoMaisAprendido(String idDaConta) {
+    return _pendentes
+        .putIfAbsent(idDaConta, () => Completer<String?>())
+        .future;
+  }
+
+  @override
+  Future<Map<String, int>> ordensDeConclusao(String idDaConta) async =>
+      _ordensPorConta[idDaConta] ?? const <String, int>{};
+
+  @override
+  Future<String?> ultimoConcluido(String idDaConta) async => null;
+
+  @override
+  Future<void> apagar() async {}
+
+  @override
+  Future<Map<String, int>> concluidos(String idDaConta) async =>
+      const <String, int>{};
+
+  @override
+  Future<bool> registrarChegadaAoPasso({
+    required String idDaConta,
+    required String chave,
+    required int numeroDoPasso,
+    required int totalDePassos,
+  }) async =>
+      false;
+
+  @override
+  Future<void> registrarConclusao({
+    required String idDaConta,
+    required String chave,
+  }) async {}
 }

@@ -99,7 +99,7 @@ public class ControladorCanais {
             throw FalhaDoMemora.de(
                     CodigoDeErro.DADOS_INVALIDOS,
                     "Esse código não conferiu. Ele vale por 10 minutinhos — "
-                            + "se já passou, posso te enviar outro 😊");
+                            + "se já passou, posso te enviar outro.");
         }
 
         return corpoDe(

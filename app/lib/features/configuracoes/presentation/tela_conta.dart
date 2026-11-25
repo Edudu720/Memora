@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_secundario.dart';
+import '../../../design_system/componentes/cartoes/caixa_de_etapa.dart';
+import '../../../design_system/componentes/cartoes/cartao.dart';
 import '../../../design_system/componentes/confirmacao/confirmacao_memora.dart';
 import '../../../design_system/componentes/feedback/carregando.dart';
 import '../../../design_system/componentes/feedback/estado_vazio.dart';
 import '../../../design_system/componentes/feedback/mensagem_erro.dart';
 import '../../../design_system/componentes/ilustracao/ilustracao_memora.dart';
+import '../../../design_system/componentes/informacao/badge_de_status.dart';
 import '../../../design_system/componentes/informacao/campo_informacao.dart';
 import '../../../design_system/componentes/informacao/lista_informacao.dart';
 import '../../../design_system/componentes/navegacao/cabecalho_de_tela.dart';
@@ -131,30 +134,35 @@ class _TelaContaState extends State<TelaConta> {
                   const SizedBox(height: MemoraEspacamento.xl),
                   _nuncaFaco(),
                   const SizedBox(height: MemoraEspacamento.xl),
-                  const TextoMemora.tituloSecao(TextosConfiguracoes.tituloSair),
-                  const SizedBox(height: MemoraEspacamento.md),
-                  SaidaComConfirmacao(
-                    chaveConfirmacao: TelaConta.chaveConfirmacao,
-                    aoConfirmar: _sair,
-                    botao: (VoidCallback aoTocar) => BotaoSecundario(
-                      key: TelaConta.chaveSair,
-                      rotulo: TextosAutenticacao.botaoSair,
-                      icone: Icons.logout,
-                      aoTocar: aoTocar,
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.tituloSair,
+                    child: SaidaComConfirmacao(
+                      chaveConfirmacao: TelaConta.chaveConfirmacao,
+                      aoConfirmar: _sair,
+                      botao: (VoidCallback aoTocar) => BotaoSecundario(
+                        key: TelaConta.chaveSair,
+                        rotulo: TextosAutenticacao.botaoSair,
+                        icone: Icons.logout_rounded,
+                        aoTocar: aoTocar,
+                      ),
                     ),
                   ),
                   // Longe do "Sair": a mais destrutiva das duas não fica
                   // adjacente à comum (FR-041, Princípio II).
                   const SizedBox(height: MemoraEspacamento.xxxl),
-                  const TextoMemora.tituloSecao(
-                    TextosConfiguracoes.tituloEsquecer,
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.tituloEsquecer,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const TextoMemora.apoio(
+                          TextosConfiguracoes.paraQueServeEsquecer,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        _esquecerOAparelho(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: MemoraEspacamento.sm),
-                  const TextoMemora.apoio(
-                    TextosConfiguracoes.paraQueServeEsquecer,
-                  ),
-                  const SizedBox(height: MemoraEspacamento.lg),
-                  _esquecerOAparelho(),
                 ],
               ),
             ),
@@ -201,18 +209,29 @@ class _TelaContaState extends State<TelaConta> {
   /// O que **ninguém do Memora** faz (FR-036a). As frases são as da
   /// apresentação, lidas de `TextosApresentacao`: um texto só.
   Widget _nuncaFaco() {
-    return Column(
+    return Cartao(
       key: TelaConta.chaveNuncaFaco,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        const TextoMemora.tituloSecao(TextosApresentacao.tituloNunca),
-        const SizedBox(height: MemoraEspacamento.sm),
-        for (final String frase in TextosApresentacao.nuncaFaco) ...<Widget>[
-          TextoMemora(frase),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: BadgeDeStatus(
+              rotulo: 'Sua proteção',
+              icone: Icons.shield_rounded,
+              tom: TomBadgeStatus.informativo,
+            ),
+          ),
           const SizedBox(height: MemoraEspacamento.sm),
+          const TextoMemora.tituloSecao(TextosApresentacao.tituloNunca),
+          const SizedBox(height: MemoraEspacamento.sm),
+          for (final String frase in TextosApresentacao.nuncaFaco) ...<Widget>[
+            TextoMemora(frase),
+            const SizedBox(height: MemoraEspacamento.sm),
+          ],
+          const TextoMemora.apoio(TextosApresentacao.seAlguemPedir),
         ],
-        const TextoMemora.apoio(TextosApresentacao.seAlguemPedir),
-      ],
+      ),
     );
   }
 
@@ -234,7 +253,7 @@ class _TelaContaState extends State<TelaConta> {
     return BotaoSecundario(
       key: TelaConta.chaveEsquecer,
       rotulo: TextosConfiguracoes.botaoEsquecer,
-      icone: Icons.phonelink_erase,
+      icone: Icons.phonelink_erase_rounded,
       aoTocar: () => setState(() => _confirmandoEsquecer = true),
     );
   }

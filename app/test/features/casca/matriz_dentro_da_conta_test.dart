@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
@@ -41,14 +42,33 @@ void main() {
     final double topoDaBarra = t
         .getTopLeft(find.byKey(CascaInterna.chaveDaBarra))
         .dy;
+    // Desde 2026-11-18 não há faixa do SOS no topo (feature 014): a bolinha
+    // mora no cabeçalho da tela. O que tampa o topo é só a barra superior.
+    double topoUtil = 0;
+    final Iterable<Element> barrasSuperiores = find
+        .byType(BarraSuperior)
+        .evaluate()
+        .where((Element e) {
+          final RenderBox? rb = e.findRenderObject() as RenderBox?;
+          return rb != null && rb.hasSize;
+        });
+    for (final Element e in barrasSuperiores) {
+      final double baseBarra = t
+          .getBottomLeft(find.byWidget(e.widget))
+          .dy;
+      if (baseBarra > topoUtil && baseBarra < topoDaBarra) {
+        topoUtil = baseBarra;
+      }
+    }
+    final double alturaVisivel = topoDaBarra - topoUtil;
     expect(
       r.top,
       // Folga de ruído de ponto flutuante: `ensureVisible` alinha o alvo ao
-      // topo e o topo sai como -1e-13 (visto no "ver tudo" do Início, T115).
-      greaterThanOrEqualTo(-0.01),
-      reason: '${nomeDa(c)}: o alvo ficou acima da janela ($r)',
+      // topo da área útil e o topo sai com pequena folga.
+      greaterThanOrEqualTo(topoUtil - 0.01),
+      reason: '${nomeDa(c)}: o alvo ($r) ficou atrás da faixa superior ($topoUtil)',
     );
-    if (r.height <= topoDaBarra) {
+    if (r.height <= alturaVisivel) {
       expect(
         r.bottom,
         lessThanOrEqualTo(topoDaBarra),
@@ -76,11 +96,12 @@ void main() {
 
       // --- Início
       expect(t.takeException(), isNull, reason: 'Início, ${nomeDa(c)}');
-      await exigirAcimaDaBarra(
-        t,
-        find.byKey(TelaInicio.chaveConversar),
-        c,
-      );
+      // A anfitriã (T053/T054) está lá, uma só, e o toque nela chega à vista
+      // acima da barra: encolher é o que ela faz para isso (o balão é texto, e
+      // texto longo rola: não é ação).
+      expect(find.byKey(TelaInicio.chaveMemora), findsOneWidget);
+      await exigirAcimaDaBarra(t, find.byKey(MemoraAnfitria.chaveDaAcao), c);
+      await exigirAcimaDaBarra(t, find.byKey(TelaInicio.chaveConversar), c);
       await exigirAcimaDaBarra(t, find.byKey(TelaInicio.chaveVerTudo), c);
 
       // --- Hub
@@ -98,7 +119,8 @@ void main() {
       expect(
         find.byKey(TelaConversa.chaveCampo),
         findsOneWidget,
-        reason: '${nomeDa(c)}: tocar na ação principal do Hub não abriu a '
+        reason:
+            '${nomeDa(c)}: tocar na ação principal do Hub não abriu a '
             'conversa',
       );
       expect(t.takeException(), isNull, reason: 'Conversa, ${nomeDa(c)}');

@@ -187,3 +187,87 @@ outros exigem 4,5:1.
 
 O azul `#1040F8` veio do protótipo e mede 6,75:1 com texto branco. A identidade
 visual foi preservada de propósito — não a altere sem medir.
+
+---
+
+## 11. Padrão Visual 2.0 e Tokens Evoluídos (Feature 007)
+
+A partir da Feature `007-redesenho-visual-profissional`, o Design System passa a
+separar blocos por **fundo, respiro e elevação sutil**, em vez de contornar
+tudo com bordas escuras de wireframe:
+
+- **Superfícies em `MemoraCores`**: `fundo` funciona como canvas suave
+  (`#F4F6FA` no tema Claro), contrastando com `superficie` (`#FFFFFF`),
+  `superficieSutil` (faixas, badges neutros e balão da pessoa),
+  `superficieBarra` (navegação inferior e barra do chat) e `bordaSutil` para
+  divisores leves de `1 dp`. No tema **Alto Contraste**, os contornos reforçados
+  (`borda`, `>= 3:1`) continuam automáticos e obrigatórios.
+- **Gradientes e Saúde**: `gradienteHeroiInicio` / `gradienteHeroiFim` com texto
+  em `sobreGradienteHeroi`, e `gradienteSaudeInicio` / `gradienteSaudeFim` com
+  `sobreGradienteSaude`, `saudeSuave` e `sucessoTexto` garantem leitura segura em
+  todos os 3 temas × 6 paletas.
+- **Elevação padronizada (`MemoraElevacao`)**: use
+  `MemoraElevacao.listaSombrasCartao(cores)` e
+  `MemoraElevacao.listaSombrasBarra(cores)` — ambos devolvem lista vazia no tema
+  Alto Contraste, onde o sinal visual passa para a borda reforçada.
+- **Dimensões e raios 2.0**: `MemoraDimensoes.badgeAtalhoRapido` (`48.0`),
+  `espessuraBordaSutil` (`1.0`), `indicadorAtivoBarra` (`3.0`),
+  `escalaColapsoGrade` (`1.5`), `larguraMinimaGrade` (`300`), além de
+  `MemoraRaio.badge` (`14`), `cartaoMedio` (`20`) e `cartaoDestaque` (`24`).
+
+---
+
+## 12. Novos componentes da versão 2.0 (Informação vs. Ação)
+
+A fronteira da `002/FR-012` permanece estrita nos novos blocos:
+
+| Componente | Papel | Pode tocar (`aoTocar`)? | Observações |
+|---|---|---|---|
+| `PainelHeroi` | Resumo principal de saúde/dados | **Não** | `Semantics(button: false, readOnly: true)`, algarismos tabulares |
+| `BadgeDeStatus` | Selo curto (`TomBadgeStatus`: `positivo`, `atencao`, `informativo`, `neutro`) | **Não** | Piso de `16 sp`, nunca formato de pílula clicável |
+| `LinhaDeLista` (sem `aoTocar`) | Linha informativa em lista | **Não** | Sem seta nem superfície de toque |
+| `CartaoHeroi` | Ação principal da tela (ex.: conversar) | **Sim (obrigatório)** | Pista explícita (`rotuloAcao` + seta) e semântica de botão |
+| `TileAcaoRapida` | Atalho de grade com badge (`VarianteBadge`) | **Sim (opcional)** | Badge `48 dp` ocultado em ampliações extremas, pista `"Abrir"` |
+| `ChipFiltro` | Filtro interativo em formato pílula | **Sim (obrigatório)** | Alvo mínimo `48 dp`; seleção por preenchimento, negrito e ícone |
+| `LinhaDeLista` (com `aoTocar`) | Navegação ou item acionável em grupo | **Sim** | Exibe seta de navegação e respeita alvo mínimo `48 dp` |
+
+---
+
+## 13. Mascote unificado (`MemoraPersonagem`)
+
+`ExpressaoDaMemora` centraliza as **6 expressões** da Memora, que desde a
+feature 013 é **vetorial em 2.5D, desenhada pelo aplicativo** (`MemoraAnimada`),
+e não mais imagem: segue a paleta e o tema, fica parada com "reduzir movimento"
+e responde ao toque com um aceno ou uma piscada (`reageAoToque`; a área de toque
+fica a 8 dp de qualquer botão):
+
+- `neutra` — repouso, boas-vindas, perfil, saúde;
+- `falando` — conversa, ajuda e orientações;
+- `comemorando` — conclusão de etapa ou conta criada;
+- `preocupada` — avisos antigolpe e atenção imediata (com escudo);
+- `dica` — cartões de sugestão, exemplo guiado e dicas (com livro);
+- `mini` — só a cabeça, para balões e cabeçalhos estreitos.
+
+No Início ela é a **anfitriã** (`MemoraAnfitria`): flutua, fala por um balão de
+dicas e adia a troca da dica a cada toque na tela (`atividade`).
+
+---
+
+## 14. Ditado por voz na Conversa (`FR-013`)
+
+O microfone da conversa segue os **Princípios I e II da Constituição**:
+
+1. **Domínio isolado**: o contrato `LeitorDeVoz` (`EstadoDitado`,
+   `ResultadoDitado`) e a implementação nativa `LeitorDeVozSpeechToText`
+   (`pt_BR`) operam exclusivamente em memória. Nenhum áudio é gravado em disco
+   nem registrado em logs.
+2. **Explicação antes da permissão**: no primeiro acionamento de
+   `TelaConversa.chaveMicrofone`, um diálogo prévio
+   (`TelaConversa.chaveDialogoPermissaoVoz`) explica o motivo do uso do microfone
+   antes da abertura do canal nativo.
+3. **Somente rascunho, sem envio automático**: o texto ditado preenche o campo de
+   mensagem (`rascunho`) no `ControladorConversa` para a pessoa conferir e tocar
+   em enviar manualmente, acompanhado por uma faixa acessível com
+   `liveRegion: true` (`TelaConversa.chaveStatusVoz`) em caso de escuta,
+   indisponibilidade ou erro.
+

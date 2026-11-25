@@ -41,15 +41,22 @@ abstract final class TextosApresentacao {
   /// Título do quadro do que a Memora nunca faz.
   static const String tituloNunca = 'O que eu nunca faço';
 
-  /// O que **ninguém do Memora** faz (FR-036a).
+  /// Garantia de canal único: a Memora só fala com a pessoa dentro do
+  /// aplicativo (FR-035).
+  static const String soDentroDoAplicativo =
+      'Eu só falo com você dentro do aplicativo — nunca por mensagem, '
+      'ligação ou rede social.';
+
+  /// O que **ninguém do Memora** faz (FR-036a, FR-035).
   ///
   /// Literal de propósito: a versão "o Memora nunca pede senha" seria falsa,
   /// porque ele pede a senha no login, na recuperação e na confirmação do
   /// canal. O que ninguém faz é pedir **por telefone, mensagem ou e-mail**.
-  /// São quatro frases curtas, e não um parágrafo: quem lê devagar acha cada
+  /// São cinco frases curtas, e não um parágrafo: quem lê devagar acha cada
   /// uma sem reler as outras.
   static const List<String> nuncaFaco = <String>[
     'Eu nunca peço sua senha ou um código por telefone, mensagem ou e-mail.',
+    soDentroDoAplicativo,
     'Ninguém do Memora liga para você.',
     'Eu nunca peço para instalar um aplicativo fora da loja oficial, nem '
         '"para o Memora funcionar".',
@@ -71,7 +78,7 @@ abstract final class TextosApresentacao {
   /// A Memora explica a conversa.
   static const String conversa =
       'Quando você tiver uma dúvida, é só me perguntar, do seu jeito. Eu '
-      'mostro o caminho, para que da próxima vez você consiga sozinha.';
+      'mostro o caminho, para que da próxima vez você consiga por conta própria.';
 
   /// Ela ensina, não faz por ela (Princípio VII).
   static const String ensinoNaoSubstituo =
@@ -94,8 +101,8 @@ abstract final class TextosApresentacao {
 
   /// A resposta de exemplo, no balão da Memora.
   static const String exemploResposta =
-      'Claro! Primeiro abra o WhatsApp e entre na conversa com quem vai '
-      'receber a foto. Quando estiver lá, me avise, e eu mostro o próximo '
+      'Claro, primeiro abra o WhatsApp e entre na conversa com quem vai '
+      'receber a foto. Quando estiver lá, me avise que eu mostro o próximo '
       'passo.';
 
   /// Fecha a apresentação e leva ao Início.

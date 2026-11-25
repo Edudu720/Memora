@@ -30,7 +30,7 @@ void main() {
       );
       final Finder voltar = find.byKey(CabecalhoDeTela.chaveVoltar);
       expect(
-        find.descendant(of: voltar, matching: find.byIcon(Icons.arrow_back)),
+        find.descendant(of: voltar, matching: find.byIcon(Icons.arrow_back_rounded)),
         findsOneWidget,
       );
       expect(
@@ -134,6 +134,29 @@ void main() {
         ),
       );
       expect(find.byKey(CabecalhoDeTela.chaveFigura), findsOneWidget);
+    });
+
+    testWidgets('suporta novas expressões dica e mini no Cabecalho e BarraSuperior', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(
+        app(
+          const Column(
+            children: <Widget>[
+              CabecalhoDeTela(
+                titulo: 'Dica rápida',
+                memora: ExpressaoDaMemora.dica,
+              ),
+              BarraSuperior(
+                titulo: 'Guia prático',
+                memora: ExpressaoDaMemora.mini,
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.byType(MemoraPersonagem), findsNWidgets(2));
+      expect(t.takeException(), isNull);
     });
 
     testWidgets('some a partir de 175% de texto', (WidgetTester t) async {

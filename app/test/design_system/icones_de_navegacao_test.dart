@@ -1,60 +1,46 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 
 import 'contraste_test.dart' show contraste;
 
-/// Os ícones da barra inferior — T112, FR-015 da feature 004.
+/// Os ícones da barra inferior — T057, FR-045 da feature 013 (R5).
 ///
-/// Dois portões. O primeiro lê os **arquivos**: grade, traço e cor são o que
-/// faz os três pesarem igual, e um arquivo novo desenhado em outra grade
-/// quebraria isso sem nenhum widget reclamar. O segundo monta a barra nos três
-/// temas e confere o contraste do que ela **de fato** pinta.
+/// Dois portões. O primeiro confere a **família**: os desenhos próprios da 004
+/// (`assets/icones/navegacao/`) saíram, e cada destino usa o ícone arredondado
+/// que vem com o Flutter, como o resto do aplicativo. O segundo monta a barra
+/// nos três temas e confere o contraste do que ela **de fato** pinta.
 void main() {
-  group('Os arquivos — mesma grade, mesmo traço, nenhuma cor própria', () {
-    for (final IconeDeNavegacao icone in IconeDeNavegacao.values) {
-      for (final bool preenchido in <bool>[false, true]) {
-        final String caminho = icone.caminho(preenchido: preenchido);
+  group('A família — um estilo só (FR-045)', () {
+    const Map<IconeDeNavegacao, IconData> esperados =
+        <IconeDeNavegacao, IconData>{
+          IconeDeNavegacao.ajustes: Icons.settings_rounded,
+          IconeDeNavegacao.inicio: Icons.home_rounded,
+          IconeDeNavegacao.perfil: Icons.person_rounded,
+        };
 
-        test(caminho, () {
-          final File arquivo = File(caminho);
-          expect(arquivo.existsSync(), isTrue, reason: 'o par precisa existir');
-          final String svg = arquivo.readAsStringSync();
-
-          // A mesma grade: com viewBox diferente, o "mesmo tamanho" de
-          // MemoraDimensoes.iconeDestaque deixaria de ser a mesma área.
-          expect(svg, contains('viewBox="0 0 24 24"'));
-
-          // O mesmo traço em todo elemento que traça — e que traça.
-          final Iterable<RegExpMatch> tracos = RegExp(
-            r'stroke-width="([^"]+)"',
-          ).allMatches(svg);
-          expect(tracos, isNotEmpty);
-          for (final RegExpMatch t in tracos) {
-            expect(t.group(1), '2', reason: 'o traço é de 2 em toda a barra');
-          }
-
-          // Cor fixa no arquivo é cor que o tema não alcança. O filtro do
-          // widget só tinge o que é opaco, e `currentColor` não diz cor
-          // nenhuma — o que o arquivo precisa dizer é a ausência.
-          expect(
-            RegExp(r'#[0-9a-fA-F]{3,8}\b').hasMatch(svg),
-            isFalse,
-            reason: 'sem cor própria: quem tinge é o tema',
-          );
-          expect(svg, contains('currentColor'));
-          expect(svg, isNot(contains('rgb(')));
-        });
+    test('todo destino tem desenho, e é o arredondado', () {
+      expect(esperados.keys.toSet(), IconeDeNavegacao.values.toSet());
+      for (final IconeDeNavegacao icone in IconeDeNavegacao.values) {
+        expect(icone.dados, esperados[icone], reason: icone.name);
       }
-    }
+    });
 
-    test('o pubspec declara a pasta, senão o app não acha os desenhos', () {
+    test('os três são da mesma fonte de ícones', () {
+      final Set<String?> familias = <String?>{
+        for (final IconeDeNavegacao icone in IconeDeNavegacao.values)
+          icone.dados.fontFamily,
+      };
+      expect(familias, <String?>{'MaterialIcons'});
+    });
+
+    test('os SVG próprios saíram: pasta apagada e fora do pubspec', () {
+      expect(Directory('assets/icones/navegacao').existsSync(), isFalse);
       expect(
         File('pubspec.yaml').readAsStringSync(),
-        contains('assets/icones/navegacao/'),
+        isNot(contains('assets/icones/navegacao/')),
       );
     });
   });
@@ -97,22 +83,21 @@ void main() {
           ),
         );
 
-        ColorFilter? filtroDe(int posicao) => t
-            .widget<SvgPicture>(
+        Color? corDoIcone(int posicao) => t
+            .widget<Icon>(
               find.descendant(
                 of: find.byKey(NavegacaoInferior.chaveDoIcone(posicao)),
-                matching: find.byType(SvgPicture),
+                matching: find.byType(Icon),
               ),
             )
-            .colorFilter;
+            .color;
 
-        // O que a barra pinta, e não o que a paleta tem: o filtro é lido do
+        // O que a barra pinta, e não o que a paleta tem: a cor é lida do
         // widget. Se alguém trocar a cor do ícone, o par medido abaixo
         // deixa de ser o que está na tela e este teste reprova.
-        const BlendMode modo = BlendMode.srcIn;
-        expect(filtroDe(2), ColorFilter.mode(c.primaria, modo));
-        expect(filtroDe(1), ColorFilter.mode(c.texto, modo));
-        expect(filtroDe(3), ColorFilter.mode(c.texto, modo));
+        expect(corDoIcone(2), c.primaria);
+        expect(corDoIcone(1), c.texto);
+        expect(corDoIcone(3), c.texto);
 
         // Atrás do ícone atual há a pílula; atrás dos outros, a barra.
         expect(
@@ -121,12 +106,12 @@ void main() {
           reason: 'ícone atual sobre a pílula',
         );
         expect(
-          contraste(c.primaria, c.superficieAlt),
+          contraste(c.primaria, c.superficieBarra),
           greaterThanOrEqualTo(3),
           reason: 'ícone atual sobre a barra',
         );
         expect(
-          contraste(c.texto, c.superficieAlt),
+          contraste(c.texto, c.superficieBarra),
           greaterThanOrEqualTo(3),
           reason: 'ícone inativo sobre a barra',
         );
@@ -140,7 +125,7 @@ void main() {
               )
               .first,
         );
-        expect(barra.color, c.superficieAlt);
+        expect(barra.color, c.superficieBarra);
       });
     }
   });

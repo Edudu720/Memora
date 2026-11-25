@@ -8,8 +8,9 @@ CPU) e medir.
 | Peça | Onde | Custo |
 |---|---|---|
 | Backend (Docker) | Render, plano **Free**, região **Virginia** | US$ 0 |
+| Site tutorial (`site/`) | Render, **Static Site** (CDN, não dorme) | US$ 0 |
 | Banco PostgreSQL | **Neon**, plano Free, região **AWS us-east-1** | US$ 0 |
-| Manter acordado | ping externo a cada 10 min | US$ 0 |
+| Manter acordado | ping externo a cada 10 min (apenas no backend) | US$ 0 |
 | IA | Gemini, nível gratuito (ADR-002, Emenda 1) | US$ 0 |
 
 ---
@@ -34,6 +35,18 @@ CPU) e medir.
   5 min** e cobra tempo de computação. Por isso o health check do Render e o
   ping usam **`/actuator/health/liveness`**, que não toca no banco. O
   `/actuator/health` consulta o banco e o manteria acordado o mês inteiro.
+- **Conexão aberta também mantém o Neon acordado.** Em 2026-11-17 o primeiro
+  projeto gastou as **100 CU-hora gratuitas do mês em ~16 dias** e foi
+  suspenso, com o ping certo no `/liveness`: o Hikari mantinha as 20 conexões
+  do pool abertas o tempo todo (`minimum-idle` padrão = máximo), e o Neon nunca
+  dormia. O gráfico de RAM do Monitoring mostrava o compute **Active** a hora
+  inteira com CPU perto de zero. Hoje `minimum-idle=0` e `idle-timeout=60000`
+  (no `application.properties`) deixam as conexões paradas fecharem em 1 min, e
+  a limpeza de contas pendentes roda a cada 6 h. **Conferir depois de cada
+  implantação:** uns 10 min sem uso, o Monitoring deve mostrar a faixa
+  hachurada de "Endpoint inactive". Se a cota acabar de novo, o limite é **por
+  projeto** (o plano gratuito permite vários): um projeto novo na mesma conta
+  volta a funcionar, ao custo dos dados.
 - **Virginia + us-east-1**: as duas peças na mesma região. Cada requisição faz
   várias consultas, e banco longe do servidor multiplica a latência.
 
@@ -62,7 +75,8 @@ este passo pode exigir o Eduardo.
    e escolha `Edudu720/Memora`. O Render lê o [`render.yaml`](../../render.yaml).
 2. Ele vai pedir os valores marcados `sync: false`:
    - `DATABASE_URL`: a URL direta do Neon do passo 1;
-   - `GEMINI_API_KEY`: a chave do Gemini.
+   - `GEMINI_API_KEY`: a chave do Gemini;
+   - `MEMORA_LOCALIZADOR_GEOAPIFY_API_KEY`: a chave da Geoapify para o Localizador de Serviços (opcional, mas recomendada no Render para busca rápida via Places/Geocoding; quando vazia, o backend usa as instâncias públicas do Overpass com fallback de busca delimitada por viewbox no Nominatim).
 3. **Apply.** O build leva alguns minutos, e a primeira subida, ~3,5 min. O
    Flyway aplica as migrations no Neon.
 
@@ -74,6 +88,7 @@ O que o `render.yaml` já define, e não precisa de mão:
 | `MEMORA_CHAVE_ORIGEM` | `generateValue` | Fixa entre reinícios; sem ela, a contagem por origem da R4 zera |
 | `MEMORA_ASSISTENTE_PROVEDOR` | `gemini` | Vazio cairia no simulado |
 | `MEMORA_ASSISTENTE_GEMINI_MODELO` | `gemini-3.6-flash` | O `3.8` deu 503 por sobrecarga em 2026-10-21 (ADR-002) |
+| `MEMORA_ASSISTENTE_GEMINI_MODELO_RESERVA` | `gemini-3.5-flash-lite` | Reserva automática antes do 1º trecho quando o principal sofre `429` ou `5xx` persistente |
 
 ⚠️ **Não ponha `SPRING_PROFILES_ACTIVE=producao`.** Esse perfil não tem
 `EnviadorDeCodigo` (T065a) e a aplicação não sobe, de propósito. Sem ele, os
@@ -92,6 +107,34 @@ curl.exe https://<servico>.onrender.com/actuator/health/liveness
 
 Deve responder `{"status":"UP"}`. O `/actuator/health` (com o banco) também
 responde, mas não o use para o ping.
+
+## 2b. Site tutorial estático (`memora-site`)
+
+O mesmo [`render.yaml`](../../render.yaml) declara o serviço `memora-site`
+(`runtime: static`, `staticPublishPath: site`, sem etapa de build). Por ser
+hospedagem estática no Render, **ele não dorme** e não precisa de ping externo;
+além disso, possui `buildFilter` próprio (`site/**` e `render.yaml`) para não
+reconstruir quando apenas o backend ou o app mudarem.
+
+1. Depois do merge na branch configurada do Blueprint (`develop`), confirme no
+   painel do Render se o serviço `memora-site` foi criado/sincronizado.
+2. URL oficial publicada em produção:
+   **`https://memora-site-thf2.onrender.com/`**
+   (**atenção**: o subdomínio exato `https://memora-site.onrender.com` pertence
+   a outro projeto externo no Render e não deve ser usado).
+3. Confira que os cabeçalhos de segurança estão ativos:
+
+```powershell
+curl.exe -I https://memora-site-thf2.onrender.com/
+```
+
+Deve responder `200 OK` com `Content-Security-Policy`, `X-Frame-Options: DENY`,
+`X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` e
+`Permissions-Policy`.
+
+4. A URL oficial `https://memora-site-thf2.onrender.com/` já está configurada
+   como padrão em `Ambiente.urlSiteTutorialPadrao` (`MEMORA_URL_SITE_TUTORIAL`)
+   para habilitar o botão do site na tela de Ajuda (**Issue #106 — Item 11**).
 
 ## 3. Ping a cada 10 minutos
 
@@ -119,6 +162,10 @@ Pendências antes de mandar o APK para alguém de fora:
 ```powershell
 $env:TEMP="C:\memora-tmp"; $env:TMP="C:\memora-tmp"; cd app; flutter build apk --release --dart-define=MEMORA_URL_BASE=https://<servico>.onrender.com/v1 --dart-define=MEMORA_SERVIDOR_REAL=true
 ```
+
+*(O endereço oficial do site de tutoriais `https://memora-site-thf2.onrender.com/`
+já é assumido por padrão via `Ambiente.urlSiteTutorialPadrao`, podendo ser
+sobrescrito com `--dart-define=MEMORA_URL_SITE_TUTORIAL=...` se necessário.)*
 
 Na máquina do Henrique, reverta `app/pubspec.lock` e
 `app/android/gradle.properties` depois do build.

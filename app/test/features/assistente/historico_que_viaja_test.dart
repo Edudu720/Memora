@@ -23,6 +23,7 @@ class _RepositorioQueAnota implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async {
     historicos.add(List<MensagemDaConversa>.of(historico));
     return const AssistenteRespondeu('Vamos juntos.');

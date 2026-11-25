@@ -1,5 +1,5 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
@@ -33,9 +33,9 @@ class IconeDoAplicativo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
-    final String normalizada = (chave.isNotEmpty ? chave : (nome ?? ''))
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final String normalizada = _normalizarChave(
+      chave.isNotEmpty ? chave : (nome ?? ''),
+    );
 
     return MediaQuery.withNoTextScaling(
       child: ClipRRect(
@@ -49,11 +49,74 @@ class IconeDoAplicativo extends StatelessWidget {
     );
   }
 
+  /// Mapa constante dos 10 ícones vetoriais compartilhados em
+  /// `assets/icones_apps/` (Feature 016 Item 6 + Feature 019 Item 13).
+  static const Map<String, String> _iconesSvgPorChave = <String, String>{
+    'youtube': 'assets/icones_apps/youtube.svg',
+    'tiktok': 'assets/icones_apps/tiktok.svg',
+    'googlefotos': 'assets/icones_apps/google-fotos.svg',
+    'meuinss': 'assets/icones_apps/meu-inss.svg',
+    'poupatempo': 'assets/icones_apps/poupatempo.svg',
+    'carteiradigital': 'assets/icones_apps/carteira-digital.svg',
+    'carteiradetrabalho': 'assets/icones_apps/carteira-de-trabalho.svg',
+    'instagram': 'assets/icones_apps/instagram.svg',
+    'etitulo': 'assets/icones_apps/e-titulo.svg',
+    'fgts': 'assets/icones_apps/fgts.svg',
+  };
+
+  static String? _buscarSvgPorChave(String normalizada) {
+    final String? direto = _iconesSvgPorChave[normalizada];
+    if (direto != null) return direto;
+    if (normalizada.contains('trabalho')) {
+      return _iconesSvgPorChave['carteiradetrabalho'];
+    }
+    if (normalizada.contains('carteira')) {
+      return _iconesSvgPorChave['carteiradigital'];
+    }
+    if (normalizada.contains('youtube')) {
+      return _iconesSvgPorChave['youtube'];
+    }
+    if (normalizada.contains('tiktok')) {
+      return _iconesSvgPorChave['tiktok'];
+    }
+    if (normalizada.contains('foto') ||
+        (normalizada.contains('google') && !normalizada.contains('gov'))) {
+      return _iconesSvgPorChave['googlefotos'];
+    }
+    if (normalizada.contains('inss')) {
+      return _iconesSvgPorChave['meuinss'];
+    }
+    if (normalizada.contains('poupatempo')) {
+      return _iconesSvgPorChave['poupatempo'];
+    }
+    if (normalizada.contains('instagram')) {
+      return _iconesSvgPorChave['instagram'];
+    }
+    if (normalizada.contains('titulo')) {
+      return _iconesSvgPorChave['etitulo'];
+    }
+    if (normalizada.contains('fgts')) {
+      return _iconesSvgPorChave['fgts'];
+    }
+    return null;
+  }
+
   Widget _desenharIcone(
     BuildContext context,
     String normalizada,
     MemoraCores cores,
   ) {
+    final String? caminhoSvg = _buscarSvgPorChave(normalizada);
+    if (caminhoSvg != null) {
+      return SvgPicture.asset(
+        caminhoSvg,
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.cover,
+        excludeFromSemantics: true,
+      );
+    }
+
     // 1. WhatsApp (logo oficial fornecida)
     if (normalizada.contains('whatsapp')) {
       return Image.asset(
@@ -64,299 +127,53 @@ class IconeDoAplicativo extends StatelessWidget {
       );
     }
 
-    // 2. YouTube
-    if (normalizada.contains('youtube')) {
-      return Container(
-        color: const Color(0xFFFF0000),
-        alignment: Alignment.center,
-        child: CustomPaint(
-          size: Size(tamanho * 0.48, tamanho * 0.48),
-          painter: _TrianguloBrancoPainter(),
-        ),
-      );
-    }
-
-    // 3. Instagram
-    if (normalizada.contains('instagram')) {
-      return Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(-0.8, 0.8),
-            radius: 1.25,
-            colors: <Color>[
-              Color(0xFFFFDC80),
-              Color(0xFFF77737),
-              Color(0xFFF56040),
-              Color(0xFFFD1D1D),
-              Color(0xFFE1306C),
-              Color(0xFFC13584),
-              Color(0xFF833AB4),
-              Color(0xFF5851DB),
-            ],
-          ),
-        ),
-        alignment: Alignment.center,
-        child: CustomPaint(
-          size: Size(tamanho * 0.65, tamanho * 0.65),
-          painter: _CameraInstagramPainter(),
-        ),
-      );
-    }
-
-    // 4. Facebook
+    // 4. Facebook (logo oficial fornecida)
     if (normalizada.contains('facebook')) {
-      return Container(
-        color: const Color(0xFF1877F2),
-        alignment: Alignment.bottomRight,
-        child: Transform.translate(
-          offset: Offset(tamanho * 0.04, tamanho * 0.05),
-          child: Text(
-            'f',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: tamanho * 0.90,
-              fontWeight: FontWeight.w900,
-              fontFamily: 'sans-serif',
-              height: 1.0,
-            ),
-          ),
-        ),
+      return Image.asset(
+        'assets/ilustracoes/facebook_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
-    // 5. TikTok
-    if (normalizada.contains('tiktok')) {
-      return Container(
-        color: const Color(0xFF010101),
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Transform.translate(
-              offset: const Offset(-2.0, -1.5),
-              child: Icon(
-                Icons.music_note_rounded,
-                color: const Color(0xFF00F2FE),
-                size: tamanho * 0.68,
-              ),
-            ),
-            Transform.translate(
-              offset: const Offset(2.0, 1.5),
-              child: Icon(
-                Icons.music_note_rounded,
-                color: const Color(0xFFFE2C55),
-                size: tamanho * 0.68,
-              ),
-            ),
-            Icon(
-              Icons.music_note_rounded,
-              color: Colors.white,
-              size: tamanho * 0.68,
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 6. Telegram
+    // 6. Telegram (logo oficial fornecida)
     if (normalizada.contains('telegram')) {
-      return Container(
-        color: const Color(0xFF229ED9),
-        alignment: Alignment.center,
-        child: Transform.translate(
-          offset: Offset(-tamanho * 0.03, 0),
-          child: Icon(
-            Icons.send_rounded,
-            color: Colors.white,
-            size: tamanho * 0.58,
-          ),
-        ),
+      return Image.asset(
+        'assets/ilustracoes/telegram_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
-    // 7. Google Fotos
-    if (normalizada.contains('foto') || normalizada.contains('google')) {
-      return Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(tamanho * 0.12),
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Positioned(
-              top: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEA4335), // vermelho
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4285F4), // azul
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF34A853), // verde
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            Positioned(
-              left: 0,
-              child: Container(
-                width: tamanho * 0.32,
-                height: tamanho * 0.32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFBBC05), // amarelo
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 8. Gov.br (Azul Marinho Oficial)
+    // 8. Gov.br (logo oficial fornecida)
     if (normalizada.contains('gov')) {
-      return Container(
-        color: const Color(0xFF002776),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.account_balance_rounded,
-          color: Colors.white,
-          size: tamanho * 0.62,
-        ),
+      return Image.asset(
+        'assets/ilustracoes/gov_br_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
-    // 9. Meu INSS (Azul Previdência)
-    if (normalizada.contains('inss')) {
-      return Container(
-        color: const Color(0xFF003882),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.health_and_safety_rounded,
-          color: const Color(0xFFFFD100),
-          size: tamanho * 0.64,
-        ),
-      );
-    }
-
-    // 10. E-Título (Verde Eleitoral)
-    if (normalizada.contains('titulo')) {
-      return Container(
-        color: const Color(0xFF0E5E35),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.how_to_vote_rounded,
-          color: const Color(0xFFFFDF00),
-          size: tamanho * 0.62,
-        ),
-      );
-    }
-
-    // 11. Serasa (Magenta Serasa)
+    // 11. Serasa (logo oficial fornecida)
     if (normalizada.contains('serasa')) {
-      return Container(
-        color: const Color(0xFFE6007E),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.verified_user_rounded,
-          color: Colors.white,
-          size: tamanho * 0.62,
-        ),
+      return Image.asset(
+        'assets/ilustracoes/serasa_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
-    // 12. FGTS (Azul Caixa com Laranja)
-    if (normalizada.contains('fgts')) {
-      return Container(
-        color: const Color(0xFF005CA9),
-        alignment: Alignment.center,
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: tamanho * 0.28,
-              child: Container(color: const Color(0xFFF26522)),
-            ),
-            Icon(
-              Icons.savings_rounded,
-              color: Colors.white,
-              size: tamanho * 0.60,
-            ),
-          ],
-        ),
-      );
-    }
-
-    // 13. Poupatempo (Vermelho SP)
-    if (normalizada.contains('poupatempo')) {
-      return Container(
-        color: const Color(0xFFCC1414),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.schedule_rounded,
-          color: Colors.white,
-          size: tamanho * 0.64,
-        ),
-      );
-    }
-
-    // 14. Carteira Digital de Trânsito (Verde CDT)
-    if (normalizada.contains('carteira') && !normalizada.contains('trabalho')) {
-      return Container(
-        color: const Color(0xFF146342),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.drive_eta_rounded,
-          color: const Color(0xFFFFD100),
-          size: tamanho * 0.62,
-        ),
-      );
-    }
-
-    // 15. Carteira de Trabalho (Azul CTPS)
-    if (normalizada.contains('trabalho')) {
-      return Container(
-        color: const Color(0xFF0B2545),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.badge_rounded,
-          color: Colors.white,
-          size: tamanho * 0.62,
-        ),
-      );
-    }
-
-    // 16. Correios (Amarelo Correios)
+    // 16. Correios (logo oficial fornecida)
     if (normalizada.contains('correios')) {
-      return Container(
-        color: const Color(0xFFFFCC00),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.markunread_mailbox_rounded,
-          color: const Color(0xFF004184),
-          size: tamanho * 0.64,
-        ),
+      return Image.asset(
+        'assets/ilustracoes/correios_logo.png',
+        width: tamanho,
+        height: tamanho,
+        fit: BoxFit.contain,
       );
     }
 
@@ -371,58 +188,16 @@ class IconeDoAplicativo extends StatelessWidget {
       ),
     );
   }
-}
 
-/// Desenha o triângulo branco clássico do YouTube.
-class _TrianguloBrancoPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    final Path path = Path()
-      ..moveTo(size.width * 0.15, size.height * 0.1)
-      ..lineTo(size.width * 0.95, size.height * 0.5)
-      ..lineTo(size.width * 0.15, size.height * 0.9)
-      ..close();
-
-    canvas.drawPath(path, paint);
+  static String _normalizarChave(String entrada) {
+    final String semAcento = entrada
+        .toLowerCase()
+        .replaceAll(RegExp(r'[áàãâä]'), 'a')
+        .replaceAll(RegExp(r'[éèêë]'), 'e')
+        .replaceAll(RegExp(r'[íìîï]'), 'i')
+        .replaceAll(RegExp(r'[óòõôö]'), 'o')
+        .replaceAll(RegExp(r'[úùûü]'), 'u')
+        .replaceAll('ç', 'c');
+    return semAcento.replaceAll(RegExp(r'[^a-z0-9]'), '');
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Desenha a silhueta da câmera do Instagram (quadrado arredondado + círculo + ponto).
-class _CameraInstagramPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint strokePaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = math.max(2.0, size.width * 0.08);
-
-    final Paint fillPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    // Moldura arredondada
-    final RRect rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      Radius.circular(size.width * 0.28),
-    );
-    canvas.drawRRect(rrect, strokePaint);
-
-    // Lente circular central
-    final Offset center = Offset(size.width / 2, size.height / 2);
-    canvas.drawCircle(center, size.width * 0.22, strokePaint);
-
-    // Ponto de flash
-    final Offset flash = Offset(size.width * 0.78, size.height * 0.22);
-    canvas.drawCircle(flash, size.width * 0.05, fillPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

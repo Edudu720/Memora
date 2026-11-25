@@ -156,35 +156,42 @@ class _TelaLoginState extends State<TelaLogin> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      // Top Hero Mascot Banner inspirado no design-1.jpg
+                      // Top Hero Mascot Banner alinhado ao DS 2.0
                       if (cabeMascote)
-                        Container(
-                    margin: const EdgeInsets.only(bottom: MemoraEspacamento.md),
-                    padding: const EdgeInsets.all(MemoraEspacamento.md),
-                    decoration: BoxDecoration(
-                      color: cores.superficie,
-                      borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-                      border: Border.all(color: cores.borda),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        const Center(
-                          child: MemoraPersonagem(),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: MemoraEspacamento.md,
+                          ),
+                          child: Cartao(
+                            padding: const EdgeInsets.all(MemoraEspacamento.md),
+                            child: Column(
+                              children: <Widget>[
+                                Center(
+                                  // Uma Memora por tela (FR-006): enquanto a
+                                  // espera tem a sua, esta cede o lugar (o
+                                  // espaço fica, para a tela não pular).
+                                  child: c.enviando
+                                      ? const SizedBox.square(
+                                          dimension: MemoraDimensoes
+                                              .ilustracaoCabecalho,
+                                        )
+                                      : const MemoraPersonagem(),
+                                ),
+                                const SizedBox(height: MemoraEspacamento.sm),
+                                const TextoMemora(
+                                  'Memora',
+                                  estilo: EstiloTexto.destaque,
+                                  alinhamento: TextAlign.center,
+                                ),
+                                const SizedBox(height: MemoraEspacamento.xs),
+                                const TextoMemora.apoio(
+                                  'Seu assistente digital para usar o celular com facilidade',
+                                  alinhamento: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: MemoraEspacamento.sm),
-                        const TextoMemora(
-                          'Memora',
-                          estilo: EstiloTexto.destaque,
-                          alinhamento: TextAlign.center,
-                        ),
-                        const SizedBox(height: MemoraEspacamento.xs),
-                        const TextoMemora.apoio(
-                          'Seu assistente digital para usar o celular com facilidade',
-                          alinhamento: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
                   CaixaDeEtapa(
                     instrucao: TextosAutenticacao.tituloLogin,
                     child: Column(
@@ -216,6 +223,8 @@ class _TelaLoginState extends State<TelaLogin> {
                         if (c.mensagemDeErro != null) ...<Widget>[
                           const SizedBox(height: MemoraEspacamento.md),
                           MensagemErro(
+                            // A Memora desta tela é a do cartão (FR-006).
+                            comMemora: false,
                             mensagem: c.mensagemDeErro!,
                             // Durante o bloqueio não há o que tentar: o botão de
                             // repetir só reapresentaria a mesma recusa e faria a
@@ -243,7 +252,7 @@ class _TelaLoginState extends State<TelaLogin> {
                           BotaoPrimario(
                             key: TelaLogin.chaveEntrar,
                             rotulo: TextosAutenticacao.botaoEntrar,
-                            icone: Icons.arrow_forward,
+                            icone: Icons.arrow_forward_rounded,
                             aoTocar: c.podeEnviar ? c.entrar : null,
                           ),
                       ],

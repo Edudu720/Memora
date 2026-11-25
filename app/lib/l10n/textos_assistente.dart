@@ -39,6 +39,16 @@ class TextosAssistente {
   /// O que essa porta faz.
   static const String descricaoAplicativos = 'Eu te ensino e posso abrir';
 
+  /// Rótulo quando o aplicativo cotidiano não está instalado no aparelho (T089).
+  static const String soEnsinaNaoInstalado =
+      'Eu te ensino (não instalado no celular)';
+
+  /// Aviso calmo na conversa quando a ação autorizada aponta para app ausente (T089).
+  static String naoInstaladoAntesDeAbrir(String nome) =>
+      'Olhei aqui e o $nome não está instalado neste celular, então não dá '
+      'para abrir para você agora. Posso continuar te explicando passo a passo '
+      'ou mostrar onde baixar na loja oficial!';
+
   /// Nome da porta de ajuda.
   static const String portaAjuda = 'Preciso de ajuda';
 
@@ -63,8 +73,7 @@ class TextosAssistente {
   /// Deixa claro que a Memora é um programa de computador, sem repetir o aviso.
   static const String convite =
       'Eu sou a Memora, um programa de computador para te ajudar. '
-      'Pode me perguntar do jeito que você fala. Não precisa escrever bonito, '
-      'e não tem pergunta boba 😊';
+      'Pode me perguntar do jeito que você fala — não tem pergunta boba.';
 
   /// Rótulo da ação de recomeçar a conversa (T085, FR-050).
   static const String rotuloRecomecar = 'Recomeçar conversa';
@@ -93,6 +102,68 @@ class TextosAssistente {
   /// Rótulo do botão de enviar.
   static const String botaoEnviar = 'Perguntar';
 
+  /// Rótulo do botão para iniciar o ditado por voz no rascunho (FR-013).
+  static const String botaoFalar = 'Falar';
+
+  /// Rótulo do botão para encerrar o ditado por voz em andamento (FR-013).
+  static const String botaoPararDitado = 'Parar';
+
+  /// Rótulo semântico completo do botão de microfone parado.
+  static const String dicaFalar = 'Ditar pergunta usando a voz';
+
+  /// Rótulo semântico completo do botão de microfone ouvindo.
+  static const String dicaPararDitado = 'Parar ditado por voz';
+
+  /// Indicação visível e falada enquanto o microfone está capturando fala.
+  static const String avisoOuvindoVoz =
+      'Estou te ouvindo… fale a sua pergunta e toque em Parar quando terminar.';
+
+  /// Título do diálogo prévio que explica a permissão de microfone.
+  static const String tituloPermissaoVoz = 'Usar o microfone para escrever';
+
+  /// Explicação em português simples antes de pedir a permissão ao sistema.
+  static const String explicacaoPermissaoVoz =
+      'Para transformar o que você fala em texto aqui na caixa de pergunta, '
+      'precisamos ligar o microfone. Nada fica gravado e nada é enviado '
+      'sozinho: você confere o texto e só envia quando tocar em Perguntar.';
+
+  /// Botão que confirma a explicação e autoriza o pedido ao aparelho.
+  static const String botaoConfirmarPermissaoVoz = 'Entendi, usar microfone';
+
+  /// Botão que fecha a explicação sem ligar o microfone.
+  static const String botaoRecusarPermissaoVoz = 'Prefiro digitar';
+
+  /// Fallback amigável quando o ditado é negado ou não suportado.
+  static const String vozIndisponivel =
+      'O microfone não pôde ser usado agora, mas você pode digitar sua '
+      'pergunta pelo teclado.';
+
+  /// Orientação acolhedora quando o pacote de voz offline em português falta
+  /// ou o aparelho recusa o reconhecimento estritamente local (FR-005).
+  static const String vozOfflineIndisponivel =
+      'O ditado por voz neste celular não está disponível agora, mas você pode '
+      'digitar sua pergunta pelo teclado.';
+
+  /// Mensagem amigável quando o reconhecimento falha momentaneamente.
+  static const String vozErro =
+      'Não consegui entender o que foi falado desta vez. Tente novamente ou '
+      'escreva pelo teclado.';
+
+  /// Título da grade 2x2 de sugestões na recepção da conversa.
+  static const String tituloSugestoesConversa = 'Exemplos do que perguntar';
+
+  /// Primeira sugestão rápida na recepção da conversa.
+  static const String sugestaoLetraMaior = 'Como aumento a letra?';
+
+  /// Segunda sugestão rápida na recepção da conversa.
+  static const String sugestaoFotos = 'Como ver fotos da família?';
+
+  /// Terceira sugestão rápida na recepção da conversa.
+  static const String sugestaoGolpe = 'Este aviso no celular é golpe?';
+
+  /// Quarta sugestão rápida na recepção da conversa.
+  static const String sugestaoWhatsapp = 'Como mandar áudio no WhatsApp?';
+
   /// Título do aviso permanente contra golpe (FR-033).
   static const String tituloAvisoAntigolpe = 'Eu nunca peço sua senha';
 
@@ -120,8 +191,8 @@ class TextosAssistente {
   /// fora é do nível gratuito, e a ADR-002 registra por quê.
   static const String avisoPrivacidade =
       'Para eu te responder, o que você escreve vai para um serviço de fora do '
-      'Memora, e pessoas de lá podem ler. Não escreva senha, documento, '
-      'endereço, nem nada sobre sua saúde ou seu dinheiro.';
+      'Memora, e pessoas de lá podem ler. Não escreva dados pessoais aqui: '
+      'nada de senha, documento, endereço, saúde ou dinheiro.';
 
   /// O que o **escudo** diz ao leitor de tela, depois da primeira pergunta
   /// (FR-022 e FR-049 da 004, T130; FR-033 e FR-051 da 003).
@@ -138,7 +209,7 @@ class TextosAssistente {
 
   /// Os dois avisos inteiros, na mesma caixa: o do golpe e o de privacidade.
   static const String avisosInteiros =
-      '$avisoAntigolpe\n\n$tituloAvisoPrivacidade. $avisoPrivacidade';
+      '$avisoAntigolpe\n\n$avisoPrivacidade';
 
   // ---------------------------------------------------------------------------
   // O consentimento antes da primeira mensagem — FR-051
@@ -154,11 +225,10 @@ class TextosAssistente {
   /// melhorar os programas dele e pode ser lido por gente. E o que não
   /// escrever.
   static const String corpoDoAceite =
-      'Para eu conseguir te responder, o que você escrever aqui é enviado a um '
-      'serviço do Google, fora do Memora. Esse serviço pode usar a conversa '
-      'para melhorar os programas dele, e pessoas de lá podem lê-la. Por isso, '
-      'nunca escreva senha, documento, endereço, nem nada sobre sua saúde ou '
-      'seu dinheiro.';
+      'O que você escrever aqui vai para um serviço do Google, fora do Memora, '
+      'que pode usar a conversa para melhorar os programas dele, e pessoas de '
+      'lá podem lê-la. Por isso, nunca escreva senha, documento, endereço, nem '
+      'nada sobre sua saúde ou seu dinheiro.';
 
   /// Aceita. Diz o que acontece, e não "OK".
   static const String botaoAceitar = 'Entendi, vamos conversar';
@@ -190,11 +260,11 @@ class TextosAssistente {
   /// *"Prefiro tentar"*, e não *"cancelar"*: quem recusa aqui está escolhendo
   /// aprender, e o texto reconhece isso em vez de tratar a recusa como
   /// desistência.
-  static const String botaoPrefiroTentar = 'Prefiro tentar sozinha';
+  static const String botaoPrefiroTentar = 'Prefiro tentar por conta própria';
 
   /// Reconhecimento depois de a pessoa fazer sozinha.
   static const String vocePodeFazerSozinha =
-      'Viu? Foi você quem fez 😊 Da próxima vez vai ser mais fácil.';
+      'Viu? Foi você quem fez, e da próxima vez vai ser mais fácil.';
 
   // ---------------------------------------------------------------------------
   // Catálogo — US5
@@ -206,9 +276,9 @@ class TextosAssistente {
   /// FR-041 é uma proteção, e precisa ser lida como tal — senão soa como
   /// limitação do produto.
   static const String porqueNaoAbroServicoSensivel =
-      'Esse eu te ensino, mas não abro. É de propósito: se eu abrisse banco e '
-      'governo, alguém poderia ligar dizendo ser do suporte e pedir a mesma '
-      'coisa. Assim você fica mais segura 😊';
+      'Esse eu te ensino, mas não abro: se eu abrisse banco e governo, '
+      'alguém poderia ligar fingindo ser do suporte e pedir a mesma coisa. '
+      'Assim é mais seguro para você.';
 
   /// A pergunta que já vem escrita ao tocar num serviço do catálogo (T077).
   ///
@@ -237,7 +307,7 @@ class TextosAssistente {
   /// ter quebrado o aparelho, é o mesmo que porta que não abre. Aponta o que
   /// funciona hoje.
   static const String catalogoVazioExplicacao =
-      'Mas você pode me perguntar sobre qualquer aplicativo na conversa 😊';
+      'Mas você pode me perguntar sobre qualquer aplicativo na conversa.';
 
   // ---------------------------------------------------------------------------
   // Falhas
@@ -261,7 +331,7 @@ class TextosAssistente {
   ///
   /// Não sugere que a pessoa fez algo errado — ela só conversou bastante.
   static const String limiteDeConversas =
-      'Conversamos bastante hoje 😊 Vamos continuar amanhã? Eu estarei aqui.';
+      'Conversamos bastante hoje — vamos continuar amanhã? Eu estarei aqui.';
 
   /// O serviço que gera as respostas está fora do ar, sem cota ou não
   /// respondeu no prazo (FR-057).
@@ -271,7 +341,7 @@ class TextosAssistente {
   /// — o limite do dia, que volta amanhã, tem texto próprio.
   static const String assistenteIndisponivel =
       'Estou com um pouquinho de dificuldade para pensar agora — não foi nada '
-      'que você fez. Vamos tentar de novo daqui a pouco? 😊';
+      'que você fez. Vamos tentar de novo daqui a pouco?';
 
   /// A sessão caiu — a renovação em silêncio foi recusada (T108, T111).
   ///
@@ -279,7 +349,7 @@ class TextosAssistente {
   /// um tempinho que você não usa") era errada. E ela é breve de propósito: o
   /// fluxo já está levando a pessoa à entrada.
   static const String sessaoExpirada =
-      'Por segurança, preciso que você entre de novo 😊';
+      'Por segurança, preciso que você entre de novo.';
 
   /// Qualquer outra falha.
   static const String inesperada =
@@ -292,9 +362,8 @@ class TextosAssistente {
   /// resultado, ela aprendeu que a Memora resolve. Vendo o caminho, ela tem
   /// chance de reconhecê-lo da próxima vez.
   static String caminhoPercorrido(String aplicativo) =>
-      'Pronto, abri o $aplicativo 😊 Olha o caminho que eu fiz, para você '
-      'reconhecer da próxima vez: toquei no ícone dele na sua tela inicial. '
-      'É só isso — quando quiser tentar, eu fico aqui do lado.';
+      'Pronto, abri o $aplicativo: toquei no ícone dele na sua tela inicial. '
+      'Quando quiser tentar, eu fico aqui do lado.';
 
   /// O aplicativo não estava instalado, ou não abriu.
   ///
@@ -310,7 +379,7 @@ class TextosAssistente {
   /// funcionou, e o que não funcionou foi a anotação da Memora.
   static String naoAnoteiNoRegistro(String aplicativo) =>
       'Abri o $aplicativo, mas não consegui anotar isso no seu Registro. '
-      'Não foi nada que você fez — pode usar o aplicativo com calma 😊';
+      'Não foi nada que você fez — pode usar o aplicativo com calma.';
 
   // ---------------------------------------------------------------------------
   // Registro — US4
@@ -322,7 +391,7 @@ class TextosAssistente {
   /// precisa saber que pode conferir, não que existe uma tabela imutável.
   static const String explicacaoDoRegistro =
       'Sempre que eu abrir alguma coisa no seu lugar, eu anoto aqui. Assim '
-      'você pode conferir quando quiser 😊';
+      'você pode conferir quando quiser.';
 
   /// Quando não há nada registrado.
   ///
@@ -330,7 +399,7 @@ class TextosAssistente {
   /// encontrado" faria a pessoa achar que perdeu alguma coisa.
   static const String registroVazio =
       'Ainda não precisei fazer nada no seu lugar. Continue assim que logo '
-      'você não vai mais precisar de mim para isso 😊';
+      'você não vai mais precisar de mim para isso.';
 
   /// O que foi feito, numa frase.
   static String oQueFoiFeito(String aplicativo, String pedido) =>

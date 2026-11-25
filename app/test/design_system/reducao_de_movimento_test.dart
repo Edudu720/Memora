@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/assistente/data/repositorio_assistente_simulado.dart';
@@ -15,6 +17,7 @@ import '../features/autenticacao/dubles_autenticacao.dart';
 import '../features/autenticacao/fluxo_dentro_da_conta.dart';
 import '../suporte/aceite_em_memoria.dart';
 import 'package:memora/services/seguranca/sessao_perdida.dart';
+import '../suporte/movimento.dart';
 
 /// V9 — redução de movimento (FR-027, FR-028).
 ///
@@ -33,6 +36,7 @@ import 'package:memora/services/seguranca/sessao_perdida.dart';
 /// pega esse terceiro no dia em que ele nascer, sem ninguém precisar lembrar
 /// de escrever um caso para ele.
 void main() {
+  movimentoLiberado();
   Future<void> montar(
     WidgetTester t,
     Widget filho, {
@@ -79,6 +83,47 @@ void main() {
               'passa a nao provar nada — e precisa ser reescrito, nao apagado');
       expect(duracoesDe(t), everyElement(Duration.zero));
     });
+
+    testWidgets(
+      'o botão suprime a escala ao pressionar (1.0) mas mantém o anel de foco externo',
+      (WidgetTester t) async {
+        await montar(
+          t,
+          BotaoPrimario(rotulo: 'Continuar', aoTocar: () {}),
+          reduzirMovimento: true,
+        );
+
+        await t.sendKeyEvent(LogicalKeyboardKey.tab);
+        await t.pump();
+
+        final AnimatedContainer superficie = t.widget<AnimatedContainer>(
+          find.descendant(
+            of: find.byType(BotaoPrimario),
+            matching: find.byType(AnimatedContainer),
+          ),
+        );
+        final BoxDecoration anel =
+            superficie.foregroundDecoration! as BoxDecoration;
+        expect((anel.border! as Border).top.width, MemoraDimensoes.bordaSelecao);
+
+        final TestGesture gesto = await t.startGesture(
+          t.getCenter(find.byType(BotaoPrimario)),
+        );
+        await t.pump(kPressTimeout);
+
+        final AnimatedScale escala = t.widget<AnimatedScale>(
+          find.descendant(
+            of: find.byType(BotaoPrimario),
+            matching: find.byType(AnimatedScale),
+          ),
+        );
+        expect(escala.scale, 1.0);
+        expect(escala.duration, Duration.zero);
+
+        await gesto.up();
+        await t.pump();
+      },
+    );
 
     testWidgets('a opção selecionável não anima', (WidgetTester t) async {
       await montar(
@@ -148,7 +193,18 @@ void main() {
       final List<String> linhas = arquivo.readAsLinesSync();
       for (int i = 0; i < linhas.length; i++) {
         final String linha = linhas[i].split('//').first;
-        if (!linha.contains('duration:')) continue;
+        // `duration:` dos widgets e a duração das rotas (`transitionDuration` e
+        // `reverseTransitionDuration`, feature 013): uma rota que dura o que
+        // quiser ignora "reduzir movimento" do mesmo jeito. Na rota só se
+        // olha quem **escreve** uma duração (`Duration(...)` ou um token):
+        // `Duration.zero` (troca sem animação) e uma variável já calculada
+        // com `efetiva` não precisam passar por ela de novo.
+        final String adiante =
+            linha + (i + 1 < linhas.length ? linhas[i + 1] : '');
+        final bool ehDuracaoDeRota =
+            RegExp(r'ransitionDuration').hasMatch(linha) &&
+            RegExp(r'Duration\(|MemoraMovimento\.').hasMatch(adiante);
+        if (!linha.contains('duration:') && !ehDuracaoDeRota) continue;
 
         // A chamada costuma quebrar em várias linhas; olha a linha e a
         // seguinte, que é onde `efetiva(` aparece no estilo daqui.
@@ -170,13 +226,13 @@ void main() {
     );
   });
 
-  testWidgets('o que o giro comunica, o texto também comunica (FR-028)',
+  testWidgets('o que a barra comunica, o texto também comunica (FR-028)',
       (WidgetTester t) async {
-    // A segunda metade do V9. O `CircularProgressIndicator` do Material gira
-    // independentemente da preferência — não é nosso para desligar. O que
-    // está ao nosso alcance é garantir que ele não seja o ÚNICO portador da
-    // informação: quem não percebe o movimento continua sabendo que a Memora
-    // está pensando, porque está escrito e anunciado.
+    // A segunda metade do V9. Desde a T095 a espera é a Memora segurando a
+    // barra, e ela obedece a "reduzir movimento" (fica parada). Mesmo assim
+    // o desenho não é o ÚNICO portador da informação: quem não percebe o
+    // movimento continua sabendo que a Memora está pensando, porque está
+    // escrito e anunciado.
     final SemanticsHandle h = t.ensureSemantics();
     await montar(
       t,

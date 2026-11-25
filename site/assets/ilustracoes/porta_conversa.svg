@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#1040F8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <!-- S07: Icone vetorial familia Material Rounded (chat_bubble_rounded) -->
+  <path d="M20 2H4c-1.1 0-2 .9-2 2v15.5a1 1 0 0 0 1.7.7L6.8 17H20c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#1040F8" stroke="none"/>
+  <circle cx="8" cy="9.5" r="1.35" fill="#FFFFFF" stroke="none"/>
+  <circle cx="12" cy="9.5" r="1.35" fill="#FFFFFF" stroke="none"/>
+  <circle cx="16" cy="9.5" r="1.35" fill="#FFFFFF" stroke="none"/>
+</svg>

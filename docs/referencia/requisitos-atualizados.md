@@ -113,6 +113,12 @@ Registradas com a medição que as justificou. Detalhamento em
 | Botão "Idiomas" | Removido enquanto houver um idioma | Opção que não faz nada desgasta a confiança |
 | Azul `#7090E8` | Removido da paleta | **Medido**: 3,07:1 com branco, reprova como texto |
 | Azul `#1040F8` | **Mantido** | **Medido**: 6,75:1, aprovado |
+| Passo a passo por cima do aplicativo real (Figuras 21–24 e 29–36) | Passo a passo **inteiro dentro do Memora**, com selo `"Exemplo"` (`FR-028`, `FR-029` da 004) | Evita a permissão `SYSTEM_ALERT_WINDOW` (sobreposição de tela), explorada por trojans bancários |
+| `"Apps atuais"` em grade (Figura 20) | `"Meus aplicativos"` em lista vertical com busca no topo (`FR-023` da 004) | Leitura linear sem truncamento do nome do aplicativo em `150%` e `200%` |
+| Link externo `ajudamemora.com.br` na Ajuda (Figura 14) | Removido; saída direta para a conversa com a Memora (`R12`, `FR-037` da 004) | Domínio não registrado pela equipe seria vetor de golpe |
+| Tela de Planos (Figura 10) e plano no Perfil (Figura 27) | Fora do aplicativo (`US9`, `FR-008` da 004) | Evita preparar o terreno para o golpe *"seu plano venceu"* |
+| `"Tela"` e `"Acessibilidade"` juntas (Figuras 25–26) | Separadas em `Aparência` (temas + 6 paletas validadas) e `Acessibilidade` (`FR-038`, `FR-039`, `FR-039a` da 004) | Acessibilidade tratada como grupo próprio de primeira classe |
+| Perfil sem idade ou com data exposta (Figura 27) | Data de nascimento opcional e local por conta, exibindo apenas a idade calculada no Perfil (`FR-042c` da 004) | Minimização de dados no servidor (Princípio I) e proteção contra exposição visual |
 
 ---
 

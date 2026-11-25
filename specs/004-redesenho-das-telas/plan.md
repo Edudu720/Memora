@@ -32,6 +32,26 @@ A segurança não perde nada. O que muda é **o tamanho dela na tela**: o aviso
 antigolpe vira `AvisoCompacto`, permanente e expansível, e a conversa recupera
 pelo menos metade da altura ([R5](research.md#r5--aviso-de-segurança-proporcional)).
 
+### Fechamento Técnico (2026-11-09 — Base `develop`)
+
+Com a fundação e as User Stories `US1` a `US9` implementadas, este plano consolida os 4 blocos finais de engenharia da Feature 004 ([R16](research.md#r16--fechamento-técnico-da-feature-004-caixadeetapa-álbum-completo-e-inventário)) antes da revisão visual humana (`T104`) e do teste com 5 pessoas idosas (`T105`):
+
+1. **Aplicação de `CaixaDeEtapa` (`FR-002a` — `T125a`, `T125b`, `T125c`, `T125d`)**:
+   - Aplicar `CaixaDeEtapa` (`app/lib/design_system/componentes/cartoes/caixa_de_etapa.dart`) nas telas que pedem ação e ainda não a utilizam:
+     - **`T125a` (`US7`)**: `TelaConfiguracoes`, `TelaConta` e `TelaPrivacidade` (`app/lib/features/configuracoes/presentation/`).
+     - **`T125b` (`US8`)**: `TelaDataDeNascimento` (`app/lib/features/perfil/presentation/tela_data_de_nascimento.dart`).
+     - **`T125c` (`US4`)**: `PassoIlustrado` / `TelaPassoAPasso` (`app/lib/design_system/componentes/guia/passo_ilustrado.dart` e `app/lib/features/aprendizado/presentation/tela_passo_a_passo.dart`).
+     - **`T125d` (`US6`)**: `TelaAjuda`, `TelaAssunto` e `AjudaGuiadaDaConversa` (`app/lib/features/ajuda/presentation/`).
+   - Validar todas as telas alteradas na matriz completa de 4 aparelhos × 3 escalas × 3 temas sem overflow.
+2. **Consolidação dos Testes do Hub (`T035`)**:
+   - Verificar e encerrar `T035` em `app/test/features/hub/tela_hub_test.dart`, `app/test/acessibilidade/hub_acessibilidade_test.dart` e `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart` conforme a regra vigente da `FR-017`.
+3. **Extensão do Álbum de Telas (`T101`)**:
+   - Estender `app/test/album/album_de_telas_test.dart` para renderizar e salvar em `app/build/album/<tema>/` todas as telas da Feature 004 e as telas fora do wireframe redesenhadas na `T099` nos 3 temas (`claro`, `escuro`, `altoContraste`).
+4. **Fechamento Documental e Verificação Completa (`T102`, `T103`, `T107`)**:
+   - Preencher a tabela `"Onde cada cenário roda"` em `specs/004-redesenho-das-telas/quickstart.md` e conferir o inventário de telas em `spec.md` (`T102`).
+   - Registrar as divergências do wireframe em `docs/design/divergencias-do-prototipo.md`, atualizar `docs/referencia/requisitos-atualizados.md` e alinhar `specs/003-hub-e-assistente/spec.md` (`T107`).
+   - Executar a verificação completa (`flutter analyze`, `flutter test`, `validar_paleta.py`, `validar_tokens.py --autoteste`) e atualizar `docs/relatorios/o-que-falta.md` (`T103`).
+
 ## Technical Context
 
 **Language/Version**: Dart 3.11 / Flutter 3.41 (aplicativo) · Kotlin, só no
@@ -127,7 +147,7 @@ app/
 ├── assets/
 │   ├── fontes/atkinson_hyperlegible_next/   # .ttf + OFL.txt          (novo)
 │   ├── ilustracoes/                         # + Memora, portas, assuntos; LICENCAS.md
-│   └── guias/<chave>/passo_N.png            # capturas, 3x            (novo)
+│   └── guias/<chave>/passo_N.webp           # capturas (WebP; PNG na exceção)
 ├── android/app/src/main/
 │   ├── AndroidManifest.xml                  # <queries> + 6 pacotes
 │   └── kotlin/br/fatec/memora/

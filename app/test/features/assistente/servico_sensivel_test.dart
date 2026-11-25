@@ -188,7 +188,7 @@ void main() {
       'passo com temCampoDeSenha mostra o aviso da FR-032 inteiro, nunca compacto (FR-049)',
       (WidgetTester t) async {
         final Guia guiaComSenha = guiaGovBr;
-        final Passo passoComSenha = guiaComSenha.passos.firstWhere(
+        final Passo passoComSenha = guiaComSenha.todosOsPassos.firstWhere(
           (Passo p) => p.temCampoDeSenha,
         );
 
@@ -199,7 +199,7 @@ void main() {
               body: PassoIlustrado(
                 passo: passoComSenha,
                 posicao: 4,
-                total: guiaComSenha.passos.length,
+                total: guiaComSenha.todosOsPassos.length,
               ),
             ),
           ),

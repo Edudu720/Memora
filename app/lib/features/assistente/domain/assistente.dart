@@ -110,6 +110,9 @@ class ServicoDoCatalogo {
   /// lugares que podem divergir.
   final bool memoraPodeAbrir;
 
+  /// Identificador do pacote Android quando disponível no catálogo (T089).
+  final String? identificadorAndroid;
+
   /// Cria um serviço do catálogo.
   const ServicoDoCatalogo({
     required this.id,
@@ -118,6 +121,7 @@ class ServicoDoCatalogo {
     required this.descricaoCurta,
     required this.categoria,
     required this.memoraPodeAbrir,
+    this.identificadorAndroid,
   });
 }
 
@@ -250,10 +254,13 @@ abstract interface class RepositorioAssistente {
   /// [aoReceberTrecho] recebe a resposta em pedaços, para a tela mostrar o
   /// texto aparecendo. Tela parada é o que faz este público concluir que o
   /// aparelho travou.
+  /// [aoCriarCancelamento] recebe uma função síncrona que aborta a conexão de
+  /// streaming subjacente caso a espera expire ou a pessoa feche a tela (T096).
   Future<RespostaDaAssistente> conversar({
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   });
 
   /// Os serviços que a Memora conhece, para as duas portas do Hub.

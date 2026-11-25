@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../../tokens/tipografia.dart';
-import '../../temas/memora_theme_extension.dart';
 import '../texto/texto_memora.dart';
 
 /// Informação de maior ênfase — ainda inequivocamente **não clicável**.
@@ -35,7 +36,9 @@ class DestaqueInformacao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
 
     return Semantics(
       button: false,
@@ -47,10 +50,16 @@ class DestaqueInformacao extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(MemoraEspacamento.lg),
           decoration: BoxDecoration(
-            // Superfície secundária, nunca a cor primária: preenchimento com
-            // primária é linguagem de botão.
-            color: cores.superficieAlt,
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+            // Superfície limpa elevada (nunca a cor primária de botão).
+            color: cores.superficie,
+            borderRadius: BorderRadius.circular(MemoraRaio.cartaoMedio),
+            border: Border.all(
+              color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+              width: ehAltoContraste
+                  ? MemoraDimensoes.bordaEnfase
+                  : MemoraDimensoes.espessuraBordaSutil,
+            ),
+            boxShadow: MemoraElevacao.listaSombrasCartao(cores),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,9 +68,11 @@ class DestaqueInformacao extends StatelessWidget {
               Row(
                 children: <Widget>[
                   if (icone != null) ...<Widget>[
-                    Icon(icone,
-                        size: MemoraDimensoes.iconePequeno,
-                        color: cores.texto),
+                    Icon(
+                      icone,
+                      size: MemoraDimensoes.iconePequeno,
+                      color: cores.textoSuave,
+                    ),
                     const SizedBox(width: MemoraEspacamento.sm),
                   ],
                   Flexible(
@@ -69,7 +80,7 @@ class DestaqueInformacao extends StatelessWidget {
                       rotulo,
                       textScaler: escalaTextoLimitada(context),
                       style: MemoraTipografia.apoio.copyWith(
-                        color: cores.texto,
+                        color: cores.textoSuave,
                       ),
                     ),
                   ),

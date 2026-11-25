@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../design_system/componentes/botoes/botao_secundario.dart';
+import '../../../design_system/componentes/cartoes/caixa_de_etapa.dart';
+import '../../../design_system/componentes/cartoes/cartao.dart';
 import '../../../design_system/componentes/confirmacao/confirmacao_memora.dart';
 import '../../../design_system/componentes/feedback/carregando.dart';
 import '../../../design_system/componentes/feedback/mensagem_erro.dart';
@@ -99,7 +101,12 @@ class _TelaPrivacidadeState extends State<TelaPrivacidade> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  const TextoMemora.apoio(TextosConfiguracoes.privacidadeIntro),
+                  const Cartao(
+                    padding: EdgeInsets.all(MemoraEspacamento.md),
+                    child: TextoMemora.apoio(
+                      TextosConfiguracoes.privacidadeIntro,
+                    ),
+                  ),
                   const SizedBox(height: MemoraEspacamento.lg),
                   const ListaInformacao(
                     campos: <CampoInformacao>[
@@ -126,15 +133,19 @@ class _TelaPrivacidadeState extends State<TelaPrivacidade> {
                     TextosConfiguracoes.guardadoNuncaFica,
                   ),
                   const SizedBox(height: MemoraEspacamento.xxl),
-                  const TextoMemora.tituloSecao(
-                    TextosConfiguracoes.tituloApagarConversa,
+                  CaixaDeEtapa(
+                    instrucao: TextosConfiguracoes.tituloApagarConversa,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        const TextoMemora.apoio(
+                          TextosConfiguracoes.explicacaoApagarConversa,
+                        ),
+                        const SizedBox(height: MemoraEspacamento.lg),
+                        _parteQueApaga(),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: MemoraEspacamento.sm),
-                  const TextoMemora.apoio(
-                    TextosConfiguracoes.explicacaoApagarConversa,
-                  ),
-                  const SizedBox(height: MemoraEspacamento.lg),
-                  _parteQueApaga(),
                 ],
               ),
             ),
@@ -149,7 +160,7 @@ class _TelaPrivacidadeState extends State<TelaPrivacidade> {
       _Fase.inicial => BotaoSecundario(
         key: TelaPrivacidade.chaveApagar,
         rotulo: TextosConfiguracoes.botaoApagarConversa,
-        icone: Icons.delete_outline,
+        icone: Icons.delete_outline_rounded,
         aoTocar: () => setState(() => _fase = _Fase.perguntando),
       ),
       _Fase.perguntando => ConfirmacaoMemora.irreversivel(

@@ -84,9 +84,7 @@ void main() {
   double topoDaBarra(WidgetTester t) =>
       t.getTopLeft(find.byKey(CascaInterna.chaveDaBarra)).dy;
 
-  final Finder principal = find.byWidgetPredicate(
-    (Widget w) => w is CartaoDePorta && w.principal,
-  );
+  final Finder principal = find.byType(CartaoHeroi);
 
   group('FR-017 — a porta principal aparece sem rolar, em toda combinação', () {
     for (final Combinacao c in matriz()) {
@@ -191,7 +189,7 @@ void main() {
         expect(
           find.descendant(
             of: faixa,
-            matching: find.byIcon(Icons.keyboard_arrow_down),
+            matching: find.byIcon(Icons.keyboard_arrow_down_rounded),
           ),
           findsOneWidget,
           reason: '${nomeDa(c)}: a faixa não tem a seta',

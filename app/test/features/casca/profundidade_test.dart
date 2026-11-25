@@ -5,10 +5,13 @@ import 'package:memora/design_system/design_system.dart';
 import 'package:memora/features/ajuda/domain/assunto_de_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_ajuda.dart';
 import 'package:memora/features/ajuda/presentation/tela_assunto.dart';
+import 'package:memora/features/antigolpe/presentation/telas/tela_analise_golpe.dart';
 import 'package:memora/features/aprendizado/presentation/tela_passo_a_passo.dart';
+import 'package:memora/features/aprendizado/presentation/tela_seletor_de_secao.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_catalogo.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_conversa.dart';
 import 'package:memora/features/assistente/presentation/telas/tela_registro.dart';
+import 'package:memora/features/atalhos_aplicativos/presentation/telas/tela_atalhos_aplicativos.dart';
 import 'package:memora/features/casca/casca_interna.dart';
 import 'package:memora/features/cuidado/presentation/telas/tela_dispositivo_cuidado.dart';
 import 'package:memora/features/perfil/presentation/tela_perfil.dart';
@@ -17,6 +20,7 @@ import 'package:memora/features/configuracoes/presentation/tela_conta.dart';
 import 'package:memora/features/configuracoes/presentation/tela_privacidade.dart';
 import 'package:memora/features/hub/presentation/telas/tela_hub.dart';
 import 'package:memora/features/inicio/presentation/tela_inicio.dart';
+import 'package:memora/features/localizador/presentation/telas/tela_localizador.dart';
 import 'package:memora/l10n/textos_assistente.dart';
 
 import '../autenticacao/fluxo_dentro_da_conta.dart';
@@ -111,6 +115,15 @@ void main() {
   final Finder deCuidado = find.byKey(
     TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
   );
+  final Finder doLocalizador = find.byKey(
+    TelaHub.chaveDaPorta('Localizador de Serviços'),
+  );
+  final Finder doAntigolpeInicio = find.byKey(
+    TelaInicio.chaveVerificarGolpe,
+  );
+  final Finder doAntigolpeAjuda = find.byKey(
+    TelaAjuda.chaveVerificarGolpe,
+  );
   final Finder doHub = find.byKey(TelaInicio.chaveVerTudo);
 
   /// Todas as partes do aplicativo e o caminho até cada uma.
@@ -119,6 +132,23 @@ void main() {
       parte: 'conversa (pelo atalho do Início)',
       toques: <Finder>[find.byKey(TelaInicio.chaveConversar)],
       chegada: find.byKey(TelaConversa.chaveCampo),
+      via: null,
+    ),
+    (
+      parte: 'meus aplicativos (pelo atalho do Início)',
+      toques: <Finder>[find.text(TextosAssistente.portaAplicativos)],
+      chegada: find.byWidgetPredicate(
+        (Widget w) => w is TelaCatalogo && w.categoria.name == 'cotidiano',
+      ),
+      via: null,
+    ),
+    (
+      parte: 'atalhos diretos para aplicativos (a partir do Catálogo)',
+      toques: <Finder>[
+        find.text(TextosAssistente.portaAplicativos),
+        find.byKey(TelaCatalogo.chaveAtalhosDiretos),
+      ],
+      chegada: find.byType(TelaAtalhosAplicativos),
       via: null,
     ),
     (
@@ -162,6 +192,24 @@ void main() {
       via: null,
     ),
     (
+      parte: 'localizador de serviços',
+      toques: <Finder>[doHub, doLocalizador],
+      chegada: find.byType(TelaLocalizador),
+      via: null,
+    ),
+    (
+      parte: 'verificar golpe (pelo atalho do Início)',
+      toques: <Finder>[doAntigolpeInicio],
+      chegada: find.byType(TelaAnaliseGolpe),
+      via: null,
+    ),
+    (
+      parte: 'verificar golpe (pela Ajuda)',
+      toques: <Finder>[doHub, daAjuda, doAntigolpeAjuda],
+      chegada: find.byType(TelaAnaliseGolpe),
+      via: null,
+    ),
+    (
       // A US6 existe para isto: achar, pela Ajuda, como se proteger de um
       // golpe por telefone. Três toques a partir do Início.
       parte: 'dicas de segurança contra golpe (pela Ajuda)',
@@ -184,13 +232,25 @@ void main() {
       via: null,
     ),
     (
-      parte: 'um serviço social do catálogo (leva ao passo a passo)',
+      parte: 'um serviço social do catálogo (leva às áreas do guia)',
       toques: <Finder>[
         doHub,
         deServicos,
         find.byKey(TelaCatalogo.chaveDoItem('Gov.br')),
       ],
-      chegada: find.byType(TelaPassoAPasso),
+      chegada: find.byType(TelaSeletorDeSecao),
+      via: null,
+    ),
+    (
+      // Guia extenso (FR-028d): o serviço leva primeiro à escolha do assunto,
+      // ainda dentro dos três toques. Escolher a seção já é o conteúdo do guia.
+      parte: 'um guia em seções (FGTS leva à escolha do assunto)',
+      toques: <Finder>[
+        doHub,
+        deServicos,
+        find.byKey(TelaCatalogo.chaveDoItem('FGTS')),
+      ],
+      chegada: find.byType(TelaSeletorDeSecao),
       via: null,
     ),
     (
@@ -298,6 +358,15 @@ void main() {
     for (final Caminho c in caminhos) {
       await recomecar(t);
       for (final Finder alvo in c.toques) {
+        // Lista preguiçosa só constrói o que está na tela: o item mais abaixo
+        // (o FGTS é o quinto serviço) precisa de rolagem, que não é toque.
+        if (alvo.evaluate().isEmpty) {
+          await t.scrollUntilVisible(
+            alvo,
+            120,
+            scrollable: find.byType(Scrollable).hitTestable().first,
+          );
+        }
         // Sem este aviso, um alvo que não existe vira "No element" e ninguém
         // sabe de qual caminho.
         expect(
@@ -344,6 +413,7 @@ void main() {
       TelaHub.chaveDaPorta(TextosAssistente.portaConversa),
       TelaHub.chaveDaPorta(TextosAssistente.portaAjuda),
       TelaHub.chaveDaPorta('Dispositivo de Cuidado'),
+      TelaHub.chaveDaPorta('Localizador de Serviços'),
     };
     expect(
       daTela.difference(daTabela),

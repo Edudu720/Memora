@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="fundo_etitulo" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#147A46"/>
+      <stop offset="1" stop-color="#0B4C2B"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" fill="url(#fundo_etitulo)"/>
+  <path d="M0 36 C16 32, 32 40, 48 34 L48 48 L0 48 Z" fill="#FFDF00"/>
+  <path d="M0 40 C16 37, 32 43, 48 39 L48 48 L0 48 Z" fill="#1D56B8"/>
+  <rect x="11" y="8" width="24" height="30" rx="3.5" fill="#FFFFFF"/>
+  <rect x="11" y="8" width="24" height="7" rx="3.5" fill="#0E5E35"/>
+  <rect x="11" y="12" width="24" height="3" fill="#0E5E35"/>
+  <circle cx="17.5" cy="21" r="3" fill="#0E5E35"/>
+  <path d="M13.5 29 C13.5 26.2, 21.5 26.2, 21.5 29 Z" fill="#0E5E35"/>
+  <rect x="23.5" y="19" width="8.5" height="2.4" rx="1.2" fill="#2E7D55"/>
+  <rect x="23.5" y="23.5" width="7" height="2.4" rx="1.2" fill="#2E7D55"/>
+  <rect x="14" y="32" width="12" height="2.4" rx="1.2" fill="#88B89D"/>
+  <circle cx="33.5" cy="31.5" r="7.5" fill="#FFDF00" stroke="#0B4C2B" stroke-width="1.6"/>
+  <path d="M30 31.5 L32.5 34 L37.2 29" fill="none" stroke="#0B4C2B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

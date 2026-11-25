@@ -3,6 +3,8 @@ package br.fatec.memora.assistente.infra;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,5 +62,37 @@ class PersonaDaMemoraTest {
                 .contains("transferir")
                 .contains("irreversíveis")
                 .contains("segurança do dinheiro");
+    }
+
+    @Test
+    @DisplayName("acolhe quando a pessoa não acha um botão porque a tela mudou (T090)")
+    void acolheQuandoNaoAchaBotaoNaTela() {
+        assertThat(TEXTO)
+                .contains("não achei o botão")
+                .contains("sem culpar")
+                .contains("mudam desenhos");
+    }
+
+    @Test
+    @DisplayName("limita a no máximo um emoji por mensagem, nunca no lugar de uma palavra (FR-023, T042)")
+    void limitaUmEmojiPorMensagem() {
+        assertThat(TEXTO)
+                .contains("no máximo um emoji por mensagem")
+                .contains("nunca no lugar de uma palavra");
+
+        Pattern pictograma = Pattern.compile("\\p{IsExtended_Pictographic}");
+        assertThat(contar(pictograma, ClienteDaAssistenteSimulado.RESPOSTA_PADRAO))
+                .isLessThanOrEqualTo(1);
+        assertThat(contar(pictograma, ClienteDaAssistenteSimulado.RECUSA_FINANCEIRA_PADRAO))
+                .isLessThanOrEqualTo(1);
+    }
+
+    private static int contar(Pattern padrao, String texto) {
+        Matcher matcher = padrao.matcher(texto);
+        int total = 0;
+        while (matcher.find()) {
+            total++;
+        }
+        return total;
     }
 }

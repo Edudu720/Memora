@@ -1,0 +1,159 @@
+/**
+ * Tokens visuais oficiais do site tutorial do Memora.
+ * Espelhados exatamente de `app/lib/design_system/tokens/cores.dart`
+ * para garantir unidade visual e conformidade WCAG 2.2 AA/AAA.
+ */
+
+:root,
+:root[data-tema="claro"] {
+  --fundo: #F8F8F8;
+  --superficie: #FFFFFF;
+  --superficie-alt: #D8D8D8;
+  --destaque: #E3EAFF;
+  --medalhao: #E3EAFF;
+  --primaria: #1040F8;
+  --sobre-primaria: #FFFFFF;
+  --texto: #111111;
+  --texto-suave: #4A4A4A;
+  --borda: #6B6B6B;
+  --sucesso: #186A2E;
+  --perigo: #B3231F;
+  --sobre-perigo: #FFFFFF;
+  --sombra-suave: 0 8px 24px rgba(17, 17, 17, 0.08);
+  --memora-corpo: #3565F3;
+  --memora-corpo-sombra: #264AA9;
+  --memora-corpo-luz: #4F76E6;
+  --memora-contorno: #0D1C50;
+  --memora-aro: #0D1C50;
+  --memora-tem-aro: 0;
+  --memora-visor: #D7E4FC;
+  --memora-olho: #0E1F53;
+  --memora-bochecha: #FCB5AF;
+  --memora-detalhe: #FAD66B;
+  --memora-escudo: #A3BCDD;
+  --memora-escudo-luz: #D3E2F5;
+  --memora-painel-barra: #9DBAF2;
+  --memora-livro: #5E7FAE;
+  --memora-livro-pagina: #E8EEF8;
+  --memora-sombra-chao: rgba(13, 28, 80, 0.32);
+  --memora-brilho: #EDF3FE;
+  --memora-luz-contorno: #91AEF1;
+  color-scheme: light;
+}
+
+:root[data-tema="escuro"] {
+  --fundo: #101216;
+  --superficie: #1B1E24;
+  --superficie-alt: #2A2E36;
+  --destaque: #22305A;
+  --medalhao: #DCE5FF;
+  --primaria: #9CB8FF;
+  --sobre-primaria: #06132E;
+  --texto: #F2F4F8;
+  --texto-suave: #C2C7D0;
+  --borda: #8A909C;
+  --sucesso: #7CD69A;
+  --perigo: #FF9B95;
+  --sobre-perigo: #3A0705;
+  --sombra-suave: 0 10px 28px rgba(0, 0, 0, 0.42);
+  --memora-aro: #9CB8FF;
+  --memora-tem-aro: 1;
+  --memora-sombra-chao: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+:root[data-tema="alto-contraste"] {
+  --fundo: #000000;
+  --superficie: #000000;
+  --superficie-alt: #1A1A1A;
+  --destaque: #10245A;
+  --medalhao: #DCE5FF;
+  --primaria: #8FB4FF;
+  --sobre-primaria: #000000;
+  --texto: #FFFFFF;
+  --texto-suave: #E8E8E8;
+  --borda: #FFFFFF;
+  --sucesso: #7BE49B;
+  --perigo: #FF9E97;
+  --sobre-perigo: #000000;
+  --sombra-suave: none;
+  --memora-corpo: #4F7CFF;
+  --memora-corpo-sombra: #2F52C4;
+  --memora-corpo-luz: #7399FF;
+  --memora-contorno: #0D1C50;
+  --memora-aro: #FFFFFF;
+  --memora-tem-aro: 1;
+  --memora-visor: #F0F5FF;
+  --memora-olho: #050E33;
+  --memora-sombra-chao: transparent;
+  --memora-brilho: #F8FAFF;
+  --memora-luz-contorno: #9DB8FF;
+  color-scheme: dark;
+}
+
+:root {
+  --familia-fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+  --tamanho-corpo: 1.125rem;
+  --tamanho-apoio: 1rem;
+  --tamanho-titulo-h1: clamp(1.9rem, 3.8vw, 2.75rem);
+  --tamanho-titulo-h2: clamp(1.5rem, 3vw, 2.05rem);
+  --tamanho-titulo-h3: clamp(1.2rem, 2.2vw, 1.45rem);
+  --altura-linha: 1.65;
+
+  --espaco-xs: 0.5rem;
+  --espaco-sm: 0.75rem;
+  --espaco-md: 1.25rem;
+  --espaco-lg: 2rem;
+  --espaco-xl: 3rem;
+
+  --altura-toque: 3rem;
+  --largura-maxima: 70rem;
+  --largura-leitura: 68ch;
+
+  --raio-pequeno: 0.875rem;
+  --raio-cartao: 1.5rem;
+  --raio-pilula: 999px;
+
+  --borda-padrao: 2px;
+  --borda-foco: 3px;
+}
+
+:root[data-escala="grande"] {
+  --tamanho-corpo: 1.45rem;
+  --tamanho-apoio: 1.25rem;
+  --tamanho-titulo-h1: clamp(2.15rem, 4.4vw, 3.1rem);
+  --tamanho-titulo-h2: clamp(1.75rem, 3.4vw, 2.35rem);
+  --tamanho-titulo-h3: clamp(1.4rem, 2.6vw, 1.7rem);
+}
+
+:root[data-escala="muito-grande"] {
+  --tamanho-corpo: 2rem;
+  --tamanho-apoio: 1.75rem;
+  --tamanho-titulo-h1: clamp(2.35rem, 5vw, 3.4rem);
+  --tamanho-titulo-h2: clamp(2rem, 4vw, 2.75rem);
+  --tamanho-titulo-h3: clamp(1.65rem, 3vw, 2.1rem);
+}
+
+/* Melhoria progressiva S09: light-dark() apenas para Claro/Escuro.
+   Alto contraste permanece isolado com >= 7,0:1 fora de light-dark(). */
+@supports (color: light-dark(#000, #fff)) {
+  :root:not([data-tema]),
+  :root[data-tema="claro"],
+  :root[data-tema="escuro"] {
+    --fundo: light-dark(#F8F8F8, #101216);
+    --superficie: light-dark(#FFFFFF, #1B1E24);
+    --superficie-alt: light-dark(#D8D8D8, #2A2E36);
+    --destaque: light-dark(#E3EAFF, #22305A);
+    --medalhao: light-dark(#E3EAFF, #DCE5FF);
+    --primaria: light-dark(#1040F8, #9CB8FF);
+    --sobre-primaria: light-dark(#FFFFFF, #06132E);
+    --texto: light-dark(#111111, #F2F4F8);
+    --texto-suave: light-dark(#4A4A4A, #C2C7D0);
+    --borda: light-dark(#6B6B6B, #8A909C);
+    --sucesso: light-dark(#186A2E, #7CD69A);
+    --perigo: light-dark(#B3231F, #FF9B95);
+    --sobre-perigo: light-dark(#FFFFFF, #3A0705);
+    --memora-aro: light-dark(#0D1C50, #9CB8FF);
+    --memora-sombra-chao: light-dark(rgba(13, 28, 80, 0.32), rgba(0, 0, 0, 0.55));
+  }
+}

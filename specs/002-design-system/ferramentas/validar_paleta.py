@@ -37,64 +37,111 @@ TEMAS = {
     "claro": {
         "min_texto": 4.5,
         "cores": {
-            "fundo":            "#F8F8F8",  # amostrado do prototipo
-            "superficie":       "#FFFFFF",
-            "superficie_alt":   "#D8D8D8",  # amostrado do prototipo
-            "destaque":         "#E3EAFF",  # feature 004
-            "medalhao":         "#E3EAFF",  # decorativo, sem par: nada se escreve sobre ele
-            "primaria":         "#1040F8",  # amostrado do prototipo
-            "sobre_primaria":   "#FFFFFF",
-            "texto":            "#111111",
-            "texto_suave":      "#4A4A4A",
-            "borda":            "#6B6B6B",
-            "sucesso":          "#186A2E",
-            "perigo":           "#B3231F",
-            "sobre_perigo":     "#FFFFFF",
+            "fundo":                   "#F4F6FA",  # Tokens 2.0 (Feature 007)
+            "superficie":              "#FFFFFF",
+            "superficie_alt":          "#D8D8D8",  # legado
+            "superficie_sutil":        "#EEF2FA",
+            "superficie_barra":        "#FFFFFF",
+            "borda_sutil":             "#E2E8F0",  # decorativa no claro/escuro
+            "destaque":                "#E3EAFF",
+            "medalhao":                "#E3EAFF",  # decorativo, sem par
+            "primaria":                "#1040F8",
+            "sobre_primaria":          "#FFFFFF",
+            "texto":                   "#111111",
+            "texto_suave":             "#4A4A4A",
+            "borda":                   "#596475",
+            "sucesso":                 "#186A2E",
+            "perigo":                  "#B3231F",
+            "sobre_perigo":            "#FFFFFF",
+            "gradiente_heroi_inicio":  "#155EEF",
+            "gradiente_heroi_fim":     "#0B3BC2",
+            "sobre_gradiente_heroi":   "#FFFFFF",
+            "gradiente_saude_inicio":  "#0E7490",
+            "gradiente_saude_fim":     "#155EEF",
+            "sobre_gradiente_saude":   "#FFFFFF",
+            "saude_suave":             "#E6F6F4",
+            "sucesso_texto":           "#0F6A43",
+            # A Memora (feature 013): segue a paleta, menos olhos e afins.
+            "memora_corpo":     "#3565F3",  # referencia do Henrique
+            "memora_contorno":  "#0D1C50",
+            "memora_aro":       "#0D1C50",  # claro: o aro e o proprio contorno
+            "memora_visor":     "#D7E4FC",
+            "memora_olho":      "#0E1F53",
         },
     },
     "escuro": {
         "min_texto": 4.5,
         "cores": {
-            "fundo":            "#101216",
-            "superficie":       "#1B1E24",
-            "superficie_alt":   "#2A2E36",
-            "destaque":         "#22305A",  # feature 004
-            "medalhao":         "#DCE5FF",  # claro de proposito, ver cores.dart
-            "primaria":         "#9CB8FF",
-            "sobre_primaria":   "#06132E",
-            "texto":            "#F2F4F8",
-            "texto_suave":      "#C2C7D0",
-            "borda":            "#8A909C",
-            "sucesso":          "#7CD69A",
-            "perigo":           "#FF9B95",
-            "sobre_perigo":     "#3A0705",
+            "fundo":                   "#0F141E",
+            "superficie":              "#182030",
+            "superficie_alt":          "#2A2E36",
+            "superficie_sutil":        "#222C40",
+            "superficie_barra":        "#161E2C",
+            "borda_sutil":             "#2B364B",
+            "destaque":                "#22305A",
+            "medalhao":                "#DCE5FF",
+            "primaria":                "#9CB8FF",
+            "sobre_primaria":          "#06132E",
+            "texto":                   "#F2F4F8",
+            "texto_suave":             "#C2C7D0",
+            "borda":                   "#8EA0BD",
+            "sucesso":                 "#7CD69A",
+            "perigo":                  "#FF9B95",
+            "sobre_perigo":            "#3A0705",
+            "gradiente_heroi_inicio":  "#1E40AF",
+            "gradiente_heroi_fim":     "#162E7A",
+            "sobre_gradiente_heroi":   "#FFFFFF",
+            "gradiente_saude_inicio":  "#0F5266",
+            "gradiente_saude_fim":     "#183C8C",
+            "sobre_gradiente_saude":   "#FFFFFF",
+            "saude_suave":             "#123532",
+            "sucesso_texto":           "#6EE7B7",
+            # A Memora (feature 013): segue a paleta, menos olhos e afins.
+            "memora_corpo":     "#3565F3",  # referencia do Henrique
+            "memora_contorno":  "#0D1C50",
+            "memora_aro":       "#9CB8FF",  # escuro: o aro e a primaria do tema
+            "memora_visor":     "#D7E4FC",
+            "memora_olho":      "#0E1F53",
         },
     },
     "alto_contraste": {
         "min_texto": 7.0,  # FR-035
         "cores": {
-            "fundo":            "#000000",
-            "superficie":       "#000000",
-            "superficie_alt":   "#1A1A1A",
-            "destaque":         "#10245A",  # feature 004
-            "medalhao":         "#DCE5FF",
-            "primaria":         "#8FB4FF",
-            "sobre_primaria":   "#000000",
-            "texto":            "#FFFFFF",
-            "texto_suave":      "#E8E8E8",
-            "borda":            "#FFFFFF",
-            "sucesso":          "#7BE49B",
-            "perigo":           "#FF9E97",
-            "sobre_perigo":     "#000000",
+            "fundo":                   "#000000",
+            "superficie":              "#0A0A0A",
+            "superficie_alt":          "#1A1A1A",
+            "superficie_sutil":        "#141414",
+            "superficie_barra":        "#000000",
+            "borda_sutil":             "#FFFFFF",
+            "destaque":                "#10245A",
+            "medalhao":                "#DCE5FF",
+            "primaria":                "#8FB4FF",
+            "sobre_primaria":          "#000000",
+            "texto":                   "#FFFFFF",
+            "texto_suave":             "#E8E8E8",
+            "borda":                   "#FFFFFF",
+            "sucesso":                 "#7BE49B",
+            "perigo":                  "#FF9E97",
+            "sobre_perigo":            "#000000",
+            "gradiente_heroi_inicio":  "#8FB4FF",
+            "gradiente_heroi_fim":     "#8FB4FF",
+            "sobre_gradiente_heroi":   "#000000",
+            "gradiente_saude_inicio":  "#8FB4FF",
+            "gradiente_saude_fim":     "#8FB4FF",
+            "sobre_gradiente_saude":   "#000000",
+            "saude_suave":             "#0A0A0A",
+            "sucesso_texto":           "#80FFAA",
+            # A Memora no alto contraste: conjunto proprio, a paleta nao vale.
+            "memora_corpo":     "#4F7CFF",
+            "memora_contorno":  "#0D1C50",
+            "memora_aro":       "#FFFFFF",
+            "memora_visor":     "#F0F5FF",
+            "memora_olho":      "#050E33",
         },
     },
 }
 
-# Paletas prontas (R15). "azul" e a do prototipo e o padrao: nao sobrescreve
-# nada, ou seja, e exatamente o que ja esta em TEMAS. As demais (verde, roxo,
-# laranja-terra, rosa, grafite) so entram AQUI depois de medidas -- e o valor
-# que passar aqui e o que vai para `app/lib/design_system/tokens/cores.dart`
-# (T122). Formato: {tema: {nome_da_cor: "#RRGGBB"}}, so `claro` e `escuro`.
+# Paletas prontas (R15). "azul" e a base: nao sobrescreve nada.
 PALETAS = {
     "azul": {},
     "verde": {
@@ -103,12 +150,20 @@ PALETAS = {
             "sobre_primaria": "#FFFFFF",
             "destaque": "#E0F2E5",
             "medalhao": "#E0F2E5",
+            "superficie_sutil": "#E8F5EC",
+            "gradiente_heroi_inicio": "#157A39",
+            "gradiente_heroi_fim": "#0C5225",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
         "escuro": {
             "primaria": "#8FE2A5",
             "sobre_primaria": "#062A12",
             "destaque": "#143D22",
             "medalhao": "#D2F5DC",
+            "superficie_sutil": "#163322",
+            "gradiente_heroi_inicio": "#166534",
+            "gradiente_heroi_fim": "#0E4423",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
     },
     "roxo": {
@@ -117,12 +172,20 @@ PALETAS = {
             "sobre_primaria": "#FFFFFF",
             "destaque": "#EFE6FD",
             "medalhao": "#EFE6FD",
+            "superficie_sutil": "#F2ECFE",
+            "gradiente_heroi_inicio": "#6D35BA",
+            "gradiente_heroi_fim": "#4B1D8C",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
         "escuro": {
             "primaria": "#CDAFFF",
             "sobre_primaria": "#230A47",
             "destaque": "#351B5C",
             "medalhao": "#ECDEFF",
+            "superficie_sutil": "#2A1B47",
+            "gradiente_heroi_inicio": "#5B21B6",
+            "gradiente_heroi_fim": "#3D147C",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
     },
     "laranja-terra": {
@@ -131,12 +194,20 @@ PALETAS = {
             "sobre_primaria": "#FFFFFF",
             "destaque": "#FCE9DF",
             "medalhao": "#FCE9DF",
+            "superficie_sutil": "#FDF0E8",
+            "gradiente_heroi_inicio": "#B54708",
+            "gradiente_heroi_fim": "#8A3105",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
         "escuro": {
             "primaria": "#FFB188",
             "sobre_primaria": "#381002",
             "destaque": "#4E210D",
             "medalhao": "#FFE2D3",
+            "superficie_sutil": "#3A1F12",
+            "gradiente_heroi_inicio": "#9A3412",
+            "gradiente_heroi_fim": "#6E220A",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
     },
     "rosa": {
@@ -145,12 +216,20 @@ PALETAS = {
             "sobre_primaria": "#FFFFFF",
             "destaque": "#FDE6F0",
             "medalhao": "#FDE6F0",
+            "superficie_sutil": "#FDEBF3",
+            "gradiente_heroi_inicio": "#B32468",
+            "gradiente_heroi_fim": "#87154B",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
         "escuro": {
             "primaria": "#FFAECB",
             "sobre_primaria": "#38041B",
             "destaque": "#541233",
             "medalhao": "#FFE0EC",
+            "superficie_sutil": "#3D1629",
+            "gradiente_heroi_inicio": "#9D174D",
+            "gradiente_heroi_fim": "#6F0E37",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
     },
     "grafite": {
@@ -159,49 +238,96 @@ PALETAS = {
             "sobre_primaria": "#FFFFFF",
             "destaque": "#E7ECF2",
             "medalhao": "#E7ECF2",
+            "superficie_sutil": "#ECF0F5",
+            "gradiente_heroi_inicio": "#334155",
+            "gradiente_heroi_fim": "#1E293B",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
         "escuro": {
             "primaria": "#B7C6DE",
             "sobre_primaria": "#0E1826",
             "destaque": "#232D3B",
             "medalhao": "#E2EAF5",
+            "superficie_sutil": "#222C3A",
+            "gradiente_heroi_inicio": "#334155",
+            "gradiente_heroi_fim": "#1E293B",
+            "sobre_gradiente_heroi": "#FFFFFF",
         },
     },
 }
+
+# A Memora segue a paleta escolhida (feature 013, decisao do Henrique de
+# 2026-11-15): corpo, contorno e visor mudam; olhos, bochechas, antena e escudo
+# sao a identidade dela e ficam fixos. Os valores do corpo valem nos temas claro
+# e escuro; so o aro (a linha de fora, que garante a silhueta sobre fundo
+# escuro) muda: no claro e o contorno, no escuro e a primaria do tema.
+# Formato: nome -> (corpo, contorno, visor). O azul e o dos TEMAS acima.
+MEMORA_PALETAS = {
+    "verde":         ("#2E9B52", "#0A3017", "#D9F2E1"),
+    "roxo":          ("#7C4FD6", "#24104A", "#E6DCFA"),
+    "laranja-terra": ("#D2641F", "#3E1A08", "#FBE3D3"),
+    "rosa":          ("#D6457F", "#4A0F28", "#FBDDEA"),
+    "grafite":       ("#5B6B82", "#141C2A", "#E1E7EF"),
+}
+for _nome, (_corpo, _contorno, _visor) in MEMORA_PALETAS.items():
+    for _tema in ("claro", "escuro"):
+        _aro = _contorno if _tema == "claro" else PALETAS[_nome]["escuro"]["primaria"]
+        PALETAS[_nome][_tema].update({
+            "memora_corpo": _corpo,
+            "memora_contorno": _contorno,
+            "memora_aro": _aro,
+            "memora_visor": _visor,
+        })
 
 # Os temas em que a paleta se aplica (R15): alto contraste fica de fora.
 TEMAS_COM_PALETA = ("claro", "escuro")
 
 # (frente, fundo, tipo)  -- tipo define o limiar exigido
 PARES = [
-    ("texto",          "fundo",          "texto"),
-    ("texto",          "superficie",     "texto"),
-    ("texto",          "superficie_alt", "texto"),
-    ("texto_suave",    "fundo",          "texto"),
-    ("texto_suave",    "superficie",     "texto"),
-    ("texto_suave",    "superficie_alt", "texto"),  # estado desabilitado
-    ("primaria",       "fundo",          "texto"),
-    ("primaria",       "superficie",     "texto"),
-    ("sobre_primaria", "primaria",       "texto"),
-    ("sucesso",        "fundo",          "texto"),
-    ("sucesso",        "superficie",     "texto"),
-    ("perigo",         "fundo",          "texto"),
-    ("perigo",         "superficie",     "texto"),
-    ("sobre_perigo",   "perigo",         "texto"),
-    ("borda",          "fundo",          "grafico"),
-    ("borda",          "superficie",     "grafico"),
-    ("primaria",       "superficie_alt", "grafico"),
-    # feature 004: o tom suave da primaria. Ele NUNCA e o unico sinal de estado
-    # (mede so 1,1 a 1,6:1 contra fundo e superficie); o que importa e o que
-    # se escreve por cima dele.
-    ("texto",          "destaque",       "texto"),
-    ("texto_suave",    "destaque",       "texto"),
-    ("primaria",       "destaque",       "texto"),
-    # revisao da #38: pares que a interface ja usava sem validacao. O "Ler o
-    # aviso inteiro" escreve primaria como TEXTO sobre superficie_alt (antes so
-    # validada como grafico), e a borda e o escudo do aviso usam perigo sobre ela.
-    ("primaria",       "superficie_alt", "texto"),
-    ("perigo",         "superficie_alt", "grafico"),
+    ("texto",                 "fundo",                  "texto"),
+    ("texto",                 "superficie",             "texto"),
+    ("texto",                 "superficie_alt",         "texto"),
+    ("texto_suave",           "fundo",                  "texto"),
+    ("texto_suave",           "superficie",             "texto"),
+    ("texto_suave",           "superficie_alt",         "texto"),  # estado desabilitado
+    ("primaria",              "fundo",                  "texto"),
+    ("primaria",              "superficie",             "texto"),
+    ("sobre_primaria",        "primaria",               "texto"),
+    ("sucesso",               "fundo",                  "texto"),
+    ("sucesso",               "superficie",             "texto"),
+    ("perigo",                "fundo",                  "texto"),
+    ("perigo",                "superficie",             "texto"),
+    ("sobre_perigo",          "perigo",                 "texto"),
+    ("borda",                 "fundo",                  "grafico"),
+    ("borda",                 "superficie",             "grafico"),
+    ("primaria",              "superficie_alt",         "grafico"),
+    ("texto",                 "destaque",               "texto"),
+    ("texto_suave",           "destaque",               "texto"),
+    ("primaria",              "destaque",               "texto"),
+    ("primaria",              "superficie_alt",         "texto"),
+    ("perigo",                "superficie_alt",         "grafico"),
+    # Tokens 2.0 (Feature 007): gradientes herói/saúde, superfícies sutil/barra e selos
+    ("texto",                 "superficie_sutil",       "texto"),
+    ("texto_suave",           "superficie_sutil",       "texto"),
+    ("primaria",              "superficie_sutil",       "texto"),
+    ("texto",                 "superficie_barra",       "texto"),
+    ("texto_suave",           "superficie_barra",       "texto"),
+    ("primaria",              "superficie_barra",       "texto"),
+    ("sobre_gradiente_heroi", "gradiente_heroi_inicio", "texto"),
+    ("sobre_gradiente_heroi", "gradiente_heroi_fim",    "texto"),
+    ("sobre_gradiente_saude", "gradiente_saude_inicio", "texto"),
+    ("sobre_gradiente_saude", "gradiente_saude_fim",    "texto"),
+    ("sucesso_texto",         "superficie",             "texto"),
+    ("sucesso_texto",         "saude_suave",            "texto"),
+    # feature 013: a Memora, em CADA paleta e tema. A silhueta (corpo e aro)
+    # precisa de 3:1 com o fundo e com a superficie onde ela pode aparecer; o
+    # contorno precisa de 3:1 com o corpo; os olhos, com o visor.
+    ("memora_corpo",    "fundo",          "grafico"),
+    ("memora_corpo",    "superficie",     "grafico"),
+    ("memora_aro",      "fundo",          "grafico"),
+    ("memora_aro",      "superficie",     "grafico"),
+    ("memora_contorno", "memora_corpo",   "grafico"),
+    ("memora_olho",     "memora_visor",   "grafico"),
 ]
 
 def cores_da(tema_nome, paleta):
@@ -296,7 +422,10 @@ def autoteste():
     ruim_claro = {"claro": {"primaria": "#B8C7FF"}}   # ~1,6:1 sobre #F8F8F8
     ruim_escuro = {"escuro": {"primaria": "#2A3A6A"}}  # ~1,5:1 sobre #101216
     boa = {"claro": {"primaria": "#0B3BD0"}, "escuro": {"primaria": "#A8C0FF"}}
-    paletas = {"ruim_claro": ruim_claro, "ruim_escuro": ruim_escuro, "boa": boa}
+    # feature 013: corpo da Memora igual ao fundo some a silhueta dela
+    ruim_memora = {"claro": {"memora_corpo": "#F8F8F8"}}
+    paletas = {"ruim_claro": ruim_claro, "ruim_escuro": ruim_escuro,
+               "ruim_memora": ruim_memora, "boa": boa}
 
     resultado = rodar(paletas)
     esperado = combinacoes_esperadas(paletas)
@@ -305,12 +434,14 @@ def autoteste():
         erros.append(f"{len(resultado)} combinacoes rodaram, esperadas {esperado}")
 
     for tema, rotulo in (("claro", "paleta ruim_claro"),
-                         ("escuro", "paleta ruim_escuro")):
+                         ("escuro", "paleta ruim_escuro"),
+                         ("claro", "paleta ruim_memora")):
         if (tema, rotulo) not in resultado:
             erros.append(f"{rotulo} nem chegou a ser validada no tema {tema}")
 
     for (tema, rotulo), falhas in resultado.items():
-        deve_falhar = ((tema == "claro" and rotulo == "paleta ruim_claro")
+        deve_falhar = ((tema == "claro"
+                        and rotulo in ("paleta ruim_claro", "paleta ruim_memora"))
                        or (tema == "escuro" and rotulo == "paleta ruim_escuro"))
         if deve_falhar and falhas == 0:
             erros.append(f"{rotulo} NAO reprovou no tema {tema}")

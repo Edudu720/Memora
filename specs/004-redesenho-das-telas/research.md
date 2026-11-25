@@ -475,3 +475,34 @@ multiplicaria as combinações a validar sem pedido nenhum por isso.
 
 **O que faria mudar de ideia**: alguma paleta reprovar no validador em mais de
 um tema — aí ela sai da lista, em vez de ganhar exceção.
+
+---
+
+## R16 — Fechamento Técnico da Feature 004 (`CaixaDeEtapa`, Álbum Completo e Inventário)
+
+Acrescentada em 2026-11-09 para consolidar as tarefas técnicas remanescentes da Feature 004 (`T035`, `T125a–d`, `T101`, `T102`, `T103`, `T107`) sobre a branch `develop`.
+
+**Decisão**:
+1. **Aplicação de `CaixaDeEtapa` (`FR-002a` — `T125a`, `T125b`, `T125c`, `T125d`)**:
+   - **`T125a` (`US7` — Ajustes, Conta e Privacidade)**:
+     - Em `TelaConfiguracoes`: envolver o grupo das 4 portas de ajustes em uma `CaixaDeEtapa` com instrução acolhedora orientando a escolha do que ajustar.
+     - Em `TelaConta`: envolver a seção de `"Sair"` e a seção separada de `"Sair e esquecer este aparelho"` em suas respectivas `CaixaDeEtapa` (mantendo o espaçamento `MemoraEspacamento.xxxl` entre as duas ações para cumprir o Princípio II e a `FR-041`).
+     - Em `TelaPrivacidade`: envolver a seção de ação `"Apagar a conversa deste aparelho"` em uma `CaixaDeEtapa` com a frase orientadora, mantendo a `ListaInformacao` acima como informação pura.
+   - **`T125b` (`US8` — Data de nascimento no Perfil)**:
+     - Em `TelaDataDeNascimento`: envolver cada etapa de preenchimento (ou o grupo de campos de dia, mês e ano e a ação de guardar) com `CaixaDeEtapa`, garantindo que os rótulos, textos de ajuda e erros por campo continuem intactos e sem estouro em `320×568` a `200%`.
+   - **`T125c` (`US4` — Passo a Passo dos guias)**:
+     - Em `PassoIlustrado` / `TelaPassoAPasso`: envolver o bloco de ações do passo (`Continuar` / `Voltar ao início`, `A minha tela está diferente`, `Peça à Memora para abrir`, `Ficou com alguma dúvida?`) em uma `CaixaDeEtapa` orientando o próximo passo da pessoa.
+   - **`T125d` (`US6` — Ajuda)**:
+     - Em `TelaAjuda`, `TelaAssunto` e `AjudaGuiadaDaConversa`: envolver a escolha de assunto (`TelaAjuda`) e os controles de navegação/ação (`TelaAssunto` e `AjudaGuiadaDaConversa`) em `CaixaDeEtapa`.
+2. **Consolidação dos Testes do Hub (`T035`)**:
+   - Confirmar que `app/test/features/hub/tela_hub_test.dart`, `app/test/acessibilidade/hub_acessibilidade_test.dart` e `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart` cobrem integralmente a regra vigente da `FR-017` (porta principal sempre à vista + faixa `"há mais"`; Hub inteiro sem rolar em `360×800` a `100%`; exceção de `320×568` a `200%`), a `FR-018` (porta sem destino não aparece) e os estados da `FR-006`, marcando `T035` como concluída.
+3. **Extensão do Álbum de Telas (`T101`)**:
+   - Estender `app/test/album/album_de_telas_test.dart` para renderizar e gravar em `app/build/album/<tema>/` as telas da Feature 004 (Apresentação, Início, Hub, Conversa, Catálogos Cotidiano e Sensível, Passo a Passo, Ajuda, Assunto, Ajuda Guiada, Ajustes, Aparência, Acessibilidade, Privacidade, Conta, Perfil e Data de Nascimento) e as telas fora do wireframe redesenhadas na `T099` (Login, Cadastro, Confirmar Canal, Entrega do Aparelho, Primeira Entrada, Recuperação e Registro).
+4. **Fechamento Documental (`T102`, `T103`, `T107`)**:
+   - Preencher a tabela `"Onde cada cenário roda"` em `specs/004-redesenho-das-telas/quickstart.md` mapeando `V1` a `V14` para seus respectivos arquivos de teste (`T102`).
+   - Registrar as divergências conscientes em relação ao protótipo em `docs/design/divergencias-do-prototipo.md`, atualizar `docs/referencia/requisitos-atualizados.md` e alinhar `specs/003-hub-e-assistente/spec.md` quanto ao nome `"Serviços sociais"` (`T107`).
+   - Executar a bateria completa de verificação (`flutter analyze`, `flutter test`, `validar_paleta.py`, `validar_tokens.py` e `--autoteste`) e atualizar `docs/relatorios/o-que-falta.md` (`T103`).
+
+**Por quê**: fecha 100% das tarefas de engenharia de software da Feature 004 sobre a branch `develop`, deixando pendentes exclusivamente as atividades presenciais/humanas (`T104` revisão visual humana do álbum gerado, `T105` teste presencial com 5 idosos 65+ e `T074` capturas adicionais).
+
+**Alternativas descartadas**: adiar `T125a–d` ou `T101` para depois da revisão humana — sem o álbum completo (`T101`) e sem as `CaixaDeEtapa` (`T125a–d`), o álbum fotografaria telas ainda sem o acabamento aprovado na `T044`.

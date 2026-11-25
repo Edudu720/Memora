@@ -71,8 +71,28 @@ dependencies:
   dio: ^5.7.0
 
   # Cliente MQTT para recepção de telemetria e alertas em tempo real do
-  # Dispositivo de Cuidado (ESP32 / Wokwi) (FR-013).
+  # Dispositivo de Cuidado (ESP32 físico) (FR-013).
   mqtt_client: ^10.3.3
+
+  # Ditado de voz opcional na conversa, preenchendo somente o rascunho antes
+  # de a pessoa confirmar o envio manualmente (FR-013, Feature 007).
+  speech_to_text: ^7.3.0
+
+  # Localizador de Serviços Essenciais (Feature 009).
+  # Geolocalização para busca de estabelecimentos próximos com consentimento prévio.
+  geolocator: ^13.0.2
+  # Abertura de rotas e chamadas telefônicas após confirmação explícita em 2 etapas.
+  url_launcher: ^6.3.1
+  # Mapa acessível em alto contraste com OpenStreetMap.
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  # Seleção de foto de perfil da galeria (Android Photo Picker) ou câmera
+  # sob demanda (FR-003, feature 011).
+  image_picker: ^1.2.4
+
+  # Validação binária, correção de orientação, recorte 1:1 e remoção completa
+  # de metadados EXIF/GPS em Dart puro antes de persistir (FR-005, feature 011).
+  image: ^4.13.1
 
 dev_dependencies:
   flutter_test:
@@ -105,8 +125,7 @@ flutter:
 
   assets:
     - assets/ilustracoes/
-    # Os ícones da barra inferior, em pares contorno/preenchido (T112).
-    - assets/icones/navegacao/
+    - assets/icones_apps/
     # A licença da fonte vai junto, e aparece em "Licenças" do aplicativo.
     - assets/fontes/atkinson_hyperlegible_next/OFL.txt
     # Guias de aplicativos cotidianos (T071, T072)

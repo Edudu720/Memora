@@ -24,13 +24,14 @@ comparação tivesse acontecido.
 
 ## Decisão
 
-**Google Gemini API, nível gratuito, modelo `gemini-3.8-flash`.**
+**Google Gemini API, nível gratuito, modelo `gemini-3.6-flash` com reserva automática `gemini-3.5-flash-lite` (atualizado em 2026-11-20; decisão inicial de 2026-10-02 usava `gemini-3.8-flash`).**
 
 | Item | Escolha |
 |---|---|
 | Provedor | Google Gemini API |
 | Nível | **Gratuito** (sem faturamento no Google Cloud) |
-| Modelo | `gemini-3.8-flash` — estável, o Flash mais inteligente da linha, com chamada de ferramenta, streaming e entrada de áudio. Configurável em `memora.assistente.gemini.modelo` |
+| Modelo principal | `gemini-3.6-flash` — alinhado ao Render após ocorrências de `503` no `3.8-flash`. Configurável em `memora.assistente.gemini.modelo` |
+| Modelo reserva | `gemini-3.5-flash-lite` — cota isolada e menor disputa no nível gratuito; acionado apenas antes do 1º trecho em `429` ou após falha nas retentativas (`5xx`, rede, prazo). Configurável em `memora.assistente.gemini.modelo-reserva` |
 | Integração | REST direto, com o `HttpClient` do JDK; **não** o SDK oficial (ver abaixo) |
 | Chave | Variável de ambiente `GEMINI_API_KEY`, sem padrão no repositório; o perfil `producao` não sobe sem ela |
 | Seleção | `memora.assistente.provedor` (`MEMORA_ASSISTENTE_PROVEDOR`): vazio = simulado; `gemini` = real; `producao` = sempre real |

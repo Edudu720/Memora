@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img">
+  <!--
+    Porta "Localizador de Servicos": o alfinete de mapa, o mesmo que a tela do
+    Localizador usa, para a porta nao se confundir com a dos Servicos sociais
+    (revisao de 2026-11-18).
+
+    Desenho original da equipe, no estilo das outras portas: formas planas e
+    arredondadas, sem contorno. Sem fundo: quem desenha o medalhao e o
+    IlustracaoMemora.
+  -->
+  <ellipse cx="60" cy="104" rx="26" ry="7" fill="#0B1B4D" opacity="0.25"/>
+  <path d="M60 100 C54 92 26 62 26 44 C26 24 41 10 60 10 C79 10 94 24 94 44 C94 62 66 92 60 100 Z" fill="#1040F8"/>
+  <circle cx="60" cy="44" r="14" fill="#FFFFFF"/>
+</svg>

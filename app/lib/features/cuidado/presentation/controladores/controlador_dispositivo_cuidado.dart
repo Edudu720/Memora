@@ -37,6 +37,7 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
 
   ContatoEmergencia? _contatoEmergencia;
   EventoQueda? _quedaAtiva;
+  bool _descartado = false;
 
   StreamSubscription<TelemetriaIot>? _subTelemetria;
   StreamSubscription<StatusConexaoIot>? _subStatus;
@@ -55,7 +56,9 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
   ProvedorDeTelemetria get provedor => _provedorAtual;
 
   Future<void> _carregarContato() async {
-    _contatoEmergencia = await repositorioContato.obterContato();
+    final ContatoEmergencia? contato = await repositorioContato.obterContato();
+    if (_descartado) return;
+    _contatoEmergencia = contato;
     notifyListeners();
   }
 
@@ -65,16 +68,19 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
     _subQueda?.cancel();
 
     _subTelemetria = _provedorAtual.streamTelemetria.listen((TelemetriaIot telemetria) {
+      if (_descartado) return;
       _dispositivo = _dispositivo.copyWith(ultimaTelemetria: telemetria);
       notifyListeners();
     });
 
     _subStatus = _provedorAtual.streamStatusConexao.listen((StatusConexaoIot status) {
+      if (_descartado) return;
       _dispositivo = _dispositivo.copyWith(statusConexao: status);
       notifyListeners();
     });
 
     _subQueda = _provedorAtual.streamQueda.listen((EventoQueda queda) {
+      if (_descartado) return;
       _quedaAtiva = queda;
       notifyListeners();
     });
@@ -82,16 +88,19 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
 
   /// Inicia a conexão com o provedor de telemetria atual.
   Future<void> conectar() async {
+    if (_descartado) return;
     await _provedorAtual.conectar();
   }
 
   /// Encerra a conexão com o provedor de telemetria atual.
   Future<void> desconectar() async {
+    if (_descartado) return;
     await _provedorAtual.desconectar();
   }
 
-  /// Alterna entre o modo simulado e o modo MQTT (Wokwi / ESP32).
+  /// Alterna entre o modo simulado local e o modo MQTT do ESP32 físico.
   Future<void> alternarModo(ModoOperacaoIot novoModo, {String? broker, String? topico}) async {
+    if (_descartado) return;
     final String brokerFinal = (broker != null && broker.trim().isNotEmpty)
         ? broker.trim()
         : _dispositivo.brokerHost;
@@ -100,6 +109,7 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
         : _dispositivo.topicoBase;
 
     await _provedorAtual.desconectar();
+    if (_descartado) return;
     _provedorAtual.descartar();
 
     if (novoModo == ModoOperacaoIot.mqtt) {
@@ -119,31 +129,46 @@ class ControladorDispositivoCuidado extends ChangeNotifier {
 
     _iniciarOuvintes();
     await _provedorAtual.conectar();
+    if (_descartado) return;
     notifyListeners();
   }
 
   /// Salva o [contato] de emergência no repositório local.
   Future<void> salvarContato(ContatoEmergencia contato) async {
+    if (_descartado) return;
     await repositorioContato.salvarContato(contato);
+    if (_descartado) return;
     _contatoEmergencia = contato;
     notifyListeners();
   }
 
-  /// Dispara uma simulação de queda quando em modo simulado.
+  /// Dispara localmente um evento de queda para validar a tela de verificação,
+  /// tanto no modo simulado quanto no modo ESP32 físico (MQTT).
   void simularQuedaTeste() {
-    if (_provedorAtual is ProvedorDeTelemetriaSimulado) {
-      (_provedorAtual as ProvedorDeTelemetriaSimulado).simularQueda();
+    if (_descartado || _quedaAtiva != null) return;
+    final ProvedorDeTelemetria provedor = _provedorAtual;
+    if (provedor is ProvedorDeTelemetriaSimulado) {
+      provedor.simularQueda();
+      return;
     }
+    _quedaAtiva = EventoQueda.novo(
+      bpm: _dispositivo.ultimaTelemetria?.bpm ?? 72,
+      aceleracao: 2.8,
+    );
+    notifyListeners();
   }
 
   /// Limpa o evento de queda ativo após abrir a tela de verificação.
   void limparQuedaAtiva() {
+    if (_descartado) return;
     _quedaAtiva = null;
     notifyListeners();
   }
 
   @override
   void dispose() {
+    if (_descartado) return;
+    _descartado = true;
     _subTelemetria?.cancel();
     _subStatus?.cancel();
     _subQueda?.cancel();

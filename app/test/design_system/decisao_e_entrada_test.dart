@@ -1,6 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
+import '../suporte/movimento.dart';
 
 Widget _comTema(Widget filho) {
   return MaterialApp(
@@ -216,7 +219,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
       expect(
         find.text('Não consegui entender esse e-mail. Pode conferir?'),
         findsOneWidget,
@@ -324,7 +327,14 @@ void main() {
       );
 
       expect(find.text('Estou entrando na sua conta...'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is MemoraAnimada && w.expressao == PoseDaMemora.carregando,
+        ),
+        findsOneWidget,
+        reason: 'A espera é a Memora segurando a barra (FR-059).',
+      );
     });
 
     testWidgets('erro é anunciado como região viva ao leitor de tela',
@@ -420,4 +430,131 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group(
+    'BotaoBase — duplo sinal visual de foco e toque (Feature 006 / FR-001..FR-003)',
+    () {
+      AnimatedContainer superficieDoBotao(WidgetTester t, Finder botao) =>
+          t.widget<AnimatedContainer>(
+            find.descendant(
+              of: botao,
+              matching: find.byType(AnimatedContainer),
+            ),
+          );
+
+      AnimatedScale escalaDoBotao(WidgetTester t, Finder botao) =>
+          t.widget<AnimatedScale>(
+            find.descendant(of: botao, matching: find.byType(AnimatedScale)),
+          );
+
+      testWidgets(
+        'as 4 variantes exibem anel de foco externo (strokeAlignOutside) ao receber foco',
+        (WidgetTester tester) async {
+          final List<Widget> variantes = <Widget>[
+            BotaoPrimario(rotulo: 'Primário', aoTocar: () {}),
+            BotaoSecundario(rotulo: 'Secundário', aoTocar: () {}),
+            BotaoTerciario(rotulo: 'Terciário', aoTocar: () {}),
+            BotaoPerigo(
+              rotulo: 'Perigo',
+              icone: Icons.delete_outline_rounded,
+              aoTocar: () {},
+            ),
+          ];
+
+          for (final Widget botao in variantes) {
+            await tester.pumpWidget(_comTema(botao));
+            final Finder alvo = find.byWidget(botao);
+            expect(superficieDoBotao(tester, alvo).foregroundDecoration, isNull);
+
+            await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+            await tester.pump();
+
+            final BoxDecoration anel =
+                superficieDoBotao(tester, alvo).foregroundDecoration!
+                    as BoxDecoration;
+            final BorderSide lado = (anel.border! as Border).top;
+            expect(lado.width, MemoraDimensoes.bordaSelecao);
+            expect(lado.color, MemoraCores.claro.primaria);
+            expect(lado.strokeAlign, BorderSide.strokeAlignOutside);
+          }
+        },
+      );
+
+      testWidgets(
+        'as 4 variantes encolhem ao toque e variantes transparentes ganham preenchimento destaque',
+        (WidgetTester tester) async {
+      liberarMovimento(tester);
+          final List<(Widget, bool)> casos = <(Widget, bool)>[
+            (BotaoPrimario(rotulo: 'Primário', aoTocar: () {}), false),
+            (BotaoSecundario(rotulo: 'Secundário', aoTocar: () {}), true),
+            (BotaoTerciario(rotulo: 'Terciário', aoTocar: () {}), true),
+            (
+              BotaoPerigo(
+                rotulo: 'Perigo',
+                icone: Icons.delete_outline_rounded,
+                aoTocar: () {},
+              ),
+              false,
+            ),
+          ];
+
+          for (final (Widget botao, bool transparenteEmRepouso) in casos) {
+            await tester.pumpWidget(_comTema(botao));
+            final Finder alvo = find.byWidget(botao);
+            expect(escalaDoBotao(tester, alvo).scale, 1);
+
+            final TestGesture gesto = await tester.startGesture(
+              tester.getCenter(alvo),
+            );
+            await tester.pump(kPressTimeout);
+
+            expect(
+              escalaDoBotao(tester, alvo).scale,
+              MemoraMovimento.escalaPressionado,
+            );
+            if (transparenteEmRepouso) {
+              final BoxDecoration decoracao =
+                  superficieDoBotao(tester, alvo).decoration! as BoxDecoration;
+              expect(decoracao.color, MemoraCores.claro.destaque);
+            }
+
+            await gesto.up();
+            await tester.pumpAndSettle();
+            expect(escalaDoBotao(tester, alvo).scale, 1);
+          }
+        },
+      );
+
+      testWidgets(
+        'estados desabilitado e carregando permanecem inativos sem anel de foco nem escala',
+        (WidgetTester tester) async {
+          final List<Widget> inativos = <Widget>[
+            const BotaoPrimario(rotulo: 'Desabilitado'),
+            BotaoPrimario(
+              rotulo: 'Carregando',
+              aoTocar: () {},
+              carregando: true,
+            ),
+          ];
+
+          for (final Widget botao in inativos) {
+            await tester.pumpWidget(_comTema(botao));
+            final Finder alvo = find.byWidget(botao);
+
+            await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+            await tester.pump();
+            expect(superficieDoBotao(tester, alvo).foregroundDecoration, isNull);
+
+            final TestGesture gesto = await tester.startGesture(
+              tester.getCenter(alvo),
+            );
+            await tester.pump(kPressTimeout);
+            expect(escalaDoBotao(tester, alvo).scale, 1);
+            await gesto.up();
+            await tester.pump();
+          }
+        },
+      );
+    },
+  );
 }

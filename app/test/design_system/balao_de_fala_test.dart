@@ -38,11 +38,131 @@ void main() {
         app(const BalaoDeFala(autor: AutorDoBalao.pessoa, texto: 'Oi')),
       );
       expect(find.byType(MemoraPersonagem), findsNothing);
-      expect(find.byIcon(Icons.person), findsOneWidget);
+      expect(find.byIcon(Icons.person_rounded), findsOneWidget);
       expect(find.text('Você'), findsOneWidget);
       expect(
-        t.getTopLeft(find.byIcon(Icons.person)).dx,
+        t.getTopLeft(find.byIcon(Icons.person_rounded)).dx,
         greaterThan(t.getTopLeft(find.text('Oi')).dx),
+      );
+    });
+
+    testWidgets(
+      'avatarPessoa customizado substitui _RostoDaPessoa à direita apenas na fala da pessoa',
+      (WidgetTester t) async {
+        const Key chaveCustom = Key('balao.avatar_custom');
+        await t.pumpWidget(
+          app(
+            const Column(
+              children: <Widget>[
+                BalaoDeFala(
+                  autor: AutorDoBalao.pessoa,
+                  texto: 'Com retrato',
+                  avatarPessoa: SizedBox(
+                    key: chaveCustom,
+                    width: MemoraDimensoes.pisoDeIlustracao,
+                    height: MemoraDimensoes.pisoDeIlustracao,
+                  ),
+                ),
+                BalaoDeFala(
+                  autor: AutorDoBalao.memora,
+                  texto: 'Ignora avatarPessoa',
+                  avatarPessoa: SizedBox(
+                    key: Key('balao.avatar_ignorado_memora'),
+                    width: MemoraDimensoes.pisoDeIlustracao,
+                    height: MemoraDimensoes.pisoDeIlustracao,
+                  ),
+                ),
+                BalaoDeFala(
+                  autor: AutorDoBalao.pessoa,
+                  texto: 'Sem rosto',
+                  comRosto: false,
+                  avatarPessoa: SizedBox(
+                    key: Key('balao.avatar_oculto'),
+                    width: MemoraDimensoes.pisoDeIlustracao,
+                    height: MemoraDimensoes.pisoDeIlustracao,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        expect(find.byKey(chaveCustom), findsOneWidget);
+        expect(find.byIcon(Icons.person_rounded), findsNothing);
+        expect(
+          t.getTopLeft(find.byKey(chaveCustom)).dx,
+          greaterThan(t.getTopLeft(find.text('Com retrato')).dx),
+        );
+        expect(find.byKey(const Key('balao.avatar_ignorado_memora')), findsNothing);
+        expect(find.byKey(const Key('balao.avatar_oculto')), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'rostoAnimado: false desativa toque e injeta disableAnimations nos balões da Memora',
+      (WidgetTester t) async {
+        await t.pumpWidget(
+          app(
+            const Column(
+              children: <Widget>[
+                BalaoDeFala(
+                  autor: AutorDoBalao.memora,
+                  texto: 'Estática no chat',
+                  rostoAnimado: false,
+                ),
+                BalaoDeFala.escrevendo(rostoAnimado: false),
+              ],
+            ),
+          ),
+        );
+
+        final Iterable<MemoraPersonagem> personagens =
+            t.widgetList<MemoraPersonagem>(find.byType(MemoraPersonagem));
+        expect(personagens, hasLength(2));
+        for (final MemoraPersonagem p in personagens) {
+          expect(p.reageAoToque, isFalse);
+        }
+
+        final Iterable<Element> animadas = find.byType(MemoraAnimada).evaluate();
+        expect(animadas, hasLength(2));
+        for (final Element el in animadas) {
+          expect((el.widget as MemoraAnimada).reageAoToque, isFalse);
+          expect(MediaQuery.disableAnimationsOf(el), isTrue);
+        }
+      },
+    );
+
+    testWidgets('sem rosto (a conversa, FR-042): so posicao e nome escrito', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(
+        app(
+          const Column(
+            children: <Widget>[
+              BalaoDeFala(
+                autor: AutorDoBalao.memora,
+                texto: 'Olá!',
+                comRosto: false,
+              ),
+              BalaoDeFala(
+                autor: AutorDoBalao.pessoa,
+                texto: 'Oi',
+                comRosto: false,
+              ),
+              BalaoDeFala.escrevendo(comRosto: false),
+            ],
+          ),
+        ),
+      );
+      expect(find.byType(MemoraPersonagem), findsNothing);
+      expect(find.byType(MemoraAnimada), findsNothing);
+      expect(find.byIcon(Icons.person_rounded), findsNothing);
+      expect(find.text('Memora'), findsNWidgets(2));
+      expect(find.text('Você'), findsOneWidget);
+      // O balão da pessoa continua à direita da Memora.
+      expect(
+        t.getTopLeft(find.text('Você')).dx,
+        greaterThan(t.getTopLeft(find.text('Memora').first).dx - 1),
       );
     });
 

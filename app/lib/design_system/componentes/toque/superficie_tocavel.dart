@@ -47,8 +47,14 @@ class SuperficieTocavel extends StatefulWidget {
   /// Ação. Nula, a superfície fica desabilitada.
   final VoidCallback? aoTocar;
 
-  /// Cor de fundo.
+  /// Cor de fundo (ignorada quando [gradiente] é informado).
   final Color fundo;
+
+  /// Gradiente opcional para superfícies herói com foco e pressão consistentes.
+  final Gradient? gradiente;
+
+  /// Sombras personalizadas em repouso.
+  final List<BoxShadow>? sombras;
 
   /// Arredondamento.
   final BorderRadius raio;
@@ -66,12 +72,19 @@ class SuperficieTocavel extends StatefulWidget {
   /// Cor da sombra.
   final Color corDaSombra;
 
-  /// Contorno de [MemoraDimensoes.bordaEnfase] nesta cor. Nulo, sem contorno.
+  /// Contorno desta cor com [larguraBorda]. Nulo, sem contorno.
   final Color? borda;
+
+  /// Espessura do contorno [borda].
+  final double larguraBorda;
 
   /// Para o leitor de tela: é o item escolhido de um grupo (o destino ativo
   /// da barra inferior). Nulo, a superfície não faz parte de grupo nenhum.
   final bool? selecionada;
+
+  /// Isola o nó semântico como contêiner próprio quando o chamador não possui
+  /// irmãos semânticos que impeçam a fusão com um ancestral.
+  final bool conteinerSemantico;
 
   /// Conteúdo.
   final Widget child;
@@ -82,6 +95,8 @@ class SuperficieTocavel extends StatefulWidget {
     required this.fundo,
     required this.raio,
     required this.child,
+    this.gradiente,
+    this.sombras,
     this.aoTocar,
     this.dica,
     this.sombra = false,
@@ -89,7 +104,9 @@ class SuperficieTocavel extends StatefulWidget {
     this.elevacaoPressionada = MemoraElevacao.plana,
     this.corDaSombra = MemoraElevacao.sombra,
     this.borda,
+    this.larguraBorda = MemoraDimensoes.bordaEnfase,
     this.selecionada,
+    this.conteinerSemantico = false,
     super.key,
   });
 
@@ -111,6 +128,7 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
         : widget.elevacao;
 
     return Semantics(
+      container: widget.conteinerSemantico,
       button: true,
       enabled: habilitada,
       selected: widget.selecionada,
@@ -121,7 +139,9 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
       onTap: widget.aoTocar,
       child: ExcludeSemantics(
         child: AnimatedScale(
-          scale: _pressionada ? MemoraMovimento.escalaPressionado : 1,
+          scale: _pressionada && !reduzir
+              ? MemoraMovimento.escalaPressionado
+              : 1,
           duration: MemoraMovimento.efetiva(
             MemoraMovimento.rapido,
             reduzirMovimento: reduzir,
@@ -132,28 +152,33 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
               reduzirMovimento: reduzir,
             ),
             decoration: BoxDecoration(
-              color: _pressionada && widget.fundo.a == 0
-                  ? cores.destaque
-                  : widget.fundo,
+              color: widget.gradiente != null
+                  ? null
+                  : (_pressionada && widget.fundo.a == 0
+                        ? cores.destaque
+                        : widget.fundo),
+              gradient: widget.gradiente,
               borderRadius: widget.raio,
               border: widget.borda == null
                   ? null
                   : Border.all(
                       color: widget.borda!,
-                      width: MemoraDimensoes.bordaEnfase,
+                      width: widget.larguraBorda,
                     ),
               // Com `elevacaoPressionada` > 0 a lista continua com um item e o
               // `AnimatedContainer` interpola desfoque e deslocamento: a
               // sombra *encolhe*, em vez de sumir de uma vez.
-              boxShadow: widget.sombra && elevacaoAgora > MemoraElevacao.plana
-                  ? <BoxShadow>[
-                      BoxShadow(
-                        color: widget.corDaSombra,
-                        blurRadius: elevacaoAgora * 4,
-                        offset: Offset(0, elevacaoAgora),
-                      ),
-                    ]
-                  : null,
+              boxShadow:
+                  widget.sombras ??
+                  (widget.sombra && elevacaoAgora > MemoraElevacao.plana
+                      ? <BoxShadow>[
+                          BoxShadow(
+                            color: widget.corDaSombra,
+                            blurRadius: elevacaoAgora * 4,
+                            offset: Offset(0, elevacaoAgora),
+                          ),
+                        ]
+                      : null),
             ),
             foregroundDecoration: _focada
                 ? BoxDecoration(
@@ -165,17 +190,37 @@ class _SuperficieTocavelState extends State<SuperficieTocavel> {
                     ),
                   )
                 : null,
-            child: Material(
-              color: Colors.transparent,
-              borderRadius: widget.raio,
-              child: InkWell(
-                onTap: widget.aoTocar,
+            // DecoratedBox sempre presente (sem mudar profundidade na árvore)
+            // para sinalizar toque imediato sob "reduzir movimento" (FR-028,
+            // T065) sem desmontar o InkWell nem interromper o onTap.
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration:
+                  (_pressionada &&
+                      reduzir &&
+                      !_focada &&
+                      (widget.gradiente != null || widget.fundo.a > 0))
+                  ? BoxDecoration(
+                      borderRadius: widget.raio,
+                      border: Border.all(
+                        color: cores.borda,
+                        width: MemoraDimensoes.bordaSelecao,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                    )
+                  : const BoxDecoration(),
+              child: Material(
+                color: Colors.transparent,
                 borderRadius: widget.raio,
-                onHighlightChanged: (bool pressionada) =>
-                    setState(() => _pressionada = pressionada),
-                onFocusChange: (bool focada) =>
-                    setState(() => _focada = focada),
-                child: widget.child,
+                child: InkWell(
+                  onTap: widget.aoTocar,
+                  borderRadius: widget.raio,
+                  onHighlightChanged: (bool pressionada) =>
+                      setState(() => _pressionada = pressionada),
+                  onFocusChange: (bool focada) =>
+                      setState(() => _focada = focada),
+                  child: widget.child,
+                ),
               ),
             ),
           ),

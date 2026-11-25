@@ -51,6 +51,7 @@ class _RepositorioQueFalhaNoRegistro implements RepositorioAssistente {
     required String mensagem,
     required List<MensagemDaConversa> historico,
     void Function(String trecho)? aoReceberTrecho,
+    void Function(void Function() cancelar)? aoCriarCancelamento,
   }) async => const AssistenteRespondeu(
     'Quer que eu abra o WhatsApp?',
     acao: AcaoAutorizada(

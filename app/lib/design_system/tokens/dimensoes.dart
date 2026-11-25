@@ -26,6 +26,10 @@ abstract final class MemoraDimensoes {
   /// (research.md, R7).
   static const double escalaTextoMax = 2.0;
 
+  /// Limiar de ampliação a partir do qual visuais decorativos laterais cedem
+  /// lugar à largura total do texto (regra 7 da R2).
+  static const double escalaTextoAlta = 1.75;
+
   /// Piso da escala de texto.
   static const double escalaTextoMin = 1.0;
 
@@ -109,12 +113,6 @@ abstract final class MemoraDimensoes {
   /// 2.5 dp — espessura do giro pequeno.
   static const double espessuraIndicadorEmBotao = 2.5;
 
-  /// 40 dp — o giro que ocupa a tela enquanto a pessoa espera.
-  static const double indicadorDeTela = 40;
-
-  /// 4 dp — espessura do giro grande.
-  static const double espessuraIndicadorDeTela = 4;
-
   // ---------------------------------------------------------------------------
   // Ilustração (feature 004)
   //
@@ -122,6 +120,14 @@ abstract final class MemoraDimensoes {
   // são tetos, e quem desenha encolhe a ilustração quando a altura aperta e a
   // tira de vez abaixo de [pisoDeIlustracao] — o texto e a ação, nunca.
   // ---------------------------------------------------------------------------
+
+  /// Teto da `BarraSuperior` no `appBar` do `Scaffold` — não a altura dela.
+  ///
+  /// A barra mede o próprio conteúdo: 56 dp com a letra normal, e mais com a
+  /// letra ampliada, quando o título e a bolinha do SOS precisam de duas
+  /// linhas (feature 014, 2026-11-18). O `Scaffold` exige um teto finito, e
+  /// este existe para nunca morder: se morder, o título é cortado.
+  static const double tetoDaBarraSuperior = 400;
 
   /// 48 dp — a ilustração de um cartão de porta, ao lado do nome.
   ///
@@ -138,7 +144,7 @@ abstract final class MemoraDimensoes {
   /// Fração, e não pixel: o respiro fixo de 8 dp que o commit `d5a5031` impôs
   /// apertava o 390×844 para caber no 320×568, e a revisão da T044 chamou o
   /// resultado de "junto demais". A conta é refeita em cada aparelho.
-  static const double fracaoDeRespiroDaPorta = 0.02;
+  static const double fracaoDeRespiroDaPorta = 0.011;
 
   /// Fração da altura da tela, já descontada a ampliação do texto, que vira o
   /// afastamento **entre** portas. Limitado entre `MemoraEspacamento.md` e
@@ -164,6 +170,19 @@ abstract final class MemoraDimensoes {
   /// 390x844 sem rolar, e a figura é o que cede primeiro (regra 7 da R2).
   static const double fracaoDaFiguraDoInicio = 0.14;
 
+  /// Fração da altura disponível que o **lado da anfitriã** do Início ocupa
+  /// (feature 013, T053), antes de descontar a ampliação do texto. A anfitriã
+  /// é a primeira a ceder quando falta altura (FR-041): o lado dela é esta
+  /// fração dividida pela ampliação, entre `alvoMinimo` e `ilustracaoHeroi`.
+  /// Fração, e não pixel, pela lição do teto da conversa.
+  ///
+  /// 0,15 foi medido com a Atkinson: num 390×844 a anfitriã inteira (desenho,
+  /// 8 dp e o balão da dica mais longa) ocupa cerca de **um terço** da altura
+  /// (FR-040). Com os quatro atalhos o Início passa da altura de qualquer
+  /// aparelho e rola — o balão sozinho tem 134 dp —, e o que rola chega ao
+  /// toque, acima da barra.
+  static const double fracaoDaAnfitriaDoInicio = 0.15;
+
   /// 40 dp — abaixo disto a ilustração some. Desenho pequeno demais vira
   /// borrão para quem enxerga pouco, e ocupa o espaço de uma linha de texto.
   static const double pisoDeIlustracao = 40;
@@ -178,6 +197,14 @@ abstract final class MemoraDimensoes {
   /// O aviso compacto, aberto, não passa desta fração da altura disponível;
   /// o resto do texto rola dentro dele (R5).
   static const double tetoDoAvisoAberto = 0.5;
+
+  /// Dentro do aviso aberto, o botão de fechar não passa desta fração da altura
+  /// que o aviso tem; acima dela, o botão rola (feature 013).
+  ///
+  /// O botão fica fixo para a pessoa sempre achar a saída, mas pede a altura
+  /// natural dele — e a 200% num 320×568, dentro da casca, ela sozinha passava
+  /// do teto do aviso e a caixa estourava 39 px. O texto rola no resto.
+  static const double tetoDoBotaoDoAvisoAberto = 0.4;
 
   /// A faixa do campo de escrever da conversa, com o respiro dela, não passa
   /// desta fração da altura disponível; acima dela, a faixa rola (T055).
@@ -205,4 +232,27 @@ abstract final class MemoraDimensoes {
 
   /// Altura da pílula do destino ativo.
   static const double alturaDaPilulaDeNavegacao = 32;
+
+  // ---------------------------------------------------------------------------
+  // Padrão visual 2.0 (feature 007)
+  // ---------------------------------------------------------------------------
+
+  /// 48 dp — container quadrado arredondado dos ícones em `TileAcaoRapida` e
+  /// `LinhaDeLista`.
+  static const double badgeAtalhoRapido = 48.0;
+
+  /// 1.0 dp — espessura de divisores leves e separadores de barra.
+  static const double espessuraBordaSutil = 1.0;
+
+  /// 3.0 dp — barra indicadora superior da aba ativa em `NavegacaoInferior`.
+  static const double indicadorAtivoBarra = 3.0;
+
+  /// Escala de fonte a partir da qual grades 2x2 colapsam para uma coluna.
+  static const double escalaColapsoGrade = 1.5;
+
+  /// Largura mínima interna (dp) para exibir grade em duas colunas.
+  ///
+  /// Telas de `320 dp` (`272 dp` úteis) colapsam para uma coluna; telas a partir
+  /// de `360 dp` (`>= 300 dp` úteis) mantêm a grade 2x2 em `1.0x`.
+  static const double larguraMinimaGrade = 300;
 }

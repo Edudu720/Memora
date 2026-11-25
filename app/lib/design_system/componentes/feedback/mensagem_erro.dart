@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../../temas/memora_theme_extension.dart';
 import '../../tokens/cores.dart';
 import '../../tokens/dimensoes.dart';
+import '../../tokens/elevacao.dart';
 import '../../tokens/espacamento.dart';
 import '../../tokens/raio.dart';
 import '../botoes/botao_secundario.dart';
+import '../ilustracao/memora_personagem.dart';
 import '../texto/texto_memora.dart';
 
 /// Comunica que algo não deu certo.
@@ -28,17 +30,29 @@ class MensagemErro extends StatelessWidget {
   /// Rótulo do botão de recuperação.
   final String rotuloTentarNovamente;
 
+  /// Se a Memora (preocupada) aparece acima do texto (FR-001, T073).
+  ///
+  /// Uma Memora só por tela (FR-006, T096): quando a tela já mostra a dela —
+  /// no cartão de apresentação, na barra —, passe `false`. O ícone e o texto
+  /// do erro nunca saem (FR-032).
+  final bool comMemora;
+
   /// Cria uma mensagem de erro.
   const MensagemErro({
     required this.mensagem,
     this.aoTentarNovamente,
     this.rotuloTentarNovamente = 'Tentar de novo',
+    this.comMemora = true,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final MemoraCores cores = context.memora.cores;
+    final bool mostrarMascote =
+        comMemora &&
+        MediaQuery.textScalerOf(context).scale(1) <
+            MemoraDimensoes.escalaTextoAlta;
 
     return Semantics(
       liveRegion: true,
@@ -46,33 +60,47 @@ class MensagemErro extends StatelessWidget {
       child: ExcludeSemantics(
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(MemoraEspacamento.lg),
+          padding: const EdgeInsets.all(MemoraEspacamento.md),
           decoration: BoxDecoration(
             color: cores.superficie,
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+            borderRadius: BorderRadius.circular(MemoraRaio.cartaoMedio),
             border: Border.all(
-                color: cores.perigo, width: MemoraDimensoes.bordaEnfase),
+              color: cores.perigo,
+              width: MemoraDimensoes.bordaEnfase,
+            ),
+            boxShadow: MemoraElevacao.listaSombrasCartao(cores),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              if (mostrarMascote) ...<Widget>[
+                const Center(
+                  child: MemoraPersonagem(
+                    expressao: ExpressaoDaMemora.preocupada,
+                    tamanho: MemoraDimensoes.pisoDeIlustracao,
+                  ),
+                ),
+                const SizedBox(height: MemoraEspacamento.sm),
+              ],
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   // Ícone E texto: cor sozinha não comunica.
-                  Icon(Icons.error_outline,
-                      color: cores.perigo,
-                      size: MemoraDimensoes.iconeDestaque),
+                  Icon(
+                    Icons.error_outline_rounded,
+                    color: cores.perigo,
+                    size: MemoraDimensoes.iconeDestaque,
+                  ),
                   const SizedBox(width: MemoraEspacamento.md),
                   Expanded(child: TextoMemora(mensagem)),
                 ],
               ),
               if (aoTentarNovamente != null) ...<Widget>[
-                const SizedBox(height: MemoraEspacamento.lg),
+                const SizedBox(height: MemoraEspacamento.md),
                 BotaoSecundario(
                   rotulo: rotuloTentarNovamente,
-                  icone: Icons.refresh,
+                  icone: Icons.refresh_rounded,
                   aoTocar: aoTentarNovamente,
                 ),
               ],

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../../design_system/design_system.dart';
+import '../../../../l10n/textos_cuidado.dart';
 import '../../domain/casos_de_uso/disparar_socorro_emergencia.dart';
 import '../../domain/entidades/contato_emergencia.dart';
 import '../../domain/entidades/enums_cuidado.dart';
@@ -32,14 +34,14 @@ class TelaDispositivoCuidado extends StatefulWidget {
   final String nomePessoaIdosa;
 
   @override
-  State<TelaDispositivoCuidado> createState() =>
-      _TelaDispositivoCuidadoState();
+  State<TelaDispositivoCuidado> createState() => _TelaDispositivoCuidadoState();
 }
 
 class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
   late final TextEditingController _controladorBroker;
   late final TextEditingController _controladorTopico;
   bool _painelConexaoAberto = false;
+  bool _verificacaoQuedaAberta = false;
 
   @override
   void initState() {
@@ -55,6 +57,15 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
   }
 
   @override
+  void didUpdateWidget(covariant TelaDispositivoCuidado oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controlador != widget.controlador) {
+      oldWidget.controlador.removeListener(_verificarQuedaAtiva);
+      widget.controlador.addListener(_verificarQuedaAtiva);
+    }
+  }
+
+  @override
   void dispose() {
     widget.controlador.removeListener(_verificarQuedaAtiva);
     _controladorBroker.dispose();
@@ -66,13 +77,13 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
     final EventoQueda? queda = widget.controlador.quedaAtiva;
     if (queda != null && mounted) {
       widget.controlador.limparQuedaAtiva();
+      if (_verificacaoQuedaAberta) return;
       _abrirTelaVerificacaoQueda(queda);
     }
   }
 
   void _abrirTelaVerificacaoQueda(EventoQueda queda) {
-    final ControladorVerificacaoQueda ctrlQueda =
-        ControladorVerificacaoQueda(
+    final ControladorVerificacaoQueda ctrlQueda = ControladorVerificacaoQueda(
       evento: queda,
       provedor: widget.controlador.provedor,
       casoDeUsoSocorro: const DispararSocorroEmergencia(),
@@ -85,13 +96,22 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
       },
     );
 
-    Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        fullscreenDialog: true,
-        builder: (BuildContext ctx) =>
-            TelaVerificacaoQueda(controlador: ctrlQueda),
-      ),
-    );
+    _verificacaoQuedaAberta = true;
+    Navigator.of(context)
+        .push<void>(
+          // Uma pergunta que cobre tudo: sobe por cima, e a tela de trás fica
+          // onde está (FR-010).
+          RotaMemora<void>(
+            fullscreenDialog: true,
+            direcao: DirecaoDaTransicao.sobrepor,
+            builder: (BuildContext ctx) =>
+                TelaVerificacaoQueda(controlador: ctrlQueda),
+          ),
+        )
+        .whenComplete(() {
+          ctrlQueda.dispose();
+          _verificacaoQuedaAberta = false;
+        });
   }
 
   void _abrirDialogoContato() {
@@ -106,7 +126,10 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
 
     return AnimatedBuilder(
       animation: widget.controlador,
@@ -115,308 +138,408 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
             widget.controlador.dispositivo.ultimaTelemetria;
         final StatusConexaoIot statusConexao =
             widget.controlador.dispositivo.statusConexao;
-        final ContatoEmergencia? contato =
-            widget.controlador.contatoEmergencia;
-        final bool estaConectado =
-            widget.controlador.dispositivo.estaConectado;
-        final bool modoMqtt = widget.controlador.dispositivo.modoOperacao ==
-            ModoOperacaoIot.mqtt;
+        final ContatoEmergencia? contato = widget.controlador.contatoEmergencia;
+        final bool estaConectado = widget.controlador.dispositivo.estaConectado;
+        final bool modoMqtt =
+            widget.controlador.dispositivo.modoOperacao == ModoOperacaoIot.mqtt;
+        final bool bpmValido = telemetria?.bpmValido ?? false;
+        final String valorHeroi = bpmValido
+            ? '${telemetria!.bpm} ${TextosCuidado.unidadeBpm}'
+            : '-- ${TextosCuidado.unidadeBpm}';
 
         return Scaffold(
           backgroundColor: cores.fundo,
+          appBar: BarraSuperior(
+            titulo: TextosCuidado.tituloDispositivo,
+            aoVoltar: widget.aoVoltar,
+            // A Memora desta tela é a do painel (FR-006).
+          ),
           body: SafeArea(
-            child: Column(
-              children: <Widget>[
-                // Barra superior com navegação padronizada
-                BarraSuperior(
-                  titulo: 'Dispositivo de Cuidado',
-                  aoVoltar: widget.aoVoltar,
-                ),
-
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: MemoraEspacamento.md,
-                      vertical: MemoraEspacamento.sm,
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MemoraEspacamento.md,
+                vertical: MemoraEspacamento.sm,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  PainelHeroi(
+                    titulo: _textoDoStatus(statusConexao),
+                    valorDestaque: valorHeroi,
+                    subtitulo:
+                        '${modoMqtt ? TextosCuidado.modoMqtt : TextosCuidado.modoSimulador} · ${estaConectado ? TextosCuidado.resumoMonitorando : TextosCuidado.resumoAguardando}',
+                    visualEsquerda: const MemoraPersonagem(
+                      tamanho: MemoraDimensoes.alvoDecisao,
                     ),
+                    badgeStatus: BadgeDeStatus(
+                      rotulo: estaConectado
+                          ? TextosCuidado.badgeMonitoramentoAtivo
+                          : TextosCuidado.badgeAguardandoVinculo,
+                      icone: estaConectado
+                          ? Icons.favorite_rounded
+                          : Icons.sensors_off_rounded,
+                      tom: _tomDoBadge(statusConexao),
+                    ),
+                  ),
+
+                  const SizedBox(height: MemoraEspacamento.md),
+
+                  if (estaConectado)
+                    BotaoSecundario(
+                      rotulo: TextosCuidado.botaoDesconectar,
+                      icone: Icons.link_off_rounded,
+                      aoTocar: widget.controlador.desconectar,
+                    )
+                  else
+                    BotaoPrimario(
+                      rotulo: TextosCuidado.botaoConectar,
+                      icone: Icons.link_rounded,
+                      aoTocar: widget.controlador.conectar,
+                    ),
+
+                  const SizedBox(height: MemoraEspacamento.lg),
+
+                  LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints box) {
+                      final bool emDuasColunas =
+                          box.maxWidth >= MemoraDimensoes.larguraMinimaGrade &&
+                          escala < MemoraDimensoes.escalaColapsoGrade;
+
+                      final Widget cardBpm = MedidorBpm(
+                        bpm: telemetria?.bpm ?? 0,
+                        bpmValido: bpmValido,
+                      );
+                      final Widget cardMovimento = IndicadorMovimento(
+                        emMovimento: telemetria?.emMovimento ?? false,
+                        nivelMovimento: telemetria?.nivelMovimento ?? 0,
+                      );
+
+                      if (!emDuasColunas) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            cardBpm,
+                            const SizedBox(height: MemoraEspacamento.md),
+                            cardMovimento,
+                          ],
+                        );
+                      }
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(child: cardBpm),
+                          const SizedBox(width: MemoraEspacamento.sm),
+                          Expanded(child: cardMovimento),
+                        ],
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: MemoraEspacamento.lg),
+
+                  const TextoMemora(
+                    TextosCuidado.tituloAcoesRapidas,
+                    estilo: EstiloTexto.tituloSecao,
+                    cabecalho: true,
+                  ),
+                  const SizedBox(height: MemoraEspacamento.sm),
+
+                  LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints box) {
+                      final bool emDuasColunas =
+                          box.maxWidth >= MemoraDimensoes.larguraMinimaGrade &&
+                          escala < MemoraDimensoes.escalaColapsoGrade;
+
+                      final Widget tileContato = TileAcaoRapida(
+                        icone: Icons.contact_phone_rounded,
+                        titulo: TextosCuidado.tituloContatoEmergencia,
+                        subtitulo: (contato != null && contato.ehValido)
+                            ? (contato.temEmailValido
+                                  ? '${contato.nome} (${contato.parentesco}) · ${contato.telefone} · ${contato.email.trim()}'
+                                  : '${contato.nome} (${contato.parentesco}) · ${contato.telefone}')
+                            : TextosCuidado.pistaCadastrarContato,
+                        variacao: VarianteBadge.saude,
+                        pistaAcao: (contato != null && contato.ehValido)
+                            ? TextosCuidado.pistaAlterarContato
+                            : TextosCuidado.pistaCadastrarContato,
+                        aoTocar: _abrirDialogoContato,
+                      );
+
+                      final Widget tileVinculo = TileAcaoRapida(
+                        icone: Icons.sensors_rounded,
+                        titulo: TextosCuidado.tituloAtalhoConexao,
+                        subtitulo: estaConectado
+                            ? TextosCuidado.subtituloAtalhoDesconectar
+                            : TextosCuidado.subtituloAtalhoConectar,
+                        pistaAcao: estaConectado
+                            ? TextosCuidado.botaoDesconectar
+                            : TextosCuidado.botaoConectar,
+                        aoTocar: estaConectado
+                            ? widget.controlador.desconectar
+                            : widget.controlador.conectar,
+                      );
+
+                      final Widget tileSimulador = TileAcaoRapida(
+                        icone: Icons.phonelink_setup_rounded,
+                        titulo: TextosCuidado.tituloAtalhoSimulador,
+                        subtitulo: modoMqtt
+                            ? TextosCuidado.subtituloTrocarSimulador
+                            : TextosCuidado.subtituloSimuladorAtivo,
+                        variacao: VarianteBadge.neutro,
+                        pistaAcao: TextosCuidado.pistaAtalhoSimulador,
+                        aoTocar: () {
+                          widget.controlador.alternarModo(
+                            ModoOperacaoIot.simulado,
+                          );
+                        },
+                      );
+
+                      final Widget tileTecnico = TileAcaoRapida(
+                        icone: Icons.settings_input_antenna_rounded,
+                        titulo: TextosCuidado.tituloAtalhoTecnico,
+                        subtitulo: TextosCuidado.subtituloAtalhoTecnico,
+                        variacao: VarianteBadge.neutro,
+                        pistaAcao: _painelConexaoAberto
+                            ? TextosCuidado.pistaFecharTecnico
+                            : TextosCuidado.pistaAbrirTecnico,
+                        aoTocar: () {
+                          setState(() {
+                            _painelConexaoAberto = !_painelConexaoAberto;
+                          });
+                        },
+                      );
+
+                      if (!emDuasColunas) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            tileContato,
+                            const SizedBox(height: MemoraEspacamento.sm),
+                            tileVinculo,
+                            const SizedBox(height: MemoraEspacamento.sm),
+                            tileSimulador,
+                            const SizedBox(height: MemoraEspacamento.sm),
+                            tileTecnico,
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(child: tileContato),
+                              const SizedBox(width: MemoraEspacamento.sm),
+                              Expanded(child: tileVinculo),
+                            ],
+                          ),
+                          const SizedBox(height: MemoraEspacamento.sm),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Expanded(child: tileSimulador),
+                              const SizedBox(width: MemoraEspacamento.sm),
+                              Expanded(child: tileTecnico),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: MemoraEspacamento.md),
+
+                  // Painel técnico recolhível discreto (MQTT / Simulação)
+                  Cartao(
+                    comBorda: ehAltoContraste,
+                    padding: const EdgeInsets.all(MemoraEspacamento.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        // Cartão de Estado da Conexão
-                        Container(
-                          padding: const EdgeInsets.all(MemoraEspacamento.md),
-                          decoration: BoxDecoration(
-                            color: cores.superficie,
-                            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                            border: Border.all(color: cores.borda),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                children: <Widget>[
-                                  Container(
-                                    width: MemoraEspacamento.md,
-                                    height: MemoraEspacamento.md,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _corDoStatus(statusConexao, cores),
-                                    ),
+                        Semantics(
+                          button: true,
+                          label: TextosCuidado.tituloConexaoEsp32Testes,
+                          hint: TextosCuidado.subtituloDetalhesTecnicos,
+                          onTap: () {
+                            setState(() {
+                              _painelConexaoAberto = !_painelConexaoAberto;
+                            });
+                          },
+                          excludeSemantics: true,
+                          child: Material(
+                            color: cores.superficieSutil,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                MemoraRaio.cartaoMedio,
+                              ),
+                              side: ehAltoContraste
+                                  ? BorderSide(
+                                      color: cores.borda,
+                                      width: MemoraDimensoes.bordaEnfase,
+                                    )
+                                  : BorderSide.none,
+                            ),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(
+                                MemoraRaio.cartaoMedio,
+                              ),
+                              onTap: () {
+                                setState(() {
+                                  _painelConexaoAberto = !_painelConexaoAberto;
+                                });
+                              },
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: MemoraDimensoes.alvoMinimo,
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: MemoraEspacamento.md,
+                                    vertical: MemoraEspacamento.sm,
                                   ),
-                                  const SizedBox(width: MemoraEspacamento.sm),
-                                  Expanded(
-                                    child: Text(
-                                      _textoDoStatus(statusConexao),
-                                      style: MemoraTipografia.corpoForte.copyWith(
-                                        color: cores.texto,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.settings_input_antenna_rounded,
+                                        color: ehAltoContraste
+                                            ? cores.texto
+                                            : cores.primaria,
+                                        size: MemoraDimensoes.iconePadrao,
                                       ),
-                                      textScaler: escalaTextoLimitada(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: MemoraEspacamento.xs),
-                              Text(
-                                modoMqtt ? 'Dispositivo ESP32 (MQTT)' : 'Simulador',
-                                style: MemoraTipografia.apoio.copyWith(
-                                  color: cores.textoSuave,
-                                ),
-                                textScaler: escalaTextoLimitada(context),
-                              ),
-                              const SizedBox(height: MemoraEspacamento.sm),
-                              Text(
-                                estaConectado
-                                    ? 'Monitorando movimentação e batimentos em tempo real.'
-                                    : 'Aguardando conexão com os sensores.',
-                                style: MemoraTipografia.apoio.copyWith(
-                                  color: cores.textoSuave,
-                                ),
-                                textScaler: escalaTextoLimitada(context),
-                              ),
-                              const SizedBox(height: MemoraEspacamento.md),
-                              Row(
-                                children: <Widget>[
-                                  Expanded(
-                                    child: estaConectado
-                                        ? BotaoSecundario(
-                                            rotulo: 'Desconectar',
-                                            aoTocar:
-                                                widget.controlador.desconectar,
-                                          )
-                                        : BotaoPrimario(
-                                            rotulo: 'Conectar agora',
-                                            aoTocar:
-                                                widget.controlador.conectar,
-                                          ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: MemoraEspacamento.md),
-
-                        // Medidor de BPM e Indicador de Movimento
-                        MedidorBpm(
-                          bpm: telemetria?.bpm ?? 0,
-                          bpmValido: telemetria?.bpmValido ?? false,
-                        ),
-                        const SizedBox(height: MemoraEspacamento.md),
-                        IndicadorMovimento(
-                          emMovimento: telemetria?.emMovimento ?? false,
-                          nivelMovimento: telemetria?.nivelMovimento ?? 0,
-                        ),
-
-                        const SizedBox(height: MemoraEspacamento.md),
-
-                        // Cartão do Contato de Emergência
-                        Container(
-                          padding: const EdgeInsets.all(MemoraEspacamento.md),
-                          decoration: BoxDecoration(
-                            color: cores.superficie,
-                            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                            border: Border.all(color: cores.borda),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Row(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.contact_phone_rounded,
-                                    color: cores.primaria,
-                                    size: MemoraDimensoes.iconePadrao,
-                                  ),
-                                  const SizedBox(width: MemoraEspacamento.sm),
-                                  Expanded(
-                                    child: Text(
-                                      'Contato de Emergência',
-                                      style: MemoraTipografia.corpoForte.copyWith(
-                                        color: cores.texto,
+                                      const SizedBox(
+                                        width: MemoraEspacamento.sm,
                                       ),
-                                      textScaler: escalaTextoLimitada(context),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: MemoraEspacamento.xs),
-                              if (contato != null && contato.ehValido) ...<Widget>[
-                                Text(
-                                  '${contato.nome} (${contato.parentesco})',
-                                  style: MemoraTipografia.corpoForte.copyWith(
-                                    color: cores.texto,
-                                  ),
-                                  textScaler: escalaTextoLimitada(context),
-                                ),
-                                const SizedBox(height: MemoraEspacamento.xs),
-                                Text(
-                                  contato.telefone,
-                                  style: MemoraTipografia.apoio.copyWith(
-                                    color: cores.textoSuave,
-                                  ),
-                                  textScaler: escalaTextoLimitada(context),
-                                ),
-                                const SizedBox(height: MemoraEspacamento.sm),
-                                BotaoSecundario(
-                                  rotulo: 'Alterar contato',
-                                  aoTocar: _abrirDialogoContato,
-                                ),
-                              ] else ...<Widget>[
-                                Text(
-                                  'Nenhum contato cadastrado. Cadastre alguém para receber uma mensagem pré-pronta no WhatsApp caso sofra uma queda.',
-                                  style: MemoraTipografia.apoio.copyWith(
-                                    color: cores.textoSuave,
-                                  ),
-                                  textScaler: escalaTextoLimitada(context),
-                                ),
-                                const SizedBox(height: MemoraEspacamento.sm),
-                                BotaoPrimario(
-                                  rotulo: 'Cadastrar contato',
-                                  aoTocar: _abrirDialogoContato,
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: MemoraEspacamento.md),
-
-                        // Seção de Conexão ESP32 & Testes
-                        Container(
-                          padding: const EdgeInsets.all(MemoraEspacamento.md),
-                          decoration: BoxDecoration(
-                            color: cores.superficie,
-                            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
-                            border: Border.all(color: cores.borda),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _painelConexaoAberto = !_painelConexaoAberto;
-                                  });
-                                },
-                                child: Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.settings_input_antenna_rounded,
-                                      color: cores.primaria,
-                                      size: MemoraDimensoes.iconePadrao,
-                                    ),
-                                    const SizedBox(width: MemoraEspacamento.sm),
-                                    Expanded(
-                                      child: Text(
-                                        'Conexão ESP32 & Testes',
-                                        style: MemoraTipografia.corpoForte.copyWith(
-                                          color: cores.texto,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            const TextoMemora(
+                                              TextosCuidado
+                                                  .tituloConexaoEsp32Testes,
+                                              estilo: EstiloTexto.corpoForte,
+                                            ),
+                                            TextoMemora.apoio(
+                                              TextosCuidado
+                                                  .subtituloDetalhesTecnicos,
+                                              cor: cores.textoSuave,
+                                            ),
+                                          ],
                                         ),
-                                        textScaler: escalaTextoLimitada(context),
                                       ),
-                                    ),
-                                    const SizedBox(width: MemoraEspacamento.sm),
-                                    Icon(
-                                      _painelConexaoAberto
-                                          ? Icons.expand_less_rounded
-                                          : Icons.expand_more_rounded,
-                                      color: cores.textoSuave,
-                                    ),
-                                  ],
+                                      const SizedBox(
+                                        width: MemoraEspacamento.sm,
+                                      ),
+                                      Icon(
+                                        _painelConexaoAberto
+                                            ? Icons.expand_less_rounded
+                                            : Icons.expand_more_rounded,
+                                        color: cores.texto,
+                                        size: MemoraDimensoes.iconePadrao,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              if (_painelConexaoAberto) ...<Widget>[
-                                const SizedBox(height: MemoraEspacamento.md),
-                                Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: BotaoSecundario(
-                                        rotulo: modoMqtt ? 'Usar Simulador' : 'Simulador Ativo',
-                                        aoTocar: () {
-                                          widget.controlador.alternarModo(
-                                            ModoOperacaoIot.simulado,
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    const SizedBox(width: MemoraEspacamento.sm),
-                                    Expanded(
-                                      child: BotaoSecundario(
-                                        rotulo: modoMqtt ? 'ESP32 Ativo' : 'Usar ESP32',
-                                        aoTocar: () {
-                                          widget.controlador.alternarModo(
-                                            ModoOperacaoIot.mqtt,
-                                            broker: _controladorBroker.text.trim(),
-                                            topico: _controladorTopico.text.trim(),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                if (modoMqtt) ...<Widget>[
-                                  const SizedBox(height: MemoraEspacamento.sm),
-                                  CampoTexto(
-                                    rotulo: 'Broker MQTT',
-                                    textoAjuda: 'Endereço do broker (ex.: broker.hivemq.com)',
-                                    controlador: _controladorBroker,
-                                  ),
-                                  const SizedBox(height: MemoraEspacamento.sm),
-                                  CampoTexto(
-                                    rotulo: 'Tópico Base',
-                                    textoAjuda: 'Prefixo dos tópicos (ex.: memora/iot/demonstracao-01)',
-                                    controlador: _controladorTopico,
-                                  ),
-                                  const SizedBox(height: MemoraEspacamento.sm),
-                                  BotaoPrimario(
-                                    rotulo: 'Reconectar ao ESP32',
-                                    aoTocar: () {
-                                      widget.controlador.alternarModo(
-                                        ModoOperacaoIot.mqtt,
-                                        broker: _controladorBroker.text.trim(),
-                                        topico: _controladorTopico.text.trim(),
-                                      );
-                                    },
-                                  ),
-                                ],
-                                const SizedBox(height: MemoraEspacamento.md),
-                                BotaoPerigo(
-                                  rotulo: 'Simular Queda de Teste',
-                                  icone: Icons.notification_important_rounded,
-                                  aoTocar: widget.controlador.simularQuedaTeste,
-                                ),
-                              ],
-                            ],
+                            ),
                           ),
                         ),
+                        if (_painelConexaoAberto) ...<Widget>[
+                          const SizedBox(height: MemoraEspacamento.md),
+                          LayoutBuilder(
+                            builder:
+                                (BuildContext context, BoxConstraints box) {
+                              final bool ladoALado =
+                                  box.maxWidth >=
+                                      MemoraDimensoes.larguraMinimaGrade &&
+                                  escala < MemoraDimensoes.escalaColapsoGrade;
 
-                        const SizedBox(height: MemoraEspacamento.lg),
+                              final Widget btnSimulador = BotaoSecundario(
+                                rotulo: modoMqtt
+                                    ? TextosCuidado.botaoUsarSimulador
+                                    : TextosCuidado.botaoSimuladorAtivo,
+                                aoTocar: () {
+                                  widget.controlador.alternarModo(
+                                    ModoOperacaoIot.simulado,
+                                  );
+                                },
+                              );
+                              final Widget btnEsp32 = BotaoSecundario(
+                                rotulo: modoMqtt
+                                    ? TextosCuidado.botaoEsp32Ativo
+                                    : TextosCuidado.botaoUsarEsp32,
+                                aoTocar: () {
+                                  widget.controlador.alternarModo(
+                                    ModoOperacaoIot.mqtt,
+                                    broker: _controladorBroker.text.trim(),
+                                    topico: _controladorTopico.text.trim(),
+                                  );
+                                },
+                              );
+
+                              if (ladoALado) {
+                                return Row(
+                                  children: <Widget>[
+                                    Expanded(child: btnSimulador),
+                                    const SizedBox(width: MemoraEspacamento.sm),
+                                    Expanded(child: btnEsp32),
+                                  ],
+                                );
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  btnSimulador,
+                                  const SizedBox(height: MemoraEspacamento.sm),
+                                  btnEsp32,
+                                ],
+                              );
+                            },
+                          ),
+                          if (modoMqtt) ...<Widget>[
+                            const SizedBox(height: MemoraEspacamento.md),
+                            CampoTexto(
+                              rotulo: TextosCuidado.rotuloBrokerMqtt,
+                              textoAjuda: TextosCuidado.ajudaBrokerMqtt,
+                              controlador: _controladorBroker,
+                            ),
+                            const SizedBox(height: MemoraEspacamento.sm),
+                            CampoTexto(
+                              rotulo: TextosCuidado.rotuloTopicoBase,
+                              textoAjuda: TextosCuidado.ajudaTopicoBase,
+                              controlador: _controladorTopico,
+                            ),
+                            const SizedBox(height: MemoraEspacamento.md),
+                            BotaoPrimario(
+                              rotulo: TextosCuidado.botaoReconectarEsp32,
+                              aoTocar: () {
+                                widget.controlador.alternarModo(
+                                  ModoOperacaoIot.mqtt,
+                                  broker: _controladorBroker.text.trim(),
+                                  topico: _controladorTopico.text.trim(),
+                                );
+                              },
+                            ),
+                          ],
+                          const SizedBox(height: MemoraEspacamento.xl),
+                          BotaoPerigo(
+                            rotulo: TextosCuidado.botaoSimularQueda,
+                            icone: Icons.notification_important_rounded,
+                            aoTocar: widget.controlador.simularQuedaTeste,
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: MemoraEspacamento.lg),
+                ],
+              ),
             ),
           ),
         );
@@ -424,25 +547,25 @@ class _TelaDispositivoCuidadoState extends State<TelaDispositivoCuidado> {
     );
   }
 
-  static Color _corDoStatus(StatusConexaoIot status, MemoraCores cores) {
+  static TomBadgeStatus _tomDoBadge(StatusConexaoIot status) {
     switch (status) {
       case StatusConexaoIot.conectado:
-        return cores.sucesso;
+        return TomBadgeStatus.positivo;
       case StatusConexaoIot.conectando:
-        return cores.primaria;
+        return TomBadgeStatus.informativo;
       case StatusConexaoIot.desconectado:
-        return cores.textoSuave;
+        return TomBadgeStatus.neutro;
     }
   }
 
   static String _textoDoStatus(StatusConexaoIot status) {
     switch (status) {
       case StatusConexaoIot.conectado:
-        return 'Dispositivo Conectado';
+        return TextosCuidado.statusConectado;
       case StatusConexaoIot.conectando:
-        return 'Conectando ao dispositivo...';
+        return TextosCuidado.statusConectando;
       case StatusConexaoIot.desconectado:
-        return 'Dispositivo Desconectado';
+        return TextosCuidado.statusDesconectado;
     }
   }
 }

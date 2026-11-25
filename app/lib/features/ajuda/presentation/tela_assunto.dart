@@ -136,14 +136,20 @@ class _TelaAssuntoState extends State<TelaAssunto> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   if (total > 1) ...<Widget>[
-                    Semantics(
-                      label: TextosAjuda.passoDescrito(
-                        assunto.titulo,
-                        _indice + 1,
-                        total,
-                      ),
-                      child: ExcludeSemantics(
-                        child: TextoMemora.apoio(contador),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Semantics(
+                        label: TextosAjuda.passoDescrito(
+                          assunto.titulo,
+                          _indice + 1,
+                          total,
+                        ),
+                        child: ExcludeSemantics(
+                          child: BadgeDeStatus(
+                            rotulo: contador,
+                            tom: TomBadgeStatus.informativo,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: MemoraEspacamento.md),
@@ -153,7 +159,13 @@ class _TelaAssuntoState extends State<TelaAssunto> {
                     texto: _telas[_indice],
                   ),
                   const SizedBox(height: MemoraEspacamento.xl),
-                  ..._acoes(),
+                  CaixaDeEtapa(
+                    instrucao: TextosAjuda.instrucaoNavegacao,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: _acoes(),
+                    ),
+                  ),
                   const SizedBox(height: MemoraEspacamento.xl),
                 ],
               ),
@@ -186,6 +198,8 @@ class _TelaAssuntoState extends State<TelaAssunto> {
         if (_falhou) ...<Widget>[
           const MensagemErro(
             key: TelaAssunto.chaveErro,
+            // A Memora desta tela é a do balão (FR-006).
+            comMemora: false,
             mensagem: TextosAjuda.erroAoCompartilhar,
           ),
           espaco,
@@ -206,7 +220,7 @@ class _TelaAssuntoState extends State<TelaAssunto> {
           BotaoPrimario(
             key: TelaAssunto.chaveCompartilhar,
             rotulo: TextosAjuda.botaoCompartilhar,
-            icone: Icons.share,
+            icone: Icons.share_rounded,
             carregando: _enviando,
             aoTocar: _enviando
                 ? null

@@ -44,8 +44,13 @@ class AvisoAntigolpe extends StatelessWidget {
   /// Chave usada pelos testes para confirmar que o aviso está na tela.
   static const Key chave = Key('recuperacao.aviso_antigolpe');
 
+  /// Se o rosto da Memora aparece no aviso. A tela o desliga enquanto espera
+  /// uma resposta, porque a espera tem a Memora dela e a tela só mostra uma
+  /// (FR-006, FR-059). O texto do aviso nunca sai (FR-023).
+  final bool comMemora;
+
   /// Cria o aviso.
-  const AvisoAntigolpe({super.key});
+  const AvisoAntigolpe({this.comMemora = true, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,30 +68,43 @@ class AvisoAntigolpe extends StatelessWidget {
           padding: const EdgeInsets.all(MemoraEspacamento.lg),
           decoration: BoxDecoration(
             color: cores.superficieAlt,
-            borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
             // A borda é o que separa este bloco do resto da tela sem recorrer a
             // preenchimento forte, que o leria como botão.
             border: Border.all(
               color: cores.perigo,
               width: MemoraDimensoes.bordaEnfase,
             ),
+            boxShadow: MemoraElevacao.listaSombrasCartao(cores),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              const BadgeDeStatus(
+                rotulo: 'Cuidado com golpes',
+                icone: Icons.shield_rounded,
+                tom: TomBadgeStatus.atencao,
+              ),
+              const SizedBox(height: MemoraEspacamento.sm),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   // Preocupada, não brava: aviso dado com raiva assusta quem
                   // precisava ser protegido. Decorativo — o texto ao lado diz
                   // tudo, e o `Semantics` de fora já anuncia o aviso.
-                  const MemoraPersonagem(
-                    expressao: ExpressaoDaMemora.preocupada,
-                    tamanho: MemoraDimensoes.pisoDeIlustracao,
-                  ),
+                  // Sem o rosto, o espaço fica, para o aviso não pular.
+                  if (comMemora)
+                    const MemoraPersonagem(
+                      expressao: ExpressaoDaMemora.preocupada,
+                      tamanho: MemoraDimensoes.pisoDeIlustracao,
+                    )
+                  else
+                    const SizedBox.square(
+                      dimension: MemoraDimensoes.pisoDeIlustracao,
+                    ),
                   const SizedBox(width: MemoraEspacamento.sm),
-                  Expanded(
+                  const Expanded(
                     child: TextoMemora(
                       TextosAutenticacao.tituloAvisoAntigolpe,
                       estilo: EstiloTexto.corpoForte,

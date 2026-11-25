@@ -44,6 +44,11 @@ class OpcaoDoBalao {
 /// disse: …" — sem isso, a conversa lida em voz alta seria um texto corrido
 /// sem dono.
 ///
+/// Na **conversa** o desenho acompanha o balão em forma estática
+/// ([rostoAnimado] falso) enquanto a única Memora animada e falante fica no
+/// topo da tela (`FR-025`, rev. `022-avatares-no-chat`), e o rosto recua em
+/// ampliações tipográficas altas (`>= 175%`).
+///
 /// ## O canto que aponta
 ///
 /// O canto do lado de quem fala é menos arredondado: é o "rabinho" do balão
@@ -95,6 +100,37 @@ class BalaoDeFala extends StatelessWidget {
   /// Chamado a cada letra que entra na tela — para a lista rolar atrás.
   final VoidCallback? aoEscrever;
 
+  /// Avisa quando a escrita aos poucos começa (verdadeiro) e quando para
+  /// (falso) — é o que mexe a boca da Memora do topo da conversa (FR-025).
+  final ValueChanged<bool>? aoMudarEscrita;
+
+  /// Mostra o rosto de quem fala ao lado do balão? Verdadeiro por padrão.
+  ///
+  /// Na **conversa** (`022-avatares-no-chat`), é verdadeiro abaixo de `175%`
+  /// com [rostoAnimado] falso, mantendo os balões identificados pelo rosto sem
+  /// competir com a única Memora viva/falante na barra superior (`FR-025`). Em
+  /// ampliações `>= 175%`, desliga para devolver largura útil ao texto.
+  final bool comRosto;
+
+  /// O rosto da Memora ao lado do balão (T072). Só vale para o balão dela.
+  ///
+  /// O padrão é a cabeça pequena ([ExpressaoDaMemora.mini]). Quem fala de uma
+  /// conclusão pode pedir [ExpressaoDaMemora.comemorando]: o balão continua
+  /// sendo a **única** Memora da tela (FR-006).
+  final ExpressaoDaMemora expressaoDaMemora;
+
+  /// Retrato decorativo opcional exibido ao lado direito quando [autor] é
+  /// [AutorDoBalao.pessoa] e [comRosto] é verdadeiro (`022-avatares-no-chat`).
+  ///
+  /// Quando nulo, utiliza o desenho padrão neutro `_RostoDaPessoa`. Mantém o
+  /// Design System desacoplado de features de perfil.
+  final Widget? avatarPessoa;
+
+  /// Se o rosto da Memora ao lado do balão reage ao toque e anima (`true` por
+  /// padrão). Quando falso, desativa toque (`reageAoToque: false`) e reduz
+  /// animações localmente (`MediaQuery.disableAnimations: true`).
+  final bool rostoAnimado;
+
   /// Cria uma fala.
   const BalaoDeFala({
     required this.autor,
@@ -103,6 +139,11 @@ class BalaoDeFala extends StatelessWidget {
     this.escreverAosPoucos = false,
     this.emAndamento = false,
     this.aoEscrever,
+    this.aoMudarEscrita,
+    this.comRosto = true,
+    this.expressaoDaMemora = ExpressaoDaMemora.mini,
+    this.avatarPessoa,
+    this.rostoAnimado = true,
     super.key,
   });
 
@@ -111,13 +152,19 @@ class BalaoDeFala extends StatelessWidget {
   /// É estado, e precisa ser visto por mais de um sinal: o rosto falando, o
   /// texto "escrevendo" e os três pontos — nenhum deles depende de animação,
   /// para valer com "reduzir movimento" ligado (FR-028 da 002).
-  const BalaoDeFala.escrevendo({super.key})
-    : autor = AutorDoBalao.memora,
-      texto = null,
-      opcoes = const <OpcaoDoBalao>[],
-      escreverAosPoucos = false,
-      emAndamento = false,
-      aoEscrever = null;
+  const BalaoDeFala.escrevendo({
+    this.comRosto = true,
+    this.rostoAnimado = true,
+    super.key,
+  }) : autor = AutorDoBalao.memora,
+       texto = null,
+       opcoes = const <OpcaoDoBalao>[],
+       escreverAosPoucos = false,
+       emAndamento = false,
+       aoEscrever = null,
+       aoMudarEscrita = null,
+       expressaoDaMemora = ExpressaoDaMemora.mini,
+       avatarPessoa = null;
 
   /// Nome escrito de quem fala.
   static String nomeDe(AutorDoBalao autor) =>
@@ -131,22 +178,40 @@ class BalaoDeFala extends StatelessWidget {
 
   bool get _daMemora => autor == AutorDoBalao.memora;
 
+  Widget _rostoDaMemora(BuildContext context) {
+    final Widget personagem = MemoraPersonagem(
+      // Chave pela expressão: ao trocar, a Memora nova chega e faz o
+      // gesto da expressão (a comemoração, uma vez).
+      key: ValueKey<ExpressaoDaMemora>(expressaoDaMemora),
+      expressao: expressaoDaMemora,
+      tamanho: MemoraDimensoes.pisoDeIlustracao,
+      reageAoToque: rostoAnimado,
+    );
+    if (rostoAnimado) return personagem;
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(disableAnimations: true),
+      child: personagem,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
-    final bool modoClaro = cores == MemoraCores.claro;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
     const Radius curvo = Radius.circular(MemoraRaio.balao);
     const Radius ponta = Radius.circular(MemoraRaio.balaoPonta);
 
     final Color corDeFundo = _daMemora
-        ? (modoClaro ? cores.destaque : cores.superficie)
-        : cores.superficieAlt;
+        ? cores.superficie
+        : cores.superficieSutil;
 
-    final Border borda = _daMemora
-        ? (modoClaro
-            ? Border.all(color: cores.destaque)
-            : Border.all(color: cores.borda))
-        : Border.all(color: cores.borda);
+    final Border borda = Border.all(
+      color: ehAltoContraste ? cores.borda : cores.bordaSutil,
+      width: ehAltoContraste
+          ? MemoraDimensoes.bordaEnfase
+          : MemoraDimensoes.espessuraBordaSutil,
+    );
 
     final Widget balao = Flexible(
       child: Container(
@@ -166,13 +231,7 @@ class BalaoDeFala extends StatelessWidget {
             bottomLeft: curvo,
             bottomRight: curvo,
           ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: MemoraElevacao.sombra,
-              blurRadius: MemoraElevacao.porta,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: MemoraElevacao.listaSombrasCartao(cores),
         ),
         child: Semantics(
           // A fala inteira e sem marcas, nunca a parte que já apareceu: o
@@ -197,6 +256,7 @@ class BalaoDeFala extends StatelessWidget {
                     aosPoucos: escreverAosPoucos,
                     emAndamento: emAndamento,
                     aoAvancar: aoEscrever,
+                    aoMudarEscrita: aoMudarEscrita,
                   )
                 else if (texto != null)
                   TextoMemora(texto!)
@@ -210,11 +270,8 @@ class BalaoDeFala extends StatelessWidget {
     );
 
     final Widget rosto = _daMemora
-        ? MemoraPersonagem(
-            expressao: ExpressaoDaMemora.falando,
-            tamanho: MemoraDimensoes.pisoDeIlustracao,
-          )
-        : _RostoDaPessoa(cores: cores);
+        ? _rostoDaMemora(context)
+        : (avatarPessoa ?? _RostoDaPessoa(cores: cores));
 
     return Column(
       crossAxisAlignment: _daMemora
@@ -227,7 +284,9 @@ class BalaoDeFala extends StatelessWidget {
               ? MainAxisAlignment.start
               : MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: _daMemora
+          children: !comRosto
+              ? <Widget>[balao]
+              : _daMemora
               ? <Widget>[
                   rosto,
                   const SizedBox(width: MemoraEspacamento.sm),
@@ -268,7 +327,7 @@ class _RostoDaPessoa extends StatelessWidget {
           color: cores.destaque,
         ),
         child: Icon(
-          Icons.person,
+          Icons.person_rounded,
           color: cores.primaria,
           size: MemoraDimensoes.iconePadrao,
         ),

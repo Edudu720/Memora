@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#1040F8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img">
+  <!-- S07: Icone vetorial familia Material Rounded (person + smartphone_rounded) -->
+  <circle cx="9" cy="7" r="3" fill="#1040F8" stroke="none"/>
+  <path d="M4 18.5a5 5 0 0 1 10 0" fill="#1040F8" stroke="none"/>
+  <rect x="14.5" y="7" width="6.5" height="12" rx="1.6" fill="#FFFFFF" stroke="#1040F8" stroke-width="1.8"/>
+  <circle cx="17.75" cy="16.4" r="0.7" fill="#1040F8" stroke="none"/>
+</svg>

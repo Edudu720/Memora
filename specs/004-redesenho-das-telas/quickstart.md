@@ -172,21 +172,19 @@ tarefa, e a média de cada nota é ≥ 4.
 
 ## Onde cada cenário roda
 
-*Preenchido durante a implementação.*
-
 | Cenário | Teste | Situação |
 |---|---|---|
-| V1 | — | — |
-| V2 | — | — |
-| V3 | — | — |
-| V4 | — | — |
-| V5 | — | — |
-| V6 | — | — |
-| V7 | — | — |
-| V8 | — | — |
-| V9 | — | — |
-| V10 | — | — |
-| V11 | Verificação completa | — |
-| V12 | — | — |
-| V13 | `test/album/album_de_telas_test.dart` | — |
-| V14 | Pessoas | — |
+| V1 | `app/test/features/casca/sem_andaime_test.dart` | Automatizado |
+| V2 | `app/test/features/apresentacao/fluxo_apresentacao_test.dart`, `app/test/features/apresentacao/apresentacao_vista_test.dart` | Automatizado |
+| V3 | `app/test/features/inicio/tela_inicio_test.dart`, `app/test/features/hub/tela_hub_test.dart`, `app/test/acessibilidade/hub_cabe_sem_rolar_test.dart`, `app/test/features/casca/profundidade_test.dart` | Automatizado |
+| V4 | `app/test/features/assistente/conversa_espaco_util_test.dart`, `app/test/design_system/aviso_compacto_test.dart` | Automatizado |
+| V5 | `app/test/features/aprendizado/busca_test.dart`, `app/test/features/aprendizado/tela_passo_a_passo_test.dart`, `app/test/features/assistente/catalogo_guardado_test.dart` | Automatizado |
+| V6 | `app/test/features/assistente/servico_sensivel_test.dart`, `backend/src/test/java/br/fatec/memora/assistente/ServicosSociaisTest.java` | Automatizado |
+| V7 | `app/test/features/ajuda/tela_ajuda_test.dart`, `app/test/services/ambiente_test.dart` | Automatizado |
+| V8 | `app/test/features/configuracoes/configuracoes_test.dart`, `app/test/design_system/reducao_de_movimento_test.dart`, `app/test/preferencias/tela_aparencia_test.dart` | Automatizado |
+| V9 | `app/test/features/perfil/tela_perfil_test.dart`, `app/test/features/perfil/data_de_nascimento_test.dart`, `app/test/features/aprendizado/progresso_de_aprendizado_test.dart` | Automatizado |
+| V10 | `app/test/acessibilidade/`, `app/test/features/` (matriz 4 aparelhos × 3 escalas × 3 temas) | Automatizado |
+| V11 | Verificação completa (`flutter analyze`, `flutter test`, `validar_paleta.py`, `validar_tokens.py --autoteste`, `mvnw clean test`) | Automatizado |
+| V12 | `backend/src/test/java/br/fatec/memora/assistente/ChaveDoCatalogoTest.java`, `app/test/features/aprendizado/catalogo_e_guias_test.dart` | Automatizado |
+| V13 | `app/test/album/album_de_telas_test.dart` + revisão humana em `specs/004-redesenho-das-telas/revisao-de-design.md` | Gerador automatizado + revisão da equipe |
+| V14 | Sessão presencial com 5 pessoas de 65+ anos (`specs/004-redesenho-das-telas/teste-com-pessoas.md`) | Presencial (equipe) |

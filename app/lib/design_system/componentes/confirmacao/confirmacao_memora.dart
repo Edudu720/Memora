@@ -163,7 +163,7 @@ class _ConfirmacaoMemoraState extends State<ConfirmacaoMemora> {
               rotulo: _aguardandoSegundaConfirmacao
                   ? 'Não, deixa como está'
                   : widget.rotuloRecusar,
-              icone: Icons.arrow_back,
+              icone: Icons.arrow_back_rounded,
               aoTocar: _cancelar,
             ),
             // Espaçamento grande isola a ação destrutiva (FR-013).
@@ -180,13 +180,13 @@ class _ConfirmacaoMemoraState extends State<ConfirmacaoMemora> {
           ] else ...<Widget>[
             BotaoPrimario(
               rotulo: widget.rotuloConfirmar,
-              icone: Icons.check,
+              icone: Icons.check_rounded,
               aoTocar: _primeiroToque,
             ),
             const SizedBox(height: MemoraEspacamento.md),
             BotaoSecundario(
               rotulo: widget.rotuloRecusar,
-              icone: Icons.close,
+              icone: Icons.close_rounded,
               aoTocar: _cancelar,
             ),
           ],

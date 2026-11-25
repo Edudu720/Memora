@@ -134,7 +134,7 @@ mundo. **Sai ao sair da conta?** Não: não é dado da pessoa (FR-024a).
 
 ## No servidor
 
-### `servico_conhecido` — migrations V8 a V10
+### `servico_conhecido` — migrations V8, V10 e V11
 
 | Coluna | Mudança | Regra |
 |---|---|---|
@@ -158,16 +158,11 @@ mundo. **Sai ao sair da conta?** Não: não é dado da pessoa (FR-024a).
 Trânsito.** A primeira versão desta tabela supunha a de Trânsito, com a chave
 `carteira-digital-de-transito`; corrigida antes de existir migration.
 
-**Linhas novas da V9** — `COTIDIANO`, com pacote declarado em `<queries>`:
+**Linha nova da V11 (`V11__tiktok_no_catalogo.sql`)** — `COTIDIANO`, com pacote declarado em `<queries>` (os demais candidatos avaliados na T073 — Kwai, Messenger, Gmail, Netflix e Google — ficaram de fora do catálogo semeado nesta fase conforme a regra de escopo de guias):
 
 | `chave` | `nome_exibido` | `identificador_android` |
 |---|---|---|
 | `tiktok` | TikTok | `com.zhiliaoapp.musically` |
-| `kwai` | Kwai | `com.kwai.video` |
-| `messenger` | Messenger | `com.facebook.orca` |
-| `gmail` | Gmail | `com.google.android.gm` |
-| `netflix` | Netflix | `com.netflix.mediaclient` |
-| `google` | Google | `com.google.android.googlequicksearchbox` |
 
 ⚠️ **Cada pacote acima precisa ser conferido num aparelho real antes da
 migration**, como a V5 fez — a V5 descartou candidatos óbvios por pacote

@@ -43,6 +43,12 @@ class CampoTexto extends StatelessWidget {
   /// Chamada a cada alteração.
   final ValueChanged<String>? aoMudar;
 
+  /// Ação exibida no botão principal do teclado virtual (ex: buscar, concluir).
+  final TextInputAction? acaoTeclado;
+
+  /// Chamada quando a pessoa confirma a ação do teclado virtual.
+  final ValueChanged<String>? aoSubmeter;
+
   /// Oculta o conteúdo digitado.
   final bool ocultarConteudo;
 
@@ -51,6 +57,12 @@ class CampoTexto extends StatelessWidget {
 
   /// Habilita ou desabilita a edição.
   final bool habilitado;
+
+  /// Quantidade mínima de linhas visíveis quando o campo é multilinha.
+  final int? minLines;
+
+  /// Quantidade máxima de linhas visíveis (`1` por padrão para campos comuns).
+  final int? maxLines;
 
   /// Cria um campo de texto.
   const CampoTexto({
@@ -61,9 +73,13 @@ class CampoTexto extends StatelessWidget {
     this.tipoTeclado = TextInputType.text,
     this.formatadores,
     this.aoMudar,
+    this.acaoTeclado,
+    this.aoSubmeter,
     this.ocultarConteudo = false,
     this.sufixo,
     this.habilitado = true,
+    this.minLines,
+    this.maxLines = 1,
     super.key,
   });
 
@@ -93,10 +109,16 @@ class CampoTexto extends StatelessWidget {
             child: TextField(
               controller: controlador,
               onChanged: aoMudar,
+              onSubmitted: aoSubmeter,
+              textInputAction: acaoTeclado,
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
               obscureText: ocultarConteudo,
               keyboardType: tipoTeclado,
               inputFormatters: formatadores,
               enabled: habilitado,
+              minLines: minLines,
+              maxLines: maxLines,
               style: MemoraTipografia.corpo.copyWith(color: cores.texto),
               decoration: InputDecoration(
                 filled: true,
@@ -134,7 +156,7 @@ class CampoTexto extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Icon(Icons.error_outline,
+              Icon(Icons.error_outline_rounded,
                   color: cores.perigo,
                   size: MemoraDimensoes.iconePadrao),
               const SizedBox(width: MemoraEspacamento.sm),

@@ -367,7 +367,7 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 - **FR-042**: Ao recusar abrir um serviço sensível, a Memora MUST explicar o
   motivo em linguagem comum — que é justamente **para proteger a pessoa** — e
   MUST oferecer ensinar o caminho.
-- **FR-043**: A porta **Serviços do dia a dia** MUST listar os serviços sensíveis
+- **FR-043**: A porta **Serviços sociais** (anteriormente chamada *Serviços do dia a dia*, alinhada ao wireframe na Feature 004 — `FR-016` e `FR-030`) MUST listar os serviços sensíveis
   que a Memora sabe ensinar, com nome pelo qual a pessoa os conhece.
 - **FR-044**: A porta **Meus aplicativos** MUST listar os aplicativos cotidianos
   que a Memora sabe ensinar e abrir.
@@ -381,7 +381,10 @@ formas e insistindo, e verificar que ela ensina e nunca abre.
 ### Requisitos Funcionais — Histórico da conversa
 
 - **FR-047**: A conversa MUST ser guardada **apenas no aparelho**. O conteúdo
-  MUST NOT ser mantido no servidor.
+  MUST NOT ser mantido no servidor — inclusive quando uma sugestão do modelo é
+  recusada durante a conversa (`ACAO_RECUSADA`), a trilha grava o evento sem
+  armazenar o texto cru enviado no chat (a única exceção de resumo restrito
+  pertence às ações executadas na FR-023).
 - **FR-048**: Ao sair da conta, a conversa guardada MUST ser apagada do aparelho,
   junto com o restante dos dados pessoais (FR-026 da feature 001).
 - **FR-049**: A pessoa MUST conseguir retomar um passo a passo interrompido, ou
@@ -631,7 +634,7 @@ dois. Ficou assim:
 
 | Categoria | O que é | O que a Memora faz |
 |---|---|---|
-| **Serviços do dia a dia** | Serviços recorrentes do Brasil: Gov.br, banco, saúde, previdência | **Só ensina.** Nunca abre |
+| **Serviços sociais** *(antes: Serviços do dia a dia; alinhado na 004)* | Serviços recorrentes do Brasil: Gov.br, banco, saúde, previdência | **Só ensina.** Nunca abre |
 | **Meus aplicativos** | Cotidianos e populares: Instagram, YouTube, WhatsApp, câmera | Ensina **e** pode abrir |
 
 O critério é o dado sensível envolvido, e a regra que sai daí é *quanto mais

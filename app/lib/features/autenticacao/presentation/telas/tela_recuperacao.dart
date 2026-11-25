@@ -138,7 +138,9 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   // Antes de tudo, inclusive do convite (FR-023).
-                  const AvisoAntigolpe(),
+                  // Uma Memora por tela (FR-006): durante a espera, o aviso
+                  // fica inteiro, mas sem o rosto dela.
+                  AvisoAntigolpe(comMemora: !c.enviando),
                   const SizedBox(height: MemoraEspacamento.xxl),
                   ...switch (c.etapa) {
                     EtapaRecuperacao.pedirCodigo => _pedirCodigo(c, cores),
@@ -156,28 +158,21 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
   }
 
   List<Widget> _pedirCodigo(ControladorRecuperacao c, MemoraCores cores) => <Widget>[
-        Container(
+        Cartao(
           padding: const EdgeInsets.all(MemoraEspacamento.md),
-          decoration: BoxDecoration(
-            color: cores.superficie,
-            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-            border: Border.all(color: cores.borda),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: MemoraElevacao.sombra,
-                blurRadius: MemoraElevacao.cartao,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const Row(
+          child: Row(
             children: <Widget>[
-              MemoraPersonagem(
-                expressao: ExpressaoDaMemora.falando,
-                tamanho: MemoraDimensoes.alvoDecisao,
-              ),
-              SizedBox(width: MemoraEspacamento.md),
-              Expanded(
+              // Uma Memora por tela (FR-006): enquanto a espera tem a sua,
+              // esta cede o lugar (o espaço fica).
+              if (c.enviando)
+                const SizedBox.square(dimension: MemoraDimensoes.alvoDecisao)
+              else
+                const MemoraPersonagem(
+                  expressao: ExpressaoDaMemora.falando,
+                  tamanho: MemoraDimensoes.alvoDecisao,
+                ),
+              const SizedBox(width: MemoraEspacamento.md),
+              const Expanded(
                 child: TextoMemora(TextosAutenticacao.conviteRecuperacao),
               ),
             ],
@@ -198,7 +193,8 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
         ),
         if (c.mensagemDeErro != null) ...<Widget>[
           const SizedBox(height: MemoraEspacamento.lg),
-          MensagemErro(mensagem: c.mensagemDeErro!),
+          // A Memora desta tela é a do aviso ou a do cartão (FR-006).
+          MensagemErro(mensagem: c.mensagemDeErro!, comMemora: false),
         ],
         const SizedBox(height: MemoraEspacamento.xl),
         if (c.enviando)
@@ -207,7 +203,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
           BotaoPrimario(
             key: TelaRecuperacao.chavePedirCodigo,
             rotulo: TextosAutenticacao.botaoPedirCodigo,
-            icone: Icons.arrow_forward,
+            icone: Icons.arrow_forward_rounded,
             aoTocar: c.podePedirCodigo ? c.pedirCodigo : null,
           ),
       ];
@@ -253,7 +249,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
           BotaoPrimario(
             key: TelaRecuperacao.chaveTrocarSenha,
             rotulo: TextosAutenticacao.botaoTrocarSenha,
-            icone: Icons.check,
+            icone: Icons.check_rounded,
             aoTocar: c.podeTrocarSenha ? c.trocarSenha : null,
           ),
         const SizedBox(height: MemoraEspacamento.md),
@@ -272,7 +268,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
             width: MemoraDimensoes.ilustracaoCabecalho,
             height: MemoraDimensoes.ilustracaoCabecalho,
             decoration: BoxDecoration(
-              color: cores.sucesso.withValues(alpha: 0.12),
+              color: cores.saudeSuave,
               shape: BoxShape.circle,
             ),
             child: const Center(
@@ -283,21 +279,8 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
           ),
         ),
         const SizedBox(height: MemoraEspacamento.lg),
-        Container(
-          padding: const EdgeInsets.all(MemoraEspacamento.lg),
-          decoration: BoxDecoration(
-            color: cores.superficie,
-            borderRadius: BorderRadius.circular(MemoraRaio.cartao),
-            border: Border.all(color: cores.borda),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: MemoraElevacao.sombra,
-                blurRadius: MemoraElevacao.cartao,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: const TextoMemora(
+        const Cartao(
+          child: TextoMemora(
             TextosAutenticacao.avisoSessoesEncerradas,
             alinhamento: TextAlign.center,
           ),
@@ -306,7 +289,7 @@ class _TelaRecuperacaoState extends State<TelaRecuperacao> {
         BotaoPrimario(
           key: TelaRecuperacao.chaveContinuar,
           rotulo: TextosAutenticacao.botaoEntrarComSenhaNova,
-          icone: Icons.arrow_forward,
+          icone: Icons.arrow_forward_rounded,
           aoTocar: () => widget.aoConcluir(c.pessoa!),
         ),
       ];

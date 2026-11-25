@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:memora/design_system/design_system.dart';
@@ -222,24 +223,64 @@ void main() {
       }
     });
 
-    test('cada expressão da Memora usa um desenho da Memora', () {
-      final Set<Ilustracao> usadas = <Ilustracao>{
-        for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
-          e.ilustracao,
-      };
+    test('cada expressão da Memora é desenhada por uma pose própria da Memora '
+        'vetorial (T047)', () {
       expect(
-        usadas.length,
-        ExpressaoDaMemora.values.length,
-        reason: 'duas expressões com o mesmo desenho',
+        ExpressaoDaMemora.values,
+        containsAll(<ExpressaoDaMemora>[
+          ExpressaoDaMemora.neutra,
+          ExpressaoDaMemora.falando,
+          ExpressaoDaMemora.comemorando,
+          ExpressaoDaMemora.preocupada,
+          ExpressaoDaMemora.dica,
+          ExpressaoDaMemora.mini,
+        ]),
       );
-      for (final Ilustracao i in usadas) {
-        expect(i.name, startsWith('memora'));
+      // Duas expressões com a mesma pose seriam a mesma Memora com dois nomes.
+      final Set<PoseDaMemora> poses = <PoseDaMemora>{
+        for (final ExpressaoDaMemora e in ExpressaoDaMemora.values) e.pose,
+      };
+      expect(poses.length, ExpressaoDaMemora.values.length);
+    });
+
+    testWidgets('a MemoraPersonagem monta a MemoraAnimada da pose da expressão, '
+        'no tamanho pedido', (WidgetTester t) async {
+      for (final ExpressaoDaMemora e in ExpressaoDaMemora.values) {
+        await t.pumpWidget(
+          _app(MemoraPersonagem(expressao: e, tamanho: 64)),
+        );
+        final MemoraAnimada m = t.widget<MemoraAnimada>(
+          find.byType(MemoraAnimada),
+        );
+        expect(m.expressao, e.pose, reason: e.name);
+        expect(m.tamanho, 64, reason: e.name);
       }
+      // E nenhuma imagem: ela é desenhada pelo aplicativo, não carregada.
+      expect(find.byType(Image), findsNothing);
+    });
+
+    testWidgets('MemoraPersonagem renderiza todas as 6 expressões sem erro', (
+      WidgetTester t,
+    ) async {
+      await t.pumpWidget(
+        _app(
+          Wrap(
+            children: <Widget>[
+              for (final ExpressaoDaMemora e in ExpressaoDaMemora.values)
+                MemoraPersonagem(expressao: e),
+            ],
+          ),
+        ),
+      );
+      expect(find.byType(MemoraPersonagem), findsNWidgets(6));
+      expect(t.takeException(), isNull);
     });
 
     for (final MemoraTheme tema in MemoraTheme.todos) {
-      testWidgets('Memora e medalhão sobre o círculo claro no tema '
-          '${tema.id.name}', (WidgetTester t) async {
+      testWidgets('o medalhão de ilustração fica sobre o círculo claro no tema '
+          '${tema.id.name}, e a Memora vetorial dispensa o medalhão', (
+        WidgetTester t,
+      ) async {
         await t.pumpWidget(
           _app(
             const Column(
@@ -259,10 +300,12 @@ void main() {
                   d.decoration is BoxDecoration &&
                   (d.decoration as BoxDecoration).shape == BoxShape.circle,
             );
-        expect(circulos.length, 2);
-        for (final DecoratedBox d in circulos) {
-          expect((d.decoration as BoxDecoration).color, tema.cores.medalhao);
-        }
+        // Só o do medalhão: o desenho da Memora traz o próprio aro (FR-007).
+        expect(circulos.length, 1);
+        expect(
+          (circulos.single.decoration as BoxDecoration).color,
+          tema.cores.medalhao,
+        );
       });
     }
 
@@ -283,10 +326,11 @@ void main() {
       expect(find.bySemanticsLabel('A Memora, preocupada'), findsOneWidget);
     });
 
-    testWidgets('nem a Memora nem o medalhão aceitam toque', (
-      WidgetTester t,
-    ) async {
-      // São retrato, não ação (FR-012 da 002).
+    testWidgets('a Memora não é botão (nem para o leitor de tela) e o medalhão '
+        'não aceita toque', (WidgetTester t) async {
+      // O gesto de toque da Memora é enfeite (FR-005a/b); o medalhão é retrato,
+      // não ação (FR-012 da 002).
+      final SemanticsHandle semantica = t.ensureSemantics();
       await t.pumpWidget(
         _app(
           const Column(
@@ -298,7 +342,20 @@ void main() {
         ),
       );
       expect(find.byType(InkWell), findsNothing);
-      expect(find.byType(GestureDetector), findsNothing);
+      expect(find.semantics.byAction(SemanticsAction.tap), findsNothing);
+
+      // Onde ela não pode roubar o toque de quem está por perto, o gesto sai.
+      await t.pumpWidget(
+        _app(const MemoraPersonagem(reageAoToque: false)),
+      );
+      expect(
+        find.descendant(
+          of: find.byType(MemoraPersonagem),
+          matching: find.byType(GestureDetector),
+        ),
+        findsNothing,
+      );
+      semantica.dispose();
     });
   });
 }

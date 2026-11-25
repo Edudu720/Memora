@@ -54,13 +54,22 @@ class MedalhaoDeIlustracao extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    // A porta do Cuidado leva o par de saúde, o mesmo do atalho de Cuidado do
+    // Início: o coração verde separa a porta das outras (rev. 2026-11-18).
+    final bool daSaude = ilustracao == Ilustracao.portaCuidado;
+    final Color corIcone = daSaude
+        ? cores.sucessoTexto
+        : tema.id == MemoraTemaId.claro
+        ? cores.primaria
+        : cores.sobrePrimaria;
     return SizedBox.square(
       dimension: tamanho,
       child: DecoratedBox(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: cores.medalhao,
+          color: daSaude ? cores.saudeSuave : cores.medalhao,
           border: contorno == null
               ? null
               : Border.all(
@@ -73,6 +82,7 @@ class MedalhaoDeIlustracao extends StatelessWidget {
             ilustracao,
             altura: tamanho * proporcaoDoDesenho,
             largura: tamanho * proporcaoDoDesenho,
+            cor: corIcone,
             descricao: descricao,
           ),
         ),

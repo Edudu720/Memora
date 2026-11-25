@@ -84,12 +84,19 @@ void vestir(WidgetTester t, Size aparelho) {
 }
 
 /// Um aplicativo mínimo na combinação [c], com [filho] como tela.
+///
+/// **Com "reduzir movimento" ligado, de propósito**: a matriz mede **layout**,
+/// e a Memora vetorial (feature 013) repete o relógio dela para sempre — com
+/// movimento, `pumpAndSettle` nunca assenta e o teste morre em "timed out".
+/// O desenho dela tem o mesmo tamanho parado e em movimento, então a medida é
+/// a mesma. Quem quer provar movimento monta o próprio aplicativo.
 Widget naCombinacao(Combinacao c, Widget filho) => MaterialApp(
   theme: TemasMemora.porId(c.tema),
   home: MediaQuery(
     data: MediaQueryData(
       size: c.aparelho,
       textScaler: TextScaler.linear(c.escala),
+      disableAnimations: true,
     ),
     child: filho,
   ),

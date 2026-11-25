@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../../../../design_system/design_system.dart';
+import '../../../../l10n/textos_cuidado.dart';
 import '../../domain/entidades/contato_emergencia.dart';
 
 /// Modal para cadastrar ou editar o contato de emergência.
@@ -23,9 +25,11 @@ class DialogoContatoEmergencia extends StatefulWidget {
     ContatoEmergencia? contatoAtual,
     required ValueChanged<ContatoEmergencia> aoSalvar,
   }) {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext ctx) => DialogoContatoEmergencia(
+    // Pela sobreposição do Dialogo: sem ela o `showDialog` cru ficava sem a
+    // animação nova e com 150 ms fixos mesmo com "reduzir movimento" (T091).
+    return DialogoMemora.mostrarConteudo<void>(
+      context,
+      construtor: (BuildContext ctx) => DialogoContatoEmergencia(
         contatoAtual: contatoAtual,
         aoSalvar: aoSalvar,
       ),
@@ -40,6 +44,7 @@ class DialogoContatoEmergencia extends StatefulWidget {
 class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
   late final TextEditingController _controladorNome;
   late final TextEditingController _controladorTelefone;
+  late final TextEditingController _controladorEmail;
   late final TextEditingController _controladorParentesco;
 
   String? _erroValidacao;
@@ -47,9 +52,12 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
   @override
   void initState() {
     super.initState();
-    _controladorNome = TextEditingController(text: widget.contatoAtual?.nome ?? '');
+    _controladorNome =
+        TextEditingController(text: widget.contatoAtual?.nome ?? '');
     _controladorTelefone =
         TextEditingController(text: widget.contatoAtual?.telefone ?? '');
+    _controladorEmail =
+        TextEditingController(text: widget.contatoAtual?.email ?? '');
     _controladorParentesco =
         TextEditingController(text: widget.contatoAtual?.parentesco ?? '');
   }
@@ -58,22 +66,31 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
   void dispose() {
     _controladorNome.dispose();
     _controladorTelefone.dispose();
+    _controladorEmail.dispose();
     _controladorParentesco.dispose();
     super.dispose();
   }
 
   void _salvar() {
     final ContatoEmergencia novoContato = ContatoEmergencia(
-      id: widget.contatoAtual?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: widget.contatoAtual?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       nome: _controladorNome.text.trim(),
       telefone: _controladorTelefone.text.trim(),
+      email: _controladorEmail.text.trim(),
       parentesco: _controladorParentesco.text.trim(),
     );
 
     if (!novoContato.ehValido) {
       setState(() {
-        _erroValidacao =
-            'Por favor, preencha o nome e um telefone com DDD (10 ou 11 números).';
+        _erroValidacao = TextosCuidado.erroTelefoneContato;
+      });
+      return;
+    }
+
+    if (!novoContato.emailValidoOuVazio) {
+      setState(() {
+        _erroValidacao = TextosCuidado.erroEmailContato;
       });
       return;
     }
@@ -84,12 +101,21 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
 
   @override
   Widget build(BuildContext context) {
-    final MemoraCores cores = context.memora.cores;
+    final MemoraTheme tema = context.memora;
+    final MemoraCores cores = tema.cores;
+    final bool ehAltoContraste = tema.id == MemoraTemaId.altoContraste;
+    final double escala = MediaQuery.textScalerOf(context).scale(1);
 
     return Dialog(
       backgroundColor: cores.superficie,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(MemoraRaio.padrao),
+        borderRadius: BorderRadius.circular(MemoraRaio.cartao),
+        side: ehAltoContraste
+            ? BorderSide(
+                color: cores.borda,
+                width: MemoraDimensoes.bordaEnfase,
+              )
+            : BorderSide.none,
       ),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(MemoraEspacamento.lg),
@@ -97,60 +123,88 @@ class _DialogoContatoEmergenciaState extends State<DialogoContatoEmergencia> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Text(
-              'Contato de Emergência',
-              style: MemoraTipografia.tituloSecao.copyWith(
-                color: cores.texto,
-                fontWeight: FontWeight.bold,
-              ),
-              textScaler: escalaTextoLimitada(context),
+            Row(
+              children: <Widget>[
+                if (escala < MemoraDimensoes.escalaTextoAlta) ...<Widget>[
+                  Container(
+                    width: MemoraDimensoes.badgeAtalhoRapido,
+                    height: MemoraDimensoes.badgeAtalhoRapido,
+                    decoration: BoxDecoration(
+                      color: ehAltoContraste
+                          ? cores.superficieSutil
+                          : cores.saudeSuave,
+                      borderRadius: BorderRadius.circular(MemoraRaio.badge),
+                      border: ehAltoContraste
+                          ? Border.all(
+                              color: cores.borda,
+                            )
+                          : null,
+                    ),
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.contact_phone_rounded,
+                      color: cores.sucessoTexto,
+                      size: MemoraDimensoes.iconePadrao,
+                    ),
+                  ),
+                  const SizedBox(width: MemoraEspacamento.sm),
+                ],
+                const Expanded(
+                  child: TextoMemora(
+                    TextosCuidado.tituloContatoEmergencia,
+                    estilo: EstiloTexto.tituloSecao,
+                    cabecalho: true,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: MemoraEspacamento.xs),
-            Text(
-              'Pessoa de confiança que receberá uma mensagem pré-pronta no WhatsApp se você sofrer uma queda e não responder.',
-              style: MemoraTipografia.apoio.copyWith(
-                color: cores.textoSuave,
-              ),
-              textScaler: escalaTextoLimitada(context),
+            TextoMemora.apoio(
+              TextosCuidado.subtituloDialogoContato,
+              cor: cores.textoSuave,
             ),
             const SizedBox(height: MemoraEspacamento.md),
             CampoTexto(
-              rotulo: 'Nome do contato',
-              textoAjuda: 'Como a pessoa se chama (ex.: Filha Mariana)',
+              rotulo: TextosCuidado.rotuloNomeContato,
+              textoAjuda: TextosCuidado.ajudaNomeContato,
               controlador: _controladorNome,
             ),
             const SizedBox(height: MemoraEspacamento.sm),
             CampoTexto(
-              rotulo: 'Telefone com DDD',
-              textoAjuda: 'Número com DDD (ex.: 19 98765-4321)',
+              rotulo: TextosCuidado.rotuloTelefoneContato,
+              textoAjuda: TextosCuidado.ajudaTelefoneContato,
               tipoTeclado: TextInputType.phone,
               controlador: _controladorTelefone,
             ),
             const SizedBox(height: MemoraEspacamento.sm),
             CampoTexto(
-              rotulo: 'Parentesco ou relação',
-              textoAjuda: 'Qual o vínculo (ex.: Filho, Cuidador, Vizinho)',
+              rotulo: TextosCuidado.rotuloEmailContato,
+              textoAjuda: TextosCuidado.ajudaEmailContato,
+              tipoTeclado: TextInputType.emailAddress,
+              controlador: _controladorEmail,
+            ),
+            const SizedBox(height: MemoraEspacamento.sm),
+            CampoTexto(
+              rotulo: TextosCuidado.rotuloParentescoContato,
+              textoAjuda: TextosCuidado.ajudaParentescoContato,
               controlador: _controladorParentesco,
             ),
             if (_erroValidacao != null) ...<Widget>[
               const SizedBox(height: MemoraEspacamento.sm),
-              Text(
-                _erroValidacao!,
-                style: MemoraTipografia.apoio.copyWith(
-                  color: cores.perigo,
-                  fontWeight: FontWeight.bold,
-                ),
-                textScaler: escalaTextoLimitada(context),
+              BadgeDeStatus(
+                rotulo: _erroValidacao!,
+                icone: Icons.error_outline_rounded,
+                tom: TomBadgeStatus.atencao,
               ),
             ],
             const SizedBox(height: MemoraEspacamento.lg),
             BotaoPrimario(
-              rotulo: 'Salvar contato',
+              rotulo: TextosCuidado.botaoSalvarContato,
               aoTocar: _salvar,
             ),
             const SizedBox(height: MemoraEspacamento.sm),
             BotaoSecundario(
-              rotulo: 'Cancelar',
+              rotulo: TextosCuidado.botaoCancelarContato,
               aoTocar: () => Navigator.of(context).pop(),
             ),
           ],

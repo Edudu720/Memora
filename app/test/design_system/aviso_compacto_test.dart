@@ -128,7 +128,7 @@ void main() {
       (WidgetTester t) async {
         await t.pumpWidget(app(linha()));
         expect(find.text(resumoDaConversa), findsOneWidget);
-        expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
         expect(find.text(AvisoCompacto.rotuloAbrir), findsNothing);
         expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
         // O núcleo (FR-049): sem ele, a linha fechada não diria nada.
@@ -213,7 +213,7 @@ void main() {
       WidgetTester t,
     ) async {
       await t.pumpWidget(app(escudo()));
-      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
       expect(find.byType(Text), findsNothing);
       expect(find.text(resumoDosAvisos), findsNothing);
       expect(find.text(AvisoCompacto.rotuloAbrir), findsNothing);
@@ -246,7 +246,7 @@ void main() {
       await t.tap(find.byKey(AvisoCompacto.chaveAlternar));
       await t.pump();
       expect(find.byKey(AvisoCompacto.chaveTextoCompleto), findsNothing);
-      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
       expect(find.byType(Text), findsNothing);
     });
 
@@ -288,7 +288,7 @@ void main() {
           ),
         );
         expect(t.takeException(), isNull, reason: nomeDa(c));
-        expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.shield_rounded), findsOneWidget);
       });
     }
   });
